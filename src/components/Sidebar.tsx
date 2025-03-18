@@ -13,13 +13,18 @@ import {
   DollarSign
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { 
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const navItems = [
   { 
     icon: LayoutDashboard, 
     label: 'Dashboard', 
     href: '/dashboard',
-    active: true
   },
   { 
     icon: Building2, 
@@ -72,7 +77,7 @@ const Sidebar = ({ collapsed = false, onToggle }: SidebarProps) => {
         <Link to="/dashboard">
           <h1 className={cn(
             "font-semibold text-xl text-sidebar-foreground transition-opacity",
-            collapsed ? "opacity-0 w-0" : "opacity-100"
+            collapsed ? "opacity-0 w-0 hidden" : "opacity-100"
           )}>
             PropertyPro
           </h1>
@@ -85,35 +90,44 @@ const Sidebar = ({ collapsed = false, onToggle }: SidebarProps) => {
       </div>
       
       <nav className="flex-1 py-6 px-3 space-y-1.5 overflow-y-auto scrollbar-none">
-        {navItems.map((item) => {
-          const isActive = location.pathname === item.href;
-          
-          return (
-            <Link
-              key={item.href}
-              to={item.href}
-              className={cn(
-                "flex items-center rounded-md px-3 py-2.5 group transition-all",
-                isActive 
-                  ? "bg-accent text-accent-foreground" 
-                  : "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-              )}
-            >
-              <item.icon 
-                className={cn(
-                  "h-5 w-5 mr-2 flex-shrink-0",
-                  collapsed && "mr-0 mx-auto"
-                )} 
-              />
-              <span className={cn(
-                "transition-all",
-                collapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100"
-              )}>
-                {item.label}
-              </span>
-            </Link>
-          );
-        })}
+        <TooltipProvider delayDuration={200}>
+          {navItems.map((item) => {
+            const isActive = location.pathname === item.href;
+            
+            return (
+              <Tooltip key={item.href}>
+                <TooltipTrigger asChild>
+                  <Link
+                    to={item.href}
+                    className={cn(
+                      "flex items-center rounded-md px-3 py-2.5 group transition-all",
+                      isActive 
+                        ? "bg-accent text-accent-foreground" 
+                        : "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                    )}
+                  >
+                    <item.icon 
+                      className={cn(
+                        "h-5 w-5 flex-shrink-0",
+                        collapsed ? "mx-auto" : "mr-2"
+                      )} 
+                    />
+                    {!collapsed && (
+                      <span className="transition-all">
+                        {item.label}
+                      </span>
+                    )}
+                  </Link>
+                </TooltipTrigger>
+                {collapsed && (
+                  <TooltipContent side="right">
+                    {item.label}
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            );
+          })}
+        </TooltipProvider>
       </nav>
       
       <div className="p-4 border-t border-sidebar-border">
@@ -122,13 +136,10 @@ const Sidebar = ({ collapsed = false, onToggle }: SidebarProps) => {
           size="sm"
           className="w-full justify-start text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
         >
-          <LogOut className={cn("h-5 w-5 mr-2", collapsed && "mr-0 mx-auto")} />
-          <span className={cn(
-            "transition-all",
-            collapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100"
-          )}>
-            Logout
-          </span>
+          <LogOut className={cn("h-5 w-5", collapsed ? "mx-auto" : "mr-2")} />
+          {!collapsed && (
+            <span>Logout</span>
+          )}
         </Button>
       </div>
     </div>
