@@ -137,8 +137,9 @@ const Properties = () => {
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-4">
-              <div className="flex-1 min-w-[200px]">
-                <Input placeholder="Search by address, title..." className="w-full" icon={<Search className="w-4 h-4" />} />
+              <div className="flex-1 min-w-[200px] relative">
+                <Input placeholder="Search by address, title..." className="w-full pl-9" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               </div>
               <Button>Search</Button>
             </div>

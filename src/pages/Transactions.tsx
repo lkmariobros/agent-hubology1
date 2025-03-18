@@ -164,7 +164,7 @@ const Transactions = () => {
                     </TableCell>
                     <TableCell>
                       <Badge
-                        variant={transaction.status === 'completed' ? 'success' : 'outline'}
+                        variant={transaction.status === 'completed' ? 'default' : 'outline'}
                       >
                         {transaction.status === 'completed' ? 'Completed' : 'Pending'}
                       </Badge>
