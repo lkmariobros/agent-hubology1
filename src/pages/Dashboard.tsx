@@ -5,6 +5,7 @@ import MainLayout from '@/components/layout/MainLayout';
 import MetricCard from '@/components/dashboard/MetricCard';
 import PropertyList from '@/components/dashboard/PropertyList';
 import RecentTransactions from '@/components/dashboard/RecentTransactions';
+import OpportunitiesBoard from '@/components/dashboard/OpportunitiesBoard';
 import Leaderboard from '@/components/leaderboard/Leaderboard';
 import { DashboardMetric, Property, Transaction, User } from '@/types';
 import { cn } from '@/lib/utils';
@@ -227,6 +228,11 @@ const Dashboard = () => {
           {/* Leaderboard - 1/3 width on large screens */}
           <div className="lg:col-span-1">
             <Leaderboard users={users} />
+          </div>
+          
+          {/* Opportunities Board - Full width */}
+          <div className="lg:col-span-3">
+            <OpportunitiesBoard />
           </div>
           
           {/* Recent Transactions - Full width */}
