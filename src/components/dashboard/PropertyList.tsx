@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Building2 } from 'lucide-react';
 import { Property } from '@/types';
+import { cn } from '@/lib/utils';
 
 interface PropertyListProps {
   properties: Property[];

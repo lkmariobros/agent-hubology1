@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, DollarSign } from 'lucide-react';
 import { Transaction } from '@/types';
+import { cn } from '@/lib/utils';
 
 interface RecentTransactionsProps {
   transactions: Transaction[];

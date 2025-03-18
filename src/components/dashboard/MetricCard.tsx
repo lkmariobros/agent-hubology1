@@ -1,9 +1,9 @@
 
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
-import { cn } from '@/lib/utils';
-import { ArrowDown, ArrowUp } from 'lucide-react';
+import { TrendingDown, TrendingUp } from "lucide-react";
 import { DashboardMetric } from '@/types';
+import { cn } from '@/lib/utils';
 
 interface MetricCardProps {
   metric: DashboardMetric;
@@ -11,41 +11,49 @@ interface MetricCardProps {
 }
 
 const MetricCard = ({ metric, className }: MetricCardProps) => {
-  const { label, value, change, trend, icon } = metric;
-  
   return (
     <Card className={cn("glass-card overflow-hidden", className)}>
       <CardContent className="p-6">
-        <div className="flex items-start justify-between">
+        <div className="flex justify-between items-start">
           <div>
-            <p className="text-sm font-medium text-muted-foreground mb-1">{label}</p>
-            <h3 className="text-2xl font-bold text-gradient mb-1">{value}</h3>
-            {change !== undefined && trend && (
-              <div className="flex items-center">
-                <span 
-                  className={cn(
-                    "flex items-center text-xs font-medium",
-                    trend === 'up' ? 'text-green-400' : trend === 'down' ? 'text-red-400' : 'text-muted-foreground'
-                  )}
-                >
-                  {trend === 'up' ? (
-                    <ArrowUp className="w-3 h-3 mr-1" />
-                  ) : trend === 'down' ? (
-                    <ArrowDown className="w-3 h-3 mr-1" />
-                  ) : null}
-                  {trend === 'up' ? '+' : trend === 'down' ? '-' : ''}
-                  {Math.abs(change)}%
-                </span>
-                <span className="text-xs ml-1 text-muted-foreground">vs last month</span>
-              </div>
-            )}
+            <p className="text-sm font-medium text-muted-foreground">
+              {metric.label}
+            </p>
+            <h3 className="text-2xl font-bold mt-1 text-gradient">
+              {metric.value}
+            </h3>
           </div>
-          {icon && (
-            <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center">
-              {icon}
+          {metric.icon && (
+            <div className="rounded-full p-2 bg-white/5">
+              {metric.icon}
             </div>
           )}
         </div>
+        
+        {metric.change !== undefined && (
+          <div className="flex items-center mt-4">
+            {metric.trend === 'up' ? (
+              <TrendingUp className="mr-2 h-4 w-4 text-green-400" />
+            ) : metric.trend === 'down' ? (
+              <TrendingDown className="mr-2 h-4 w-4 text-red-400" />
+            ) : null}
+            <span
+              className={
+                metric.trend === 'up'
+                  ? 'text-green-400 text-sm'
+                  : metric.trend === 'down'
+                  ? 'text-red-400 text-sm'
+                  : 'text-muted-foreground text-sm'
+              }
+            >
+              {metric.change > 0 ? '+' : ''}
+              {metric.change}%
+            </span>
+            <span className="text-muted-foreground text-sm ml-1">
+              from last month
+            </span>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

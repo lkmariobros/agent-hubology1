@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -129,6 +128,13 @@ export default {
         "glass-gradient": 
           "linear-gradient(to bottom right, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02))",
       },
+      animationDelay: {
+        '100ms': '100ms',
+        '200ms': '200ms',
+        '300ms': '300ms',
+        '400ms': '400ms',
+        '500ms': '500ms',
+      }
     },
   },
   plugins: [require("tailwindcss-animate")],

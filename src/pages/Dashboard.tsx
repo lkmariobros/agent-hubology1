@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Building2, DollarSign, TrendingUp, Users } from 'lucide-react';
 import MetricCard from '../components/dashboard/MetricCard';
@@ -6,6 +5,7 @@ import PropertyList from '../components/dashboard/PropertyList';
 import RecentTransactions from '../components/dashboard/RecentTransactions';
 import Leaderboard from '../components/leaderboard/Leaderboard';
 import { DashboardMetric, Property, Transaction, User } from '@/types';
+import { cn } from '@/lib/utils';
 
 // Mock data
 const metrics: DashboardMetric[] = [
@@ -278,8 +278,7 @@ const Dashboard = () => {
           <MetricCard 
             key={metric.label} 
             metric={metric}
-            className={cn("animate-fadeIn")}
-            style={{ animationDelay: `${i * 0.1}s` }}
+            className={cn("animate-fadeIn", { [`animation-delay-${i * 100}ms`]: true })}
           />
         ))}
       </div>
