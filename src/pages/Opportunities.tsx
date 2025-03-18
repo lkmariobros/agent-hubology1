@@ -1,11 +1,28 @@
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import MainLayout from '@/components/layout/MainLayout';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { PlusCircle, Briefcase, Target, Flag, Clock, ArrowRight } from 'lucide-react';
+import { Input } from "@/components/ui/input";
+import { 
+  PlusCircle, 
+  Briefcase, 
+  Target, 
+  Flag, 
+  Clock, 
+  Search,
+  Filter,
+  ArrowDownUp
+} from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from '@/lib/utils';
 
 // Define opportunity type
@@ -21,7 +38,7 @@ interface Opportunity {
   postedAt: string;
 }
 
-// Sample opportunities data
+// Sample opportunities data (expanded version of the one in OpportunitiesBoard)
 const sampleOpportunities: Opportunity[] = [
   {
     id: '1',
@@ -77,20 +94,81 @@ const sampleOpportunities: Opportunity[] = [
     status: 'New',
     postedBy: 'Robert Wilson',
     postedAt: '2024-06-04T10:10:00Z'
+  },
+  {
+    id: '6',
+    title: 'Office space for tech startup',
+    description: 'Growing tech startup looking for modern office space with flexible layout.',
+    propertyType: 'Commercial',
+    budget: 'RM12,000 - RM18,000/mo',
+    location: 'Bangsar South, KL Sentral',
+    status: 'Urgent',
+    postedBy: 'Jessica Lee',
+    postedAt: '2024-06-01T08:30:00Z'
+  },
+  {
+    id: '7',
+    title: 'Bungalow for family of 6',
+    description: 'Large family seeking spacious bungalow with garden and swimming pool.',
+    propertyType: 'Residential',
+    budget: 'RM3.5M - RM5M',
+    location: 'Damansara Heights, Kenny Hills',
+    status: 'Featured',
+    postedBy: 'David Wong',
+    postedAt: '2024-06-02T13:20:00Z'
+  },
+  {
+    id: '8',
+    title: 'Industrial land for factory',
+    description: 'Manufacturing company looking for industrial land to build new factory.',
+    propertyType: 'Industrial',
+    budget: 'RM5M - RM8M',
+    location: 'Port Klang, Shah Alam',
+    status: 'Regular',
+    postedBy: 'Steven Tan',
+    postedAt: '2024-06-03T15:45:00Z'
   }
 ];
 
-interface OpportunitiesBoardProps {
-  className?: string;
-}
-
-const OpportunitiesBoard: React.FC<OpportunitiesBoardProps> = ({ className }) => {
+const Opportunities = () => {
   const [activeTab, setActiveTab] = useState<string>('All');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortOption, setSortOption] = useState('newest');
 
-  // Filter opportunities based on selected tab
-  const filteredOpportunities = activeTab === 'All' 
-    ? sampleOpportunities 
-    : sampleOpportunities.filter(opp => opp.propertyType === activeTab);
+  // Filter opportunities based on selected tab and search query
+  const filteredOpportunities = sampleOpportunities
+    .filter(opp => {
+      // Filter by property type
+      if (activeTab !== 'All' && opp.propertyType !== activeTab) {
+        return false;
+      }
+      
+      // Filter by search query
+      if (searchQuery.trim() !== '') {
+        const query = searchQuery.toLowerCase();
+        return (
+          opp.title.toLowerCase().includes(query) ||
+          opp.description.toLowerCase().includes(query) ||
+          opp.location.toLowerCase().includes(query) ||
+          opp.budget.toLowerCase().includes(query)
+        );
+      }
+      
+      return true;
+    })
+    // Sort opportunities
+    .sort((a, b) => {
+      if (sortOption === 'newest') {
+        return new Date(b.postedAt).getTime() - new Date(a.postedAt).getTime();
+      } else if (sortOption === 'oldest') {
+        return new Date(a.postedAt).getTime() - new Date(b.postedAt).getTime();
+      } else if (sortOption === 'urgent') {
+        if (a.status === 'Urgent' && b.status !== 'Urgent') return -1;
+        if (a.status !== 'Urgent' && b.status === 'Urgent') return 1;
+        return 0;
+      }
+      return 0;
+    });
 
   // Function to format date
   const formatDate = (dateString: string) => {
@@ -140,28 +218,68 @@ const OpportunitiesBoard: React.FC<OpportunitiesBoardProps> = ({ className }) =>
   };
 
   return (
-    <Card className={cn("glass-card", className)}>
-      <CardHeader className="px-6 pt-6 pb-4 flex flex-row items-center justify-between">
-        <CardTitle className="text-lg font-semibold">Opportunities Board</CardTitle>
-        <div className="flex items-center gap-2">
+    <MainLayout>
+      <div className="space-y-6">
+        {/* Page Title */}
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">Opportunities Board</h1>
+            <p className="text-muted-foreground">
+              Browse and connect with potential clients looking for properties
+            </p>
+          </div>
           <Button size="sm" className="gap-1">
             <PlusCircle className="h-4 w-4" />
             New Opportunity
           </Button>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="gap-1" 
-            asChild
-          >
-            <Link to="/opportunities">
-              View All
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </Button>
         </div>
-      </CardHeader>
-      <CardContent className="px-6 pb-6 space-y-4">
+        
+        {/* Filters and Search */}
+        <Card className="glass-card">
+          <CardContent className="p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="relative">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search opportunities..."
+                className="pl-8 bg-background"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            
+            <Select value={sortOption} onValueChange={setSortOption}>
+              <SelectTrigger className="bg-background">
+                <div className="flex items-center gap-2">
+                  <ArrowDownUp className="h-4 w-4" />
+                  <span>Sort by</span>
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="newest">Newest first</SelectItem>
+                <SelectItem value="oldest">Oldest first</SelectItem>
+                <SelectItem value="urgent">Urgent first</SelectItem>
+              </SelectContent>
+            </Select>
+            
+            <Select defaultValue="All">
+              <SelectTrigger className="bg-background">
+                <div className="flex items-center gap-2">
+                  <Filter className="h-4 w-4" />
+                  <span>Filter by status</span>
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="All">All statuses</SelectItem>
+                <SelectItem value="Urgent">Urgent</SelectItem>
+                <SelectItem value="New">New</SelectItem>
+                <SelectItem value="Featured">Featured</SelectItem>
+                <SelectItem value="Regular">Regular</SelectItem>
+              </SelectContent>
+            </Select>
+          </CardContent>
+        </Card>
+        
+        {/* Main Content */}
         <Tabs defaultValue="All" value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid grid-cols-5 mb-4">
             <TabsTrigger value="All">All</TabsTrigger>
@@ -172,7 +290,7 @@ const OpportunitiesBoard: React.FC<OpportunitiesBoardProps> = ({ className }) =>
           </TabsList>
           
           <TabsContent value={activeTab} className="mt-0">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {filteredOpportunities.map((opportunity) => (
                 <Card key={opportunity.id} className="overflow-hidden border-border/40 hover:border-border transition-all">
                   <CardContent className="p-4">
@@ -214,20 +332,11 @@ const OpportunitiesBoard: React.FC<OpportunitiesBoardProps> = ({ className }) =>
                 </Card>
               ))}
             </div>
-            
-            <div className="flex justify-center mt-6">
-              <Button variant="outline" size="sm" className="gap-2" asChild>
-                <Link to="/opportunities">
-                  View All Opportunities
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </Button>
-            </div>
           </TabsContent>
         </Tabs>
-      </CardContent>
-    </Card>
+      </div>
+    </MainLayout>
   );
 };
 
-export default OpportunitiesBoard;
+export default Opportunities;
