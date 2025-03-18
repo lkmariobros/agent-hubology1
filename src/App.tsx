@@ -13,6 +13,8 @@ import Commission from "./pages/Commission";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+import PointsLeaderboard from "./pages/leaderboard/Points";
+import SalesLeaderboard from "./pages/leaderboard/Sales";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +31,8 @@ const App = () => (
           <Route path="/transactions" element={<Transactions />} />
           <Route path="/team" element={<Team />} />
           <Route path="/commission" element={<Commission />} />
+          <Route path="/leaderboard/points" element={<PointsLeaderboard />} />
+          <Route path="/leaderboard/sales" element={<SalesLeaderboard />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/settings" element={<Settings />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

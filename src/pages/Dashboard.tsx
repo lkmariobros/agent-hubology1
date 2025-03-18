@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Building2, BarChart4, Users, DollarSign } from 'lucide-react';
 import MainLayout from '@/components/layout/MainLayout';
@@ -6,7 +5,6 @@ import MetricCard from '@/components/dashboard/MetricCard';
 import PropertyList from '@/components/dashboard/PropertyList';
 import RecentTransactions from '@/components/dashboard/RecentTransactions';
 import OpportunitiesBoard from '@/components/dashboard/OpportunitiesBoard';
-import Leaderboard from '@/components/leaderboard/Leaderboard';
 import { DashboardMetric, Property, Transaction, User } from '@/types';
 import { cn } from '@/lib/utils';
 
@@ -148,50 +146,6 @@ const transactions: Transaction[] = [
   }
 ];
 
-// Sample users data
-const users: User[] = [
-  {
-    id: '1',
-    name: 'John Smith',
-    email: 'john@example.com',
-    role: 'agent',
-    tier: 'senior',
-    avatar: 'https://randomuser.me/api/portraits/men/1.jpg'
-  },
-  {
-    id: '2',
-    name: 'Sarah Johnson',
-    email: 'sarah@example.com',
-    role: 'agent',
-    tier: 'principal',
-    avatar: 'https://randomuser.me/api/portraits/women/2.jpg'
-  },
-  {
-    id: '3',
-    name: 'Michael Brown',
-    email: 'michael@example.com',
-    role: 'agent',
-    tier: 'associate',
-    avatar: 'https://randomuser.me/api/portraits/men/3.jpg'
-  },
-  {
-    id: '4',
-    name: 'Emily Davis',
-    email: 'emily@example.com',
-    role: 'manager',
-    tier: 'director',
-    avatar: 'https://randomuser.me/api/portraits/women/4.jpg'
-  },
-  {
-    id: '5',
-    name: 'Robert Wilson',
-    email: 'robert@example.com',
-    role: 'agent',
-    tier: 'junior',
-    avatar: 'https://randomuser.me/api/portraits/men/5.jpg'
-  }
-];
-
 const Dashboard = () => {
   return (
     <MainLayout>
@@ -219,24 +173,19 @@ const Dashboard = () => {
         </div>
         
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Properties List - 2/3 width on large screens */}
-          <div className="lg:col-span-2">
+        <div className="grid grid-cols-1 gap-6">
+          {/* Properties List */}
+          <div>
             <PropertyList properties={properties} />
           </div>
           
-          {/* Leaderboard - 1/3 width on large screens */}
-          <div className="lg:col-span-1">
-            <Leaderboard users={users} />
-          </div>
-          
-          {/* Opportunities Board - Full width */}
-          <div className="lg:col-span-3">
+          {/* Opportunities Board */}
+          <div>
             <OpportunitiesBoard />
           </div>
           
-          {/* Recent Transactions - Full width */}
-          <div className="lg:col-span-3">
+          {/* Recent Transactions */}
+          <div>
             <RecentTransactions transactions={transactions} />
           </div>
         </div>
