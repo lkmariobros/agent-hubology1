@@ -63,152 +63,147 @@ export function AppSidebar() {
       </SidebarHeader>
       
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Main Navigation</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  isActive={isActiveRoute('/dashboard')}
-                  tooltip="Dashboard"
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              isActive={isActiveRoute('/dashboard')}
+              tooltip="Dashboard"
+              asChild
+            >
+              <Link to="/dashboard">
+                <LayoutDashboard className="h-5 w-5" />
+                <span>Dashboard</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              isActive={isActiveRoute('/properties')}
+              tooltip="Properties"
+              asChild
+            >
+              <Link to="/properties">
+                <Building2 className="h-5 w-5" />
+                <span>Properties</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              isActive={isActiveRoute('/transactions')}
+              tooltip="Transactions"
+              asChild
+            >
+              <Link to="/transactions">
+                <FileText className="h-5 w-5" />
+                <span>Transactions</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              isActive={isActiveRoute('/team')}
+              tooltip="Team"
+              asChild
+            >
+              <Link to="/team">
+                <Users className="h-5 w-5" />
+                <span>Team</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              isActive={isActiveRoute('/commission')}
+              tooltip="Commission"
+              asChild
+            >
+              <Link to="/commission">
+                <DollarSign className="h-5 w-5" />
+                <span>Commission</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              isActive={isActiveSubRoute(['/leaderboard/points', '/leaderboard/sales'])}
+              tooltip={isCollapsed ? "Leaderboard" : undefined}
+            >
+              <Trophy className="h-5 w-5" />
+              <span>Leaderboard</span>
+              {!isCollapsed && <ChevronDown className="ml-auto h-4 w-4" />}
+            </SidebarMenuButton>
+            
+            <SidebarMenuSub>
+              <SidebarMenuSubItem>
+                <SidebarMenuSubButton
+                  isActive={isActiveRoute('/leaderboard/points')}
                   asChild
                 >
-                  <Link to="/dashboard">
-                    <LayoutDashboard className="h-5 w-5" />
-                    <span>Dashboard</span>
+                  <Link to="/leaderboard/points">
+                    <TrendingUp className="h-4 w-4" />
+                    <span>Points</span>
                   </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  isActive={isActiveRoute('/properties')}
-                  tooltip="Properties"
+                </SidebarMenuSubButton>
+              </SidebarMenuSubItem>
+              <SidebarMenuSubItem>
+                <SidebarMenuSubButton
+                  isActive={isActiveRoute('/leaderboard/sales')}
                   asChild
                 >
-                  <Link to="/properties">
-                    <Building2 className="h-5 w-5" />
-                    <span>Properties</span>
+                  <Link to="/leaderboard/sales">
+                    <DollarSign className="h-4 w-4" />
+                    <span>Sales</span>
                   </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+                </SidebarMenuSubButton>
+              </SidebarMenuSubItem>
+            </SidebarMenuSub>
+          </SidebarMenuItem>
 
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  isActive={isActiveRoute('/transactions')}
-                  tooltip="Transactions"
-                  asChild
-                >
-                  <Link to="/transactions">
-                    <FileText className="h-5 w-5" />
-                    <span>Transactions</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              isActive={isActiveRoute('/opportunities')}
+              tooltip="Opportunities"
+              asChild
+            >
+              <Link to="/opportunities">
+                <Lightbulb className="h-5 w-5" />
+                <span>Opportunities</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
 
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  isActive={isActiveRoute('/team')}
-                  tooltip="Team"
-                  asChild
-                >
-                  <Link to="/team">
-                    <Users className="h-5 w-5" />
-                    <span>Team</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              isActive={isActiveRoute('/reports')}
+              tooltip="Reports"
+              asChild
+            >
+              <Link to="/reports">
+                <BarChart4 className="h-5 w-5" />
+                <span>Reports</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
 
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  isActive={isActiveRoute('/commission')}
-                  tooltip="Commission"
-                  asChild
-                >
-                  <Link to="/commission">
-                    <DollarSign className="h-5 w-5" />
-                    <span>Commission</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  isActive={isActiveSubRoute(['/leaderboard/points', '/leaderboard/sales'])}
-                  tooltip={isCollapsed ? "Leaderboard" : undefined}
-                >
-                  <Trophy className="h-5 w-5" />
-                  <span>Leaderboard</span>
-                  {!isCollapsed && <ChevronDown className="ml-auto h-4 w-4" />}
-                </SidebarMenuButton>
-                
-                <SidebarMenuSub>
-                  <SidebarMenuSubItem>
-                    <SidebarMenuSubButton
-                      isActive={isActiveRoute('/leaderboard/points')}
-                      asChild
-                    >
-                      <Link to="/leaderboard/points">
-                        <TrendingUp className="h-4 w-4" />
-                        <span>Points</span>
-                      </Link>
-                    </SidebarMenuSubButton>
-                  </SidebarMenuSubItem>
-                  <SidebarMenuSubItem>
-                    <SidebarMenuSubButton
-                      isActive={isActiveRoute('/leaderboard/sales')}
-                      asChild
-                    >
-                      <Link to="/leaderboard/sales">
-                        <DollarSign className="h-4 w-4" />
-                        <span>Sales</span>
-                      </Link>
-                    </SidebarMenuSubButton>
-                  </SidebarMenuSubItem>
-                </SidebarMenuSub>
-              </SidebarMenuItem>
-
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  isActive={isActiveRoute('/opportunities')}
-                  tooltip="Opportunities"
-                  asChild
-                >
-                  <Link to="/opportunities">
-                    <Lightbulb className="h-5 w-5" />
-                    <span>Opportunities</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  isActive={isActiveRoute('/reports')}
-                  tooltip="Reports"
-                  asChild
-                >
-                  <Link to="/reports">
-                    <BarChart4 className="h-5 w-5" />
-                    <span>Reports</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  isActive={isActiveRoute('/settings')}
-                  tooltip="Settings"
-                  asChild
-                >
-                  <Link to="/settings">
-                    <Settings className="h-5 w-5" />
-                    <span>Settings</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              isActive={isActiveRoute('/settings')}
+              tooltip="Settings"
+              asChild
+            >
+              <Link to="/settings">
+                <Settings className="h-5 w-5" />
+                <span>Settings</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarContent>
       
       <SidebarFooter className="border-t border-sidebar-border">

@@ -35,6 +35,12 @@
     
     --radius: 0.75rem;
 
+    /* Custom property colors */
+    --property-orange: 35 100% 60%;
+    --property-purple: 264 70% 50%;
+    --property-pink: 336 80% 58%;
+    --property-blue: 214 80% 56%;
+
     /* Sidebar variables - ensuring consistency */
     --sidebar-background: 240 10% 3.9%;
     --sidebar-foreground: 0 0% 98%;
@@ -106,5 +112,30 @@
     opacity: 1;
     transform: translateY(0);
     transition: opacity 300ms, transform 300ms;
+  }
+  
+  /* Status badges */
+  .status-badge {
+    @apply px-2 py-0.5 text-xs rounded-full;
+  }
+  
+  .status-available {
+    @apply bg-green-500/20 text-green-400;
+  }
+  
+  .status-pending {
+    @apply bg-yellow-500/20 text-yellow-400;
+  }
+  
+  .status-sold {
+    @apply bg-blue-500/20 text-blue-400;
+  }
+  
+  .status-commercial {
+    @apply bg-indigo-500/20 text-indigo-400;
+  }
+  
+  .status-residential {
+    @apply bg-teal-500/20 text-teal-400;
   }
 }

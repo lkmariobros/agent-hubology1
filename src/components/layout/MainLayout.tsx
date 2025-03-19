@@ -49,7 +49,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
             <header className="h-16 flex items-center justify-between px-4 border-b border-border">
               <div className="flex items-center gap-2">
                 <SidebarTrigger />
-                {/* Remove duplicate PropertyPro text since it's already in the sidebar */}
+                {/* No duplicate header text needed */}
               </div>
               
               <div className="flex items-center space-x-2">

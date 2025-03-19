@@ -1,11 +1,12 @@
 
 import React from 'react';
-import { Building2, BarChart4, Users, DollarSign } from 'lucide-react';
+import { Building2, BarChart4, Users, DollarSign, ArrowRight } from 'lucide-react';
 import MetricCard from '@/components/dashboard/MetricCard';
 import PropertyList from '@/components/dashboard/PropertyList';
 import RecentTransactions from '@/components/dashboard/RecentTransactions';
 import OpportunitiesBoard from '@/components/dashboard/OpportunitiesBoard';
 import { DashboardMetric, Property, Transaction } from '@/types';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 // Sample dashboard metrics data
@@ -15,28 +16,28 @@ const metrics: DashboardMetric[] = [
     value: '142',
     change: 12.5,
     trend: 'up',
-    icon: <Building2 className="h-5 w-5 text-property-orange" />
+    icon: <Building2 className="h-5 w-5 text-[hsl(var(--property-orange))]" />
   },
   {
     label: 'Active Agents',
     value: '38',
     change: 4.2,
     trend: 'up',
-    icon: <Users className="h-5 w-5 text-property-purple" />
+    icon: <Users className="h-5 w-5 text-[hsl(var(--property-purple))]" />
   },
   {
     label: 'Monthly Revenue',
     value: '$92,428',
     change: -2.8,
     trend: 'down',
-    icon: <DollarSign className="h-5 w-5 text-property-pink" />
+    icon: <DollarSign className="h-5 w-5 text-[hsl(var(--property-pink))]" />
   },
   {
     label: 'Conversion Rate',
     value: '24.3%',
     change: 6.1,
     trend: 'up',
-    icon: <BarChart4 className="h-5 w-5 text-property-blue" />
+    icon: <BarChart4 className="h-5 w-5 text-[hsl(var(--property-blue))]" />
   }
 ];
 
@@ -148,18 +149,18 @@ const transactions: Transaction[] = [
 
 const Dashboard = () => {
   return (
-    <div className="space-y-4 md:space-y-6">
+    <div className="space-y-6">
       {/* Page Title */}
-      <div>
-        <h1 className="text-xl md:text-2xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground text-sm md:text-base">
+      <div className="text-left">
+        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+        <p className="text-muted-foreground">
           Welcome back! Here's an overview of your agency's performance.
         </p>
       </div>
       
       {/* Metrics */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-        {metrics.map((metric, index) => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {metrics.map((metric) => (
           <MetricCard 
             key={metric.label} 
             metric={metric} 
@@ -167,20 +168,38 @@ const Dashboard = () => {
         ))}
       </div>
       
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 gap-4 md:gap-6">
-        {/* Properties List */}
-        <div>
+      {/* Main Content */}
+      <div className="space-y-6">
+        {/* Latest Properties */}
+        <div className="rounded-lg border border-border bg-card p-4">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold">Latest Properties</h2>
+            <Button variant="link" size="sm" className="text-accent flex items-center gap-1 p-0">
+              View all <ArrowRight className="h-4 w-4" />
+            </Button>
+          </div>
           <PropertyList properties={properties} />
         </div>
         
         {/* Opportunities Board */}
-        <div>
+        <div className="rounded-lg border border-border bg-card p-4">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold">Opportunities Board</h2>
+            <Button variant="outline" size="sm" className="flex items-center gap-1">
+              New Opportunity
+            </Button>
+          </div>
           <OpportunitiesBoard />
         </div>
         
         {/* Recent Transactions */}
-        <div>
+        <div className="rounded-lg border border-border bg-card p-4">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold">Recent Transactions</h2>
+            <Button variant="link" size="sm" className="text-accent flex items-center gap-1 p-0">
+              View all <ArrowRight className="h-4 w-4" />
+            </Button>
+          </div>
           <RecentTransactions transactions={transactions} />
         </div>
       </div>
