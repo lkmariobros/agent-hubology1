@@ -1,4 +1,3 @@
-
 import React from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import { User } from '@/types';
@@ -8,72 +7,60 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 // Sample users data
-const users: User[] = [
-  {
-    id: '1',
-    name: 'John Smith',
-    email: 'john@example.com',
-    phone: '+1 (555) 123-4567',
-    role: 'agent',
-    tier: 'senior',
-    avatar: 'https://randomuser.me/api/portraits/men/1.jpg',
-    properties: 42,
-    transactions: 18
-  },
-  {
-    id: '2',
-    name: 'Sarah Johnson',
-    email: 'sarah@example.com',
-    phone: '+1 (555) 234-5678',
-    role: 'agent',
-    tier: 'principal',
-    avatar: 'https://randomuser.me/api/portraits/women/2.jpg',
-    properties: 78,
-    transactions: 36
-  },
-  {
-    id: '3',
-    name: 'Michael Brown',
-    email: 'michael@example.com',
-    phone: '+1 (555) 345-6789',
-    role: 'agent',
-    tier: 'associate',
-    avatar: 'https://randomuser.me/api/portraits/men/3.jpg',
-    properties: 29,
-    transactions: 11
-  },
-  {
-    id: '4',
-    name: 'Emily Davis',
-    email: 'emily@example.com',
-    phone: '+1 (555) 456-7890',
-    role: 'manager',
-    tier: 'director',
-    avatar: 'https://randomuser.me/api/portraits/women/4.jpg',
-    properties: 56,
-    transactions: 22
-  },
-  {
-    id: '5',
-    name: 'Robert Wilson',
-    email: 'robert@example.com',
-    phone: '+1 (555) 567-8901',
-    role: 'agent',
-    tier: 'junior',
-    avatar: 'https://randomuser.me/api/portraits/men/5.jpg',
-    properties: 17,
-    transactions: 4
-  }
-];
-
+const users: User[] = [{
+  id: '1',
+  name: 'John Smith',
+  email: 'john@example.com',
+  phone: '+1 (555) 123-4567',
+  role: 'agent',
+  tier: 'senior',
+  avatar: 'https://randomuser.me/api/portraits/men/1.jpg',
+  properties: 42,
+  transactions: 18
+}, {
+  id: '2',
+  name: 'Sarah Johnson',
+  email: 'sarah@example.com',
+  phone: '+1 (555) 234-5678',
+  role: 'agent',
+  tier: 'principal',
+  avatar: 'https://randomuser.me/api/portraits/women/2.jpg',
+  properties: 78,
+  transactions: 36
+}, {
+  id: '3',
+  name: 'Michael Brown',
+  email: 'michael@example.com',
+  phone: '+1 (555) 345-6789',
+  role: 'agent',
+  tier: 'associate',
+  avatar: 'https://randomuser.me/api/portraits/men/3.jpg',
+  properties: 29,
+  transactions: 11
+}, {
+  id: '4',
+  name: 'Emily Davis',
+  email: 'emily@example.com',
+  phone: '+1 (555) 456-7890',
+  role: 'manager',
+  tier: 'director',
+  avatar: 'https://randomuser.me/api/portraits/women/4.jpg',
+  properties: 56,
+  transactions: 22
+}, {
+  id: '5',
+  name: 'Robert Wilson',
+  email: 'robert@example.com',
+  phone: '+1 (555) 567-8901',
+  role: 'agent',
+  tier: 'junior',
+  avatar: 'https://randomuser.me/api/portraits/men/5.jpg',
+  properties: 17,
+  transactions: 4
+}];
 const getRoleBadge = (role: string) => {
   switch (role) {
     case 'agent':
@@ -86,7 +73,6 @@ const getRoleBadge = (role: string) => {
       return <Badge variant="outline">{role}</Badge>;
   }
 };
-
 const getTierBadge = (tier: string) => {
   switch (tier) {
     case 'junior':
@@ -103,11 +89,9 @@ const getTierBadge = (tier: string) => {
       return <Badge variant="outline">{tier}</Badge>;
   }
 };
-
 const Team = () => {
-  return (
-    <MainLayout>
-      <div className="space-y-6">
+  return <MainLayout>
+      <div className="space-y-6 px-[31px] py-[3px]">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold tracking-tight">Team</h1>
           <Button className="gap-2">
@@ -131,8 +115,7 @@ const Team = () => {
         </Card>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {users.map(user => (
-            <Card key={user.id} className="overflow-hidden">
+          {users.map(user => <Card key={user.id} className="overflow-hidden">
               <CardContent className="p-0">
                 <div className="p-6">
                   <div className="flex items-center gap-4">
@@ -190,12 +173,9 @@ const Team = () => {
                   </div>
                 </div>
               </CardContent>
-            </Card>
-          ))}
+            </Card>)}
         </div>
       </div>
-    </MainLayout>
-  );
+    </MainLayout>;
 };
-
 export default Team;
