@@ -4,16 +4,17 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useNavigate } from 'react-router-dom';
-import { Building, Home, Upload, Plus, X } from 'lucide-react';
+import { Building, Home, Upload, Plus, X, Check } from 'lucide-react';
 import { toast } from 'sonner';
 
 // UI Components
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import {
   Form,
   FormControl,
@@ -23,7 +24,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { PropertyFormValues, Address } from '@/types';
+import { PropertyFormValues } from '@/types';
 
 // Common features for different property types
 const commonFeatures = [
@@ -65,7 +66,7 @@ const propertySubtypes = {
   land: ['Residential Land', 'Commercial Land', 'Agricultural Land', 'Industrial Land'],
 };
 
-// Validation schema
+// Validation schema - simplified for essential fields
 const propertySchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters'),
   description: z.string().min(20, 'Description must be at least 20 characters'),
@@ -75,8 +76,8 @@ const propertySchema = z.object({
   area: z.coerce.number().min(1, 'Area must be greater than 0'),
   bedrooms: z.coerce.number().min(0).optional(),
   bathrooms: z.coerce.number().min(0).optional(),
-  features: z.array(z.string()),
-  status: z.enum(['available', 'pending', 'sold']),
+  features: z.array(z.string()).default([]),
+  status: z.enum(['available', 'pending', 'sold']).default('available'),
   address: z.object({
     street: z.string().min(1, 'Street is required'),
     city: z.string().min(1, 'City is required'),
@@ -90,6 +91,7 @@ const PropertyForm = () => {
   const navigate = useNavigate();
   const [propertyImages, setPropertyImages] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [activeTab, setActiveTab] = useState("essential");
 
   const form = useForm<PropertyFormValues>({
     resolver: zodResolver(propertySchema),
@@ -184,395 +186,473 @@ const PropertyForm = () => {
     }
   }, [propertyType, form]);
 
+  const nextTab = () => {
+    if (activeTab === "essential") setActiveTab("details");
+    else if (activeTab === "details") setActiveTab("address");
+    else if (activeTab === "address") setActiveTab("media");
+  };
+
+  const prevTab = () => {
+    if (activeTab === "media") setActiveTab("address");
+    else if (activeTab === "address") setActiveTab("details");
+    else if (activeTab === "details") setActiveTab("essential");
+  };
+
   return (
     <Card className="w-full">
       <CardHeader>
         <CardTitle>New Property Listing</CardTitle>
+        <CardDescription>
+          Enter property information step by step - only essential fields are required
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {/* Property Type Selection */}
-            <FormField
-              control={form.control}
-              name="type"
-              render={({ field }) => (
-                <FormItem className="space-y-3">
-                  <FormLabel>Property Type</FormLabel>
-                  <FormControl>
-                    <ToggleGroup
-                      type="single"
-                      value={field.value}
-                      onValueChange={(value) => {
-                        if (value) field.onChange(value);
-                      }}
-                      className="justify-start"
-                    >
-                      <ToggleGroupItem value="residential" className="gap-2">
-                        <Home className="h-4 w-4" />
-                        Residential
-                      </ToggleGroupItem>
-                      <ToggleGroupItem value="commercial" className="gap-2">
-                        <Building className="h-4 w-4" />
-                        Commercial
-                      </ToggleGroupItem>
-                      <ToggleGroupItem value="industrial" className="gap-2">
-                        <Building className="h-4 w-4" />
-                        Industrial
-                      </ToggleGroupItem>
-                      <ToggleGroupItem value="land" className="gap-2">
-                        <Building className="h-4 w-4" />
-                        Land
-                      </ToggleGroupItem>
-                    </ToggleGroup>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Basic Information */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Property Title</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter property title..." {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="subtype"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Property Subtype</FormLabel>
-                    <FormControl>
-                      <select
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                        {...field}
-                      >
-                        {propertySubtypes[propertyType].map((subtype) => (
-                          <option key={subtype} value={subtype}>
-                            {subtype}
-                          </option>
-                        ))}
-                      </select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            {/* Progress Indicator */}
+            <div className="mb-6">
+              <div className="flex justify-between mb-2">
+                <div className="text-sm">Essential Info</div>
+                <div className="text-sm">Property Details</div>
+                <div className="text-sm">Address</div>
+                <div className="text-sm">Media</div>
+              </div>
+              <div className="w-full bg-muted rounded-full h-2">
+                <div 
+                  className="bg-accent h-2 rounded-full transition-all duration-300" 
+                  style={{ 
+                    width: activeTab === "essential" ? "25%" : 
+                           activeTab === "details" ? "50%" : 
+                           activeTab === "address" ? "75%" : "100%" 
+                  }}
+                />
+              </div>
             </div>
 
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Describe the property..."
-                      className="min-h-[120px]"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              {/* STEP 1: Essential Information */}
+              <TabsContent value="essential" className="space-y-6 mt-0">
+                <div className="space-y-4">
+                  {/* Property Type Selection */}
+                  <FormField
+                    control={form.control}
+                    name="type"
+                    render={({ field }) => (
+                      <FormItem className="space-y-3">
+                        <FormLabel>Property Type *</FormLabel>
+                        <FormControl>
+                          <ToggleGroup
+                            type="single"
+                            value={field.value}
+                            onValueChange={(value) => {
+                              if (value) field.onChange(value);
+                            }}
+                            className="justify-start flex-wrap"
+                          >
+                            <ToggleGroupItem value="residential" className="gap-2">
+                              <Home className="h-4 w-4" />
+                              Residential
+                            </ToggleGroupItem>
+                            <ToggleGroupItem value="commercial" className="gap-2">
+                              <Building className="h-4 w-4" />
+                              Commercial
+                            </ToggleGroupItem>
+                            <ToggleGroupItem value="industrial" className="gap-2">
+                              <Building className="h-4 w-4" />
+                              Industrial
+                            </ToggleGroupItem>
+                            <ToggleGroupItem value="land" className="gap-2">
+                              <Building className="h-4 w-4" />
+                              Land
+                            </ToggleGroupItem>
+                          </ToggleGroup>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <FormField
-                control={form.control}
-                name="price"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Price</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2">$</span>
-                        <Input 
-                          type="number" 
-                          placeholder="0.00" 
-                          className="pl-7" 
+                  {/* Basic Information */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="title"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Property Title *</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Enter property title..." {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="subtype"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Property Subtype *</FormLabel>
+                          <FormControl>
+                            <select
+                              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                              {...field}
+                            >
+                              {propertySubtypes[propertyType].map((subtype) => (
+                                <option key={subtype} value={subtype}>
+                                  {subtype}
+                                </option>
+                              ))}
+                            </select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name="price"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Price *</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2">$</span>
+                            <Input 
+                              type="number" 
+                              placeholder="0.00" 
+                              className="pl-7" 
+                              {...field}
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="status"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Status *</FormLabel>
+                        <FormControl>
+                          <select
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            {...field}
+                          >
+                            <option value="available">Available</option>
+                            <option value="pending">Pending</option>
+                            <option value="sold">Sold</option>
+                          </select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="flex justify-end mt-6">
+                  <Button type="button" onClick={nextTab}>
+                    Continue to Details
+                  </Button>
+                </div>
+              </TabsContent>
+
+              {/* STEP 2: Property Details */}
+              <TabsContent value="details" className="space-y-6 mt-0">
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Description *</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Describe the property..."
+                          className="min-h-[120px]"
                           {...field}
                         />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="area"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Area (sq ft)</FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="0" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="status"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Status</FormLabel>
-                    <FormControl>
-                      <select
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                        {...field}
-                      >
-                        <option value="available">Available</option>
-                        <option value="pending">Pending</option>
-                        <option value="sold">Sold</option>
-                      </select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            {/* Conditional fields for residential properties */}
-            {propertyType === 'residential' && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
-                  control={form.control}
-                  name="bedrooms"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Bedrooms</FormLabel>
-                      <FormControl>
-                        <Input type="number" min="0" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="bathrooms"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Bathrooms</FormLabel>
-                      <FormControl>
-                        <Input type="number" min="0" step="0.5" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            )}
-
-            {/* Address */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium">Property Address</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
-                  control={form.control}
-                  name="address.street"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Street Address</FormLabel>
-                      <FormControl>
-                        <Input placeholder="123 Main St" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="address.city"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>City</FormLabel>
-                      <FormControl>
-                        <Input placeholder="New York" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <FormField
-                  control={form.control}
-                  name="address.state"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>State/Province</FormLabel>
-                      <FormControl>
-                        <Input placeholder="NY" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="address.zip"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>ZIP/Postal Code</FormLabel>
-                      <FormControl>
-                        <Input placeholder="10001" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="address.country"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Country</FormLabel>
-                      <FormControl>
-                        <Input placeholder="USA" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </div>
-
-            {/* Features */}
-            <FormField
-              control={form.control}
-              name="features"
-              render={() => (
-                <FormItem>
-                  <div className="mb-4">
-                    <FormLabel className="text-base">Features</FormLabel>
-                    <FormDescription>
-                      Select all the features available for this property.
-                    </FormDescription>
-                  </div>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    {getFeaturesByType().map((feature) => (
-                      <FormField
-                        key={feature.id}
-                        control={form.control}
-                        name="features"
-                        render={({ field }) => {
-                          return (
-                            <FormItem
-                              key={feature.id}
-                              className="flex flex-row items-start space-x-3 space-y-0"
-                            >
-                              <FormControl>
-                                <Checkbox
-                                  checked={field.value?.includes(feature.id)}
-                                  onCheckedChange={(checked) => {
-                                    const currentValues = [...field.value];
-                                    if (checked) {
-                                      field.onChange([...currentValues, feature.id]);
-                                    } else {
-                                      field.onChange(
-                                        currentValues.filter((value) => value !== feature.id)
-                                      );
-                                    }
-                                  }}
-                                />
-                              </FormControl>
-                              <FormLabel className="font-normal">
-                                {feature.label}
-                              </FormLabel>
-                            </FormItem>
-                          );
-                        }}
-                      />
-                    ))}
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Image Upload */}
-            <div className="space-y-3">
-              <FormLabel>Property Images</FormLabel>
-              <div className="border-2 border-dashed rounded-md p-6 flex flex-col items-center">
-                <Upload className="h-10 w-10 text-muted-foreground mb-2" />
-                <p className="text-sm text-muted-foreground mb-4">Drag and drop images or click to upload</p>
-                <label htmlFor="image-upload">
-                  <Input
-                    id="image-upload"
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    className="hidden"
-                    onChange={handleImageUpload}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="area"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Area (sq ft) *</FormLabel>
+                        <FormControl>
+                          <Input type="number" placeholder="0" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                  <Button type="button" variant="outline" className="cursor-pointer">
-                    Select Images
-                  </Button>
-                </label>
-              </div>
 
-              {/* Image Preview */}
-              {propertyImages.length > 0 && (
-                <div className="space-y-2 mt-4">
-                  <p className="text-sm font-medium">Uploaded Images:</p>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                    {propertyImages.map((image, index) => (
-                      <div 
-                        key={index} 
-                        className="relative rounded-md overflow-hidden aspect-square border"
-                      >
-                        <img
-                          src={URL.createObjectURL(image)}
-                          alt={`Property ${index}`}
-                          className="object-cover w-full h-full"
-                        />
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="sm"
-                          className="absolute top-1 right-1 h-6 w-6 p-0"
-                          onClick={() => removeImage(index)}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))}
+                  {/* Conditional fields for residential properties */}
+                  {propertyType === 'residential' && (
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="bedrooms"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Bedrooms</FormLabel>
+                            <FormControl>
+                              <Input type="number" min="0" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="bathrooms"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Bathrooms</FormLabel>
+                            <FormControl>
+                              <Input type="number" min="0" step="0.5" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Features - moved to a collapsible section */}
+                <div className="border rounded-md p-4">
+                  <FormField
+                    control={form.control}
+                    name="features"
+                    render={() => (
+                      <FormItem>
+                        <div className="mb-2">
+                          <FormLabel className="text-base">Features (Optional)</FormLabel>
+                          <FormDescription>
+                            Select features available for this property.
+                          </FormDescription>
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                          {getFeaturesByType().slice(0, 6).map((feature) => (
+                            <FormField
+                              key={feature.id}
+                              control={form.control}
+                              name="features"
+                              render={({ field }) => {
+                                return (
+                                  <FormItem
+                                    key={feature.id}
+                                    className="flex flex-row items-start space-x-3 space-y-0"
+                                  >
+                                    <FormControl>
+                                      <Checkbox
+                                        checked={field.value?.includes(feature.id)}
+                                        onCheckedChange={(checked) => {
+                                          const currentValues = [...field.value];
+                                          if (checked) {
+                                            field.onChange([...currentValues, feature.id]);
+                                          } else {
+                                            field.onChange(
+                                              currentValues.filter((value) => value !== feature.id)
+                                            );
+                                          }
+                                        }}
+                                      />
+                                    </FormControl>
+                                    <FormLabel className="font-normal">
+                                      {feature.label}
+                                    </FormLabel>
+                                  </FormItem>
+                                );
+                              }}
+                            />
+                          ))}
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="flex justify-between mt-6">
+                  <Button type="button" variant="outline" onClick={prevTab}>
+                    Back
+                  </Button>
+                  <Button type="button" onClick={nextTab}>
+                    Continue to Address
+                  </Button>
+                </div>
+              </TabsContent>
+
+              {/* STEP 3: Address */}
+              <TabsContent value="address" className="space-y-6 mt-0">
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="address.street"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Street Address *</FormLabel>
+                          <FormControl>
+                            <Input placeholder="123 Main St" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="address.city"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>City *</FormLabel>
+                          <FormControl>
+                            <Input placeholder="New York" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="address.state"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>State/Province *</FormLabel>
+                          <FormControl>
+                            <Input placeholder="NY" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="address.zip"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>ZIP/Postal Code *</FormLabel>
+                          <FormControl>
+                            <Input placeholder="10001" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="address.country"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Country *</FormLabel>
+                          <FormControl>
+                            <Input placeholder="USA" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
                 </div>
-              )}
-            </div>
 
-            {/* Submit Button */}
-            <div className="flex justify-end space-x-2">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => navigate('/properties')}
-                disabled={isSubmitting}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Submitting...' : 'Create Property'}
-              </Button>
-            </div>
+                <div className="flex justify-between mt-6">
+                  <Button type="button" variant="outline" onClick={prevTab}>
+                    Back
+                  </Button>
+                  <Button type="button" onClick={nextTab}>
+                    Continue to Media
+                  </Button>
+                </div>
+              </TabsContent>
+
+              {/* STEP 4: Media Upload */}
+              <TabsContent value="media" className="space-y-6 mt-0">
+                <div className="space-y-3">
+                  <FormLabel>Property Images (Optional)</FormLabel>
+                  <div className="border-2 border-dashed rounded-md p-6 flex flex-col items-center">
+                    <Upload className="h-10 w-10 text-muted-foreground mb-2" />
+                    <p className="text-sm text-muted-foreground mb-4">Drag and drop images or click to upload</p>
+                    <label htmlFor="image-upload">
+                      <Input
+                        id="image-upload"
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        className="hidden"
+                        onChange={handleImageUpload}
+                      />
+                      <Button type="button" variant="outline" className="cursor-pointer">
+                        Select Images
+                      </Button>
+                    </label>
+                  </div>
+
+                  {/* Image Preview */}
+                  {propertyImages.length > 0 && (
+                    <div className="space-y-2 mt-4">
+                      <p className="text-sm font-medium">Uploaded Images:</p>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                        {propertyImages.map((image, index) => (
+                          <div 
+                            key={index} 
+                            className="relative rounded-md overflow-hidden aspect-square border"
+                          >
+                            <img
+                              src={URL.createObjectURL(image)}
+                              alt={`Property ${index}`}
+                              className="object-cover w-full h-full"
+                            />
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="sm"
+                              className="absolute top-1 right-1 h-6 w-6 p-0"
+                              onClick={() => removeImage(index)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Final Submit Buttons */}
+                <div className="flex justify-between mt-6">
+                  <Button type="button" variant="outline" onClick={prevTab}>
+                    Back
+                  </Button>
+                  <div className="space-x-2">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => navigate('/properties')}
+                      disabled={isSubmitting}
+                    >
+                      Cancel
+                    </Button>
+                    <Button type="submit" disabled={isSubmitting}>
+                      {isSubmitting ? 'Submitting...' : 'Create Property'}
+                    </Button>
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
           </form>
         </Form>
       </CardContent>
