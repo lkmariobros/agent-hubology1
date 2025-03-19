@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Building2, BarChart4, Users, DollarSign } from 'lucide-react';
 import MetricCard from '@/components/dashboard/MetricCard';
@@ -162,10 +163,6 @@ const Dashboard = () => {
           <MetricCard 
             key={metric.label} 
             metric={metric} 
-            className={cn(
-              "animate-fade-in",
-              index === 0 ? "sm:col-span-2 lg:col-span-1" : ""
-            )} 
           />
         ))}
       </div>

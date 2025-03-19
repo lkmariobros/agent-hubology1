@@ -54,6 +54,21 @@ export const SidebarProvider = React.forwardRef<
     const isMobile = useIsMobile()
     const [openMobile, setOpenMobile] = React.useState(false)
 
+    // Use localStorage instead of cookies for client-side only state
+    React.useEffect(() => {
+      // On mount, read the stored state from localStorage
+      if (typeof window !== 'undefined' && defaultOpen === true) {
+        const savedState = localStorage.getItem(SIDEBAR_COOKIE_NAME);
+        if (savedState === 'collapsed') {
+          if (setOpenProp) {
+            setOpenProp(false);
+          } else {
+            _setOpen(false);
+          }
+        }
+      }
+    }, []);
+
     // This is the internal state of the sidebar.
     // We use openProp and setOpenProp for control from outside the component.
     const [_open, _setOpen] = React.useState(defaultOpen)
@@ -67,9 +82,9 @@ export const SidebarProvider = React.forwardRef<
           _setOpen(openState)
         }
 
-        // This sets the cookie to keep the sidebar state.
+        // This sets localStorage to keep the sidebar state.
         if (typeof window !== 'undefined') {
-          document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState ? 'expanded' : 'collapsed'}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`
+          localStorage.setItem(SIDEBAR_COOKIE_NAME, openState ? 'expanded' : 'collapsed')
         }
       },
       [setOpenProp, open]
