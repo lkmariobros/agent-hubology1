@@ -35,7 +35,7 @@
     
     --radius: 0.75rem;
 
-    /* Ensure sidebar variables are consistent */
+    /* Sidebar variables - ensuring consistency */
     --sidebar-background: 240 10% 3.9%;
     --sidebar-foreground: 0 0% 98%;
     --sidebar-border: 240 3.7% 15.9%;
@@ -45,6 +45,7 @@
     --sidebar-accent-foreground: 0 0% 98%;
     --sidebar-ring: 240 4.9% 83.9%;
     
+    /* Fixed sidebar width values to ensure consistency */
     --sidebar-width: 16rem;
     --sidebar-width-icon: 4rem;
 

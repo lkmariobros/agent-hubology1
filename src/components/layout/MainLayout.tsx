@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { Bell, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -49,7 +49,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
             <header className="h-16 flex items-center justify-between px-4 border-b border-border">
               <div className="flex items-center gap-2">
                 <SidebarTrigger />
-                <h1 className="text-lg font-semibold">PropertyPro</h1>
+                {/* Remove duplicate PropertyPro text since it's already in the sidebar */}
               </div>
               
               <div className="flex items-center space-x-2">
