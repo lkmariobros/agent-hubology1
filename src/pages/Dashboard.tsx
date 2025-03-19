@@ -1,12 +1,10 @@
-
 import React from 'react';
 import { Building2, BarChart4, Users, DollarSign } from 'lucide-react';
-import MainLayout from '@/components/layout/MainLayout';
 import MetricCard from '@/components/dashboard/MetricCard';
 import PropertyList from '@/components/dashboard/PropertyList';
 import RecentTransactions from '@/components/dashboard/RecentTransactions';
 import OpportunitiesBoard from '@/components/dashboard/OpportunitiesBoard';
-import { DashboardMetric, Property, Transaction, User } from '@/types';
+import { DashboardMetric, Property, Transaction } from '@/types';
 import { cn } from '@/lib/utils';
 
 // Sample dashboard metrics data
@@ -149,49 +147,47 @@ const transactions: Transaction[] = [
 
 const Dashboard = () => {
   return (
-    <MainLayout>
-      <div className="space-y-4 md:space-y-6">
-        {/* Page Title */}
+    <div className="space-y-4 md:space-y-6">
+      {/* Page Title */}
+      <div>
+        <h1 className="text-xl md:text-2xl font-bold tracking-tight">Dashboard</h1>
+        <p className="text-muted-foreground text-sm md:text-base">
+          Welcome back! Here's an overview of your agency's performance.
+        </p>
+      </div>
+      
+      {/* Metrics */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+        {metrics.map((metric, index) => (
+          <MetricCard 
+            key={metric.label} 
+            metric={metric} 
+            className={cn(
+              "animate-fade-in",
+              index === 0 ? "sm:col-span-2 lg:col-span-1" : ""
+            )} 
+          />
+        ))}
+      </div>
+      
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 gap-4 md:gap-6">
+        {/* Properties List */}
         <div>
-          <h1 className="text-xl md:text-2xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground text-sm md:text-base">
-            Welcome back! Here's an overview of your agency's performance.
-          </p>
+          <PropertyList properties={properties} />
         </div>
         
-        {/* Metrics */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-          {metrics.map((metric, index) => (
-            <MetricCard 
-              key={metric.label} 
-              metric={metric} 
-              className={cn(
-                "animate-fade-in",
-                index === 0 ? "sm:col-span-2 lg:col-span-1" : ""
-              )} 
-            />
-          ))}
+        {/* Opportunities Board */}
+        <div>
+          <OpportunitiesBoard />
         </div>
         
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 gap-4 md:gap-6">
-          {/* Properties List */}
-          <div>
-            <PropertyList properties={properties} />
-          </div>
-          
-          {/* Opportunities Board */}
-          <div>
-            <OpportunitiesBoard />
-          </div>
-          
-          {/* Recent Transactions */}
-          <div>
-            <RecentTransactions transactions={transactions} />
-          </div>
+        {/* Recent Transactions */}
+        <div>
+          <RecentTransactions transactions={transactions} />
         </div>
       </div>
-    </MainLayout>
+    </div>
   );
 };
 

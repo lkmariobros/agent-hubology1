@@ -40,50 +40,51 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   };
 
   return (
-    <SidebarWrapper 
-      defaultOpen={getInitialSidebarState()}
-      onOpenChange={handleSidebarChange}
-      className="min-h-screen w-full flex"
-    >
-      <AppSidebar />
-      <SidebarInset className="bg-background">
-        <header className="h-16 flex items-center justify-between px-4 border-b border-border">
-          <div className="flex items-center gap-2">
-            <SidebarTrigger />
-            <h1 className="text-lg font-semibold">PropertyPro</h1>
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            <Button variant="ghost" size="icon" className="text-muted-foreground">
-              <Bell className="h-5 w-5" />
-            </Button>
+    <div className="flex min-h-screen w-full">
+      <SidebarWrapper 
+        defaultOpen={getInitialSidebarState()}
+        onOpenChange={handleSidebarChange}
+      >
+        <AppSidebar />
+        <SidebarInset className="bg-background flex flex-col">
+          <header className="h-16 flex items-center justify-between px-4 border-b border-border">
+            <div className="flex items-center gap-2">
+              <SidebarTrigger />
+              <h1 className="text-lg font-semibold">PropertyPro</h1>
+            </div>
             
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-full">
-                  <div className="h-8 w-8 rounded-full bg-accent/10 flex items-center justify-center">
-                    <User className="h-4 w-4 text-accent" />
-                  </div>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>Profile</DropdownMenuItem>
-                <DropdownMenuItem>Settings</DropdownMenuItem>
-                <DropdownMenuItem>Billing</DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>Logout</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </header>
-        
-        <main className="flex-1 p-4 md:p-6 overflow-y-auto">
-          {children || <Outlet />}
-        </main>
-      </SidebarInset>
-    </SidebarWrapper>
+            <div className="flex items-center space-x-2">
+              <Button variant="ghost" size="icon" className="text-muted-foreground">
+                <Bell className="h-5 w-5" />
+              </Button>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="rounded-full">
+                    <div className="h-8 w-8 rounded-full bg-accent/10 flex items-center justify-center">
+                      <User className="h-4 w-4 text-accent" />
+                    </div>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>Profile</DropdownMenuItem>
+                  <DropdownMenuItem>Settings</DropdownMenuItem>
+                  <DropdownMenuItem>Billing</DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>Logout</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </header>
+          
+          <main className="flex-1 p-4 md:p-6 overflow-y-auto">
+            {children || <Outlet />}
+          </main>
+        </SidebarInset>
+      </SidebarWrapper>
+    </div>
   );
 };
 
