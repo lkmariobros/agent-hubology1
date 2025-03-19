@@ -4,7 +4,7 @@ import { Outlet } from 'react-router-dom';
 import { Bell, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
-  SidebarProvider,
+  SidebarWrapper,
   SidebarInset,
   SidebarTrigger
 } from "@/components/ui/sidebar";
@@ -40,7 +40,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   };
 
   return (
-    <SidebarProvider 
+    <SidebarWrapper 
       defaultOpen={getInitialSidebarState()}
       onOpenChange={handleSidebarChange}
       style={{
@@ -87,7 +87,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
           {children || <Outlet />}
         </main>
       </SidebarInset>
-    </SidebarProvider>
+    </SidebarWrapper>
   );
 };
 
