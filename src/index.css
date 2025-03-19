@@ -1,4 +1,6 @@
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -33,7 +35,7 @@
     --input: 240 3.7% 15.9%;
     --ring: 240 4.9% 83.9%;
     
-    --radius: 0.75rem;
+    --radius: 0.5rem;
 
     --sidebar-background: 240 10% 3.9%;
     --sidebar-foreground: 0 0% 98%;
@@ -63,10 +65,15 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
+    letter-spacing: -0.01em;
   }
 
   html {
     @apply scroll-smooth;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-medium tracking-tight;
   }
 }
 
@@ -81,7 +88,7 @@
   }
 
   .glass-card {
-    @apply backdrop-blur-2xl bg-white/5 border border-white/10 shadow-[0_4px_12px_-2px_rgba(0,0,0,0.3)];
+    @apply backdrop-blur-xl bg-white/5 border border-white/10 shadow-[0_4px_12px_-2px_rgba(0,0,0,0.2)];
   }
   
   .neo-blur {
@@ -109,5 +116,21 @@
     opacity: 1;
     transform: translateY(0);
     transition: opacity 300ms, transform 300ms;
+  }
+  
+  .clean-table {
+    @apply w-full border-collapse;
+  }
+  
+  .clean-table th {
+    @apply text-xs uppercase tracking-wider text-muted-foreground font-normal py-3 px-4 text-left border-b border-muted;
+  }
+  
+  .clean-table td {
+    @apply py-3 px-4 border-b border-muted/50;
+  }
+  
+  .clean-table tr:hover {
+    @apply bg-muted/20;
   }
 }

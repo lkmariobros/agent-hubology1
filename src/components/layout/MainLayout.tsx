@@ -51,7 +51,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       {/* Main content */}
       <div className="flex-1 flex flex-col h-full">
         {/* Fixed header */}
-        <header className="h-16 flex-shrink-0 border-b border-border flex items-center justify-between px-4">
+        <header className="h-14 flex-shrink-0 border-b border-border flex items-center justify-between px-4">
           <div className="flex items-center">
             <Button 
               variant="ghost" 
@@ -71,7 +71,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
               <Menu className="h-5 w-5" />
             </Button>
             
-            <h1 className="text-lg font-semibold ml-2">PropertyPro</h1>
+            <h1 className="text-lg font-normal ml-2">PropertyPro</h1>
           </div>
           
           <div className="flex items-center space-x-2">

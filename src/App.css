@@ -8,6 +8,15 @@
   text-align: left;
 }
 
+/* Custom typography */
+.thin-headings h1, 
+.thin-headings h2, 
+.thin-headings h3, 
+.thin-headings h4 {
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
 /* Keep animation styles */
 @keyframes logo-spin {
   from {

@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
 import { Transaction } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, Search, Filter, Download, Plus } from 'lucide-react';
+import { Search, Filter, Download, Plus, ArrowUpDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { 
@@ -102,15 +102,16 @@ const Transactions = () => {
 
   return (
     <MainLayout>
-      <div className="space-y-6">
+      <div className="p-6 space-y-6 max-w-[1200px] mx-auto">
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold tracking-tight">Transactions</h1>
+          <h1 className="text-xl font-normal tracking-tight">Transactions</h1>
           <div className="flex space-x-2">
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" size="sm" className="gap-2">
               <Download size={16} />
               Export
             </Button>
             <Button 
+              size="sm"
               className="gap-2"
               onClick={() => navigate('/transactions/new')}
             >
@@ -120,72 +121,95 @@ const Transactions = () => {
           </div>
         </div>
         
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle>Filter Transactions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-4">
-              <div className="flex-1 min-w-[200px]">
-                <Input placeholder="Search by property, agent..." className="w-full" />
-              </div>
-              <Button variant="outline" className="gap-2">
-                <Filter size={16} />
-                Filters
-              </Button>
-              <Button>Search</Button>
+        <Card className="p-4">
+          <div className="flex flex-wrap gap-4">
+            <div className="flex-1 min-w-[200px]">
+              <Input placeholder="Search by property, agent..." className="w-full h-9" />
             </div>
-          </CardContent>
+            <Button variant="outline" size="sm" className="gap-2">
+              <Filter size={16} />
+              Filters
+            </Button>
+            <Button size="sm">Search</Button>
+          </div>
         </Card>
         
-        <Card>
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Property</TableHead>
-                  <TableHead>Agent</TableHead>
-                  <TableHead>Price</TableHead>
-                  <TableHead>Commission</TableHead>
-                  <TableHead>Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {transactions.map((transaction) => (
-                  <TableRow key={transaction.id}>
-                    <TableCell>
-                      {new Date(transaction.date).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell>
-                      <div>
-                        <div className="font-medium">{transaction.property?.title}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {transaction.property?.address.city}, {transaction.property?.address.state}
-                        </div>
+        <Card className="overflow-hidden">
+          <table className="clean-table">
+            <thead>
+              <tr>
+                <th>
+                  <div className="flex items-center">
+                    Date <ArrowUpDown size={14} className="ml-1" />
+                  </div>
+                </th>
+                <th>Property</th>
+                <th>Agent</th>
+                <th>
+                  <div className="flex items-center">
+                    Price <ArrowUpDown size={14} className="ml-1" />
+                  </div>
+                </th>
+                <th>
+                  <div className="flex items-center">
+                    Commission <ArrowUpDown size={14} className="ml-1" />
+                  </div>
+                </th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {transactions.map((transaction) => (
+                <tr 
+                  key={transaction.id}
+                  className="cursor-pointer"
+                  onClick={() => navigate(`/transactions/${transaction.id}`)}
+                >
+                  <td>
+                    {new Date(transaction.date).toLocaleDateString()}
+                  </td>
+                  <td>
+                    <div>
+                      <div className="font-medium">{transaction.property?.title}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {transaction.property?.address.city}, {transaction.property?.address.state}
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      {transaction.agent?.name}
-                    </TableCell>
-                    <TableCell>
-                      ${transaction.price?.toLocaleString()}
-                    </TableCell>
-                    <TableCell>
-                      ${transaction.commission.toLocaleString()}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={transaction.status === 'completed' ? 'default' : 'outline'}
-                      >
-                        {transaction.status === 'completed' ? 'Completed' : 'Pending'}
-                      </Badge>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
+                    </div>
+                  </td>
+                  <td>
+                    {transaction.agent?.name}
+                  </td>
+                  <td className="font-medium">
+                    ${transaction.price?.toLocaleString()}
+                  </td>
+                  <td className="font-medium">
+                    ${transaction.commission.toLocaleString()}
+                  </td>
+                  <td>
+                    <Badge
+                      variant={transaction.status === 'completed' ? 'default' : 'outline'}
+                      className={transaction.status === 'pending' ? 'bg-orange-500/10 text-orange-500 hover:bg-orange-500/20' : ''}
+                    >
+                      {transaction.status}
+                    </Badge>
+                  </td>
+                  <td>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/transactions/${transaction.id}/edit`);
+                      }}
+                    >
+                      Edit
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </Card>
       </div>
     </MainLayout>
