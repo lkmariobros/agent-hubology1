@@ -36,9 +36,11 @@
     --radius: 0.75rem;
 
     /* Ensure sidebar variables are consistent */
-    --sidebar: 240 10% 3.9%;
+    --sidebar-background: 240 10% 3.9%;
     --sidebar-foreground: 0 0% 98%;
     --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-primary: 240 5.9% 90%;
+    --sidebar-primary-foreground: 240 5.9% 10%;
     --sidebar-accent: 240 3.7% 15.9%;
     --sidebar-accent-foreground: 0 0% 98%;
     --sidebar-ring: 240 4.9% 83.9%;

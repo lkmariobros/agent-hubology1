@@ -2,7 +2,6 @@ import * as React from "react"
 import { useIsMobile } from "@/hooks/use-mobile"
 
 const SIDEBAR_COOKIE_NAME = "sidebar:state"
-const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
 const SIDEBAR_KEYBOARD_SHORTCUT = "b"
 
 type SidebarContext = {
@@ -67,7 +66,7 @@ export const SidebarProvider = React.forwardRef<
           }
         }
       }
-    }, []);
+    }, [defaultOpen, setOpenProp]);
 
     // This is the internal state of the sidebar.
     // We use openProp and setOpenProp for control from outside the component.
