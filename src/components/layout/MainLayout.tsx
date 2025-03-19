@@ -1,10 +1,10 @@
+
 import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from '../Sidebar';
 import { Button } from '@/components/ui/button';
 import { Menu, User, BellRing } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { GeistMono } from 'geist/font/mono';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,7 +23,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <div className={`flex h-full bg-background text-foreground ${GeistMono.className}`}>
+    <div className="flex h-full bg-background text-foreground font-mono">
       {/* Sidebar for desktop */}
       <div className={cn(
         "hidden md:block h-full transition-all duration-300 ease-in-out", 
