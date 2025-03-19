@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -31,7 +30,49 @@ import {
   useCommissionHistory,
   useAgentHierarchy
 } from '@/hooks/useCommission';
-import { AgentWithHierarchy, CommissionHistory } from '@/types';
+import { AgentWithHierarchy, CommissionHistory, CommissionTier } from '@/types';
+
+// Sample commission tiers for fallback when API fails
+const fallbackTiers: CommissionTier[] = [
+  { tier: 'Bronze', rate: 20, minTransactions: 0, color: 'orange' },
+  { tier: 'Silver', rate: 25, minTransactions: 10, color: 'blue' },
+  { tier: 'Gold', rate: 30, minTransactions: 25, color: 'orange' },
+  { tier: 'Platinum', rate: 35, minTransactions: 50, color: 'purple' },
+  { tier: 'Diamond', rate: 40, minTransactions: 100, color: 'pink' }
+];
+
+// Sample agent hierarchy for fallback when API fails
+const fallbackAgentHierarchy: AgentWithHierarchy = {
+  id: 'agent123',
+  name: 'Jane Smith',
+  email: 'jane.smith@example.com',
+  phone: '+1-555-123-4567',
+  avatar: '',
+  rank: 'Team Leader',
+  joinDate: '2023-01-15',
+  transactions: 42,
+  salesVolume: 4500000,
+  personalCommission: 112500,
+  overrideCommission: 45000,
+  totalCommission: 157500,
+  downline: [
+    {
+      id: 'agent456',
+      name: 'Robert Wilson',
+      email: 'robert.wilson@example.com',
+      phone: '+1-555-987-6543',
+      avatar: '',
+      rank: 'Sales Leader',
+      joinDate: '2023-03-10',
+      transactions: 28,
+      salesVolume: 2800000,
+      personalCommission: 70000,
+      overrideCommission: 15000,
+      totalCommission: 85000,
+      downline: []
+    }
+  ]
+};
 
 // Sample recent commission history (would come from API in production)
 const recentCommissions: CommissionHistory[] = [
@@ -108,9 +149,13 @@ const Commission = () => {
   
   // Fetch commission data - in production, these would use real API calls
   // const { data: commissionSummary, isLoading: isLoadingSummary } = useCommissionSummary();
-  const { data: commissionTiers, isLoading: isLoadingTiers } = useCommissionTiers();
+  const { data: commissionTiersResponse, isLoading: isLoadingTiers } = useCommissionTiers();
   // const { data: commissionHistory, isLoading: isLoadingHistory } = useCommissionHistory();
-  const { data: agentHierarchy, isLoading: isLoadingHierarchy } = useAgentHierarchy('agent123');
+  const { data: agentHierarchyResponse, isLoading: isLoadingHierarchy } = useAgentHierarchy('agent123');
+
+  // Extract and provide fallbacks for API data
+  const commissionTiers = commissionTiersResponse || fallbackTiers;
+  const agentHierarchy = agentHierarchyResponse || fallbackAgentHierarchy;
 
   const handleAgentClick = (agent: AgentWithHierarchy) => {
     setSelectedAgent(agent);
@@ -249,7 +294,7 @@ const Commission = () => {
               
               <div>
                 <CommissionTiers 
-                  tiers={commissionTiers || []}
+                  tiers={commissionTiers} 
                   currentTier="Silver" 
                   transactionsCompleted={15}
                 />
@@ -279,12 +324,10 @@ const Commission = () => {
                 </CardContent>
               </Card>
               
-              {agentHierarchy && (
-                <CommissionCalculator
-                  agent={agentHierarchy}
-                  commissionRate={25}
-                />
-              )}
+              <CommissionCalculator
+                agent={agentHierarchy}
+                commissionRate={25}
+              />
             </div>
           </TabsContent>
           
@@ -295,7 +338,7 @@ const Commission = () => {
                   <p>Loading team hierarchy...</p>
                 </CardContent>
               </Card>
-            ) : agentHierarchy ? (
+            ) : (
               <>
                 <AgentHierarchyChart
                   data={agentHierarchy}
@@ -414,12 +457,6 @@ const Commission = () => {
                   </div>
                 )}
               </>
-            ) : (
-              <Card>
-                <CardContent className="p-6 flex justify-center">
-                  <p className="text-muted-foreground">No hierarchy data available</p>
-                </CardContent>
-              </Card>
             )}
           </TabsContent>
         </Tabs>

@@ -12,6 +12,20 @@ interface CommissionTiersProps {
 }
 
 const CommissionTiers = ({ tiers, currentTier, transactionsCompleted }: CommissionTiersProps) => {
+  // Check if tiers array is empty or undefined
+  if (!tiers || tiers.length === 0) {
+    return (
+      <Card className="glass-card">
+        <CardHeader className="px-6 pt-6 pb-4">
+          <CardTitle className="text-lg font-semibold">Commission Tiers</CardTitle>
+        </CardHeader>
+        <CardContent className="px-6 pb-6">
+          <p className="text-muted-foreground">No commission tiers available</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   const currentTierObj = tiers.find(t => t.tier === currentTier) || tiers[0];
   const nextTierObj = tiers.find(t => t.minTransactions > transactionsCompleted);
   

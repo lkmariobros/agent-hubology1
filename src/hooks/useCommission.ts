@@ -1,7 +1,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { commissionApi } from '@/lib/api';
-import { AgentRank, AgentWithHierarchy, OverrideCommission } from '@/types';
+import { AgentRank, AgentWithHierarchy, CommissionTier, OverrideCommission } from '@/types';
 
 // Get commission summary (current month, previous month, year to date)
 export function useCommissionSummary() {
@@ -22,17 +22,17 @@ export function useCommissionHistory(page = 1, pageSize = 10) {
   });
 }
 
-// Get commission tiers
+// Get commission tiers with proper typing
 export function useCommissionTiers() {
-  return useQuery({
+  return useQuery<CommissionTier[]>({
     queryKey: ['commission', 'tiers'],
     queryFn: commissionApi.getTiers,
   });
 }
 
-// Get agent hierarchy data (for org chart)
+// Get agent hierarchy data (for org chart) with proper typing
 export function useAgentHierarchy(agentId?: string) {
-  return useQuery({
+  return useQuery<AgentWithHierarchy>({
     queryKey: ['agents', 'hierarchy', agentId],
     queryFn: () => commissionApi.getAgentHierarchy(agentId),
     enabled: !!agentId,
