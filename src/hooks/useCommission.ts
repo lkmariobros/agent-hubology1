@@ -15,7 +15,9 @@ export function useCommissionHistory(page = 1, pageSize = 10) {
   return useQuery({
     queryKey: ['commission', 'history', page, pageSize],
     queryFn: () => commissionApi.getHistory(page, pageSize),
-    keepPreviousData: true,
+    meta: {
+      keepPreviousData: true
+    }
   });
 }
 

@@ -25,18 +25,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     queryFn: authApi.getProfile,
     retry: false,
     enabled: !!localStorage.getItem('token'), // Only run if token exists
-    onSuccess: (response) => {
-      if (response.success) {
-        setUser(response.data);
-      } else {
-        // Handle case where API returns success: false
+    meta: {
+      onSuccess: (response: any) => {
+        if (response.success) {
+          setUser(response.data);
+        } else {
+          // Handle case where API returns success: false
+          localStorage.removeItem('token');
+          setUser(null);
+        }
+      },
+      onError: () => {
         localStorage.removeItem('token');
         setUser(null);
       }
-    },
-    onError: () => {
-      localStorage.removeItem('token');
-      setUser(null);
     }
   });
   

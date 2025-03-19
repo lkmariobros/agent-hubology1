@@ -9,7 +9,9 @@ export function useProperties(page = 1, pageSize = 10, filters = {}) {
   return useQuery({
     queryKey: ['properties', page, pageSize, filters],
     queryFn: () => propertiesApi.getAll(page, pageSize, filters),
-    keepPreviousData: true,
+    meta: {
+      keepPreviousData: true
+    }
   });
 }
 
