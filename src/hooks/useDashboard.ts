@@ -1,7 +1,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { dashboardApi } from '@/lib/api';
-import { DashboardMetric, Property, Transaction, Opportunity } from '@/types';
+import { DashboardMetric, Property, Transaction, Opportunity, ApiResponse } from '@/types';
 
 export function useMetrics() {
   return useQuery({
@@ -40,8 +40,10 @@ export function useMetrics() {
             icon: 'chart'
           }
         ]
-      }
-    }
+      },
+      message: 'Metrics retrieved successfully',
+      success: true
+    } as ApiResponse<any>
   });
 }
 
@@ -122,8 +124,10 @@ export function useRecentProperties(limit = 5) {
           createdAt: '2024-01-20T11:45:00Z',
           updatedAt: '2024-01-20T11:45:00Z'
         }
-      ]
-    }
+      ],
+      message: 'Recent properties retrieved successfully',
+      success: true
+    } as ApiResponse<any[]>
   });
 }
 
@@ -162,14 +166,55 @@ export function useRecentTransactions(limit = 5) {
           status: 'completed',
           date: '2024-02-28T09:15:00Z'
         }
-      ]
-    }
+      ],
+      message: 'Recent transactions retrieved successfully',
+      success: true
+    } as ApiResponse<any[]>
   });
 }
 
 export function useOpportunities() {
   return useQuery({
     queryKey: ['dashboard', 'opportunities'],
-    queryFn: dashboardApi.getOpportunities
+    queryFn: dashboardApi.getOpportunities,
+    placeholderData: {
+      data: [
+        {
+          id: '1',
+          title: 'Family looking for 3BR apartment',
+          description: 'Family of 4 needs 3-bedroom apartment in central area with good schools nearby.',
+          propertyType: 'Residential',
+          budget: 'RM450,000 - RM550,000',
+          location: 'Kuala Lumpur (KLCC, Bangsar)',
+          status: 'Urgent',
+          postedBy: 'Sarah Johnson',
+          postedAt: '2024-06-01T09:30:00Z'
+        },
+        {
+          id: '2',
+          title: 'Retail space for boutique',
+          description: 'Fashion designer looking for 800-1000 sq ft retail space in a high foot traffic area.',
+          propertyType: 'Commercial',
+          budget: 'RM8,000 - RM12,000/mo',
+          location: 'Bukit Bintang, Pavilion area',
+          status: 'New',
+          postedBy: 'Michael Brown',
+          postedAt: '2024-06-05T14:15:00Z'
+        },
+        {
+          id: '3',
+          title: 'Land for agricultural project',
+          description: 'Investor seeking 2-5 acres of agricultural land for sustainable farming project.',
+          propertyType: 'Land',
+          budget: 'RM1.2M - RM2.5M',
+          location: 'Selangor (Rawang, Semenyih)',
+          status: 'Featured',
+          postedBy: 'John Smith',
+          postedAt: '2024-06-03T11:45:00Z'
+        }
+      ],
+      message: 'Opportunities retrieved successfully',
+      success: true
+    } as ApiResponse<Opportunity[]>
   });
 }

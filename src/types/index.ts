@@ -84,6 +84,18 @@ export interface Transaction {
   date: string;
 }
 
+export interface Opportunity {
+  id: string;
+  title: string;
+  description: string;
+  propertyType: 'Residential' | 'Commercial' | 'Industrial' | 'Land';
+  budget: string;
+  location: string;
+  status: 'Urgent' | 'New' | 'Featured' | 'Regular';
+  postedBy: string;
+  postedAt: string;
+}
+
 // API response interfaces - for use with backend integration
 export interface ApiResponse<T> {
   data: T;
