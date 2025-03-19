@@ -1,10 +1,15 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Outlet } from 'react-router-dom';
-import Sidebar from '../Sidebar';
-import { Button } from '@/components/ui/button';
-import { Menu, User, BellRing } from 'lucide-react';
+import { Bell, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import {
+  SidebarProvider,
+  SidebarInset,
+  SidebarTrigger
+} from "@/components/ui/sidebar";
+import { AppSidebar } from './AppSidebar';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,62 +24,42 @@ interface MainLayoutProps {
 }
 
 const MainLayout = ({ children }: MainLayoutProps) => {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  // Read the sidebar state from localStorage on initial render
+  const getInitialSidebarState = () => {
+    if (typeof window !== 'undefined') {
+      const savedState = localStorage.getItem('sidebar:state');
+      return savedState ? savedState === 'expanded' : true;
+    }
+    return true;
+  };
+
+  const handleSidebarChange = (open: boolean) => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('sidebar:state', open ? 'expanded' : 'collapsed');
+    }
+  };
 
   return (
-    <div className="flex h-screen bg-background text-foreground overflow-hidden">
-      {/* Sidebar for desktop */}
-      <div className={cn(
-        "hidden md:block transition-all duration-300 ease-in-out", 
-        sidebarCollapsed ? "w-20" : "w-64"
-      )}>
-        <Sidebar collapsed={sidebarCollapsed} />
-      </div>
-      
-      {/* Mobile sidebar as overlay */}
-      {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 md:hidden">
-          {/* Backdrop */}
-          <div 
-            className="fixed inset-0 bg-black/50"
-            onClick={() => setMobileMenuOpen(false)}
-          />
-          
-          {/* Sidebar */}
-          <div className="fixed inset-y-0 left-0 w-64 bg-sidebar border-r border-sidebar-border">
-            <Sidebar collapsed={false} />
-          </div>
-        </div>
-      )}
-      
-      <div className="flex-1 flex flex-col overflow-hidden">
+    <SidebarProvider 
+      defaultOpen={getInitialSidebarState()}
+      onOpenChange={handleSidebarChange}
+      style={{
+        '--sidebar-width': '16rem',
+        '--sidebar-width-icon': '4rem',
+      } as React.CSSProperties}
+      className="min-h-screen w-full"
+    >
+      <AppSidebar />
+      <SidebarInset className="bg-background">
         <header className="h-16 flex items-center justify-between px-4 border-b border-border">
-          <div className="flex items-center">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="mr-2 md:hidden"
-              onClick={() => setMobileMenuOpen(true)}
-            >
-              <Menu className="h-5 w-5" />
-            </Button>
-            
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="hidden md:flex"
-              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            >
-              <Menu className="h-5 w-5" />
-            </Button>
-            
-            <h1 className="text-lg font-semibold ml-2">PropertyPro</h1>
+          <div className="flex items-center gap-2">
+            <SidebarTrigger />
+            <h1 className="text-lg font-semibold">PropertyPro</h1>
           </div>
           
           <div className="flex items-center space-x-2">
             <Button variant="ghost" size="icon" className="text-muted-foreground">
-              <BellRing className="h-5 w-5" />
+              <Bell className="h-5 w-5" />
             </Button>
             
             <DropdownMenu>
@@ -98,11 +83,11 @@ const MainLayout = ({ children }: MainLayoutProps) => {
           </div>
         </header>
         
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 p-6 overflow-y-auto">
           {children || <Outlet />}
         </main>
-      </div>
-    </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 };
 
