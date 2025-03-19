@@ -1,31 +1,17 @@
-
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  tier: string;
-  avatar?: string;
-  sales?: number;
-  points?: number;
-  phone?: string;
-  properties?: number;
-  transactions?: number;
-}
-
-export interface CommissionTier {
-  tier: string;
-  rate: number;
-  minTransactions: number;
-  color: string;
-}
-
 export interface DashboardMetric {
   label: string;
   value: string;
-  change?: number;
-  trend?: 'up' | 'down' | 'neutral';
-  icon?: React.ReactNode;
+  change: number;
+  trend: 'up' | 'down';
+  icon: React.ReactNode;
+}
+
+export interface Address {
+  street: string;
+  city: string;
+  state: string;
+  zip: string;
+  country: string;
 }
 
 export interface Property {
@@ -33,13 +19,7 @@ export interface Property {
   title: string;
   description: string;
   price: number;
-  address: {
-    street: string;
-    city: string;
-    state: string;
-    zip: string;
-    country: string;
-  };
+  address: Address;
   type: 'residential' | 'commercial' | 'industrial' | 'land';
   subtype: string;
   features: string[];
@@ -53,6 +33,36 @@ export interface Property {
   updatedAt: string;
 }
 
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  tier: string;
+  avatar?: string;
+}
+
+export interface CommissionTier {
+  tier: string;
+  rate: number;
+  minTransactions: number;
+  color: string;
+}
+
+// Extend the User interface with additional properties if they don't exist
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  role: string;
+  tier: string;
+  avatar?: string;
+  properties?: number;
+  transactions?: number;
+}
+
+// Extend the Transaction interface with additional properties
 export interface Transaction {
   id: string;
   propertyId: string;
@@ -61,7 +71,7 @@ export interface Transaction {
     address: {
       city: string;
       state: string;
-    };
+    }
   };
   agentId: string;
   agent?: {
@@ -78,6 +88,6 @@ export interface Transaction {
   };
   price?: number;
   commission: number;
-  status: 'pending' | 'completed' | 'cancelled';
+  status: string;
   date: string;
 }

@@ -16,7 +16,6 @@ import NotFound from "./pages/NotFound";
 import PointsLeaderboard from "./pages/leaderboard/Points";
 import SalesLeaderboard from "./pages/leaderboard/Sales";
 import Opportunities from "./pages/Opportunities";
-import MainLayout from "./components/layout/MainLayout";
 
 const queryClient = new QueryClient();
 
@@ -28,18 +27,16 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route element={<MainLayout />}>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/properties" element={<Properties />} />
-            <Route path="/transactions" element={<Transactions />} />
-            <Route path="/team" element={<Team />} />
-            <Route path="/commission" element={<Commission />} />
-            <Route path="/leaderboard/points" element={<PointsLeaderboard />} />
-            <Route path="/leaderboard/sales" element={<SalesLeaderboard />} />
-            <Route path="/opportunities" element={<Opportunities />} />
-            <Route path="/reports" element={<Reports />} />
-            <Route path="/settings" element={<Settings />} />
-          </Route>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/properties" element={<Properties />} />
+          <Route path="/transactions" element={<Transactions />} />
+          <Route path="/team" element={<Team />} />
+          <Route path="/commission" element={<Commission />} />
+          <Route path="/leaderboard/points" element={<PointsLeaderboard />} />
+          <Route path="/leaderboard/sales" element={<SalesLeaderboard />} />
+          <Route path="/opportunities" element={<Opportunities />} />
+          <Route path="/reports" element={<Reports />} />
+          <Route path="/settings" element={<Settings />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

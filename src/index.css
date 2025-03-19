@@ -35,24 +35,17 @@
     
     --radius: 0.75rem;
 
-    /* Custom property colors */
-    --property-orange: 35 100% 60%;
-    --property-purple: 264 70% 50%;
-    --property-pink: 336 80% 58%;
-    --property-blue: 214 80% 56%;
-    --property-green: 142 71% 45%;
+    --sidebar-background: 240 10% 3.9%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 264 70% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 240 4.9% 83.9%;
 
-    /* Sidebar variables */
-    --sidebar-width: 16rem;
-    --sidebar-width-icon: 4rem;
-    --sidebar-background: var(--background);
-    --sidebar-foreground: var(--foreground);
-    --sidebar-border: var(--border);
-    --sidebar-primary: var(--primary);
-    --sidebar-primary-foreground: var(--primary-foreground);
-    --sidebar-accent: var(--secondary);
-    --sidebar-accent-foreground: var(--secondary-foreground);
-    --sidebar-ring: var(--ring);
+    --font-sans: 'Inter', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
   }
 
   * {
@@ -108,30 +101,5 @@
     opacity: 1;
     transform: translateY(0);
     transition: opacity 300ms, transform 300ms;
-  }
-  
-  /* Status badges */
-  .status-badge {
-    @apply px-2 py-0.5 text-xs rounded-full;
-  }
-  
-  .status-available {
-    @apply bg-green-500/20 text-green-400;
-  }
-  
-  .status-pending {
-    @apply bg-yellow-500/20 text-yellow-400;
-  }
-  
-  .status-sold {
-    @apply bg-blue-500/20 text-blue-400;
-  }
-  
-  .status-commercial {
-    @apply bg-indigo-500/20 text-indigo-400;
-  }
-  
-  .status-residential {
-    @apply bg-teal-500/20 text-teal-400;
   }
 }
