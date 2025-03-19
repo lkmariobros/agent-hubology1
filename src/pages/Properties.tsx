@@ -31,7 +31,9 @@ const sampleProperties: Property[] = [
     images: ['/placeholder.svg'],
     status: 'available',
     features: ['Parking', 'Pool', 'Gym'],
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    listedBy: 'Agent Smith'
   },
   {
     id: '2',
@@ -51,7 +53,9 @@ const sampleProperties: Property[] = [
     images: ['/placeholder.svg'],
     status: 'available',
     features: ['24/7 Access', 'Security System', 'Conference Rooms'],
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    listedBy: 'Agent Johnson'
   },
   {
     id: '3',
@@ -71,16 +75,18 @@ const sampleProperties: Property[] = [
     images: ['/placeholder.svg'],
     status: 'pending',
     features: ['Loading Docks', 'High Ceiling', 'Climate Control'],
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    listedBy: 'Agent Williams'
   }
 ];
 
 const Properties = () => {
   const navigate = useNavigate();
-  const [view, setView] = useState<'table' | 'grid' | 'map'>('table');
+  const [view, setView] = useState<'grid' | 'map'>('grid');
   const [properties] = useState<Property[]>(sampleProperties);
   
-  const handleViewChange = (newView: 'table' | 'grid' | 'map') => {
+  const handleViewChange = (newView: 'grid' | 'map') => {
     setView(newView);
   };
   
@@ -130,12 +136,12 @@ const Properties = () => {
         
         <PropertyFilterBar 
           onFilter={handleFilter} 
-          onViewChange={(view) => handleViewChange(view as 'table' | 'grid' | 'map')} 
+          onViewChange={handleViewChange} 
           currentView={view}
         />
         
         <Card className="overflow-hidden">
-          {view === 'table' && (
+          {view === 'grid' && (
             <div className="overflow-x-auto">
               <table className="clean-table">
                 <thead>
@@ -220,7 +226,52 @@ const Properties = () => {
           {view === 'grid' && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
               {properties.length > 0 ? (
-                <p>Grid view to be implemented</p>
+                properties.map(property => (
+                  <div 
+                    key={property.id}
+                    className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
+                    onClick={() => navigate(`/properties/${property.id}`)}
+                  >
+                    <div className="relative h-40 bg-muted">
+                      {property.images && property.images.length > 0 ? (
+                        <img 
+                          src={property.images[0]} 
+                          alt={property.title}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          {getPropertyTypeIcon(property.type)}
+                        </div>
+                      )}
+                      <Badge
+                        className="absolute top-2 right-2"
+                        variant={property.status === 'available' ? 'default' : 'outline'}
+                      >
+                        {property.status}
+                      </Badge>
+                    </div>
+                    <div className="p-4">
+                      <h3 className="font-medium truncate">{property.title}</h3>
+                      <div className="flex items-center gap-1 text-muted-foreground text-sm mt-1">
+                        <MapPin className="h-3 w-3" />
+                        <span>{property.address.city}, {property.address.state}</span>
+                      </div>
+                      <div className="mt-2 font-medium">{formatPrice(property.price)}</div>
+                      <div className="flex items-center text-sm text-muted-foreground mt-2 space-x-3">
+                        {property.bedrooms && (
+                          <span>{property.bedrooms} bd</span>
+                        )}
+                        {property.bathrooms && (
+                          <span>{property.bathrooms} ba</span>
+                        )}
+                        {property.area && (
+                          <span>{property.area} ft²</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))
               ) : (
                 <p className="col-span-full text-center text-muted-foreground py-12">
                   No properties to display. Add a new property to get started.
