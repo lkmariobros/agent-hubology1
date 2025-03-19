@@ -1,29 +1,42 @@
-
 import React, { useState } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Users } from 'lucide-react';
-
 import CommissionHeader from '@/components/commission/CommissionHeader';
 import CommissionMetrics from '@/components/commission/CommissionMetrics';
 import DashboardContent from '@/components/commission/DashboardContent';
 import TeamContent from '@/components/commission/TeamContent';
-
-import { 
-  useCommissionTiers, 
-  useAgentHierarchy
-} from '@/hooks/useCommission';
+import { useCommissionTiers, useAgentHierarchy } from '@/hooks/useCommission';
 import { AgentWithHierarchy, CommissionHistory, CommissionTier } from '@/types';
 
 // Sample commission tiers for fallback when API fails
-const fallbackTiers: CommissionTier[] = [
-  { tier: 'Bronze', rate: 20, minTransactions: 0, color: 'orange' },
-  { tier: 'Silver', rate: 25, minTransactions: 10, color: 'blue' },
-  { tier: 'Gold', rate: 30, minTransactions: 25, color: 'orange' },
-  { tier: 'Platinum', rate: 35, minTransactions: 50, color: 'purple' },
-  { tier: 'Diamond', rate: 40, minTransactions: 100, color: 'pink' }
-];
+const fallbackTiers: CommissionTier[] = [{
+  tier: 'Bronze',
+  rate: 20,
+  minTransactions: 0,
+  color: 'orange'
+}, {
+  tier: 'Silver',
+  rate: 25,
+  minTransactions: 10,
+  color: 'blue'
+}, {
+  tier: 'Gold',
+  rate: 30,
+  minTransactions: 25,
+  color: 'orange'
+}, {
+  tier: 'Platinum',
+  rate: 35,
+  minTransactions: 50,
+  color: 'purple'
+}, {
+  tier: 'Diamond',
+  rate: 40,
+  minTransactions: 100,
+  color: 'pink'
+}];
 
 // Sample agent hierarchy for fallback when API fails
 const fallbackAgentHierarchy: AgentWithHierarchy = {
@@ -39,74 +52,67 @@ const fallbackAgentHierarchy: AgentWithHierarchy = {
   personalCommission: 112500,
   overrideCommission: 45000,
   totalCommission: 157500,
-  downline: [
-    {
-      id: 'agent456',
-      name: 'Robert Wilson',
-      email: 'robert.wilson@example.com',
-      phone: '+1-555-987-6543',
-      avatar: '',
-      rank: 'Sales Leader',
-      joinDate: '2023-03-10',
-      transactions: 28,
-      salesVolume: 2800000,
-      personalCommission: 70000,
-      overrideCommission: 15000,
-      totalCommission: 85000,
-      downline: []
-    }
-  ]
+  downline: [{
+    id: 'agent456',
+    name: 'Robert Wilson',
+    email: 'robert.wilson@example.com',
+    phone: '+1-555-987-6543',
+    avatar: '',
+    rank: 'Sales Leader',
+    joinDate: '2023-03-10',
+    transactions: 28,
+    salesVolume: 2800000,
+    personalCommission: 70000,
+    overrideCommission: 15000,
+    totalCommission: 85000,
+    downline: []
+  }]
 };
 
 // Sample recent commission history (would come from API in production)
-const recentCommissions: CommissionHistory[] = [
-  {
-    id: '1',
-    transactionId: 'tx1',
-    property: {
-      title: 'Suburban Family Home',
-      location: 'Palo Alto, CA'
-    },
-    date: '2024-02-15T10:30:00Z',
-    amount: 22500,
-    type: 'personal'
+const recentCommissions: CommissionHistory[] = [{
+  id: '1',
+  transactionId: 'tx1',
+  property: {
+    title: 'Suburban Family Home',
+    location: 'Palo Alto, CA'
   },
-  {
-    id: '2',
-    transactionId: 'tx2',
-    property: {
-      title: 'Downtown Loft',
-      location: 'San Francisco, CA'
-    },
-    date: '2024-02-28T09:15:00Z',
-    amount: 30000,
-    type: 'personal'
+  date: '2024-02-15T10:30:00Z',
+  amount: 22500,
+  type: 'personal'
+}, {
+  id: '2',
+  transactionId: 'tx2',
+  property: {
+    title: 'Downtown Loft',
+    location: 'San Francisco, CA'
   },
-  {
-    id: '3',
-    transactionId: 'tx3',
-    property: {
-      title: 'Luxury Beach Condo',
-      location: 'Santa Monica, CA'
-    },
-    date: '2024-03-10T14:45:00Z',
-    amount: 8500,
-    type: 'override',
-    source: 'Robert Wilson'
+  date: '2024-02-28T09:15:00Z',
+  amount: 30000,
+  type: 'personal'
+}, {
+  id: '3',
+  transactionId: 'tx3',
+  property: {
+    title: 'Luxury Beach Condo',
+    location: 'Santa Monica, CA'
   },
-  {
-    id: '4',
-    transactionId: 'tx4',
-    property: {
-      title: 'Modern Townhouse',
-      location: 'Berkeley, CA'
-    },
-    date: '2024-03-18T11:20:00Z',
-    amount: 6200,
-    type: 'override',
-    source: 'Emily Davis'
-  }
-];
+  date: '2024-03-10T14:45:00Z',
+  amount: 8500,
+  type: 'override',
+  source: 'Robert Wilson'
+}, {
+  id: '4',
+  transactionId: 'tx4',
+  property: {
+    title: 'Modern Townhouse',
+    location: 'Berkeley, CA'
+  },
+  date: '2024-03-18T11:20:00Z',
+  amount: 6200,
+  type: 'override',
+  source: 'Emily Davis'
+}];
 
 // Sample commission data - would come from API in production
 const metricsData = {
@@ -126,26 +132,28 @@ const metricsData = {
     progress: 59.67
   }
 };
-
 const Commission = () => {
   const [currentTab, setCurrentTab] = useState('dashboard');
   const [selectedAgent, setSelectedAgent] = useState<AgentWithHierarchy | null>(null);
-  
+
   // Fetch commission data - in production, these would use real API calls
-  const { data: commissionTiersResponse, isLoading: isLoadingTiers } = useCommissionTiers();
-  const { data: agentHierarchyResponse, isLoading: isLoadingHierarchy } = useAgentHierarchy('agent123');
+  const {
+    data: commissionTiersResponse,
+    isLoading: isLoadingTiers
+  } = useCommissionTiers();
+  const {
+    data: agentHierarchyResponse,
+    isLoading: isLoadingHierarchy
+  } = useAgentHierarchy('agent123');
 
   // Extract and provide fallbacks for API data
   const commissionTiers = commissionTiersResponse || fallbackTiers;
   const agentHierarchy = agentHierarchyResponse || fallbackAgentHierarchy;
-
   const handleAgentClick = (agent: AgentWithHierarchy) => {
     setSelectedAgent(agent);
   };
-
-  return (
-    <MainLayout>
-      <div className="space-y-6">
+  return <MainLayout>
+      <div className="space-y-6 px-[24px]">
         <CommissionHeader />
         
         <Tabs value={currentTab} onValueChange={setCurrentTab}>
@@ -156,25 +164,14 @@ const Commission = () => {
           
           <TabsContent value="dashboard" className="space-y-6">
             <CommissionMetrics metrics={metricsData} />
-            <DashboardContent 
-              commissionTiers={commissionTiers}
-              commissions={recentCommissions}
-              agentHierarchy={agentHierarchy}
-            />
+            <DashboardContent commissionTiers={commissionTiers} commissions={recentCommissions} agentHierarchy={agentHierarchy} />
           </TabsContent>
           
           <TabsContent value="team" className="space-y-6">
-            <TeamContent
-              agentHierarchy={agentHierarchy}
-              selectedAgent={selectedAgent}
-              onAgentClick={handleAgentClick}
-              isLoading={isLoadingHierarchy}
-            />
+            <TeamContent agentHierarchy={agentHierarchy} selectedAgent={selectedAgent} onAgentClick={handleAgentClick} isLoading={isLoadingHierarchy} />
           </TabsContent>
         </Tabs>
       </div>
-    </MainLayout>
-  );
+    </MainLayout>;
 };
-
 export default Commission;
