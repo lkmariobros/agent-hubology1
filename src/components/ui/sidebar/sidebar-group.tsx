@@ -1,17 +1,19 @@
 
 import * as React from "react"
-import { Slot } from "@radix-ui/react-slot"
+import { ChevronDown, ChevronRight } from "lucide-react"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { cn } from "@/lib/utils"
+import { useSidebar } from "./sidebar-context"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 
 export const SidebarGroup = React.forwardRef<
   HTMLDivElement,
-  React.ComponentProps<"div">
+  React.ComponentPropsWithoutRef<"div">
 >(({ className, ...props }, ref) => {
   return (
     <div
       ref={ref}
-      data-sidebar="group"
-      className={cn("relative flex w-full min-w-0 flex-col p-2", className)}
+      className={cn("pb-4", className)}
       {...props}
     />
   )
@@ -20,17 +22,20 @@ SidebarGroup.displayName = "SidebarGroup"
 
 export const SidebarGroupLabel = React.forwardRef<
   HTMLDivElement,
-  React.ComponentProps<"div"> & { asChild?: boolean }
->(({ className, asChild = false, ...props }, ref) => {
-  const Comp = asChild ? Slot : "div"
+  React.ComponentPropsWithoutRef<"div">
+>(({ className, ...props }, ref) => {
+  const { state } = useSidebar()
+  const collapsed = state === "collapsed"
+
+  if (collapsed) {
+    return null
+  }
 
   return (
-    <Comp
+    <div
       ref={ref}
-      data-sidebar="group-label"
       className={cn(
-        "duration-200 flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-medium text-sidebar-foreground/70 outline-none ring-sidebar-ring transition-[margin,opa] ease-linear focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0",
-        "group-data-[collapsible=icon]:-mt-8 group-data-[collapsible=icon]:opacity-0",
+        "px-3 py-2 text-xs font-medium text-muted-foreground",
         className
       )}
       {...props}
@@ -39,38 +44,87 @@ export const SidebarGroupLabel = React.forwardRef<
 })
 SidebarGroupLabel.displayName = "SidebarGroupLabel"
 
-export const SidebarGroupAction = React.forwardRef<
-  HTMLButtonElement,
-  React.ComponentProps<"button"> & { asChild?: boolean }
->(({ className, asChild = false, ...props }, ref) => {
-  const Comp = asChild ? Slot : "button"
-
+export const SidebarGroupContent = React.forwardRef<
+  HTMLDivElement,
+  React.ComponentPropsWithoutRef<"div">
+>(({ className, ...props }, ref) => {
   return (
-    <Comp
+    <div
       ref={ref}
-      data-sidebar="group-action"
-      className={cn(
-        "absolute right-3 top-3.5 flex aspect-square w-5 items-center justify-center rounded-md p-0 text-sidebar-foreground outline-none ring-sidebar-ring transition-transform hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0",
-        // Increases the hit area of the button on mobile.
-        "after:absolute after:-inset-2 after:md:hidden",
-        "group-data-[collapsible=icon]:hidden",
-        className
-      )}
+      className={cn("", className)}
       {...props}
     />
   )
 })
-SidebarGroupAction.displayName = "SidebarGroupAction"
-
-export const SidebarGroupContent = React.forwardRef<
-  HTMLDivElement,
-  React.ComponentProps<"div">
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    data-sidebar="group-content"
-    className={cn("w-full text-sm", className)}
-    {...props}
-  />
-))
 SidebarGroupContent.displayName = "SidebarGroupContent"
+
+export interface SidebarGroupCollapsibleProps
+  extends React.ComponentPropsWithoutRef<typeof Collapsible> {
+  label: string
+  icon?: React.ReactNode
+  open?: boolean
+  defaultOpen?: boolean
+  onOpenChange?: (open: boolean) => void
+  tooltipLabel?: string
+}
+
+export const SidebarGroupCollapsible = React.forwardRef<
+  HTMLDivElement,
+  SidebarGroupCollapsibleProps
+>(
+  (
+    {
+      className,
+      children,
+      open,
+      defaultOpen,
+      onOpenChange,
+      label,
+      icon,
+      tooltipLabel,
+      ...props
+    },
+    ref
+  ) => {
+    const { state } = useSidebar()
+    const collapsed = state === "collapsed"
+
+    if (collapsed) {
+      return (
+        <div ref={ref} className={cn("relative", className)} {...props}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex h-9 items-center justify-center rounded-md hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
+                {icon}
+              </div>
+            </TooltipTrigger>
+            <TooltipContent className="flex items-center" side="right">
+              {tooltipLabel || label}
+            </TooltipContent>
+          </Tooltip>
+        </div>
+      )
+    }
+
+    return (
+      <Collapsible
+        open={open}
+        defaultOpen={defaultOpen}
+        onOpenChange={onOpenChange}
+        className={className}
+        ref={ref}
+        {...props}
+      >
+        <CollapsibleTrigger className="flex h-9 w-full items-center rounded-md px-3 text-sm font-medium hover:bg-sidebar-accent hover:text-sidebar-accent-foreground">
+          {icon && <span className="mr-2">{icon}</span>}
+          <span className="flex-1 truncate">{label}</span>
+          <ChevronRight className="h-4 w-4 shrink-0 transition-transform duration-200 group-data-[state=open]:rotate-90" />
+        </CollapsibleTrigger>
+        <CollapsibleContent className="pl-4 pt-1">
+          {children}
+        </CollapsibleContent>
+      </Collapsible>
+    )
+  }
+)
+SidebarGroupCollapsible.displayName = "SidebarGroupCollapsible"

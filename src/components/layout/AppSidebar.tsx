@@ -1,215 +1,154 @@
 
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { 
-  Building2, 
-  LayoutDashboard, 
-  Users, 
-  FileText, 
-  Settings, 
-  LogOut,
-  BarChart4,
-  DollarSign,
-  Trophy,
-  TrendingUp,
-  ChevronDown,
-  Lightbulb
-} from 'lucide-react';
-
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
-  SidebarRail,
-  useSidebar
-} from "@/components/ui/sidebar";
+import { NavLink } from 'react-router-dom';
+import { Home, Building, ClipboardList, Users, BarChart3, Bell, Settings, LineChart, ArrowUp, Star, Menu, BarChart2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Sidebar, SidebarContent, SidebarHeader, SidebarFooter } from '@/components/ui/sidebar';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useSidebar } from '@/components/ui/sidebar/sidebar-context';
 
 export function AppSidebar() {
-  const location = useLocation();
   const { state } = useSidebar();
-  const isCollapsed = state === "collapsed";
+  const isCollapsed = state === 'collapsed';
 
-  const isActiveRoute = (path: string) => {
-    return location.pathname === path;
-  };
-
-  const isActiveSubRoute = (paths: string[]) => {
-    return paths.some(path => location.pathname === path);
-  };
+  const routes = [
+    { path: '/dashboard', label: 'Dashboard', icon: Home },
+    { path: '/properties', label: 'Properties', icon: Building },
+    { path: '/transactions', label: 'Transactions', icon: ClipboardList },
+    { path: '/team', label: 'Team', icon: Users },
+    { path: '/commission', label: 'Commission', icon: BarChart3 },
+    { path: '/leaderboard', label: 'Leaderboard', icon: LineChart,
+      submenu: [
+        { path: '/leaderboard/points', label: 'Points' },
+        { path: '/leaderboard/sales', label: 'Sales' }
+      ]
+    },
+    { path: '/opportunities', label: 'Opportunities', icon: Star },
+    { path: '/reports', label: 'Reports', icon: BarChart2 },
+    { path: '/settings', label: 'Settings', icon: Settings }
+  ];
 
   return (
     <Sidebar>
-      <SidebarRail />
-      <SidebarHeader className="border-b border-sidebar-border">
-        <Link to="/dashboard" className="flex items-center px-4 py-3">
-          {isCollapsed ? (
-            <div className="h-9 w-9 rounded-full bg-accent flex items-center justify-center">
-              <span className="text-white font-bold">P</span>
+      <SidebarHeader className="p-0 flex items-center justify-between border-b border-border">
+        <div className={cn("flex items-center", isCollapsed ? "justify-center w-full px-0" : "px-4")}>
+          {!isCollapsed ? (
+            <div className="flex items-center py-3">
+              <div className="w-7 h-7 rounded-md bg-accent flex items-center justify-center mr-2">
+                <Building className="h-3.5 w-3.5 text-accent-foreground" />
+              </div>
+              <span className="font-semibold text-lg">PropertyPro</span>
             </div>
           ) : (
-            <h1 className="font-semibold text-xl text-sidebar-foreground">PropertyPro</h1>
+            <div className="py-3 flex items-center justify-center">
+              <div className="w-7 h-7 rounded-md bg-accent flex items-center justify-center">
+                <Building className="h-3.5 w-3.5 text-accent-foreground" />
+              </div>
+            </div>
           )}
-        </Link>
+        </div>
       </SidebarHeader>
       
-      <SidebarContent>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              isActive={isActiveRoute('/dashboard')}
-              tooltip="Dashboard"
-              asChild
-            >
-              <Link to="/dashboard">
-                <LayoutDashboard className="h-5 w-5" />
-                <span>Dashboard</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              isActive={isActiveRoute('/properties')}
-              tooltip="Properties"
-              asChild
-            >
-              <Link to="/properties">
-                <Building2 className="h-5 w-5" />
-                <span>Properties</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              isActive={isActiveRoute('/transactions')}
-              tooltip="Transactions"
-              asChild
-            >
-              <Link to="/transactions">
-                <FileText className="h-5 w-5" />
-                <span>Transactions</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              isActive={isActiveRoute('/team')}
-              tooltip="Team"
-              asChild
-            >
-              <Link to="/team">
-                <Users className="h-5 w-5" />
-                <span>Team</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              isActive={isActiveRoute('/commission')}
-              tooltip="Commission"
-              asChild
-            >
-              <Link to="/commission">
-                <DollarSign className="h-5 w-5" />
-                <span>Commission</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              isActive={isActiveSubRoute(['/leaderboard/points', '/leaderboard/sales'])}
-              tooltip={isCollapsed ? "Leaderboard" : undefined}
-            >
-              <Trophy className="h-5 w-5" />
-              <span>Leaderboard</span>
-              {!isCollapsed && <ChevronDown className="ml-auto h-4 w-4" />}
-            </SidebarMenuButton>
+      <SidebarContent className="px-2 py-2">
+        <nav className="space-y-1">
+          {routes.map((route) => {
+            const Icon = route.icon;
             
-            <SidebarMenuSub>
-              <SidebarMenuSubItem>
-                <SidebarMenuSubButton
-                  isActive={isActiveRoute('/leaderboard/points')}
-                  asChild
-                >
-                  <Link to="/leaderboard/points">
-                    <TrendingUp className="h-4 w-4" />
-                    <span>Points</span>
-                  </Link>
-                </SidebarMenuSubButton>
-              </SidebarMenuSubItem>
-              <SidebarMenuSubItem>
-                <SidebarMenuSubButton
-                  isActive={isActiveRoute('/leaderboard/sales')}
-                  asChild
-                >
-                  <Link to="/leaderboard/sales">
-                    <DollarSign className="h-4 w-4" />
-                    <span>Sales</span>
-                  </Link>
-                </SidebarMenuSubButton>
-              </SidebarMenuSubItem>
-            </SidebarMenuSub>
-          </SidebarMenuItem>
-
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              isActive={isActiveRoute('/opportunities')}
-              tooltip="Opportunities"
-              asChild
-            >
-              <Link to="/opportunities">
-                <Lightbulb className="h-5 w-5" />
-                <span>Opportunities</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              isActive={isActiveRoute('/reports')}
-              tooltip="Reports"
-              asChild
-            >
-              <Link to="/reports">
-                <BarChart4 className="h-5 w-5" />
-                <span>Reports</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              isActive={isActiveRoute('/settings')}
-              tooltip="Settings"
-              asChild
-            >
-              <Link to="/settings">
-                <Settings className="h-5 w-5" />
-                <span>Settings</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+            if (route.submenu) {
+              return (
+                <div key={route.path} className="space-y-1">
+                  <div className={cn(
+                    "flex items-center rounded-md px-3 py-2 text-sm font-medium",
+                    "text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                  )}>
+                    {isCollapsed ? (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="flex items-center w-full">
+                            <Icon className="h-5 w-5" />
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="right">{route.label}</TooltipContent>
+                      </Tooltip>
+                    ) : (
+                      <>
+                        <Icon className="h-5 w-5 mr-3" />
+                        <span>{route.label}</span>
+                      </>
+                    )}
+                  </div>
+                  
+                  {!isCollapsed && (
+                    <div className="pl-10 space-y-1">
+                      {route.submenu.map((subItem) => (
+                        <NavLink
+                          key={subItem.path}
+                          to={subItem.path}
+                          className={({ isActive }) => cn(
+                            "block rounded-md px-3 py-2 text-sm font-medium",
+                            isActive 
+                              ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                              : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
+                          )}
+                        >
+                          {subItem.label}
+                        </NavLink>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            }
+            
+            return (
+              <NavLink
+                key={route.path}
+                to={route.path}
+                className={({ isActive }) => cn(
+                  "flex items-center rounded-md px-3 py-2 text-sm font-medium",
+                  isActive 
+                    ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                    : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
+                )}
+              >
+                {isCollapsed ? (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Icon className="h-5 w-5" />
+                    </TooltipTrigger>
+                    <TooltipContent side="right">{route.label}</TooltipContent>
+                  </Tooltip>
+                ) : (
+                  <>
+                    <Icon className="h-5 w-5 mr-3" />
+                    <span>{route.label}</span>
+                  </>
+                )}
+              </NavLink>
+            );
+          })}
+        </nav>
       </SidebarContent>
       
-      <SidebarFooter className="border-t border-sidebar-border">
-        <SidebarMenuButton asChild tooltip="Logout">
-          <button className="w-full">
-            <LogOut className="h-5 w-5" />
-            <span>Logout</span>
-          </button>
-        </SidebarMenuButton>
+      <SidebarFooter className="p-2">
+        <div className={cn(
+          "flex items-center rounded-md px-3 py-2 text-sm font-medium text-muted-foreground",
+          "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+        )}>
+          {isCollapsed ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Bell className="h-5 w-5" />
+              </TooltipTrigger>
+              <TooltipContent side="right">Notifications</TooltipContent>
+            </Tooltip>
+          ) : (
+            <>
+              <Bell className="h-5 w-5 mr-3" />
+              <span>Notifications</span>
+            </>
+          )}
+        </div>
       </SidebarFooter>
     </Sidebar>
   );
