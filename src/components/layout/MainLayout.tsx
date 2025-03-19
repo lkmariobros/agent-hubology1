@@ -80,7 +80,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
             </div>
           </header>
           
-          {/* Main scrollable content */}
+          {/* Main scrollable content - Changed overflow-y-auto to h-screen overflow-y-auto to ensure scrolling works */}
           <main className="flex-1 overflow-y-auto">
             {children || <Outlet />}
           </main>
