@@ -65,7 +65,7 @@ const Dashboard = () => {
 
   return (
     <MainLayout>
-      <div className="p-6 space-y-6 pb-24">
+      <div className="p-6 space-y-6">
         {/* Page Title */}
         <div className="flex justify-between items-center">
           <div>
@@ -113,7 +113,7 @@ const Dashboard = () => {
         </div>
         
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-24">
           {/* Properties List */}
           <div className="md:col-span-2">
             <PropertyList 

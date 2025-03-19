@@ -48,6 +48,10 @@
     --font-mono: 'JetBrains Mono', monospace;
   }
 
+  html, body, #root {
+    @apply h-full overflow-hidden;
+  }
+  
   * {
     @apply border-border selection:bg-accent/10 selection:text-white;
   }

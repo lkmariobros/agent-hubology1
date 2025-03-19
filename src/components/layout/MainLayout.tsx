@@ -50,7 +50,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       )}
       
       {/* Main content */}
-      <div className="flex-1 flex flex-col h-screen">
+      <div className="flex-1 flex flex-col h-screen overflow-hidden">
         {/* Fixed header */}
         <header className="h-16 flex-shrink-0 border-b border-border flex items-center justify-between px-4">
           <div className="flex items-center">
@@ -101,12 +101,12 @@ const MainLayout = ({ children }: MainLayoutProps) => {
           </div>
         </header>
         
-        {/* Scrollable main content */}
-        <ScrollArea className="flex-1">
-          <main>
+        {/* Scrollable main content - use native overflow instead of ScrollArea for better performance */}
+        <div className="flex-1 overflow-y-auto">
+          <main className="h-full">
             {children || <Outlet />}
           </main>
-        </ScrollArea>
+        </div>
       </div>
     </div>
   );
