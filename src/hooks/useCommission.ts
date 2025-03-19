@@ -26,7 +26,13 @@ export function useCommissionHistory(page = 1, pageSize = 10) {
 export function useCommissionTiers() {
   return useQuery<CommissionTier[]>({
     queryKey: ['commission', 'tiers'],
-    queryFn: commissionApi.getTiers,
+    queryFn: () => {
+      const response = commissionApi.getTiers();
+      return response.then(data => {
+        // Handle the API response and transform it into CommissionTier[]
+        return data.data || [];
+      });
+    },
   });
 }
 
@@ -34,7 +40,13 @@ export function useCommissionTiers() {
 export function useAgentHierarchy(agentId?: string) {
   return useQuery<AgentWithHierarchy>({
     queryKey: ['agents', 'hierarchy', agentId],
-    queryFn: () => commissionApi.getAgentHierarchy(agentId),
+    queryFn: () => {
+      const response = commissionApi.getAgentHierarchy(agentId);
+      return response.then(data => {
+        // Return the data from the API response or fallback to null
+        return data.data || null;
+      });
+    },
     enabled: !!agentId,
   });
 }
