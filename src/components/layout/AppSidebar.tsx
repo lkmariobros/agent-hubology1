@@ -16,7 +16,7 @@ import { SidebarProfile } from './sidebar/SidebarProfile';
 
 export function AppSidebar() {
   return (
-    <Sidebar className="border-r-0">
+    <Sidebar className="border-r-0 bg-[#0F0E11]">
       <SidebarHeader>
         <Link to="/dashboard" className="flex items-center px-2 py-3">
           <div className="flex items-center justify-center h-8 w-8 rounded-full bg-accent text-white">

@@ -85,6 +85,6 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       </SidebarProvider>
     </ThemeProvider>
   );
-};
+}
 
 export default MainLayout;
