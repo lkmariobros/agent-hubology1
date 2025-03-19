@@ -14,9 +14,8 @@ import { DashboardMetric } from '@/types';
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
 
-  // Fetch dashboard data with React Query
+  // Fetch dashboard data with React Query - using placeholderData to prevent loading flashes
   const { data: metricsData, isLoading: isLoadingMetrics } = useMetrics();
   const { data: propertiesData, isLoading: isLoadingProperties } = useRecentProperties();
   const { data: transactionsData, isLoading: isLoadingTransactions } = useRecentTransactions();

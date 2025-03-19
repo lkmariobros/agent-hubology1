@@ -3,51 +3,67 @@ import { ApiResponse, PaginatedResponse } from '@/types';
 
 const API_URL = 'https://your-api-url.com/api';
 
+// Flag to indicate if we're in development mode - use mock data
+const IS_DEVELOPMENT = true;
+
 // Utility function to handle API requests
 async function apiRequest<T>(
   endpoint: string,
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' = 'GET',
   data?: any
 ): Promise<T> {
-  const token = localStorage.getItem('token');
-  
-  const headers: HeadersInit = {
-    'Content-Type': 'application/json',
-  };
-  
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-  
-  const config: RequestInit = {
-    method,
-    headers,
-    body: data ? JSON.stringify(data) : undefined,
-  };
-  
-  const response = await fetch(`${API_URL}${endpoint}`, config);
-  
-  if (!response.ok) {
-    // Handle different error statuses
-    if (response.status === 401) {
-      // Handle unauthorized (e.g., redirect to login)
-      localStorage.removeItem('token');
-      window.location.href = '/login';
-      throw new Error('Unauthorized access');
+  try {
+    // In development mode with missing API, return placeholder data
+    if (IS_DEVELOPMENT && endpoint.startsWith('/dashboard')) {
+      console.log(`Development mode: Using placeholder data for ${endpoint}`);
+      // Let the hooks handle this with their placeholderData
+      throw new Error('Using placeholder data in development');
     }
     
-    if (response.status === 403) {
-      throw new Error('Forbidden: You do not have permission to access this resource');
+    const token = localStorage.getItem('token');
+    
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
+    
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
     }
     
-    // Try to parse error response
-    const errorData = await response.json().catch(() => null);
-    throw new Error(
-      errorData?.message || `API request failed with status ${response.status}`
-    );
+    const config: RequestInit = {
+      method,
+      headers,
+      body: data ? JSON.stringify(data) : undefined,
+    };
+    
+    const response = await fetch(`${API_URL}${endpoint}`, config);
+    
+    if (!response.ok) {
+      // Handle different error statuses
+      if (response.status === 401) {
+        // Handle unauthorized (e.g., redirect to login)
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+        throw new Error('Unauthorized access');
+      }
+      
+      if (response.status === 403) {
+        throw new Error('Forbidden: You do not have permission to access this resource');
+      }
+      
+      // Try to parse error response
+      const errorData = await response.json().catch(() => null);
+      throw new Error(
+        errorData?.message || `API request failed with status ${response.status}`
+      );
+    }
+    
+    return response.json();
+  } catch (error) {
+    console.error(`API request error for ${endpoint}:`, error);
+    // Re-throw the error so it can be handled by the query hooks
+    throw error;
   }
-  
-  return response.json();
 }
 
 // Auth API functions
