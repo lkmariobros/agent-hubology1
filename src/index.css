@@ -41,22 +41,17 @@
     --property-pink: 336 80% 58%;
     --property-blue: 214 80% 56%;
 
-    /* Sidebar variables - ensuring consistency */
-    --sidebar-background: 240 10% 3.9%;
-    --sidebar-foreground: 0 0% 98%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-primary: 240 5.9% 90%;
-    --sidebar-primary-foreground: 240 5.9% 10%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-ring: 240 4.9% 83.9%;
-    
-    /* Fixed sidebar width values to ensure consistency */
+    /* Sidebar variables */
     --sidebar-width: 16rem;
     --sidebar-width-icon: 4rem;
-
-    --font-sans: 'Inter', system-ui, sans-serif;
-    --font-mono: 'JetBrains Mono', monospace;
+    --sidebar-background: var(--background);
+    --sidebar-foreground: var(--foreground);
+    --sidebar-border: var(--border);
+    --sidebar-primary: var(--primary);
+    --sidebar-primary-foreground: var(--primary-foreground);
+    --sidebar-accent: var(--secondary);
+    --sidebar-accent-foreground: var(--secondary-foreground);
+    --sidebar-ring: var(--ring);
   }
 
   * {

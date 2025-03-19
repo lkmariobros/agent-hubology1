@@ -27,9 +27,6 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-  SidebarGroup,
-  SidebarGroupLabel,
-  SidebarGroupContent,
   SidebarRail,
   useSidebar
 } from "@/components/ui/sidebar";
@@ -57,7 +54,7 @@ export function AppSidebar() {
               <span className="text-white font-bold">P</span>
             </div>
           ) : (
-            <h1 className="font-semibold text-xl">PropertyPro</h1>
+            <h1 className="font-semibold text-xl text-sidebar-foreground">PropertyPro</h1>
           )}
         </Link>
       </SidebarHeader>
