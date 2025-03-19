@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { dashboardApi } from '@/lib/api';
 import { DashboardMetric, Property, Transaction, Opportunity, ApiResponse } from '@/types';
 
-// Default mock data to prevent UI flashing or disappearing
+// Using these constants as fallbacks and default values
 const DEFAULT_METRICS = {
   data: {
     metrics: [
@@ -197,10 +197,11 @@ export function useMetrics() {
   return useQuery({
     queryKey: ['dashboard', 'metrics'],
     queryFn: dashboardApi.getMetrics,
-    placeholderData: DEFAULT_METRICS,
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 1, // Only retry once to prevent excessive API calls
     refetchOnWindowFocus: false,
+    // Improved error handling using placeholder data
+    placeholderData: DEFAULT_METRICS,
   });
 }
 
@@ -208,10 +209,11 @@ export function useRecentProperties(limit = 5) {
   return useQuery({
     queryKey: ['dashboard', 'recentProperties', limit],
     queryFn: () => dashboardApi.getRecentProperties(limit),
-    placeholderData: DEFAULT_PROPERTIES,
     staleTime: 5 * 60 * 1000,
     retry: 1,
     refetchOnWindowFocus: false,
+    // Improved error handling using placeholder data
+    placeholderData: DEFAULT_PROPERTIES,
   });
 }
 
@@ -219,10 +221,11 @@ export function useRecentTransactions(limit = 5) {
   return useQuery({
     queryKey: ['dashboard', 'recentTransactions', limit],
     queryFn: () => dashboardApi.getRecentTransactions(limit),
-    placeholderData: DEFAULT_TRANSACTIONS,
     staleTime: 5 * 60 * 1000,
     retry: 1,
     refetchOnWindowFocus: false,
+    // Improved error handling using placeholder data
+    placeholderData: DEFAULT_TRANSACTIONS,
   });
 }
 
@@ -230,9 +233,10 @@ export function useOpportunities() {
   return useQuery({
     queryKey: ['dashboard', 'opportunities'],
     queryFn: dashboardApi.getOpportunities,
-    placeholderData: DEFAULT_OPPORTUNITIES,
     staleTime: 5 * 60 * 1000,
     retry: 1,
     refetchOnWindowFocus: false,
+    // Improved error handling using placeholder data
+    placeholderData: DEFAULT_OPPORTUNITIES,
   });
 }

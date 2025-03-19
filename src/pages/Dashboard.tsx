@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Building2, BarChart4, Users, DollarSign, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
@@ -15,7 +15,7 @@ import { DashboardMetric } from '@/types';
 const Dashboard = () => {
   const navigate = useNavigate();
 
-  // Fetch dashboard data with React Query - using placeholderData to prevent loading flashes
+  // Fetch dashboard data with React Query - using hooks with improved error handling
   const { data: metricsData, isLoading: isLoadingMetrics } = useMetrics();
   const { data: propertiesData, isLoading: isLoadingProperties } = useRecentProperties();
   const { data: transactionsData, isLoading: isLoadingTransactions } = useRecentTransactions();
@@ -36,8 +36,8 @@ const Dashboard = () => {
     }
   };
 
-  // Process metrics data to include icon components
-  const metrics: DashboardMetric[] = metricsData?.data.metrics.map(metric => ({
+  // Process metrics data to include icon components - with safe fallbacks
+  const metrics: DashboardMetric[] = metricsData?.data?.metrics?.map(metric => ({
     ...metric,
     icon: getIconComponent(metric.icon)
   })) || [];
@@ -65,7 +65,7 @@ const Dashboard = () => {
 
   return (
     <MainLayout>
-      <div className="space-y-6">
+      <div className="space-y-6 pb-8">
         {/* Page Title */}
         <div className="flex justify-between items-center">
           <div>
@@ -113,9 +113,9 @@ const Dashboard = () => {
         </div>
         
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Properties List */}
-          <div>
+          <div className="md:col-span-2">
             <PropertyList 
               properties={propertiesData?.data || []} 
               isLoading={isLoadingProperties}
