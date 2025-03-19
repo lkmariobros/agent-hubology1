@@ -153,7 +153,7 @@ const Commission = () => {
     setSelectedAgent(agent);
   };
   return <MainLayout>
-      <div className="space-y-6 px-[24px]">
+      <div className="space-y-6 px-[24px] py-[28px] my-[2px] mx-0">
         <CommissionHeader />
         
         <Tabs value={currentTab} onValueChange={setCurrentTab}>
