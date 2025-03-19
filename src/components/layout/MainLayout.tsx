@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from '../Sidebar';
@@ -24,7 +23,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <div className={`flex h-full bg-background text-foreground ${GeistMono.variable}`}>
+    <div className={`flex h-full bg-background text-foreground ${GeistMono.className}`}>
       {/* Sidebar for desktop */}
       <div className={cn(
         "hidden md:block h-full transition-all duration-300 ease-in-out", 

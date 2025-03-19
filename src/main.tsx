@@ -6,7 +6,7 @@ import App from './App.tsx';
 import './index.css';
 
 createRoot(document.getElementById("root")!).render(
-  <div className={`${GeistSans.variable} ${GeistMono.variable} font-sans`}>
+  <div className={`${GeistSans.className} ${GeistMono.className} font-sans`}>
     <App />
   </div>
 );
