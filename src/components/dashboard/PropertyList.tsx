@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -51,7 +50,6 @@ const PropertyList = ({ properties, isLoading = false, onViewAll }: PropertyList
       <CardContent className="px-6 pb-6">
         <div className="space-y-4">
           {isLoading ? (
-            // Loading skeletons
             Array(3).fill(0).map((_, index) => (
               <div 
                 key={`skeleton-${index}`}
@@ -127,7 +125,10 @@ const PropertyList = ({ properties, isLoading = false, onViewAll }: PropertyList
                       variant="ghost" 
                       size="icon" 
                       className="h-6 w-6" 
-                      onClick={(e) => handleViewProperty(property.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleViewProperty(property.id);
+                      }}
                     >
                       <Eye className="h-3.5 w-3.5" />
                     </Button>

@@ -6,6 +6,7 @@ import { Toaster } from 'sonner';
 import Dashboard from './pages/Dashboard';
 import Properties from './pages/Properties';
 import PropertyNew from './pages/PropertyNew';
+import PropertyDetail from './pages/PropertyDetail';
 import Transactions from './pages/Transactions';
 import TransactionNew from './pages/TransactionNew';
 import Opportunities from './pages/Opportunities';
@@ -39,6 +40,7 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/properties" element={<Properties />} />
           <Route path="/properties/new" element={<PropertyNew />} />
+          <Route path="/properties/:id" element={<PropertyDetail />} />
           <Route path="/transactions" element={<Transactions />} />
           <Route path="/transactions/new" element={<TransactionNew />} />
           <Route path="/opportunities" element={<Opportunities />} />
