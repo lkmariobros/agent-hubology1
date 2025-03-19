@@ -65,7 +65,7 @@ const Dashboard = () => {
 
   return (
     <MainLayout>
-      <div className="space-y-6 pb-8">
+      <div className="p-6 space-y-6 pb-16 min-h-full">
         {/* Page Title */}
         <div className="flex justify-between items-center">
           <div>

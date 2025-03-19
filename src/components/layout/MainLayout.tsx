@@ -48,8 +48,8 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         </div>
       )}
       
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="h-16 flex items-center justify-between px-4 border-b border-border">
+      <div className="flex-1 flex flex-col h-screen overflow-hidden">
+        <header className="h-16 flex-shrink-0 flex items-center justify-between px-4 border-b border-border">
           <div className="flex items-center">
             <Button 
               variant="ghost" 
@@ -98,7 +98,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
           </div>
         </header>
         
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto">
           {children || <Outlet />}
         </main>
       </div>
