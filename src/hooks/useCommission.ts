@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { commissionApi } from '@/lib/api';
 import { AgentRank, AgentWithHierarchy, CommissionTier, OverrideCommission } from '@/types';
@@ -41,11 +40,15 @@ export function useAgentHierarchy(agentId?: string) {
   return useQuery<AgentWithHierarchy>({
     queryKey: ['agents', 'hierarchy', agentId],
     queryFn: () => {
-      const response = commissionApi.getAgentHierarchy(agentId);
-      return response.then(data => {
-        // Return the data from the API response or fallback to null
-        return data.data || null;
-      });
+      return commissionApi.getAgentHierarchy(agentId)
+        .then(response => {
+          // Check if the response is already in the correct format (development mode)
+          if ('id' in response) {
+            return response as AgentWithHierarchy;
+          }
+          // Otherwise, extract data from the API response
+          return response.data as AgentWithHierarchy;
+        });
     },
     enabled: !!agentId,
   });
