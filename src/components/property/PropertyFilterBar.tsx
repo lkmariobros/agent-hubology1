@@ -96,9 +96,15 @@ export function PropertyFilterBar({
   };
 
   const handlePriceChange = (value: number[]) => {
+    // Ensure we always have exactly two values for the price range
+    const priceRange: [number, number] = [
+      value[0] || 0,
+      value[1] || 5000000
+    ];
+    
     setFilters({
       ...filters,
-      priceRange: [value[0], value[1]]
+      priceRange
     });
   };
 
@@ -133,10 +139,14 @@ export function PropertyFilterBar({
   };
 
   const handleClearFilters = () => {
-    const clearedFilters = {
-      priceRange: [0, 5000000],
+    // Explicitly define as a tuple to match the expected type
+    const defaultPriceRange: [number, number] = [0, 5000000];
+    
+    const clearedFilters: FilterOptions = {
+      priceRange: defaultPriceRange,
       features: []
     };
+    
     setFilters(clearedFilters);
     setSearchQuery('');
     onFilter(clearedFilters);
