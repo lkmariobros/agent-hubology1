@@ -13,13 +13,13 @@ interface MetricCardProps {
 const MetricCard = ({ metric, className }: MetricCardProps) => {
   return (
     <Card className={cn("glass-card overflow-hidden", className)}>
-      <CardContent className="p-6">
+      <CardContent className="p-4 md:p-6">
         <div className="flex justify-between items-start">
           <div>
-            <p className="text-sm font-medium text-muted-foreground">
+            <p className="text-xs md:text-sm font-medium text-muted-foreground">
               {metric.label}
             </p>
-            <h3 className="text-2xl font-bold mt-1 text-gradient">
+            <h3 className="text-xl md:text-2xl font-bold mt-1 text-gradient">
               {metric.value}
             </h3>
           </div>
@@ -31,25 +31,25 @@ const MetricCard = ({ metric, className }: MetricCardProps) => {
         </div>
         
         {metric.change !== undefined && (
-          <div className="flex items-center mt-4">
+          <div className="flex items-center mt-3 md:mt-4">
             {metric.trend === 'up' ? (
-              <TrendingUp className="mr-2 h-4 w-4 text-green-400" />
+              <TrendingUp className="mr-1 md:mr-2 h-3 w-3 md:h-4 md:w-4 text-green-400" />
             ) : metric.trend === 'down' ? (
-              <TrendingDown className="mr-2 h-4 w-4 text-red-400" />
+              <TrendingDown className="mr-1 md:mr-2 h-3 w-3 md:h-4 md:w-4 text-red-400" />
             ) : null}
             <span
               className={
                 metric.trend === 'up'
-                  ? 'text-green-400 text-sm'
+                  ? 'text-green-400 text-xs md:text-sm'
                   : metric.trend === 'down'
-                  ? 'text-red-400 text-sm'
-                  : 'text-muted-foreground text-sm'
+                  ? 'text-red-400 text-xs md:text-sm'
+                  : 'text-muted-foreground text-xs md:text-sm'
               }
             >
               {metric.change > 0 ? '+' : ''}
               {metric.change}%
             </span>
-            <span className="text-muted-foreground text-sm ml-1">
+            <span className="text-muted-foreground text-xs md:text-sm ml-1">
               from last month
             </span>
           </div>

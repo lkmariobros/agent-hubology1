@@ -43,11 +43,11 @@ const MainLayout = ({ children }: MainLayoutProps) => {
     <SidebarWrapper 
       defaultOpen={getInitialSidebarState()}
       onOpenChange={handleSidebarChange}
+      className="min-h-screen w-full"
       style={{
         '--sidebar-width': '16rem',
         '--sidebar-width-icon': '4rem',
       } as React.CSSProperties}
-      className="min-h-screen w-full"
     >
       <AppSidebar />
       <SidebarInset className="bg-background">
@@ -83,7 +83,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
           </div>
         </header>
         
-        <main className="flex-1 p-6 overflow-y-auto">
+        <main className="flex-1 p-4 md:p-6 overflow-y-auto">
           {children || <Outlet />}
         </main>
       </SidebarInset>

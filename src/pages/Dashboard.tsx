@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Building2, BarChart4, Users, DollarSign } from 'lucide-react';
 import MainLayout from '@/components/layout/MainLayout';
@@ -149,17 +150,17 @@ const transactions: Transaction[] = [
 const Dashboard = () => {
   return (
     <MainLayout>
-      <div className="space-y-6">
+      <div className="space-y-4 md:space-y-6">
         {/* Page Title */}
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-xl md:text-2xl font-bold tracking-tight">Dashboard</h1>
+          <p className="text-muted-foreground text-sm md:text-base">
             Welcome back! Here's an overview of your agency's performance.
           </p>
         </div>
         
         {/* Metrics */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
           {metrics.map((metric, index) => (
             <MetricCard 
               key={metric.label} 
@@ -173,7 +174,7 @@ const Dashboard = () => {
         </div>
         
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 gap-6">
+        <div className="grid grid-cols-1 gap-4 md:gap-6">
           {/* Properties List */}
           <div>
             <PropertyList properties={properties} />

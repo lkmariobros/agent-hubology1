@@ -48,8 +48,8 @@ export function AppSidebar() {
 
   return (
     <Sidebar>
-      <SidebarHeader>
-        <Link to="/dashboard" className="flex items-center px-2 py-3">
+      <SidebarHeader className="border-b border-sidebar-border">
+        <Link to="/dashboard" className="flex items-center px-4 py-3">
           {isCollapsed ? (
             <div className="h-9 w-9 rounded-full bg-accent flex items-center justify-center">
               <span className="text-white font-bold">P</span>
@@ -72,7 +72,7 @@ export function AppSidebar() {
                   asChild
                 >
                   <Link to="/dashboard">
-                    <LayoutDashboard />
+                    <LayoutDashboard className="h-5 w-5" />
                     <span>Dashboard</span>
                   </Link>
                 </SidebarMenuButton>
@@ -85,7 +85,7 @@ export function AppSidebar() {
                   asChild
                 >
                   <Link to="/properties">
-                    <Building2 />
+                    <Building2 className="h-5 w-5" />
                     <span>Properties</span>
                   </Link>
                 </SidebarMenuButton>
@@ -98,7 +98,7 @@ export function AppSidebar() {
                   asChild
                 >
                   <Link to="/transactions">
-                    <FileText />
+                    <FileText className="h-5 w-5" />
                     <span>Transactions</span>
                   </Link>
                 </SidebarMenuButton>
@@ -111,7 +111,7 @@ export function AppSidebar() {
                   asChild
                 >
                   <Link to="/team">
-                    <Users />
+                    <Users className="h-5 w-5" />
                     <span>Team</span>
                   </Link>
                 </SidebarMenuButton>
@@ -124,7 +124,7 @@ export function AppSidebar() {
                   asChild
                 >
                   <Link to="/commission">
-                    <DollarSign />
+                    <DollarSign className="h-5 w-5" />
                     <span>Commission</span>
                   </Link>
                 </SidebarMenuButton>
@@ -135,7 +135,7 @@ export function AppSidebar() {
                   isActive={isActiveSubRoute(['/leaderboard/points', '/leaderboard/sales'])}
                   tooltip={isCollapsed ? "Leaderboard" : undefined}
                 >
-                  <Trophy />
+                  <Trophy className="h-5 w-5" />
                   <span>Leaderboard</span>
                   {!isCollapsed && <ChevronDown className="ml-auto h-4 w-4" />}
                 </SidebarMenuButton>
@@ -147,7 +147,7 @@ export function AppSidebar() {
                       asChild
                     >
                       <Link to="/leaderboard/points">
-                        <TrendingUp />
+                        <TrendingUp className="h-4 w-4" />
                         <span>Points</span>
                       </Link>
                     </SidebarMenuSubButton>
@@ -158,7 +158,7 @@ export function AppSidebar() {
                       asChild
                     >
                       <Link to="/leaderboard/sales">
-                        <DollarSign />
+                        <DollarSign className="h-4 w-4" />
                         <span>Sales</span>
                       </Link>
                     </SidebarMenuSubButton>
@@ -173,7 +173,7 @@ export function AppSidebar() {
                   asChild
                 >
                   <Link to="/opportunities">
-                    <Lightbulb />
+                    <Lightbulb className="h-5 w-5" />
                     <span>Opportunities</span>
                   </Link>
                 </SidebarMenuButton>
@@ -186,7 +186,7 @@ export function AppSidebar() {
                   asChild
                 >
                   <Link to="/reports">
-                    <BarChart4 />
+                    <BarChart4 className="h-5 w-5" />
                     <span>Reports</span>
                   </Link>
                 </SidebarMenuButton>
@@ -199,7 +199,7 @@ export function AppSidebar() {
                   asChild
                 >
                   <Link to="/settings">
-                    <Settings />
+                    <Settings className="h-5 w-5" />
                     <span>Settings</span>
                   </Link>
                 </SidebarMenuButton>
@@ -209,10 +209,10 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
       
-      <SidebarFooter>
+      <SidebarFooter className="border-t border-sidebar-border">
         <SidebarMenuButton asChild tooltip="Logout">
           <button className="w-full">
-            <LogOut />
+            <LogOut className="h-5 w-5" />
             <span>Logout</span>
           </button>
         </SidebarMenuButton>
