@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
 
-import MainLayout from './components/layout/MainLayout';
 import Dashboard from './pages/Dashboard';
 import Properties from './pages/Properties';
 import PropertyNew from './pages/PropertyNew';
@@ -39,20 +38,20 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/dashboard" element={<MainLayout><Dashboard /></MainLayout>} />
-          <Route path="/properties" element={<MainLayout><Properties /></MainLayout>} />
-          <Route path="/properties/new" element={<MainLayout><PropertyNew /></MainLayout>} />
-          <Route path="/properties/:id" element={<MainLayout><PropertyDetail /></MainLayout>} />
-          <Route path="/transactions" element={<MainLayout><Transactions /></MainLayout>} />
-          <Route path="/transactions/new" element={<MainLayout><TransactionNew /></MainLayout>} />
-          <Route path="/opportunities" element={<MainLayout><Opportunities /></MainLayout>} />
-          <Route path="/commission" element={<MainLayout><Commission /></MainLayout>} />
-          <Route path="/admin/commission" element={<MainLayout><AdminCommission /></MainLayout>} />
-          <Route path="/team" element={<MainLayout><Team /></MainLayout>} />
-          <Route path="/reports" element={<MainLayout><Reports /></MainLayout>} />
-          <Route path="/settings" element={<MainLayout><Settings /></MainLayout>} />
-          <Route path="/leaderboard/points" element={<MainLayout><Points /></MainLayout>} />
-          <Route path="/leaderboard/sales" element={<MainLayout><Sales /></MainLayout>} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/properties" element={<Properties />} />
+          <Route path="/properties/new" element={<PropertyNew />} />
+          <Route path="/properties/:id" element={<PropertyDetail />} />
+          <Route path="/transactions" element={<Transactions />} />
+          <Route path="/transactions/new" element={<TransactionNew />} />
+          <Route path="/opportunities" element={<Opportunities />} />
+          <Route path="/commission" element={<Commission />} />
+          <Route path="/admin/commission" element={<AdminCommission />} />
+          <Route path="/team" element={<Team />} />
+          <Route path="/reports" element={<Reports />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/leaderboard/points" element={<Points />} />
+          <Route path="/leaderboard/sales" element={<Sales />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Toaster position="top-right" />
