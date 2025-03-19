@@ -1,9 +1,10 @@
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
 import { Transaction } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, Search, Filter, Download } from 'lucide-react';
+import { FileText, Search, Filter, Download, Plus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { 
@@ -97,15 +98,26 @@ const transactions: Transaction[] = [
 ];
 
 const Transactions = () => {
+  const navigate = useNavigate();
+
   return (
     <MainLayout>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold tracking-tight">Transactions</h1>
-          <Button variant="outline" className="gap-2">
-            <Download size={16} />
-            Export
-          </Button>
+          <div className="flex space-x-2">
+            <Button variant="outline" className="gap-2">
+              <Download size={16} />
+              Export
+            </Button>
+            <Button 
+              className="gap-2"
+              onClick={() => navigate('/transactions/new')}
+            >
+              <Plus size={16} />
+              Add Transaction
+            </Button>
+          </div>
         </div>
         
         <Card>

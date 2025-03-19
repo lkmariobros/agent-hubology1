@@ -82,6 +82,9 @@ export interface Transaction {
   commission: number;
   status: string;
   date: string;
+  type?: 'individual' | 'developer'; // Added transaction type
+  documents?: string[]; // Added for document uploads
+  notes?: string; // Added for additional notes
 }
 
 export interface Opportunity {
@@ -120,4 +123,35 @@ export interface LoginCredentials {
 export interface AuthResponse {
   user: User;
   token: string;
+}
+
+// Added for transaction form
+export interface TransactionFormValues {
+  type: 'individual' | 'developer';
+  date: Date | string;
+  status: string;
+  propertyId: string;
+  agentId: string;
+  buyerId?: string;
+  sellerId?: string;
+  price: number;
+  commission: number;
+  documents?: File[];
+  notes?: string;
+}
+
+// Added for property form
+export interface PropertyFormValues {
+  title: string;
+  description: string;
+  price: number;
+  address: Address;
+  type: 'residential' | 'commercial' | 'industrial' | 'land';
+  subtype: string;
+  features: string[];
+  bedrooms?: number;
+  bathrooms?: number;
+  area: number;
+  images: File[];
+  status: 'available' | 'pending' | 'sold';
 }
