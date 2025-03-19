@@ -76,7 +76,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
               </header>
               
               {/* Main scrollable content */}
-              <main className="flex-1 h-[calc(100vh-3.5rem-2rem)] overflow-y-auto bg-background">
+              <main className="flex-1 min-h-[calc(100vh-3.5rem-2rem)] overflow-y-auto bg-background">
                 {children || <Outlet />}
               </main>
             </div>

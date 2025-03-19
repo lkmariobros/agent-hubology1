@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -171,5 +172,10 @@
   /* Custom border style for sidebar */
   .border-sidebar-border\/5 {
     border-color: hsla(var(--sidebar-border) / 0.05);
+  }
+  
+  /* Ensure consistent borders for all content sections */
+  .content-container {
+    @apply min-h-[calc(100vh-4rem)] border border-muted/60 rounded-xl;
   }
 }
