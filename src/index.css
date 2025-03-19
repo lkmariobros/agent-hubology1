@@ -168,4 +168,9 @@
   .clean-table tr:hover {
     @apply bg-muted/20;
   }
+  
+  /* Custom border style for sidebar */
+  .border-sidebar-border\/5 {
+    border-color: hsla(var(--sidebar-border) / 0.05);
+  }
 }

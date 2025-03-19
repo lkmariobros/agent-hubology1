@@ -41,7 +41,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
           <SidebarInset className="flex flex-col h-full p-4">
             <div className="flex flex-col h-full rounded-xl border border-muted/60 overflow-hidden shadow-sm">
               {/* Fixed header */}
-              <header className="h-14 flex-shrink-0 border-b border-border flex items-center justify-between px-4 bg-card">
+              <header className="h-14 flex-shrink-0 border-b border-border/20 flex items-center justify-between px-4 bg-card">
                 <div className="flex items-center">
                   <SidebarTrigger className="mr-2" />
                   <h1 className="text-lg font-normal ml-2">PropertyPro</h1>
