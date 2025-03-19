@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Bell, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -43,11 +43,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
     <SidebarWrapper 
       defaultOpen={getInitialSidebarState()}
       onOpenChange={handleSidebarChange}
-      className="min-h-screen w-full"
-      style={{
-        '--sidebar-width': '16rem',
-        '--sidebar-width-icon': '4rem',
-      } as React.CSSProperties}
+      className="min-h-screen w-full flex"
     >
       <AppSidebar />
       <SidebarInset className="bg-background">

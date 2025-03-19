@@ -35,14 +35,15 @@
     
     --radius: 0.75rem;
 
-    --sidebar-background: 240 10% 3.9%;
+    --sidebar: 240 10% 3.9%;
     --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 264 70% 50%;
-    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-border: 240 3.7% 15.9%;
     --sidebar-accent: 240 3.7% 15.9%;
     --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 240 4.9% 83.9%;
+    
+    --sidebar-width: 16rem;
+    --sidebar-width-icon: 4rem;
 
     --font-sans: 'Inter', system-ui, sans-serif;
     --font-mono: 'JetBrains Mono', monospace;

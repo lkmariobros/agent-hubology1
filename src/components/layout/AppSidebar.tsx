@@ -30,6 +30,7 @@ import {
   SidebarGroup,
   SidebarGroupLabel,
   SidebarGroupContent,
+  SidebarRail,
   useSidebar
 } from "@/components/ui/sidebar";
 
@@ -48,6 +49,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar>
+      <SidebarRail />
       <SidebarHeader className="border-b border-sidebar-border">
         <Link to="/dashboard" className="flex items-center px-4 py-3">
           {isCollapsed ? (
