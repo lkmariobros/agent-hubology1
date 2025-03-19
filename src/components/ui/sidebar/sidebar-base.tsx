@@ -1,4 +1,3 @@
-
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cn } from "@/lib/utils"
@@ -6,7 +5,7 @@ import { PanelLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { TooltipProvider } from "@/components/ui/tooltip"
-import { useSidebar } from "./sidebar-context"
+import { useSidebar, SidebarProvider } from "./sidebar-context"
 
 export const Sidebar = React.forwardRef<
   HTMLDivElement,
