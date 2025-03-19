@@ -1,3 +1,6 @@
+
+import React from 'react';
+
 export interface DashboardMetric {
   label: string;
   value: string;
@@ -40,6 +43,9 @@ export interface User {
   role: string;
   tier: string;
   avatar?: string;
+  phone?: string;
+  properties?: number;
+  transactions?: number;
 }
 
 export interface CommissionTier {
@@ -49,20 +55,6 @@ export interface CommissionTier {
   color: string;
 }
 
-// Extend the User interface with additional properties if they don't exist
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  role: string;
-  tier: string;
-  avatar?: string;
-  properties?: number;
-  transactions?: number;
-}
-
-// Extend the Transaction interface with additional properties
 export interface Transaction {
   id: string;
   propertyId: string;
@@ -90,4 +82,30 @@ export interface Transaction {
   commission: number;
   status: string;
   date: string;
+}
+
+// API response interfaces - for use with backend integration
+export interface ApiResponse<T> {
+  data: T;
+  message: string;
+  success: boolean;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
+// Authentication interfaces
+export interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+export interface AuthResponse {
+  user: User;
+  token: string;
 }

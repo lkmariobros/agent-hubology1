@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Building2, BarChart4, Users, DollarSign } from 'lucide-react';
 import MainLayout from '@/components/layout/MainLayout';
@@ -114,7 +115,7 @@ const properties: Property[] = [
   }
 ];
 
-// Sample transactions data
+// Sample transactions data - THIS WOULD COME FROM YOUR BACKEND API
 const transactions: Transaction[] = [
   {
     id: '1',
@@ -145,6 +146,24 @@ const transactions: Transaction[] = [
     date: '2024-02-28T09:15:00Z'
   }
 ];
+
+// For a real backend integration, you would use React Query like this:
+// 
+// const fetchDashboardData = async () => {
+//   const response = await fetch('https://your-api.com/api/dashboard', {
+//     headers: {
+//       'Authorization': `Bearer ${localStorage.getItem('token')}`,
+//       'Content-Type': 'application/json'
+//     }
+//   });
+//   if (!response.ok) throw new Error('Failed to fetch dashboard data');
+//   return response.json();
+// };
+//
+// const { data, isLoading, error } = useQuery({
+//   queryKey: ['dashboardData'],
+//   queryFn: fetchDashboardData
+// });
 
 const Dashboard = () => {
   return (

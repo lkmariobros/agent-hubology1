@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 
-// Sample properties data
+// Sample properties data - REPLACE WITH API CALL TO YOUR BACKEND
 const properties: Property[] = [
   {
     id: '1',
@@ -81,6 +81,24 @@ const properties: Property[] = [
     updatedAt: '2024-01-20T11:45:00Z'
   }
 ];
+
+// For real backend integration:
+//
+// const fetchProperties = async () => {
+//   const response = await fetch('https://your-api.com/api/properties', {
+//     headers: {
+//       'Authorization': `Bearer ${localStorage.getItem('token')}`,
+//       'Content-Type': 'application/json'
+//     }
+//   });
+//   if (!response.ok) throw new Error('Failed to fetch properties');
+//   return response.json();
+// };
+//
+// const { data: properties, isLoading, error } = useQuery({
+//   queryKey: ['properties'],
+//   queryFn: fetchProperties
+// });
 
 const PropertyCard = ({ property }: { property: Property }) => {
   return (
