@@ -5,15 +5,15 @@ import React from 'react';
 export const getPropertyTypeIcon = (type: string) => {
   switch(type) {
     case 'residential':
-      return <Building2 className="h-4 w-4" />;
+      return React.createElement(Building2, { className: "h-4 w-4" });
     case 'commercial':
-      return <Store className="h-4 w-4" />;
+      return React.createElement(Store, { className: "h-4 w-4" });
     case 'industrial':
-      return <Factory className="h-4 w-4" />;
+      return React.createElement(Factory, { className: "h-4 w-4" });
     case 'land':
-      return <Map className="h-4 w-4" />;
+      return React.createElement(Map, { className: "h-4 w-4" });
     default:
-      return <Building2 className="h-4 w-4" />;
+      return React.createElement(Building2, { className: "h-4 w-4" });
   }
 };
 
