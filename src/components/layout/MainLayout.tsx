@@ -13,7 +13,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface MainLayoutProps {
   children?: React.ReactNode;
@@ -24,10 +23,10 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <div className="flex h-screen bg-background text-foreground overflow-hidden">
+    <div className="flex h-full bg-background text-foreground">
       {/* Sidebar for desktop */}
       <div className={cn(
-        "hidden md:block transition-all duration-300 ease-in-out", 
+        "hidden md:block h-full transition-all duration-300 ease-in-out", 
         sidebarCollapsed ? "w-20" : "w-64"
       )}>
         <Sidebar collapsed={sidebarCollapsed} />
@@ -50,7 +49,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       )}
       
       {/* Main content */}
-      <div className="flex-1 flex flex-col h-screen overflow-hidden">
+      <div className="flex-1 flex flex-col h-full">
         {/* Fixed header */}
         <header className="h-16 flex-shrink-0 border-b border-border flex items-center justify-between px-4">
           <div className="flex items-center">
@@ -101,12 +100,10 @@ const MainLayout = ({ children }: MainLayoutProps) => {
           </div>
         </header>
         
-        {/* Scrollable main content - use native overflow instead of ScrollArea for better performance */}
-        <div className="flex-1 overflow-y-auto">
-          <main className="h-full">
-            {children || <Outlet />}
-          </main>
-        </div>
+        {/* Main scrollable content */}
+        <main className="flex-1 overflow-y-auto">
+          {children || <Outlet />}
+        </main>
       </div>
     </div>
   );
