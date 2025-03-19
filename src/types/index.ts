@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 export interface DashboardMetric {
@@ -154,4 +153,79 @@ export interface PropertyFormValues {
   area: number;
   images: File[];
   status: 'available' | 'pending' | 'sold';
+}
+
+// Agent Hierarchy related types
+export type AgentRank = 'Advisor' | 'Sales Leader' | 'Team Leader' | 'Group Leader' | 'Supreme Leader';
+
+export interface Agent {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  avatar?: string;
+  rank: AgentRank;
+  uplineId?: string;
+  joinDate: string;
+  transactions: number;
+  salesVolume: number;
+  personalCommission: number;
+  overrideCommission: number;
+  totalCommission: number;
+}
+
+export interface AgentWithHierarchy extends Agent {
+  upline?: AgentWithHierarchy;
+  downline?: AgentWithHierarchy[];
+}
+
+export interface OverrideCommission {
+  agentId: string;
+  agentName: string;
+  rank: AgentRank;
+  percentage: number;
+  amount: number;
+}
+
+export interface RankRequirement {
+  rank: AgentRank;
+  minTransactions: number;
+  minSalesVolume: number;
+  personalSales: boolean;
+  recruitedAgents?: number;
+  color: string;
+}
+
+export interface CommissionSummary {
+  personalCommission: number;
+  overrideCommission: number;
+  totalCommission: number;
+  currentMonth: {
+    earned: number;
+    target: number;
+    progress: number;
+  };
+  previousMonth: {
+    earned: number;
+    target: number;
+    progress: number;
+  };
+  yearToDate: {
+    earned: number;
+    target: number;
+    progress: number;
+  };
+}
+
+export interface CommissionHistory {
+  id: string;
+  transactionId: string;
+  property: {
+    title: string;
+    location: string;
+  };
+  date: string;
+  amount: number;
+  type: 'personal' | 'override';
+  source?: string; // Name of the agent who generated the override commission
 }

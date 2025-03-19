@@ -11,6 +11,7 @@ import Transactions from './pages/Transactions';
 import TransactionNew from './pages/TransactionNew';
 import Opportunities from './pages/Opportunities';
 import Commission from './pages/Commission';
+import AdminCommission from './pages/AdminCommission';
 import Team from './pages/Team';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
@@ -45,6 +46,7 @@ function App() {
           <Route path="/transactions/new" element={<TransactionNew />} />
           <Route path="/opportunities" element={<Opportunities />} />
           <Route path="/commission" element={<Commission />} />
+          <Route path="/admin/commission" element={<AdminCommission />} />
           <Route path="/team" element={<Team />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/settings" element={<Settings />} />

@@ -1,14 +1,89 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { DollarSign, TrendingUp, Calendar } from 'lucide-react';
+import { DollarSign, TrendingUp, Calendar, Users, Plus, Download, Filter, ChevronDown } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
-import CommissionTiers from '@/components/commission/CommissionTiers';
-import { CommissionTier } from '@/types';
+import { Button } from '@/components/ui/button';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogTrigger
+} from "@/components/ui/dialog";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
 
-// Sample commission data
+import CommissionTiers from '@/components/commission/CommissionTiers';
+import CommissionHistoryComponent from '@/components/commission/CommissionHistory';
+import AgentHierarchyChart from '@/components/commission/AgentHierarchyChart';
+import CommissionCalculator from '@/components/commission/CommissionCalculator';
+import { 
+  useCommissionSummary,
+  useCommissionTiers, 
+  useCommissionHistory,
+  useAgentHierarchy
+} from '@/hooks/useCommission';
+import { AgentWithHierarchy, CommissionHistory } from '@/types';
+
+// Sample recent commission history (would come from API in production)
+const recentCommissions: CommissionHistory[] = [
+  {
+    id: '1',
+    transactionId: 'tx1',
+    property: {
+      title: 'Suburban Family Home',
+      location: 'Palo Alto, CA'
+    },
+    date: '2024-02-15T10:30:00Z',
+    amount: 22500,
+    type: 'personal'
+  },
+  {
+    id: '2',
+    transactionId: 'tx2',
+    property: {
+      title: 'Downtown Loft',
+      location: 'San Francisco, CA'
+    },
+    date: '2024-02-28T09:15:00Z',
+    amount: 30000,
+    type: 'personal'
+  },
+  {
+    id: '3',
+    transactionId: 'tx3',
+    property: {
+      title: 'Luxury Beach Condo',
+      location: 'Santa Monica, CA'
+    },
+    date: '2024-03-10T14:45:00Z',
+    amount: 8500,
+    type: 'override',
+    source: 'Robert Wilson'
+  },
+  {
+    id: '4',
+    transactionId: 'tx4',
+    property: {
+      title: 'Modern Townhouse',
+      location: 'Berkeley, CA'
+    },
+    date: '2024-03-18T11:20:00Z',
+    amount: 6200,
+    type: 'override',
+    source: 'Emily Davis'
+  }
+];
+
+// Sample commission data - would come from API in production
 const currentMonth = {
   earned: 12750,
   target: 20000,
@@ -27,199 +102,327 @@ const yearToDate = {
   progress: 59.67
 };
 
-// Sample commission tiers
-const commissionTiers: CommissionTier[] = [
-  {
-    tier: 'Bronze',
-    rate: 20,
-    minTransactions: 0,
-    color: 'blue'
-  },
-  {
-    tier: 'Silver',
-    rate: 25,
-    minTransactions: 10,
-    color: 'purple'
-  },
-  {
-    tier: 'Gold',
-    rate: 30,
-    minTransactions: 25,
-    color: 'pink'
-  },
-  {
-    tier: 'Platinum',
-    rate: 35,
-    minTransactions: 50,
-    color: 'orange'
-  },
-  {
-    tier: 'Diamond',
-    rate: 40,
-    minTransactions: 100,
-    color: 'green'
-  }
-];
-
-// Sample recent commission history
-const recentCommissions = [
-  {
-    id: '1',
-    propertyTitle: 'Suburban Family Home',
-    location: 'Palo Alto, CA',
-    date: '2024-02-15',
-    amount: 22500
-  },
-  {
-    id: '2',
-    propertyTitle: 'Downtown Loft',
-    location: 'San Francisco, CA',
-    date: '2024-02-28',
-    amount: 30000
-  },
-  {
-    id: '3',
-    propertyTitle: 'Beachside Condo',
-    location: 'Santa Monica, CA',
-    date: '2024-01-20',
-    amount: 18750
-  },
-  {
-    id: '4',
-    propertyTitle: 'Modern Townhouse',
-    location: 'Berkeley, CA',
-    date: '2024-01-05',
-    amount: 15000
-  }
-];
-
 const Commission = () => {
+  const [currentTab, setCurrentTab] = useState('dashboard');
+  const [selectedAgent, setSelectedAgent] = useState<AgentWithHierarchy | null>(null);
+  
+  // Fetch commission data - in production, these would use real API calls
+  // const { data: commissionSummary, isLoading: isLoadingSummary } = useCommissionSummary();
+  const { data: commissionTiers, isLoading: isLoadingTiers } = useCommissionTiers();
+  // const { data: commissionHistory, isLoading: isLoadingHistory } = useCommissionHistory();
+  const { data: agentHierarchy, isLoading: isLoadingHierarchy } = useAgentHierarchy('agent123');
+
+  const handleAgentClick = (agent: AgentWithHierarchy) => {
+    setSelectedAgent(agent);
+  };
+
   return (
     <MainLayout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Commission</h1>
-          <p className="text-muted-foreground">
-            Track your commission earnings and progress towards your targets.
-          </p>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">Commission Dashboard</h1>
+            <p className="text-muted-foreground">
+              Track your commission earnings, team performance, and progress towards targets.
+            </p>
+          </div>
+          
+          <div className="flex gap-2">
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Record Transaction
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[800px]">
+                <DialogHeader>
+                  <DialogTitle>Record New Transaction</DialogTitle>
+                  <DialogDescription>
+                    Enter the transaction details to calculate and distribute commission.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="py-4">
+                  <p className="text-center text-muted-foreground">Transaction form would go here</p>
+                </div>
+              </DialogContent>
+            </Dialog>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">
+                  <Filter className="h-4 w-4 mr-2" />
+                  Actions
+                  <ChevronDown className="h-4 w-4 ml-2" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem>
+                  <Download className="h-4 w-4 mr-2" />
+                  Export Commission Report
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Users className="h-4 w-4 mr-2" />
+                  Manage Team
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Current Month</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center">
-                <DollarSign className="h-5 w-5 text-muted-foreground mr-2" />
-                <span className="text-2xl font-bold">${currentMonth.earned.toLocaleString()}</span>
-                <span className="text-muted-foreground ml-2">/ ${currentMonth.target.toLocaleString()}</span>
-              </div>
-              <Progress 
-                value={currentMonth.progress} 
-                className="h-2 mt-4" 
-                indicatorClassName="bg-property-blue"
-              />
-              <p className="text-xs text-muted-foreground mt-2">
-                {currentMonth.progress}% of monthly target
-              </p>
-            </CardContent>
-          </Card>
+        <Tabs value={currentTab} onValueChange={setCurrentTab}>
+          <TabsList className="grid grid-cols-2 w-full sm:w-auto">
+            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+            <TabsTrigger value="team">Team Hierarchy</TabsTrigger>
+          </TabsList>
           
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Previous Month</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center">
-                <Calendar className="h-5 w-5 text-muted-foreground mr-2" />
-                <span className="text-2xl font-bold">${previousMonth.earned.toLocaleString()}</span>
-                <span className="text-muted-foreground ml-2">/ ${previousMonth.target.toLocaleString()}</span>
+          <TabsContent value="dashboard" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium">Current Month</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center">
+                    <DollarSign className="h-5 w-5 text-muted-foreground mr-2" />
+                    <span className="text-2xl font-bold">${currentMonth.earned.toLocaleString()}</span>
+                    <span className="text-muted-foreground ml-2">/ ${currentMonth.target.toLocaleString()}</span>
+                  </div>
+                  <Progress 
+                    value={currentMonth.progress} 
+                    className="h-2 mt-4" 
+                    indicatorClassName="bg-property-blue"
+                  />
+                  <p className="text-xs text-muted-foreground mt-2">
+                    {currentMonth.progress}% of monthly target
+                  </p>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium">Previous Month</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center">
+                    <Calendar className="h-5 w-5 text-muted-foreground mr-2" />
+                    <span className="text-2xl font-bold">${previousMonth.earned.toLocaleString()}</span>
+                    <span className="text-muted-foreground ml-2">/ ${previousMonth.target.toLocaleString()}</span>
+                  </div>
+                  <Progress 
+                    value={previousMonth.progress} 
+                    className="h-2 mt-4" 
+                    indicatorClassName="bg-property-purple"
+                  />
+                  <p className="text-xs text-muted-foreground mt-2">
+                    {previousMonth.progress}% of monthly target
+                  </p>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium">Year to Date</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center">
+                    <TrendingUp className="h-5 w-5 text-muted-foreground mr-2" />
+                    <span className="text-2xl font-bold">${yearToDate.earned.toLocaleString()}</span>
+                    <span className="text-muted-foreground ml-2">/ ${yearToDate.target.toLocaleString()}</span>
+                  </div>
+                  <Progress 
+                    value={yearToDate.progress} 
+                    className="h-2 mt-4" 
+                    indicatorClassName="bg-property-pink"
+                  />
+                  <p className="text-xs text-muted-foreground mt-2">
+                    {yearToDate.progress}% of yearly target
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <CommissionHistoryComponent commissions={recentCommissions} />
               </div>
-              <Progress 
-                value={previousMonth.progress} 
-                className="h-2 mt-4" 
-                indicatorClassName="bg-property-purple"
-              />
-              <p className="text-xs text-muted-foreground mt-2">
-                {previousMonth.progress}% of monthly target
-              </p>
-            </CardContent>
-          </Card>
+              
+              <div>
+                <CommissionTiers 
+                  tiers={commissionTiers || []}
+                  currentTier="Silver" 
+                  transactionsCompleted={15}
+                />
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Commission Breakdown</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center py-2 border-b">
+                      <span className="font-medium">Personal Sales Commission</span>
+                      <span className="text-xl font-bold">$58,500</span>
+                    </div>
+                    <div className="flex justify-between items-center py-2 border-b">
+                      <span className="font-medium">Override Commission</span>
+                      <span className="text-xl font-bold">$31,000</span>
+                    </div>
+                    <div className="flex justify-between items-center py-2">
+                      <span className="font-medium">Total Commission (YTD)</span>
+                      <span className="text-2xl font-bold">$89,500</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              {agentHierarchy && (
+                <CommissionCalculator
+                  agent={agentHierarchy}
+                  commissionRate={25}
+                />
+              )}
+            </div>
+          </TabsContent>
           
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Year to Date</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center">
-                <TrendingUp className="h-5 w-5 text-muted-foreground mr-2" />
-                <span className="text-2xl font-bold">${yearToDate.earned.toLocaleString()}</span>
-                <span className="text-muted-foreground ml-2">/ ${yearToDate.target.toLocaleString()}</span>
-              </div>
-              <Progress 
-                value={yearToDate.progress} 
-                className="h-2 mt-4" 
-                indicatorClassName="bg-property-pink"
-              />
-              <p className="text-xs text-muted-foreground mt-2">
-                {yearToDate.progress}% of yearly target
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <Tabs defaultValue="history">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="history">Recent History</TabsTrigger>
-                <TabsTrigger value="forecast">Forecast</TabsTrigger>
-              </TabsList>
-              <TabsContent value="history" className="mt-4">
-                <Card>
-                  <CardContent className="p-0">
-                    <div className="divide-y divide-border">
-                      {recentCommissions.map(commission => (
-                        <div key={commission.id} className="flex justify-between p-4">
-                          <div>
-                            <p className="font-medium">{commission.propertyTitle}</p>
-                            <p className="text-sm text-muted-foreground">{commission.location}</p>
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {new Date(commission.date).toLocaleDateString()}
-                            </p>
+          <TabsContent value="team" className="space-y-6">
+            {isLoadingHierarchy ? (
+              <Card>
+                <CardContent className="p-6 flex justify-center">
+                  <p>Loading team hierarchy...</p>
+                </CardContent>
+              </Card>
+            ) : agentHierarchy ? (
+              <>
+                <AgentHierarchyChart
+                  data={agentHierarchy}
+                  onAgentClick={handleAgentClick}
+                />
+                
+                {selectedAgent && (
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Agent Details</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-4">
+                            <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
+                              {selectedAgent.avatar ? (
+                                <img 
+                                  src={selectedAgent.avatar} 
+                                  alt={selectedAgent.name}
+                                  className="w-full h-full rounded-full object-cover"
+                                />
+                              ) : (
+                                <span className="text-xl font-bold">
+                                  {selectedAgent.name.substring(0, 2).toUpperCase()}
+                                </span>
+                              )}
+                            </div>
+                            <div>
+                              <h3 className="text-lg font-bold">{selectedAgent.name}</h3>
+                              <p className="text-sm text-muted-foreground">{selectedAgent.rank}</p>
+                            </div>
                           </div>
-                          <div className="text-right">
-                            <p className="font-bold">${commission.amount.toLocaleString()}</p>
+                          
+                          <div className="grid grid-cols-2 gap-4 pt-4">
+                            <div>
+                              <p className="text-sm text-muted-foreground">Email</p>
+                              <p className="font-medium">{selectedAgent.email}</p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-muted-foreground">Phone</p>
+                              <p className="font-medium">{selectedAgent.phone || 'N/A'}</p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-muted-foreground">Join Date</p>
+                              <p className="font-medium">
+                                {new Date(selectedAgent.joinDate).toLocaleDateString()}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-muted-foreground">Transactions</p>
+                              <p className="font-medium">{selectedAgent.transactions}</p>
+                            </div>
+                          </div>
+                          
+                          <div className="pt-4 space-y-2">
+                            <h4 className="font-medium">Commission</h4>
+                            <div className="grid grid-cols-3 gap-4">
+                              <div className="p-3 bg-muted rounded-lg text-center">
+                                <p className="text-sm text-muted-foreground">Personal</p>
+                                <p className="font-bold">
+                                  ${selectedAgent.personalCommission.toLocaleString()}
+                                </p>
+                              </div>
+                              <div className="p-3 bg-muted rounded-lg text-center">
+                                <p className="text-sm text-muted-foreground">Override</p>
+                                <p className="font-bold">
+                                  ${selectedAgent.overrideCommission.toLocaleString()}
+                                </p>
+                              </div>
+                              <div className="p-3 bg-muted rounded-lg text-center">
+                                <p className="text-sm text-muted-foreground">Total</p>
+                                <p className="font-bold">
+                                  ${selectedAgent.totalCommission.toLocaleString()}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="pt-4 flex flex-wrap gap-2">
+                            <Button variant="outline" size="sm">
+                              View Details
+                            </Button>
+                            <Button variant="outline" size="sm">
+                              Edit Agent
+                            </Button>
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button size="sm">
+                                  Add Downline
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent>
+                                <DialogHeader>
+                                  <DialogTitle>Add New Agent</DialogTitle>
+                                  <DialogDescription>
+                                    Add a new agent under {selectedAgent.name}
+                                  </DialogDescription>
+                                </DialogHeader>
+                                <div className="py-4">
+                                  <p className="text-center text-muted-foreground">
+                                    New agent form would go here
+                                  </p>
+                                </div>
+                              </DialogContent>
+                            </Dialog>
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-              <TabsContent value="forecast" className="mt-4">
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="text-center py-8">
-                      <p className="text-muted-foreground">
-                        Commission forecast will be available soon
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
-          </div>
-          
-          <div>
-            <CommissionTiers 
-              tiers={commissionTiers} 
-              currentTier="Silver" 
-              transactionsCompleted={15}
-            />
-          </div>
-        </div>
+                      </CardContent>
+                    </Card>
+                    
+                    <CommissionCalculator
+                      agent={selectedAgent}
+                      commissionRate={25}
+                    />
+                  </div>
+                )}
+              </>
+            ) : (
+              <Card>
+                <CardContent className="p-6 flex justify-center">
+                  <p className="text-muted-foreground">No hierarchy data available</p>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
     </MainLayout>
   );

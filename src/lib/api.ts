@@ -1,4 +1,3 @@
-
 import { ApiResponse, PaginatedResponse } from '@/types';
 
 const API_URL = 'https://your-api-url.com/api';
@@ -273,6 +272,198 @@ function getMockOpportunities(): ApiResponse<any[]> {
   };
 }
 
+// Add mock data for agent hierarchy
+function getMockAgentHierarchy(agentId?: string) {
+  // This would normally come from the backend
+  return {
+    data: {
+      id: agentId || 'agent123',
+      name: 'John Smith',
+      email: 'john@example.com',
+      phone: '+1 (555) 123-4567',
+      avatar: 'https://randomuser.me/api/portraits/men/1.jpg',
+      rank: 'Team Leader',
+      joinDate: '2020-01-15T00:00:00Z',
+      transactions: 45,
+      salesVolume: 12500000,
+      personalCommission: 375000,
+      overrideCommission: 128000,
+      totalCommission: 503000,
+      downline: [
+        {
+          id: 'agent456',
+          name: 'Sarah Johnson',
+          email: 'sarah@example.com',
+          phone: '+1 (555) 234-5678',
+          avatar: 'https://randomuser.me/api/portraits/women/2.jpg',
+          rank: 'Sales Leader',
+          joinDate: '2021-03-10T00:00:00Z',
+          transactions: 32,
+          salesVolume: 8900000,
+          personalCommission: 267000,
+          overrideCommission: 45000,
+          totalCommission: 312000,
+          downline: [
+            {
+              id: 'agent789',
+              name: 'Robert Wilson',
+              email: 'robert@example.com',
+              phone: '+1 (555) 345-6789',
+              avatar: 'https://randomuser.me/api/portraits/men/3.jpg',
+              rank: 'Advisor',
+              joinDate: '2022-06-05T00:00:00Z',
+              transactions: 18,
+              salesVolume: 4500000,
+              personalCommission: 135000,
+              overrideCommission: 0,
+              totalCommission: 135000,
+              downline: []
+            },
+            {
+              id: 'agent101',
+              name: 'Emily Davis',
+              email: 'emily@example.com',
+              phone: '+1 (555) 456-7890',
+              avatar: 'https://randomuser.me/api/portraits/women/4.jpg',
+              rank: 'Advisor',
+              joinDate: '2022-07-12T00:00:00Z',
+              transactions: 15,
+              salesVolume: 3800000,
+              personalCommission: 114000,
+              overrideCommission: 0,
+              totalCommission: 114000,
+              downline: []
+            }
+          ]
+        },
+        {
+          id: 'agent202',
+          name: 'Michael Brown',
+          email: 'michael@example.com',
+          phone: '+1 (555) 567-8901',
+          avatar: 'https://randomuser.me/api/portraits/men/5.jpg',
+          rank: 'Sales Leader',
+          joinDate: '2021-04-20T00:00:00Z',
+          transactions: 28,
+          salesVolume: 7600000,
+          personalCommission: 228000,
+          overrideCommission: 32000,
+          totalCommission: 260000,
+          downline: [
+            {
+              id: 'agent303',
+              name: 'Lisa Thompson',
+              email: 'lisa@example.com',
+              phone: '+1 (555) 678-9012',
+              avatar: 'https://randomuser.me/api/portraits/women/6.jpg',
+              rank: 'Advisor',
+              joinDate: '2022-10-03T00:00:00Z',
+              transactions: 12,
+              salesVolume: 3200000,
+              personalCommission: 96000,
+              overrideCommission: 0,
+              totalCommission: 96000,
+              downline: []
+            }
+          ]
+        }
+      ]
+    },
+    message: 'Agent hierarchy retrieved successfully',
+    success: true
+  };
+}
+
+// Add mock data for commission history
+function getMockCommissionHistory() {
+  return {
+    data: [
+      {
+        id: '1',
+        transactionId: 'tx1',
+        property: {
+          title: 'Suburban Family Home',
+          location: 'Palo Alto, CA'
+        },
+        date: '2024-02-15T10:30:00Z',
+        amount: 22500,
+        type: 'personal'
+      },
+      {
+        id: '2',
+        transactionId: 'tx2',
+        property: {
+          title: 'Downtown Loft',
+          location: 'San Francisco, CA'
+        },
+        date: '2024-02-28T09:15:00Z',
+        amount: 30000,
+        type: 'personal'
+      },
+      {
+        id: '3',
+        transactionId: 'tx3',
+        property: {
+          title: 'Luxury Beach Condo',
+          location: 'Santa Monica, CA'
+        },
+        date: '2024-03-10T14:45:00Z',
+        amount: 8500,
+        type: 'override',
+        source: 'Robert Wilson'
+      },
+      {
+        id: '4',
+        transactionId: 'tx4',
+        property: {
+          title: 'Modern Townhouse',
+          location: 'Berkeley, CA'
+        },
+        date: '2024-03-18T11:20:00Z',
+        amount: 6200,
+        type: 'override',
+        source: 'Emily Davis'
+      }
+    ],
+    total: 4,
+    page: 1,
+    pageSize: 10,
+    totalPages: 1
+  };
+}
+
+// Add mock data for agent downline
+function getMockAgentDownline() {
+  return {
+    data: [
+      {
+        id: 'agent456',
+        name: 'Sarah Johnson',
+        email: 'sarah@example.com',
+        phone: '+1 (555) 234-5678',
+        avatar: 'https://randomuser.me/api/portraits/women/2.jpg',
+        rank: 'Sales Leader',
+        joinDate: '2021-03-10T00:00:00Z',
+        transactions: 32,
+        downlineCount: 2
+      },
+      {
+        id: 'agent202',
+        name: 'Michael Brown',
+        email: 'michael@example.com',
+        phone: '+1 (555) 567-8901',
+        avatar: 'https://randomuser.me/api/portraits/men/5.jpg',
+        rank: 'Sales Leader',
+        joinDate: '2021-04-20T00:00:00Z',
+        transactions: 28,
+        downlineCount: 1
+      }
+    ],
+    message: 'Agent downline retrieved successfully',
+    success: true
+  };
+}
+
 // Auth API functions
 export const authApi = {
   login: async (email: string, password: string) => {
@@ -358,6 +549,12 @@ export const commissionApi = {
   },
   
   getHistory: async (page = 1, pageSize = 10) => {
+    // In development mode, return mock data
+    if (IS_DEVELOPMENT) {
+      console.log('Development mode: Using mock commission history data');
+      return getMockCommissionHistory();
+    }
+    
     const queryParams = new URLSearchParams({
       page: page.toString(),
       pageSize: pageSize.toString()
@@ -368,6 +565,36 @@ export const commissionApi = {
   
   getTiers: async () => {
     return apiRequest<ApiResponse<any[]>>('/commissions/tiers');
+  },
+  
+  // Add new agent hierarchy related functions
+  getAgentHierarchy: async (agentId?: string) => {
+    // In development mode, return mock data
+    if (IS_DEVELOPMENT) {
+      console.log('Development mode: Using mock agent hierarchy data');
+      return getMockAgentHierarchy(agentId).data;
+    }
+    
+    const endpoint = agentId ? `/agents/hierarchy/${agentId}` : '/agents/hierarchy';
+    return apiRequest<ApiResponse<any>>(endpoint);
+  },
+  
+  getAgentDownline: async (agentId?: string) => {
+    // In development mode, return mock data
+    if (IS_DEVELOPMENT) {
+      console.log('Development mode: Using mock agent downline data');
+      return getMockAgentDownline().data;
+    }
+    
+    return apiRequest<ApiResponse<any[]>>(`/agents/${agentId}/downline`);
+  },
+  
+  updateAgentRank: async ({ agentId, newRank }: { agentId: string, newRank: string }) => {
+    return apiRequest<ApiResponse<any>>(`/agents/${agentId}/rank`, 'PUT', { rank: newRank });
+  },
+  
+  addAgent: async (agentData: any) => {
+    return apiRequest<ApiResponse<any>>('/agents', 'POST', agentData);
   }
 };
 
