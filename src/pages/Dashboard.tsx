@@ -1,211 +1,143 @@
 
-import React from 'react';
-import { Building2, BarChart4, Users, DollarSign } from 'lucide-react';
+import React, { useState } from 'react';
+import { Building2, BarChart4, Users, DollarSign, Plus } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
 import MetricCard from '@/components/dashboard/MetricCard';
 import PropertyList from '@/components/dashboard/PropertyList';
 import RecentTransactions from '@/components/dashboard/RecentTransactions';
 import OpportunitiesBoard from '@/components/dashboard/OpportunitiesBoard';
-import { DashboardMetric, Property, Transaction, User } from '@/types';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-
-// Sample dashboard metrics data
-const metrics: DashboardMetric[] = [
-  {
-    label: 'Total Listings',
-    value: '142',
-    change: 12.5,
-    trend: 'up',
-    icon: <Building2 className="h-5 w-5 text-property-orange" />
-  },
-  {
-    label: 'Active Agents',
-    value: '38',
-    change: 4.2,
-    trend: 'up',
-    icon: <Users className="h-5 w-5 text-property-purple" />
-  },
-  {
-    label: 'Monthly Revenue',
-    value: '$92,428',
-    change: -2.8,
-    trend: 'down',
-    icon: <DollarSign className="h-5 w-5 text-property-pink" />
-  },
-  {
-    label: 'Conversion Rate',
-    value: '24.3%',
-    change: 6.1,
-    trend: 'up',
-    icon: <BarChart4 className="h-5 w-5 text-property-blue" />
-  }
-];
-
-// Sample properties data
-const properties: Property[] = [
-  {
-    id: '1',
-    title: 'Modern Downtown Apartment',
-    description: 'Luxurious apartment in downtown with excellent amenities.',
-    price: 425000,
-    address: {
-      street: '123 Main St',
-      city: 'San Francisco',
-      state: 'CA',
-      zip: '94102',
-      country: 'USA'
-    },
-    type: 'residential',
-    subtype: 'apartment',
-    features: ['balcony', 'parking', 'pool'],
-    bedrooms: 2,
-    bathrooms: 2,
-    area: 1200,
-    images: ['https://picsum.photos/id/1068/800/600'],
-    status: 'available',
-    listedBy: 'agent123',
-    createdAt: '2024-01-15T12:00:00Z',
-    updatedAt: '2024-01-15T12:00:00Z'
-  },
-  {
-    id: '2',
-    title: 'Suburban Family Home',
-    description: 'Spacious family home with large backyard in quiet neighborhood.',
-    price: 750000,
-    address: {
-      street: '456 Oak Ave',
-      city: 'Palo Alto',
-      state: 'CA',
-      zip: '94301',
-      country: 'USA'
-    },
-    type: 'residential',
-    subtype: 'house',
-    features: ['backyard', 'garage', 'renovated kitchen'],
-    bedrooms: 4,
-    bathrooms: 3,
-    area: 2500,
-    images: ['https://picsum.photos/id/164/800/600'],
-    status: 'pending',
-    listedBy: 'agent456',
-    createdAt: '2024-01-10T09:30:00Z',
-    updatedAt: '2024-02-05T14:15:00Z'
-  },
-  {
-    id: '3',
-    title: 'Commercial Office Space',
-    description: 'Prime location commercial office in the business district.',
-    price: 1200000,
-    address: {
-      street: '789 Market St',
-      city: 'San Francisco',
-      state: 'CA',
-      zip: '94103',
-      country: 'USA'
-    },
-    type: 'commercial',
-    subtype: 'office',
-    features: ['reception', 'conference rooms', 'parking'],
-    area: 3500,
-    images: ['https://picsum.photos/id/260/800/600'],
-    status: 'available',
-    listedBy: 'agent789',
-    createdAt: '2024-01-20T11:45:00Z',
-    updatedAt: '2024-01-20T11:45:00Z'
-  }
-];
-
-// Sample transactions data - THIS WOULD COME FROM YOUR BACKEND API
-const transactions: Transaction[] = [
-  {
-    id: '1',
-    propertyId: '2',
-    agentId: 'agent456',
-    buyerId: 'buyer123',
-    sellerId: 'seller123',
-    commission: 22500,
-    status: 'completed',
-    date: '2024-02-15T10:30:00Z'
-  },
-  {
-    id: '2',
-    propertyId: '4',
-    agentId: 'agent789',
-    commission: 15000,
-    status: 'pending',
-    date: '2024-03-01T15:45:00Z'
-  },
-  {
-    id: '3',
-    propertyId: '5',
-    agentId: 'agent123',
-    buyerId: 'buyer456',
-    sellerId: 'seller456',
-    commission: 30000,
-    status: 'completed',
-    date: '2024-02-28T09:15:00Z'
-  }
-];
-
-// For a real backend integration, you would use React Query like this:
-// 
-// const fetchDashboardData = async () => {
-//   const response = await fetch('https://your-api.com/api/dashboard', {
-//     headers: {
-//       'Authorization': `Bearer ${localStorage.getItem('token')}`,
-//       'Content-Type': 'application/json'
-//     }
-//   });
-//   if (!response.ok) throw new Error('Failed to fetch dashboard data');
-//   return response.json();
-// };
-//
-// const { data, isLoading, error } = useQuery({
-//   queryKey: ['dashboardData'],
-//   queryFn: fetchDashboardData
-// });
+import { useMetrics, useRecentProperties, useRecentTransactions } from '@/hooks/useDashboard';
+import { DashboardMetric } from '@/types';
 
 const Dashboard = () => {
+  const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Fetch dashboard data with React Query
+  const { data: metricsData, isLoading: isLoadingMetrics } = useMetrics();
+  const { data: propertiesData, isLoading: isLoadingProperties } = useRecentProperties();
+  const { data: transactionsData, isLoading: isLoadingTransactions } = useRecentTransactions();
+
+  // Map the icon names to actual icon components
+  const getIconComponent = (iconName: string) => {
+    switch (iconName) {
+      case 'building':
+        return <Building2 className="h-5 w-5 text-property-orange" />;
+      case 'users':
+        return <Users className="h-5 w-5 text-property-purple" />;
+      case 'dollar':
+        return <DollarSign className="h-5 w-5 text-property-pink" />;
+      case 'chart':
+        return <BarChart4 className="h-5 w-5 text-property-blue" />;
+      default:
+        return <Building2 className="h-5 w-5 text-property-orange" />;
+    }
+  };
+
+  // Process metrics data to include icon components
+  const metrics: DashboardMetric[] = metricsData?.data.metrics.map(metric => ({
+    ...metric,
+    icon: getIconComponent(metric.icon)
+  })) || [];
+
+  // Navigation handlers
+  const handleAddProperty = () => {
+    navigate('/properties/new');
+  };
+
+  const handleAddTransaction = () => {
+    navigate('/transactions/new');
+  };
+
+  const handleViewAllProperties = () => {
+    navigate('/properties');
+  };
+
+  const handleViewAllTransactions = () => {
+    navigate('/transactions');
+  };
+
+  const handleViewAllOpportunities = () => {
+    navigate('/opportunities');
+  };
+
   return (
     <MainLayout>
       <div className="space-y-6">
         {/* Page Title */}
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground">
-            Welcome back! Here's an overview of your agency's performance.
-          </p>
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+            <p className="text-muted-foreground">
+              Welcome back! Here's an overview of your agency's performance.
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Button onClick={handleAddProperty} className="gap-1">
+              <Plus className="h-4 w-4" /> Add Property
+            </Button>
+            <Button onClick={handleAddTransaction} variant="outline" className="gap-1">
+              <Plus className="h-4 w-4" /> Add Transaction
+            </Button>
+          </div>
         </div>
         
         {/* Metrics */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {metrics.map((metric, index) => (
-            <MetricCard 
-              key={metric.label} 
-              metric={metric} 
-              className={cn(
-                "animate-fade-in",
-                index === 0 ? "sm:col-span-2 lg:col-span-1" : ""
-              )} 
-            />
-          ))}
+          {isLoadingMetrics ? (
+            // Skeleton loading states for metrics
+            Array(4).fill(0).map((_, index) => (
+              <div 
+                key={index} 
+                className={cn(
+                  "animate-pulse h-32 bg-card/50 rounded-lg",
+                  index === 0 ? "sm:col-span-2 lg:col-span-1" : ""
+                )} 
+              />
+            ))
+          ) : (
+            // Actual metrics
+            metrics.map((metric, index) => (
+              <MetricCard 
+                key={metric.label} 
+                metric={metric} 
+                className={cn(
+                  "animate-fade-in",
+                  index === 0 ? "sm:col-span-2 lg:col-span-1" : ""
+                )} 
+              />
+            ))
+          )}
         </div>
         
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 gap-6">
           {/* Properties List */}
           <div>
-            <PropertyList properties={properties} />
+            <PropertyList 
+              properties={propertiesData?.data || []} 
+              isLoading={isLoadingProperties}
+              onViewAll={handleViewAllProperties}
+            />
           </div>
           
           {/* Opportunities Board */}
           <div>
-            <OpportunitiesBoard />
+            <OpportunitiesBoard 
+              onViewAll={handleViewAllOpportunities}
+            />
           </div>
           
           {/* Recent Transactions */}
           <div>
-            <RecentTransactions transactions={transactions} />
+            <RecentTransactions 
+              transactions={transactionsData?.data || []} 
+              isLoading={isLoadingTransactions}
+              onViewAll={handleViewAllTransactions}
+            />
           </div>
         </div>
       </div>
