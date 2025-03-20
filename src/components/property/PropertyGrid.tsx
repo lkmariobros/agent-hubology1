@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Property } from '@/types';
 import { ExpandablePropertyCard } from './ExpandablePropertyCard';
@@ -12,6 +12,28 @@ interface PropertyGridProps {
 export const PropertyGrid: React.FC<PropertyGridProps> = ({ properties }) => {
   const navigate = useNavigate();
   const [expandedCardId, setExpandedCardId] = useState<string | null>(null);
+  const [columnCount, setColumnCount] = useState(3);
+  const gridRef = useRef<HTMLDivElement>(null);
+
+  // Update column count based on current viewport
+  useEffect(() => {
+    const updateColumnCount = () => {
+      if (window.innerWidth >= 1024) {
+        setColumnCount(3); // lg and above
+      } else if (window.innerWidth >= 640) {
+        setColumnCount(2); // sm to lg
+      } else {
+        setColumnCount(1); // xs
+      }
+    };
+
+    // Set initial column count
+    updateColumnCount();
+
+    // Update column count when window is resized
+    window.addEventListener('resize', updateColumnCount);
+    return () => window.removeEventListener('resize', updateColumnCount);
+  }, []);
 
   const handleEditProperty = (id: string) => {
     navigate(`/properties/${id}/edit`);
@@ -30,26 +52,35 @@ export const PropertyGrid: React.FC<PropertyGridProps> = ({ properties }) => {
     setExpandedCardId(isExpanded ? id : null);
   };
 
+  // Get the column index for a specific card
+  const getColumnIndex = (index: number) => index % columnCount;
+
+  // Calculate which cards should be pushed down
+  const calculateLayout = (index: number) => {
+    if (!expandedCardId) return 0;
+    
+    const expandedIndex = properties.findIndex(p => p.id === expandedCardId);
+    if (expandedIndex === -1) return 0;
+    
+    const expandedColumnIndex = getColumnIndex(expandedIndex);
+    const currentColumnIndex = getColumnIndex(index);
+    
+    // Only push down cards that are in the same column AND below the expanded card
+    if (currentColumnIndex === expandedColumnIndex && index > expandedIndex) {
+      return 150; // Extra space needed for expanded content
+    }
+    
+    return 0;
+  };
+
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 p-6 relative">
+    <div 
+      ref={gridRef} 
+      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 p-6 relative"
+    >
       {properties.length > 0 ? (
         properties.map((property, index) => {
-          // Determine if this card is after the expanded card in the same column
-          const isAfterExpandedInSameColumn = (() => {
-            if (!expandedCardId) return false;
-            
-            // Get expanded card index
-            const expandedIndex = properties.findIndex(p => p.id === expandedCardId);
-            if (expandedIndex === -1) return false;
-            
-            // Only affect cards in the same column
-            const columnCount = window.innerWidth >= 1024 ? 3 : window.innerWidth >= 640 ? 2 : 1;
-            const currentColumn = index % columnCount;
-            const expandedColumn = expandedIndex % columnCount;
-            
-            // Only affect cards below the expanded one
-            return currentColumn === expandedColumn && index > expandedIndex;
-          })();
+          const extraMargin = calculateLayout(index);
           
           return (
             <div 
@@ -57,8 +88,8 @@ export const PropertyGrid: React.FC<PropertyGridProps> = ({ properties }) => {
               className="relative overflow-visible z-auto"
               style={{
                 isolation: 'isolate',
-                // Only apply margin to cards below the expanded one in the same column
-                marginTop: isAfterExpandedInSameColumn ? '120px' : '0'
+                marginTop: extraMargin ? `${extraMargin}px` : '0',
+                transition: 'margin-top 0.3s ease-in-out'
               }}
             >
               <ExpandablePropertyCard
