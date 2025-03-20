@@ -113,7 +113,7 @@ const CoBrokingSetup: React.FC = () => {
       <ErrorBoundary FallbackComponent={ErrorFallback} onReset={handleErrorReset}>
         {coBroking?.enabled ? (
           <CoBrokingForm 
-            coBroking={coBroking}
+            coBroking={coBroking as CoBrokingInfo}
             errors={errors}
             onFieldChange={handleCoBrokingChange}
           />
