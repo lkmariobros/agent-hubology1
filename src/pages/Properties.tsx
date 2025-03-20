@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
@@ -217,8 +218,8 @@ const Properties = () => {
           </div>
         </div>
         
-        {/* Property content with consistent background */}
-        <div className="bg-neutral-900 rounded-lg min-h-[60vh] relative">
+        {/* Property content - removed the background/border */}
+        <div className="min-h-[60vh] relative">
           {viewMode === 'grid' && <PropertyGrid properties={filteredProperties} />}
           {viewMode === 'table' && <PropertyTable properties={filteredProperties} />}
           {viewMode === 'map' && <PropertyMap properties={filteredProperties} />}
