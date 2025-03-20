@@ -24,8 +24,8 @@ export function PropertyCardBasicInfo({
     <div 
       className={cn(
         "px-4 py-3 flex flex-col justify-between cursor-pointer",
-        "transition-all duration-300 ease-in-out hover:bg-neutral-800/40",
-        isOpen ? "rounded-b-none border-b border-neutral-800/40" : "rounded-b-xl",
+        "transition-all duration-300 ease-in-out hover:bg-neutral-800/10",
+        isOpen ? "rounded-b-none border-b border-dashed border-neutral-700/40" : "rounded-b-xl",
         className
       )}
       onClick={onCardClick}
@@ -62,7 +62,7 @@ export function PropertyCardBasicInfo({
         </div>
       </div>
       
-      <div className="border-t border-b border-neutral-800/40 mt-3 mb-0 py-3">
+      <div className="border-t border-b border-dashed border-neutral-700/40 mt-3 mb-0 py-3">
         <div className="flex justify-between items-center">
           <div>
             <div className="text-xs text-neutral-500 mb-1.5">Price</div>

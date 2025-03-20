@@ -102,7 +102,7 @@ export function ExpandablePropertyCard({
       >
         <Card 
           className={cn(
-            "transition-all duration-300 ease-in-out border-0 bg-[#1a1a1a] overflow-hidden shadow-lg", 
+            "transition-all duration-300 ease-in-out border border-neutral-800/60 bg-[#121212] overflow-hidden shadow-lg", 
             "rounded-xl",
             className
           )}
@@ -129,8 +129,8 @@ export function ExpandablePropertyCard({
             />
           </div>
           
-          {/* Card content - wrapping the basic info and expandable content */}
-          <div className="rounded-b-xl overflow-hidden">
+          {/* Main content wrapper with dark background and rounded corners */}
+          <div className="bg-[#121212] rounded-b-xl overflow-hidden">
             {/* Basic info section - This will be clickable for expansion */}
             <PropertyCardBasicInfo 
               property={property} 
@@ -142,7 +142,7 @@ export function ExpandablePropertyCard({
             <CollapsibleContent
               className={cn(
                 "data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up",
-                "bg-[#1a1a1a] overflow-hidden"
+                "overflow-hidden"
               )}
             >
               <PropertyCardDetails 
