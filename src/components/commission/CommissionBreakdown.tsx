@@ -20,15 +20,15 @@ const CommissionBreakdown: React.FC<CommissionBreakdownProps> = ({
       </CardHeader>
       <CardContent className="p-5 pt-0">
         <div className="space-y-4">
-          <div className="flex justify-between items-center py-2 border-b">
+          <div className="flex justify-between items-center py-3 border-b">
             <span className="font-medium">Personal Sales Commission</span>
             <span className="text-xl font-bold">${personalCommission.toLocaleString()}</span>
           </div>
-          <div className="flex justify-between items-center py-2 border-b">
+          <div className="flex justify-between items-center py-3 border-b">
             <span className="font-medium">Override Commission</span>
             <span className="text-xl font-bold">${overrideCommission.toLocaleString()}</span>
           </div>
-          <div className="flex justify-between items-center py-2">
+          <div className="flex justify-between items-center py-3">
             <span className="font-medium">Total Commission (YTD)</span>
             <span className="text-2xl font-bold">${totalCommission.toLocaleString()}</span>
           </div>

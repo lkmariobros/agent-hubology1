@@ -40,8 +40,8 @@ const CommissionTiers = ({
       <CardHeader className="p-5">
         <CardTitle className="text-lg font-semibold">Commission Tiers</CardTitle>
       </CardHeader>
-      <CardContent className="p-5 pt-0">
-        <div className="flex items-center justify-between mb-6 gap-4">
+      <CardContent className="p-5 pt-0 space-y-6">
+        <div className="flex items-center justify-between gap-4">
           <div className="space-y-2">
             <p className="text-sm font-medium text-foreground">Current Tier</p>
             <h3 className="text-2xl font-bold text-gradient">
@@ -53,7 +53,7 @@ const CommissionTiers = ({
                 : 'Maximum tier reached'}
             </p>
           </div>
-          <div className="flex h-20 items-center justify-center rounded-full min-w-[5rem] w-20">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full">
             <div className="text-center">
               <span className="text-2xl font-bold">{currentTierObj.rate}%</span>
               <p className="text-xs text-muted-foreground">Commission</p>
@@ -61,7 +61,7 @@ const CommissionTiers = ({
           </div>
         </div>
         
-        <div className="mb-6 space-y-2">
+        <div className="space-y-2">
           <div className="flex justify-between mb-1 text-sm">
             <span>Progress to next tier</span>
             <span className="font-medium">{Math.round(progress)}%</span>
@@ -73,28 +73,28 @@ const CommissionTiers = ({
           />
         </div>
         
-        <div className="grid grid-cols-5 gap-2">
+        <div className="grid grid-cols-5 gap-3">
           {tiers.map((tier, index) => (
             <div 
               key={tier.tier} 
               className={cn(
-                "relative p-3 rounded-lg text-center transition-all",
+                "flex flex-col items-center text-center transition-all rounded-lg py-3 px-2",
                 currentTier === tier.tier ? "glass-card ring-1 ring-white/20" : "bg-transparent hover:bg-white/5",
-                index < tiers.findIndex(t => t.tier === currentTier) && "opacity-50"
+                index < tiers.findIndex(t => t.tier === currentTier) && "opacity-70"
               )}
             >
               <div 
                 className={cn(
-                  "w-8 h-8 mx-auto mb-2 rounded-full flex items-center justify-center text-white",
+                  "w-10 h-10 mb-2.5 rounded-full flex items-center justify-center text-white font-medium",
                   getTierColor(tier.color)
                 )}
               >
                 {index + 1}
               </div>
-              <p className="text-xs font-medium truncate">{tier.tier}</p>
+              <p className="text-xs font-medium truncate mb-0.5">{tier.tier}</p>
               <p className="text-xs text-muted-foreground">{tier.rate}%</p>
               {currentTier === tier.tier && (
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full animate-pulse" />
+                <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-white rounded-full animate-pulse" />
               )}
             </div>
           ))}
