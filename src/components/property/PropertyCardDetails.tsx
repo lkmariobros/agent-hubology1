@@ -7,15 +7,20 @@ import {
 } from 'lucide-react';
 import { Property } from '@/types';
 import { Badge } from '../ui/badge';
+import { cn } from '@/lib/utils';
 
 interface PropertyCardDetailsProps {
   property: Property;
   onEdit?: (id: string) => void;
+  className?: string;
 }
 
-export function PropertyCardDetails({ property, onEdit }: PropertyCardDetailsProps) {
+export function PropertyCardDetails({ property, onEdit, className }: PropertyCardDetailsProps) {
   return (
-    <div className="px-4 pb-4">
+    <div className={cn(
+      "px-4 pb-4 pt-2 rounded-b-xl transition-all duration-300 ease-in-out",
+      className
+    )}>
       {/* Property metrics tabs */}
       <div className="grid grid-cols-3 gap-1 mb-3">
         <div className="bg-[#2d2d2d] py-2.5 px-3 rounded-md text-center">

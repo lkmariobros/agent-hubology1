@@ -24,7 +24,8 @@ export function PropertyCardBasicInfo({
     <div 
       className={cn(
         "px-4 py-3 flex flex-col justify-between cursor-pointer",
-        "transition-colors duration-150 hover:bg-neutral-800/40",
+        "transition-all duration-300 ease-in-out hover:bg-neutral-800/40",
+        isOpen ? "rounded-b-none" : "rounded-b-xl",
         className
       )}
       onClick={onCardClick}
@@ -39,7 +40,7 @@ export function PropertyCardBasicInfo({
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="h-6 w-6 p-0 ml-2 rounded-full text-neutral-400 hover:bg-transparent hover:text-white shrink-0"
+                className="h-6 w-6 p-0 ml-2 rounded-full text-neutral-400 hover:bg-transparent hover:text-white shrink-0 transition-transform duration-300"
                 onClick={(e) => {
                   // Prevent the click from bubbling to the parent div
                   // which would toggle the expanded state twice
