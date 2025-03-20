@@ -4,6 +4,7 @@ import { useTransactionForm } from '@/context/TransactionFormContext';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { ErrorBoundary } from 'react-error-boundary';
+import { CoBrokingInfo } from '@/types/transaction-form';
 import CoBrokingForm from './co-broking/CoBrokingForm';
 import CoBrokingDisabledCard from './co-broking/CoBrokingDisabledCard';
 
