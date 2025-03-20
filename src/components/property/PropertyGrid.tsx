@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Property } from '@/types';
@@ -78,4 +77,3 @@ export const PropertyGrid: React.FC<PropertyGridProps> = ({ properties }) => {
     </div>
   );
 };
-
