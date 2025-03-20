@@ -33,6 +33,7 @@ export interface Property {
   listedBy: string;
   createdAt: string;
   updatedAt: string;
+  stock?: number; // Adding stock property as optional
 }
 
 export interface User {
