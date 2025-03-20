@@ -12,7 +12,7 @@ import { PropertyGrid } from '@/components/property/PropertyGrid';
 import { PropertyMap } from '@/components/property/PropertyMap';
 import { sampleProperties } from '@/data/sampleProperties';
 
-type ViewMode = 'list' | 'grid' | 'map';
+type ViewMode = 'grid' | 'map';
 
 const Properties = () => {
   const navigate = useNavigate();
@@ -20,9 +20,7 @@ const Properties = () => {
   const [properties] = useState<Property[]>(sampleProperties);
   
   const handleViewChange = (newView: 'grid' | 'map') => {
-    // Convert the incoming view type to our internal ViewMode
-    const mode: ViewMode = newView === 'grid' ? 'grid' : 'map';
-    setViewMode(mode);
+    setViewMode(newView);
   };
   
   const handleFilter = (filters: any) => {
@@ -48,15 +46,10 @@ const Properties = () => {
         <PropertyFilterBar 
           onFilter={handleFilter} 
           onViewChange={handleViewChange} 
-          currentView={viewMode === 'list' ? 'grid' : 'map'}
+          currentView={viewMode}
         />
         
         <div className="bg-neutral-950/30 backdrop-blur-sm rounded-xl p-1 min-h-[60vh] relative">
-          {viewMode === 'list' && (
-            <Card className="overflow-hidden border-0 bg-transparent">
-              <PropertyTable properties={properties} />
-            </Card>
-          )}
           {viewMode === 'grid' && (
             <PropertyGrid properties={properties} />
           )}

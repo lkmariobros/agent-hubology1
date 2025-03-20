@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Property } from '@/types';
 import { ExpandablePropertyCard } from './ExpandablePropertyCard';
@@ -13,8 +13,7 @@ export const PropertyGrid: React.FC<PropertyGridProps> = ({ properties }) => {
   const navigate = useNavigate();
   const [expandedCardId, setExpandedCardId] = useState<string | null>(null);
   const [columnCount, setColumnCount] = useState(3);
-  const gridRef = useRef<HTMLDivElement>(null);
-
+  
   // Update column count based on current viewport
   useEffect(() => {
     const updateColumnCount = () => {
@@ -68,29 +67,34 @@ export const PropertyGrid: React.FC<PropertyGridProps> = ({ properties }) => {
 
   const columns = organizeIntoColumns();
 
-  return (
-    <div ref={gridRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-6">
-      {properties.length > 0 ? (
-        properties.map((property) => (
-          <div 
-            key={property.id} 
-            className="relative overflow-visible z-auto"
-          >
-            <ExpandablePropertyCard
-              property={property}
-              onFavorite={handleFavoriteProperty}
-              onShare={handleShareProperty}
-              onEdit={handleEditProperty}
-              onExpand={(isExpanded) => handleCardExpand(property.id, isExpanded)}
-              isExpanded={expandedCardId === property.id}
-            />
-          </div>
-        ))
-      ) : (
-        <p className="col-span-full text-center text-muted-foreground py-12">
+  if (properties.length === 0) {
+    return (
+      <div className="p-6">
+        <p className="text-center text-muted-foreground py-12">
           No properties to display. Add a new property to get started.
         </p>
-      )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-6">
+      {columns.map((column, columnIndex) => (
+        <div key={columnIndex} className="flex flex-col gap-6">
+          {column.map((property) => (
+            <div key={property.id} className="w-full">
+              <ExpandablePropertyCard
+                property={property}
+                onFavorite={handleFavoriteProperty}
+                onShare={handleShareProperty}
+                onEdit={handleEditProperty}
+                onExpand={(isExpanded) => handleCardExpand(property.id, isExpanded)}
+                isExpanded={expandedCardId === property.id}
+              />
+            </div>
+          ))}
+        </div>
+      ))}
     </div>
   );
 };

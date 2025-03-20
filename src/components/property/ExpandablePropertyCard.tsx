@@ -66,14 +66,14 @@ export function ExpandablePropertyCard({
   };
 
   return (
-    <div className="w-full h-full">
+    <div className="w-full">
       <Collapsible
         open={isOpen}
         onOpenChange={handleOpenChange}
         className="w-full"
       >
         <Card className={cn(
-          "h-full relative transition-all duration-300 border-0 bg-neutral-900 backdrop-blur-sm overflow-hidden", 
+          "relative transition-all duration-300 border-0 bg-neutral-900 backdrop-blur-sm overflow-hidden", 
           isOpen ? "rounded-t-xl" : "rounded-xl",
           className
         )}>
