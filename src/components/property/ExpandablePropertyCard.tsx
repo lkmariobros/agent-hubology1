@@ -71,11 +71,11 @@ export function ExpandablePropertyCard({
         className="w-full"
       >
         <Card className={cn(
-          "relative transition-all duration-300 border-0 bg-neutral-900 backdrop-blur-sm overflow-hidden", 
+          "relative transition-all duration-300 border-0 bg-neutral-900 backdrop-blur-sm overflow-hidden shadow-md", 
           isOpen ? "rounded-t-xl" : "rounded-xl",
           className
         )}>
-          {/* Image section with fixed aspect ratio */}
+          {/* Image section with 4:3 aspect ratio */}
           <div className="aspect-[4/3] w-full overflow-hidden">
             <PropertyCardHeader
               property={property}
@@ -97,7 +97,7 @@ export function ExpandablePropertyCard({
         <CollapsibleContent
           className={cn(
             "overflow-hidden transition-all data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up",
-            "rounded-b-xl bg-neutral-900 backdrop-blur-sm border-0 border-t border-neutral-800"
+            "rounded-b-xl bg-neutral-900 backdrop-blur-sm border-0 border-t border-neutral-800 shadow-md"
           )}
         >
           <PropertyCardDetails 

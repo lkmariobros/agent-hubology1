@@ -17,14 +17,14 @@ export const PropertyGrid: React.FC<PropertyGridProps> = ({ properties }) => {
   // Update column count based on current viewport
   useEffect(() => {
     const updateColumnCount = () => {
-      if (window.innerWidth >= 1440) {
-        setColumnCount(4); // 2xl and above
-      } else if (window.innerWidth >= 1024) {
-        setColumnCount(3); // lg to xl
-      } else if (window.innerWidth >= 640) {
-        setColumnCount(2); // sm to lg
+      if (window.innerWidth >= 1536) { // 2xl
+        setColumnCount(3);
+      } else if (window.innerWidth >= 1024) { // lg
+        setColumnCount(3);
+      } else if (window.innerWidth >= 768) { // md
+        setColumnCount(2);
       } else {
-        setColumnCount(1); // xs
+        setColumnCount(1);
       }
     };
 
@@ -46,7 +46,6 @@ export const PropertyGrid: React.FC<PropertyGridProps> = ({ properties }) => {
 
   const handleShareProperty = (id: string) => {
     toast.success(`Share link for property ${id} copied to clipboard`);
-    // In a real app, you'd copy the link to clipboard here
   };
 
   // This function handles the expansion toggle of a card
@@ -79,7 +78,7 @@ export const PropertyGrid: React.FC<PropertyGridProps> = ({ properties }) => {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-4 gap-6 p-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-3 gap-6 p-6">
       {columns.map((column, columnIndex) => (
         <div key={columnIndex} className="flex flex-col gap-6">
           {column.map((property) => (

@@ -13,7 +13,7 @@ interface PropertyCardBasicInfoProps {
 
 export function PropertyCardBasicInfo({ property, isOpen }: PropertyCardBasicInfoProps) {
   return (
-    <div className="p-4 h-[84px] flex flex-col justify-between">
+    <div className="p-4 flex flex-col justify-between min-h-[100px]">
       <div className="flex justify-between items-start gap-2">
         <div className="flex-1 min-w-0">
           <h3 className="font-medium text-white text-base tracking-tight truncate">
@@ -27,13 +27,13 @@ export function PropertyCardBasicInfo({ property, isOpen }: PropertyCardBasicInf
             </span>
           </div>
           
-          {/* Only show price in basic info when card is not expanded */}
-          {!isOpen && (
-            <div className="mt-1.5 font-semibold text-sm text-orange-500">
-              {formatPrice(property.price)}
-              {property.type === 'commercial' ? '/month' : ''}
-            </div>
-          )}
+          {/* Always show price with orange highlight and specific formatting */}
+          <div className="mt-2 font-semibold text-base text-orange-500">
+            {property.type === 'commercial' ? 
+              `RM ${formatPrice(property.price).replace('RM ', '')}/month` :
+              formatPrice(property.price)
+            }
+          </div>
         </div>
         
         <CollapsibleTrigger asChild>
