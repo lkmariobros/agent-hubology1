@@ -1,7 +1,7 @@
 
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PropertyFormProvider, usePropertyForm } from '@/context/PropertyFormContext';
+import { PropertyFormProvider, usePropertyForm } from '@/context/PropertyForm';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
