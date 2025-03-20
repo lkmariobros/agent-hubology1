@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
 
+// Agent portal pages
 import Dashboard from './pages/Dashboard';
 import Properties from './pages/Properties';
 import PropertyNew from './pages/PropertyNew';
@@ -11,7 +12,6 @@ import Transactions from './pages/Transactions';
 import TransactionNew from './pages/TransactionNew';
 import Opportunities from './pages/Opportunities';
 import Commission from './pages/Commission';
-import AdminCommission from './pages/AdminCommission';
 import Team from './pages/Team';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
@@ -19,6 +19,10 @@ import Points from './pages/leaderboard/Points';
 import Sales from './pages/leaderboard/Sales';
 import NotFound from './pages/NotFound';
 import Index from './pages/Index';
+
+// Admin portal pages
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminCommission from './pages/AdminCommission';
 
 import './App.css';
 
@@ -37,7 +41,10 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Router>
         <Routes>
+          {/* Landing page */}
           <Route path="/" element={<Index />} />
+          
+          {/* Agent Portal Routes */}
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/properties" element={<Properties />} />
           <Route path="/properties/new" element={<PropertyNew />} />
@@ -46,12 +53,17 @@ function App() {
           <Route path="/transactions/new" element={<TransactionNew />} />
           <Route path="/opportunities" element={<Opportunities />} />
           <Route path="/commission" element={<Commission />} />
-          <Route path="/admin/commission" element={<AdminCommission />} />
           <Route path="/team" element={<Team />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/leaderboard/points" element={<Points />} />
           <Route path="/leaderboard/sales" element={<Sales />} />
+          
+          {/* Admin Portal Routes */}
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/commission" element={<AdminCommission />} />
+          
+          {/* 404 Not Found */}
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Toaster position="top-right" />
