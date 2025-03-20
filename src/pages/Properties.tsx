@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
@@ -14,6 +13,8 @@ import { sampleProperties } from '@/data/sampleProperties';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 // Import ViewMode type from PropertyFilterBar
 import { ViewMode } from '@/components/property/PropertyFilterBar';
+import { PropertyFilterDrawer, FilterOptions } from '@/components/property/filters/PropertyFilterDrawer';
+import { SlidersHorizontal } from 'lucide-react';
 
 type TimeFilter = '7days' | '30days' | '90days' | 'all';
 
@@ -23,6 +24,10 @@ const Properties = () => {
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('all');
   const [properties, setProperties] = useState<Property[]>(sampleProperties);
   const [filteredProperties, setFilteredProperties] = useState<Property[]>(sampleProperties);
+  const [filters, setFilters] = useState<FilterOptions>({
+    priceRange: [0, 5000000],
+    features: []
+  });
   const [summaryStats, setSummaryStats] = useState({
     total: 0,
     active: 0,
@@ -90,9 +95,23 @@ const Properties = () => {
     setViewMode(newView);
   };
   
-  const handleFilter = (filters: any) => {
+  const handleFilter = (newFilters: FilterOptions) => {
+    console.log('Applying filters:', newFilters);
+    setFilters(newFilters);
+    // In a real app, this would filter the properties based on the filters
+  };
+
+  const handleApplyFilters = () => {
     console.log('Applying filters:', filters);
     // Implementation for filtering properties would go here
+  };
+
+  const handleClearFilters = () => {
+    const defaultPriceRange: [number, number] = [0, 5000000];
+    setFilters({
+      priceRange: defaultPriceRange,
+      features: []
+    });
   };
 
   return (
@@ -111,7 +130,7 @@ const Properties = () => {
           </Button>
         </div>
         
-        {/* Summary Stats - Updated to match reference image */}
+        {/* Summary Stats */}
         <div className="grid grid-cols-4 gap-4 bg-neutral-900/60 backdrop-blur-sm rounded-lg p-5">
           <div className="flex flex-col">
             <span className="text-sm text-neutral-400">Total Properties</span>
@@ -182,7 +201,19 @@ const Properties = () => {
               </SelectContent>
             </Select>
             
-            {/* Removed the redundant Filter button */}
+            {/* Filter button now located on the far right */}
+            <PropertyFilterDrawer 
+              filters={filters}
+              onFiltersChange={setFilters}
+              onApplyFilters={handleApplyFilters}
+              onClearFilters={handleClearFilters}
+              trigger={
+                <Button variant="outline" size="sm" className="gap-2">
+                  <SlidersHorizontal size={16} />
+                  Filters
+                </Button>
+              }
+            />
           </div>
         </div>
         

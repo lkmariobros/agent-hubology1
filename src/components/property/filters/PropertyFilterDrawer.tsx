@@ -31,13 +31,15 @@ interface PropertyFilterDrawerProps {
   onFiltersChange: (filters: FilterOptions) => void;
   onApplyFilters: () => void;
   onClearFilters: () => void;
+  trigger?: React.ReactNode;
 }
 
 export function PropertyFilterDrawer({
   filters,
   onFiltersChange,
   onApplyFilters,
-  onClearFilters
+  onClearFilters,
+  trigger
 }: PropertyFilterDrawerProps) {
   const [isOpen, setIsOpen] = React.useState(false);
 
@@ -90,13 +92,17 @@ export function PropertyFilterDrawer({
     setIsOpen(false);
   };
 
+  const defaultTrigger = (
+    <Button variant="outline" className="gap-2">
+      <SlidersHorizontal className="h-4 w-4" />
+      Filters
+    </Button>
+  );
+
   return (
     <Drawer open={isOpen} onOpenChange={setIsOpen}>
       <DrawerTrigger asChild>
-        <Button variant="outline" className="gap-2">
-          <SlidersHorizontal className="h-4 w-4" />
-          Filters
-        </Button>
+        {trigger || defaultTrigger}
       </DrawerTrigger>
       <DrawerContent className="max-h-[90vh] overflow-y-auto">
         <DrawerHeader>
