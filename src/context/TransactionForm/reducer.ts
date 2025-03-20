@@ -1,3 +1,4 @@
+
 import { 
   TransactionFormState, 
   TransactionFormData, 
@@ -27,6 +28,21 @@ export const transactionFormReducer = (
 ): TransactionFormState => {
   switch (action.type) {
     case 'UPDATE_FORM_DATA':
+      // Handle coBroking field updates properly
+      if (action.payload.coBroking) {
+        return {
+          ...state,
+          formData: { 
+            ...state.formData, 
+            ...action.payload,
+            coBroking: {
+              ...state.formData.coBroking,
+              ...action.payload.coBroking
+            }
+          },
+          isDirty: true,
+        };
+      }
       return {
         ...state,
         formData: { ...state.formData, ...action.payload },

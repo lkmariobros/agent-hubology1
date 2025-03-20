@@ -20,7 +20,7 @@ const CoBrokingSetup: React.FC = () => {
   const { state, updateFormData } = useTransactionForm();
   const { formData, errors } = state;
   
-  // Initialize coBroking with default values if it doesn't exist
+  // Ensure coBroking is initialized
   useEffect(() => {
     if (!formData.coBroking) {
       updateFormData({
@@ -33,9 +33,9 @@ const CoBrokingSetup: React.FC = () => {
         }
       });
     }
-  }, [formData.coBroking, updateFormData]);
-
-  // Skip rendering until formData.coBroking is properly initialized
+  }, [formData, updateFormData]);
+  
+  // Skip rendering until coBroking is properly initialized
   if (!formData.coBroking) {
     return <div className="py-4">Loading co-broking options...</div>;
   }
@@ -65,6 +65,9 @@ const CoBrokingSetup: React.FC = () => {
       handleCoBrokingChange('commissionSplit', splitValue);
     }
   };
+  
+  // Default split value (used for tabs)
+  const splitValue = formData.coBroking?.commissionSplit?.toString() || "50";
   
   return (
     <div className="space-y-6">
@@ -137,9 +140,9 @@ const CoBrokingSetup: React.FC = () => {
               </Label>
               <Tabs 
                 defaultValue="50" 
-                className="w-full" 
-                value={formData.coBroking.commissionSplit?.toString() || "50"}
+                value={splitValue}
                 onValueChange={handleCommissionSplitChange}
+                className="w-full"
               >
                 <TabsList className="grid grid-cols-5 w-full">
                   <TabsTrigger value="10">10%</TabsTrigger>

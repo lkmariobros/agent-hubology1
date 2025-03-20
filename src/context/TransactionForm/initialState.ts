@@ -1,5 +1,5 @@
 
-import { TransactionFormData, TransactionFormState, TransactionType } from "../../types/transaction-form";
+import { TransactionFormData, TransactionFormState, TransactionType } from "./types";
 
 // Initial transaction data based on transaction type
 export const getInitialTransactionData = (transactionType: TransactionType): TransactionFormData => {

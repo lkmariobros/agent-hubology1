@@ -1,7 +1,7 @@
 
 import { 
-  TransactionFormState, 
-  TransactionFormData, 
+  TransactionFormState,
+  TransactionFormData,
   TransactionDocument, 
   CommissionBreakdown,
   TransactionType

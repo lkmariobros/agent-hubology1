@@ -1,13 +1,13 @@
 
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TransactionFormProvider, useTransactionForm } from '@/context/TransactionForm'; // Updated import path
+import { TransactionFormProvider, useTransactionForm } from '@/context/TransactionForm'; 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { Loader2, Save, ArrowLeft, ArrowRight } from 'lucide-react';
 
-// Step components (we'll implement these next)
+// Step components
 import TransactionFormStepper from './form/TransactionFormStepper';
 import TransactionTypeSelector from './form/TransactionTypeSelector';
 import PropertyDetails from './form/PropertyDetails';
