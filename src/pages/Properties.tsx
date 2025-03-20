@@ -149,7 +149,7 @@ const Properties = () => {
         
         {/* Filter row with consistent alignment */}
         <div className="flex justify-between bg-neutral-900 rounded-lg p-4">
-          <div className="w-1/2">
+          <div className="flex-1">
             <PropertyFilterBar 
               onFilter={handleFilter} 
               onViewChange={handleViewChange} 
@@ -182,7 +182,7 @@ const Properties = () => {
               </SelectContent>
             </Select>
             
-            <Button className="h-10 px-5 rounded-lg">Filter</Button>
+            {/* Removed the redundant Filter button */}
           </div>
         </div>
         
