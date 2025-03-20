@@ -1,105 +1,100 @@
 
 import React from 'react';
 import { useTransactionForm } from '@/context/TransactionFormContext';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
-import { CreditCard, Building, Home, DollarSign } from 'lucide-react';
+import { Home, Building, Key } from 'lucide-react';
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardFooter, 
+  CardHeader, 
+  CardTitle 
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { TransactionType } from '@/types/transaction-form';
+
+const transactionTypes: {
+  type: TransactionType;
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+  commissionInfo: string;
+}[] = [
+  {
+    type: 'Sale',
+    title: 'Property Sale',
+    description: 'Sale transaction between a buyer and seller',
+    icon: <Home className="h-8 w-8" />,
+    commissionInfo: '2% standard commission'
+  },
+  {
+    type: 'Rent',
+    title: 'Property Rental',
+    description: 'Rental transaction between a tenant and landlord',
+    icon: <Key className="h-8 w-8" />,
+    commissionInfo: '1% standard commission'
+  },
+  {
+    type: 'Primary',
+    title: 'Developer Project',
+    description: 'Primary market sale from a developer to a buyer',
+    icon: <Building className="h-8 w-8" />,
+    commissionInfo: '3% standard commission'
+  }
+];
 
 const TransactionTypeSelector: React.FC = () => {
   const { state, updateTransactionType } = useTransactionForm();
-  const { formData, errors } = state;
-
-  const handleTypeChange = (value: TransactionType) => {
-    updateTransactionType(value);
-  };
-
+  const { formData } = state;
+  
   return (
     <div className="space-y-6">
-      <div className="space-y-2">
-        <h3 className="text-lg font-medium">Transaction Type</h3>
-        <p className="text-sm text-muted-foreground">
-          Select the type of transaction you're creating
-        </p>
-      </div>
-
-      <RadioGroup
-        value={formData.transactionType}
-        onValueChange={handleTypeChange}
-        className="grid grid-cols-1 md:grid-cols-3 gap-4"
-      >
-        <div className={`flex flex-col items-start space-y-2 rounded-md border p-4 
-          ${formData.transactionType === 'Sale' ? 'border-primary' : 'border-input'}`}>
-          <RadioGroupItem value="Sale" id="sale" className="sr-only" />
-          <div className="flex items-center justify-center">
-            <Label 
-              htmlFor="sale"
-              className="flex flex-col items-center gap-2 cursor-pointer"
-            >
-              <Home className="h-8 w-8 text-primary" />
-              <span className="font-medium">Sale</span>
-              <span className="text-xs text-muted-foreground text-center">
-                Property sale between buyer and seller
-              </span>
-            </Label>
-          </div>
-        </div>
-        
-        <div className={`flex flex-col items-start space-y-2 rounded-md border p-4 
-          ${formData.transactionType === 'Rent' ? 'border-primary' : 'border-input'}`}>
-          <RadioGroupItem value="Rent" id="rent" className="sr-only" />
-          <div className="flex items-center justify-center">
-            <Label 
-              htmlFor="rent"
-              className="flex flex-col items-center gap-2 cursor-pointer"
-            >
-              <CreditCard className="h-8 w-8 text-primary" />
-              <span className="font-medium">Rent</span>
-              <span className="text-xs text-muted-foreground text-center">
-                Rental agreement between landlord and tenant
-              </span>
-            </Label>
-          </div>
-        </div>
-        
-        <div className={`flex flex-col items-start space-y-2 rounded-md border p-4 
-          ${formData.transactionType === 'Primary' ? 'border-primary' : 'border-input'}`}>
-          <RadioGroupItem value="Primary" id="primary" className="sr-only" />
-          <div className="flex items-center justify-center">
-            <Label 
-              htmlFor="primary"
-              className="flex flex-col items-center gap-2 cursor-pointer"
-            >
-              <Building className="h-8 w-8 text-primary" />
-              <span className="font-medium">Primary Project</span>
-              <span className="text-xs text-muted-foreground text-center">
-                New development purchase from developer
-              </span>
-            </Label>
-          </div>
-        </div>
-      </RadioGroup>
-
-      {errors.transactionType && (
-        <p className="text-sm text-destructive">{errors.transactionType}</p>
-      )}
-
-      <div className="border rounded-md p-4 bg-muted/30 space-y-3 mt-6">
-        <div className="flex items-center gap-2">
-          <DollarSign className="h-5 w-5 text-primary" />
-          <h4 className="font-medium">Commission Information</h4>
-        </div>
-        <p className="text-sm">
-          Default commission rates:
-        </p>
-        <ul className="text-sm space-y-1 list-disc pl-5">
-          <li>Sale: 2% of transaction value</li>
-          <li>Rent: 1% of annual rental value</li>
-          <li>Primary Project: 3% of transaction value</li>
-        </ul>
-        <p className="text-sm italic">
-          These rates can be adjusted in later steps if needed.
-        </p>
+      <h2 className="text-2xl font-bold">Select Transaction Type</h2>
+      <p className="text-muted-foreground">
+        Choose the type of transaction you want to create. The form fields and commission structure will adjust based on your selection.
+      </p>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {transactionTypes.map((type) => (
+          <Card 
+            key={type.type}
+            className={`cursor-pointer transition-all ${
+              formData.transactionType === type.type
+                ? 'ring-2 ring-primary'
+                : 'hover:border-primary/50'
+            }`}
+            onClick={() => updateTransactionType(type.type)}
+          >
+            <CardHeader className="pb-2">
+              <div className="flex justify-between items-start">
+                <CardTitle className="text-lg">{type.title}</CardTitle>
+                <div className={`p-2 rounded-full ${
+                  formData.transactionType === type.type
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-muted text-muted-foreground'
+                }`}>
+                  {type.icon}
+                </div>
+              </div>
+              <CardDescription>{type.description}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">{type.commissionInfo}</p>
+            </CardContent>
+            <CardFooter>
+              <Button 
+                variant={formData.transactionType === type.type ? "default" : "outline"}
+                className="w-full"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  updateTransactionType(type.type);
+                }}
+              >
+                {formData.transactionType === type.type ? 'Selected' : 'Select'}
+              </Button>
+            </CardFooter>
+          </Card>
+        ))}
       </div>
     </div>
   );
