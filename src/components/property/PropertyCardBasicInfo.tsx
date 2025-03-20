@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp, MapPin } from 'lucide-react';
+import { ChevronDown, ChevronUp, CornerUpRight } from 'lucide-react';
 import { CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Property } from '@/types';
 import { formatPrice } from '@/utils/propertyUtils';
@@ -13,55 +13,55 @@ interface PropertyCardBasicInfoProps {
 
 export function PropertyCardBasicInfo({ property, isOpen }: PropertyCardBasicInfoProps) {
   return (
-    <div className="p-4 flex flex-col justify-between">
-      <div className="flex justify-between items-start gap-2">
-        <div className="flex-1 min-w-0">
-          <h3 className="font-medium text-white text-lg tracking-tight truncate">
-            {property.title}
-          </h3>
-          
-          <div className="flex items-center gap-1 mt-1.5">
-            <MapPin className="h-3 w-3 text-neutral-400 flex-shrink-0" />
-            <span className="text-xs text-neutral-400 truncate">
-              {property.address.city}, {property.address.state}
-            </span>
+    <div className="px-4 pb-3 flex flex-col justify-between">
+      <div className="flex justify-between items-start">
+        <div className="flex-1 min-w-0 py-2.5">
+          <div className="flex items-center gap-2">
+            <h3 className="font-medium text-white text-base tracking-tight truncate">
+              {property.title}
+            </h3>
+            <CollapsibleTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-6 w-6 p-0 rounded-full hover:bg-neutral-800/50 shrink-0"
+              >
+                {isOpen ? (
+                  <ChevronUp className="h-3.5 w-3.5 text-neutral-400" />
+                ) : (
+                  <ChevronDown className="h-3.5 w-3.5 text-neutral-400" />
+                )}
+              </Button>
+            </CollapsibleTrigger>
           </div>
           
-          <div className="mt-4 mb-1 flex justify-between items-end">
-            <div>
-              <div className="text-xs text-neutral-500 mb-1">Price</div>
-              <div className="font-semibold text-xl text-orange-500">
-                {formatPrice(property.price)}
+          <span className="text-xs text-neutral-500 font-medium mt-0.5 block capitalize">
+            {property.type}
+          </span>
+        </div>
+      </div>
+      
+      <div className="border-t border-b border-neutral-800/40 mt-1 mb-3 py-3">
+        <div className="flex justify-between items-center">
+          <div>
+            <div className="text-xs text-neutral-500 mb-1.5">Price</div>
+            <div className="font-mono text-cyan-400 text-lg">
+              {formatPrice(property.price)}
+            </div>
+          </div>
+          
+          {property.stock && (
+            <div className="text-right">
+              <div className="text-xs text-neutral-500 mb-1.5">Stock</div>
+              <div className="text-sm flex items-center gap-1">
+                <span className="text-white">{property.stock} units</span>
+                {property.stock > 10 && (
+                  <CornerUpRight className="h-3.5 w-3.5 text-emerald-500" />
+                )}
               </div>
             </div>
-            
-            {property.stock && (
-              <div className="text-right">
-                <div className="text-xs text-neutral-500 mb-1">Stock</div>
-                <div className="text-sm text-neutral-300 flex items-center gap-1">
-                  {property.stock} units
-                  {property.stock > 10 && (
-                    <span className="text-green-500">↗</span>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
+          )}
         </div>
-        
-        <CollapsibleTrigger asChild>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="h-8 w-8 p-0 rounded-full hover:bg-neutral-800 flex-shrink-0 mt-0.5"
-          >
-            {isOpen ? (
-              <ChevronUp className="h-4 w-4 text-neutral-400" />
-            ) : (
-              <ChevronDown className="h-4 w-4 text-neutral-400" />
-            )}
-          </Button>
-        </CollapsibleTrigger>
       </div>
     </div>
   );

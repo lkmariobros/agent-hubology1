@@ -71,8 +71,8 @@ export function ExpandablePropertyCard({
         className="w-full"
       >
         <Card className={cn(
-          "relative transition-all duration-300 border-0 bg-neutral-900 overflow-hidden shadow-md", 
-          isOpen ? "rounded-t-xl" : "rounded-xl",
+          "transition-all duration-300 border-0 bg-neutral-950 overflow-hidden shadow-lg", 
+          "rounded-xl",
           className
         )}>
           {/* Image section with 4:3 aspect ratio */}
@@ -92,23 +92,20 @@ export function ExpandablePropertyCard({
             property={property} 
             isOpen={isOpen}
           />
+          
+          {/* Expandable content */}
+          <CollapsibleContent
+            className={cn(
+              "overflow-hidden transition-all data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up",
+              "bg-neutral-950 border-t border-neutral-900/40"
+            )}
+          >
+            <PropertyCardDetails 
+              property={property}
+              onEdit={onEdit}
+            />
+          </CollapsibleContent>
         </Card>
-        
-        <CollapsibleContent
-          className={cn(
-            "overflow-hidden transition-all data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up",
-            "rounded-b-xl bg-neutral-900 border-0 border-t border-neutral-800 shadow-md"
-          )}
-        >
-          <div className="p-1 bg-neutral-900">
-            <div className="bg-neutral-950/70 rounded-lg overflow-hidden">
-              <PropertyCardDetails 
-                property={property}
-                onEdit={onEdit}
-              />
-            </div>
-          </div>
-        </CollapsibleContent>
       </Collapsible>
     </div>
   );

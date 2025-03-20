@@ -17,15 +17,11 @@ export const getPropertyTypeIcon = (type: string) => {
 };
 
 export const formatPrice = (price: number) => {
-  // Format as "RM 850K", "RM 1.3M", etc.
-  if (price >= 1000000) {
-    const millions = price / 1000000;
-    return `RM ${millions.toFixed(millions < 10 ? 1 : 0)}M`;
-  } else if (price >= 1000) {
-    const thousands = price / 1000;
-    return `RM ${thousands}K`;
-  }
-  return `RM ${price.toLocaleString()}`;
+  // Format as "$948.00" style
+  return `$${price.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })}`;
 };
 
 export const getTimeAgo = (date: string) => {
