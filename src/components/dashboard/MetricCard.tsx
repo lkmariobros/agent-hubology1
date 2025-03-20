@@ -13,18 +13,18 @@ interface MetricCardProps {
 const MetricCard = ({ metric, className }: MetricCardProps) => {
   return (
     <Card className={cn("glass-card overflow-hidden", className)}>
-      <CardContent className="p-6">
-        <div className="flex justify-between items-start">
-          <div>
+      <CardContent className="p-5">
+        <div className="flex justify-between items-start gap-3">
+          <div className="space-y-2">
             <p className="text-sm font-medium text-muted-foreground">
               {metric.label}
             </p>
-            <h3 className="text-2xl font-bold mt-1 text-gradient">
+            <h3 className="text-2xl font-bold text-gradient">
               {metric.value}
             </h3>
           </div>
           {metric.icon && (
-            <div className="rounded-full p-2 bg-white/5">
+            <div className="rounded-full p-2 bg-white/5 flex items-center justify-center">
               {metric.icon}
             </div>
           )}

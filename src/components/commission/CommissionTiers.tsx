@@ -1,13 +1,16 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { cn } from '@/lib/utils';
 import { CommissionTier } from '@/types';
+
 interface CommissionTiersProps {
   tiers: CommissionTier[];
   currentTier: string;
   transactionsCompleted: number;
 }
+
 const CommissionTiers = ({
   tiers,
   currentTier,
@@ -15,32 +18,39 @@ const CommissionTiers = ({
 }: CommissionTiersProps) => {
   // Check if tiers array is empty or undefined
   if (!tiers || tiers.length === 0) {
-    return <Card className="glass-card">
-        <CardHeader className="px-6 pt-6 pb-4">
+    return (
+      <Card className="glass-card">
+        <CardHeader className="p-5">
           <CardTitle className="text-lg font-semibold">Commission Tiers</CardTitle>
         </CardHeader>
-        <CardContent className="px-6 pb-6">
+        <CardContent className="p-5 pt-0">
           <p className="text-muted-foreground">No commission tiers available</p>
         </CardContent>
-      </Card>;
+      </Card>
+    );
   }
+
   const currentTierObj = tiers.find(t => t.tier === currentTier) || tiers[0];
   const nextTierObj = tiers.find(t => t.minTransactions > transactionsCompleted);
   const transactionsToNextTier = nextTierObj ? nextTierObj.minTransactions - transactionsCompleted : 0;
-  const progress = nextTierObj ? transactionsCompleted / nextTierObj.minTransactions * 100 : 100;
-  return <Card className="glass-card">
-      <CardHeader className="px-6 pt-6 pb-4">
+  const progress = nextTierObj ? (transactionsCompleted / nextTierObj.minTransactions) * 100 : 100;
+
+  return (
+    <Card className="glass-card">
+      <CardHeader className="p-5">
         <CardTitle className="text-lg font-semibold">Commission Tiers</CardTitle>
       </CardHeader>
-      <CardContent className="pb-6 py-[9px] px-[3px]">
-        <div className="flex items-center justify-between mb-6">
-          <div>
+      <CardContent className="p-5 pt-0">
+        <div className="flex items-center justify-between mb-6 gap-4">
+          <div className="space-y-2">
             <p className="text-sm font-medium text-foreground">Current Tier</p>
             <h3 className="text-2xl font-bold text-gradient">
               {currentTierObj.tier}
             </h3>
-            <p className="text-xs text-muted-foreground mt-1">
-              {nextTierObj ? `${transactionsToNextTier} more transaction${transactionsToNextTier !== 1 ? 's' : ''} to next tier` : 'Maximum tier reached'}
+            <p className="text-xs text-muted-foreground">
+              {nextTierObj 
+                ? `${transactionsToNextTier} more transaction${transactionsToNextTier !== 1 ? 's' : ''} to next tier` 
+                : 'Maximum tier reached'}
             </p>
           </div>
           <div className="flex h-20 items-center justify-center rounded-full min-w-[5rem] w-20">
@@ -51,27 +61,49 @@ const CommissionTiers = ({
           </div>
         </div>
         
-        <div className="mb-6">
-          <div className="flex justify-between mb-2 text-sm">
+        <div className="mb-6 space-y-2">
+          <div className="flex justify-between mb-1 text-sm">
             <span>Progress to next tier</span>
             <span className="font-medium">{Math.round(progress)}%</span>
           </div>
-          <Progress value={progress} className="h-2" indicatorClassName={cn("bg-gradient-to-r", getProgressColor(currentTierObj.color))} />
+          <Progress 
+            value={progress} 
+            className="h-2" 
+            indicatorClassName={cn("bg-gradient-to-r", getProgressColor(currentTierObj.color))} 
+          />
         </div>
         
         <div className="grid grid-cols-5 gap-2">
-          {tiers.map((tier, index) => <div key={tier.tier} className={cn("relative p-3 rounded-lg text-center transition-all", currentTier === tier.tier ? "glass-card ring-1 ring-white/20" : "bg-transparent hover:bg-white/5", index < tiers.findIndex(t => t.tier === currentTier) && "opacity-50")}>
-              <div className={cn("w-8 h-8 mx-auto mb-2 rounded-full flex items-center justify-center text-white", getTierColor(tier.color))}>
+          {tiers.map((tier, index) => (
+            <div 
+              key={tier.tier} 
+              className={cn(
+                "relative p-3 rounded-lg text-center transition-all",
+                currentTier === tier.tier ? "glass-card ring-1 ring-white/20" : "bg-transparent hover:bg-white/5",
+                index < tiers.findIndex(t => t.tier === currentTier) && "opacity-50"
+              )}
+            >
+              <div 
+                className={cn(
+                  "w-8 h-8 mx-auto mb-2 rounded-full flex items-center justify-center text-white",
+                  getTierColor(tier.color)
+                )}
+              >
                 {index + 1}
               </div>
               <p className="text-xs font-medium truncate">{tier.tier}</p>
               <p className="text-xs text-muted-foreground">{tier.rate}%</p>
-              {currentTier === tier.tier && <div className="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full animate-pulse" />}
-            </div>)}
+              {currentTier === tier.tier && (
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full animate-pulse" />
+              )}
+            </div>
+          ))}
         </div>
       </CardContent>
-    </Card>;
+    </Card>
+  );
 };
+
 function getTierColor(color: string) {
   switch (color) {
     case 'blue':
@@ -88,6 +120,7 @@ function getTierColor(color: string) {
       return 'bg-accent';
   }
 }
+
 function getProgressColor(color: string) {
   switch (color) {
     case 'blue':
@@ -104,4 +137,5 @@ function getProgressColor(color: string) {
       return 'from-accent/50 to-accent';
   }
 }
+
 export default CommissionTiers;

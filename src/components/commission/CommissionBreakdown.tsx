@@ -15,10 +15,10 @@ const CommissionBreakdown: React.FC<CommissionBreakdownProps> = ({
 }) => {
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="p-5">
         <CardTitle>Commission Breakdown</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-5 pt-0">
         <div className="space-y-4">
           <div className="flex justify-between items-center py-2 border-b">
             <span className="font-medium">Personal Sales Commission</span>
