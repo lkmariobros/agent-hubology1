@@ -62,7 +62,7 @@ export function PropertyCardBasicInfo({
         </div>
       </div>
       
-      <div className="border-t border-b border-dashed border-neutral-700/40 mt-3 mb-0 py-3">
+      <div className="mt-3 mb-0 py-3">
         <div className="flex justify-between items-center">
           <div>
             <div className="text-xs text-neutral-500 mb-1.5">Price</div>
