@@ -93,9 +93,6 @@ export function ExpandablePropertyCard({
     if (onFavorite) onFavorite(property.id);
   };
 
-  // Modified to exclude this function as we don't want image area to trigger expansion
-  // Instead, the clickable area will be in PropertyCardBasicInfo component only
-
   return (
     <div className="w-full" ref={cardRef}>
       <Collapsible
@@ -105,8 +102,8 @@ export function ExpandablePropertyCard({
       >
         <Card 
           className={cn(
-            "transition-all duration-300 border-0 bg-neutral-950 overflow-hidden shadow-lg", 
-            "rounded-xl hover:bg-neutral-900/30", // Removed cursor-pointer as we don't want the whole card clickable
+            "transition-all duration-300 border-0 bg-[#1a1a1a] overflow-hidden shadow-lg", 
+            "rounded-xl",
             className
           )}
         >
@@ -143,7 +140,7 @@ export function ExpandablePropertyCard({
           <CollapsibleContent
             className={cn(
               "overflow-hidden transition-all data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up",
-              "bg-neutral-950 border-t border-neutral-900/40"
+              "bg-[#1a1a1a]"
             )}
           >
             <PropertyCardDetails 

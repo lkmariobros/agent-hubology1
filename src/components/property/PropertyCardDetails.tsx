@@ -18,13 +18,13 @@ export function PropertyCardDetails({ property, onEdit }: PropertyCardDetailsPro
     <div className="px-4 pb-4">
       {/* Property metrics tabs */}
       <div className="grid grid-cols-3 gap-1 mb-3">
-        <div className="bg-neutral-900/80 py-2.5 px-3 rounded-md text-center">
+        <div className="bg-[#2d2d2d] py-2.5 px-3 rounded-md text-center">
           <div className="text-xs text-orange-500 font-medium">Sales</div>
         </div>
-        <div className="bg-neutral-900/40 py-2.5 px-3 rounded-md text-center">
+        <div className="bg-[#222222] py-2.5 px-3 rounded-md text-center">
           <div className="text-xs text-neutral-500">Views</div>
         </div>
-        <div className="bg-neutral-900/40 py-2.5 px-3 rounded-md text-center">
+        <div className="bg-[#222222] py-2.5 px-3 rounded-md text-center">
           <div className="text-xs text-neutral-500">Stock</div>
         </div>
       </div>
@@ -53,7 +53,7 @@ export function PropertyCardDetails({ property, onEdit }: PropertyCardDetailsPro
       <Button 
         variant="default" 
         size="sm" 
-        className="bg-neutral-800 hover:bg-neutral-700 text-white rounded-md h-10 w-full"
+        className="bg-[#2d2d2d] hover:bg-[#3a3a3a] text-white border-0 rounded-md h-10 w-full"
         onClick={() => onEdit?.(property.id)}
       >
         <Edit2 className="h-3.5 w-3.5 mr-1.5" />
@@ -62,14 +62,14 @@ export function PropertyCardDetails({ property, onEdit }: PropertyCardDetailsPro
       
       {/* Additional property stats if needed - optional section */}
       {property.features && property.features.length > 0 && (
-        <div className="pt-3 mt-3 border-t border-neutral-900/40">
+        <div className="pt-3 mt-3 border-t border-neutral-800/40">
           <h4 className="text-xs text-neutral-500 mb-2">Features</h4>
           <div className="flex flex-wrap gap-1.5">
             {property.features.map((feature, index) => (
               <Badge 
                 key={index}
                 variant="outline" 
-                className="text-xs bg-neutral-900/40 border-neutral-800/40 text-neutral-400"
+                className="text-xs bg-[#222222] border-[#333333] text-neutral-400"
               >
                 {feature}
               </Badge>
