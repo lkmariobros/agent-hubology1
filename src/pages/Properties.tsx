@@ -12,8 +12,11 @@ import { PropertyMap } from '@/components/property/PropertyMap';
 import { sampleProperties } from '@/data/sampleProperties';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-type ViewMode = 'grid' | 'table' | 'map';
+
+// Import ViewMode type from PropertyFilterBar instead of redefining it
+import { ViewMode } from '@/components/property/PropertyFilterBar';
 type TimeFilter = '7days' | '30days' | '90days' | 'all';
+
 const Properties = () => {
   const navigate = useNavigate();
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
@@ -30,6 +33,7 @@ const Properties = () => {
       active: 0
     }
   });
+
   useEffect(() => {
     // Calculate summary statistics
     const total = properties.length;
@@ -88,6 +92,7 @@ const Properties = () => {
     console.log('Applying filters:', filters);
     // Implementation for filtering properties would go here
   };
+
   return <MainLayout>
       <div className="p-6 space-y-6 max-w-[1560px] mx-auto">
         <div className="flex justify-between items-center">
@@ -134,13 +139,14 @@ const Properties = () => {
           </Card>
         </div>
         
-        <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+        {/* Updated layout to match reference image */}
+        <div className="flex items-center justify-between gap-4">
           <PropertyFilterBar onFilter={handleFilter} onViewChange={handleViewChange} currentView={viewMode} />
           
-          <div className="ml-auto flex gap-2 items-center">
+          <div className="flex items-center gap-3">
             <Select value={timeFilter} onValueChange={value => setTimeFilter(value as TimeFilter)}>
               <SelectTrigger className="w-[140px] h-9">
-                <SelectValue placeholder="Time period" />
+                <SelectValue placeholder="Last 7 days" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="7days">Last 7 days</SelectItem>
@@ -150,12 +156,21 @@ const Properties = () => {
               </SelectContent>
             </Select>
             
-            <ToggleGroup type="single" value={viewMode} className="mr-2">
-              
-              <ToggleGroupItem value="table" onClick={() => handleViewChange('table')} aria-label="Table view">
-                
-              </ToggleGroupItem>
-            </ToggleGroup>
+            <Select defaultValue="newest">
+              <SelectTrigger className="w-[140px] h-9">
+                <SelectValue placeholder="Newest" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="newest">Newest</SelectItem>
+                <SelectItem value="oldest">Oldest</SelectItem>
+                <SelectItem value="price-asc">Price: Low to High</SelectItem>
+                <SelectItem value="price-desc">Price: High to Low</SelectItem>
+              </SelectContent>
+            </Select>
+            
+            <Button variant="outline" className="h-9 px-4">
+              Filter
+            </Button>
           </div>
         </div>
         
