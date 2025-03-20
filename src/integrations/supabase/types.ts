@@ -9,7 +9,388 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      enhanced_properties: {
+        Row: {
+          agent_id: string | null
+          agent_notes: string | null
+          bathrooms: number | null
+          bedrooms: number | null
+          building_class: string | null
+          built_up_area: number | null
+          ceiling_height: number | null
+          city: string | null
+          country: string | null
+          created_at: string | null
+          description: string | null
+          featured: boolean | null
+          floor_area: number | null
+          furnishing_status: string | null
+          id: string
+          land_area: number | null
+          land_size: number | null
+          loading_bays: number | null
+          power_capacity: string | null
+          price: number | null
+          property_type_id: string | null
+          rental_rate: number | null
+          road_frontage: number | null
+          state: string | null
+          status_id: string | null
+          street: string | null
+          title: string
+          topography: string | null
+          transaction_type_id: string | null
+          updated_at: string | null
+          zip: string | null
+          zoning: string | null
+          zoning_type: string | null
+        }
+        Insert: {
+          agent_id?: string | null
+          agent_notes?: string | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          building_class?: string | null
+          built_up_area?: number | null
+          ceiling_height?: number | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          description?: string | null
+          featured?: boolean | null
+          floor_area?: number | null
+          furnishing_status?: string | null
+          id?: string
+          land_area?: number | null
+          land_size?: number | null
+          loading_bays?: number | null
+          power_capacity?: string | null
+          price?: number | null
+          property_type_id?: string | null
+          rental_rate?: number | null
+          road_frontage?: number | null
+          state?: string | null
+          status_id?: string | null
+          street?: string | null
+          title: string
+          topography?: string | null
+          transaction_type_id?: string | null
+          updated_at?: string | null
+          zip?: string | null
+          zoning?: string | null
+          zoning_type?: string | null
+        }
+        Update: {
+          agent_id?: string | null
+          agent_notes?: string | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          building_class?: string | null
+          built_up_area?: number | null
+          ceiling_height?: number | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          description?: string | null
+          featured?: boolean | null
+          floor_area?: number | null
+          furnishing_status?: string | null
+          id?: string
+          land_area?: number | null
+          land_size?: number | null
+          loading_bays?: number | null
+          power_capacity?: string | null
+          price?: number | null
+          property_type_id?: string | null
+          rental_rate?: number | null
+          road_frontage?: number | null
+          state?: string | null
+          status_id?: string | null
+          street?: string | null
+          title?: string
+          topography?: string | null
+          transaction_type_id?: string | null
+          updated_at?: string | null
+          zip?: string | null
+          zoning?: string | null
+          zoning_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "enhanced_properties_property_type_id_fkey"
+            columns: ["property_type_id"]
+            isOneToOne: false
+            referencedRelation: "property_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enhanced_properties_status_id_fkey"
+            columns: ["status_id"]
+            isOneToOne: false
+            referencedRelation: "property_statuses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "enhanced_properties_transaction_type_id_fkey"
+            columns: ["transaction_type_id"]
+            isOneToOne: false
+            referencedRelation: "transaction_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_documents: {
+        Row: {
+          created_at: string | null
+          document_type: string | null
+          id: string
+          name: string
+          property_id: string | null
+          storage_path: string
+        }
+        Insert: {
+          created_at?: string | null
+          document_type?: string | null
+          id?: string
+          name: string
+          property_id?: string | null
+          storage_path: string
+        }
+        Update: {
+          created_at?: string | null
+          document_type?: string | null
+          id?: string
+          name?: string
+          property_id?: string | null
+          storage_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_documents_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "enhanced_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_images: {
+        Row: {
+          created_at: string | null
+          display_order: number | null
+          id: string
+          is_cover: boolean | null
+          property_id: string | null
+          storage_path: string
+        }
+        Insert: {
+          created_at?: string | null
+          display_order?: number | null
+          id?: string
+          is_cover?: boolean | null
+          property_id?: string | null
+          storage_path: string
+        }
+        Update: {
+          created_at?: string | null
+          display_order?: number | null
+          id?: string
+          is_cover?: boolean | null
+          property_id?: string | null
+          storage_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_images_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "enhanced_properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_statuses: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      property_transactions: {
+        Row: {
+          agent_id: string | null
+          buyer_email: string | null
+          buyer_name: string | null
+          buyer_phone: string | null
+          closing_date: string | null
+          co_agent_commission_percentage: number | null
+          co_agent_id: string | null
+          commission_amount: number | null
+          commission_rate: number | null
+          commission_split: boolean | null
+          created_at: string | null
+          id: string
+          listing_fee: number | null
+          notes: string | null
+          property_id: string | null
+          seller_email: string | null
+          seller_name: string | null
+          seller_phone: string | null
+          status: string | null
+          transaction_date: string
+          transaction_type_id: string | null
+          transaction_value: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          agent_id?: string | null
+          buyer_email?: string | null
+          buyer_name?: string | null
+          buyer_phone?: string | null
+          closing_date?: string | null
+          co_agent_commission_percentage?: number | null
+          co_agent_id?: string | null
+          commission_amount?: number | null
+          commission_rate?: number | null
+          commission_split?: boolean | null
+          created_at?: string | null
+          id?: string
+          listing_fee?: number | null
+          notes?: string | null
+          property_id?: string | null
+          seller_email?: string | null
+          seller_name?: string | null
+          seller_phone?: string | null
+          status?: string | null
+          transaction_date: string
+          transaction_type_id?: string | null
+          transaction_value?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          agent_id?: string | null
+          buyer_email?: string | null
+          buyer_name?: string | null
+          buyer_phone?: string | null
+          closing_date?: string | null
+          co_agent_commission_percentage?: number | null
+          co_agent_id?: string | null
+          commission_amount?: number | null
+          commission_rate?: number | null
+          commission_split?: boolean | null
+          created_at?: string | null
+          id?: string
+          listing_fee?: number | null
+          notes?: string | null
+          property_id?: string | null
+          seller_email?: string | null
+          seller_name?: string | null
+          seller_phone?: string | null
+          status?: string | null
+          transaction_date?: string
+          transaction_type_id?: string | null
+          transaction_value?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_transactions_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "enhanced_properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_transactions_transaction_type_id_fkey"
+            columns: ["transaction_type_id"]
+            isOneToOne: false
+            referencedRelation: "transaction_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_types: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      transaction_documents: {
+        Row: {
+          created_at: string | null
+          document_type: string | null
+          id: string
+          name: string
+          storage_path: string
+          transaction_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          document_type?: string | null
+          id?: string
+          name: string
+          storage_path: string
+          transaction_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          document_type?: string | null
+          id?: string
+          name?: string
+          storage_path?: string
+          transaction_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transaction_documents_transaction_id_fkey"
+            columns: ["transaction_id"]
+            isOneToOne: false
+            referencedRelation: "property_transactions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transaction_types: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
