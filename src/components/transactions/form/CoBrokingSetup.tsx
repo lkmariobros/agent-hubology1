@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useTransactionForm } from '@/context/TransactionFormContext';
+import { useTransactionForm } from '@/context/TransactionForm/TransactionFormContext';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -15,12 +15,19 @@ import {
   TabsList,
   TabsTrigger
 } from '@/components/ui/tabs';
-import { Textarea } from '@/components/ui/textarea';
 
 const CoBrokingSetup: React.FC = () => {
   const { state, updateFormData } = useTransactionForm();
   const { formData, errors } = state;
-  const { coBroking } = formData;
+  
+  // Ensure coBroking exists with default values if missing
+  const coBroking = formData.coBroking || {
+    enabled: false,
+    agentName: '',
+    agentCompany: '',
+    agentContact: '',
+    commissionSplit: 50
+  };
   
   const handleCoBrokingToggle = (enabled: boolean) => {
     updateFormData({
@@ -38,6 +45,11 @@ const CoBrokingSetup: React.FC = () => {
         [field]: value
       }
     });
+  };
+  
+  // Handle commission split change from tabs
+  const handleCommissionSplitChange = (value: string) => {
+    handleCoBrokingChange('commissionSplit', parseInt(value) || 50);
   };
   
   return (
@@ -67,7 +79,7 @@ const CoBrokingSetup: React.FC = () => {
               </Label>
               <Input
                 id="agentName"
-                value={coBroking.agentName}
+                value={coBroking.agentName || ''}
                 onChange={(e) => handleCoBrokingChange('agentName', e.target.value)}
                 placeholder="Enter co-broker agent name"
                 className={errors.coAgentName ? 'border-destructive' : ''}
@@ -83,7 +95,7 @@ const CoBrokingSetup: React.FC = () => {
               </Label>
               <Input
                 id="agentCompany"
-                value={coBroking.agentCompany}
+                value={coBroking.agentCompany || ''}
                 onChange={(e) => handleCoBrokingChange('agentCompany', e.target.value)}
                 placeholder="Enter co-broker company name"
                 className={errors.coAgentCompany ? 'border-destructive' : ''}
@@ -99,7 +111,7 @@ const CoBrokingSetup: React.FC = () => {
               </Label>
               <Input
                 id="agentContact"
-                value={coBroking.agentContact}
+                value={coBroking.agentContact || ''}
                 onChange={(e) => handleCoBrokingChange('agentContact', e.target.value)}
                 placeholder="Enter co-broker contact information"
               />
@@ -109,7 +121,12 @@ const CoBrokingSetup: React.FC = () => {
               <Label htmlFor="commissionSplit">
                 Commission Split (%)
               </Label>
-              <Tabs defaultValue="50" className="w-full" onValueChange={(value) => handleCoBrokingChange('commissionSplit', parseInt(value))}>
+              <Tabs 
+                defaultValue="50" 
+                className="w-full" 
+                value={coBroking.commissionSplit?.toString() || "50"}
+                onValueChange={handleCommissionSplitChange}
+              >
                 <TabsList className="grid grid-cols-5 w-full">
                   <TabsTrigger value="10">10%</TabsTrigger>
                   <TabsTrigger value="25">25%</TabsTrigger>
@@ -123,12 +140,12 @@ const CoBrokingSetup: React.FC = () => {
                     type="number"
                     min="1"
                     max="99"
-                    value={coBroking.commissionSplit}
+                    value={coBroking.commissionSplit || 50}
                     onChange={(e) => handleCoBrokingChange('commissionSplit', parseInt(e.target.value) || 50)}
                     className="w-full"
                   />
                   <p className="text-sm text-muted-foreground mt-1">
-                    The co-broker will receive {coBroking.commissionSplit}% of the agent's commission.
+                    The co-broker will receive {coBroking.commissionSplit || 50}% of the agent's commission.
                   </p>
                 </div>
               </Tabs>
