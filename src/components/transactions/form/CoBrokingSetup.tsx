@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useTransactionForm } from '@/context/TransactionForm/TransactionFormContext';
+import { useTransactionForm } from '@/context/TransactionForm'; // Import from the correct path
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
