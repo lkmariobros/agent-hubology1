@@ -1,46 +1,24 @@
 
 import React from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { UseFormReturn } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { PropertyFormValues } from '@/types';
-import { propertySchema } from './validation';
 import PropertyEssentialInfo from './PropertyEssentialInfo';
 import PropertyDetailsInfo from './PropertyDetailsInfo';
 import PropertyAddressInfo from './PropertyAddressInfo';
 import PropertyMediaUpload from './PropertyMediaUpload';
 import ProgressIndicator from './ProgressIndicator';
 
-const PropertyFormSteps = () => {
+interface PropertyFormStepsProps {
+  form: UseFormReturn<PropertyFormValues>;
+}
+
+const PropertyFormSteps: React.FC<PropertyFormStepsProps> = ({ form }) => {
   const navigate = useNavigate();
   const [propertyImages, setPropertyImages] = React.useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [activeTab, setActiveTab] = React.useState("essential");
-
-  const form = useForm<PropertyFormValues>({
-    resolver: zodResolver(propertySchema),
-    defaultValues: {
-      title: '',
-      description: '',
-      price: 0,
-      type: 'residential',
-      subtype: 'Apartment',
-      area: 0,
-      bedrooms: 0,
-      bathrooms: 0,
-      features: [],
-      status: 'available',
-      address: {
-        street: '',
-        city: '',
-        state: '',
-        zip: '',
-        country: 'USA'
-      },
-      images: []
-    },
-  });
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
