@@ -1,6 +1,6 @@
 
 import React, { useCallback, useMemo, useEffect } from 'react';
-import { useTransactionForm } from '@/context/TransactionForm';
+import { useTransactionForm } from '@/context/TransactionFormContext';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { ErrorBoundary } from 'react-error-boundary';
@@ -8,7 +8,7 @@ import CoBrokingForm from './co-broking/CoBrokingForm';
 import CoBrokingDisabledCard from './co-broking/CoBrokingDisabledCard';
 
 // Fallback component if there's an error in the co-broking section
-const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error, resetErrorBoundary: () => void }) => (
+const ErrorFallback = ({ error, resetErrorBoundary }) => (
   <div className="p-4 border border-destructive rounded-md">
     <h3 className="text-lg font-semibold text-destructive">Something went wrong in the co-broking section</h3>
     <p className="text-sm text-muted-foreground mb-4">{error.message}</p>
@@ -21,7 +21,7 @@ const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error, resetError
   </div>
 );
 
-const CoBrokingSetup: React.FC = () => {
+const CoBrokingSetup = () => {
   const { state, updateFormData } = useTransactionForm();
   const { formData, errors } = state;
   
@@ -52,7 +52,7 @@ const CoBrokingSetup: React.FC = () => {
   }, [formData.coBroking]);
   
   // Memoized callbacks to prevent unnecessary re-renders
-  const handleCoBrokingToggle = useCallback((enabled: boolean) => {
+  const handleCoBrokingToggle = useCallback((enabled) => {
     updateFormData({
       coBroking: {
         ...coBroking,
@@ -61,7 +61,7 @@ const CoBrokingSetup: React.FC = () => {
     });
   }, [coBroking, updateFormData]);
   
-  const handleCoBrokingChange = useCallback((field: string, value: string | number | boolean) => {
+  const handleCoBrokingChange = useCallback((field, value) => {
     updateFormData({
       coBroking: {
         ...coBroking,
