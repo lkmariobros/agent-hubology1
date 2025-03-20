@@ -203,7 +203,7 @@ export const useTransactionFormActions = () => {
     
     // Return true if there are no errors
     return Object.keys(errors).length === 0;
-  }, [state]);
+  }, [state, dispatch]);
 
   return {
     state,
