@@ -51,17 +51,19 @@ const Properties = () => {
           currentView={viewMode === 'list' ? 'grid' : 'map'}
         />
         
-        {viewMode === 'list' && (
-          <Card className="overflow-hidden border-0 bg-neutral-900">
-            <PropertyTable properties={properties} />
-          </Card>
-        )}
-        {viewMode === 'grid' && <PropertyGrid properties={properties} />}
-        {viewMode === 'map' && (
-          <Card className="overflow-hidden border-0 bg-neutral-900">
-            <PropertyMap properties={properties} />
-          </Card>
-        )}
+        <div className="bg-neutral-950/30 backdrop-blur-sm rounded-xl p-1">
+          {viewMode === 'list' && (
+            <Card className="overflow-hidden border-0 bg-transparent">
+              <PropertyTable properties={properties} />
+            </Card>
+          )}
+          {viewMode === 'grid' && <PropertyGrid properties={properties} />}
+          {viewMode === 'map' && (
+            <Card className="overflow-hidden border-0 bg-transparent">
+              <PropertyMap properties={properties} />
+            </Card>
+          )}
+        </div>
       </div>
     </MainLayout>
   );
