@@ -20,7 +20,7 @@ export const sampleProperties: Property[] = [
       zip: '94105',
       country: 'USA'
     },
-    images: ['/placeholder.svg'],
+    images: ['/placeholder.svg', '/placeholder.svg', '/placeholder.svg'],
     status: 'available',
     features: ['Parking', 'Pool', 'Gym'],
     createdAt: new Date().toISOString(),
@@ -42,7 +42,7 @@ export const sampleProperties: Property[] = [
       zip: '10001',
       country: 'USA'
     },
-    images: ['/placeholder.svg'],
+    images: ['/placeholder.svg', '/placeholder.svg'],
     status: 'available',
     features: ['24/7 Access', 'Security System', 'Conference Rooms'],
     createdAt: new Date().toISOString(),
@@ -70,5 +70,73 @@ export const sampleProperties: Property[] = [
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     listedBy: 'Agent Williams'
+  },
+  {
+    id: '4',
+    title: 'Luxury Penthouse',
+    description: 'Stunning penthouse with panoramic ocean views',
+    type: 'residential',
+    subtype: 'Penthouse',
+    price: 3200000,
+    bedrooms: 4,
+    bathrooms: 4.5,
+    area: 3500,
+    address: {
+      street: '1000 Ocean Drive',
+      city: 'Miami',
+      state: 'FL',
+      zip: '33139',
+      country: 'USA'
+    },
+    images: ['/placeholder.svg', '/placeholder.svg', '/placeholder.svg'],
+    status: 'available',
+    features: ['Private Elevator', 'Rooftop Terrace', 'Smart Home'],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    listedBy: 'Agent Garcia'
+  },
+  {
+    id: '5',
+    title: 'Retail Space in Mall',
+    description: 'High-traffic retail space in premium shopping mall',
+    type: 'commercial',
+    subtype: 'Retail',
+    price: 750000,
+    area: 1800,
+    address: {
+      street: '200 Shopping Center Blvd',
+      city: 'Los Angeles',
+      state: 'CA',
+      zip: '90045',
+      country: 'USA'
+    },
+    images: ['/placeholder.svg', '/placeholder.svg'],
+    status: 'available',
+    features: ['High Foot Traffic', 'Storage Room', 'Display Windows'],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    listedBy: 'Agent Davis'
+  },
+  {
+    id: '6',
+    title: 'Manufacturing Facility',
+    description: 'Turnkey manufacturing facility with modern equipment',
+    type: 'industrial',
+    subtype: 'Manufacturing',
+    price: 2100000,
+    area: 15000,
+    address: {
+      street: '500 Industry Road',
+      city: 'Detroit',
+      state: 'MI',
+      zip: '48201',
+      country: 'USA'
+    },
+    images: ['/placeholder.svg'],
+    status: 'sold',
+    features: ['Loading Bays', 'Office Space', 'Heavy Power'],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    listedBy: 'Agent Miller'
   }
 ];

@@ -16,7 +16,7 @@ type ViewMode = 'list' | 'grid' | 'map';
 
 const Properties = () => {
   const navigate = useNavigate();
-  const [viewMode, setViewMode] = useState<ViewMode>('list');
+  const [viewMode, setViewMode] = useState<ViewMode>('grid'); // Default to grid view
   const [properties] = useState<Property[]>(sampleProperties);
   
   const handleViewChange = (newView: 'grid' | 'map') => {
@@ -51,11 +51,17 @@ const Properties = () => {
           currentView={viewMode === 'list' ? 'grid' : 'map'}
         />
         
-        <Card className="overflow-hidden">
-          {viewMode === 'list' && <PropertyTable properties={properties} />}
-          {viewMode === 'grid' && <PropertyGrid properties={properties} />}
-          {viewMode === 'map' && <PropertyMap properties={properties} />}
-        </Card>
+        {viewMode === 'list' && (
+          <Card className="overflow-hidden">
+            <PropertyTable properties={properties} />
+          </Card>
+        )}
+        {viewMode === 'grid' && <PropertyGrid properties={properties} />}
+        {viewMode === 'map' && (
+          <Card className="overflow-hidden">
+            <PropertyMap properties={properties} />
+          </Card>
+        )}
       </div>
     </MainLayout>
   );
