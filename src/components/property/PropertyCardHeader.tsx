@@ -10,9 +10,9 @@ interface PropertyCardHeaderProps {
   property: Property;
   currentImageIndex: number;
   isFavorited: boolean;
-  onFavoriteClick: () => void;
+  onFavoriteClick: (e: React.MouseEvent) => void;
   onShare?: (id: string) => void;
-  onMouseMove: (e: React.MouseEvent<HTMLDivElement>) => void;
+  isDragging?: boolean;
 }
 
 export function PropertyCardHeader({
@@ -21,7 +21,7 @@ export function PropertyCardHeader({
   isFavorited,
   onFavoriteClick,
   onShare,
-  onMouseMove
+  isDragging = false
 }: PropertyCardHeaderProps) {
   const statusColors = {
     available: 'bg-green-500 text-white',
@@ -38,20 +38,40 @@ export function PropertyCardHeader({
 
   const typeLabel = getPropertyTypeLabel();
 
+  const handleShareClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card expansion
+    if (onShare) onShare(property.id);
+  };
+
+  const handleMoreClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent card expansion
+  };
+
   return (
     <div 
-      className="w-full h-full relative overflow-hidden bg-neutral-800"
-      onMouseMove={onMouseMove}
+      className={cn(
+        "w-full h-full relative overflow-hidden bg-neutral-800",
+        isDragging && "cursor-grabbing" // Change cursor when dragging
+      )}
     >
       {property.images && property.images.length > 0 ? (
         <img 
           src={property.images[currentImageIndex]} 
           alt={property.title}
           className="w-full h-full object-cover transition-all duration-300"
+          draggable="false" // Prevent default image drag behavior
         />
       ) : (
         <div className="w-full h-full flex items-center justify-center bg-neutral-800">
           <span className="text-neutral-500">No image</span>
+        </div>
+      )}
+      
+      {/* Add left/right drag indicators if multiple images */}
+      {property.images && property.images.length > 1 && (
+        <div className="absolute inset-0 pointer-events-none flex opacity-0 hover:opacity-100 transition-opacity">
+          <div className="w-1/2 bg-gradient-to-r from-black/20 to-transparent"></div>
+          <div className="w-1/2 bg-gradient-to-l from-black/20 to-transparent"></div>
         </div>
       )}
       
@@ -101,7 +121,7 @@ export function PropertyCardHeader({
           size="icon" 
           variant="ghost" 
           className="h-8 w-8 rounded-full bg-neutral-800/80 backdrop-blur-sm hover:bg-neutral-800"
-          onClick={() => onShare?.(property.id)}
+          onClick={handleShareClick}
         >
           <Share2 className="h-4 w-4 text-white" />
         </Button>
@@ -110,6 +130,7 @@ export function PropertyCardHeader({
           size="icon" 
           variant="ghost" 
           className="h-8 w-8 rounded-full bg-neutral-800/80 backdrop-blur-sm hover:bg-neutral-800"
+          onClick={handleMoreClick}
         >
           <MoreVertical className="h-4 w-4 text-white" />
         </Button>

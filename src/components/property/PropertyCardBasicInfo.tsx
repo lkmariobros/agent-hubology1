@@ -16,7 +16,7 @@ export function PropertyCardBasicInfo({ property, isOpen }: PropertyCardBasicInf
     <div className="px-4 pb-3 flex flex-col justify-between">
       <div className="flex justify-between items-start">
         <div className="flex-1 min-w-0 py-2.5">
-          <div className="flex items-center gap-2">
+          <div className="flex justify-between items-center">
             <h3 className="font-medium text-white text-base tracking-tight truncate">
               {property.title}
             </h3>
@@ -24,7 +24,7 @@ export function PropertyCardBasicInfo({ property, isOpen }: PropertyCardBasicInf
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="h-6 w-6 p-0 rounded-full hover:bg-neutral-800/50 shrink-0"
+                className="h-6 w-6 p-0 ml-2 rounded-full hover:bg-neutral-800/50 shrink-0"
               >
                 {isOpen ? (
                   <ChevronUp className="h-3.5 w-3.5 text-neutral-400" />
