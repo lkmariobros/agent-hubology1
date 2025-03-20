@@ -3,6 +3,7 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Form } from '@/components/ui/form';
 import PropertyFormSteps from './form/PropertyFormSteps';
 import { propertySchema } from './form/validation';
 import { PropertyFormValues } from '@/types';
@@ -41,7 +42,9 @@ const PropertyForm = () => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <PropertyFormSteps form={form} />
+        <Form {...form}>
+          <PropertyFormSteps form={form} />
+        </Form>
       </CardContent>
     </Card>
   );
