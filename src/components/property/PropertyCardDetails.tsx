@@ -35,7 +35,7 @@ export function PropertyCardDetails({ property, onEdit, className }: PropertyCar
       </div>
       
       {/* Activity graph */}
-      <div className="mb-4 pt-1 pb-3">
+      <div className="mb-4 pt-1 pb-3 border-b border-dashed border-neutral-800/40">
         <svg width="100%" height="80" viewBox="0 0 100 80" preserveAspectRatio="none">
           <path
             d="M0,40 C5,20 15,60 25,35 C35,15 45,55 55,40 C65,25 75,55 85,35 C95,15 100,40 100,40"

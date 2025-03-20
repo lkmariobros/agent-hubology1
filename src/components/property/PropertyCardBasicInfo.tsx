@@ -25,7 +25,7 @@ export function PropertyCardBasicInfo({
       className={cn(
         "px-4 py-3 flex flex-col justify-between cursor-pointer",
         "transition-all duration-300 ease-in-out hover:bg-neutral-800/40",
-        isOpen ? "rounded-b-none" : "rounded-b-xl",
+        isOpen ? "rounded-b-none border-b border-neutral-800/40" : "rounded-b-xl",
         className
       )}
       onClick={onCardClick}

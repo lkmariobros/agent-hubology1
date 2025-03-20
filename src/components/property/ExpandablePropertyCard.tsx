@@ -129,25 +129,28 @@ export function ExpandablePropertyCard({
             />
           </div>
           
-          {/* Basic info section - This will be clickable for expansion */}
-          <PropertyCardBasicInfo 
-            property={property} 
-            isOpen={isOpen}
-            onCardClick={() => handleOpenChange(!isOpen)}
-          />
-          
-          {/* Expandable content */}
-          <CollapsibleContent
-            className={cn(
-              "data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up",
-              "bg-[#1a1a1a] overflow-hidden"
-            )}
-          >
-            <PropertyCardDetails 
-              property={property}
-              onEdit={onEdit}
+          {/* Card content - wrapping the basic info and expandable content */}
+          <div className="rounded-b-xl overflow-hidden">
+            {/* Basic info section - This will be clickable for expansion */}
+            <PropertyCardBasicInfo 
+              property={property} 
+              isOpen={isOpen}
+              onCardClick={() => handleOpenChange(!isOpen)}
             />
-          </CollapsibleContent>
+            
+            {/* Expandable content */}
+            <CollapsibleContent
+              className={cn(
+                "data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up",
+                "bg-[#1a1a1a] overflow-hidden"
+              )}
+            >
+              <PropertyCardDetails 
+                property={property}
+                onEdit={onEdit}
+              />
+            </CollapsibleContent>
+          </div>
         </Card>
       </Collapsible>
     </div>
