@@ -77,22 +77,19 @@ export const PropertyGrid: React.FC<PropertyGridProps> = ({ properties }) => {
     );
   }
 
+  // Removed the additional border by applying the grid directly in the parent div
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 p-6">
-      {columns.map((column, columnIndex) => (
-        <div key={columnIndex} className="flex flex-col gap-6">
-          {column.map((property) => (
-            <div key={property.id} className="w-full">
-              <ExpandablePropertyCard
-                property={property}
-                onFavorite={handleFavoriteProperty}
-                onShare={handleShareProperty}
-                onEdit={handleEditProperty}
-                onExpand={(isExpanded) => handleCardExpand(property.id, isExpanded)}
-                isExpanded={expandedCardId === property.id}
-              />
-            </div>
-          ))}
+      {properties.map((property) => (
+        <div key={property.id} className="w-full">
+          <ExpandablePropertyCard
+            property={property}
+            onFavorite={handleFavoriteProperty}
+            onShare={handleShareProperty}
+            onEdit={handleEditProperty}
+            onExpand={(isExpanded) => handleCardExpand(property.id, isExpanded)}
+            isExpanded={expandedCardId === property.id}
+          />
         </div>
       ))}
     </div>
