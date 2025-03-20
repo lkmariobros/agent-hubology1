@@ -17,11 +17,11 @@ export const getPropertyTypeIcon = (type: string) => {
 };
 
 export const formatPrice = (price: number) => {
-  // Format as "$948.00" style
-  return `$${price.toLocaleString(undefined, {
+  // Format with only one $ symbol
+  return price.toLocaleString(undefined, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
-  })}`;
+  });
 };
 
 export const getTimeAgo = (date: string) => {
