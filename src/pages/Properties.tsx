@@ -51,13 +51,17 @@ const Properties = () => {
           currentView={viewMode === 'list' ? 'grid' : 'map'}
         />
         
-        <div className="bg-neutral-950/30 backdrop-blur-sm rounded-xl p-1">
+        <div className="bg-neutral-950/30 backdrop-blur-sm rounded-xl p-1 min-h-[60vh] relative">
           {viewMode === 'list' && (
             <Card className="overflow-hidden border-0 bg-transparent">
               <PropertyTable properties={properties} />
             </Card>
           )}
-          {viewMode === 'grid' && <PropertyGrid properties={properties} />}
+          {viewMode === 'grid' && (
+            <div className="relative">
+              <PropertyGrid properties={properties} />
+            </div>
+          )}
           {viewMode === 'map' && (
             <Card className="overflow-hidden border-0 bg-transparent">
               <PropertyMap properties={properties} />
@@ -70,3 +74,4 @@ const Properties = () => {
 };
 
 export default Properties;
+

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,8 @@ interface ExpandablePropertyCardProps {
   onFavorite?: (id: string) => void;
   onShare?: (id: string) => void;
   onEdit?: (id: string) => void;
+  onExpand?: (isExpanded: boolean) => void;
+  isExpanded?: boolean;
   className?: string;
 }
 
@@ -34,11 +36,26 @@ export function ExpandablePropertyCard({
   onFavorite, 
   onShare, 
   onEdit,
+  onExpand,
+  isExpanded = false,
   className = ''
 }: ExpandablePropertyCardProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(isExpanded);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isFavorited, setIsFavorited] = useState(false);
+
+  // Sync internal state with external control
+  useEffect(() => {
+    setIsOpen(isExpanded);
+  }, [isExpanded]);
+
+  // Notify parent component when expansion state changes
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    if (onExpand) {
+      onExpand(open);
+    }
+  };
 
   // Function to cycle through images based on cursor position
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -66,10 +83,10 @@ export function ExpandablePropertyCard({
   };
 
   return (
-    <div className="relative w-full overflow-visible">
+    <div className="relative w-full overflow-visible z-auto group" style={{ isolation: 'isolate' }}>
       <Collapsible
         open={isOpen}
-        onOpenChange={setIsOpen}
+        onOpenChange={handleOpenChange}
         className="w-full overflow-visible"
       >
         <Card className={cn(
@@ -193,6 +210,7 @@ export function ExpandablePropertyCard({
             "overflow-hidden transition-all data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up",
             "rounded-b-xl bg-neutral-900/80 backdrop-blur-sm border-0 border-t border-neutral-800"
           )}
+          style={{ position: 'relative', zIndex: 10 }}
         >
           <div className="p-4 space-y-4">
             <div className="grid grid-cols-2 gap-3">
@@ -286,3 +304,4 @@ export function ExpandablePropertyCard({
     </div>
   );
 }
+
