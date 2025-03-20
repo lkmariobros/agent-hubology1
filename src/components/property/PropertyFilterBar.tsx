@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import {
@@ -157,69 +158,28 @@ export function PropertyFilterBar({
 
   return (
     <div className="w-full">
-      <div className="flex items-center gap-4 w-full">
-        <form onSubmit={handleSearch} className="relative flex-grow">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
-          <Input
-            placeholder="Search properties..."
-            className="pl-11 pr-10 py-2 h-10 bg-neutral-800 border-none rounded-lg w-full"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          {searchQuery && (
-            <button 
-              type="button" 
-              className="absolute right-3 top-1/2 -translate-y-1/2"
-              onClick={() => {
-                setSearchQuery('');
-                setFilters({...filters, search: undefined});
-                onFilter({...filters, search: undefined});
-              }}
-            >
-              <X className="h-4 w-4 text-neutral-400" />
-            </button>
-          )}
-        </form>
-        
-        {/* View Toggle - Now visible on all screen sizes next to search */}
-        <ToggleGroup type="single" value={currentView} className="hidden md:flex">
-          <ToggleGroupItem 
-            value="grid" 
-            onClick={() => onViewChange('grid')}
-            aria-label="Grid view"
+      <form onSubmit={handleSearch} className="relative w-full">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
+        <Input
+          placeholder="Search properties..."
+          className="pl-11 pr-10 py-2 h-10 bg-neutral-800 border-none rounded-lg w-full"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+        {searchQuery && (
+          <button 
+            type="button" 
+            className="absolute right-3 top-1/2 -translate-y-1/2"
+            onClick={() => {
+              setSearchQuery('');
+              setFilters({...filters, search: undefined});
+              onFilter({...filters, search: undefined});
+            }}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="h-4 w-4"
-            >
-              <rect width="7" height="7" x="3" y="3" rx="1" />
-              <rect width="7" height="7" x="14" y="3" rx="1" />
-              <rect width="7" height="7" x="14" y="14" rx="1" />
-              <rect width="7" height="7" x="3" y="14" rx="1" />
-            </svg>
-          </ToggleGroupItem>
-          <ToggleGroupItem 
-            value="table" 
-            onClick={() => onViewChange('table')}
-            aria-label="Table view"
-          >
-            <List className="h-4 w-4" />
-          </ToggleGroupItem>
-          <ToggleGroupItem 
-            value="map" 
-            onClick={() => onViewChange('map')}
-            aria-label="Map view"
-          >
-            <Map className="h-4 w-4" />
-          </ToggleGroupItem>
-        </ToggleGroup>
-      </div>
+            <X className="h-4 w-4 text-neutral-400" />
+          </button>
+        )}
+      </form>
       
       {/* Mobile view filters - hidden on desktop */}
       <div className="lg:hidden flex gap-2 mt-4">
@@ -356,8 +316,7 @@ export function PropertyFilterBar({
             </DrawerContent>
         </Drawer>
         
-        {/* Mobile view toggle - only shown on small screens */}
-        <ToggleGroup type="single" value={currentView} className="md:hidden ml-auto">
+        <ToggleGroup type="single" value={currentView} className="ml-auto">
           <ToggleGroupItem 
             value="grid" 
             onClick={() => onViewChange('grid')}
