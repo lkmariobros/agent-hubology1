@@ -52,59 +52,45 @@ export const PropertyGrid: React.FC<PropertyGridProps> = ({ properties }) => {
     setExpandedCardId(isExpanded ? id : null);
   };
 
-  // Get the column index for a specific card
-  const getColumnIndex = (index: number) => index % columnCount;
-
-  // Calculate which cards should be pushed down
-  const calculateLayout = (index: number) => {
-    if (!expandedCardId) return 0;
+  // Organize properties into columns based on the current column count
+  const organizeIntoColumns = () => {
+    const columns: Property[][] = Array.from({ length: columnCount }, () => []);
     
-    const expandedIndex = properties.findIndex(p => p.id === expandedCardId);
-    if (expandedIndex === -1) return 0;
+    properties.forEach((property, index) => {
+      const columnIndex = index % columnCount;
+      columns[columnIndex].push(property);
+    });
     
-    const expandedColumnIndex = getColumnIndex(expandedIndex);
-    const currentColumnIndex = getColumnIndex(index);
-    
-    // Only push down cards that are in the same column AND below the expanded card
-    if (currentColumnIndex === expandedColumnIndex && index > expandedIndex) {
-      return 150; // Extra space needed for expanded content
-    }
-    
-    return 0;
+    return columns;
   };
 
+  const columns = organizeIntoColumns();
+
   return (
-    <div 
-      ref={gridRef} 
-      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 p-6 relative"
-    >
+    <div ref={gridRef} className="flex gap-6 p-6">
       {properties.length > 0 ? (
-        properties.map((property, index) => {
-          const extraMargin = calculateLayout(index);
-          
-          return (
-            <div 
-              key={property.id} 
-              className="relative overflow-visible z-auto"
-              style={{
-                isolation: 'isolate',
-                marginTop: extraMargin ? `${extraMargin}px` : '0',
-                transition: 'margin-top 0.3s ease-in-out'
-              }}
-            >
-              <ExpandablePropertyCard
-                property={property}
-                onFavorite={handleFavoriteProperty}
-                onShare={handleShareProperty}
-                onEdit={handleEditProperty}
-                onExpand={(isExpanded) => handleCardExpand(property.id, isExpanded)}
-                isExpanded={expandedCardId === property.id}
-              />
-            </div>
-          );
-        })
+        columns.map((column, columnIndex) => (
+          <div key={`column-${columnIndex}`} className="flex-1 space-y-6">
+            {column.map((property) => (
+              <div 
+                key={property.id} 
+                className="relative overflow-visible z-auto"
+                style={{ isolation: 'isolate' }}
+              >
+                <ExpandablePropertyCard
+                  property={property}
+                  onFavorite={handleFavoriteProperty}
+                  onShare={handleShareProperty}
+                  onEdit={handleEditProperty}
+                  onExpand={(isExpanded) => handleCardExpand(property.id, isExpanded)}
+                  isExpanded={expandedCardId === property.id}
+                />
+              </div>
+            ))}
+          </div>
+        ))
       ) : (
-        <p className="col-span-full text-center text-muted-foreground py-12">
+        <p className="w-full text-center text-muted-foreground py-12">
           No properties to display. Add a new property to get started.
         </p>
       )}
