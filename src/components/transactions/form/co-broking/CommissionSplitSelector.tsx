@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -8,6 +8,7 @@ import {
   TabsList,
   TabsTrigger
 } from '@/components/ui/tabs';
+import { debounce } from 'lodash';
 
 interface CommissionSplitSelectorProps {
   value: number;
@@ -18,19 +19,37 @@ const CommissionSplitSelector: React.FC<CommissionSplitSelectorProps> = ({
   value, 
   onChange 
 }) => {
-  const handleTabChange = (newValue: string) => {
+  // Memoize the tab values to prevent unnecessary recalculations
+  const tabValues = useMemo(() => ["10", "25", "50", "75", "90"], []);
+  
+  // Use debounce for input changes to prevent rapid state updates
+  const debouncedOnChange = useCallback(
+    debounce((newValue: number) => {
+      onChange(newValue);
+    }, 300),
+    [onChange]
+  );
+  
+  // Callbacks for handling changes
+  const handleTabChange = useCallback((newValue: string) => {
     const splitValue = parseInt(newValue);
     if (!isNaN(splitValue)) {
-      onChange(splitValue);
+      onChange(splitValue); // Use direct onChange since tabs don't need debouncing
     }
-  };
+  }, [onChange]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = parseInt(e.target.value);
     if (!isNaN(newValue)) {
-      onChange(newValue);
+      debouncedOnChange(newValue);
     }
-  };
+  }, [debouncedOnChange]);
+
+  // Memoize the description text to prevent re-renders
+  const descriptionText = useMemo(() => 
+    `The co-broker will receive ${value}% of the agent's commission.`,
+    [value]
+  );
 
   return (
     <div className="space-y-2">
@@ -44,11 +63,11 @@ const CommissionSplitSelector: React.FC<CommissionSplitSelectorProps> = ({
         className="w-full"
       >
         <TabsList className="grid grid-cols-5 w-full">
-          <TabsTrigger value="10">10%</TabsTrigger>
-          <TabsTrigger value="25">25%</TabsTrigger>
-          <TabsTrigger value="50">50%</TabsTrigger>
-          <TabsTrigger value="75">75%</TabsTrigger>
-          <TabsTrigger value="90">90%</TabsTrigger>
+          {tabValues.map(tabValue => (
+            <TabsTrigger key={tabValue} value={tabValue}>
+              {tabValue}%
+            </TabsTrigger>
+          ))}
         </TabsList>
         <div className="mt-4">
           <Input
@@ -61,7 +80,7 @@ const CommissionSplitSelector: React.FC<CommissionSplitSelectorProps> = ({
             className="w-full"
           />
           <p className="text-sm text-muted-foreground mt-1">
-            The co-broker will receive {value}% of the agent's commission.
+            {descriptionText}
           </p>
         </div>
       </Tabs>
@@ -69,4 +88,5 @@ const CommissionSplitSelector: React.FC<CommissionSplitSelectorProps> = ({
   );
 };
 
-export default CommissionSplitSelector;
+// Use React.memo to prevent unnecessary re-renders
+export default React.memo(CommissionSplitSelector);

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useCallback, useState, useMemo, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -18,18 +18,33 @@ const CoBrokingForm: React.FC<CoBrokingFormProps> = ({
   errors,
   onFieldChange
 }) => {
-  const [isCredentialsVerified, setIsCredentialsVerified] = React.useState(
+  // Local state to reduce parent re-renders
+  const [isCredentialsVerified, setIsCredentialsVerified] = useState(
     coBroking?.credentialsVerified || false
   );
 
-  const handleCredentialsVerified = (checked: boolean) => {
+  // Update local state when props change
+  useEffect(() => {
+    setIsCredentialsVerified(coBroking?.credentialsVerified || false);
+  }, [coBroking?.credentialsVerified]);
+
+  // Memoized callbacks to prevent unnecessary re-renders
+  const handleCredentialsVerified = useCallback((checked: boolean) => {
     setIsCredentialsVerified(checked);
     onFieldChange('credentialsVerified', checked);
-  };
+  }, [onFieldChange]);
 
-  const handleSplitChange = (value: number) => {
+  const handleSplitChange = useCallback((value: number) => {
     onFieldChange('commissionSplit', value);
-  };
+  }, [onFieldChange]);
+
+  const handleTextChange = useCallback((field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    onFieldChange(field, e.target.value);
+  }, [onFieldChange]);
+
+  // Memoize error messages to prevent unnecessary re-renders
+  const nameError = useMemo(() => errors?.coAgentName, [errors?.coAgentName]);
+  const companyError = useMemo(() => errors?.coAgentCompany, [errors?.coAgentCompany]);
 
   return (
     <Card className="mt-4">
@@ -41,12 +56,12 @@ const CoBrokingForm: React.FC<CoBrokingFormProps> = ({
           <Input
             id="agentName"
             value={coBroking?.agentName || ''}
-            onChange={(e) => onFieldChange('agentName', e.target.value)}
+            onChange={handleTextChange('agentName')}
             placeholder="Enter co-broker agent name"
-            className={errors?.coAgentName ? 'border-destructive' : ''}
+            className={nameError ? 'border-destructive' : ''}
           />
-          {errors?.coAgentName && (
-            <p className="text-sm text-destructive mt-1">{errors.coAgentName}</p>
+          {nameError && (
+            <p className="text-sm text-destructive mt-1">{nameError}</p>
           )}
         </div>
         
@@ -57,12 +72,12 @@ const CoBrokingForm: React.FC<CoBrokingFormProps> = ({
           <Input
             id="agentCompany"
             value={coBroking?.agentCompany || ''}
-            onChange={(e) => onFieldChange('agentCompany', e.target.value)}
+            onChange={handleTextChange('agentCompany')}
             placeholder="Enter co-broker company name"
-            className={errors?.coAgentCompany ? 'border-destructive' : ''}
+            className={companyError ? 'border-destructive' : ''}
           />
-          {errors?.coAgentCompany && (
-            <p className="text-sm text-destructive mt-1">{errors.coAgentCompany}</p>
+          {companyError && (
+            <p className="text-sm text-destructive mt-1">{companyError}</p>
           )}
         </div>
         
@@ -73,7 +88,7 @@ const CoBrokingForm: React.FC<CoBrokingFormProps> = ({
           <Input
             id="agentContact"
             value={coBroking?.agentContact || ''}
-            onChange={(e) => onFieldChange('agentContact', e.target.value)}
+            onChange={handleTextChange('agentContact')}
             placeholder="Enter co-broker contact information"
           />
         </div>
@@ -100,4 +115,5 @@ const CoBrokingForm: React.FC<CoBrokingFormProps> = ({
   );
 };
 
-export default CoBrokingForm;
+// Use React.memo to prevent unnecessary re-renders
+export default React.memo(CoBrokingForm);

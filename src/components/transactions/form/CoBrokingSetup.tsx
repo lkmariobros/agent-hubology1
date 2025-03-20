@@ -1,10 +1,25 @@
 
-import React, { useEffect } from 'react';
+import React, { useCallback, useMemo, useEffect } from 'react';
 import { useTransactionForm } from '@/context/TransactionForm';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { ErrorBoundary } from 'react-error-boundary';
 import CoBrokingForm from './co-broking/CoBrokingForm';
 import CoBrokingDisabledCard from './co-broking/CoBrokingDisabledCard';
+
+// Fallback component if there's an error in the co-broking section
+const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error, resetErrorBoundary: () => void }) => (
+  <div className="p-4 border border-destructive rounded-md">
+    <h3 className="text-lg font-semibold text-destructive">Something went wrong in the co-broking section</h3>
+    <p className="text-sm text-muted-foreground mb-4">{error.message}</p>
+    <button 
+      onClick={resetErrorBoundary}
+      className="px-4 py-2 bg-primary text-white rounded-md"
+    >
+      Reset
+    </button>
+  </div>
+);
 
 const CoBrokingSetup: React.FC = () => {
   const { state, updateFormData } = useTransactionForm();
@@ -26,33 +41,49 @@ const CoBrokingSetup: React.FC = () => {
     }
   }, [formData.coBroking, updateFormData]);
   
-  // Safely access coBroking data with fallbacks to prevent null/undefined errors
-  const coBroking = formData.coBroking || {
+  // Safely access coBroking data with memoization to prevent unnecessary recalculations
+  const coBroking = useMemo(() => formData.coBroking || {
     enabled: false,
     agentName: '',
     agentCompany: '',
     agentContact: '',
     commissionSplit: 50,
     credentialsVerified: false
-  };
+  }, [formData.coBroking]);
   
-  const handleCoBrokingToggle = (enabled: boolean) => {
+  // Memoized callbacks to prevent unnecessary re-renders
+  const handleCoBrokingToggle = useCallback((enabled: boolean) => {
     updateFormData({
       coBroking: {
         ...coBroking,
         enabled
       }
     });
-  };
+  }, [coBroking, updateFormData]);
   
-  const handleCoBrokingChange = (field: string, value: string | number | boolean) => {
+  const handleCoBrokingChange = useCallback((field: string, value: string | number | boolean) => {
     updateFormData({
       coBroking: {
         ...coBroking,
         [field]: value
       }
     });
-  };
+  }, [coBroking, updateFormData]);
+
+  // Reset error boundary when toggling co-broking
+  const handleErrorReset = useCallback(() => {
+    // Reset to default state
+    updateFormData({
+      coBroking: {
+        enabled: false,
+        agentName: '',
+        agentCompany: '',
+        agentContact: '',
+        commissionSplit: 50,
+        credentialsVerified: false
+      }
+    });
+  }, [updateFormData]);
   
   return (
     <div className="space-y-6">
@@ -72,15 +103,17 @@ const CoBrokingSetup: React.FC = () => {
         </Label>
       </div>
       
-      {coBroking?.enabled ? (
-        <CoBrokingForm 
-          coBroking={coBroking}
-          errors={errors}
-          onFieldChange={handleCoBrokingChange}
-        />
-      ) : (
-        <CoBrokingDisabledCard />
-      )}
+      <ErrorBoundary FallbackComponent={ErrorFallback} onReset={handleErrorReset}>
+        {coBroking?.enabled ? (
+          <CoBrokingForm 
+            coBroking={coBroking}
+            errors={errors}
+            onFieldChange={handleCoBrokingChange}
+          />
+        ) : (
+          <CoBrokingDisabledCard />
+        )}
+      </ErrorBoundary>
     </div>
   );
 };

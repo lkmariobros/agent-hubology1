@@ -14,4 +14,5 @@ const CoBrokingDisabledCard: React.FC = () => {
   );
 };
 
-export default CoBrokingDisabledCard;
+// Use React.memo to prevent unnecessary re-renders for this static component
+export default React.memo(CoBrokingDisabledCard);
