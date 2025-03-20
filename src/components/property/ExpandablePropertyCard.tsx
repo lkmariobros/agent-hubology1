@@ -1,12 +1,11 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { 
   ChevronDown,
   ChevronUp,
-  Edit,
   Heart,
   Share2,
   MoreVertical,
@@ -60,15 +59,17 @@ export function ExpandablePropertyCard({
     if (onFavorite) onFavorite(property.id);
   };
 
-  const statusColor = {
-    available: 'bg-green-500/20 text-green-500 hover:bg-green-500/30',
-    pending: 'bg-amber-500/20 text-amber-500 hover:bg-amber-500/30',
-    sold: 'bg-red-500/20 text-red-500 hover:bg-red-500/30'
+  const statusColors = {
+    available: 'bg-green-500 text-black',
+    pending: 'bg-amber-500 text-black',
+    sold: 'bg-red-500 text-white'
   };
+
+  const iconButtonClass = "h-10 w-10 rounded-full bg-gray-800 hover:bg-gray-700";
 
   return (
     <Card className={cn(
-      "overflow-hidden transition-all duration-300 hover:shadow-md border-neutral-800 bg-black", 
+      "overflow-hidden transition-all duration-300 hover:shadow-lg border-0 bg-neutral-900", 
       isOpen ? "scale-[1.02]" : "",
       className
     )}>
@@ -80,7 +81,7 @@ export function ExpandablePropertyCard({
         <div className="relative">
           <AspectRatio ratio={4/3}>
             <div 
-              className="w-full h-full relative overflow-hidden"
+              className="w-full h-full relative overflow-hidden bg-neutral-800"
               onMouseMove={handleMouseMove}
             >
               {property.images && property.images.length > 0 ? (
@@ -90,20 +91,20 @@ export function ExpandablePropertyCard({
                   className="w-full h-full object-cover transition-opacity duration-300"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center bg-neutral-900">
+                <div className="w-full h-full flex items-center justify-center bg-neutral-800">
                   {getPropertyTypeIcon(property.type)}
                 </div>
               )}
               
               {/* Image indicator dots */}
               {property.images && property.images.length > 1 && (
-                <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1">
+                <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">
                   {property.images.map((_, idx) => (
                     <div 
                       key={idx} 
                       className={cn(
-                        "w-1.5 h-1.5 rounded-full",
-                        idx === currentImageIndex ? "bg-white" : "bg-white/50"
+                        "w-2 h-2 rounded-full",
+                        idx === currentImageIndex ? "bg-white" : "bg-white/40"
                       )} 
                     />
                   ))}
@@ -114,48 +115,55 @@ export function ExpandablePropertyCard({
           
           <div className="absolute top-3 left-3 right-3 flex justify-between items-start z-10">
             <Badge 
-              variant="outline"
-              className={`${statusColor[property.status as keyof typeof statusColor]} capitalize text-xs`}
+              className={cn(
+                "px-3 py-1 rounded-full font-medium capitalize border-0",
+                statusColors[property.status as keyof typeof statusColors] || "bg-neutral-500"
+              )}
             >
               {property.status}
             </Badge>
             
-            <div className="flex gap-1">
+            <div className="flex gap-2">
               <Button 
                 size="icon" 
-                variant="outline" 
-                className="h-8 w-8 rounded-full bg-black/50 backdrop-blur-sm hover:bg-black/70 border-neutral-700"
+                variant="ghost" 
+                className={iconButtonClass}
                 onClick={handleFavoriteClick}
               >
                 <Heart 
-                  className={`h-4 w-4 ${isFavorited ? 'fill-red-500 text-red-500' : 'text-neutral-300'}`} 
+                  className={cn(
+                    "h-5 w-5", 
+                    isFavorited ? "fill-red-500 text-red-500" : "text-white"
+                  )} 
                 />
               </Button>
               
               <Button 
                 size="icon" 
-                variant="outline" 
-                className="h-8 w-8 rounded-full bg-black/50 backdrop-blur-sm hover:bg-black/70 border-neutral-700"
+                variant="ghost" 
+                className={iconButtonClass}
                 onClick={() => onShare?.(property.id)}
               >
-                <Share2 className="h-4 w-4 text-neutral-300" />
+                <Share2 className="h-5 w-5 text-white" />
               </Button>
               
               <Button 
                 size="icon" 
-                variant="outline" 
-                className="h-8 w-8 rounded-full bg-black/50 backdrop-blur-sm hover:bg-black/70 border-neutral-700"
+                variant="ghost" 
+                className={iconButtonClass}
               >
-                <MoreVertical className="h-4 w-4 text-neutral-300" />
+                <MoreVertical className="h-5 w-5 text-white" />
               </Button>
             </div>
           </div>
         </div>
         
-        <div className="p-3">
+        <div className="p-4">
           <div className="flex justify-between items-start">
             <div>
-              <h3 className="font-medium text-white truncate">{property.title}</h3>
+              <h3 className="font-semibold text-white text-base tracking-tight truncate">
+                {property.title}
+              </h3>
               <p className="text-sm text-neutral-400">{property.subtype}</p>
             </div>
             <CollapsibleTrigger asChild>
@@ -173,15 +181,15 @@ export function ExpandablePropertyCard({
             </CollapsibleTrigger>
           </div>
           
-          <CollapsibleContent className="space-y-3 pt-3">
+          <CollapsibleContent className="space-y-4 pt-4">
             <div className="grid grid-cols-2 gap-3 border-t border-b border-neutral-800 py-3">
               <div>
-                <p className="text-xs text-neutral-400">Price</p>
+                <p className="text-xs text-neutral-500">Price</p>
                 <p className="text-lg font-semibold text-white">{formatPrice(property.price)}</p>
               </div>
               <div>
-                <p className="text-xs text-neutral-400">Status</p>
-                <div className="flex items-center gap-1">
+                <p className="text-xs text-neutral-500">Status</p>
+                <div className="flex items-center gap-1.5">
                   <span className={cn(
                     "inline-block w-2 h-2 rounded-full",
                     property.status === 'available' ? 'bg-green-500' : 
@@ -194,22 +202,22 @@ export function ExpandablePropertyCard({
             
             <div className="flex justify-between">
               {property.bedrooms && (
-                <div className="flex items-center gap-1">
-                  <Bed className="h-4 w-4 text-neutral-400" />
-                  <span className="text-sm">{property.bedrooms} bd</span>
+                <div className="flex items-center gap-1.5">
+                  <Bed className="h-4 w-4 text-neutral-500" />
+                  <span className="text-sm">{property.bedrooms} beds</span>
                 </div>
               )}
               
               {property.bathrooms && (
-                <div className="flex items-center gap-1">
-                  <Bath className="h-4 w-4 text-neutral-400" />
-                  <span className="text-sm">{property.bathrooms} ba</span>
+                <div className="flex items-center gap-1.5">
+                  <Bath className="h-4 w-4 text-neutral-500" />
+                  <span className="text-sm">{property.bathrooms} baths</span>
                 </div>
               )}
               
               {property.area && (
-                <div className="flex items-center gap-1">
-                  <Square className="h-4 w-4 text-neutral-400" />
+                <div className="flex items-center gap-1.5">
+                  <Square className="h-4 w-4 text-neutral-500" />
                   <span className="text-sm">{property.area} ft²</span>
                 </div>
               )}
@@ -219,7 +227,7 @@ export function ExpandablePropertyCard({
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="border-neutral-700 text-neutral-300 hover:text-white flex-1"
+                className="border-neutral-700 text-neutral-300 hover:text-white flex-1 rounded-full"
               >
                 <LineChart className="h-4 w-4 mr-1" />
                 <span>Sales</span>
@@ -228,7 +236,7 @@ export function ExpandablePropertyCard({
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="border-neutral-700 text-neutral-300 hover:text-white flex-1"
+                className="border-neutral-700 text-neutral-300 hover:text-white flex-1 rounded-full"
               >
                 <span>Views</span>
               </Button>
@@ -236,7 +244,7 @@ export function ExpandablePropertyCard({
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="border-neutral-700 text-neutral-300 hover:text-white flex-1"
+                className="border-neutral-700 text-neutral-300 hover:text-white flex-1 rounded-full"
               >
                 <span>Stock</span>
               </Button>
@@ -244,7 +252,7 @@ export function ExpandablePropertyCard({
             
             <Button 
               variant="default" 
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+              className="w-full bg-orange-500 hover:bg-orange-600 text-white rounded-full"
               onClick={() => onEdit?.(property.id)}
             >
               <Edit2 className="h-4 w-4 mr-2" />

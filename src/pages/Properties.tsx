@@ -21,7 +21,7 @@ const Properties = () => {
   
   const handleViewChange = (newView: 'grid' | 'map') => {
     // Convert the incoming view type to our internal ViewMode
-    const mode: ViewMode = newView === 'grid' ? 'list' : 'map';
+    const mode: ViewMode = newView === 'grid' ? 'grid' : 'map';
     setViewMode(mode);
   };
   
@@ -32,12 +32,12 @@ const Properties = () => {
 
   return (
     <MainLayout>
-      <div className="p-6 space-y-6 max-w-[1200px] mx-auto">
+      <div className="p-6 space-y-6 max-w-[1440px] mx-auto">
         <div className="flex justify-between items-center">
           <h1 className="text-xl font-normal tracking-tight">Properties</h1>
           <Button 
             size="sm"
-            className="gap-2" 
+            className="gap-2 rounded-full bg-orange-500 hover:bg-orange-600" 
             onClick={() => navigate('/properties/new')}
           >
             <Plus size={16} />
@@ -52,13 +52,13 @@ const Properties = () => {
         />
         
         {viewMode === 'list' && (
-          <Card className="overflow-hidden">
+          <Card className="overflow-hidden border-0 bg-neutral-900">
             <PropertyTable properties={properties} />
           </Card>
         )}
         {viewMode === 'grid' && <PropertyGrid properties={properties} />}
         {viewMode === 'map' && (
-          <Card className="overflow-hidden">
+          <Card className="overflow-hidden border-0 bg-neutral-900">
             <PropertyMap properties={properties} />
           </Card>
         )}
