@@ -24,9 +24,9 @@ export function PropertyCardHeader({
   onMouseMove
 }: PropertyCardHeaderProps) {
   const statusColors = {
-    available: 'bg-green-500/20 text-green-500',
-    pending: 'bg-amber-500/20 text-amber-500',
-    sold: 'bg-red-500/20 text-red-500'
+    available: 'bg-green-500/80 text-white',
+    pending: 'bg-amber-500/80 text-white',
+    sold: 'bg-red-500/80 text-white'
   };
 
   return (
@@ -42,69 +42,72 @@ export function PropertyCardHeader({
         />
       ) : (
         <div className="w-full h-full flex items-center justify-center bg-neutral-800">
-          {/* Placeholder or icon */}
+          {/* Placeholder when no image is available */}
+          <span className="text-neutral-500">No image</span>
         </div>
       )}
       
-      {/* Image indicator dots */}
+      {/* Status badge - top left */}
+      <div className="absolute top-3 left-3 z-10">
+        <Badge 
+          variant="outline"
+          className={cn(
+            "capitalize border-0 px-3 py-1 text-xs font-normal rounded-full",
+            statusColors[property.status as keyof typeof statusColors] || "bg-neutral-500/80"
+          )}
+        >
+          {property.status}
+        </Badge>
+      </div>
+      
+      {/* Action buttons - top right */}
+      <div className="absolute top-3 right-3 flex gap-1.5 z-10">
+        <Button 
+          size="icon" 
+          variant="ghost" 
+          className="h-8 w-8 rounded-full bg-neutral-800/60 backdrop-blur-sm hover:bg-neutral-800/80"
+          onClick={onFavoriteClick}
+        >
+          <Heart 
+            className={cn(
+              "h-4 w-4", 
+              isFavorited ? "fill-red-500 text-red-500" : "text-white"
+            )} 
+          />
+        </Button>
+        
+        <Button 
+          size="icon" 
+          variant="ghost" 
+          className="h-8 w-8 rounded-full bg-neutral-800/60 backdrop-blur-sm hover:bg-neutral-800/80"
+          onClick={() => onShare?.(property.id)}
+        >
+          <Share2 className="h-4 w-4 text-white" />
+        </Button>
+        
+        <Button 
+          size="icon" 
+          variant="ghost" 
+          className="h-8 w-8 rounded-full bg-neutral-800/60 backdrop-blur-sm hover:bg-neutral-800/80"
+        >
+          <MoreVertical className="h-4 w-4 text-white" />
+        </Button>
+      </div>
+      
+      {/* Image gallery indicator dots */}
       {property.images && property.images.length > 1 && (
-        <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">
+        <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 z-10">
           {property.images.map((_, idx) => (
             <div 
               key={idx} 
               className={cn(
-                "w-1.5 h-1.5 rounded-full",
+                "w-2 h-2 rounded-full",
                 idx === currentImageIndex ? "bg-white" : "bg-white/40"
               )} 
             />
           ))}
         </div>
       )}
-
-      <div className="absolute top-3 left-3 right-3 flex justify-between items-start z-10">
-        <Badge 
-          variant="outline"
-          className={cn(
-            "rounded-md capitalize border-0 px-2 py-1 text-xs font-normal",
-            statusColors[property.status as keyof typeof statusColors] || "bg-neutral-500/20"
-          )}
-        >
-          {property.status}
-        </Badge>
-        
-        <div className="flex gap-1.5">
-          <Button 
-            size="icon" 
-            variant="ghost" 
-            className="h-7 w-7 rounded-full bg-black/30 backdrop-blur-sm hover:bg-black/50"
-            onClick={onFavoriteClick}
-          >
-            <Heart 
-              className={cn(
-                "h-3.5 w-3.5", 
-                isFavorited ? "fill-red-500 text-red-500" : "text-white"
-              )} 
-            />
-          </Button>
-          
-          <Button 
-            size="icon" 
-            variant="ghost" 
-            className="h-7 w-7 rounded-full bg-black/30 backdrop-blur-sm hover:bg-black/50"
-            onClick={() => onShare?.(property.id)}
-          >
-            <Share2 className="h-3.5 w-3.5 text-white" />
-          </Button>
-          
-          <Button 
-            size="icon" 
-            variant="ghost" 
-            className="h-7 w-7 rounded-full bg-black/30 backdrop-blur-sm hover:bg-black/50"
-          >
-            <MoreVertical className="h-3.5 w-3.5 text-white" />
-          </Button>
-        </div>
-      </div>
     </div>
   );
 }

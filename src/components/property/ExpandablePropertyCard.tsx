@@ -3,8 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { Card } from "@/components/ui/card";
 import { Property } from '@/types';
 import { cn } from '@/lib/utils';
-import { getPropertyTypeIcon } from '@/utils/propertyUtils';
-import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
 import { PropertyCardHeader } from './PropertyCardHeader';
 import { PropertyCardBasicInfo } from './PropertyCardBasicInfo';
@@ -77,7 +75,8 @@ export function ExpandablePropertyCard({
           isOpen ? "rounded-t-xl" : "rounded-xl",
           className
         )}>
-          <AspectRatio ratio={4/3}>
+          {/* Image section with fixed aspect ratio */}
+          <div className="aspect-[4/3] w-full overflow-hidden">
             <PropertyCardHeader
               property={property}
               currentImageIndex={currentImageIndex}
@@ -86,8 +85,9 @@ export function ExpandablePropertyCard({
               onShare={onShare}
               onMouseMove={handleMouseMove}
             />
-          </AspectRatio>
+          </div>
           
+          {/* Basic info section with fixed height */}
           <PropertyCardBasicInfo 
             property={property} 
             isOpen={isOpen}
