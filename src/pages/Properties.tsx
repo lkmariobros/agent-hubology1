@@ -153,7 +153,7 @@ const Properties = () => {
             <ToggleGroup type="single" value={viewMode} className="mr-2">
               
               <ToggleGroupItem value="table" onClick={() => handleViewChange('table')} aria-label="Table view">
-                <List className="h-4 w-4" />
+                
               </ToggleGroupItem>
             </ToggleGroup>
           </div>
