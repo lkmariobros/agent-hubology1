@@ -44,14 +44,10 @@ const TransactionFormSteps: React.FC = () => {
   };
   
   const handleNextStep = () => {
-    // First validate the current step
-    const isValid = validateCurrentStep();
-    
-    // If validation passes, proceed to the next step
-    if (isValid) {
+    // Validate the current step before proceeding
+    if (validateCurrentStep()) {
       nextStep();
     } else {
-      // Show an error toast to alert the user
       toast.error('Please fix the validation errors before proceeding');
     }
   };

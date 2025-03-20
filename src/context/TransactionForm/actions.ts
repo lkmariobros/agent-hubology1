@@ -40,86 +40,6 @@ export const useTransactionFormActions = () => {
     dispatch({ type: 'REMOVE_DOCUMENT', payload: index });
   }, []);
 
-  // Navigation functions
-  const nextStep = useCallback(() => {
-    // Always validate the current step before moving to the next
-    const isValid = validateCurrentStep();
-    if (isValid) {
-      dispatch({ type: 'NEXT_STEP' });
-      return true;
-    }
-    return false;
-  }, [state.currentStep, state.formData]);
-
-  const prevStep = useCallback(() => {
-    dispatch({ type: 'PREV_STEP' });
-  }, []);
-
-  const goToStep = useCallback((step: number) => {
-    dispatch({ type: 'GO_TO_STEP', payload: step });
-  }, []);
-
-  // Reset form
-  const resetForm = useCallback(() => {
-    dispatch({ type: 'RESET_FORM' });
-  }, []);
-
-  // Save form as draft
-  const saveForm = useCallback(async () => {
-    try {
-      await saveFormAsDraft(state);
-      dispatch({ type: 'FORM_SAVED', payload: new Date() });
-      return Promise.resolve();
-    } catch (error) {
-      console.error('Error saving form:', error);
-      return Promise.reject(error);
-    }
-  }, [state]);
-
-  // Submit form
-  const submitForm = useCallback(async () => {
-    if (!validateCurrentStep()) {
-      return Promise.reject(new Error('Please fix validation errors before submitting'));
-    }
-    
-    dispatch({ type: 'SUBMITTING', payload: true });
-    
-    try {
-      await submitTransactionForm(state);
-      dispatch({ type: 'SUBMITTING', payload: false });
-      resetForm();
-      return Promise.resolve();
-    } catch (error) {
-      dispatch({ type: 'SUBMITTING', payload: false });
-      return Promise.reject(error);
-    }
-  }, [state, resetForm]);
-
-  // Calculate commission breakdown
-  const calculateCommission = useCallback((): CommissionBreakdown => {
-    const { transactionValue, commissionRate, coBroking } = state.formData;
-    
-    const totalCommission = (transactionValue * commissionRate) / 100;
-    const agencyShare = totalCommission * 0.3; // 30% to agency
-    let agentShare = totalCommission * 0.7; // 70% to agent
-    let coAgentShare = 0;
-    
-    // Calculate co-broker share if co-broking is enabled
-    if (coBroking?.enabled) {
-      coAgentShare = (agentShare * (coBroking.commissionSplit || 0)) / 100;
-      agentShare = agentShare - coAgentShare;
-    }
-    
-    return {
-      transactionValue: transactionValue || 0,
-      commissionRate: commissionRate || 0,
-      totalCommission,
-      agencyShare,
-      agentShare,
-      coAgentShare: coBroking?.enabled ? coAgentShare : undefined,
-    };
-  }, [state.formData]);
-
   // Validate current step
   const validateCurrentStep = useCallback((): boolean => {
     const errors: Record<string, string> = {};
@@ -127,7 +47,7 @@ export const useTransactionFormActions = () => {
     
     switch (currentStep) {
       case 0: // Transaction Type
-        // No validation needed for transaction type
+        // No validation needed for transaction type selection
         break;
         
       case 1: // Property Details
@@ -204,6 +124,86 @@ export const useTransactionFormActions = () => {
     // Return true if there are no errors
     return Object.keys(errors).length === 0;
   }, [state, dispatch]);
+
+  // Navigation functions
+  const nextStep = useCallback(() => {
+    // Always validate the current step before moving to the next
+    const isValid = validateCurrentStep();
+    if (isValid) {
+      dispatch({ type: 'NEXT_STEP' });
+      return true;
+    }
+    return false;
+  }, [validateCurrentStep]);
+
+  const prevStep = useCallback(() => {
+    dispatch({ type: 'PREV_STEP' });
+  }, []);
+
+  const goToStep = useCallback((step: number) => {
+    dispatch({ type: 'GO_TO_STEP', payload: step });
+  }, []);
+
+  // Reset form
+  const resetForm = useCallback(() => {
+    dispatch({ type: 'RESET_FORM' });
+  }, []);
+
+  // Save form as draft
+  const saveForm = useCallback(async () => {
+    try {
+      await saveFormAsDraft(state);
+      dispatch({ type: 'FORM_SAVED', payload: new Date() });
+      return Promise.resolve();
+    } catch (error) {
+      console.error('Error saving form:', error);
+      return Promise.reject(error);
+    }
+  }, [state]);
+
+  // Submit form
+  const submitForm = useCallback(async () => {
+    if (!validateCurrentStep()) {
+      return Promise.reject(new Error('Please fix validation errors before submitting'));
+    }
+    
+    dispatch({ type: 'SUBMITTING', payload: true });
+    
+    try {
+      await submitTransactionForm(state);
+      dispatch({ type: 'SUBMITTING', payload: false });
+      resetForm();
+      return Promise.resolve();
+    } catch (error) {
+      dispatch({ type: 'SUBMITTING', payload: false });
+      return Promise.reject(error);
+    }
+  }, [state, resetForm, validateCurrentStep]);
+
+  // Calculate commission breakdown
+  const calculateCommission = useCallback((): CommissionBreakdown => {
+    const { transactionValue, commissionRate, coBroking } = state.formData;
+    
+    const totalCommission = (transactionValue * commissionRate) / 100;
+    const agencyShare = totalCommission * 0.3; // 30% to agency
+    let agentShare = totalCommission * 0.7; // 70% to agent
+    let coAgentShare = 0;
+    
+    // Calculate co-broker share if co-broking is enabled
+    if (coBroking?.enabled) {
+      coAgentShare = (agentShare * (coBroking.commissionSplit || 0)) / 100;
+      agentShare = agentShare - coAgentShare;
+    }
+    
+    return {
+      transactionValue: transactionValue || 0,
+      commissionRate: commissionRate || 0,
+      totalCommission,
+      agencyShare,
+      agentShare,
+      coAgentShare: coBroking?.enabled ? coAgentShare : undefined,
+    };
+  }, [state.formData]);
 
   return {
     state,
