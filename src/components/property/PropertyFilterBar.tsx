@@ -158,39 +158,81 @@ export function PropertyFilterBar({
 
   return (
     <div className="w-full">
-      <form onSubmit={handleSearch} className="relative w-full">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
-        <Input
-          placeholder="Search properties..."
-          className="pl-11 pr-10 py-2 h-10 bg-neutral-800 border-none rounded-lg w-full"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-        {searchQuery && (
-          <button 
-            type="button" 
-            className="absolute right-3 top-1/2 -translate-y-1/2"
-            onClick={() => {
-              setSearchQuery('');
-              setFilters({...filters, search: undefined});
-              onFilter({...filters, search: undefined});
-            }}
-          >
-            <X className="h-4 w-4 text-neutral-400" />
-          </button>
-        )}
-      </form>
-      
-      {/* Mobile view filters - hidden on desktop */}
-      <div className="lg:hidden flex gap-2 mt-4">
-        <Drawer open={isOpen} onOpenChange={setIsOpen}>
-          <DrawerTrigger asChild>
-            <Button variant="outline" className="gap-2">
-              <SlidersHorizontal className="h-4 w-4" />
-              Filters
-            </Button>
-          </DrawerTrigger>
-          <DrawerContent className="max-h-[90vh] overflow-y-auto">
+      <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+        <form onSubmit={handleSearch} className="relative w-full lg:max-w-md">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
+          <Input
+            placeholder="Search properties..."
+            className="pl-11 pr-10 py-2 h-10 bg-neutral-800 border-none rounded-lg w-full"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          {searchQuery && (
+            <button 
+              type="button" 
+              className="absolute right-3 top-1/2 -translate-y-1/2"
+              onClick={() => {
+                setSearchQuery('');
+                setFilters({...filters, search: undefined});
+                onFilter({...filters, search: undefined});
+              }}
+            >
+              <X className="h-4 w-4 text-neutral-400" />
+            </button>
+          )}
+        </form>
+        
+        {/* View toggle - visible on both mobile and desktop */}
+        <div className="flex items-center">
+          <ToggleGroup type="single" value={currentView} className="mr-4">
+            <ToggleGroupItem 
+              value="grid" 
+              onClick={() => onViewChange('grid')}
+              aria-label="Grid view"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-4 w-4"
+              >
+                <rect width="7" height="7" x="3" y="3" rx="1" />
+                <rect width="7" height="7" x="14" y="3" rx="1" />
+                <rect width="7" height="7" x="14" y="14" rx="1" />
+                <rect width="7" height="7" x="3" y="14" rx="1" />
+              </svg>
+            </ToggleGroupItem>
+            <ToggleGroupItem 
+              value="table" 
+              onClick={() => onViewChange('table')}
+              aria-label="Table view"
+            >
+              <List className="h-4 w-4" />
+            </ToggleGroupItem>
+            <ToggleGroupItem 
+              value="map" 
+              onClick={() => onViewChange('map')}
+              aria-label="Map view"
+            >
+              <Map className="h-4 w-4" />
+            </ToggleGroupItem>
+          </ToggleGroup>
+        </div>
+        
+        {/* Mobile filters button */}
+        <div className="flex items-center">
+          <Drawer open={isOpen} onOpenChange={setIsOpen}>
+            <DrawerTrigger asChild>
+              <Button variant="outline" className="gap-2">
+                <SlidersHorizontal className="h-4 w-4" />
+                Filters
+              </Button>
+            </DrawerTrigger>
+            <DrawerContent className="max-h-[90vh] overflow-y-auto">
               <DrawerHeader>
                 <DrawerTitle>Filter Properties</DrawerTitle>
                 <DrawerDescription>
@@ -314,45 +356,8 @@ export function PropertyFilterBar({
                 </DrawerClose>
               </DrawerFooter>
             </DrawerContent>
-        </Drawer>
-        
-        <ToggleGroup type="single" value={currentView} className="ml-auto">
-          <ToggleGroupItem 
-            value="grid" 
-            onClick={() => onViewChange('grid')}
-            aria-label="Grid view"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="h-4 w-4"
-            >
-              <rect width="7" height="7" x="3" y="3" rx="1" />
-              <rect width="7" height="7" x="14" y="3" rx="1" />
-              <rect width="7" height="7" x="14" y="14" rx="1" />
-              <rect width="7" height="7" x="3" y="14" rx="1" />
-            </svg>
-          </ToggleGroupItem>
-          <ToggleGroupItem 
-            value="table" 
-            onClick={() => onViewChange('table')}
-            aria-label="Table view"
-          >
-            <List className="h-4 w-4" />
-          </ToggleGroupItem>
-          <ToggleGroupItem 
-            value="map" 
-            onClick={() => onViewChange('map')}
-            aria-label="Map view"
-          >
-            <Map className="h-4 w-4" />
-          </ToggleGroupItem>
-        </ToggleGroup>
+          </Drawer>
+        </div>
       </div>
     </div>
   );

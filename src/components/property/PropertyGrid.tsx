@@ -82,7 +82,7 @@ export const PropertyGrid: React.FC<PropertyGridProps> = ({ properties }) => {
       {columns.map((column, columnIndex) => (
         <div key={columnIndex} className="flex flex-col gap-6">
           {column.map((property) => (
-            <div key={property.id} className="w-full">
+            <div key={property.id}>
               <ExpandablePropertyCard
                 property={property}
                 onFavorite={handleFavoriteProperty}
