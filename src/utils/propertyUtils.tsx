@@ -1,3 +1,4 @@
+
 import { Building2, Store, Factory, Map } from 'lucide-react';
 import React from 'react';
 
@@ -17,7 +18,6 @@ export const getPropertyTypeIcon = (type: string) => {
 };
 
 export const formatPrice = (price: number) => {
-  // Format with only one $ symbol
   return price.toLocaleString(undefined, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
