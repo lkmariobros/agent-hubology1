@@ -9,11 +9,15 @@ import { formatPrice } from '@/utils/propertyUtils';
 interface PropertyCardBasicInfoProps {
   property: Property;
   isOpen: boolean;
+  onCardClick?: () => void;
 }
 
-export function PropertyCardBasicInfo({ property, isOpen }: PropertyCardBasicInfoProps) {
+export function PropertyCardBasicInfo({ property, isOpen, onCardClick }: PropertyCardBasicInfoProps) {
   return (
-    <div className="px-4 pb-3 flex flex-col justify-between">
+    <div 
+      className="px-4 pb-3 flex flex-col justify-between cursor-pointer hover:bg-neutral-900/20"
+      onClick={onCardClick}
+    >
       <div className="flex justify-between items-start">
         <div className="flex-1 min-w-0 py-2.5">
           <div className="flex justify-between items-center">
@@ -25,6 +29,11 @@ export function PropertyCardBasicInfo({ property, isOpen }: PropertyCardBasicInf
                 variant="ghost" 
                 size="sm" 
                 className="h-6 w-6 p-0 ml-2 rounded-full hover:bg-neutral-800/50 shrink-0"
+                onClick={(e) => {
+                  // Prevent the click from bubbling to the parent div
+                  // which would toggle the expanded state twice
+                  e.stopPropagation();
+                }}
               >
                 {isOpen ? (
                   <ChevronUp className="h-3.5 w-3.5 text-neutral-400" />

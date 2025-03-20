@@ -93,9 +93,8 @@ export function ExpandablePropertyCard({
     if (onFavorite) onFavorite(property.id);
   };
 
-  const handleCardClick = () => {
-    handleOpenChange(!isOpen);
-  };
+  // Modified to exclude this function as we don't want image area to trigger expansion
+  // Instead, the clickable area will be in PropertyCardBasicInfo component only
 
   return (
     <div className="w-full" ref={cardRef}>
@@ -107,10 +106,9 @@ export function ExpandablePropertyCard({
         <Card 
           className={cn(
             "transition-all duration-300 border-0 bg-neutral-950 overflow-hidden shadow-lg", 
-            "rounded-xl hover:bg-neutral-900/30 cursor-pointer", // Added hover effect and cursor
+            "rounded-xl hover:bg-neutral-900/30", // Removed cursor-pointer as we don't want the whole card clickable
             className
           )}
-          onClick={handleCardClick}
         >
           {/* Image section with 4:3 aspect ratio */}
           <div 
@@ -134,10 +132,11 @@ export function ExpandablePropertyCard({
             />
           </div>
           
-          {/* Basic info section */}
+          {/* Basic info section - This will be clickable for expansion */}
           <PropertyCardBasicInfo 
             property={property} 
             isOpen={isOpen}
+            onCardClick={() => handleOpenChange(!isOpen)}
           />
           
           {/* Expandable content */}
