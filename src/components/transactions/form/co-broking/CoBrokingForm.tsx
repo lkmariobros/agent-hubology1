@@ -20,13 +20,13 @@ const CoBrokingForm: React.FC<CoBrokingFormProps> = ({
 }) => {
   // Local state to reduce parent re-renders
   const [isCredentialsVerified, setIsCredentialsVerified] = useState(
-    coBroking?.credentialsVerified || false
+    coBroking.credentialsVerified || false
   );
 
   // Update local state when props change
   useEffect(() => {
-    setIsCredentialsVerified(coBroking?.credentialsVerified || false);
-  }, [coBroking?.credentialsVerified]);
+    setIsCredentialsVerified(coBroking.credentialsVerified || false);
+  }, [coBroking.credentialsVerified]);
 
   // Memoized callbacks to prevent unnecessary re-renders
   const handleCredentialsVerified = useCallback((checked: boolean) => {

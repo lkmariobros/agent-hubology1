@@ -17,7 +17,7 @@ export const getInitialTransactionData = (transactionType: TransactionType): Tra
       agentCompany: '',
       agentContact: '',
       commissionSplit: 50,
-      credentialsVerified: false,
+      credentialsVerified: false, // Make sure this is always initialized
     },
   };
 

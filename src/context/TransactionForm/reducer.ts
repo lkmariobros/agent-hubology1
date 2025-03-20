@@ -30,13 +30,14 @@ export const transactionFormReducer = (
     case 'UPDATE_FORM_DATA':
       // Handle coBroking field updates properly
       if (action.payload.coBroking) {
-        // Make sure the coBroking object is initialized
+        // Make sure the coBroking object is initialized with credentialsVerified
         const currentCoBroking = state.formData.coBroking || {
           enabled: false,
           agentName: '',
           agentCompany: '',
           agentContact: '',
-          commissionSplit: 50
+          commissionSplit: 50,
+          credentialsVerified: false
         };
         
         return {
