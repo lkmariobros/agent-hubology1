@@ -42,6 +42,7 @@ export interface CoBrokingInfo {
   agentCompany: string;
   agentContact: string;
   commissionSplit: number; // Percentage of the total commission
+  credentialsVerified?: boolean; // Add the missing property
 }
 
 // Document
@@ -137,6 +138,7 @@ export const coBrokingSchema = z.object({
   agentCompany: z.string().min(1, "Agent company is required").optional(),
   agentContact: z.string().optional(),
   commissionSplit: z.number().min(1).max(99).optional(),
+  credentialsVerified: z.boolean().optional(),
 });
 
 export const transactionSchema = z.object({

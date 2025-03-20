@@ -29,7 +29,8 @@ const CoBrokingSetup: React.FC = () => {
           agentName: '',
           agentCompany: '',
           agentContact: '',
-          commissionSplit: 50
+          commissionSplit: 50,
+          credentialsVerified: false
         }
       });
     }
@@ -41,7 +42,8 @@ const CoBrokingSetup: React.FC = () => {
     agentName: '',
     agentCompany: '',
     agentContact: '',
-    commissionSplit: 50
+    commissionSplit: 50,
+    credentialsVerified: false
   };
   
   const handleCoBrokingToggle = (enabled: boolean) => {
@@ -53,7 +55,7 @@ const CoBrokingSetup: React.FC = () => {
     });
   };
   
-  const handleCoBrokingChange = (field: string, value: string | number) => {
+  const handleCoBrokingChange = (field: string, value: string | number | boolean) => {
     updateFormData({
       coBroking: {
         ...coBroking,
@@ -74,18 +76,14 @@ const CoBrokingSetup: React.FC = () => {
   const splitValue = coBroking?.commissionSplit?.toString() || "50";
   
   // Validate credentials checkbox state
-  const [isCredentialsVerified, setIsCredentialsVerified] = React.useState(false);
+  const [isCredentialsVerified, setIsCredentialsVerified] = React.useState(coBroking?.credentialsVerified || false);
+  
   const handleCredentialsVerified = (checked: boolean) => {
     setIsCredentialsVerified(checked);
     
     // If co-broking is enabled, also update this in the form data
     if (coBroking?.enabled) {
-      updateFormData({
-        coBroking: {
-          ...coBroking,
-          credentialsVerified: checked
-        }
-      });
+      handleCoBrokingChange('credentialsVerified', checked);
     }
   };
   
