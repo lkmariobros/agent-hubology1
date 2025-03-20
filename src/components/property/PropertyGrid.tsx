@@ -18,8 +18,10 @@ export const PropertyGrid: React.FC<PropertyGridProps> = ({ properties }) => {
   // Update column count based on current viewport
   useEffect(() => {
     const updateColumnCount = () => {
-      if (window.innerWidth >= 1024) {
-        setColumnCount(3); // lg and above
+      if (window.innerWidth >= 1280) {
+        setColumnCount(4); // xl and above
+      } else if (window.innerWidth >= 1024) {
+        setColumnCount(3); // lg to xl
       } else if (window.innerWidth >= 640) {
         setColumnCount(2); // sm to lg
       } else {
@@ -67,30 +69,25 @@ export const PropertyGrid: React.FC<PropertyGridProps> = ({ properties }) => {
   const columns = organizeIntoColumns();
 
   return (
-    <div ref={gridRef} className="flex gap-6 p-6">
+    <div ref={gridRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-6">
       {properties.length > 0 ? (
-        columns.map((column, columnIndex) => (
-          <div key={`column-${columnIndex}`} className="flex-1 space-y-6">
-            {column.map((property) => (
-              <div 
-                key={property.id} 
-                className="relative overflow-visible z-auto"
-                style={{ isolation: 'isolate' }}
-              >
-                <ExpandablePropertyCard
-                  property={property}
-                  onFavorite={handleFavoriteProperty}
-                  onShare={handleShareProperty}
-                  onEdit={handleEditProperty}
-                  onExpand={(isExpanded) => handleCardExpand(property.id, isExpanded)}
-                  isExpanded={expandedCardId === property.id}
-                />
-              </div>
-            ))}
+        properties.map((property) => (
+          <div 
+            key={property.id} 
+            className="relative overflow-visible z-auto"
+          >
+            <ExpandablePropertyCard
+              property={property}
+              onFavorite={handleFavoriteProperty}
+              onShare={handleShareProperty}
+              onEdit={handleEditProperty}
+              onExpand={(isExpanded) => handleCardExpand(property.id, isExpanded)}
+              isExpanded={expandedCardId === property.id}
+            />
           </div>
         ))
       ) : (
-        <p className="w-full text-center text-muted-foreground py-12">
+        <p className="col-span-full text-center text-muted-foreground py-12">
           No properties to display. Add a new property to get started.
         </p>
       )}

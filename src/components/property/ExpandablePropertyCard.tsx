@@ -66,29 +66,27 @@ export function ExpandablePropertyCard({
   };
 
   return (
-    <div className="relative w-full overflow-visible z-auto group" style={{ isolation: 'isolate' }}>
+    <div className="w-full h-full">
       <Collapsible
         open={isOpen}
         onOpenChange={handleOpenChange}
-        className="w-full overflow-visible"
+        className="w-full"
       >
         <Card className={cn(
-          "relative overflow-hidden transition-all duration-300 border-0 bg-neutral-900/80 backdrop-blur-sm", 
+          "h-full relative transition-all duration-300 border-0 bg-neutral-900 backdrop-blur-sm overflow-hidden", 
           isOpen ? "rounded-t-xl" : "rounded-xl",
           className
         )}>
-          <div className="relative">
-            <AspectRatio ratio={5/3}>
-              <PropertyCardHeader
-                property={property}
-                currentImageIndex={currentImageIndex}
-                isFavorited={isFavorited}
-                onFavoriteClick={handleFavoriteClick}
-                onShare={onShare}
-                onMouseMove={handleMouseMove}
-              />
-            </AspectRatio>
-          </div>
+          <AspectRatio ratio={4/3}>
+            <PropertyCardHeader
+              property={property}
+              currentImageIndex={currentImageIndex}
+              isFavorited={isFavorited}
+              onFavoriteClick={handleFavoriteClick}
+              onShare={onShare}
+              onMouseMove={handleMouseMove}
+            />
+          </AspectRatio>
           
           <PropertyCardBasicInfo 
             property={property} 
@@ -99,9 +97,8 @@ export function ExpandablePropertyCard({
         <CollapsibleContent
           className={cn(
             "overflow-hidden transition-all data-[state=open]:animate-collapsible-down data-[state=closed]:animate-collapsible-up",
-            "rounded-b-xl bg-neutral-900/80 backdrop-blur-sm border-0 border-t border-neutral-800"
+            "rounded-b-xl bg-neutral-900 backdrop-blur-sm border-0 border-t border-neutral-800"
           )}
-          style={{ position: 'relative', zIndex: 10 }}
         >
           <PropertyCardDetails 
             property={property}

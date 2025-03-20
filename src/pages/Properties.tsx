@@ -32,7 +32,7 @@ const Properties = () => {
 
   return (
     <MainLayout>
-      <div className="p-6 space-y-6 max-w-[1440px] mx-auto">
+      <div className="p-6 space-y-6 max-w-[1560px] mx-auto">
         <div className="flex justify-between items-center">
           <h1 className="text-xl font-normal tracking-tight">Properties</h1>
           <Button 
@@ -58,9 +58,7 @@ const Properties = () => {
             </Card>
           )}
           {viewMode === 'grid' && (
-            <div className="relative">
-              <PropertyGrid properties={properties} />
-            </div>
+            <PropertyGrid properties={properties} />
           )}
           {viewMode === 'map' && (
             <Card className="overflow-hidden border-0 bg-transparent">
@@ -74,4 +72,3 @@ const Properties = () => {
 };
 
 export default Properties;
-
