@@ -34,9 +34,11 @@ import {
   SlidersHorizontal,
   Search,
   X,
+  List,
 } from "lucide-react";
 
 type PropertyType = 'residential' | 'commercial' | 'industrial' | 'land';
+type ViewMode = 'grid' | 'table' | 'map';
 
 interface FilterOptions {
   type?: PropertyType;
@@ -49,8 +51,8 @@ interface FilterOptions {
 
 interface PropertyFilterBarProps {
   onFilter: (filters: FilterOptions) => void;
-  onViewChange: (view: 'grid' | 'map') => void;
-  currentView: 'grid' | 'map';
+  onViewChange: (view: ViewMode) => void;
+  currentView: ViewMode;
 }
 
 export function PropertyFilterBar({ 
@@ -334,6 +336,13 @@ export function PropertyFilterBar({
                 <rect width="7" height="7" x="14" y="14" rx="1" />
                 <rect width="7" height="7" x="3" y="14" rx="1" />
               </svg>
+            </ToggleGroupItem>
+            <ToggleGroupItem 
+              value="table" 
+              onClick={() => onViewChange('table')}
+              aria-label="Table view"
+            >
+              <List className="h-4 w-4" />
             </ToggleGroupItem>
             <ToggleGroupItem 
               value="map" 
