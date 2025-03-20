@@ -1,4 +1,9 @@
-import { TransactionFormState, TransactionFormData, TransactionDocument, TransactionType } from '../../types/transaction-form';
+import { 
+  TransactionFormState, 
+  TransactionFormData, 
+  TransactionDocument, 
+  TransactionType 
+} from './types';
 import { getInitialTransactionData } from './initialState';
 
 // Action types

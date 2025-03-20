@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { useTransactionForm } from '@/context/TransactionForm'; // Import from the correct path
+import React, { useEffect } from 'react';
+import { useTransactionForm } from '@/context/TransactionForm';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -20,19 +20,30 @@ const CoBrokingSetup: React.FC = () => {
   const { state, updateFormData } = useTransactionForm();
   const { formData, errors } = state;
   
-  // Ensure coBroking exists with default values if missing
-  const coBroking = formData.coBroking || {
-    enabled: false,
-    agentName: '',
-    agentCompany: '',
-    agentContact: '',
-    commissionSplit: 50
-  };
+  // Initialize coBroking with default values if it doesn't exist
+  useEffect(() => {
+    if (!formData.coBroking) {
+      updateFormData({
+        coBroking: {
+          enabled: false,
+          agentName: '',
+          agentCompany: '',
+          agentContact: '',
+          commissionSplit: 50
+        }
+      });
+    }
+  }, [formData.coBroking, updateFormData]);
+
+  // Skip rendering until formData.coBroking is properly initialized
+  if (!formData.coBroking) {
+    return <div className="py-4">Loading co-broking options...</div>;
+  }
   
   const handleCoBrokingToggle = (enabled: boolean) => {
     updateFormData({
       coBroking: {
-        ...coBroking,
+        ...formData.coBroking,
         enabled
       }
     });
@@ -41,7 +52,7 @@ const CoBrokingSetup: React.FC = () => {
   const handleCoBrokingChange = (field: string, value: string | number) => {
     updateFormData({
       coBroking: {
-        ...coBroking,
+        ...formData.coBroking,
         [field]: value
       }
     });
@@ -49,7 +60,10 @@ const CoBrokingSetup: React.FC = () => {
   
   // Handle commission split change from tabs
   const handleCommissionSplitChange = (value: string) => {
-    handleCoBrokingChange('commissionSplit', parseInt(value) || 50);
+    const splitValue = parseInt(value);
+    if (!isNaN(splitValue)) {
+      handleCoBrokingChange('commissionSplit', splitValue);
+    }
   };
   
   return (
@@ -62,7 +76,7 @@ const CoBrokingSetup: React.FC = () => {
       <div className="flex items-center space-x-2">
         <Switch 
           id="coBroking" 
-          checked={coBroking.enabled}
+          checked={formData.coBroking.enabled}
           onCheckedChange={handleCoBrokingToggle}
         />
         <Label htmlFor="coBroking" className="font-medium">
@@ -70,7 +84,7 @@ const CoBrokingSetup: React.FC = () => {
         </Label>
       </div>
       
-      {coBroking.enabled && (
+      {formData.coBroking.enabled && (
         <Card className="mt-4">
           <CardContent className="pt-6 space-y-4">
             <div>
@@ -79,7 +93,7 @@ const CoBrokingSetup: React.FC = () => {
               </Label>
               <Input
                 id="agentName"
-                value={coBroking.agentName || ''}
+                value={formData.coBroking.agentName || ''}
                 onChange={(e) => handleCoBrokingChange('agentName', e.target.value)}
                 placeholder="Enter co-broker agent name"
                 className={errors.coAgentName ? 'border-destructive' : ''}
@@ -95,7 +109,7 @@ const CoBrokingSetup: React.FC = () => {
               </Label>
               <Input
                 id="agentCompany"
-                value={coBroking.agentCompany || ''}
+                value={formData.coBroking.agentCompany || ''}
                 onChange={(e) => handleCoBrokingChange('agentCompany', e.target.value)}
                 placeholder="Enter co-broker company name"
                 className={errors.coAgentCompany ? 'border-destructive' : ''}
@@ -111,7 +125,7 @@ const CoBrokingSetup: React.FC = () => {
               </Label>
               <Input
                 id="agentContact"
-                value={coBroking.agentContact || ''}
+                value={formData.coBroking.agentContact || ''}
                 onChange={(e) => handleCoBrokingChange('agentContact', e.target.value)}
                 placeholder="Enter co-broker contact information"
               />
@@ -124,7 +138,7 @@ const CoBrokingSetup: React.FC = () => {
               <Tabs 
                 defaultValue="50" 
                 className="w-full" 
-                value={coBroking.commissionSplit?.toString() || "50"}
+                value={formData.coBroking.commissionSplit?.toString() || "50"}
                 onValueChange={handleCommissionSplitChange}
               >
                 <TabsList className="grid grid-cols-5 w-full">
@@ -140,12 +154,17 @@ const CoBrokingSetup: React.FC = () => {
                     type="number"
                     min="1"
                     max="99"
-                    value={coBroking.commissionSplit || 50}
-                    onChange={(e) => handleCoBrokingChange('commissionSplit', parseInt(e.target.value) || 50)}
+                    value={formData.coBroking.commissionSplit || 50}
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value);
+                      if (!isNaN(value)) {
+                        handleCoBrokingChange('commissionSplit', value);
+                      }
+                    }}
                     className="w-full"
                   />
                   <p className="text-sm text-muted-foreground mt-1">
-                    The co-broker will receive {coBroking.commissionSplit || 50}% of the agent's commission.
+                    The co-broker will receive {formData.coBroking.commissionSplit || 50}% of the agent's commission.
                   </p>
                 </div>
               </Tabs>
@@ -163,7 +182,7 @@ const CoBrokingSetup: React.FC = () => {
         </Card>
       )}
       
-      {!coBroking.enabled && (
+      {!formData.coBroking.enabled && (
         <Card className="mt-4 bg-muted/30">
           <CardContent className="p-6">
             <p className="text-center text-muted-foreground">

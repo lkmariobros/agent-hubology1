@@ -1,5 +1,5 @@
 
-import { createContext, ReactNode, useEffect } from 'react';
+import React, { createContext, ReactNode, useEffect } from 'react';
 import { TransactionFormContextType } from './types';
 import { useTransactionFormActions } from './actions';
 
@@ -47,13 +47,10 @@ export const TransactionFormProvider: React.FC<{ children: ReactNode }> = ({ chi
       const commissionAmount = (transactionValue * commissionRate) / 100;
       
       if (commissionAmount !== state.formData.commissionAmount) {
-        dispatch({ 
-          type: 'UPDATE_FORM_DATA', 
-          payload: { commissionAmount }
-        });
+        updateFormData({ commissionAmount });
       }
     }
-  }, [state.formData.transactionValue, state.formData.commissionRate, dispatch]);
+  }, [state.formData.transactionValue, state.formData.commissionRate, updateFormData]);
 
   const contextValue: TransactionFormContextType = {
     state,
