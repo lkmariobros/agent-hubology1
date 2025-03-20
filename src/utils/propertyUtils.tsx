@@ -1,4 +1,3 @@
-
 import { Building2, Store, Factory, Map } from 'lucide-react';
 import React from 'react';
 
@@ -24,7 +23,7 @@ export const formatPrice = (price: number) => {
     return `RM ${millions.toFixed(millions < 10 ? 1 : 0)}M`;
   } else if (price >= 1000) {
     const thousands = price / 1000;
-    return `RM ${thousands.toFixed(0)}K`;
+    return `RM ${thousands}K`;
   }
   return `RM ${price.toLocaleString()}`;
 };

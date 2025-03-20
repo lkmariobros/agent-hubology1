@@ -13,9 +13,9 @@ interface PropertyCardDetailsProps {
 
 export function PropertyCardDetails({ property, onEdit }: PropertyCardDetailsProps) {
   return (
-    <div className="p-5 pt-2 space-y-5">
+    <div className="space-y-4">
       {/* Property specs */}
-      <div className="grid grid-cols-3 gap-3 pt-2">
+      <div className="grid grid-cols-3 gap-3 p-4">
         {property.bedrooms && (
           <div className="flex flex-col items-center p-3 bg-neutral-800/50 rounded-md">
             <Bed className="h-4 w-4 text-neutral-400 mb-1.5" />
@@ -39,41 +39,37 @@ export function PropertyCardDetails({ property, onEdit }: PropertyCardDetailsPro
       </div>
       
       {/* Property features/tags */}
-      <div className="flex flex-wrap gap-1.5 pt-1">
-        {property.features && property.features.map((feature, index) => (
-          <Badge 
-            key={index}
-            variant="outline" 
-            className="text-xs bg-neutral-800/80 border-neutral-700 text-neutral-300"
-          >
-            {feature}
-          </Badge>
-        ))}
-      </div>
+      {property.features && property.features.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 px-4 pb-3">
+          {property.features.map((feature, index) => (
+            <Badge 
+              key={index}
+              variant="outline" 
+              className="text-xs bg-neutral-800/80 border-neutral-700 text-neutral-300"
+            >
+              {feature}
+            </Badge>
+          ))}
+        </div>
+      )}
       
-      {/* Units and Stock info */}
-      <div className="flex justify-between items-center pt-1 border-t border-neutral-800">
+      {/* Units and Listed info */}
+      <div className="flex justify-between items-center p-4 border-t border-neutral-800/70">
         <div>
           <p className="text-xs text-neutral-400 mb-1">Units Available</p>
           <div className="flex items-center gap-1.5">
-            <p className="text-white">{property.stock || 1}</p>
-            {property.stock && property.stock > 5 && (
-              <Badge variant="outline" className="bg-green-500/20 text-green-500 text-xs px-1.5 border-0">In Stock</Badge>
-            )}
-            {property.stock && property.stock <= 5 && property.stock > 0 && (
-              <Badge variant="outline" className="bg-amber-500/20 text-amber-500 text-xs px-1.5 border-0">Limited</Badge>
-            )}
+            <p className="text-sm text-white">{property.stock || 1}</p>
           </div>
         </div>
         
         <div className="text-right">
           <p className="text-xs text-neutral-400 mb-1">Listed</p>
-          <p className="text-xs text-white">2 days ago</p>
+          <p className="text-sm text-white">2 days ago</p>
         </div>
       </div>
       
       {/* Quick stats */}
-      <div className="grid grid-cols-4 gap-2 pt-1 border-t border-neutral-800">
+      <div className="grid grid-cols-4 gap-2 px-4 py-3 bg-neutral-950/50 border-t border-b border-neutral-800/50">
         <div className="text-center">
           <div className="flex justify-center mb-1.5">
             <Calendar className="h-3.5 w-3.5 text-neutral-400" />
@@ -108,13 +104,13 @@ export function PropertyCardDetails({ property, onEdit }: PropertyCardDetailsPro
       </div>
       
       {/* Simple activity visualization */}
-      <div className="h-16 w-full bg-transparent px-1 py-2 border-t border-neutral-800">
+      <div className="px-4 py-3 border-b border-neutral-800/50">
         <p className="text-xs text-neutral-400 mb-2">Property Interest (7 days)</p>
         <svg width="100%" height="24" viewBox="0 0 100 24" preserveAspectRatio="none">
           <path
             d="M0,12 C10,18 20,6 30,12 C40,18 50,3 60,12 C70,21 80,9 90,12 L100,12"
             fill="none"
-            stroke="rgba(249, 115, 22, 0.5)"
+            stroke="rgba(249, 115, 22, 0.3)"
             strokeWidth="2"
           />
           <path
@@ -122,13 +118,12 @@ export function PropertyCardDetails({ property, onEdit }: PropertyCardDetailsPro
             fill="none"
             stroke="rgba(249, 115, 22, 0.8)"
             strokeWidth="1"
-            strokeDasharray="1,1"
           />
         </svg>
       </div>
       
       {/* Action buttons */}
-      <div className="grid grid-cols-2 gap-3 pt-1">
+      <div className="grid grid-cols-2 gap-3 p-4">
         <Button 
           variant="outline" 
           size="sm" 

@@ -20,7 +20,7 @@ export const PropertyGrid: React.FC<PropertyGridProps> = ({ properties }) => {
       if (window.innerWidth >= 1536) { // 2xl
         setColumnCount(3);
       } else if (window.innerWidth >= 1024) { // lg
-        setColumnCount(3);
+        setColumnCount(2);
       } else if (window.innerWidth >= 768) { // md
         setColumnCount(2);
       } else {
@@ -78,9 +78,9 @@ export const PropertyGrid: React.FC<PropertyGridProps> = ({ properties }) => {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-3 gap-6 p-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3 gap-8 p-6">
       {columns.map((column, columnIndex) => (
-        <div key={columnIndex} className="flex flex-col gap-6">
+        <div key={columnIndex} className="flex flex-col gap-8">
           {column.map((property) => (
             <div key={property.id} className="w-full">
               <ExpandablePropertyCard
@@ -97,4 +97,4 @@ export const PropertyGrid: React.FC<PropertyGridProps> = ({ properties }) => {
       ))}
     </div>
   );
-};
+}
