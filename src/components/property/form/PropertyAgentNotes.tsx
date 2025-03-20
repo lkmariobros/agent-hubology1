@@ -14,7 +14,7 @@ const PropertyAgentNotes: React.FC = () => {
     <div className="space-y-6">
       <h3 className="text-lg font-medium">Agent Notes</h3>
       
-      <Alert variant="info" className="bg-blue-500/10 border-blue-500/20">
+      <Alert variant="default" className="bg-blue-500/10 border-blue-500/20">
         <AlertCircle className="h-4 w-4 text-blue-500" />
         <AlertDescription className="text-blue-700 dark:text-blue-400">
           These notes are for internal use only and will not be visible to clients.

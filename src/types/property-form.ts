@@ -59,11 +59,47 @@ export const landPropertySchema = commonPropertySchema.extend({
 });
 
 // Union type for all property types
-export type PropertyFormData = 
-  | z.infer<typeof residentialPropertySchema>
-  | z.infer<typeof commercialPropertySchema>
-  | z.infer<typeof industrialPropertySchema>
-  | z.infer<typeof landPropertySchema>;
+export type PropertyFormData = {
+  title: string;
+  description: string;
+  transactionType: 'Sale' | 'Rent';
+  propertyType: 'Residential' | 'Commercial' | 'Industrial' | 'Land';
+  featured: boolean;
+  status: 'Available' | 'Under Offer' | 'Pending' | 'Sold' | 'Rented';
+  address: {
+    street: string;
+    city: string;
+    state: string;
+    zip?: string;
+    country: string;
+  };
+  price: number | null;
+  rentalRate: number | null;
+  agentNotes: string;
+  
+  // Residential specific fields
+  bedrooms?: number;
+  bathrooms?: number;
+  builtUpArea?: number;
+  furnishingStatus?: 'Unfurnished' | 'Partially Furnished' | 'Fully Furnished';
+  
+  // Commercial specific fields
+  floorArea?: number;
+  zoningType?: string;
+  buildingClass?: 'Class A' | 'Class B' | 'Class C';
+  
+  // Industrial specific fields
+  landArea?: number;
+  ceilingHeight?: number;
+  loadingBays?: number;
+  powerCapacity?: string;
+  
+  // Land specific fields
+  landSize?: number;
+  zoning?: string;
+  roadFrontage?: number;
+  topography?: string;
+};
 
 // Property images type
 export interface PropertyImage {

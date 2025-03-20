@@ -482,7 +482,7 @@ export const PropertyFormProvider: React.FC<{ children: ReactNode }> = ({ childr
       dispatch({ type: 'SUBMITTING', payload: false });
       toast.success('Property listing created successfully!');
       resetForm();
-      return Promise.resolve(propertyResult.id);
+      return Promise.resolve(); // Changed to return void instead of the ID
     } catch (error) {
       console.error('Error submitting property:', error);
       dispatch({ type: 'SUBMITTING', payload: false });
