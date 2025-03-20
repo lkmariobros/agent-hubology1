@@ -78,9 +78,9 @@ export const PropertyGrid: React.FC<PropertyGridProps> = ({ properties }) => {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3 gap-8 p-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 p-6">
       {columns.map((column, columnIndex) => (
-        <div key={columnIndex} className="flex flex-col gap-8">
+        <div key={columnIndex} className="flex flex-col gap-6">
           {column.map((property) => (
             <div key={property.id} className="w-full">
               <ExpandablePropertyCard

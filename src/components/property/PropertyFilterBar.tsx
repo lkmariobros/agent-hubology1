@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import {
@@ -156,12 +157,12 @@ export function PropertyFilterBar({
   };
 
   return (
-    <div className="flex-1">
-      <form onSubmit={handleSearch} className="relative max-w-full">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+    <div className="w-full">
+      <form onSubmit={handleSearch} className="relative w-full">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
         <Input
           placeholder="Search properties..."
-          className="pl-10 pr-10 w-full rounded-full"
+          className="pl-11 pr-10 py-2 h-10 bg-neutral-800 border-none rounded-lg w-full"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
@@ -175,12 +176,12 @@ export function PropertyFilterBar({
               onFilter({...filters, search: undefined});
             }}
           >
-            <X className="h-4 w-4 text-muted-foreground" />
+            <X className="h-4 w-4 text-neutral-400" />
           </button>
         )}
       </form>
       
-      {/* Filter drawer and view modes now integrated directly into Properties.tsx */}
+      {/* Mobile view filters - hidden on desktop */}
       <div className="lg:hidden flex gap-2 mt-4">
         <Drawer open={isOpen} onOpenChange={setIsOpen}>
           <DrawerTrigger asChild>
@@ -355,4 +356,83 @@ export function PropertyFilterBar({
       </div>
     </div>
   );
+
+  function handleSearch(e: React.FormEvent) {
+    e.preventDefault();
+    setFilters({
+      ...filters,
+      search: searchQuery
+    });
+    
+    // Apply filters
+    onFilter({
+      ...filters,
+      search: searchQuery
+    });
+  }
+
+  function handleTypeChange(value: string) {
+    setFilters({
+      ...filters,
+      type: value as PropertyType
+    });
+  }
+
+  function handleBedroomChange(value: string) {
+    setFilters({
+      ...filters,
+      bedrooms: value === 'any' ? undefined : parseInt(value)
+    });
+  }
+  
+  function handleBathroomChange(value: string) {
+    setFilters({
+      ...filters,
+      bathrooms: value === 'any' ? undefined : parseInt(value)
+    });
+  }
+
+  function handlePriceChange(value: number[]) {
+    // Ensure we always have exactly two values for the price range
+    const priceRange: [number, number] = [
+      value[0] || 0,
+      value[1] || 5000000
+    ];
+    
+    setFilters({
+      ...filters,
+      priceRange
+    });
+  }
+
+  function handleFeatureToggle(id: string, checked: boolean) {
+    const currentFeatures = filters.features || [];
+    
+    setFilters({
+      ...filters,
+      features: checked 
+        ? [...currentFeatures, id] 
+        : currentFeatures.filter(f => f !== id)
+    });
+  }
+
+  function handleApplyFilters() {
+    onFilter(filters);
+    setIsOpen(false);
+  }
+
+  function handleClearFilters() {
+    // Explicitly define as a tuple to match the expected type
+    const defaultPriceRange: [number, number] = [0, 5000000];
+    
+    const clearedFilters: FilterOptions = {
+      priceRange: defaultPriceRange,
+      features: []
+    };
+    
+    setFilters(clearedFilters);
+    setSearchQuery('');
+    onFilter(clearedFilters);
+    setIsOpen(false);
+  }
 }

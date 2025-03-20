@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
 import { PropertyFilterBar } from '@/components/property/PropertyFilterBar';
 import { Button } from '@/components/ui/button';
-import { Plus, Grid, List } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Property } from '@/types';
 import { PropertyTable } from '@/components/property/PropertyTable';
@@ -11,10 +12,9 @@ import { PropertyGrid } from '@/components/property/PropertyGrid';
 import { PropertyMap } from '@/components/property/PropertyMap';
 import { sampleProperties } from '@/data/sampleProperties';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-
-// Import ViewMode type from PropertyFilterBar instead of redefining it
+// Import ViewMode type from PropertyFilterBar
 import { ViewMode } from '@/components/property/PropertyFilterBar';
+
 type TimeFilter = '7days' | '30days' | '90days' | 'all';
 
 const Properties = () => {
@@ -85,68 +85,82 @@ const Properties = () => {
     });
     setFilteredProperties(filtered);
   }, [timeFilter, properties]);
+  
   const handleViewChange = (newView: ViewMode) => {
     setViewMode(newView);
   };
+  
   const handleFilter = (filters: any) => {
     console.log('Applying filters:', filters);
     // Implementation for filtering properties would go here
   };
 
-  return <MainLayout>
-      <div className="p-6 space-y-6 max-w-[1560px] mx-auto">
+  return (
+    <MainLayout>
+      <div className="p-6 space-y-6">
+        {/* Header section with consistent alignment */}
         <div className="flex justify-between items-center">
-          <h1 className="text-xl font-normal tracking-tight">Properties</h1>
-          <Button size="sm" className="gap-2 rounded-full bg-orange-500 hover:bg-orange-600" onClick={() => navigate('/properties/new')}>
+          <h1 className="text-xl font-semibold tracking-tight">Properties</h1>
+          <Button 
+            size="sm" 
+            className="gap-2 rounded-full px-6 bg-orange-500 hover:bg-orange-600" 
+            onClick={() => navigate('/properties/new')}
+          >
             <Plus size={16} />
             Add Property
           </Button>
         </div>
         
-        {/* Summary Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="p-4 border-0 bg-neutral-950/40 backdrop-blur-sm">
-            <div className="text-sm text-neutral-400">Total Properties</div>
+        {/* Summary Stats - Updated to match reference image */}
+        <div className="grid grid-cols-4 gap-4 bg-neutral-900/60 backdrop-blur-sm rounded-lg p-5">
+          <div className="flex flex-col">
+            <span className="text-sm text-neutral-400">Total Properties</span>
             <div className="flex items-baseline mt-1">
-              <span className="text-2xl font-mono text-white">{summaryStats.total}</span>
+              <span className="text-3xl font-medium">{summaryStats.total}</span>
               <span className="ml-2 text-xs text-emerald-500">+{summaryStats.change.total} this week</span>
             </div>
-          </Card>
+          </div>
           
-          <Card className="p-4 border-0 bg-neutral-950/40 backdrop-blur-sm">
-            <div className="text-sm text-neutral-400">Active Listings</div>
+          <div className="flex flex-col">
+            <span className="text-sm text-neutral-400">Active Listings</span>
             <div className="flex items-baseline mt-1">
-              <span className="text-2xl font-mono text-white">{summaryStats.active}</span>
+              <span className="text-3xl font-medium">{summaryStats.active}</span>
               <span className={`ml-2 text-xs ${summaryStats.change.active >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
                 {summaryStats.change.active >= 0 ? '+' : ''}{summaryStats.change.active}% of total
               </span>
             </div>
-          </Card>
+          </div>
           
-          <Card className="p-4 border-0 bg-neutral-950/40 backdrop-blur-sm">
-            <div className="text-sm text-neutral-400">Pending Approvals</div>
+          <div className="flex flex-col">
+            <span className="text-sm text-neutral-400">Pending Approvals</span>
             <div className="flex items-baseline mt-1">
-              <span className="text-2xl font-mono text-white">{summaryStats.pending}</span>
+              <span className="text-3xl font-medium">{summaryStats.pending}</span>
               <span className="ml-2 text-xs text-neutral-400">properties</span>
             </div>
-          </Card>
+          </div>
           
-          <Card className="p-4 border-0 bg-neutral-950/40 backdrop-blur-sm">
-            <div className="text-sm text-neutral-400">Total Value</div>
+          <div className="flex flex-col">
+            <span className="text-sm text-neutral-400">Total Value</span>
             <div className="flex items-baseline mt-1">
-              <span className="text-2xl font-mono text-white">${(summaryStats.value / 1000000).toFixed(2)}M</span>
+              <span className="text-3xl font-medium">${(summaryStats.value / 1000000).toFixed(2)}M</span>
             </div>
-          </Card>
+          </div>
         </div>
         
-        {/* Updated layout to match reference image */}
-        <div className="flex items-center justify-between gap-4">
-          <PropertyFilterBar onFilter={handleFilter} onViewChange={handleViewChange} currentView={viewMode} />
+        {/* Filter row with consistent alignment */}
+        <div className="flex justify-between bg-neutral-900 rounded-lg p-4">
+          <div className="w-1/2">
+            <PropertyFilterBar 
+              onFilter={handleFilter} 
+              onViewChange={handleViewChange} 
+              currentView={viewMode} 
+            />
+          </div>
           
           <div className="flex items-center gap-3">
             <Select value={timeFilter} onValueChange={value => setTimeFilter(value as TimeFilter)}>
-              <SelectTrigger className="w-[140px] h-9">
-                <SelectValue placeholder="Last 7 days" />
+              <SelectTrigger className="w-[130px] h-10 rounded-lg bg-neutral-800 border-neutral-700">
+                <SelectValue placeholder="All time" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="7days">Last 7 days</SelectItem>
@@ -157,7 +171,7 @@ const Properties = () => {
             </Select>
             
             <Select defaultValue="newest">
-              <SelectTrigger className="w-[140px] h-9">
+              <SelectTrigger className="w-[130px] h-10 rounded-lg bg-neutral-800 border-neutral-700">
                 <SelectValue placeholder="Newest" />
               </SelectTrigger>
               <SelectContent>
@@ -168,20 +182,19 @@ const Properties = () => {
               </SelectContent>
             </Select>
             
-            <Button variant="outline" className="h-9 px-4">
-              Filter
-            </Button>
+            <Button className="h-10 px-5 rounded-lg">Filter</Button>
           </div>
         </div>
         
-        <div className="bg-neutral-950/30 backdrop-blur-sm rounded-xl p-1 min-h-[60vh] relative">
+        {/* Property content with consistent background */}
+        <div className="bg-neutral-900 rounded-lg min-h-[60vh] relative">
           {viewMode === 'grid' && <PropertyGrid properties={filteredProperties} />}
           {viewMode === 'table' && <PropertyTable properties={filteredProperties} />}
-          {viewMode === 'map' && <Card className="overflow-hidden border-0 bg-transparent">
-              <PropertyMap properties={filteredProperties} />
-            </Card>}
+          {viewMode === 'map' && <PropertyMap properties={filteredProperties} />}
         </div>
       </div>
-    </MainLayout>;
+    </MainLayout>
+  );
 };
+
 export default Properties;
