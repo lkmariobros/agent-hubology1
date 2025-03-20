@@ -45,6 +45,8 @@ export const useTransactionFormActions = () => {
     const errors: Record<string, string> = {};
     const { formData, currentStep } = state;
     
+    console.log('Validating step:', currentStep);
+    
     switch (currentStep) {
       case 0: // Transaction Type
         // No validation needed for transaction type selection
@@ -118,6 +120,8 @@ export const useTransactionFormActions = () => {
         break;
     }
     
+    console.log('Validation errors:', errors);
+    
     // Update the state with any validation errors
     dispatch({ type: 'SET_ERRORS', payload: errors });
     
@@ -127,8 +131,11 @@ export const useTransactionFormActions = () => {
 
   // Navigation functions
   const nextStep = useCallback(() => {
+    console.log('Attempting to proceed to next step');
     // Always validate the current step before moving to the next
     const isValid = validateCurrentStep();
+    console.log('Step validation result:', isValid);
+    
     if (isValid) {
       dispatch({ type: 'NEXT_STEP' });
       return true;

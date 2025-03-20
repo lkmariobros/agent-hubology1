@@ -48,11 +48,12 @@ const TransactionFormStepper: React.FC = () => {
               </span>
             </div>
             
+            {/* Only render the connector line if not the last item */}
             {index < steps.length - 1 && (
               <div className="flex-grow mx-2 h-0.5 self-center relative">
-                <div className={`absolute inset-0 bg-muted`}></div>
+                <div className="absolute inset-0 bg-muted"></div>
                 <div 
-                  className={`absolute inset-0 bg-primary transition-all duration-200 ease-in-out`}
+                  className="absolute inset-0 bg-primary transition-all duration-200 ease-in-out"
                   style={{ width: index < currentStep ? '100%' : '0%' }}
                 ></div>
               </div>

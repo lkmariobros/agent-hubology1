@@ -29,8 +29,8 @@ export const transactionFormReducer = (
   switch (action.type) {
     case 'UPDATE_FORM_DATA':
       // Handle coBroking field updates properly
-      if (action.payload.coBroking) {
-        // Make sure the coBroking object is initialized with credentialsVerified
+      if (action.payload.coBroking !== undefined) {
+        // Make sure the coBroking object is properly initialized
         const currentCoBroking = state.formData.coBroking || {
           enabled: false,
           agentName: '',
@@ -39,6 +39,9 @@ export const transactionFormReducer = (
           commissionSplit: 50,
           credentialsVerified: false
         };
+        
+        console.log('Current coBroking:', currentCoBroking);
+        console.log('New coBroking data:', action.payload.coBroking);
         
         return {
           ...state,

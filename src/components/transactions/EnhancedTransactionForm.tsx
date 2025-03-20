@@ -19,7 +19,7 @@ import TransactionReview from './form/TransactionReview';
 
 const TransactionFormSteps: React.FC = () => {
   const { state, prevStep, nextStep, saveForm, submitForm, validateCurrentStep } = useTransactionForm();
-  const { currentStep, isSubmitting, lastSaved } = state;
+  const { currentStep, isSubmitting, lastSaved, errors } = state;
   const navigate = useNavigate();
 
   const handleSaveDraft = async () => {
@@ -34,6 +34,11 @@ const TransactionFormSteps: React.FC = () => {
 
   const handleSubmit = async () => {
     try {
+      if (!validateCurrentStep()) {
+        toast.error('Please fix the validation errors before submitting');
+        return;
+      }
+      
       await submitForm();
       toast.success('Transaction created successfully!');
       navigate('/transactions');
@@ -44,10 +49,13 @@ const TransactionFormSteps: React.FC = () => {
   };
   
   const handleNextStep = () => {
+    console.log('Next button clicked, proceeding to validation');
     // Validate the current step before proceeding
     if (validateCurrentStep()) {
+      console.log('Validation passed, moving to next step');
       nextStep();
     } else {
+      console.log('Validation failed:', errors);
       toast.error('Please fix the validation errors before proceeding');
     }
   };
