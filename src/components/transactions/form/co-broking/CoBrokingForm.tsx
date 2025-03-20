@@ -4,8 +4,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent } from '@/components/ui/card';
-import { CoBrokingInfo } from '@/types/transaction-form';
 import CommissionSplitSelector from './CommissionSplitSelector';
+
+interface CoBrokingInfo {
+  enabled: boolean;
+  agentName: string;
+  agentCompany: string;
+  agentContact: string;
+  commissionSplit: number;
+  credentialsVerified: boolean;
+}
 
 interface CoBrokingFormProps {
   coBroking: CoBrokingInfo;
