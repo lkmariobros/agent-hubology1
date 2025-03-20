@@ -10,7 +10,6 @@ export const TransactionFormContext = createContext<TransactionFormContextType |
 export const TransactionFormProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { 
     state, 
-    dispatch,
     updateFormData,
     updateTransactionType,
     addDocument,

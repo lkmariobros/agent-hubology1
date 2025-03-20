@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useTransactionForm } from '@/context/TransactionForm';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,6 +19,21 @@ import {
 const CoBrokingSetup: React.FC = () => {
   const { state, updateFormData } = useTransactionForm();
   const { formData, errors } = state;
+  
+  // Initialize coBroking if it doesn't exist
+  useEffect(() => {
+    if (!formData.coBroking) {
+      updateFormData({
+        coBroking: {
+          enabled: false,
+          agentName: '',
+          agentCompany: '',
+          agentContact: '',
+          commissionSplit: 50
+        }
+      });
+    }
+  }, [formData.coBroking, updateFormData]);
   
   // Safely access coBroking data with fallbacks to prevent null/undefined errors
   const coBroking = formData.coBroking || {
@@ -56,7 +71,23 @@ const CoBrokingSetup: React.FC = () => {
   };
   
   // Default split value (used for tabs)
-  const splitValue = coBroking.commissionSplit?.toString() || "50";
+  const splitValue = coBroking?.commissionSplit?.toString() || "50";
+  
+  // Validate credentials checkbox state
+  const [isCredentialsVerified, setIsCredentialsVerified] = React.useState(false);
+  const handleCredentialsVerified = (checked: boolean) => {
+    setIsCredentialsVerified(checked);
+    
+    // If co-broking is enabled, also update this in the form data
+    if (coBroking?.enabled) {
+      updateFormData({
+        coBroking: {
+          ...coBroking,
+          credentialsVerified: checked
+        }
+      });
+    }
+  };
   
   return (
     <div className="space-y-6">
@@ -68,7 +99,7 @@ const CoBrokingSetup: React.FC = () => {
       <div className="flex items-center space-x-2">
         <Switch 
           id="coBroking" 
-          checked={coBroking.enabled}
+          checked={coBroking?.enabled || false}
           onCheckedChange={handleCoBrokingToggle}
         />
         <Label htmlFor="coBroking" className="font-medium">
@@ -76,7 +107,7 @@ const CoBrokingSetup: React.FC = () => {
         </Label>
       </div>
       
-      {coBroking.enabled && (
+      {coBroking?.enabled && (
         <Card className="mt-4">
           <CardContent className="pt-6 space-y-4">
             <div>
@@ -85,12 +116,12 @@ const CoBrokingSetup: React.FC = () => {
               </Label>
               <Input
                 id="agentName"
-                value={coBroking.agentName || ''}
+                value={coBroking?.agentName || ''}
                 onChange={(e) => handleCoBrokingChange('agentName', e.target.value)}
                 placeholder="Enter co-broker agent name"
-                className={errors.coAgentName ? 'border-destructive' : ''}
+                className={errors?.coAgentName ? 'border-destructive' : ''}
               />
-              {errors.coAgentName && (
+              {errors?.coAgentName && (
                 <p className="text-sm text-destructive mt-1">{errors.coAgentName}</p>
               )}
             </div>
@@ -101,12 +132,12 @@ const CoBrokingSetup: React.FC = () => {
               </Label>
               <Input
                 id="agentCompany"
-                value={coBroking.agentCompany || ''}
+                value={coBroking?.agentCompany || ''}
                 onChange={(e) => handleCoBrokingChange('agentCompany', e.target.value)}
                 placeholder="Enter co-broker company name"
-                className={errors.coAgentCompany ? 'border-destructive' : ''}
+                className={errors?.coAgentCompany ? 'border-destructive' : ''}
               />
-              {errors.coAgentCompany && (
+              {errors?.coAgentCompany && (
                 <p className="text-sm text-destructive mt-1">{errors.coAgentCompany}</p>
               )}
             </div>
@@ -117,7 +148,7 @@ const CoBrokingSetup: React.FC = () => {
               </Label>
               <Input
                 id="agentContact"
-                value={coBroking.agentContact || ''}
+                value={coBroking?.agentContact || ''}
                 onChange={(e) => handleCoBrokingChange('agentContact', e.target.value)}
                 placeholder="Enter co-broker contact information"
               />
@@ -146,7 +177,7 @@ const CoBrokingSetup: React.FC = () => {
                     type="number"
                     min="1"
                     max="99"
-                    value={coBroking.commissionSplit || 50}
+                    value={coBroking?.commissionSplit || 50}
                     onChange={(e) => {
                       const value = parseInt(e.target.value);
                       if (!isNaN(value)) {
@@ -156,7 +187,7 @@ const CoBrokingSetup: React.FC = () => {
                     className="w-full"
                   />
                   <p className="text-sm text-muted-foreground mt-1">
-                    The co-broker will receive {coBroking.commissionSplit || 50}% of the agent's commission.
+                    The co-broker will receive {coBroking?.commissionSplit || 50}% of the agent's commission.
                   </p>
                 </div>
               </Tabs>
@@ -164,7 +195,11 @@ const CoBrokingSetup: React.FC = () => {
             
             <div className="mt-6 border-t pt-4">
               <div className="flex items-center space-x-2">
-                <Checkbox id="verified" />
+                <Checkbox 
+                  id="verified" 
+                  checked={isCredentialsVerified}
+                  onCheckedChange={handleCredentialsVerified}
+                />
                 <Label htmlFor="verified" className="text-sm">
                   I confirm that I have verified the co-broker's license and credentials
                 </Label>
@@ -174,7 +209,7 @@ const CoBrokingSetup: React.FC = () => {
         </Card>
       )}
       
-      {!coBroking.enabled && (
+      {!coBroking?.enabled && (
         <Card className="mt-4 bg-muted/30">
           <CardContent className="p-6">
             <p className="text-center text-muted-foreground">

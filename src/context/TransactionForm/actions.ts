@@ -42,9 +42,13 @@ export const useTransactionFormActions = () => {
 
   // Navigation functions
   const nextStep = useCallback(() => {
-    if (validateCurrentStep()) {
+    // Always validate the current step before moving to the next
+    const isValid = validateCurrentStep();
+    if (isValid) {
       dispatch({ type: 'NEXT_STEP' });
+      return true;
     }
+    return false;
   }, [state.currentStep, state.formData]);
 
   const prevStep = useCallback(() => {
@@ -102,13 +106,13 @@ export const useTransactionFormActions = () => {
     
     // Calculate co-broker share if co-broking is enabled
     if (coBroking?.enabled) {
-      coAgentShare = (agentShare * coBroking.commissionSplit) / 100;
+      coAgentShare = (agentShare * (coBroking.commissionSplit || 0)) / 100;
       agentShare = agentShare - coAgentShare;
     }
     
     return {
-      transactionValue,
-      commissionRate,
+      transactionValue: transactionValue || 0,
+      commissionRate: commissionRate || 0,
       totalCommission,
       agencyShare,
       agentShare,
@@ -165,11 +169,12 @@ export const useTransactionFormActions = () => {
         break;
         
       case 3: // Co-Broking Setup
+        // Only validate if co-broking is enabled
         if (formData.coBroking?.enabled) {
-          if (!formData.coBroking.agentName) {
+          if (!formData.coBroking.agentName || formData.coBroking.agentName.trim() === '') {
             errors.coAgentName = 'Co-broker agent name is required';
           }
-          if (!formData.coBroking.agentCompany) {
+          if (!formData.coBroking.agentCompany || formData.coBroking.agentCompany.trim() === '') {
             errors.coAgentCompany = 'Co-broker company is required';
           }
         }

@@ -18,7 +18,7 @@ import DocumentUpload from './form/DocumentUpload';
 import TransactionReview from './form/TransactionReview';
 
 const TransactionFormSteps: React.FC = () => {
-  const { state, prevStep, nextStep, saveForm, submitForm } = useTransactionForm();
+  const { state, prevStep, nextStep, saveForm, submitForm, validateCurrentStep } = useTransactionForm();
   const { currentStep, isSubmitting, lastSaved } = state;
   const navigate = useNavigate();
 
@@ -27,6 +27,7 @@ const TransactionFormSteps: React.FC = () => {
       await saveForm();
       toast.success('Transaction saved as draft');
     } catch (error) {
+      console.error('Save error:', error);
       toast.error('Failed to save transaction');
     }
   };
@@ -37,7 +38,21 @@ const TransactionFormSteps: React.FC = () => {
       toast.success('Transaction created successfully!');
       navigate('/transactions');
     } catch (error) {
+      console.error('Submit error:', error);
       toast.error('Failed to create transaction');
+    }
+  };
+  
+  const handleNextStep = () => {
+    // First validate the current step
+    const isValid = validateCurrentStep();
+    
+    // If validation passes, proceed to the next step
+    if (isValid) {
+      nextStep();
+    } else {
+      // Show an error toast to alert the user
+      toast.error('Please fix the validation errors before proceeding');
     }
   };
 
@@ -101,7 +116,7 @@ const TransactionFormSteps: React.FC = () => {
               {currentStep < 6 ? (
                 <Button
                   type="button"
-                  onClick={nextStep}
+                  onClick={handleNextStep}
                   disabled={isSubmitting}
                 >
                   Next

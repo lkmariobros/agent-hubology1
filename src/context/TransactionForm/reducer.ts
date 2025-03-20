@@ -30,24 +30,36 @@ export const transactionFormReducer = (
     case 'UPDATE_FORM_DATA':
       // Handle coBroking field updates properly
       if (action.payload.coBroking) {
+        // Make sure the coBroking object is initialized
+        const currentCoBroking = state.formData.coBroking || {
+          enabled: false,
+          agentName: '',
+          agentCompany: '',
+          agentContact: '',
+          commissionSplit: 50
+        };
+        
         return {
           ...state,
           formData: { 
             ...state.formData, 
             ...action.payload,
             coBroking: {
-              ...state.formData.coBroking,
+              ...currentCoBroking,
               ...action.payload.coBroking
             }
           },
           isDirty: true,
         };
       }
+      
+      // Handle other fields
       return {
         ...state,
         formData: { ...state.formData, ...action.payload },
         isDirty: true,
       };
+      
     case 'UPDATE_TRANSACTION_TYPE': {
       // Keep current property data when changing transaction type
       const currentProperty = state.formData.property;
@@ -67,33 +79,39 @@ export const transactionFormReducer = (
         isDirty: true,
       };
     }
+    
     case 'ADD_DOCUMENT':
       return {
         ...state,
         documents: [...state.documents, action.payload],
         isDirty: true,
       };
+      
     case 'REMOVE_DOCUMENT':
       return {
         ...state,
         documents: state.documents.filter((_, index) => index !== action.payload),
         isDirty: true,
       };
+      
     case 'NEXT_STEP':
       return {
         ...state,
         currentStep: state.currentStep + 1,
       };
+      
     case 'PREV_STEP':
       return {
         ...state,
         currentStep: Math.max(0, state.currentStep - 1),
       };
+      
     case 'GO_TO_STEP':
       return {
         ...state,
         currentStep: action.payload,
       };
+      
     case 'RESET_FORM':
       return {
         ...state,
@@ -105,22 +123,26 @@ export const transactionFormReducer = (
         lastSaved: null,
         errors: {},
       };
+      
     case 'FORM_SAVED':
       return {
         ...state,
         lastSaved: action.payload,
         isDirty: false,
       };
+      
     case 'SUBMITTING':
       return {
         ...state,
         isSubmitting: action.payload,
       };
+      
     case 'SET_ERRORS':
       return {
         ...state,
         errors: action.payload,
       };
+      
     default:
       return state;
   }
