@@ -2,8 +2,7 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { 
-  Bed, Bath, Square, Edit2, Calendar, Eye, 
-  Users, Building, Tag, ArrowUpRight 
+  Edit2
 } from 'lucide-react';
 import { Property } from '@/types';
 import { Badge } from '../ui/badge';
@@ -18,7 +17,7 @@ interface PropertyCardDetailsProps {
 export function PropertyCardDetails({ property, onEdit, className }: PropertyCardDetailsProps) {
   return (
     <div className={cn(
-      "px-4 pb-4 pt-2 rounded-b-xl transition-all duration-300 ease-in-out bg-[#121212]",
+      "px-4 pb-4 pt-2 rounded-xl transition-all duration-300 ease-in-out bg-[#121212]",
       className
     )}>
       {/* Property metrics tabs */}

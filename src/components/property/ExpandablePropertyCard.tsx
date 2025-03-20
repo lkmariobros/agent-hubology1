@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Card } from "@/components/ui/card";
 import { Property } from '@/types';
 import { cn } from '@/lib/utils';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
 import { PropertyCardHeader } from './PropertyCardHeader';
 import { PropertyCardBasicInfo } from './PropertyCardBasicInfo';
 import { PropertyCardDetails } from './PropertyCardDetails';
@@ -129,8 +129,11 @@ export function ExpandablePropertyCard({
             />
           </div>
           
-          {/* Main content wrapper with dark background and rounded corners */}
-          <div className="bg-[#121212] rounded-b-xl overflow-hidden">
+          {/* Inner card with fully rounded corners when expanded */}
+          <div className={cn(
+            "bg-[#121212] overflow-hidden transition-all duration-300 ease-in-out",
+            isOpen ? "rounded-xl mx-2 my-2 border border-neutral-800" : "rounded-b-xl"
+          )}>
             {/* Basic info section - This will be clickable for expansion */}
             <PropertyCardBasicInfo 
               property={property} 
