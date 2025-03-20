@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
@@ -114,13 +113,13 @@ const Properties = () => {
       features: []
     });
   };
-
+  
   return (
     <MainLayout>
-      <div className="p-6 space-y-6">
+      <div className="page-container">
         {/* Header section with consistent alignment */}
-        <div className="flex justify-between items-center">
-          <h1 className="text-xl font-semibold tracking-tight">Properties</h1>
+        <div className="page-header">
+          <h1 className="page-title">Properties</h1>
           <Button 
             size="sm" 
             className="gap-2 rounded-full px-6 bg-orange-500 hover:bg-orange-600" 
