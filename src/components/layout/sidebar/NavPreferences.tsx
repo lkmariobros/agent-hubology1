@@ -24,6 +24,7 @@ export function NavPreferences() {
               asChild
               isActive={location.pathname === '/settings'}
               tooltip="Settings"
+              size="default"
             >
               <Link to="/settings">
                 <Settings />

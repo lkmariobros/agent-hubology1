@@ -176,6 +176,6 @@
   
   /* Ensure consistent borders for all content sections */
   .content-container {
-    @apply min-h-[calc(100vh-4rem)] border border-muted/60 rounded-xl;
+    @apply min-h-[calc(100vh-6rem-3.5rem)] rounded-xl;
   }
 }

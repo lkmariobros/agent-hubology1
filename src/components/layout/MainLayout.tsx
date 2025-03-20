@@ -75,9 +75,11 @@ const MainLayout = ({ children }: MainLayoutProps) => {
                 </div>
               </header>
               
-              {/* Main scrollable content */}
-              <main className="flex-1 min-h-[calc(100vh-3.5rem-2rem)] overflow-y-auto bg-background">
-                {children || <Outlet />}
+              {/* Main scrollable content - Improved with consistent minimum height */}
+              <main className="flex-1 min-h-[calc(100vh-3.5rem-2rem)] overflow-y-auto bg-background p-6">
+                <div className="content-container">
+                  {children || <Outlet />}
+                </div>
               </main>
             </div>
           </SidebarInset>

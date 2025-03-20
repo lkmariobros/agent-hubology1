@@ -60,6 +60,7 @@ export function NavMain() {
                 asChild 
                 isActive={location.pathname === item.href}
                 tooltip={item.label}
+                size="default"
               >
                 <Link to={item.href}>
                   <item.icon />

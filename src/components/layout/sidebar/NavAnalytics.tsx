@@ -59,6 +59,7 @@ export function NavAnalytics() {
                   asChild
                   isActive={location.pathname === item.href}
                   tooltip={item.label}
+                  size="default"
                 >
                   <Link to={item.href}>
                     <item.icon />
@@ -71,6 +72,7 @@ export function NavAnalytics() {
                 <SidebarMenuButton
                   tooltip={item.label}
                   isActive={item.submenu.some(sub => location.pathname === sub.href)}
+                  size="default"
                 >
                   <item.icon />
                   <span>{item.label}</span>
@@ -81,6 +83,7 @@ export function NavAnalytics() {
                       <SidebarMenuSubButton 
                         asChild
                         isActive={location.pathname === subItem.href}
+                        size="md"
                       >
                         <Link to={subItem.href}>
                           <subItem.icon />
