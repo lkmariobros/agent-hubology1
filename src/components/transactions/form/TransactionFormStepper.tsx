@@ -29,48 +29,54 @@ const TransactionFormStepper: React.FC = () => {
 
   return (
     <div className="mb-8">
-      <div className="flex items-center justify-between relative">
-        {/* Background line (unfilled) - Adjusted positioning */}
-        <div className="absolute h-0.5 bg-muted top-6 left-0 right-0 z-0"></div>
-        
-        {/* Progress line (filled) - Fixed width calculation and position */}
-        <div 
-          className="absolute h-0.5 bg-primary top-6 left-0 z-10 transition-all duration-300 ease-in-out"
-          style={{ 
-            width: currentStep === 0 
-              ? '0%' 
-              : `calc(${(currentStep / (steps.length - 1)) * 100}%)`,
-          }}
-        ></div>
-        
-        {/* Steps */}
-        {steps.map((step) => (
+      <h2 className="text-2xl font-bold mb-6">Add New Transaction</h2>
+      <div className="relative">
+        {/* Container for steps with proper justification */}
+        <div className="flex justify-between relative">
+          {/* Background line (unfilled) */}
+          <div className="absolute h-0.5 bg-muted top-6 left-0 right-0 z-0"></div>
+          
+          {/* Progress line (filled) - Adjusted for precise positioning */}
           <div 
-            key={step.id}
-            className="flex flex-col items-center z-20 cursor-pointer" 
-            onClick={() => goToStep(step.id)}
-          >
+            className="absolute h-0.5 bg-primary top-6 left-0 z-10 transition-all duration-300 ease-in-out"
+            style={{ 
+              width: currentStep === 0 
+                ? '0%' 
+                : `calc(${(currentStep / (steps.length - 1)) * 100}%)`,
+            }}
+          ></div>
+          
+          {/* Steps */}
+          {steps.map((step, index) => (
             <div 
-              className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 transition-colors
-              ${step.id <= currentStep 
-                ? 'bg-primary text-primary-foreground' 
-                : step.id === currentStep + 1 
-                  ? 'bg-muted/80 border border-muted-foreground/30'
-                  : 'bg-muted text-muted-foreground'}`}
+              key={step.id}
+              className={`flex flex-col items-center z-20 cursor-pointer`}
+              onClick={() => goToStep(step.id)}
             >
-              {step.icon}
+              <div 
+                className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 transition-colors
+                ${step.id < currentStep 
+                  ? 'bg-primary text-primary-foreground' 
+                  : step.id === currentStep 
+                    ? 'bg-primary text-primary-foreground'
+                    : step.id === currentStep + 1 
+                      ? 'bg-muted/80 border border-muted-foreground/30'
+                      : 'bg-muted text-muted-foreground'}`}
+              >
+                {step.id < currentStep ? <Check className="h-5 w-5" /> : step.icon}
+              </div>
+              <span 
+                className={`text-xs font-medium ${
+                  step.id <= currentStep 
+                    ? 'text-primary' 
+                    : 'text-muted-foreground'
+                }`}
+              >
+                {step.label}
+              </span>
             </div>
-            <span 
-              className={`text-xs font-medium ${
-                step.id <= currentStep 
-                  ? 'text-primary' 
-                  : 'text-muted-foreground'
-              }`}
-            >
-              {step.label}
-            </span>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );
