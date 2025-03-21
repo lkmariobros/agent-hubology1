@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -83,161 +82,35 @@ const NewAgent = () => {
   ];
 
   return (
-    <MainLayout>
-      <div className="p-6">
-        <h1 className="text-3xl font-bold mb-6">Add New Agent</h1>
-        
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            <Tabs defaultValue="personal" className="mb-6">
-              <TabsList className="mb-6">
-                <TabsTrigger value="personal">Personal Information</TabsTrigger>
-                <TabsTrigger value="professional">Professional Information</TabsTrigger>
-                <TabsTrigger value="specializations">Specializations & Areas</TabsTrigger>
-                <TabsTrigger value="credentials">Credentials</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="personal">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Personal Information</CardTitle>
-                    <CardDescription>Enter the agent's personal details</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="firstName"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>First Name</FormLabel>
-                            <FormControl>
-                              <Input placeholder="John" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="lastName"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Last Name</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Doe" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="email"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Email</FormLabel>
-                            <FormControl>
-                              <Input placeholder="john.doe@example.com" type="email" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="phone"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Phone</FormLabel>
-                            <FormControl>
-                              <Input placeholder="+1 (555) 123-4567" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-              
-              <TabsContent value="professional">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Professional Information</CardTitle>
-                    <CardDescription>Enter the agent's professional details</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="role"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Role</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select role" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="agent">Agent</SelectItem>
-                                <SelectItem value="juniorAgent">Junior Agent</SelectItem>
-                                <SelectItem value="seniorAgent">Senior Agent</SelectItem>
-                                <SelectItem value="teamLeader">Team Leader</SelectItem>
-                                <SelectItem value="manager">Manager</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="tier"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Tier</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select tier" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="tier1">Tier 1 (70%)</SelectItem>
-                                <SelectItem value="tier2">Tier 2 (75%)</SelectItem>
-                                <SelectItem value="tier3">Tier 3 (80%)</SelectItem>
-                                <SelectItem value="tier4">Tier 4 (82.5%)</SelectItem>
-                                <SelectItem value="tier5">Tier 5 (85%)</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                    
+    <div className="p-6">
+      <h1 className="text-3xl font-bold mb-6">Add New Agent</h1>
+      
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <Tabs defaultValue="personal" className="mb-6">
+            <TabsList className="mb-6">
+              <TabsTrigger value="personal">Personal Information</TabsTrigger>
+              <TabsTrigger value="professional">Professional Information</TabsTrigger>
+              <TabsTrigger value="specializations">Specializations & Areas</TabsTrigger>
+              <TabsTrigger value="credentials">Credentials</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="personal">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Personal Information</CardTitle>
+                  <CardDescription>Enter the agent's personal details</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
-                      name="bio"
+                      name="firstName"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Bio</FormLabel>
+                          <FormLabel>First Name</FormLabel>
                           <FormControl>
-                            <Textarea 
-                              placeholder="Enter agent bio and professional experience..."
-                              className="min-h-32"
-                              {...field} 
-                            />
+                            <Input placeholder="John" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -246,82 +119,206 @@ const NewAgent = () => {
                     
                     <FormField
                       control={form.control}
-                      name="startDate"
+                      name="lastName"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Start Date</FormLabel>
+                          <FormLabel>Last Name</FormLabel>
                           <FormControl>
-                            <Input type="date" {...field} />
+                            <Input placeholder="Doe" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-                  </CardContent>
-                </Card>
-              </TabsContent>
-              
-              <TabsContent value="specializations">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Specializations & Service Areas</CardTitle>
-                    <CardDescription>Select the agent's specializations and service areas</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <div>
-                      <FormLabel className="block mb-3">Specializations</FormLabel>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {specializations.map((item) => (
-                          <div key={item.id} className="flex items-center space-x-2">
-                            <Checkbox 
-                              id={`specialization-${item.id}`} 
-                              value={item.id}
-                              onCheckedChange={(checked) => {
-                                const current = form.getValues().specializations || [];
-                                if (checked) {
-                                  form.setValue('specializations', [...current, item.id]);
-                                } else {
-                                  form.setValue('specializations', current.filter(val => val !== item.id));
-                                }
-                              }}
-                            />
-                            <label
-                              htmlFor={`specialization-${item.id}`}
-                              className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                            >
-                              {item.label}
-                            </label>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email</FormLabel>
+                          <FormControl>
+                            <Input placeholder="john.doe@example.com" type="email" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                     
-                    <div>
-                      <FormLabel className="block mb-3">Service Areas</FormLabel>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {serviceAreas.map((item) => (
-                          <div key={item.id} className="flex items-center space-x-2">
-                            <Checkbox 
-                              id={`area-${item.id}`} 
-                              value={item.id}
-                              onCheckedChange={(checked) => {
-                                const current = form.getValues().serviceAreas || [];
-                                if (checked) {
-                                  form.setValue('serviceAreas', [...current, item.id]);
-                                } else {
-                                  form.setValue('serviceAreas', current.filter(val => val !== item.id));
-                                }
-                              }}
-                            />
-                            <label
-                              htmlFor={`area-${item.id}`}
-                              className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                            >
-                              {item.label}
-                            </label>
-                          </div>
-                        ))}
-                      </div>
+                    <FormField
+                      control={form.control}
+                      name="phone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Phone</FormLabel>
+                          <FormControl>
+                            <Input placeholder="+1 (555) 123-4567" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="professional">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Professional Information</CardTitle>
+                  <CardDescription>Enter the agent's professional details</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="role"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Role</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select role" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="agent">Agent</SelectItem>
+                              <SelectItem value="juniorAgent">Junior Agent</SelectItem>
+                              <SelectItem value="seniorAgent">Senior Agent</SelectItem>
+                              <SelectItem value="teamLeader">Team Leader</SelectItem>
+                              <SelectItem value="manager">Manager</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="tier"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Tier</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select tier" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="tier1">Tier 1 (70%)</SelectItem>
+                              <SelectItem value="tier2">Tier 2 (75%)</SelectItem>
+                              <SelectItem value="tier3">Tier 3 (80%)</SelectItem>
+                              <SelectItem value="tier4">Tier 4 (82.5%)</SelectItem>
+                              <SelectItem value="tier5">Tier 5 (85%)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  <FormField
+                    control={form.control}
+                    name="bio"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Bio</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            placeholder="Enter agent bio and professional experience..."
+                            className="min-h-32"
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="startDate"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Start Date</FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="specializations">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Specializations & Service Areas</CardTitle>
+                  <CardDescription>Select the agent's specializations and service areas</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div>
+                    <FormLabel className="block mb-3">Specializations</FormLabel>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {specializations.map((item) => (
+                        <div key={item.id} className="flex items-center space-x-2">
+                          <Checkbox 
+                            id={`specialization-${item.id}`} 
+                            value={item.id}
+                            onCheckedChange={(checked) => {
+                              const current = form.getValues().specializations || [];
+                              if (checked) {
+                                form.setValue('specializations', [...current, item.id]);
+                              } else {
+                                form.setValue('specializations', current.filter(val => val !== item.id));
+                              }
+                            }}
+                          />
+                          <label
+                            htmlFor={`specialization-${item.id}`}
+                            className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                          >
+                            {item.label}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <FormLabel className="block mb-3">Service Areas</FormLabel>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {serviceAreas.map((item) => (
+                        <div key={item.id} className="flex items-center space-x-2">
+                          <Checkbox 
+                            id={`area-${item.id}`} 
+                            value={item.id}
+                            onCheckedChange={(checked) => {
+                              const current = form.getValues().serviceAreas || [];
+                              if (checked) {
+                                form.setValue('serviceAreas', [...current, item.id]);
+                              } else {
+                                form.setValue('serviceAreas', current.filter(val => val !== item.id));
+                              }
+                            }}
+                          />
+                          <label
+                            htmlFor={`area-${item.id}`}
+                            className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                          >
+                            {item.label}
+                          </label>
+                        </div>
+                      ))}
                     </div>
                   </CardContent>
                 </Card>

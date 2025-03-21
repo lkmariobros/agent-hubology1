@@ -1,4 +1,3 @@
-
 import React from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import MetricCard from '@/components/dashboard/MetricCard';
@@ -131,45 +130,43 @@ const Home = () => {
   };
 
   return (
-    <MainLayout>
-      <div className="p-6">
-        <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {metrics.map((metric, index) => (
-            <MetricCard
-              key={index}
-              metric={metric}
-            />
-          ))}
+    <div className="p-6">
+      <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        {metrics.map((metric, index) => (
+          <MetricCard
+            key={index}
+            metric={metric}
+          />
+        ))}
+      </div>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="bg-card rounded-lg shadow p-6">
+          <h2 className="text-xl font-semibold mb-4">Recent Transactions</h2>
+          <RecentTransactions 
+            transactions={transactions}
+            onViewAll={() => handleViewAll('transactions')}
+          />
         </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="bg-card rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold mb-4">Recent Transactions</h2>
-            <RecentTransactions 
-              transactions={transactions}
-              onViewAll={() => handleViewAll('transactions')}
-            />
-          </div>
-          
-          <div className="bg-card rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold mb-4">Featured Properties</h2>
-            <PropertyList 
-              properties={properties}
-              onViewAll={() => handleViewAll('properties')}
-            />
-          </div>
-        </div>
-        
-        <div className="mt-8">
-          <h2 className="text-xl font-semibold mb-4">Opportunities</h2>
-          <OpportunitiesBoard 
-            onViewAll={() => handleViewAll('opportunities')}
+        <div className="bg-card rounded-lg shadow p-6">
+          <h2 className="text-xl font-semibold mb-4">Featured Properties</h2>
+          <PropertyList 
+            properties={properties}
+            onViewAll={() => handleViewAll('properties')}
           />
         </div>
       </div>
-    </MainLayout>
+      
+      <div className="mt-8">
+        <h2 className="text-xl font-semibold mb-4">Opportunities</h2>
+        <OpportunitiesBoard 
+          onViewAll={() => handleViewAll('opportunities')}
+        />
+      </div>
+    </div>
   );
 };
 

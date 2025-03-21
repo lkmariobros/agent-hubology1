@@ -1,10 +1,8 @@
-
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Pencil, User, Lock, BellRing, Globe, Briefcase, Warehouse } from 'lucide-react';
-import MainLayout from '@/components/layout/MainLayout';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
@@ -77,115 +75,113 @@ export default function Settings() {
   };
 
   return (
-    <MainLayout>
-      <div className="container max-w-6xl pb-10">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-bold">Settings</h1>
-            <p className="text-muted-foreground">Manage your account and agency settings</p>
-          </div>
-          
-          {isEditing && (
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={toggleEdit}>
-                Discard
-              </Button>
-              <Button onClick={form.handleSubmit(onSubmit)}>
-                Save Changes
-              </Button>
-            </div>
-          )}
+    <div className="container max-w-6xl pb-10">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-3xl font-bold">Settings</h1>
+          <p className="text-muted-foreground">Manage your account and agency settings</p>
         </div>
         
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar */}
-          <Card className="w-full lg:w-64 h-fit sticky top-6">
-            <CardContent className="p-0">
-              <nav className="flex flex-col">
-                <Button variant="ghost" className="justify-start h-12 px-4 gap-2 font-normal rounded-none">
-                  <User className="h-4 w-4" />
-                  Account Settings
-                </Button>
-                <Button variant="ghost" className="justify-start h-12 px-4 gap-2 font-normal rounded-none">
-                  <Lock className="h-4 w-4" />
-                  Privacy & Security
-                </Button>
-                <Button variant="ghost" className="justify-start h-12 px-4 gap-2 font-normal rounded-none">
-                  <BellRing className="h-4 w-4" />
-                  Notifications
-                </Button>
-                <Button variant="ghost" className="justify-start h-12 px-4 gap-2 font-normal rounded-none">
-                  <Globe className="h-4 w-4" />
-                  Language & Region
-                </Button>
-                
-                <Separator className="my-2" />
-                <div className="px-4 py-2 text-sm font-semibold text-muted-foreground">AGENCY SETTINGS</div>
-                
-                <Button variant="ghost" className="justify-start h-12 px-4 gap-2 font-normal rounded-none">
-                  <Briefcase className="h-4 w-4" />
-                  Agent Profile
-                </Button>
-                <Button variant="ghost" className="justify-start h-12 px-4 gap-2 font-normal rounded-none">
-                  <Warehouse className="h-4 w-4" />
-                  Agency Details
-                </Button>
-              </nav>
-            </CardContent>
-          </Card>
-          
-          {/* Main Content */}
-          <div className="flex-1">
-            <Tabs defaultValue="profile" className="w-full">
-              <TabsList className="mb-6">
-                <TabsTrigger value="profile">Profile</TabsTrigger>
-                <TabsTrigger value="agency">Agency</TabsTrigger>
-                <TabsTrigger value="notifications">Notifications</TabsTrigger>
-              </TabsList>
+        {isEditing && (
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={toggleEdit}>
+              Discard
+            </Button>
+            <Button onClick={form.handleSubmit(onSubmit)}>
+              Save Changes
+            </Button>
+          </div>
+        )}
+      </div>
+      
+      <div className="flex flex-col lg:flex-row gap-8">
+        {/* Sidebar */}
+        <Card className="w-full lg:w-64 h-fit sticky top-6">
+          <CardContent className="p-0">
+            <nav className="flex flex-col">
+              <Button variant="ghost" className="justify-start h-12 px-4 gap-2 font-normal rounded-none">
+                <User className="h-4 w-4" />
+                Account Settings
+              </Button>
+              <Button variant="ghost" className="justify-start h-12 px-4 gap-2 font-normal rounded-none">
+                <Lock className="h-4 w-4" />
+                Privacy & Security
+              </Button>
+              <Button variant="ghost" className="justify-start h-12 px-4 gap-2 font-normal rounded-none">
+                <BellRing className="h-4 w-4" />
+                Notifications
+              </Button>
+              <Button variant="ghost" className="justify-start h-12 px-4 gap-2 font-normal rounded-none">
+                <Globe className="h-4 w-4" />
+                Language & Region
+              </Button>
               
-              <TabsContent value="profile">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Profile Information</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <Form {...form}>
-                      <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
-                        {/* Profile Photo */}
-                        <div className="flex items-center gap-6">
-                          <Avatar className="h-20 w-20">
-                            <AvatarImage src="/placeholder.svg" alt="Profile" />
-                            <AvatarFallback>JB</AvatarFallback>
-                          </Avatar>
-                          <Button type="button" variant="outline" size="sm">
-                            Change
-                          </Button>
-                        </div>
-                        
-                        <Separator />
-                        
-                        {/* Personal Info */}
-                        <div className="grid gap-4">
-                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <FormField
-                              control={form.control}
-                              name="name"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <div className="flex justify-between">
-                                    <FormLabel>Full Name</FormLabel>
-                                    {!isEditing && (
-                                      <Button 
-                                        type="button" 
-                                        variant="ghost" 
-                                        size="icon" 
-                                        onClick={toggleEdit}
-                                        className="h-5 w-5"
-                                      >
-                                        <Pencil className="h-3 w-3" />
-                                      </Button>
-                                    )}
-                                  </div>
+              <Separator className="my-2" />
+              <div className="px-4 py-2 text-sm font-semibold text-muted-foreground">AGENCY SETTINGS</div>
+              
+              <Button variant="ghost" className="justify-start h-12 px-4 gap-2 font-normal rounded-none">
+                <Briefcase className="h-4 w-4" />
+                Agent Profile
+              </Button>
+              <Button variant="ghost" className="justify-start h-12 px-4 gap-2 font-normal rounded-none">
+                <Warehouse className="h-4 w-4" />
+                Agency Details
+              </Button>
+            </nav>
+          </CardContent>
+        </Card>
+        
+        {/* Main Content */}
+        <div className="flex-1">
+          <Tabs defaultValue="profile" className="w-full">
+            <TabsList className="mb-6">
+              <TabsTrigger value="profile">Profile</TabsTrigger>
+              <TabsTrigger value="agency">Agency</TabsTrigger>
+              <TabsTrigger value="notifications">Notifications</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="profile">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Profile Information</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Form {...form}>
+                    <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
+                      {/* Profile Photo */}
+                      <div className="flex items-center gap-6">
+                        <Avatar className="h-20 w-20">
+                          <AvatarImage src="/placeholder.svg" alt="Profile" />
+                          <AvatarFallback>JB</AvatarFallback>
+                        </Avatar>
+                        <Button type="button" variant="outline" size="sm">
+                          Change
+                        </Button>
+                      </div>
+                      
+                      <Separator />
+                      
+                      {/* Personal Info */}
+                      <div className="grid gap-4">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                          <FormField
+                            control={form.control}
+                            name="name"
+                            render={({ field }) => (
+                              <FormItem>
+                                <div className="flex justify-between">
+                                  <FormLabel>Full Name</FormLabel>
+                                  {!isEditing && (
+                                    <Button 
+                                      type="button" 
+                                      variant="ghost" 
+                                      size="icon" 
+                                      onClick={toggleEdit}
+                                      className="h-5 w-5"
+                                    >
+                                      <Pencil className="h-3 w-3" />
+                                    </Button>
+                                  )}
                                   {isEditing ? (
                                     <FormControl>
                                       <Input {...field} />
