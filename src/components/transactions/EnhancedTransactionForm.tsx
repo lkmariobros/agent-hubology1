@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TransactionFormProvider, useTransactionForm } from '@/context/TransactionFormContext'; 
+import { TransactionFormProvider, useTransactionForm } from '@/context/TransactionForm'; 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
@@ -165,6 +165,7 @@ const TransactionFormSteps: React.FC = () => {
   );
 };
 
+// The key change here is ensuring TransactionFormProvider properly wraps TransactionFormSteps
 const EnhancedTransactionForm: React.FC = () => {
   console.log('EnhancedTransactionForm rendered');
   return (

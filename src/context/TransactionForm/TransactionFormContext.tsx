@@ -1,42 +1,35 @@
 
-import React, { createContext, useContext, useReducer, ReactNode, useCallback, useEffect } from 'react';
-import { TransactionFormState, TransactionFormContextType, TransactionFormData, TransactionDocument, TransactionType, CommissionBreakdown } from '@/types/transaction-form';
+import React, { createContext, useContext, useReducer, ReactNode, useCallback } from 'react';
+import { 
+  TransactionFormState, 
+  TransactionFormContextType, 
+  TransactionFormData, 
+  TransactionDocument, 
+  TransactionType, 
+  CommissionBreakdown 
+} from './types';
 import { transactionFormReducer } from './reducer';
 import { initialTransactionFormState } from './initialState';
 import { saveFormAsDraft, submitTransactionForm } from './formSubmission';
-import { toast } from 'sonner';
 
-// Create context
-export const TransactionFormContext = createContext<TransactionFormContextType | undefined>(undefined);
+// Create context with undefined initial value
+const TransactionFormContext = createContext<TransactionFormContextType | undefined>(undefined);
 
 // Provider component
 export const TransactionFormProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(transactionFormReducer, initialTransactionFormState);
-
-  // Auto-save functionality
-  useEffect(() => {
-    let saveTimer: NodeJS.Timeout;
-    
-    if (state.isDirty) {
-      saveTimer = setTimeout(() => {
-        saveForm();
-      }, 120000); // Auto-save every 2 minutes if form is dirty
-    }
-    
-    return () => {
-      if (saveTimer) clearTimeout(saveTimer);
-    };
-  }, [state.isDirty, state.formData]);
+  
+  console.log('TransactionFormProvider rendered with state:', state);
 
   // Update form data
   const updateFormData = useCallback((data: Partial<TransactionFormData>) => {
-    console.log('Updating form data:', data);
+    console.log('updateFormData called with:', data);
     dispatch({ type: 'UPDATE_FORM_DATA', payload: data });
   }, []);
 
   // Update transaction type
   const updateTransactionType = useCallback((type: TransactionType) => {
-    console.log('Updating transaction type:', type);
+    console.log('updateTransactionType called with:', type);
     dispatch({ type: 'UPDATE_TRANSACTION_TYPE', payload: type });
   }, []);
 
@@ -51,17 +44,15 @@ export const TransactionFormProvider: React.FC<{ children: ReactNode }> = ({ chi
 
   // Navigation functions
   const nextStep = useCallback(() => {
-    console.log('Next step called, validating current step...');
-    const isValid = validateCurrentStep();
-    console.log('Validation result:', isValid);
-    
-    if (isValid) {
-      console.log('Advancing to next step');
+    console.log('nextStep called, validating current step');
+    if (validateCurrentStep()) {
+      console.log('Validation passed, dispatching NEXT_STEP');
       dispatch({ type: 'NEXT_STEP' });
       return true;
     }
+    console.log('Validation failed, not proceeding to next step');
     return false;
-  }, []);
+  }, [state]);
 
   const prevStep = useCallback(() => {
     dispatch({ type: 'PREV_STEP' });
@@ -77,7 +68,7 @@ export const TransactionFormProvider: React.FC<{ children: ReactNode }> = ({ chi
     const { formData, currentStep } = state;
     
     console.log('Validating step:', currentStep);
-    console.log('Current form data:', formData);
+    console.log('Form data:', formData);
     
     switch (currentStep) {
       case 0: // Transaction Type
@@ -221,6 +212,7 @@ export const TransactionFormProvider: React.FC<{ children: ReactNode }> = ({ chi
     };
   }, [state.formData]);
 
+  // Create context value object
   const contextValue: TransactionFormContextType = {
     state,
     updateFormData,
@@ -236,8 +228,6 @@ export const TransactionFormProvider: React.FC<{ children: ReactNode }> = ({ chi
     calculateCommission,
     validateCurrentStep,
   };
-
-  console.log('TransactionFormProvider rendering with state:', state);
 
   return (
     <TransactionFormContext.Provider value={contextValue}>
@@ -256,3 +246,6 @@ export const useTransactionForm = (): TransactionFormContextType => {
   
   return context;
 };
+
+// Export the context
+export { TransactionFormContext };
