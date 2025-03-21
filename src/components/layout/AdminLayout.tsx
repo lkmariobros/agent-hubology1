@@ -8,7 +8,6 @@ import { useAuth } from '@/providers/AuthProvider';
 import {
   SidebarProvider,
   SidebarTrigger,
-  SidebarInset
 } from "@/components/ui/sidebar";
 
 import {
@@ -47,8 +46,8 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
       <SidebarProvider>
         <AdminSidebar />
         
-        {/* Main content with border */}
-        <SidebarInset className="flex flex-col h-full p-4">
+        {/* Main content */}
+        <div className="flex flex-col h-full p-4 w-full">
           <div className="flex flex-col h-full rounded-xl border border-muted/60 overflow-hidden shadow-sm">
             {/* Fixed header */}
             <header className="h-14 flex-shrink-0 border-b border-border/20 flex items-center justify-between px-4 bg-card">
@@ -97,7 +96,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
               </div>
             </main>
           </div>
-        </SidebarInset>
+        </div>
       </SidebarProvider>
     </div>
   );

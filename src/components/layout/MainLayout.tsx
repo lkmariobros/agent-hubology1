@@ -44,7 +44,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         <AppSidebar />
         
         {/* Main content area */}
-        <SidebarInset className="flex flex-col h-full w-full">
+        <div className="flex flex-col h-full w-full overflow-hidden">
           {/* Fixed header */}
           <header className="h-14 flex-shrink-0 border-b border-border/20 flex items-center justify-between px-4 bg-card">
             <div className="flex items-center space-x-3">
@@ -89,7 +89,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
           <main className="flex-1 overflow-y-auto bg-background p-6">
             {children || <Outlet />}
           </main>
-        </SidebarInset>
+        </div>
       </SidebarProvider>
     </div>
   );
