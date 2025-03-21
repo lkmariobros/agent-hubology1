@@ -54,7 +54,7 @@ function App() {
                 <Route path="/" element={<Index />} />
                 
                 {/* Agent Routes */}
-                <Route element={<MainLayout />}>
+                <Route path="/" element={<MainLayout />}>
                   <Route path="dashboard" element={<Dashboard />} />
                   <Route path="transactions" element={<Transactions />} />
                   <Route path="transactions/:id" element={<TransactionDetail />} />

@@ -48,6 +48,7 @@ const mainNavItems = [
 
 export function NavMain() {
   const location = useLocation();
+  const currentPath = location.pathname;
   
   return (
     <SidebarGroup>
@@ -56,8 +57,8 @@ export function NavMain() {
         <SidebarMenu>
           {mainNavItems.map((item) => {
             // Check if current path starts with this item's href (for nested routes)
-            const isActive = location.pathname === item.href || 
-                           (item.href !== '/dashboard' && location.pathname.startsWith(item.href));
+            const isActive = currentPath === item.href || 
+                           (item.href !== '/dashboard' && currentPath.startsWith(item.href));
             
             return (
               <SidebarMenuItem key={item.label}>

@@ -11,8 +11,10 @@ export const useNotificationSubscription = (
   useEffect(() => {
     if (!userId) return;
 
+    let channel;
+
     try {
-      const channel = supabase
+      channel = supabase
         .channel('public:notifications')
         .on(
           'postgres_changes',
@@ -58,14 +60,20 @@ export const useNotificationSubscription = (
           }
         )
         .subscribe((status) => {
-          console.log('Subscription status:', status);
+          console.log('Notification subscription status:', status);
         });
-
-      return () => {
-        supabase.removeChannel(channel);
-      };
     } catch (error) {
       console.error('Error setting up notification subscription:', error);
     }
+
+    return () => {
+      if (channel) {
+        try {
+          supabase.removeChannel(channel);
+        } catch (error) {
+          console.error('Error removing notification channel:', error);
+        }
+      }
+    };
   }, [userId, onNewNotification]);
 };
