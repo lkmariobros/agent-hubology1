@@ -22,7 +22,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { AdminSidebar } from './AdminSidebar';
 import { ThemeToggle } from '../theme/ThemeToggle';
-import { TeamSwitcher } from './TeamSwitcher';
+import { PortalSwitcher } from './PortalSwitcher';
 
 interface AdminLayoutProps {
   children?: React.ReactNode;
@@ -54,7 +54,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
               <div className="flex items-center space-x-3">
                 <SidebarTrigger className="mr-2" />
                 <h1 className="text-lg font-normal ml-2">PropertyPro <span className="text-accent font-semibold">Admin</span></h1>
-                <TeamSwitcher />
+                <PortalSwitcher />
               </div>
               
               <div className="flex items-center space-x-2">

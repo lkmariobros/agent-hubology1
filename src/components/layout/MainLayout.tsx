@@ -22,7 +22,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { AppSidebar } from './AppSidebar';
 import { ThemeToggle } from '../theme/ThemeToggle';
-import { TeamSwitcher } from './TeamSwitcher';
+import { PortalSwitcher } from './PortalSwitcher';
 
 const MainLayout = () => {
   const isMobile = useIsMobile();
@@ -46,7 +46,7 @@ const MainLayout = () => {
             <div className="flex items-center space-x-3">
               <SidebarTrigger className="mr-2" />
               <h1 className="text-lg font-normal ml-2">PropertyPro</h1>
-              <TeamSwitcher />
+              <PortalSwitcher />
             </div>
             
             <div className="flex items-center space-x-2">
