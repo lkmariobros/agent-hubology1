@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
@@ -57,12 +56,13 @@ import {
 } from "@/components/ui/dialog";
 import StatusBadge from './StatusBadge';
 
+// Update the prop name from approvalId to id
 interface ApprovalDetailProps {
-  approvalId?: string;
+  id?: string;
 }
 
-const ApprovalDetail: React.FC<ApprovalDetailProps> = ({ approvalId }) => {
-  const { id } = useParams<{ id: string }>();
+const ApprovalDetail: React.FC<ApprovalDetailProps> = ({ id: approvalId }) => {
+  const { id: urlId } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('details');
   const [comment, setComment] = useState('');
@@ -71,7 +71,7 @@ const ApprovalDetail: React.FC<ApprovalDetailProps> = ({ approvalId }) => {
   const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
   
   // Use the approvalId prop or the id from the URL params
-  const currentApprovalId = approvalId || id;
+  const currentApprovalId = approvalId || urlId;
   
   // Get approval details with history and comments
   const { data, isLoading, error } = useCommissionApprovalDetail(currentApprovalId, true);

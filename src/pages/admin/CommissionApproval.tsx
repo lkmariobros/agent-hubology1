@@ -12,7 +12,7 @@ const CommissionApproval = () => {
     <AdminLayout>
       <div className="container mx-auto py-6">
         {id ? (
-          // Pass the prop as 'id' since that's what the component expects
+          // Updated to match the component's prop name
           <ApprovalDetail id={id} />
         ) : (
           <ApprovalDashboard />
