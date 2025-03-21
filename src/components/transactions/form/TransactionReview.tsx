@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useTransactionForm } from '@/context/TransactionFormContext';
 import { 
@@ -22,6 +21,7 @@ const TransactionReview: React.FC = () => {
   const { formData, documents } = state;
   
   const commissionBreakdown = calculateCommission();
+  const isRental = formData.transactionType === 'Rent';
   
   // Format date
   const formatDate = (date: Date) => {
@@ -82,7 +82,7 @@ const TransactionReview: React.FC = () => {
   
   // Get transaction summary items
   const getSummaryItems = () => {
-    return [
+    const items = [
       {
         icon: <Clock className="h-5 w-5" />,
         label: 'Transaction Status',
@@ -110,14 +110,29 @@ const TransactionReview: React.FC = () => {
       },
       {
         icon: <DollarSign className="h-5 w-5" />,
-        label: 'Transaction Value',
+        label: isRental ? 'Monthly Rental Value' : 'Transaction Value',
         value: formatCurrency(formData.transactionValue)
-      },
-      {
+      }
+    ];
+    
+    // Add commission-specific items based on transaction type
+    if (isRental) {
+      items.push({
+        icon: <DollarSign className="h-5 w-5" />,
+        label: 'Owner Commission Amount',
+        value: formatCurrency(formData.commissionAmount)
+      });
+    } else {
+      items.push({
         icon: <DollarSign className="h-5 w-5" />,
         label: 'Commission Rate',
         value: `${formData.commissionRate}%`
-      },
+      });
+    }
+    
+    // Add the remaining common items
+    return [
+      ...items,
       {
         icon: <Award className="h-5 w-5" />,
         label: 'Agent Tier',

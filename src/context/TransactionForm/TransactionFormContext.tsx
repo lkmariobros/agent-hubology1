@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useReducer, ReactNode, useCallback } from 'react';
 import { 
   TransactionFormState, 
@@ -136,10 +135,19 @@ export const TransactionFormProvider: React.FC<{ children: ReactNode }> = ({ chi
         
       case 4: // Commission Calculation
         if (!formData.transactionValue || formData.transactionValue <= 0) {
-          errors.transactionValue = 'Transaction value must be greater than 0';
+          errors.transactionValue = formData.transactionType === 'Rent' 
+            ? 'Monthly rental value must be greater than 0' 
+            : 'Transaction value must be greater than 0';
         }
-        if (!formData.commissionRate || formData.commissionRate <= 0) {
-          errors.commissionRate = 'Commission rate must be greater than 0';
+        
+        if (formData.transactionType === 'Rent') {
+          if (!formData.commissionAmount || formData.commissionAmount <= 0) {
+            errors.commissionAmount = 'Owner commission amount must be greater than 0';
+          }
+        } else {
+          if (!formData.commissionRate || formData.commissionRate <= 0) {
+            errors.commissionRate = 'Commission rate must be greater than 0';
+          }
         }
         break;
         
@@ -202,12 +210,18 @@ export const TransactionFormProvider: React.FC<{ children: ReactNode }> = ({ chi
     return AGENT_TIER_PERCENTAGES[tier] || 70; // Default to 70% if tier not found
   };
 
-  // Calculate commission breakdown - updated to match business rules
+  // Calculate commission breakdown - updated to handle rental transactions
   const calculateCommission = useCallback((): CommissionBreakdown => {
-    const { transactionValue, commissionRate, coBroking, agentTier = 'Advisor' } = state.formData;
+    const { transactionValue, commissionRate, commissionAmount, transactionType, coBroking, agentTier = 'Advisor' } = state.formData;
     
     // Calculate basic values
-    const totalCommission = (transactionValue * commissionRate) / 100;
+    const isRental = transactionType === 'Rent';
+    
+    // For rentals, use the commission amount directly (owner-provided commission)
+    // For sales/primary, calculate based on rate
+    const totalCommission = isRental 
+      ? (commissionAmount || 0) 
+      : (transactionValue * commissionRate) / 100;
     
     // Get the agent's commission percentage based on their tier
     const agentTierPercentage = getAgentCommissionPercentage(agentTier);
@@ -242,6 +256,7 @@ export const TransactionFormProvider: React.FC<{ children: ReactNode }> = ({ chi
     };
   }, [state.formData]);
 
+  
   // Create context value object
   const contextValue: TransactionFormContextType = {
     state,

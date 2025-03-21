@@ -17,7 +17,7 @@ export const getInitialTransactionData = (transactionType: TransactionType): Tra
       agentCompany: '',
       agentContact: '',
       commissionSplit: 50,
-      credentialsVerified: false, // Make sure this is always initialized
+      credentialsVerified: false,
     },
   };
 
@@ -49,6 +49,9 @@ export const getInitialTransactionData = (transactionType: TransactionType): Tra
           email: '',
           phone: '',
         },
+        // For rentals, we initialize with the default values appropriate for rentals
+        commissionRate: 0, // Not used for rentals
+        commissionAmount: 0, // Will be set to match the owner's commission input
       };
     case 'Primary':
       return {
@@ -75,7 +78,7 @@ export const getDefaultCommissionRate = (transactionType: TransactionType): numb
     case 'Sale':
       return 2; // 2% for sales
     case 'Rent':
-      return 1; // 1% for rentals
+      return 0; // Not applicable for rentals (we use direct commission amount)
     case 'Primary':
       return 3; // 3% for primary project sales
     default:
