@@ -1,313 +1,429 @@
-import React from 'react';
-import { useTransactionForm } from '@/context/TransactionFormContext';
+
+import React, { useState } from 'react';
+import { useTransactionForm } from '@/context/TransactionForm'; // Updated import path
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { 
-  Calendar, 
-  Home, 
-  Users, 
-  FileText, 
-  DollarSign, 
-  Clock,
-  CheckSquare,
-  XSquare,
-  Award
+  ArrowLeft, 
+  ArrowRight, 
+  Save, 
+  FileCheck, 
+  Loader2,
+  DollarSign,
+  Building,
+  Calendar,
+  User,
+  Users,
+  FileText,
+  CheckCircle2,
+  Percent
 } from 'lucide-react';
-import { 
-  Card, 
-  CardContent 
-} from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import ApprovalStatus from '@/components/commission/ApprovalStatus';
 
 const TransactionReview: React.FC = () => {
-  const { state, calculateCommission } = useTransactionForm();
+  const { 
+    state, 
+    prevStep, 
+    submitForm,
+    saveForm,
+    calculateCommission
+  } = useTransactionForm();
+  
   const { formData, documents } = state;
   
-  const commissionBreakdown = calculateCommission();
-  const isRental = formData.transactionType === 'Rent';
+  const [submitting, setSubmitting] = useState(false);
+  const [saving, setSaving] = useState(false);
   
-  // Format date
-  const formatDate = (date: Date) => {
-    return new Date(date).toLocaleDateString('en-US', {
+  // Prepare commission data for display
+  const commissionBreakdown = calculateCommission();
+  
+  // Get property type label
+  const getPropertyTypeLabel = () => {
+    const { property } = formData;
+    return property?.type || 'Not specified';
+  };
+  
+  // Get transaction parties based on transaction type
+  const getTransactionParties = () => {
+    const { transactionType, buyer, seller, landlord, tenant, developer } = formData;
+    
+    if (transactionType === 'Sale') {
+      return { 
+        party1: { label: 'Buyer', data: buyer },
+        party2: { label: 'Seller', data: seller }
+      };
+    } else if (transactionType === 'Rent') {
+      return {
+        party1: { label: 'Tenant', data: tenant },
+        party2: { label: 'Landlord', data: landlord }
+      };
+    } else {
+      return {
+        party1: { label: 'Buyer', data: buyer },
+        party2: { label: 'Developer', data: developer }
+      };
+    }
+  };
+  
+  // Format date for display
+  const formatDate = (date?: Date) => {
+    if (!date) return 'Not specified';
+    return new Intl.DateTimeFormat('en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
-    });
+    }).format(date);
   };
   
-  // Format currency
+  // Format currency for display
   const formatCurrency = (amount: number) => {
-    return amount.toLocaleString('en-US', {
+    return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
-    });
+    }).format(amount);
   };
   
-  // Get client names based on transaction type
-  const getClientNames = () => {
-    switch (formData.transactionType) {
-      case 'Sale':
-        return {
-          party1: formData.buyer?.name || 'Not provided',
-          party1Label: 'Buyer',
-          party2: formData.seller?.name || 'Not provided',
-          party2Label: 'Seller'
-        };
-      case 'Rent':
-        return {
-          party1: formData.tenant?.name || 'Not provided',
-          party1Label: 'Tenant',
-          party2: formData.landlord?.name || 'Not provided',
-          party2Label: 'Landlord'
-        };
-      case 'Primary':
-        return {
-          party1: formData.buyer?.name || 'Not provided',
-          party1Label: 'Buyer',
-          party2: formData.developer?.name || 'Not provided',
-          party2Label: 'Developer'
-        };
-      default:
-        return {
-          party1: 'Not provided',
-          party1Label: 'Party 1',
-          party2: 'Not provided',
-          party2Label: 'Party 2'
-        };
-    }
+  // Handle save draft
+  const handleSaveDraft = async () => {
+    setSaving(true);
+    await saveForm();
+    setSaving(false);
   };
   
-  const clients = getClientNames();
-  const agentTier = formData.agentTier || 'Advisor';
-  const agentCommissionPercentage = commissionBreakdown.agentCommissionPercentage || 70;
-  
-  // Get transaction summary items
-  const getSummaryItems = () => {
-    const items = [
-      {
-        icon: <Clock className="h-5 w-5" />,
-        label: 'Transaction Status',
-        value: formData.status
-      },
-      {
-        icon: <Calendar className="h-5 w-5" />,
-        label: 'Transaction Date',
-        value: formatDate(formData.transactionDate)
-      },
-      {
-        icon: <Home className="h-5 w-5" />,
-        label: 'Property',
-        value: formData.property ? formData.property.title : 'Not selected'
-      },
-      {
-        icon: <Users className="h-5 w-5" />,
-        label: clients.party1Label,
-        value: clients.party1
-      },
-      {
-        icon: <Users className="h-5 w-5" />,
-        label: clients.party2Label,
-        value: clients.party2
-      },
-      {
-        icon: <DollarSign className="h-5 w-5" />,
-        label: isRental ? 'Monthly Rental Value' : 'Transaction Value',
-        value: formatCurrency(formData.transactionValue)
-      }
-    ];
-    
-    // Add commission-specific items based on transaction type
-    if (isRental) {
-      items.push({
-        icon: <DollarSign className="h-5 w-5" />,
-        label: 'Owner Commission Amount',
-        value: formatCurrency(formData.commissionAmount)
-      });
-    } else {
-      items.push({
-        icon: <DollarSign className="h-5 w-5" />,
-        label: 'Commission Rate',
-        value: `${formData.commissionRate}%`
-      });
-    }
-    
-    // Add the remaining common items
-    return [
-      ...items,
-      {
-        icon: <Award className="h-5 w-5" />,
-        label: 'Agent Tier',
-        value: `${agentTier} (${agentCommissionPercentage}%)`
-      },
-      {
-        icon: <DollarSign className="h-5 w-5" />,
-        label: 'Total Commission',
-        value: formatCurrency(commissionBreakdown.totalCommission)
-      },
-      {
-        icon: <FileText className="h-5 w-5" />,
-        label: 'Documents',
-        value: `${documents.length} attached`
-      },
-      {
-        icon: formData.coBroking.enabled ? <CheckSquare className="h-5 w-5" /> : <XSquare className="h-5 w-5" />,
-        label: 'Co-Broking',
-        value: formData.coBroking.enabled 
-          ? `Enabled (${formData.coBroking.agentName}, ${formData.coBroking.commissionSplit}% split)`
-          : 'Disabled'
-      }
-    ];
+  // Handle submit
+  const handleSubmit = async () => {
+    setSubmitting(true);
+    await submitForm();
+    setSubmitting(false);
   };
   
-  // Calculate the agency percentage (opposite of agent percentage)
-  const agencyCommissionPercentage = 100 - agentCommissionPercentage;
+  // Get transaction parties
+  const parties = getTransactionParties();
   
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Review Transaction</h2>
-        <div className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium">
-          {formData.transactionType} Transaction
+      <h2 className="text-2xl font-bold">Review Transaction</h2>
+      <p className="text-muted-foreground">
+        Review the transaction details before submission.
+      </p>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          {/* Transaction Summary */}
+          <Card>
+            <CardContent className="pt-6">
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold flex items-center">
+                  <Calendar className="mr-2 h-5 w-5 text-muted-foreground" />
+                  Transaction Details
+                </h3>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                  <p className="text-sm font-medium mb-1">Transaction Type</p>
+                  <p>{formData.transactionType}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium mb-1">Transaction Date</p>
+                  <p>{formatDate(formData.transactionDate)}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium mb-1">Status</p>
+                  <p>{formData.status}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium mb-1">Closing Date</p>
+                  <p>{formatDate(formData.closingDate)}</p>
+                </div>
+              </div>
+              
+              <Separator className="my-4" />
+              
+              {/* Property Information */}
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold flex items-center">
+                  <Building className="mr-2 h-5 w-5 text-muted-foreground" />
+                  Property Information
+                </h3>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                  <p className="text-sm font-medium mb-1">Property</p>
+                  <p>{formData.property?.title || 'Not specified'}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium mb-1">Property Type</p>
+                  <p>{getPropertyTypeLabel()}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium mb-1">Address</p>
+                  <p>{formData.property?.address || 'Not specified'}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium mb-1">Transaction Value</p>
+                  <p>{formatCurrency(formData.transactionValue)}</p>
+                </div>
+              </div>
+              
+              <Separator className="my-4" />
+              
+              {/* Client Information */}
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold flex items-center">
+                  <Users className="mr-2 h-5 w-5 text-muted-foreground" />
+                  Client Information
+                </h3>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                  <p className="text-sm font-medium mb-1">{parties.party1.label}</p>
+                  <p>{parties.party1.data?.name || 'Not specified'}</p>
+                  {parties.party1.data?.email && <p className="text-sm text-muted-foreground">{parties.party1.data.email}</p>}
+                  {parties.party1.data?.phone && <p className="text-sm text-muted-foreground">{parties.party1.data.phone}</p>}
+                </div>
+                <div>
+                  <p className="text-sm font-medium mb-1">{parties.party2.label}</p>
+                  <p>{parties.party2.data?.name || 'Not specified'}</p>
+                  {parties.party2.data?.email && <p className="text-sm text-muted-foreground">{parties.party2.data.email}</p>}
+                  {parties.party2.data?.phone && <p className="text-sm text-muted-foreground">{parties.party2.data.phone}</p>}
+                </div>
+              </div>
+              
+              {formData.coBroking?.enabled && (
+                <>
+                  <Separator className="my-4" />
+                  
+                  {/* Co-Broking Information */}
+                  <div className="mb-4">
+                    <h3 className="text-lg font-semibold flex items-center">
+                      <User className="mr-2 h-5 w-5 text-muted-foreground" />
+                      Co-Broker Information
+                    </h3>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                      <p className="text-sm font-medium mb-1">Agent Name</p>
+                      <p>{formData.coBroking.agentName || 'Not specified'}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium mb-1">Agent Company</p>
+                      <p>{formData.coBroking.agentCompany || 'Not specified'}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium mb-1">Contact Information</p>
+                      <p>{formData.coBroking.agentContact || 'Not specified'}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium mb-1">Commission Split</p>
+                      <p>{formData.coBroking.commissionSplit}% / {100 - (formData.coBroking.commissionSplit || 0)}%</p>
+                    </div>
+                  </div>
+                </>
+              )}
+              
+              <Separator className="my-4" />
+              
+              {/* Commission Information */}
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold flex items-center">
+                  <DollarSign className="mr-2 h-5 w-5 text-muted-foreground" />
+                  Commission Information
+                </h3>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                  <p className="text-sm font-medium mb-1">Commission Rate</p>
+                  <p className="flex items-center">
+                    {formData.commissionRate}%
+                    <Percent className="h-4 w-4 ml-1 text-muted-foreground" />
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium mb-1">Commission Amount</p>
+                  <p>{formatCurrency(commissionBreakdown.totalCommission)}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium mb-1">Agent Tier</p>
+                  <p>{formData.agentTier || 'Not specified'}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium mb-1">Agent Share</p>
+                  <p>{formatCurrency(commissionBreakdown.agentShare)}</p>
+                </div>
+              </div>
+              
+              {documents.length > 0 && (
+                <>
+                  <Separator className="my-4" />
+                  
+                  {/* Documents */}
+                  <div className="mb-4">
+                    <h3 className="text-lg font-semibold flex items-center">
+                      <FileText className="mr-2 h-5 w-5 text-muted-foreground" />
+                      Documents
+                    </h3>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {documents.map((doc, index) => (
+                      <div key={index} className="bg-muted/30 p-3 rounded flex items-center">
+                        <FileText className="h-4 w-4 mr-2 text-muted-foreground" />
+                        <div>
+                          <p className="text-sm font-medium">{doc.name}</p>
+                          <p className="text-xs text-muted-foreground">{doc.documentType}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+              
+              {formData.notes && (
+                <>
+                  <Separator className="my-4" />
+                  
+                  {/* Notes */}
+                  <div className="mb-4">
+                    <h3 className="text-lg font-semibold">Additional Notes</h3>
+                  </div>
+                  
+                  <div className="bg-muted/30 p-3 rounded">
+                    <p className="text-sm whitespace-pre-line">{formData.notes}</p>
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+          
+          {/* Approval Status (if transaction has an ID, meaning it's saved) */}
+          {formData.id && (
+            <ApprovalStatus transactionId={formData.id} />
+          )}
+        </div>
+        
+        <div className="space-y-6">
+          {/* Commission Breakdown */}
+          <Card>
+            <CardContent className="pt-6">
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold flex items-center">
+                  <DollarSign className="mr-2 h-5 w-5 text-muted-foreground" />
+                  Commission Summary
+                </h3>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="flex justify-between py-2 border-b">
+                  <span className="text-sm">Transaction Value</span>
+                  <span className="font-medium">{formatCurrency(formData.transactionValue)}</span>
+                </div>
+                
+                <div className="flex justify-between py-2 border-b">
+                  <span className="text-sm">Commission Rate</span>
+                  <span className="font-medium">{formData.commissionRate}%</span>
+                </div>
+                
+                <div className="flex justify-between py-2 border-b">
+                  <span className="text-sm">Total Commission</span>
+                  <span className="font-medium">{formatCurrency(commissionBreakdown.totalCommission)}</span>
+                </div>
+                
+                {formData.coBroking?.enabled && (
+                  <>
+                    <div className="flex justify-between py-2 border-b">
+                      <span className="text-sm">Our Agency Portion ({formData.coBroking.commissionSplit}%)</span>
+                      <span className="font-medium">{formatCurrency(commissionBreakdown.ourAgencyCommission || 0)}</span>
+                    </div>
+                    
+                    <div className="flex justify-between py-2 border-b">
+                      <span className="text-sm">Co-Broker Portion ({100 - (formData.coBroking.commissionSplit || 0)}%)</span>
+                      <span className="font-medium">{formatCurrency(commissionBreakdown.coAgencyCommission || 0)}</span>
+                    </div>
+                  </>
+                )}
+                
+                <div className="flex justify-between py-2 border-b">
+                  <span className="text-sm">Agency Share</span>
+                  <span className="font-medium">{formatCurrency(commissionBreakdown.agencyShare)}</span>
+                </div>
+                
+                <div className="flex justify-between py-2 border-b">
+                  <span className="text-sm">Agent Share</span>
+                  <span className="font-medium">{formatCurrency(commissionBreakdown.agentShare)}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          {/* Transaction Actions */}
+          <Card>
+            <CardContent className="pt-6">
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold flex items-center">
+                  <FileCheck className="mr-2 h-5 w-5 text-muted-foreground" />
+                  Transaction Actions
+                </h3>
+              </div>
+              
+              <div className="space-y-4">
+                <Button
+                  className="w-full"
+                  onClick={handleSubmit}
+                  disabled={submitting}
+                >
+                  {submitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Submitting...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="mr-2 h-4 w-4" />
+                      Submit Transaction
+                    </>
+                  )}
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={handleSaveDraft}
+                  disabled={saving}
+                >
+                  {saving ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="mr-2 h-4 w-4" />
+                      Save as Draft
+                    </>
+                  )}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
       
-      <p className="text-muted-foreground">
-        Please review all transaction details before submission. You can go back to any previous step to make changes.
-      </p>
-      
-      <Card>
-        <CardContent className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4">
-            {getSummaryItems().map((item, index) => (
-              <div key={index} className="flex items-center space-x-3 py-2 border-b">
-                <div className="text-muted-foreground">{item.icon}</div>
-                <div>
-                  <div className="text-sm text-muted-foreground">{item.label}</div>
-                  <div className="font-medium">{item.value}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-          
-          {formData.notes && (
-            <div className="mt-6 pt-4 border-t">
-              <h3 className="text-lg font-medium mb-2">Additional Notes</h3>
-              <p className="text-muted-foreground whitespace-pre-line">{formData.notes}</p>
-            </div>
-          )}
-          
-          <div className="mt-6 pt-4 border-t">
-            <h3 className="text-lg font-medium mb-2">Commission Breakdown</h3>
-            
-            {formData.coBroking.enabled && commissionBreakdown.coAgencyCommission !== undefined && (
-              <div className="mb-4">
-                <h4 className="text-sm font-medium mb-2">Agency Split</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Card className="bg-blue-500/10">
-                    <CardContent className="p-4">
-                      <div className="text-sm text-muted-foreground">Our Agency ({formData.coBroking.commissionSplit}%)</div>
-                      <div className="text-lg font-bold">{formatCurrency(commissionBreakdown.ourAgencyCommission || 0)}</div>
-                    </CardContent>
-                  </Card>
-                  
-                  <Card className="bg-orange-500/10">
-                    <CardContent className="p-4">
-                      <div className="text-sm text-muted-foreground">Co-Agency ({100 - (formData.coBroking.commissionSplit || 0)}%)</div>
-                      <div className="text-lg font-bold">{formatCurrency(commissionBreakdown.coAgencyCommission || 0)}</div>
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
-            )}
-            
-            <h4 className="text-sm font-medium flex items-center gap-1 mb-2">
-              <Award className="h-4 w-4" />
-              {agentTier} Tier Internal Split ({agentCommissionPercentage}% / {agencyCommissionPercentage}%)
-            </h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Card className="bg-muted/30">
-                <CardContent className="p-4">
-                  <div className="text-sm text-muted-foreground">Agency Share ({agencyCommissionPercentage}%)</div>
-                  <div className="text-lg font-bold">{formatCurrency(commissionBreakdown.agencyShare)}</div>
-                </CardContent>
-              </Card>
-              
-              <Card className="bg-green-500/10">
-                <CardContent className="p-4">
-                  <div className="text-sm text-muted-foreground">Your Share ({agentCommissionPercentage}%)</div>
-                  <div className="text-lg font-bold">{formatCurrency(commissionBreakdown.agentShare)}</div>
-                </CardContent>
-              </Card>
-            </div>
-            
-            {/* Visual representation of split */}
-            <div className="mt-4 space-y-3">
-              <div>
-                <div className="h-4 w-full flex rounded-full overflow-hidden">
-                  <div 
-                    className="bg-green-500 h-full" 
-                    style={{ width: `${agentCommissionPercentage}%` }}
-                  ></div>
-                  <div 
-                    className="bg-primary h-full" 
-                    style={{ width: `${agencyCommissionPercentage}%` }}
-                  ></div>
-                </div>
-                <div className="flex justify-between text-xs mt-1 text-muted-foreground">
-                  <span>Your Share ({agentCommissionPercentage}%)</span>
-                  <span>Agency ({agencyCommissionPercentage}%)</span>
-                </div>
-              </div>
-              
-              {formData.coBroking.enabled && (
-                <div className="mt-2">
-                  <div className="h-4 w-full flex rounded-full overflow-hidden">
-                    <div 
-                      className="bg-blue-500 h-full" 
-                      style={{ width: `${formData.coBroking.commissionSplit}%` }}
-                    ></div>
-                    <div 
-                      className="bg-orange-500 h-full" 
-                      style={{ width: `${100 - formData.coBroking.commissionSplit}%` }}
-                    ></div>
-                  </div>
-                  <div className="flex justify-between text-xs mt-1 text-muted-foreground">
-                    <span>Our Agency ({formData.coBroking.commissionSplit}%)</span>
-                    <span>Co-Broker ({100 - formData.coBroking.commissionSplit}%)</span>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-      
-      {/* Document list */}
-      {documents.length > 0 && (
-        <div className="mt-6">
-          <h3 className="text-lg font-medium mb-2">Attached Documents</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {documents.map((doc, index) => (
-              <Card key={index} className="bg-muted/30">
-                <CardContent className="p-3">
-                  <div className="flex items-center space-x-2">
-                    <FileText className="h-5 w-5 text-primary" />
-                    <div>
-                      <div className="text-sm font-medium truncate max-w-[200px]">{doc.name}</div>
-                      <div className="text-xs text-muted-foreground">{doc.documentType}</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      )}
-      
-      <div className="bg-muted/50 p-4 rounded-lg mt-6">
-        <p className="text-sm text-muted-foreground">
-          By submitting this transaction, you confirm that all the information provided is accurate and complete.
-          Once submitted, the transaction will be sent for approval according to the company's transaction workflow.
-        </p>
+      <div className="flex justify-between pt-4">
+        <Button
+          variant="outline"
+          onClick={prevStep}
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back
+        </Button>
       </div>
     </div>
   );

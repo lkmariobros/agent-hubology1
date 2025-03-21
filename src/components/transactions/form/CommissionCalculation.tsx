@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { useTransactionForm } from '@/context/TransactionForm';
+import { useTransactionForm } from '@/context/TransactionForm'; // Updated import path
 import { getDefaultCommissionRate } from '@/context/TransactionForm/initialState';
 import { Calculator, Percent, DollarSign, Building, User, Users, Award } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { AgentRank } from '@/types/transaction-form';
 import AgentTierInfo from './commission/AgentTierInfo';
 import CommissionBreakdownCard from './commission/CommissionBreakdownCard';
+import ApprovalInfo from './commission/ApprovalInfo';
 
 // Agent tier definitions - Would be fetched from API in production
 const AGENT_TIERS = [{
@@ -253,6 +254,9 @@ const CommissionCalculation: React.FC = () => {
           )}
           
           <AgentTierInfo agentTier={agentTier} />
+          
+          {/* Add new Approval Info component */}
+          <ApprovalInfo commissionAmount={commissionBreakdown.totalCommission} />
         </div>
         
         <CommissionBreakdownCard 
