@@ -58,7 +58,7 @@ export const useCommissionApprovals = (
     queryKey,
     queryFn: async () => {
       // Use RPC function instead of direct table access
-      const { data, error } = await supabase.rpc(
+      const { data: approvalData, error } = await supabase.rpc(
         'get_commission_approvals',
         {
           p_status: status,
@@ -74,9 +74,7 @@ export const useCommissionApprovals = (
       }
       
       // Validate and transform the data
-      const approvals = data ? (data as any[]).map(item => ({
-        ...item
-      })) : [];
+      const approvals = approvalData ? (approvalData as any[]) : [];
       
       return {
         approvals: approvals as (CommissionApproval & {

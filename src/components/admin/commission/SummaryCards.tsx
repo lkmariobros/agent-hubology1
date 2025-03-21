@@ -27,7 +27,7 @@ const SummaryCards = () => {
     queryKey: ['commission-approval-metrics'],
     queryFn: async (): Promise<ApprovalMetrics> => {
       // Get counts for each approval status using the RPC function
-      const { data: counts, error } = await supabase.rpc('get_approval_status_counts');
+      const { data: countsData, error } = await supabase.rpc('get_approval_status_counts');
       
       if (error) {
         console.error('Error fetching approval metrics:', error);
@@ -35,7 +35,7 @@ const SummaryCards = () => {
       }
       
       // Get sum of commission amounts for approved approvals using RPC
-      const { data: approved, error: approvedError } = await supabase.rpc('get_approved_commission_total');
+      const { data: approvedData, error: approvedError } = await supabase.rpc('get_approved_commission_total');
       
       if (approvedError) {
         console.error('Error fetching approved amounts:', approvedError);
@@ -43,7 +43,7 @@ const SummaryCards = () => {
       }
       
       // Get sum of commission amounts for pending approvals using RPC
-      const { data: pending, error: pendingError } = await supabase.rpc('get_pending_commission_total');
+      const { data: pendingData, error: pendingError } = await supabase.rpc('get_pending_commission_total');
       
       if (pendingError) {
         console.error('Error fetching pending amounts:', pendingError);
@@ -52,18 +52,18 @@ const SummaryCards = () => {
       
       // Prepare status counts from the response with null checks
       const statusCounts: StatusCounts = {
-        pending: counts?.pending ?? 0,
-        underReview: counts?.under_review ?? 0,
-        approved: counts?.approved ?? 0,
-        readyForPayment: counts?.ready_for_payment ?? 0,
-        paid: counts?.paid ?? 0,
-        rejected: counts?.rejected ?? 0
+        pending: countsData?.pending ?? 0,
+        underReview: countsData?.under_review ?? 0,
+        approved: countsData?.approved ?? 0,
+        readyForPayment: countsData?.ready_for_payment ?? 0,
+        paid: countsData?.paid ?? 0,
+        rejected: countsData?.rejected ?? 0
       };
       
       return {
         statusCounts,
-        approvedTotal: approved?.total ?? 0,
-        pendingTotal: pending?.total ?? 0
+        approvedTotal: approvedData?.total ?? 0,
+        pendingTotal: pendingData?.total ?? 0
       };
     }
   });
