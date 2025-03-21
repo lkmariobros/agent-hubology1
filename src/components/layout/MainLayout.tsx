@@ -22,7 +22,6 @@ import {
 
 import { Button } from '@/components/ui/button';
 import { AppSidebar } from './AppSidebar';
-import { ThemeProvider } from '@/providers/ThemeProvider';
 import { ThemeToggle } from '../theme/ThemeToggle';
 import { TeamSwitcher } from './TeamSwitcher';
 
@@ -40,8 +39,8 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   }
 
   return (
-    <SidebarProvider>
-      <div className="flex h-full w-full bg-background text-foreground font-mono">
+    <div className="flex h-full w-full bg-background text-foreground font-mono">
+      <SidebarProvider>
         <AppSidebar />
         
         {/* Main content area */}
@@ -91,8 +90,8 @@ const MainLayout = ({ children }: MainLayoutProps) => {
             {children || <Outlet />}
           </main>
         </SidebarInset>
-      </div>
-    </SidebarProvider>
+      </SidebarProvider>
+    </div>
   );
 }
 

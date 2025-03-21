@@ -22,8 +22,8 @@ import AdminAgents from './pages/admin/Agents';
 import AdminTransactions from './pages/admin/Transactions';
 import AdminProperties from './pages/admin/Properties';
 import AdminPropertyDetail from './pages/admin/PropertyDetail';
-import AdminLayout from './components/layout/AdminLayout';
 import MainLayout from './components/layout/MainLayout';
+import AdminLayout from './components/layout/AdminLayout';
 import Properties from './pages/Properties';
 import PropertyDetail from './pages/PropertyDetail';
 import NewProperty from './pages/NewProperty';
@@ -41,8 +41,8 @@ const queryClient = new QueryClient({
 
 function App() {
   return (
-    <ThemeProvider>
-      <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
         <Router>
           <AuthProvider>
             <NotificationProvider>
@@ -51,33 +51,29 @@ function App() {
                 <Route path="/" element={<Index />} />
                 
                 {/* Agent Routes */}
-                <Route element={<MainLayout />}>
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/transactions" element={<Transactions />} />
-                  <Route path="/transactions/:id" element={<TransactionDetail />} />
-                  <Route path="/transactions/new" element={<NewTransaction />} />
-                  <Route path="/agents" element={<Agents />} />
-                  <Route path="/agents/:id" element={<AgentDetail />} />
-                  <Route path="/agents/new" element={<NewAgent />} />
-                  <Route path="/commission" element={<Commission />} />
-                  <Route path="/properties" element={<Properties />} />
-                  <Route path="/properties/:id" element={<PropertyDetail />} />
-                  <Route path="/properties/new" element={<NewProperty />} />
-                  <Route path="/profile" element={<Profile />} />
-                  <Route path="/settings" element={<Settings />} />
-                </Route>
+                <Route path="/dashboard" element={<MainLayout><Dashboard /></MainLayout>} />
+                <Route path="/transactions" element={<MainLayout><Transactions /></MainLayout>} />
+                <Route path="/transactions/:id" element={<MainLayout><TransactionDetail /></MainLayout>} />
+                <Route path="/transactions/new" element={<MainLayout><NewTransaction /></MainLayout>} />
+                <Route path="/agents" element={<MainLayout><Agents /></MainLayout>} />
+                <Route path="/agents/:id" element={<MainLayout><AgentDetail /></MainLayout>} />
+                <Route path="/agents/new" element={<MainLayout><NewAgent /></MainLayout>} />
+                <Route path="/commission" element={<MainLayout><Commission /></MainLayout>} />
+                <Route path="/properties" element={<MainLayout><Properties /></MainLayout>} />
+                <Route path="/properties/:id" element={<MainLayout><PropertyDetail /></MainLayout>} />
+                <Route path="/properties/new" element={<MainLayout><NewProperty /></MainLayout>} />
+                <Route path="/profile" element={<MainLayout><Profile /></MainLayout>} />
+                <Route path="/settings" element={<MainLayout><Settings /></MainLayout>} />
 
                 {/* Admin Routes */}
-                <Route path="/admin" element={<AdminLayout />}>
-                  <Route index element={<Navigate to="/admin/commission" replace />} />
-                  <Route path="commission" element={<AdminCommission />} />
-                  <Route path="commission/approvals" element={<AdminCommissionApproval />} />
-                  <Route path="commission/approvals/:id" element={<AdminCommissionApproval />} />
-                  <Route path="agents" element={<AdminAgents />} />
-                  <Route path="transactions" element={<AdminTransactions />} />
-                  <Route path="properties" element={<AdminProperties />} />
-                  <Route path="properties/:id" element={<AdminPropertyDetail />} />
-                </Route>
+                <Route path="/admin" element={<Navigate to="/admin/commission" replace />} />
+                <Route path="/admin/commission" element={<AdminLayout><AdminCommission /></AdminLayout>} />
+                <Route path="/admin/commission/approvals" element={<AdminLayout><AdminCommissionApproval /></AdminLayout>} />
+                <Route path="/admin/commission/approvals/:id" element={<AdminLayout><AdminCommissionApproval /></AdminLayout>} />
+                <Route path="/admin/agents" element={<AdminLayout><AdminAgents /></AdminLayout>} />
+                <Route path="/admin/transactions" element={<AdminLayout><AdminTransactions /></AdminLayout>} />
+                <Route path="/admin/properties" element={<AdminLayout><AdminProperties /></AdminLayout>} />
+                <Route path="/admin/properties/:id" element={<AdminLayout><AdminPropertyDetail /></AdminLayout>} />
                 
                 {/* Fallback */}
                 <Route path="*" element={<Navigate to="/" replace />} />
@@ -86,8 +82,8 @@ function App() {
             </NotificationProvider>
           </AuthProvider>
         </Router>
-      </QueryClientProvider>
-    </ThemeProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }
 

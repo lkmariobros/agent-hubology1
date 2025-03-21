@@ -43,8 +43,8 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
   }
 
   return (
-    <SidebarProvider>
-      <div className="flex h-full w-full bg-background text-foreground font-mono">
+    <div className="flex h-full w-full bg-background text-foreground font-mono">
+      <SidebarProvider>
         <AdminSidebar />
         
         {/* Main content with border */}
@@ -98,8 +98,8 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
             </main>
           </div>
         </SidebarInset>
-      </div>
-    </SidebarProvider>
+      </SidebarProvider>
+    </div>
   );
 }
 
