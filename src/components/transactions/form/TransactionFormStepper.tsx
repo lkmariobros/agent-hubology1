@@ -29,25 +29,24 @@ const TransactionFormStepper: React.FC = () => {
 
   return (
     <div className="mb-8">
-      <h2 className="text-2xl font-bold mb-6">Add New Transaction</h2>
-      <div className="relative">
-        <div className="flex items-center">
+      {/* We remove the heading since it's not in the screenshot */}
+      <div className="relative px-4">
+        <div className="flex items-center justify-between">
           {steps.map((step, index) => (
             <React.Fragment key={step.id}>
               {/* Step Circle */}
               <div 
-                className="flex flex-col items-center z-20 cursor-pointer"
+                className="flex flex-col items-center cursor-pointer relative"
                 onClick={() => goToStep(step.id)}
               >
                 <div 
-                  className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 transition-colors
-                  ${step.id < currentStep 
-                    ? 'bg-primary text-primary-foreground' 
-                    : step.id === currentStep 
-                      ? 'bg-primary text-primary-foreground'
-                      : step.id === currentStep + 1 
-                        ? 'bg-muted/80 border border-muted-foreground/30'
-                        : 'bg-muted text-muted-foreground'}`}
+                  className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 border transition-colors ${
+                    step.id < currentStep 
+                      ? 'bg-primary text-primary-foreground border-primary' 
+                      : step.id === currentStep 
+                        ? 'bg-primary text-primary-foreground border-primary'
+                        : 'bg-muted/20 border-muted-foreground/20 text-muted-foreground'
+                  }`}
                 >
                   {step.id < currentStep ? <Check className="h-5 w-5" /> : step.icon}
                 </div>
@@ -60,21 +59,24 @@ const TransactionFormStepper: React.FC = () => {
                 >
                   {step.label}
                 </span>
-              </div>
-              
-              {/* Connector line (only between circles, not after the last one) */}
-              {index < steps.length - 1 && (
-                <div className="flex-1 flex items-center h-[1px] mx-2">
-                  <div className="w-full h-[1px] bg-muted"></div>
+
+                {/* Connector line (except after the last step) */}
+                {index < steps.length - 1 && (
                   <div 
-                    className="absolute h-[1px] bg-primary transition-all duration-300 ease-in-out"
+                    className="absolute top-5 left-[calc(100%+2px)] w-[calc(100%-10px)] h-[1px] -translate-y-1/2 bg-muted"
                     style={{ 
-                      width: currentStep > index ? '100%' : '0%',
-                      left: 0,
+                      width: `calc((100vw - (${steps.length} * 70px)) / ${steps.length - 1})`,
                     }}
-                  ></div>
-                </div>
-              )}
+                  >
+                    <div 
+                      className={`absolute top-0 left-0 h-full bg-primary transition-all duration-500 ease-in-out`}
+                      style={{ 
+                        width: currentStep > index ? '100%' : '0%',
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
             </React.Fragment>
           ))}
         </div>
