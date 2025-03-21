@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useTransactionForm } from '@/context/TransactionFormContext';
+import { useTransactionForm } from '@/context/TransactionForm';
 import { 
   FileText, 
   Home, 
@@ -15,6 +15,8 @@ const TransactionFormStepper: React.FC = () => {
   const { state, goToStep } = useTransactionForm();
   const { currentStep } = state;
 
+  console.log('TransactionFormStepper rendered with currentStep:', currentStep);
+
   const steps = [
     { label: 'Transaction Type', icon: <CreditCard className="h-4 w-4" /> },
     { label: 'Property', icon: <Home className="h-4 w-4" /> },
@@ -28,9 +30,11 @@ const TransactionFormStepper: React.FC = () => {
   return (
     <div className="mb-8">
       <div className="flex justify-between relative">
-        {steps.map((step, index) => (
-          <React.Fragment key={index}>
+        {steps.map((step, index) => {
+          // Using this pattern instead of React.Fragment to avoid the data-lov-id prop warning
+          return [
             <div 
+              key={`step-${index}`}
               className="flex flex-col items-center z-10 cursor-pointer" 
               onClick={() => goToStep(index)}
             >
@@ -46,20 +50,23 @@ const TransactionFormStepper: React.FC = () => {
               }`}>
                 {step.label}
               </span>
-            </div>
+            </div>,
             
-            {/* Only render the connector line if not the last item */}
-            {index < steps.length - 1 && (
-              <div className="flex-grow mx-2 h-0.5 self-center relative">
+            // Only render the connector line if not the last item
+            index < steps.length - 1 ? (
+              <div 
+                key={`connector-${index}`}
+                className="flex-grow mx-2 h-0.5 self-center relative"
+              >
                 <div className="absolute inset-0 bg-muted"></div>
                 <div 
                   className="absolute inset-0 bg-primary transition-all duration-200 ease-in-out"
                   style={{ width: index < currentStep ? '100%' : '0%' }}
                 ></div>
               </div>
-            )}
-          </React.Fragment>
-        ))}
+            ) : null
+          ];
+        }).flat().filter(Boolean)}
       </div>
     </div>
   );

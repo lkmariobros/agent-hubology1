@@ -47,7 +47,8 @@ export const transactionFormReducer = (
         console.log('Current coBroking before update:', currentCoBroking);
         console.log('New coBroking data:', action.payload.coBroking);
         
-        return {
+        // Create a new state object with the updated coBroking data
+        const newState = {
           ...state,
           formData: { 
             ...state.formData, 
@@ -59,6 +60,9 @@ export const transactionFormReducer = (
           },
           isDirty: true,
         };
+        
+        console.log('New state after coBroking update:', newState.formData.coBroking);
+        return newState;
       }
       
       // Handle other fields

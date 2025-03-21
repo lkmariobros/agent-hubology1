@@ -34,7 +34,7 @@ const CoBrokingSetup: React.FC = () => {
   
   console.log('CoBrokingSetup rendered with formData:', formData);
   
-  // Safely access coBroking data with memoization to prevent unnecessary recalculations
+  // Safely access coBroking data with default values as fallback
   const coBroking = useMemo(() => formData.coBroking || {
     enabled: false,
     agentName: '',
@@ -47,22 +47,28 @@ const CoBrokingSetup: React.FC = () => {
   // Memoized callbacks to prevent unnecessary re-renders
   const handleCoBrokingToggle = useCallback((enabled: boolean) => {
     console.log('CoBroking toggle:', enabled);
-    updateFormData({
-      coBroking: {
-        ...coBroking,
-        enabled
-      }
-    });
+    
+    // Create a properly structured coBroking object
+    const updatedCoBroking = {
+      ...coBroking,
+      enabled
+    };
+    
+    console.log('Updating coBroking with:', updatedCoBroking);
+    updateFormData({ coBroking: updatedCoBroking });
   }, [coBroking, updateFormData]);
   
   const handleCoBrokingChange = useCallback((field: string, value: string | number | boolean) => {
     console.log('CoBroking field change:', field, value);
-    updateFormData({
-      coBroking: {
-        ...coBroking,
-        [field]: value
-      }
-    });
+    
+    // Create a properly structured coBroking object with the updated field
+    const updatedCoBroking = {
+      ...coBroking,
+      [field]: value
+    };
+    
+    console.log('Updating coBroking with:', updatedCoBroking);
+    updateFormData({ coBroking: updatedCoBroking });
   }, [coBroking, updateFormData]);
 
   // Reset error boundary when toggling co-broking
@@ -91,7 +97,7 @@ const CoBrokingSetup: React.FC = () => {
       <div className="flex items-center space-x-2">
         <Switch 
           id="coBroking" 
-          checked={coBroking?.enabled || false}
+          checked={coBroking.enabled || false}
           onCheckedChange={handleCoBrokingToggle}
         />
         <Label htmlFor="coBroking" className="font-medium">
@@ -100,7 +106,7 @@ const CoBrokingSetup: React.FC = () => {
       </div>
       
       <ErrorBoundary FallbackComponent={ErrorFallback} onReset={handleErrorReset}>
-        {coBroking?.enabled ? (
+        {coBroking.enabled ? (
           <CoBrokingForm 
             coBroking={coBroking as CoBrokingInfo}
             errors={errors}
