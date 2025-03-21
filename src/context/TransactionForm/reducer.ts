@@ -1,3 +1,4 @@
+
 import { 
   TransactionFormState, 
   TransactionFormData, 
@@ -25,7 +26,9 @@ export const transactionFormReducer = (
   state: TransactionFormState, 
   action: TransactionFormAction
 ): TransactionFormState => {
-  console.log('Reducer action:', action.type, action.payload);
+  // Safely log action type and payload if it exists
+  console.log('Reducer action:', action.type, 
+    'payload' in action ? action.payload : '(no payload)');
   
   switch (action.type) {
     case 'UPDATE_FORM_DATA':
