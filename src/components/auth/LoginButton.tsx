@@ -14,13 +14,51 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { supabase } from '@/integrations/supabase/client';
 
 export function LoginButton() {
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isRegister, setIsRegister] = useState(false);
   const { login, isAuthenticated, logout } = useAuth();
+
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!email || !password) {
+      toast.error('Please enter both email and password');
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+      
+      if (error) throw error;
+      
+      if (data.user?.identities?.length === 0) {
+        toast.error('An account with this email already exists.');
+        return;
+      }
+      
+      toast.success('Registration successful! Please check your email for verification.');
+      setIsRegister(false); // Switch back to login view
+      
+      // Reset form
+      setEmail('');
+      setPassword('');
+    } catch (error: any) {
+      console.error('Registration error:', error);
+      toast.error(error.message || 'Registration failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,6 +77,7 @@ export function LoginButton() {
       setPassword('');
     } catch (error) {
       console.error('Login error:', error);
+      // Error handling done in login function
     } finally {
       setLoading(false);
     }
@@ -74,12 +113,14 @@ export function LoginButton() {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Sign in to your account</DialogTitle>
+          <DialogTitle>{isRegister ? 'Create an account' : 'Sign in to your account'}</DialogTitle>
           <DialogDescription>
-            Enter your credentials to access your dashboard
+            {isRegister
+              ? 'Enter your details to create your account'
+              : 'Enter your credentials to access your dashboard'}
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleLogin} className="space-y-4 py-4">
+        <form onSubmit={isRegister ? handleSignUp : handleLogin} className="space-y-4 py-4">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -102,9 +143,20 @@ export function LoginButton() {
               required
             />
           </div>
+          <div className="text-sm">
+            <button
+              type="button"
+              className="text-primary hover:underline"
+              onClick={() => setIsRegister(!isRegister)}
+            >
+              {isRegister ? 'Already have an account? Sign in' : 'Don\'t have an account? Sign up'}
+            </button>
+          </div>
           <DialogFooter className="mt-6">
             <Button type="submit" disabled={loading} className="w-full">
-              {loading ? 'Signing in...' : 'Sign in'}
+              {loading 
+                ? (isRegister ? 'Creating account...' : 'Signing in...') 
+                : (isRegister ? 'Create account' : 'Sign in')}
             </Button>
           </DialogFooter>
         </form>

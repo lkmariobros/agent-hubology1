@@ -2,6 +2,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { Session, User } from '@supabase/supabase-js';
 
 // Define user types and roles
 export type UserRole = 'agent' | 'admin';
@@ -20,8 +22,9 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isAdmin: boolean; // Helper to check if user has admin access
   login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   switchRole: (role: UserRole) => void;
+  session: Session | null;
 }
 
 // Create the context with a default value
@@ -30,8 +33,9 @@ const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
   isAdmin: false,
   login: async () => {},
-  logout: () => {},
+  logout: async () => {},
   switchRole: () => {},
+  session: null,
 });
 
 export const useAuth = () => {
@@ -43,66 +47,122 @@ export const useAuth = () => {
 };
 
 // Mock admin emails for demo purposes
-// In a real application, this would be determined from backend roles
+// In a real application, this would be determined from database roles
 const ADMIN_EMAILS = ['admin@example.com', 'admin@propertypro.com'];
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<UserProfile | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   
-  // Check for stored user on initial load
+  // Initialize auth state and set up listener for auth changes
   useEffect(() => {
-    const storedUser = localStorage.getItem('auth_user');
-    if (storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        setUser(parsedUser);
-      } catch (error) {
-        console.error('Failed to parse stored user:', error);
-        localStorage.removeItem('auth_user');
+    // First set up listener to react to auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
+      console.log('Auth state changed:', event);
+      
+      setSession(newSession);
+      
+      if (newSession) {
+        // User is logged in
+        const email = newSession.user?.email || '';
+        const isAdmin = ADMIN_EMAILS.includes(email.toLowerCase());
+        
+        // Create user profile with appropriate roles
+        const roles: UserRole[] = ['agent'];
+        if (isAdmin) roles.push('admin');
+        
+        const userProfile: UserProfile = {
+          id: newSession.user.id,
+          email: email,
+          name: email.split('@')[0],
+          roles,
+          activeRole: 'agent', // Default to agent role on login
+        };
+        
+        setUser(userProfile);
+      } else {
+        // User is logged out
+        setUser(null);
       }
-    }
+    });
+
+    // Then check for existing session
+    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
+      if (initialSession) {
+        const email = initialSession.user?.email || '';
+        const isAdmin = ADMIN_EMAILS.includes(email.toLowerCase());
+        
+        // Create user profile with appropriate roles
+        const roles: UserRole[] = ['agent'];
+        if (isAdmin) roles.push('admin');
+        
+        const userProfile: UserProfile = {
+          id: initialSession.user.id,
+          email: email,
+          name: email.split('@')[0],
+          roles,
+          activeRole: 'agent', // Default to agent role on login
+        };
+        
+        setUser(userProfile);
+        setSession(initialSession);
+      }
+      
+      setLoading(false);
+    });
+
+    // Cleanup subscription on unmount
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
-  
-  // For now, we're implementing a simple auth system
-  // In a real app, this would connect to your backend
+
+  // Login using Supabase Auth
   const login = async (email: string, password: string) => {
     try {
-      // Determine roles based on email 
-      const isAdmin = ADMIN_EMAILS.includes(email.toLowerCase());
-      
-      // Create user profile with appropriate roles
-      const roles: UserRole[] = ['agent'];
-      if (isAdmin) roles.push('admin');
-      
-      const userProfile: UserProfile = {
-        id: 'user-' + Math.random().toString(36).substr(2, 9),
+      setLoading(true);
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
-        name: email.split('@')[0],
-        roles,
-        activeRole: 'agent', // Default to agent role on login
-      };
+        password,
+      });
+
+      if (error) {
+        console.error('Login error:', error.message);
+        throw error;
+      }
       
-      // Store user in state and localStorage
-      setUser(userProfile);
-      localStorage.setItem('auth_user', JSON.stringify(userProfile));
-      
+      // Navigation happens automatically via onAuthStateChange
       toast.success('Logged in successfully');
-      
-      // Navigate to appropriate dashboard based on the active role
-      navigate('/dashboard');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login error:', error);
-      toast.error('Login failed. Please try again.');
+      toast.error(error.message || 'Login failed. Please try again.');
       throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('auth_user');
-    navigate('/');
-    toast.info('Logged out successfully');
+  // Logout using Supabase Auth
+  const logout = async () => {
+    try {
+      setLoading(true);
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error('Logout error:', error.message);
+        throw error;
+      }
+      
+      // Navigation and state reset handled by onAuthStateChange
+      toast.info('Logged out successfully');
+    } catch (error: any) {
+      console.error('Logout error:', error);
+      toast.error(error.message || 'Failed to log out. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
   
   // Function to switch between roles
@@ -118,7 +178,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Update user with new active role
     const updatedUser = { ...user, activeRole: role };
     setUser(updatedUser);
-    localStorage.setItem('auth_user', JSON.stringify(updatedUser));
     
     // Navigate to appropriate dashboard based on the new role
     if (role === 'admin') {
@@ -137,7 +196,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     login,
     logout,
     switchRole,
+    session,
   };
+  
+  // Show loading state or render children
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-primary">Loading authentication...</div>
+      </div>
+    );
+  }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

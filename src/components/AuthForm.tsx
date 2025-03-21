@@ -4,25 +4,75 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const AuthForm = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // In a real application, this would connect to an authentication service
-    console.log('Submitting:', { email, password, isLogin });
+    if (!email || !password) {
+      toast.error('Please enter both email and password');
+      return;
+    }
     
-    // Simulate authentication
-    if (isLogin) {
-      // Navigate to dashboard (would happen after successful login)
-      window.location.href = '/dashboard';
-    } else {
-      // Switch to login mode after registration
-      setIsLogin(true);
+    try {
+      setLoading(true);
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      
+      if (error) throw error;
+      
+      toast.success('Logged in successfully');
+      navigate('/dashboard');
+    } catch (error: any) {
+      console.error('Login error:', error);
+      toast.error(error.message || 'Login failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!email || !password) {
+      toast.error('Please enter both email and password');
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+      
+      if (error) throw error;
+      
+      if (data.user?.identities?.length === 0) {
+        toast.error('An account with this email already exists.');
+        return;
+      }
+      
+      toast.success('Registration successful! Please check your email for verification.');
+      setIsLogin(true); // Switch to login view
+    } catch (error: any) {
+      console.error('Registration error:', error);
+      toast.error(error.message || 'Registration failed. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -42,7 +92,7 @@ const AuthForm = () => {
         </p>
       </div>
       
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={isLogin ? handleLogin : handleSignUp} className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="email" className="text-white">Email</Label>
           <Input
@@ -79,8 +129,11 @@ const AuthForm = () => {
         <Button 
           type="submit" 
           className="w-full mt-6 bg-purple-600 hover:bg-purple-700 text-white transition-all"
+          disabled={loading}
         >
-          {isLogin ? 'Sign in' : 'Create an account'}
+          {loading 
+            ? (isLogin ? 'Signing in...' : 'Creating account...') 
+            : (isLogin ? 'Sign in' : 'Create an account')}
         </Button>
       </form>
       
@@ -95,6 +148,7 @@ const AuthForm = () => {
         variant="outline"
         className="w-full mt-4 border-gray-700 hover:bg-gray-800 text-white transition-all"
         onClick={() => setIsLogin(!isLogin)}
+        disabled={loading}
       >
         {isLogin ? 'Create an account' : 'Sign in'}
       </Button>
