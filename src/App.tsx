@@ -32,6 +32,7 @@ import NewProperty from './pages/NewProperty';
 import Profile from './pages/Profile';
 import Index from './pages/Index';
 import AdminDashboard from './pages/admin/AdminDashboard';
+import Home from './pages/Home';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -56,6 +57,7 @@ function App() {
                 {/* Agent Routes */}
                 <Route path="/" element={<MainLayout />}>
                   <Route path="dashboard" element={<Dashboard />} />
+                  <Route path="home" element={<Home />} />
                   <Route path="transactions" element={<Transactions />} />
                   <Route path="transactions/:id" element={<TransactionDetail />} />
                   <Route path="transactions/new" element={<NewTransaction />} />
@@ -68,6 +70,7 @@ function App() {
                   <Route path="properties/new" element={<NewProperty />} />
                   <Route path="profile" element={<Profile />} />
                   <Route path="settings" element={<Settings />} />
+                  <Route path="team" element={<Home />} /> {/* Temporary placeholder */}
                 </Route>
 
                 {/* Admin Routes */}
