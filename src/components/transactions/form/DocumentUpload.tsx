@@ -1,6 +1,6 @@
 
 import React, { useState, useCallback } from 'react';
-import { useTransactionForm } from '@/context/TransactionFormContext';
+import { useTransactionForm } from '@/context/TransactionForm/TransactionFormContext';
 import { FileUp, X, FileText, Check, AlertCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -93,55 +93,28 @@ const DocumentUpload: React.FC = () => {
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2 space-y-4">
-          <div className="flex space-x-3">
-            <div className="flex-grow">
-              <Label htmlFor="documentType">Document Type</Label>
-              <Select
-                value={documentType}
-                onValueChange={setDocumentType}
-              >
-                <SelectTrigger id="documentType">
-                  <SelectValue placeholder="Select document type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {getDocumentTypes().map((type) => (
-                    <SelectItem key={type.value} value={type.value}>
-                      {type.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="flex items-end">
-              <Label htmlFor="file-upload" className="sr-only">
-                Choose file
-              </Label>
-              <div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="relative overflow-hidden"
-                  onClick={() => document.getElementById('file-upload')?.click()}
-                >
-                  <FileUp className="h-4 w-4 mr-2" />
-                  Browse Files
-                  <Input
-                    id="file-upload"
-                    type="file"
-                    className="absolute inset-0 opacity-0 cursor-pointer"
-                    onChange={handleFileInputChange}
-                    multiple
-                    accept="application/pdf,image/*"
-                  />
-                </Button>
-              </div>
-            </div>
+          <div>
+            <Label htmlFor="documentType">Document Type</Label>
+            <Select
+              value={documentType}
+              onValueChange={setDocumentType}
+            >
+              <SelectTrigger id="documentType">
+                <SelectValue placeholder="Select document type" />
+              </SelectTrigger>
+              <SelectContent>
+                {getDocumentTypes().map((type) => (
+                  <SelectItem key={type.value} value={type.value}>
+                    {type.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           
-          {/* Drag and drop area */}
+          {/* Combined drag & drop area with browse button */}
           <div
-            className={`border-2 border-dashed rounded-lg p-8 flex flex-col items-center justify-center transition-colors ${
+            className={`border-2 border-dashed rounded-lg p-8 flex flex-col items-center justify-center transition-colors cursor-pointer ${
               isDragging
                 ? 'border-primary bg-primary/5'
                 : 'border-muted-foreground/25 hover:border-muted-foreground/50'
@@ -149,14 +122,31 @@ const DocumentUpload: React.FC = () => {
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
+            onClick={() => document.getElementById('file-upload')?.click()}
           >
-            <FileUp className={`h-8 w-8 mb-3 ${isDragging ? 'text-primary' : 'text-muted-foreground'}`} />
-            <p className="text-sm font-medium mb-1">
+            <FileUp className={`h-10 w-10 mb-3 ${isDragging ? 'text-primary' : 'text-muted-foreground'}`} />
+            <p className="text-base font-medium mb-1">
               {isDragging ? 'Drop files here' : 'Drag and drop files here'}
             </p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground mb-4">
               Supported file types: PDF, JPG, PNG
             </p>
+            <Button 
+              type="button" 
+              variant="outline" 
+              className="relative overflow-hidden"
+            >
+              <FileUp className="h-4 w-4 mr-2" />
+              Browse Files
+              <Input
+                id="file-upload"
+                type="file"
+                className="absolute inset-0 opacity-0 cursor-pointer"
+                onChange={handleFileInputChange}
+                multiple
+                accept="application/pdf,image/*"
+              />
+            </Button>
           </div>
         </div>
         
