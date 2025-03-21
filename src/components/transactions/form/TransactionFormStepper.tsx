@@ -29,53 +29,46 @@ const TransactionFormStepper: React.FC = () => {
 
   return (
     <div className="mb-8">
-      <h2 className="text-2xl font-bold mb-6">Add New Transaction</h2>
       <div className="relative">
-        <div className="flex items-center">
-          {steps.map((step, index) => (
-            <React.Fragment key={step.id}>
-              {/* Step Circle */}
+        {/* This is the continuous background line that runs through all steps */}
+        <div className="absolute top-6 left-0 right-0 transform translate-y-(-50%) h-[2px] bg-muted"></div>
+        
+        {/* This is the progress line overlay that grows based on current step */}
+        <div 
+          className="absolute top-6 left-0 h-[2px] bg-primary transition-all duration-300 ease-in-out"
+          style={{ 
+            width: `${(currentStep / (steps.length - 1)) * 100}%`,
+          }}
+        ></div>
+        
+        {/* Step circles positioned above the line */}
+        <div className="flex justify-between items-center relative">
+          {steps.map((step) => (
+            <div 
+              key={step.id}
+              className="flex flex-col items-center z-20 cursor-pointer"
+              onClick={() => goToStep(step.id)}
+            >
               <div 
-                className="flex flex-col items-center z-20 cursor-pointer"
-                onClick={() => goToStep(step.id)}
+                className={`w-12 h-12 rounded-full border-2 flex items-center justify-center mb-2 transition-colors
+                ${step.id < currentStep 
+                  ? 'bg-primary border-primary text-primary-foreground' 
+                  : step.id === currentStep 
+                    ? 'bg-primary border-primary text-primary-foreground'
+                    : 'bg-muted border-muted-foreground/30 text-muted-foreground'}`}
               >
-                <div 
-                  className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 transition-colors
-                  ${step.id < currentStep 
-                    ? 'bg-primary text-primary-foreground' 
-                    : step.id === currentStep 
-                      ? 'bg-primary text-primary-foreground'
-                      : step.id === currentStep + 1 
-                        ? 'bg-muted/80 border border-muted-foreground/30'
-                        : 'bg-muted text-muted-foreground'}`}
-                >
-                  {step.id < currentStep ? <Check className="h-5 w-5" /> : step.icon}
-                </div>
-                <span 
-                  className={`text-xs font-medium ${
-                    step.id <= currentStep 
-                      ? 'text-primary' 
-                      : 'text-muted-foreground'
-                  }`}
-                >
-                  {step.label}
-                </span>
+                {step.id < currentStep ? <Check className="h-5 w-5" /> : step.icon}
               </div>
-              
-              {/* Connector line (only between circles, not after the last one) */}
-              {index < steps.length - 1 && (
-                <div className="flex-1 flex items-center h-[1px] mx-2">
-                  <div className="w-full h-[1px] bg-muted"></div>
-                  <div 
-                    className="absolute h-[1px] bg-primary transition-all duration-300 ease-in-out"
-                    style={{ 
-                      width: currentStep > index ? '100%' : '0%',
-                      left: 0,
-                    }}
-                  ></div>
-                </div>
-              )}
-            </React.Fragment>
+              <span 
+                className={`text-xs font-medium ${
+                  step.id <= currentStep 
+                    ? 'text-primary' 
+                    : 'text-muted-foreground'
+                }`}
+              >
+                {step.label}
+              </span>
+            </div>
           ))}
         </div>
       </div>
