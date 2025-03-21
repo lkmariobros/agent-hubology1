@@ -54,7 +54,7 @@ export const useNotificationActions = () => {
     if (!userId) return [];
     
     try {
-      const { data, error } = await supabase.functions.invoke('get_user_notifications', {
+      const { data, error } = await supabase.functions.invoke<Notification[]>('get_user_notifications', {
         body: { user_id: userId }
       });
 
