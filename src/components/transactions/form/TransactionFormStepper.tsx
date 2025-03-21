@@ -30,15 +30,15 @@ const TransactionFormStepper: React.FC = () => {
   return (
     <div className="mb-8">
       <div className="relative">
-        {/* Background line - now properly centered and positioned */}
-        <div className="absolute top-1/2 left-6 right-6 -translate-y-1/2 h-[2px] bg-muted"></div>
+        {/* Background line - adjusted left position for better alignment */}
+        <div className="absolute top-1/2 left-4 right-4 -translate-y-1/2 h-[2px] bg-muted"></div>
         
-        {/* Progress line - now with correct alignment and calculation */}
+        {/* Progress line - matched left position with background line */}
         <div 
-          className="absolute top-1/2 left-6 -translate-y-1/2 h-[2px] bg-primary transition-all duration-300"
+          className="absolute top-1/2 left-4 -translate-y-1/2 h-[2px] bg-primary transition-all duration-300"
           style={{ 
             width: currentStep > 0 
-              ? `calc(${(currentStep / (steps.length - 1)) * 100}% - ${12}px)` 
+              ? `calc(${(currentStep / (steps.length - 1)) * 100}% - ${8}px)` 
               : '0px'
           }}
         ></div>
