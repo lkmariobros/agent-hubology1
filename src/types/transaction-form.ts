@@ -1,3 +1,4 @@
+
 import { z } from 'zod';
 
 // Transaction types
@@ -5,6 +6,9 @@ export type TransactionType = 'Sale' | 'Rent' | 'Primary';
 
 // Status types
 export type TransactionStatus = 'Draft' | 'Pending' | 'In Progress' | 'Completed' | 'Cancelled';
+
+// Agent ranks
+export type AgentRank = 'Advisor' | 'Sales Leader' | 'Team Leader' | 'Group Leader' | 'Supreme Leader';
 
 // Commission types - updated to match business process
 export interface CommissionBreakdown {
@@ -15,6 +19,8 @@ export interface CommissionBreakdown {
   agentShare: number;   // Agent's share from our portion (after co-broking split)
   ourAgencyCommission?: number; // Our agency's portion of the total commission
   coAgencyCommission?: number;  // Co-broker agency's portion of the total commission
+  agentTier?: AgentRank; // The agent's current tier/rank
+  agentCommissionPercentage?: number; // The percentage the agent receives based on their tier
 }
 
 // Property information
@@ -80,6 +86,9 @@ export interface TransactionFormData {
   
   // Co-broking
   coBroking: CoBrokingInfo;
+  
+  // Agent details
+  agentTier?: AgentRank;
   
   // Additional details
   notes: string;

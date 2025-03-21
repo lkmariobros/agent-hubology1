@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useTransactionForm } from '@/context/TransactionForm';
 import { getDefaultCommissionRate } from '@/context/TransactionForm/initialState';
-import { Calculator, Percent, DollarSign, Building, User, Users } from 'lucide-react';
+import { Calculator, Percent, DollarSign, Building, User, Users, Award } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { 
@@ -15,20 +15,28 @@ import {
   TabsList,
   TabsTrigger
 } from '@/components/ui/tabs';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { AgentRank } from '@/types/transaction-form';
 
-// Mock data for agent tiers - in a real implementation, this would come from an API or context
+// Agent tier definitions
 const AGENT_TIERS = [
-  { id: 1, name: 'Junior', agentPercentage: 70 },
-  { id: 2, name: 'Associate', agentPercentage: 75 },
-  { id: 3, name: 'Senior', agentPercentage: 80 },
-  { id: 4, name: 'Director', agentPercentage: 85 },
-  { id: 5, name: 'Partner', agentPercentage: 90 },
+  { id: 1, name: 'Advisor', rank: 'Advisor' as AgentRank, agentPercentage: 70 },
+  { id: 2, name: 'Sales Leader', rank: 'Sales Leader' as AgentRank, agentPercentage: 80 },
+  { id: 3, name: 'Team Leader', rank: 'Team Leader' as AgentRank, agentPercentage: 83 },
+  { id: 4, name: 'Group Leader', rank: 'Group Leader' as AgentRank, agentPercentage: 85 },
+  { id: 5, name: 'Supreme Leader', rank: 'Supreme Leader' as AgentRank, agentPercentage: 85 },
 ];
 
 // Mock function to get agent tier - would be replaced with actual API call
 const getAgentTier = () => {
   // In production, this would fetch the current user's tier from an API
-  return AGENT_TIERS[0]; // Default to junior tier for demonstration
+  return AGENT_TIERS[2]; // Default to Team Leader tier for demonstration
 };
 
 const CommissionCalculation: React.FC = () => {
@@ -38,6 +46,20 @@ const CommissionCalculation: React.FC = () => {
   
   console.log('CommissionCalculation rendered with formData:', formData);
   console.log('Errors state in CommissionCalculation:', errors);
+  
+  // Update the agent tier when it changes
+  const handleAgentTierChange = (value: string) => {
+    const newTier = AGENT_TIERS.find(tier => tier.rank === value)!;
+    setAgentTier(newTier);
+    updateFormData({ agentTier: value as AgentRank });
+  };
+  
+  // Initialize agent tier in form data if not set
+  useEffect(() => {
+    if (!formData.agentTier) {
+      updateFormData({ agentTier: agentTier.rank });
+    }
+  }, [formData.agentTier, agentTier.rank, updateFormData]);
   
   // Get the tier-based agent percentage (how much of agency's portion goes to agent)
   const agentPortionPercentage = agentTier.agentPercentage;
@@ -53,37 +75,7 @@ const CommissionCalculation: React.FC = () => {
     : 0;
   
   // Calculate the commissions based on the business rules
-  const calculateUpdatedCommission = () => {
-    const transactionValue = formData.transactionValue || 0;
-    const commissionRate = formData.commissionRate || 0;
-    
-    // Total commission amount
-    const totalCommission = (transactionValue * commissionRate) / 100;
-    
-    // Our agency's portion of the commission
-    const ourAgencyCommission = totalCommission * (agencySplitPercentage / 100);
-    
-    // Co-broker agency's portion (if applicable)
-    const coAgencyCommission = formData.coBroking?.enabled 
-      ? totalCommission * (coAgencySplitPercentage / 100)
-      : 0;
-    
-    // From our agency's portion, calculate agent's and company's shares
-    const agentShare = ourAgencyCommission * (agentPortionPercentage / 100);
-    const agencyShare = ourAgencyCommission * (agencyPortionPercentage / 100);
-    
-    return {
-      transactionValue,
-      commissionRate,
-      totalCommission,
-      ourAgencyCommission,
-      coAgencyCommission,
-      agentShare,
-      agencyShare
-    };
-  };
-  
-  const commissionBreakdown = calculateUpdatedCommission();
+  const commissionBreakdown = calculateCommission();
   
   // Update default commission rate when transaction type changes
   useEffect(() => {
@@ -193,6 +185,31 @@ const CommissionCalculation: React.FC = () => {
             )}
           </div>
           
+          <div>
+            <Label htmlFor="agentTier" className="flex items-center gap-1">
+              <Award className="h-4 w-4" />
+              Agent Tier
+            </Label>
+            <Select 
+              value={formData.agentTier || agentTier.rank} 
+              onValueChange={handleAgentTierChange}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select agent tier" />
+              </SelectTrigger>
+              <SelectContent>
+                {AGENT_TIERS.map((tier) => (
+                  <SelectItem key={tier.id} value={tier.rank}>
+                    {tier.name} ({tier.agentPercentage}%)
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground mt-1">
+              This determines your commission split percentage
+            </p>
+          </div>
+          
           {formData.coBroking?.enabled && (
             <div className="bg-muted/50 p-4 rounded-md">
               <h3 className="text-sm font-semibold mb-2">Co-Broking Split</h3>
@@ -207,9 +224,12 @@ const CommissionCalculation: React.FC = () => {
           )}
           
           <div className="bg-muted/50 p-4 rounded-md">
-            <h3 className="text-sm font-semibold mb-2">Agent Tier: {agentTier.name}</h3>
+            <h3 className="text-sm font-semibold flex items-center gap-1 mb-2">
+              <Award className="h-4 w-4" />
+              {formData.agentTier || agentTier.rank} Commission Split
+            </h3>
             <p className="text-xs text-muted-foreground mb-2">
-              Your current commission split rate is {agentPortionPercentage}/{agencyPortionPercentage}.
+              Your current commission split rate is {agentPortionPercentage}/{agencyPortionPercentage} based on your tier.
             </p>
             <div className="flex items-center justify-between">
               <span className="text-sm">You: {agentPortionPercentage}%</span>
@@ -247,18 +267,21 @@ const CommissionCalculation: React.FC = () => {
                   
                   <div className="flex justify-between items-center pl-4">
                     <span className="text-muted-foreground">Our Agency Portion ({agencySplitPercentage}%):</span>
-                    <span className="font-medium">{formatCurrency(commissionBreakdown.ourAgencyCommission)}</span>
+                    <span className="font-medium">{formatCurrency(commissionBreakdown.ourAgencyCommission || 0)}</span>
                   </div>
                   
                   <div className="flex justify-between items-center pl-4">
                     <span className="text-muted-foreground">Co-Agency Portion ({coAgencySplitPercentage}%):</span>
-                    <span className="font-medium">{formatCurrency(commissionBreakdown.coAgencyCommission)}</span>
+                    <span className="font-medium">{formatCurrency(commissionBreakdown.coAgencyCommission || 0)}</span>
                   </div>
                 </div>
               )}
               
               <div className="pt-2 space-y-3">
-                <h4 className="font-medium">Our Agency's Internal Split</h4>
+                <h4 className="font-medium flex items-center gap-1">
+                  <Award className="h-4 w-4" />
+                  {formData.agentTier || agentTier.rank} Tier Internal Split
+                </h4>
                 
                 <div className="flex justify-between items-center pl-4">
                   <span className="flex items-center gap-1 text-muted-foreground">
@@ -280,7 +303,7 @@ const CommissionCalculation: React.FC = () => {
             
             {/* Visual representation of the split */}
             <div className="mt-6">
-              <h4 className="text-sm font-medium mb-2">Your Commission</h4>
+              <h4 className="text-sm font-medium mb-2">Your Commission Split</h4>
               <div className="h-4 w-full flex rounded-full overflow-hidden">
                 <div 
                   className="bg-green-500 h-full" 
@@ -294,13 +317,13 @@ const CommissionCalculation: React.FC = () => {
                 ></div>
               </div>
               <div className="flex justify-between text-xs mt-1 text-muted-foreground">
-                <span>Your Share</span>
-                <span>Agency</span>
+                <span>Your Share ({agentPortionPercentage}%)</span>
+                <span>Agency ({agencyPortionPercentage}%)</span>
               </div>
               
               {formData.coBroking?.enabled && (
                 <>
-                  <h4 className="text-sm font-medium mb-2 mt-4">Total Commission</h4>
+                  <h4 className="text-sm font-medium mb-2 mt-4">Inter-Agency Split</h4>
                   <div className="h-4 w-full flex rounded-full overflow-hidden">
                     <div 
                       className="bg-blue-500 h-full" 
@@ -314,8 +337,8 @@ const CommissionCalculation: React.FC = () => {
                     ></div>
                   </div>
                   <div className="flex justify-between text-xs mt-1 text-muted-foreground">
-                    <span>Our Agency</span>
-                    <span>Co-Broker</span>
+                    <span>Our Agency ({agencySplitPercentage}%)</span>
+                    <span>Co-Broker ({coAgencySplitPercentage}%)</span>
                   </div>
                 </>
               )}

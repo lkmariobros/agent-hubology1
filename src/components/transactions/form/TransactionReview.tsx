@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useTransactionForm } from '@/context/TransactionFormContext';
 import { 
@@ -8,7 +9,8 @@ import {
   DollarSign, 
   Clock,
   CheckSquare,
-  XSquare
+  XSquare,
+  Award
 } from 'lucide-react';
 import { 
   Card, 
@@ -75,6 +77,8 @@ const TransactionReview: React.FC = () => {
   };
   
   const clients = getClientNames();
+  const agentTier = formData.agentTier || 'Advisor';
+  const agentCommissionPercentage = commissionBreakdown.agentCommissionPercentage || 70;
   
   // Get transaction summary items
   const getSummaryItems = () => {
@@ -115,6 +119,11 @@ const TransactionReview: React.FC = () => {
         value: `${formData.commissionRate}%`
       },
       {
+        icon: <Award className="h-5 w-5" />,
+        label: 'Agent Tier',
+        value: `${agentTier} (${agentCommissionPercentage}%)`
+      },
+      {
         icon: <DollarSign className="h-5 w-5" />,
         label: 'Total Commission',
         value: formatCurrency(commissionBreakdown.totalCommission)
@@ -133,6 +142,9 @@ const TransactionReview: React.FC = () => {
       }
     ];
   };
+  
+  // Calculate the agency percentage (opposite of agent percentage)
+  const agencyCommissionPercentage = 100 - agentCommissionPercentage;
   
   return (
     <div className="space-y-6">
@@ -192,21 +204,63 @@ const TransactionReview: React.FC = () => {
               </div>
             )}
             
-            <h4 className="text-sm font-medium mb-2">Our Agency's Internal Split</h4>
+            <h4 className="text-sm font-medium flex items-center gap-1 mb-2">
+              <Award className="h-4 w-4" />
+              {agentTier} Tier Internal Split ({agentCommissionPercentage}% / {agencyCommissionPercentage}%)
+            </h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Card className="bg-muted/30">
                 <CardContent className="p-4">
-                  <div className="text-sm text-muted-foreground">Agency Share</div>
+                  <div className="text-sm text-muted-foreground">Agency Share ({agencyCommissionPercentage}%)</div>
                   <div className="text-lg font-bold">{formatCurrency(commissionBreakdown.agencyShare)}</div>
                 </CardContent>
               </Card>
               
               <Card className="bg-green-500/10">
                 <CardContent className="p-4">
-                  <div className="text-sm text-muted-foreground">Your Share</div>
+                  <div className="text-sm text-muted-foreground">Your Share ({agentCommissionPercentage}%)</div>
                   <div className="text-lg font-bold">{formatCurrency(commissionBreakdown.agentShare)}</div>
                 </CardContent>
               </Card>
+            </div>
+            
+            {/* Visual representation of split */}
+            <div className="mt-4 space-y-3">
+              <div>
+                <div className="h-4 w-full flex rounded-full overflow-hidden">
+                  <div 
+                    className="bg-green-500 h-full" 
+                    style={{ width: `${agentCommissionPercentage}%` }}
+                  ></div>
+                  <div 
+                    className="bg-primary h-full" 
+                    style={{ width: `${agencyCommissionPercentage}%` }}
+                  ></div>
+                </div>
+                <div className="flex justify-between text-xs mt-1 text-muted-foreground">
+                  <span>Your Share ({agentCommissionPercentage}%)</span>
+                  <span>Agency ({agencyCommissionPercentage}%)</span>
+                </div>
+              </div>
+              
+              {formData.coBroking.enabled && (
+                <div className="mt-2">
+                  <div className="h-4 w-full flex rounded-full overflow-hidden">
+                    <div 
+                      className="bg-blue-500 h-full" 
+                      style={{ width: `${formData.coBroking.commissionSplit}%` }}
+                    ></div>
+                    <div 
+                      className="bg-orange-500 h-full" 
+                      style={{ width: `${100 - formData.coBroking.commissionSplit}%` }}
+                    ></div>
+                  </div>
+                  <div className="flex justify-between text-xs mt-1 text-muted-foreground">
+                    <span>Our Agency ({formData.coBroking.commissionSplit}%)</span>
+                    <span>Co-Broker ({100 - formData.coBroking.commissionSplit}%)</span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </CardContent>

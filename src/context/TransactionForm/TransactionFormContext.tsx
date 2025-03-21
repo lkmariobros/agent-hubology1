@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useReducer, ReactNode, useCallback } from 'react';
 import { 
   TransactionFormState, 
@@ -5,7 +6,8 @@ import {
   TransactionFormData, 
   TransactionDocument, 
   TransactionType, 
-  CommissionBreakdown 
+  CommissionBreakdown,
+  AgentRank
 } from './types';
 import { transactionFormReducer } from './reducer';
 import { initialTransactionFormState } from './initialState';
@@ -13,6 +15,15 @@ import { saveFormAsDraft, submitTransactionForm } from './formSubmission';
 
 // Create context with undefined initial value
 const TransactionFormContext = createContext<TransactionFormContextType | undefined>(undefined);
+
+// Agent tier commission percentages
+const AGENT_TIER_PERCENTAGES: Record<AgentRank, number> = {
+  'Advisor': 70,
+  'Sales Leader': 80,
+  'Team Leader': 83,
+  'Group Leader': 85,
+  'Supreme Leader': 85
+};
 
 // Provider component
 export const TransactionFormProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -186,16 +197,21 @@ export const TransactionFormProvider: React.FC<{ children: ReactNode }> = ({ chi
     }
   }, [state, resetForm, validateCurrentStep]);
 
+  // Helper function to get agent's commission percentage based on their tier
+  const getAgentCommissionPercentage = (tier: AgentRank): number => {
+    return AGENT_TIER_PERCENTAGES[tier] || 70; // Default to 70% if tier not found
+  };
+
   // Calculate commission breakdown - updated to match business rules
   const calculateCommission = useCallback((): CommissionBreakdown => {
-    const { transactionValue, commissionRate, coBroking } = state.formData;
+    const { transactionValue, commissionRate, coBroking, agentTier = 'Advisor' } = state.formData;
     
     // Calculate basic values
     const totalCommission = (transactionValue * commissionRate) / 100;
     
-    // For this example, we'll assume a fixed agent tier percentage
-    // In a real implementation, this would come from the agent's profile
-    const agentTierPercentage = 70; // 70/30 split by default
+    // Get the agent's commission percentage based on their tier
+    const agentTierPercentage = getAgentCommissionPercentage(agentTier);
+    const agencyTierPercentage = 100 - agentTierPercentage;
     
     // Calculate split percentages for co-broking scenario
     const agencySplitPercentage = coBroking?.enabled ? (coBroking.commissionSplit || 50) : 100;
@@ -210,7 +226,7 @@ export const TransactionFormProvider: React.FC<{ children: ReactNode }> = ({ chi
       : 0;
     
     // From our agency's portion, calculate agent and agency shares
-    const agencyShare = ourAgencyCommission * ((100 - agentTierPercentage) / 100);
+    const agencyShare = ourAgencyCommission * (agencyTierPercentage / 100);
     const agentShare = ourAgencyCommission * (agentTierPercentage / 100);
     
     return {
@@ -221,6 +237,8 @@ export const TransactionFormProvider: React.FC<{ children: ReactNode }> = ({ chi
       agentShare,
       ourAgencyCommission,
       coAgencyCommission,
+      agentTier,
+      agentCommissionPercentage: agentTierPercentage
     };
   }, [state.formData]);
 
