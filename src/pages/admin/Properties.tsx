@@ -65,11 +65,11 @@ const AdminProperties = () => {
           </div>
           
           <TabsContent value="grid">
-            <PropertyGrid isAdmin />
+            <PropertyGrid />
           </TabsContent>
           
           <TabsContent value="table">
-            <PropertyTable isAdmin />
+            <PropertyTable />
           </TabsContent>
         </Tabs>
       </div>

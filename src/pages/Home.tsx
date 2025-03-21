@@ -5,7 +5,7 @@ import MetricCard from '@/components/dashboard/MetricCard';
 import OpportunitiesBoard from '@/components/dashboard/OpportunitiesBoard';
 import RecentTransactions from '@/components/dashboard/RecentTransactions';
 import PropertyList from '@/components/dashboard/PropertyList';
-import { DashboardMetric } from '@/types';
+import { DashboardMetric, Transaction, Property } from '@/types';
 
 const Home = () => {
   // Sample metrics for demonstration
@@ -34,19 +34,95 @@ const Home = () => {
   ];
 
   // Sample transactions
-  const transactions = [
-    { id: '1', property: { title: 'Luxury Condo', address: { city: 'New York', state: 'NY' } }, price: 750000, status: 'completed', date: '2023-08-15' },
-    { id: '2', property: { title: 'Beach House', address: { city: 'Miami', state: 'FL' } }, price: 1200000, status: 'pending', date: '2023-08-10' },
-    { id: '3', property: { title: 'Mountain Cabin', address: { city: 'Denver', state: 'CO' } }, price: 450000, status: 'completed', date: '2023-08-05' }
+  const transactions: Transaction[] = [
+    { 
+      id: '1', 
+      propertyId: '1',
+      agentId: '1',
+      commission: 30000,
+      status: 'completed', 
+      date: '2023-08-15',
+      property: { title: 'Luxury Condo', address: { city: 'New York', state: 'NY' } }, 
+      price: 750000
+    },
+    { 
+      id: '2', 
+      propertyId: '2',
+      agentId: '1',
+      commission: 48000,
+      status: 'pending', 
+      date: '2023-08-10',
+      property: { title: 'Beach House', address: { city: 'Miami', state: 'FL' } }, 
+      price: 1200000
+    },
+    { 
+      id: '3', 
+      propertyId: '3',
+      agentId: '2',
+      commission: 18000,
+      status: 'completed', 
+      date: '2023-08-05',
+      property: { title: 'Mountain Cabin', address: { city: 'Denver', state: 'CO' } }, 
+      price: 450000
+    }
   ];
 
   // Sample properties
-  const properties = [
-    { id: '1', title: 'Modern Apartment', address: { city: 'San Francisco', state: 'CA' }, price: 850000, status: 'available' },
-    { id: '2', title: 'Victorian House', address: { city: 'Boston', state: 'MA' }, price: 1500000, status: 'available' },
-    { id: '3', title: 'Downtown Loft', address: { city: 'Chicago', state: 'IL' }, price: 650000, status: 'pending' },
-    { id: '4', title: 'Suburban Home', address: { city: 'Austin', state: 'TX' }, price: 520000, status: 'available' },
-    { id: '5', title: 'Beachfront Condo', address: { city: 'San Diego', state: 'CA' }, price: 975000, status: 'available' }
+  const properties: Property[] = [
+    { 
+      id: '1', 
+      title: 'Modern Apartment', 
+      description: 'A beautiful modern apartment',
+      price: 850000, 
+      address: { street: '123 Main St', city: 'San Francisco', state: 'CA', zip: '94101', country: 'USA' }, 
+      type: 'residential', 
+      subtype: 'apartment',
+      features: ['pool', 'gym'],
+      bedrooms: 2,
+      bathrooms: 2,
+      area: 1200,
+      images: [],
+      status: 'available',
+      listedBy: 'Agent 1',
+      createdAt: '2023-01-01',
+      updatedAt: '2023-01-01'
+    },
+    { 
+      id: '2', 
+      title: 'Victorian House', 
+      description: 'A classic Victorian home',
+      price: 1500000, 
+      address: { street: '456 Oak St', city: 'Boston', state: 'MA', zip: '02108', country: 'USA' }, 
+      type: 'residential', 
+      subtype: 'single-family',
+      features: ['garden', 'fireplace'],
+      bedrooms: 4,
+      bathrooms: 3,
+      area: 2500,
+      images: [],
+      status: 'available',
+      listedBy: 'Agent 2',
+      createdAt: '2023-01-02',
+      updatedAt: '2023-01-02'
+    },
+    { 
+      id: '3', 
+      title: 'Downtown Loft', 
+      description: 'A spacious downtown loft',
+      price: 650000, 
+      address: { street: '789 State St', city: 'Chicago', state: 'IL', zip: '60601', country: 'USA' }, 
+      type: 'residential', 
+      subtype: 'loft',
+      features: ['high ceiling', 'exposed brick'],
+      bedrooms: 1,
+      bathrooms: 2,
+      area: 1800,
+      images: [],
+      status: 'pending',
+      listedBy: 'Agent 1',
+      createdAt: '2023-01-03',
+      updatedAt: '2023-01-03'
+    }
   ];
 
   const handleViewAll = (section: string) => {
