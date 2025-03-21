@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TransactionFormProvider, useTransactionForm } from '@/context/TransactionFormContext'; 
 import { Button } from '@/components/ui/button';
@@ -22,7 +22,10 @@ const TransactionFormSteps: React.FC = () => {
   const { currentStep, isSubmitting, lastSaved, errors } = state;
   const navigate = useNavigate();
 
+  console.log('TransactionFormSteps rendered with currentStep:', currentStep);
+
   const handleSaveDraft = async () => {
+    console.log('Save draft clicked');
     try {
       await saveForm();
       toast.success('Transaction saved as draft');
@@ -33,6 +36,7 @@ const TransactionFormSteps: React.FC = () => {
   };
 
   const handleSubmit = async () => {
+    console.log('Submit clicked');
     try {
       if (!validateCurrentStep()) {
         toast.error('Please fix the validation errors before submitting');
@@ -55,13 +59,14 @@ const TransactionFormSteps: React.FC = () => {
       console.log('Validation passed, moving to next step');
       nextStep();
     } else {
-      console.log('Validation failed:', errors);
+      console.log('Validation failed, errors:', errors);
       toast.error('Please fix the validation errors before proceeding');
     }
   };
 
   // Render the current step component
   const renderStepContent = () => {
+    console.log('Rendering step content for step:', currentStep);
     switch (currentStep) {
       case 0:
         return <TransactionTypeSelector />;
@@ -78,6 +83,7 @@ const TransactionFormSteps: React.FC = () => {
       case 6:
         return <TransactionReview />;
       default:
+        console.warn('Unknown step:', currentStep);
         return <TransactionTypeSelector />;
     }
   };
@@ -160,6 +166,7 @@ const TransactionFormSteps: React.FC = () => {
 };
 
 const EnhancedTransactionForm: React.FC = () => {
+  console.log('EnhancedTransactionForm rendered');
   return (
     <TransactionFormProvider>
       <TransactionFormSteps />

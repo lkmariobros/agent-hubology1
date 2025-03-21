@@ -1,5 +1,5 @@
 
-import React, { useCallback, useMemo, useEffect } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useTransactionForm } from '@/context/TransactionFormContext';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -32,21 +32,7 @@ const CoBrokingSetup: React.FC = () => {
   const { state, updateFormData } = useTransactionForm();
   const { formData, errors } = state;
   
-  // Initialize coBroking if it doesn't exist
-  useEffect(() => {
-    if (!formData.coBroking) {
-      updateFormData({
-        coBroking: {
-          enabled: false,
-          agentName: '',
-          agentCompany: '',
-          agentContact: '',
-          commissionSplit: 50,
-          credentialsVerified: false
-        }
-      });
-    }
-  }, [formData.coBroking, updateFormData]);
+  console.log('CoBrokingSetup rendered with formData:', formData);
   
   // Safely access coBroking data with memoization to prevent unnecessary recalculations
   const coBroking = useMemo(() => formData.coBroking || {
@@ -60,6 +46,7 @@ const CoBrokingSetup: React.FC = () => {
   
   // Memoized callbacks to prevent unnecessary re-renders
   const handleCoBrokingToggle = useCallback((enabled: boolean) => {
+    console.log('CoBroking toggle:', enabled);
     updateFormData({
       coBroking: {
         ...coBroking,
@@ -69,6 +56,7 @@ const CoBrokingSetup: React.FC = () => {
   }, [coBroking, updateFormData]);
   
   const handleCoBrokingChange = useCallback((field: string, value: string | number | boolean) => {
+    console.log('CoBroking field change:', field, value);
     updateFormData({
       coBroking: {
         ...coBroking,
@@ -79,6 +67,7 @@ const CoBrokingSetup: React.FC = () => {
 
   // Reset error boundary when toggling co-broking
   const handleErrorReset = useCallback(() => {
+    console.log('Resetting co-broking form due to error');
     // Reset to default state
     updateFormData({
       coBroking: {

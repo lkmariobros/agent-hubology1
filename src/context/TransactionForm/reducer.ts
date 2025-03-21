@@ -25,9 +25,11 @@ export const transactionFormReducer = (
   state: TransactionFormState, 
   action: TransactionFormAction
 ): TransactionFormState => {
+  console.log('Reducer action:', action.type, action.payload);
+  
   switch (action.type) {
     case 'UPDATE_FORM_DATA':
-      // Handle coBroking field updates properly
+      // Special handling for coBroking object
       if (action.payload.coBroking !== undefined) {
         // Make sure the coBroking object is properly initialized
         const currentCoBroking = state.formData.coBroking || {
@@ -39,7 +41,7 @@ export const transactionFormReducer = (
           credentialsVerified: false
         };
         
-        console.log('Current coBroking:', currentCoBroking);
+        console.log('Current coBroking before update:', currentCoBroking);
         console.log('New coBroking data:', action.payload.coBroking);
         
         return {
@@ -64,6 +66,8 @@ export const transactionFormReducer = (
       };
       
     case 'UPDATE_TRANSACTION_TYPE': {
+      console.log('Updating transaction type to:', action.payload);
+      
       // Keep current property data when changing transaction type
       const currentProperty = state.formData.property;
       const currentPropertyId = state.formData.propertyId;
@@ -98,6 +102,7 @@ export const transactionFormReducer = (
       };
       
     case 'NEXT_STEP':
+      console.log('Moving to next step, current step:', state.currentStep);
       return {
         ...state,
         currentStep: state.currentStep + 1,
