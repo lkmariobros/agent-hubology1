@@ -31,14 +31,12 @@ const TransactionFormStepper: React.FC = () => {
     <div className="mb-8">
       <h2 className="text-2xl font-bold mb-6">Add New Transaction</h2>
       <div className="relative">
-        {/* Containers for steps and connector lines */}
-        <div className="flex justify-between relative items-center">
-          {/* Steps with connecting lines between them */}
+        <div className="flex items-center">
           {steps.map((step, index) => (
             <React.Fragment key={step.id}>
               {/* Step Circle */}
               <div 
-                className={`flex flex-col items-center z-20 cursor-pointer`}
+                className="flex flex-col items-center z-20 cursor-pointer"
                 onClick={() => goToStep(step.id)}
               >
                 <div 
@@ -66,10 +64,10 @@ const TransactionFormStepper: React.FC = () => {
               
               {/* Connector line (only between circles, not after the last one) */}
               {index < steps.length - 1 && (
-                <div className="flex-1 flex items-center relative h-0.5">
-                  <div className="w-full h-0.5 bg-muted"></div>
+                <div className="flex-1 flex items-center h-[1px] mx-2">
+                  <div className="w-full h-[1px] bg-muted"></div>
                   <div 
-                    className="absolute h-0.5 bg-primary transition-all duration-300 ease-in-out"
+                    className="absolute h-[1px] bg-primary transition-all duration-300 ease-in-out"
                     style={{ 
                       width: currentStep > index ? '100%' : '0%',
                       left: 0,
