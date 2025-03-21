@@ -119,15 +119,29 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     setLoading(true);
     try {
       // This is a bit of a workaround since TypeScript might complain about the notifications table
-      // We're using raw query or a function call here
-      const { data, error } = await supabase.rpc(
-        'get_user_notifications',
-        { user_id_param: user }
-      );
+      // We're using a direct query here
+      const { data, error } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('user_id', user)
+        .order('created_at', { ascending: false })
+        .limit(50);
 
       if (error) throw error;
       
-      setNotifications(data as Notification[]);
+      // Transform the data to match our interface
+      const transformedData = data.map(item => ({
+        id: item.id,
+        userId: item.user_id,
+        type: item.type,
+        title: item.title,
+        message: item.message,
+        data: item.data,
+        read: item.read,
+        createdAt: item.created_at
+      })) as Notification[];
+      
+      setNotifications(transformedData);
     } catch (error) {
       console.error('Error fetching notifications:', error);
     } finally {
@@ -137,10 +151,10 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   const markAsRead = async (id: string) => {
     try {
-      const { error } = await supabase.rpc(
-        'mark_notification_read',
-        { notification_id_param: id }
-      );
+      const { error } = await supabase
+        .from('notifications')
+        .update({ read: true })
+        .eq('id', id);
 
       if (error) throw error;
       
@@ -156,10 +170,11 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (!user) return;
 
     try {
-      const { error } = await supabase.rpc(
-        'mark_all_notifications_read',
-        { user_id_param: user }
-      );
+      const { error } = await supabase
+        .from('notifications')
+        .update({ read: true })
+        .eq('user_id', user)
+        .eq('read', false);
 
       if (error) throw error;
       
@@ -171,10 +186,10 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   const deleteNotification = async (id: string) => {
     try {
-      const { error } = await supabase.rpc(
-        'delete_notification',
-        { notification_id_param: id }
-      );
+      const { error } = await supabase
+        .from('notifications')
+        .delete()
+        .eq('id', id);
 
       if (error) throw error;
       

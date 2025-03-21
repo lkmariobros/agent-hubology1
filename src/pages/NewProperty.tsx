@@ -1,7 +1,7 @@
 
 import React from 'react';
 import MainLayout from '@/components/layout/MainLayout';
-import { EnhancedPropertyForm } from '@/components/property/EnhancedPropertyForm';
+import EnhancedPropertyForm from '@/components/property/EnhancedPropertyForm';
 
 const NewProperty = () => {
   return (

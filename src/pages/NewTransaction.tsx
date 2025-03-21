@@ -1,7 +1,7 @@
 
 import React from 'react';
 import MainLayout from '@/components/layout/MainLayout';
-import { EnhancedTransactionForm } from '@/components/transactions/EnhancedTransactionForm';
+import EnhancedTransactionForm from '@/components/transactions/EnhancedTransactionForm';
 
 const NewTransaction = () => {
   return (

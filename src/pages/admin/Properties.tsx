@@ -7,8 +7,8 @@ import { Plus, Search, Filter, SortDesc } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import PropertyTable from '@/components/property/PropertyTable';
-import PropertyGrid from '@/components/property/PropertyGrid';
+import { PropertyTable } from '@/components/property/PropertyTable';
+import { PropertyGrid } from '@/components/property/PropertyGrid';
 
 const AdminProperties = () => {
   return (
