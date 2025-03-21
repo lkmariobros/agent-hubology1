@@ -33,15 +33,16 @@ const TransactionFormStepper: React.FC = () => {
       <div className="relative px-6">
         {/* Steps with exact positioning */}
         <div className="flex relative">
-          {/* Background line (unfilled) */}
-          <div className="absolute h-0.5 bg-muted top-6 left-6 right-0 z-0"></div>
+          {/* Background line (unfilled) - starting after the first icon */}
+          <div className="absolute h-0.5 bg-muted top-6 left-[calc(0%+12px)] right-[calc(0%+12px)] z-0"></div>
           
-          {/* Progress line (filled) - Adjusted to start from first icon and not extend beyond */}
+          {/* Progress line (filled) - starts from first icon and extends based on progress */}
           {currentStep > 0 && (
             <div 
-              className="absolute h-0.5 bg-primary top-6 left-6 z-10 transition-all duration-300 ease-in-out"
+              className="absolute h-0.5 bg-primary top-6 z-10 transition-all duration-300 ease-in-out"
               style={{ 
-                width: `calc(${(currentStep / (steps.length - 1)) * 100}% - 6px)`,
+                left: '12px',
+                width: `calc(${(currentStep / (steps.length - 1)) * 100}% - 24px)`,
               }}
             ></div>
           )}
