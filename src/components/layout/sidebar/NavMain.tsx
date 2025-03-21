@@ -54,21 +54,27 @@ export function NavMain() {
       <SidebarGroupLabel>Main</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
-          {mainNavItems.map((item) => (
-            <SidebarMenuItem key={item.label}>
-              <SidebarMenuButton 
-                asChild 
-                isActive={location.pathname === item.href}
-                tooltip={item.label}
-                size="default"
-              >
-                <Link to={item.href}>
-                  <item.icon />
-                  <span>{item.label}</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
+          {mainNavItems.map((item) => {
+            // Check if current path starts with this item's href (for nested routes)
+            const isActive = location.pathname === item.href || 
+                           (item.href !== '/dashboard' && location.pathname.startsWith(item.href));
+            
+            return (
+              <SidebarMenuItem key={item.label}>
+                <SidebarMenuButton 
+                  asChild 
+                  isActive={isActive}
+                  tooltip={item.label}
+                  size="default"
+                >
+                  <Link to={item.href}>
+                    <item.icon />
+                    <span>{item.label}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            );
+          })}
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>

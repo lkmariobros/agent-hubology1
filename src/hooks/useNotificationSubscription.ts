@@ -11,51 +11,61 @@ export const useNotificationSubscription = (
   useEffect(() => {
     if (!userId) return;
 
-    const channel = supabase
-      .channel('public:notifications')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'notifications',
-          filter: `user_id=eq.${userId}`,
-        },
-        (payload) => {
-          // Handle the new notification from the payload
-          const newNotification = {
-            id: payload.new.id,
-            userId: payload.new.user_id,
-            type: payload.new.type,
-            title: payload.new.title,
-            message: payload.new.message,
-            data: payload.new.data,
-            read: payload.new.read,
-            createdAt: payload.new.created_at
-          } as Notification;
-          
-          // Add to state via callback
-          onNewNotification(newNotification);
-          
-          // Show toast notification
-          toast(newNotification.title, {
-            description: newNotification.message,
-            action: {
-              label: 'View',
-              onClick: () => {
-                // If there's approval data, we can navigate to it
-                if (newNotification.type === 'approval' && newNotification.data?.approvalId) {
-                  window.location.href = `/transactions/${newNotification.data.transactionId}`;
+    try {
+      const channel = supabase
+        .channel('public:notifications')
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'notifications',
+            filter: `user_id=eq.${userId}`,
+          },
+          (payload) => {
+            try {
+              // Handle the new notification from the payload
+              const newNotification = {
+                id: payload.new.id,
+                userId: payload.new.user_id,
+                type: payload.new.type,
+                title: payload.new.title,
+                message: payload.new.message,
+                data: payload.new.data,
+                read: payload.new.read,
+                createdAt: payload.new.created_at
+              } as Notification;
+              
+              // Add to state via callback
+              onNewNotification(newNotification);
+              
+              // Show toast notification
+              toast(newNotification.title, {
+                description: newNotification.message,
+                action: {
+                  label: 'View',
+                  onClick: () => {
+                    // If there's approval data, we can navigate to it
+                    if (newNotification.type === 'approval' && newNotification.data?.approvalId) {
+                      window.location.href = `/transactions/${newNotification.data.transactionId}`;
+                    }
+                  }
                 }
-              }
+              });
+            } catch (error) {
+              console.error('Error processing notification payload:', error);
             }
-          });
-        }
-      )
-      .subscribe();
+          }
+        )
+        .subscribe((status) => {
+          console.log('Subscription status:', status);
+        });
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    } catch (error) {
+      console.error('Error setting up notification subscription:', error);
+    }
   }, [userId, onNewNotification]);
 };
