@@ -10,6 +10,7 @@ import CommissionBreakdownCard from './commission/CommissionBreakdownCard';
 import ApprovalInfo from './commission/ApprovalInfo';
 import CoBrokingInfoCard from './commission/CoBrokingInfoCard';
 import AgentTierInfo from './commission/AgentTierInfo';
+import { AgentRank } from '@/types/transaction-form';
 
 const CommissionCalculation: React.FC = () => {
   const {
@@ -53,7 +54,7 @@ const CommissionCalculation: React.FC = () => {
   }, [formData.agentTier]);
   
   // Handle agent tier change
-  const handleAgentTierChange = (tier: string) => {
+  const handleAgentTierChange = (tier: AgentRank) => {
     updateFormData({ agentTier: tier });
   };
 

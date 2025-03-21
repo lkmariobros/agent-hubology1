@@ -57,28 +57,17 @@ export const useCommissionApprovals = (
   return useQuery({
     queryKey,
     queryFn: async () => {
-      // Start with the base query
-      let query = supabase
-        .from('commission_approvals')
-        .select('*, property_transactions!inner(transaction_value, commission_amount, transaction_date)', { 
-          count: 'exact' 
-        });
-      
-      // Apply filters
-      if (status) {
-        query = query.eq('status', status);
-      }
-      
-      // Apply user filter for non-admins (RLS handles this, but we're explicit)
-      if (!isAdmin && userId) {
-        query = query.eq('submitted_by', userId);
-      }
-      
-      // Apply pagination
-      query = query.range((page - 1) * pageSize, page * pageSize - 1);
-      
-      // Execute the query
-      const { data, error, count } = await query;
+      // Since we don't have the types for our new tables yet,
+      // we need to use raw SQL for queries in the short term
+      const { data, error, count } = await supabase.rpc(
+        'get_commission_approvals',
+        {
+          p_status: status,
+          p_user_id: !isAdmin && userId ? userId : null,
+          p_limit: pageSize,
+          p_offset: (page - 1) * pageSize
+        }
+      );
       
       if (error) {
         console.error('Error fetching commission approvals:', error);
@@ -86,7 +75,7 @@ export const useCommissionApprovals = (
       }
       
       return {
-        approvals: data as any[] as (CommissionApproval & {
+        approvals: data as unknown as (CommissionApproval & {
           property_transactions: TransactionDetails;
         })[],
         totalCount: count || 0
@@ -103,24 +92,26 @@ export const useCommissionApprovalDetail = (approvalId?: string, isAdmin = false
     queryFn: async () => {
       if (!approvalId) throw new Error("Approval ID is required");
       
-      // Fetch approval details
-      const { data: approval, error: approvalError } = await supabase
-        .from('commission_approvals')
-        .select('*, property_transactions!inner(*)')
-        .eq('id', approvalId)
-        .single();
+      // Fetch approval details - using RPC for type safety
+      const { data: approvalData, error: approvalError } = await supabase.rpc(
+        'get_commission_approval_detail',
+        { p_approval_id: approvalId }
+      );
       
       if (approvalError) {
         console.error('Error fetching approval:', approvalError);
         throw approvalError;
       }
       
+      if (!approvalData) {
+        throw new Error("Approval not found");
+      }
+      
       // Fetch history
-      const { data: history, error: historyError } = await supabase
-        .from('commission_approval_history')
-        .select('*')
-        .eq('approval_id', approvalId)
-        .order('created_at', { ascending: false });
+      const { data: historyData, error: historyError } = await supabase.rpc(
+        'get_commission_approval_history',
+        { p_approval_id: approvalId }
+      );
       
       if (historyError) {
         console.error('Error fetching approval history:', historyError);
@@ -128,11 +119,10 @@ export const useCommissionApprovalDetail = (approvalId?: string, isAdmin = false
       }
       
       // Fetch comments
-      const { data: comments, error: commentsError } = await supabase
-        .from('commission_approval_comments')
-        .select('*')
-        .eq('approval_id', approvalId)
-        .order('created_at', { ascending: true });
+      const { data: commentsData, error: commentsError } = await supabase.rpc(
+        'get_commission_approval_comments',
+        { p_approval_id: approvalId }
+      );
       
       if (commentsError) {
         console.error('Error fetching approval comments:', commentsError);
@@ -140,9 +130,9 @@ export const useCommissionApprovalDetail = (approvalId?: string, isAdmin = false
       }
       
       return {
-        approval: approval as CommissionApproval & { property_transactions: TransactionDetails },
-        history: history as CommissionApprovalHistory[],
-        comments: comments as CommissionApprovalComment[]
+        approval: approvalData as unknown as CommissionApproval & { property_transactions: TransactionDetails },
+        history: historyData as unknown as CommissionApprovalHistory[],
+        comments: commentsData as unknown as CommissionApprovalComment[]
       };
     },
     enabled: !!approvalId
@@ -163,16 +153,11 @@ export const useUpdateApprovalStatus = () => {
       status: string; 
       notes?: string 
     }) => {
-      const { data, error } = await supabase
-        .from('commission_approvals')
-        .update({ 
-          status, 
-          notes,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', approvalId)
-        .select()
-        .single();
+      const { data, error } = await supabase.rpc('update_commission_approval_status', {
+        p_approval_id: approvalId,
+        p_new_status: status,
+        p_notes: notes || null
+      });
       
       if (error) {
         console.error('Error updating approval status:', error);
@@ -205,15 +190,10 @@ export const useAddApprovalComment = () => {
       approvalId: string;
       content: string;
     }) => {
-      const { data, error } = await supabase
-        .from('commission_approval_comments')
-        .insert({
-          approval_id: approvalId,
-          content,
-          created_by: (await supabase.auth.getUser()).data.user?.id
-        })
-        .select()
-        .single();
+      const { data, error } = await supabase.rpc('add_commission_approval_comment', {
+        p_approval_id: approvalId,
+        p_content: content
+      });
       
       if (error) {
         console.error('Error adding approval comment:', error);
@@ -244,10 +224,9 @@ export const useDeleteApprovalComment = () => {
       commentId: string;
       approvalId: string;
     }) => {
-      const { error } = await supabase
-        .from('commission_approval_comments')
-        .delete()
-        .eq('id', commentId);
+      const { error } = await supabase.rpc('delete_commission_approval_comment', {
+        p_comment_id: commentId
+      });
       
       if (error) {
         console.error('Error deleting approval comment:', error);

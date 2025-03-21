@@ -26,6 +26,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Label } from '@/components/ui/label';
 import {
   ArrowLeft,
   CheckCircle,
@@ -53,11 +54,14 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import StatusBadge from './StatusBadge';
 
-const ApprovalDetail = () => {
+interface ApprovalDetailProps {
+  approvalId?: string;
+}
+
+const ApprovalDetail: React.FC<ApprovalDetailProps> = ({ approvalId }) => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('details');
@@ -66,8 +70,11 @@ const ApprovalDetail = () => {
   const [targetStatus, setTargetStatus] = useState<string | null>(null);
   const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
   
+  // Use the approvalId prop or the id from the URL params
+  const currentApprovalId = approvalId || id;
+  
   // Get approval details with history and comments
-  const { data, isLoading, error } = useCommissionApprovalDetail(id, true);
+  const { data, isLoading, error } = useCommissionApprovalDetail(currentApprovalId, true);
   
   // Get threshold configuration
   const { data: thresholdConfig } = useSystemConfiguration('commission_approval_threshold');
@@ -137,7 +144,7 @@ const ApprovalDetail = () => {
     }
     
     addCommentMutation.mutate({
-      approvalId: id as string,
+      approvalId: currentApprovalId as string,
       content: comment
     }, {
       onSuccess: () => {
@@ -151,7 +158,7 @@ const ApprovalDetail = () => {
     if (!targetStatus) return;
     
     updateStatusMutation.mutate({
-      approvalId: id as string,
+      approvalId: currentApprovalId as string,
       status: targetStatus,
       notes: statusNotes
     }, {
@@ -168,7 +175,7 @@ const ApprovalDetail = () => {
     if (window.confirm('Are you sure you want to delete this comment?')) {
       deleteCommentMutation.mutate({
         commentId,
-        approvalId: id as string
+        approvalId: currentApprovalId as string
       });
     }
   };

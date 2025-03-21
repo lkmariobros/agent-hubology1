@@ -5,75 +5,66 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Clock, AlertTriangle, CheckCircle2, Banknote, PiggyBank } from 'lucide-react';
 
+// Define types for status counts and approval metrics
+interface StatusCounts {
+  pending: number;
+  underReview: number;
+  approved: number;
+  readyForPayment: number;
+  paid: number;
+  rejected: number;
+}
+
+interface ApprovalMetrics {
+  statusCounts: StatusCounts;
+  approvedTotal: number;
+  pendingTotal: number;
+}
+
 const SummaryCards = () => {
   // Fetch summary metrics
   const { data, isLoading } = useQuery({
     queryKey: ['commission-approval-metrics'],
-    queryFn: async () => {
-      // Get counts for each approval status
-      const { data: counts, error } = await supabase
-        .from('commission_approvals')
-        .select('status, count(*)')
-        .group('status');
+    queryFn: async (): Promise<ApprovalMetrics> => {
+      // Get counts for each approval status using raw SQL for now
+      // This is a workaround until the Supabase types are updated with the new tables
+      const { data: counts, error } = await supabase.rpc('get_approval_status_counts');
       
       if (error) {
         console.error('Error fetching approval metrics:', error);
         throw error;
       }
       
-      // Get sum of commission amounts for approved approvals
-      const { data: approved, error: approvedError } = await supabase
-        .from('commission_approvals')
-        .select('commission_amount:property_transactions!inner(commission_amount)')
-        .eq('status', 'Approved');
+      // Get sum of commission amounts for approved approvals using RPC
+      const { data: approved, error: approvedError } = await supabase.rpc('get_approved_commission_total');
       
       if (approvedError) {
         console.error('Error fetching approved amounts:', approvedError);
         throw approvedError;
       }
       
-      // Get sum of commission amounts for pending approvals
-      const { data: pending, error: pendingError } = await supabase
-        .from('commission_approvals')
-        .select('commission_amount:property_transactions!inner(commission_amount)')
-        .eq('status', 'Pending');
+      // Get sum of commission amounts for pending approvals using RPC
+      const { data: pending, error: pendingError } = await supabase.rpc('get_pending_commission_total');
       
       if (pendingError) {
         console.error('Error fetching pending amounts:', pendingError);
         throw pendingError;
       }
       
-      // Calculate sum of approved commission amounts
-      const approvedTotal = approved.reduce((sum, item) => {
-        return sum + (item.commission_amount?.commission_amount || 0);
-      }, 0);
-      
-      // Calculate sum of pending commission amounts
-      const pendingTotal = pending.reduce((sum, item) => {
-        return sum + (item.commission_amount?.commission_amount || 0);
-      }, 0);
-      
-      // Prepare status counts
-      const statusCounts = {
-        pending: 0,
-        underReview: 0,
-        approved: 0,
-        readyForPayment: 0,
-        paid: 0
+      // Prepare status counts from the response
+      const statusCounts: StatusCounts = {
+        pending: counts?.pending || 0,
+        underReview: counts?.under_review || 0,
+        approved: counts?.approved || 0,
+        readyForPayment: counts?.ready_for_payment || 0,
+        paid: counts?.paid || 0,
+        rejected: counts?.rejected || 0
       };
-      
-      counts.forEach((item: any) => {
-        if (item.status === 'Pending') statusCounts.pending = item.count;
-        if (item.status === 'Under Review') statusCounts.underReview = item.count;
-        if (item.status === 'Approved') statusCounts.approved = item.count;
-        if (item.status === 'Ready for Payment') statusCounts.readyForPayment = item.count;
-        if (item.status === 'Paid') statusCounts.paid = item.count;
-      });
       
       return {
         statusCounts,
-        approvedTotal,
-        pendingTotal
+        approvedTotal: approved?.total || 0,
+        pendingTotal: pending?.total || 0
       };
     }
   });
