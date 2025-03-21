@@ -57,7 +57,7 @@ const AgentTierSelector: React.FC<AgentTierSelectorProps> = ({ value, onChange }
     const selectedTier = AGENT_TIERS.find(tier => tier.rank === tierValue);
     if (selectedTier) {
       setAgentTier(selectedTier);
-      onChange(selectedTier.rank);
+      onChange(selectedTier.rank as AgentRank);
     }
   };
 

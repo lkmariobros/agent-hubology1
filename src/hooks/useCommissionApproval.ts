@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 export interface CommissionApproval {
   id: string;
   transaction_id: string;
-  status: 'Pending' | 'Under Review' | 'Approved' | 'Ready for Payment' | 'Paid';
+  status: 'Pending' | 'Under Review' | 'Approved' | 'Ready for Payment' | 'Paid' | 'Rejected';
   submitted_by: string;
   reviewed_by?: string;
   threshold_exceeded: boolean;
@@ -32,6 +32,16 @@ export interface CommissionApprovalComment {
   content: string;
   created_by: string;
   created_at: string;
+}
+
+export interface TransactionDetails {
+  transaction_value: number;
+  commission_amount: number;
+  transaction_date: string;
+  property_id?: string;
+  commission_rate?: number;
+  agent_id?: string;
+  notes?: string;
 }
 
 // Fetch approvals with filters
@@ -76,12 +86,8 @@ export const useCommissionApprovals = (
       }
       
       return {
-        approvals: data as (CommissionApproval & {
-          property_transactions: {
-            transaction_value: number;
-            commission_amount: number;
-            transaction_date: string;
-          }
+        approvals: data as any[] as (CommissionApproval & {
+          property_transactions: TransactionDetails;
         })[],
         totalCount: count || 0
       };
@@ -95,6 +101,8 @@ export const useCommissionApprovalDetail = (approvalId?: string, isAdmin = false
   return useQuery({
     queryKey: ['commission-approval', approvalId, isAdmin],
     queryFn: async () => {
+      if (!approvalId) throw new Error("Approval ID is required");
+      
       // Fetch approval details
       const { data: approval, error: approvalError } = await supabase
         .from('commission_approvals')
@@ -132,9 +140,9 @@ export const useCommissionApprovalDetail = (approvalId?: string, isAdmin = false
       }
       
       return {
-        approval,
-        history,
-        comments
+        approval: approval as CommissionApproval & { property_transactions: TransactionDetails },
+        history: history as CommissionApprovalHistory[],
+        comments: comments as CommissionApprovalComment[]
       };
     },
     enabled: !!approvalId

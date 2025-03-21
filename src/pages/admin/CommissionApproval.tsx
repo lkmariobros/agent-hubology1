@@ -11,7 +11,7 @@ const CommissionApproval = () => {
   return (
     <AdminLayout>
       <div className="container mx-auto py-6">
-        {id ? <ApprovalDetail /> : <ApprovalDashboard />}
+        {id ? <ApprovalDetail approvalId={id} /> : <ApprovalDashboard />}
       </div>
     </AdminLayout>
   );
