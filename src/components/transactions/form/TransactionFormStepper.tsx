@@ -15,6 +15,8 @@ const TransactionFormStepper: React.FC = () => {
   const { state, goToStep } = useTransactionForm();
   const { currentStep } = state;
 
+  console.log('TransactionFormStepper rendered with currentStep:', currentStep);
+
   const steps = [
     { id: 0, label: 'Transaction Type', icon: <Check className="h-4 w-4" /> },
     { id: 1, label: 'Property', icon: <Building2 className="h-4 w-4" /> },
@@ -29,40 +31,45 @@ const TransactionFormStepper: React.FC = () => {
     <div className="mb-8">
       <h2 className="text-2xl font-bold mb-6">Add New Transaction</h2>
       <div className="relative px-6">
-        <div className="flex justify-between items-center relative">
-          {/* Step circles and connecting lines */}
-          {steps.map((step, index) => (
-            <React.Fragment key={step.id}>
-              {/* Only render line before the circle if it's not the first step */}
-              {index > 0 && (
-                <div className="flex-1 h-0.5 relative">
-                  <div 
-                    className={`absolute h-0.5 w-full ${
-                      currentStep > index ? 'bg-primary' : 'bg-muted'
-                    } transition-colors duration-300`}
-                  />
-                </div>
-              )}
-              
-              {/* Step circle */}
+        {/* Steps with exact positioning */}
+        <div className="flex relative">
+          {/* Background line (unfilled) - starting after the first icon */}
+          <div className="absolute h-0.5 bg-muted top-6 left-[calc(0%+12px)] right-[calc(0%+12px)] z-0"></div>
+          
+          {/* Progress line (filled) - starts from first icon and extends based on progress */}
+          {currentStep > 0 && (
+            <div 
+              className="absolute h-0.5 bg-primary top-6 z-10 transition-all duration-300 ease-in-out"
+              style={{ 
+                left: '12px',
+                width: `calc(${(currentStep / (steps.length - 1)) * 100}% - 24px)`,
+              }}
+            ></div>
+          )}
+          
+          {/* Steps */}
+          <div className="flex justify-between w-full">
+            {steps.map((step, index) => (
               <div 
-                className="flex flex-col items-center cursor-pointer"
+                key={step.id}
+                className={`flex flex-col items-center z-20 cursor-pointer`}
                 onClick={() => goToStep(step.id)}
               >
                 <div 
-                  className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 transition-colors ${
-                    currentStep > step.id 
-                      ? 'bg-primary text-primary-foreground' 
-                      : currentStep === step.id 
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted border border-muted-foreground/30'
-                  }`}
+                  className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 transition-colors
+                  ${step.id < currentStep 
+                    ? 'bg-primary text-primary-foreground' 
+                    : step.id === currentStep 
+                      ? 'bg-primary text-primary-foreground'
+                      : step.id === currentStep + 1 
+                        ? 'bg-muted/80 border border-muted-foreground/30'
+                        : 'bg-muted text-muted-foreground'}`}
                 >
-                  {currentStep > step.id ? <Check className="h-5 w-5" /> : step.icon}
+                  {step.id < currentStep ? <Check className="h-5 w-5" /> : step.icon}
                 </div>
                 <span 
                   className={`text-xs font-medium ${
-                    currentStep >= step.id 
+                    step.id <= currentStep 
                       ? 'text-primary' 
                       : 'text-muted-foreground'
                   }`}
@@ -70,8 +77,8 @@ const TransactionFormStepper: React.FC = () => {
                   {step.label}
                 </span>
               </div>
-            </React.Fragment>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </div>
