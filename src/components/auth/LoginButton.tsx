@@ -32,7 +32,7 @@ export function LoginButton() {
     
     try {
       setLoading(true);
-      await login({ email, password });
+      await login(email, password); // Fixed: Passing email and password separately instead of as an object
       setOpen(false);
       // Reset form
       setEmail('');
@@ -112,3 +112,4 @@ export function LoginButton() {
     </Dialog>
   );
 }
+
