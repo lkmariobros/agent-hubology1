@@ -44,6 +44,20 @@ export interface TransactionDetails {
   notes?: string;
 }
 
+// Helper to make RPC calls with proper typing
+const makeRpcCall = async <T>(functionName: string, params?: Record<string, any>): Promise<T> => {
+  const { data, error } = await supabase.functions.invoke<T>(functionName, {
+    body: params
+  });
+  
+  if (error) {
+    console.error(`Error calling RPC ${functionName}:`, error);
+    throw error;
+  }
+  
+  return data as T;
+};
+
 // Fetch approvals with filters
 export const useCommissionApprovals = (
   status?: string,
@@ -58,23 +72,17 @@ export const useCommissionApprovals = (
     queryKey,
     queryFn: async () => {
       // Use RPC function instead of direct table access
-      const { data: approvalData, error } = await supabase.rpc(
-        'get_commission_approvals',
-        {
-          p_status: status,
-          p_user_id: !isAdmin && userId ? userId : null,
-          p_limit: pageSize,
-          p_offset: (page - 1) * pageSize
-        }
-      );
+      const params = {
+        p_status: status,
+        p_user_id: !isAdmin && userId ? userId : null,
+        p_limit: pageSize,
+        p_offset: (page - 1) * pageSize
+      };
       
-      if (error) {
-        console.error('Error fetching commission approvals:', error);
-        throw error;
-      }
+      const approvalData = await makeRpcCall<any[]>('get_commission_approvals', params);
       
       // Validate and transform the data
-      const approvals = approvalData ? (approvalData as any[]) : [];
+      const approvals = approvalData ? approvalData : [];
       
       return {
         approvals: approvals as (CommissionApproval & {
@@ -95,41 +103,23 @@ export const useCommissionApprovalDetail = (approvalId?: string, isAdmin = false
       if (!approvalId) throw new Error("Approval ID is required");
       
       // Fetch approval details using RPC
-      const { data: approvalData, error: approvalError } = await supabase.rpc(
-        'get_commission_approval_detail',
-        { p_approval_id: approvalId }
-      );
-      
-      if (approvalError) {
-        console.error('Error fetching approval:', approvalError);
-        throw approvalError;
-      }
+      const approvalData = await makeRpcCall<any>('get_commission_approval_detail', {
+        p_approval_id: approvalId
+      });
       
       if (!approvalData) {
         throw new Error("Approval not found");
       }
       
       // Fetch history using RPC
-      const { data: historyData, error: historyError } = await supabase.rpc(
-        'get_commission_approval_history',
-        { p_approval_id: approvalId }
-      );
-      
-      if (historyError) {
-        console.error('Error fetching approval history:', historyError);
-        throw historyError;
-      }
+      const historyData = await makeRpcCall<any[]>('get_commission_approval_history', {
+        p_approval_id: approvalId
+      });
       
       // Fetch comments using RPC
-      const { data: commentsData, error: commentsError } = await supabase.rpc(
-        'get_commission_approval_comments',
-        { p_approval_id: approvalId }
-      );
-      
-      if (commentsError) {
-        console.error('Error fetching approval comments:', commentsError);
-        throw commentsError;
-      }
+      const commentsData = await makeRpcCall<any[]>('get_commission_approval_comments', {
+        p_approval_id: approvalId 
+      });
       
       // Process and type-cast the data
       const approval = approvalData as unknown as CommissionApproval & { 
@@ -168,18 +158,13 @@ export const useUpdateApprovalStatus = () => {
       status: string; 
       notes?: string 
     }) => {
-      const { data, error } = await supabase.rpc('update_commission_approval_status', {
+      const result = await makeRpcCall<any>('update_commission_approval_status', {
         p_approval_id: approvalId,
         p_new_status: status,
         p_notes: notes || null
       });
       
-      if (error) {
-        console.error('Error updating approval status:', error);
-        throw error;
-      }
-      
-      return data;
+      return result;
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['commission-approval', variables.approvalId] });
@@ -205,17 +190,12 @@ export const useAddApprovalComment = () => {
       approvalId: string;
       content: string;
     }) => {
-      const { data, error } = await supabase.rpc('add_commission_approval_comment', {
+      const result = await makeRpcCall<any>('add_commission_approval_comment', {
         p_approval_id: approvalId,
         p_content: content
       });
       
-      if (error) {
-        console.error('Error adding approval comment:', error);
-        throw error;
-      }
-      
-      return data;
+      return result;
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['commission-approval', variables.approvalId] });
@@ -239,14 +219,9 @@ export const useDeleteApprovalComment = () => {
       commentId: string;
       approvalId: string;
     }) => {
-      const { error } = await supabase.rpc('delete_commission_approval_comment', {
+      const result = await makeRpcCall<any>('delete_commission_approval_comment', {
         p_comment_id: commentId
       });
-      
-      if (error) {
-        console.error('Error deleting approval comment:', error);
-        throw error;
-      }
       
       return { success: true };
     },
