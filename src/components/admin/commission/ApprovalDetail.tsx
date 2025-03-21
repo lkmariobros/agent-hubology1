@@ -7,6 +7,7 @@ import {
   useDeleteApprovalComment,
   useSystemConfiguration
 } from '@/hooks/useCommissionApproval';
+import { useSendNotification } from '@/hooks/useSendNotification';
 import { Button } from '@/components/ui/button';
 import { 
   Card, 
@@ -26,6 +27,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import ApprovalWorkflow from './ApprovalWorkflow';
 import {
   ArrowLeft,
   CheckCircle,
@@ -37,7 +40,8 @@ import {
   AlertTriangle,
   GripHorizontal,
   Trash2,
-  Banknote
+  Banknote,
+  Info
 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -83,6 +87,9 @@ const ApprovalDetail: React.FC<ApprovalDetailProps> = ({ id: approvalId }) => {
   const updateStatusMutation = useUpdateApprovalStatus();
   const addCommentMutation = useAddApprovalComment();
   const deleteCommentMutation = useDeleteApprovalComment();
+  
+  // Add the sendNotification hook
+  const sendNotification = useSendNotification();
   
   if (isLoading) {
     return (
@@ -153,7 +160,7 @@ const ApprovalDetail: React.FC<ApprovalDetailProps> = ({ id: approvalId }) => {
     });
   };
   
-  // Handle status update
+  // Handle status update with notification
   const handleStatusUpdate = () => {
     if (!targetStatus) return;
     
@@ -166,6 +173,44 @@ const ApprovalDetail: React.FC<ApprovalDetailProps> = ({ id: approvalId }) => {
         setStatusNotes('');
         setTargetStatus(null);
         setIsStatusDialogOpen(false);
+        
+        // Send notification to the agent
+        if (approval.submitted_by) {
+          const notificationTitle = `Commission ${targetStatus}`;
+          let notificationMessage = '';
+          
+          switch (targetStatus) {
+            case 'Approved':
+              notificationMessage = `Your commission for transaction #${approval.transaction_id} has been approved.`;
+              break;
+            case 'Rejected':
+              notificationMessage = `Your commission for transaction #${approval.transaction_id} has been rejected. ${statusNotes ? `Reason: ${statusNotes}` : ''}`;
+              break;
+            case 'Under Review':
+              notificationMessage = `Your commission for transaction #${approval.transaction_id} is now under review.`;
+              break;
+            case 'Ready for Payment':
+              notificationMessage = `Your commission for transaction #${approval.transaction_id} is now ready for payment.`;
+              break;
+            case 'Paid':
+              notificationMessage = `Your commission for transaction #${approval.transaction_id} has been paid.`;
+              break;
+            default:
+              notificationMessage = `Your commission status has been updated to ${targetStatus}.`;
+          }
+          
+          sendNotification.mutate({
+            userId: approval.submitted_by,
+            type: 'approval',
+            title: notificationTitle,
+            message: notificationMessage,
+            data: {
+              approvalId: approval.id,
+              transactionId: approval.transaction_id,
+              status: targetStatus
+            }
+          });
+        }
       }
     });
   };
@@ -295,6 +340,17 @@ const ApprovalDetail: React.FC<ApprovalDetailProps> = ({ id: approvalId }) => {
           </DropdownMenu>
         </div>
       </div>
+      
+      {/* Approval Workflow */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Approval Workflow</CardTitle>
+          <CardDescription>Track the current status in the approval process</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ApprovalWorkflow currentStatus={approval.status} />
+        </CardContent>
+      </Card>
       
       {/* Main content */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -538,31 +594,39 @@ const ApprovalDetail: React.FC<ApprovalDetailProps> = ({ id: approvalId }) => {
                   <p className="text-sm font-medium mb-1">Next Steps:</p>
                   
                   {approval.status === 'Pending' && (
-                    <p className="text-sm">
-                      This commission requires approval from an administrator. 
-                      Review the transaction details and approve or reject.
-                    </p>
+                    <Alert className="mt-2">
+                      <Info className="h-4 w-4" />
+                      <AlertDescription>
+                        Begin review by clicking "Start Review" or approve/reject directly if decision is clear.
+                      </AlertDescription>
+                    </Alert>
                   )}
                   
                   {approval.status === 'Under Review' && (
-                    <p className="text-sm">
-                      This commission is being reviewed for accuracy and compliance.
-                      Complete verification and approve or reject.
-                    </p>
+                    <Alert className="mt-2">
+                      <Info className="h-4 w-4" />
+                      <AlertDescription>
+                        After verifying all details, either approve or reject this commission.
+                      </AlertDescription>
+                    </Alert>
                   )}
                   
                   {approval.status === 'Approved' && (
-                    <p className="text-sm">
-                      This commission has been approved and is ready to be 
-                      processed for payment by the finance department.
-                    </p>
+                    <Alert className="mt-2">
+                      <Info className="h-4 w-4" />
+                      <AlertDescription>
+                        Click "Mark Ready for Payment" to notify the finance department.
+                      </AlertDescription>
+                    </Alert>
                   )}
                   
                   {approval.status === 'Ready for Payment' && (
-                    <p className="text-sm">
-                      This commission is queued for payment. The finance 
-                      department has been notified.
-                    </p>
+                    <Alert className="mt-2">
+                      <Info className="h-4 w-4" />
+                      <AlertDescription>
+                        Once payment has been processed, mark as "Paid" to complete the workflow.
+                      </AlertDescription>
+                    </Alert>
                   )}
                   
                   {approval.status === 'Paid' && (

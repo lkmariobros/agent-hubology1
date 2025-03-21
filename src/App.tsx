@@ -1,36 +1,35 @@
-
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ThemeProvider } from "@/providers/ThemeProvider";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
+import { NotificationProvider } from './context/NotificationContext';
 
-// Agent portal pages
-import Dashboard from './pages/Dashboard';
-import Properties from './pages/Properties';
-import PropertyNew from './pages/PropertyNew';
-import PropertyDetail from './pages/PropertyDetail';
+// Pages
+import Home from './pages/Home';
 import Transactions from './pages/Transactions';
-import TransactionNew from './pages/TransactionNew';
-import Opportunities from './pages/Opportunities';
+import TransactionDetail from './pages/TransactionDetail';
+import NewTransaction from './pages/NewTransaction';
+import Agents from './pages/Agents';
+import AgentDetail from './pages/AgentDetail';
+import NewAgent from './pages/NewAgent';
 import Commission from './pages/Commission';
-import Team from './pages/Team';
-import Reports from './pages/Reports';
-import Settings from './pages/Settings';
-import Points from './pages/leaderboard/Points';
-import Sales from './pages/leaderboard/Sales';
-import NotFound from './pages/NotFound';
-import Index from './pages/Index';
-
-// Admin portal pages
-import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminCommission from './pages/AdminCommission';
+import AdminCommissionApproval from './pages/admin/CommissionApproval';
+import Settings from './pages/Settings';
+import AdminAgents from './pages/admin/Agents';
+import AdminTransactions from './pages/admin/Transactions';
+import AdminProperties from './pages/admin/Properties';
+import AdminPropertyDetail from './pages/admin/PropertyDetail';
+import AdminLayout from './components/layout/AdminLayout';
+import Properties from './pages/Properties';
+import PropertyDetail from './pages/PropertyDetail';
+import NewProperty from './pages/NewProperty';
+import Profile from './pages/Profile';
 
-import './App.css';
-
-// Create a new query client for React Query
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      staleTime: 60 * 1000, // 1 minute
       refetchOnWindowFocus: false,
     },
   },
@@ -38,37 +37,40 @@ const queryClient = new QueryClient({
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <Router>
-        <Routes>
-          {/* Landing page */}
-          <Route path="/" element={<Index />} />
-          
-          {/* Agent Portal Routes */}
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/properties" element={<Properties />} />
-          <Route path="/properties/new" element={<PropertyNew />} />
-          <Route path="/properties/:id" element={<PropertyDetail />} />
-          <Route path="/transactions" element={<Transactions />} />
-          <Route path="/transactions/new" element={<TransactionNew />} />
-          <Route path="/opportunities" element={<Opportunities />} />
-          <Route path="/commission" element={<Commission />} />
-          <Route path="/team" element={<Team />} />
-          <Route path="/reports" element={<Reports />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/leaderboard/points" element={<Points />} />
-          <Route path="/leaderboard/sales" element={<Sales />} />
-          
-          {/* Admin Portal Routes */}
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/admin/commission" element={<AdminCommission />} />
-          
-          {/* 404 Not Found */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        <Toaster position="top-right" />
-      </Router>
-    </QueryClientProvider>
+    <ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <NotificationProvider>
+          <Router>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/transactions" element={<Transactions />} />
+              <Route path="/transactions/:id" element={<TransactionDetail />} />
+              <Route path="/transactions/new" element={<NewTransaction />} />
+              <Route path="/agents" element={<Agents />} />
+              <Route path="/agents/:id" element={<AgentDetail />} />
+              <Route path="/agents/new" element={<NewAgent />} />
+              <Route path="/commission" element={<Commission />} />
+              <Route path="/properties" element={<Properties />} />
+              <Route path="/properties/:id" element={<PropertyDetail />} />
+              <Route path="/properties/new" element={<NewProperty />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/settings" element={<Settings />} />
+
+              {/* Admin Routes */}
+              <Route path="/admin" element={<AdminLayout />} />
+              <Route path="/admin/commission" element={<AdminCommission />} />
+              <Route path="/admin/commission/approvals" element={<AdminCommissionApproval />} />
+              <Route path="/admin/commission/approvals/:id" element={<AdminCommissionApproval />} />
+              <Route path="/admin/agents" element={<AdminAgents />} />
+              <Route path="/admin/transactions" element={<AdminTransactions />} />
+              <Route path="/admin/properties" element={<AdminProperties />} />
+              <Route path="/admin/properties/:id" element={<AdminPropertyDetail />} />
+            </Routes>
+          </Router>
+          <Toaster position="top-right" />
+        </NotificationProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }
 
