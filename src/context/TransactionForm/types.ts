@@ -4,7 +4,8 @@ import {
   TransactionFormData,
   TransactionDocument, 
   CommissionBreakdown,
-  TransactionType
+  TransactionType,
+  AgentRank
 } from '../../types/transaction-form';
 
 // Re-export types from the main types file
@@ -13,7 +14,8 @@ export type {
   TransactionFormData,
   TransactionDocument,
   CommissionBreakdown,
-  TransactionType
+  TransactionType,
+  AgentRank
 };
 
 // Define the context type
