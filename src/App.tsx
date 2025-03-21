@@ -29,6 +29,7 @@ import PropertyDetail from './pages/PropertyDetail';
 import NewProperty from './pages/NewProperty';
 import Profile from './pages/Profile';
 import Index from './pages/Index';
+import AdminDashboard from './pages/admin/AdminDashboard';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -51,7 +52,7 @@ function App() {
                 <Route path="/" element={<Index />} />
                 
                 {/* Agent Routes */}
-                <Route path="/" element={<MainLayout />}>
+                <Route element={<MainLayout />}>
                   <Route path="dashboard" element={<Dashboard />} />
                   <Route path="transactions" element={<Transactions />} />
                   <Route path="transactions/:id" element={<TransactionDetail />} />
@@ -68,15 +69,15 @@ function App() {
                 </Route>
 
                 {/* Admin Routes */}
-                <Route path="/admin" element={<AdminLayout />}>
-                  <Route index element={<Navigate to="/admin/commission" replace />} />
-                  <Route path="commission" element={<AdminCommission />} />
-                  <Route path="commission/approvals" element={<AdminCommissionApproval />} />
-                  <Route path="commission/approvals/:id" element={<AdminCommissionApproval />} />
-                  <Route path="agents" element={<AdminAgents />} />
-                  <Route path="transactions" element={<AdminTransactions />} />
-                  <Route path="properties" element={<AdminProperties />} />
-                  <Route path="properties/:id" element={<AdminPropertyDetail />} />
+                <Route element={<AdminLayout />}>
+                  <Route path="admin" element={<AdminDashboard />} />
+                  <Route path="admin/commission" element={<AdminCommission />} />
+                  <Route path="admin/commission/approvals" element={<AdminCommissionApproval />} />
+                  <Route path="admin/commission/approvals/:id" element={<AdminCommissionApproval />} />
+                  <Route path="admin/agents" element={<AdminAgents />} />
+                  <Route path="admin/transactions" element={<AdminTransactions />} />
+                  <Route path="admin/properties" element={<AdminProperties />} />
+                  <Route path="admin/properties/:id" element={<AdminPropertyDetail />} />
                 </Route>
                 
                 {/* Fallback */}

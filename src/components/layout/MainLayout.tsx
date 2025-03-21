@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Outlet, Navigate, useLocation } from 'react-router-dom';
+import { Outlet, Navigate } from 'react-router-dom';
 import { BellRing } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAuth } from '@/providers/AuthProvider';
@@ -31,15 +31,11 @@ interface MainLayoutProps {
 const MainLayout = ({ children }: MainLayoutProps) => {
   const isMobile = useIsMobile();
   const { user, isAuthenticated, logout } = useAuth();
-  const location = useLocation();
   
   // Redirect to login if not authenticated
   if (!isAuthenticated) {
     return <Navigate to="/" replace />;
   }
-
-  // Check if this is being rendered directly (not via router outlet)
-  const isDirectRender = !!children;
 
   return (
     <div className="flex h-full w-full bg-background text-foreground font-mono">
@@ -90,7 +86,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
           
           {/* Main scrollable content */}
           <main className="flex-1 overflow-y-auto bg-background p-6">
-            {isDirectRender ? children : <Outlet />}
+            {children || <Outlet />}
           </main>
         </div>
       </SidebarProvider>
