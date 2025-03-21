@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import AdminLayout from '@/components/layout/AdminLayout';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,55 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PropertyTable } from '@/components/property/PropertyTable';
 import { PropertyGrid } from '@/components/property/PropertyGrid';
 
+// Sample properties data
+const sampleProperties = [
+  {
+    id: '1',
+    title: 'Modern Apartment',
+    address: {
+      street: '123 Main St',
+      city: 'San Francisco',
+      state: 'CA',
+      zip: '94101',
+      country: 'USA'
+    },
+    price: 850000,
+    status: 'available',
+    type: 'residential',
+    subtype: 'apartment',
+    bedrooms: 2,
+    bathrooms: 2,
+    area: 1200,
+    images: ['https://placehold.co/600x400'],
+    createdAt: '2023-01-01',
+    updatedAt: '2023-01-01'
+  },
+  {
+    id: '2',
+    title: 'Downtown Office Space',
+    address: {
+      street: '456 Market St',
+      city: 'San Francisco',
+      state: 'CA',
+      zip: '94102',
+      country: 'USA'
+    },
+    price: 1250000,
+    status: 'available',
+    type: 'commercial',
+    subtype: 'office',
+    bedrooms: 0,
+    bathrooms: 2,
+    area: 2500,
+    images: ['https://placehold.co/600x400'],
+    createdAt: '2023-01-15',
+    updatedAt: '2023-01-15'
+  }
+];
+
 const AdminProperties = () => {
+  const [properties] = useState(sampleProperties);
+
   return (
     <AdminLayout>
       <div className="p-6">
@@ -65,11 +113,11 @@ const AdminProperties = () => {
           </div>
           
           <TabsContent value="grid">
-            <PropertyGrid />
+            <PropertyGrid properties={properties} />
           </TabsContent>
           
           <TabsContent value="table">
-            <PropertyTable />
+            <PropertyTable properties={properties} />
           </TabsContent>
         </Tabs>
       </div>
