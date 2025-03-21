@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useTransactionForm } from '@/context/TransactionFormContext';
 import { 
@@ -171,10 +170,33 @@ const TransactionReview: React.FC = () => {
           
           <div className="mt-6 pt-4 border-t">
             <h3 className="text-lg font-medium mb-2">Commission Breakdown</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            
+            {formData.coBroking.enabled && commissionBreakdown.coAgencyCommission !== undefined && (
+              <div className="mb-4">
+                <h4 className="text-sm font-medium mb-2">Agency Split</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Card className="bg-blue-500/10">
+                    <CardContent className="p-4">
+                      <div className="text-sm text-muted-foreground">Our Agency ({formData.coBroking.commissionSplit}%)</div>
+                      <div className="text-lg font-bold">{formatCurrency(commissionBreakdown.ourAgencyCommission || 0)}</div>
+                    </CardContent>
+                  </Card>
+                  
+                  <Card className="bg-orange-500/10">
+                    <CardContent className="p-4">
+                      <div className="text-sm text-muted-foreground">Co-Agency ({100 - (formData.coBroking.commissionSplit || 0)}%)</div>
+                      <div className="text-lg font-bold">{formatCurrency(commissionBreakdown.coAgencyCommission || 0)}</div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            )}
+            
+            <h4 className="text-sm font-medium mb-2">Our Agency's Internal Split</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Card className="bg-muted/30">
                 <CardContent className="p-4">
-                  <div className="text-sm text-muted-foreground">Agency Share (30%)</div>
+                  <div className="text-sm text-muted-foreground">Agency Share</div>
                   <div className="text-lg font-bold">{formatCurrency(commissionBreakdown.agencyShare)}</div>
                 </CardContent>
               </Card>
@@ -185,15 +207,6 @@ const TransactionReview: React.FC = () => {
                   <div className="text-lg font-bold">{formatCurrency(commissionBreakdown.agentShare)}</div>
                 </CardContent>
               </Card>
-              
-              {formData.coBroking.enabled && commissionBreakdown.coAgentShare !== undefined && (
-                <Card className="bg-blue-500/10">
-                  <CardContent className="p-4">
-                    <div className="text-sm text-muted-foreground">Co-Agent Share</div>
-                    <div className="text-lg font-bold">{formatCurrency(commissionBreakdown.coAgentShare)}</div>
-                  </CardContent>
-                </Card>
-              )}
             </div>
           </div>
         </CardContent>

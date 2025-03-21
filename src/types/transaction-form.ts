@@ -1,4 +1,3 @@
-
 import { z } from 'zod';
 
 // Transaction types
@@ -7,14 +6,15 @@ export type TransactionType = 'Sale' | 'Rent' | 'Primary';
 // Status types
 export type TransactionStatus = 'Draft' | 'Pending' | 'In Progress' | 'Completed' | 'Cancelled';
 
-// Commission types
+// Commission types - updated to match business process
 export interface CommissionBreakdown {
   transactionValue: number;
   commissionRate: number;
   totalCommission: number;
-  agencyShare: number; // 30%
-  agentShare: number;  // 70%
-  coAgentShare?: number; // If co-broking
+  agencyShare: number;  // Agency's share from our portion (after co-broking split)
+  agentShare: number;   // Agent's share from our portion (after co-broking split)
+  ourAgencyCommission?: number; // Our agency's portion of the total commission
+  coAgencyCommission?: number;  // Co-broker agency's portion of the total commission
 }
 
 // Property information
