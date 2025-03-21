@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/select";
 import { AgentRank } from '@/types/transaction-form';
 
-// Agent tier definitions
+// Agent tier definitions - Would be fetched from API in production
 const AGENT_TIERS = [
   { id: 1, name: 'Advisor', rank: 'Advisor' as AgentRank, agentPercentage: 70 },
   { id: 2, name: 'Sales Leader', rank: 'Sales Leader' as AgentRank, agentPercentage: 80 },
@@ -33,8 +33,8 @@ const AGENT_TIERS = [
   { id: 5, name: 'Supreme Leader', rank: 'Supreme Leader' as AgentRank, agentPercentage: 85 },
 ];
 
-// Mock function to get agent tier - would be replaced with actual API call
-const getAgentTier = () => {
+// Mock function to get current agent's tier - would be replaced with actual API call
+const getCurrentAgentTier = () => {
   // In production, this would fetch the current user's tier from an API
   return AGENT_TIERS[2]; // Default to Team Leader tier for demonstration
 };
@@ -42,21 +42,15 @@ const getAgentTier = () => {
 const CommissionCalculation: React.FC = () => {
   const { state, updateFormData, calculateCommission } = useTransactionForm();
   const { formData, errors } = state;
-  const [agentTier, setAgentTier] = useState(getAgentTier());
+  const [agentTier, setAgentTier] = useState(getCurrentAgentTier());
   
   console.log('CommissionCalculation rendered with formData:', formData);
   console.log('Errors state in CommissionCalculation:', errors);
   
-  // Update the agent tier when it changes
-  const handleAgentTierChange = (value: string) => {
-    const newTier = AGENT_TIERS.find(tier => tier.rank === value)!;
-    setAgentTier(newTier);
-    updateFormData({ agentTier: value as AgentRank });
-  };
-  
   // Initialize agent tier in form data if not set
   useEffect(() => {
     if (!formData.agentTier) {
+      // Set the agent tier from the current user's profile
       updateFormData({ agentTier: agentTier.rank });
     }
   }, [formData.agentTier, agentTier.rank, updateFormData]);
@@ -190,23 +184,18 @@ const CommissionCalculation: React.FC = () => {
               <Award className="h-4 w-4" />
               Agent Tier
             </Label>
-            <Select 
-              value={formData.agentTier || agentTier.rank} 
-              onValueChange={handleAgentTierChange}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select agent tier" />
-              </SelectTrigger>
-              <SelectContent>
-                {AGENT_TIERS.map((tier) => (
-                  <SelectItem key={tier.id} value={tier.rank}>
-                    {tier.name} ({tier.agentPercentage}%)
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex items-center space-x-2">
+              <div className="bg-muted px-4 py-2 rounded-md flex-1">
+                <span className="font-medium">{agentTier.name}</span>
+                <span className="text-muted-foreground ml-2">({agentTier.agentPercentage}% commission rate)</span>
+              </div>
+              <div className="bg-primary/10 text-primary px-3 py-1 rounded-full text-xs flex items-center">
+                <Award className="h-3 w-3 mr-1" />
+                Current Tier
+              </div>
+            </div>
             <p className="text-xs text-muted-foreground mt-1">
-              This determines your commission split percentage
+              Your tier determines your commission split percentage. Only administrators can change your tier level.
             </p>
           </div>
           
@@ -226,7 +215,7 @@ const CommissionCalculation: React.FC = () => {
           <div className="bg-muted/50 p-4 rounded-md">
             <h3 className="text-sm font-semibold flex items-center gap-1 mb-2">
               <Award className="h-4 w-4" />
-              {formData.agentTier || agentTier.rank} Commission Split
+              {agentTier.name} Commission Split
             </h3>
             <p className="text-xs text-muted-foreground mb-2">
               Your current commission split rate is {agentPortionPercentage}/{agencyPortionPercentage} based on your tier.
@@ -280,7 +269,7 @@ const CommissionCalculation: React.FC = () => {
               <div className="pt-2 space-y-3">
                 <h4 className="font-medium flex items-center gap-1">
                   <Award className="h-4 w-4" />
-                  {formData.agentTier || agentTier.rank} Tier Internal Split
+                  {agentTier.name} Tier Internal Split
                 </h4>
                 
                 <div className="flex justify-between items-center pl-4">
