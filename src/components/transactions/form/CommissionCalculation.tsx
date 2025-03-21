@@ -141,9 +141,9 @@ const CommissionCalculation: React.FC = () => {
       </p>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-4">
+        <div className="space-y-4 py-0 mx-[8px] my-[6px] px-px">
           <div>
-            <Label htmlFor="transactionValue" className="flex items-center gap-1">
+            <Label htmlFor="transactionValue" className="flex items-center gap-1 py-0 my-[8px]">
               <DollarSign className="h-4 w-4" />
               Transaction Value
             </Label>
@@ -157,7 +157,7 @@ const CommissionCalculation: React.FC = () => {
               Commission Rate (%)
             </Label>
             <Tabs defaultValue={formData.commissionRate ? formData.commissionRate.toString() : "2"} onValueChange={handleTabChange}>
-              <TabsList className="grid grid-cols-4 w-full">
+              <TabsList className="grid grid-cols-4 w-full py-0 my-[9px]">
                 <TabsTrigger value="1">1%</TabsTrigger>
                 <TabsTrigger value="2">2%</TabsTrigger>
                 <TabsTrigger value="3">3%</TabsTrigger>
