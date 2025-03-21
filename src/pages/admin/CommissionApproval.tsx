@@ -11,7 +11,12 @@ const CommissionApproval = () => {
   return (
     <AdminLayout>
       <div className="container mx-auto py-6">
-        {id ? <ApprovalDetail approvalId={id} /> : <ApprovalDashboard />}
+        {id ? (
+          // Pass the prop as 'id' since that's what the component expects
+          <ApprovalDetail id={id} />
+        ) : (
+          <ApprovalDashboard />
+        )}
       </div>
     </AdminLayout>
   );

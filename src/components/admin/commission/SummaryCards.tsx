@@ -22,12 +22,11 @@ interface ApprovalMetrics {
 }
 
 const SummaryCards = () => {
-  // Fetch summary metrics
+  // Fetch summary metrics using RPC calls instead of direct table access
   const { data, isLoading } = useQuery({
     queryKey: ['commission-approval-metrics'],
     queryFn: async (): Promise<ApprovalMetrics> => {
-      // Get counts for each approval status using raw SQL for now
-      // This is a workaround until the Supabase types are updated with the new tables
+      // Get counts for each approval status using the RPC function
       const { data: counts, error } = await supabase.rpc('get_approval_status_counts');
       
       if (error) {
@@ -51,20 +50,20 @@ const SummaryCards = () => {
         throw pendingError;
       }
       
-      // Prepare status counts from the response
+      // Prepare status counts from the response with null checks
       const statusCounts: StatusCounts = {
-        pending: counts?.pending || 0,
-        underReview: counts?.under_review || 0,
-        approved: counts?.approved || 0,
-        readyForPayment: counts?.ready_for_payment || 0,
-        paid: counts?.paid || 0,
-        rejected: counts?.rejected || 0
+        pending: counts?.pending ?? 0,
+        underReview: counts?.under_review ?? 0,
+        approved: counts?.approved ?? 0,
+        readyForPayment: counts?.ready_for_payment ?? 0,
+        paid: counts?.paid ?? 0,
+        rejected: counts?.rejected ?? 0
       };
       
       return {
         statusCounts,
-        approvedTotal: approved?.total || 0,
-        pendingTotal: pending?.total || 0
+        approvedTotal: approved?.total ?? 0,
+        pendingTotal: pending?.total ?? 0
       };
     }
   });

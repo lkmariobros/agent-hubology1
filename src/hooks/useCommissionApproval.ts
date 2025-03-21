@@ -57,9 +57,8 @@ export const useCommissionApprovals = (
   return useQuery({
     queryKey,
     queryFn: async () => {
-      // Since we don't have the types for our new tables yet,
-      // we need to use raw SQL for queries in the short term
-      const { data, error, count } = await supabase.rpc(
+      // Use RPC function instead of direct table access
+      const { data, error } = await supabase.rpc(
         'get_commission_approvals',
         {
           p_status: status,
@@ -74,11 +73,16 @@ export const useCommissionApprovals = (
         throw error;
       }
       
+      // Validate and transform the data
+      const approvals = data ? (data as any[]).map(item => ({
+        ...item
+      })) : [];
+      
       return {
-        approvals: data as unknown as (CommissionApproval & {
+        approvals: approvals as (CommissionApproval & {
           property_transactions: TransactionDetails;
         })[],
-        totalCount: count || 0
+        totalCount: approvals.length
       };
     },
     enabled: !!userId
@@ -92,7 +96,7 @@ export const useCommissionApprovalDetail = (approvalId?: string, isAdmin = false
     queryFn: async () => {
       if (!approvalId) throw new Error("Approval ID is required");
       
-      // Fetch approval details - using RPC for type safety
+      // Fetch approval details using RPC
       const { data: approvalData, error: approvalError } = await supabase.rpc(
         'get_commission_approval_detail',
         { p_approval_id: approvalId }
@@ -107,7 +111,7 @@ export const useCommissionApprovalDetail = (approvalId?: string, isAdmin = false
         throw new Error("Approval not found");
       }
       
-      // Fetch history
+      // Fetch history using RPC
       const { data: historyData, error: historyError } = await supabase.rpc(
         'get_commission_approval_history',
         { p_approval_id: approvalId }
@@ -118,7 +122,7 @@ export const useCommissionApprovalDetail = (approvalId?: string, isAdmin = false
         throw historyError;
       }
       
-      // Fetch comments
+      // Fetch comments using RPC
       const { data: commentsData, error: commentsError } = await supabase.rpc(
         'get_commission_approval_comments',
         { p_approval_id: approvalId }
@@ -129,10 +133,23 @@ export const useCommissionApprovalDetail = (approvalId?: string, isAdmin = false
         throw commentsError;
       }
       
+      // Process and type-cast the data
+      const approval = approvalData as unknown as CommissionApproval & { 
+        property_transactions: TransactionDetails 
+      };
+      
+      const history = historyData ? 
+        (historyData as unknown as CommissionApprovalHistory[]) : 
+        [];
+      
+      const comments = commentsData ? 
+        (commentsData as unknown as CommissionApprovalComment[]) : 
+        [];
+      
       return {
-        approval: approvalData as unknown as CommissionApproval & { property_transactions: TransactionDetails },
-        history: historyData as unknown as CommissionApprovalHistory[],
-        comments: commentsData as unknown as CommissionApprovalComment[]
+        approval,
+        history,
+        comments
       };
     },
     enabled: !!approvalId

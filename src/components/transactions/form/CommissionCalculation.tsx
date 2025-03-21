@@ -46,7 +46,9 @@ const CommissionCalculation: React.FC = () => {
   // Update agent tier when form data changes
   useEffect(() => {
     if (formData.agentTier) {
-      const tier = AGENT_TIERS.find(t => t.rank === formData.agentTier);
+      // Make sure to cast the string to AgentRank type
+      const tierValue = formData.agentTier as AgentRank;
+      const tier = AGENT_TIERS.find(t => t.rank === tierValue);
       if (tier) {
         setAgentTier(tier);
       }
