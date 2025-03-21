@@ -1,6 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import MainLayout from '@/components/layout/MainLayout';
 import { PropertyFilterBar } from '@/components/property/PropertyFilterBar';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
@@ -115,116 +115,114 @@ const Properties = () => {
   };
   
   return (
-    <MainLayout>
-      <div className="page-container">
-        {/* Header section with consistent alignment */}
-        <div className="page-header">
-          <h1 className="page-title">Properties</h1>
-          <Button 
-            size="sm" 
-            className="gap-2 rounded-full px-6 bg-orange-500 hover:bg-orange-600" 
-            onClick={() => navigate('/properties/new')}
-          >
-            <Plus size={16} />
-            Add Property
-          </Button>
-        </div>
-        
-        {/* Summary Stats */}
-        <div className="grid grid-cols-4 gap-4 bg-neutral-900/60 backdrop-blur-sm rounded-lg p-5">
-          <div className="flex flex-col">
-            <span className="text-sm text-neutral-400">Total Properties</span>
-            <div className="flex items-baseline mt-1">
-              <span className="text-3xl font-medium">{summaryStats.total}</span>
-              <span className="ml-2 text-xs text-emerald-500">+{summaryStats.change.total} this week</span>
-            </div>
-          </div>
-          
-          <div className="flex flex-col">
-            <span className="text-sm text-neutral-400">Active Listings</span>
-            <div className="flex items-baseline mt-1">
-              <span className="text-3xl font-medium">{summaryStats.active}</span>
-              <span className={`ml-2 text-xs ${summaryStats.change.active >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
-                {summaryStats.change.active >= 0 ? '+' : ''}{summaryStats.change.active}% of total
-              </span>
-            </div>
-          </div>
-          
-          <div className="flex flex-col">
-            <span className="text-sm text-neutral-400">Pending Approvals</span>
-            <div className="flex items-baseline mt-1">
-              <span className="text-3xl font-medium">{summaryStats.pending}</span>
-              <span className="ml-2 text-xs text-neutral-400">properties</span>
-            </div>
-          </div>
-          
-          <div className="flex flex-col">
-            <span className="text-sm text-neutral-400">Total Value</span>
-            <div className="flex items-baseline mt-1">
-              <span className="text-3xl font-medium">${(summaryStats.value / 1000000).toFixed(2)}M</span>
-            </div>
+    <div className="page-container">
+      {/* Header section with consistent alignment */}
+      <div className="page-header">
+        <h1 className="page-title">Properties</h1>
+        <Button 
+          size="sm" 
+          className="gap-2 rounded-full px-6 bg-orange-500 hover:bg-orange-600" 
+          onClick={() => navigate('/properties/new')}
+        >
+          <Plus size={16} />
+          Add Property
+        </Button>
+      </div>
+      
+      {/* Summary Stats */}
+      <div className="grid grid-cols-4 gap-4 bg-neutral-900/60 backdrop-blur-sm rounded-lg p-5">
+        <div className="flex flex-col">
+          <span className="text-sm text-neutral-400">Total Properties</span>
+          <div className="flex items-baseline mt-1">
+            <span className="text-3xl font-medium">{summaryStats.total}</span>
+            <span className="ml-2 text-xs text-emerald-500">+{summaryStats.change.total} this week</span>
           </div>
         </div>
         
-        {/* Filter row with consistent alignment */}
-        <div className="flex justify-between bg-neutral-900 rounded-lg p-4">
-          <div className="flex-1">
-            <PropertyFilterBar 
-              onFilter={handleFilter} 
-              onViewChange={handleViewChange} 
-              currentView={viewMode} 
-            />
-          </div>
-          
-          <div className="flex items-center gap-3">
-            <Select value={timeFilter} onValueChange={value => setTimeFilter(value as TimeFilter)}>
-              <SelectTrigger className="w-[130px] h-10 rounded-lg bg-neutral-800 border-neutral-700">
-                <SelectValue placeholder="All time" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="7days">Last 7 days</SelectItem>
-                <SelectItem value="30days">Last 30 days</SelectItem>
-                <SelectItem value="90days">Last 90 days</SelectItem>
-                <SelectItem value="all">All time</SelectItem>
-              </SelectContent>
-            </Select>
-            
-            <Select defaultValue="newest">
-              <SelectTrigger className="w-[130px] h-10 rounded-lg bg-neutral-800 border-neutral-700">
-                <SelectValue placeholder="Newest" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="newest">Newest</SelectItem>
-                <SelectItem value="oldest">Oldest</SelectItem>
-                <SelectItem value="price-asc">Price: Low to High</SelectItem>
-                <SelectItem value="price-desc">Price: High to Low</SelectItem>
-              </SelectContent>
-            </Select>
-            
-            {/* Filter button now located on the far right */}
-            <PropertyFilterDrawer 
-              filters={filters}
-              onFiltersChange={setFilters}
-              onApplyFilters={handleApplyFilters}
-              onClearFilters={handleClearFilters}
-              trigger={
-                <Button variant="outline" size="sm" className="gap-2">
-                  <SlidersHorizontal size={16} />
-                  Filters
-                </Button>
-              }
-            />
+        <div className="flex flex-col">
+          <span className="text-sm text-neutral-400">Active Listings</span>
+          <div className="flex items-baseline mt-1">
+            <span className="text-3xl font-medium">{summaryStats.active}</span>
+            <span className={`ml-2 text-xs ${summaryStats.change.active >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
+              {summaryStats.change.active >= 0 ? '+' : ''}{summaryStats.change.active}% of total
+            </span>
           </div>
         </div>
         
-        {/* Property content - removed the background/border */}
-        <div className="min-h-[60vh] relative">
-          {viewMode === 'grid' && <PropertyGrid properties={filteredProperties} />}
-          {viewMode === 'table' && <PropertyTable properties={filteredProperties} />}
-          {viewMode === 'map' && <PropertyMap properties={filteredProperties} />}
+        <div className="flex flex-col">
+          <span className="text-sm text-neutral-400">Pending Approvals</span>
+          <div className="flex items-baseline mt-1">
+            <span className="text-3xl font-medium">{summaryStats.pending}</span>
+            <span className="ml-2 text-xs text-neutral-400">properties</span>
+          </div>
+        </div>
+        
+        <div className="flex flex-col">
+          <span className="text-sm text-neutral-400">Total Value</span>
+          <div className="flex items-baseline mt-1">
+            <span className="text-3xl font-medium">${(summaryStats.value / 1000000).toFixed(2)}M</span>
+          </div>
         </div>
       </div>
-    </MainLayout>
+      
+      {/* Filter row with consistent alignment */}
+      <div className="flex justify-between bg-neutral-900 rounded-lg p-4">
+        <div className="flex-1">
+          <PropertyFilterBar 
+            onFilter={handleFilter} 
+            onViewChange={handleViewChange} 
+            currentView={viewMode} 
+          />
+        </div>
+        
+        <div className="flex items-center gap-3">
+          <Select value={timeFilter} onValueChange={value => setTimeFilter(value as TimeFilter)}>
+            <SelectTrigger className="w-[130px] h-10 rounded-lg bg-neutral-800 border-neutral-700">
+              <SelectValue placeholder="All time" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="7days">Last 7 days</SelectItem>
+              <SelectItem value="30days">Last 30 days</SelectItem>
+              <SelectItem value="90days">Last 90 days</SelectItem>
+              <SelectItem value="all">All time</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <Select defaultValue="newest">
+            <SelectTrigger className="w-[130px] h-10 rounded-lg bg-neutral-800 border-neutral-700">
+              <SelectValue placeholder="Newest" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="newest">Newest</SelectItem>
+              <SelectItem value="oldest">Oldest</SelectItem>
+              <SelectItem value="price-asc">Price: Low to High</SelectItem>
+              <SelectItem value="price-desc">Price: High to Low</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          {/* Filter button now located on the far right */}
+          <PropertyFilterDrawer 
+            filters={filters}
+            onFiltersChange={setFilters}
+            onApplyFilters={handleApplyFilters}
+            onClearFilters={handleClearFilters}
+            trigger={
+              <Button variant="outline" size="sm" className="gap-2">
+                <SlidersHorizontal size={16} />
+                Filters
+              </Button>
+            }
+          />
+        </div>
+      </div>
+      
+      {/* Property content - removed the background/border */}
+      <div className="min-h-[60vh] relative">
+        {viewMode === 'grid' && <PropertyGrid properties={filteredProperties} />}
+        {viewMode === 'table' && <PropertyTable properties={filteredProperties} />}
+        {viewMode === 'map' && <PropertyMap properties={filteredProperties} />}
+      </div>
+    </div>
   );
 };
 

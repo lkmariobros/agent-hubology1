@@ -1,5 +1,5 @@
+
 import React from 'react';
-import MainLayout from '@/components/layout/MainLayout';
 import { User } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Search, Plus, Mail, Phone, MoreVertical } from 'lucide-react';
@@ -90,92 +90,92 @@ const getTierBadge = (tier: string) => {
   }
 };
 const Team = () => {
-  return <MainLayout>
-      <div className="space-y-6 px-[31px] py-[3px]">
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold tracking-tight">Team</h1>
-          <Button className="gap-2">
-            <Plus size={16} />
-            Add Team Member
-          </Button>
-        </div>
-        
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle>Search Team</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-4">
-              <div className="flex-1 min-w-[200px]">
-                <Input placeholder="Search by name, email..." className="w-full" />
-              </div>
-              <Button>Search</Button>
+  return (
+    <div className="space-y-6 px-[31px] py-[3px]">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold tracking-tight">Team</h1>
+        <Button className="gap-2">
+          <Plus size={16} />
+          Add Team Member
+        </Button>
+      </div>
+      
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle>Search Team</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-4">
+            <div className="flex-1 min-w-[200px]">
+              <Input placeholder="Search by name, email..." className="w-full" />
             </div>
-          </CardContent>
-        </Card>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {users.map(user => <Card key={user.id} className="overflow-hidden">
-              <CardContent className="p-0">
-                <div className="p-6">
-                  <div className="flex items-center gap-4">
-                    <Avatar className="h-16 w-16">
-                      <AvatarImage src={user.avatar} alt={user.name} />
-                      <AvatarFallback>{user.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-semibold text-lg truncate">{user.name}</h3>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem>View Profile</DropdownMenuItem>
-                            <DropdownMenuItem>Edit</DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive">Deactivate</DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                      <div className="flex items-center gap-2 mt-1">
-                        {getRoleBadge(user.role)}
-                        {getTierBadge(user.tier)}
-                      </div>
+            <Button>Search</Button>
+          </div>
+        </CardContent>
+      </Card>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {users.map(user => <Card key={user.id} className="overflow-hidden">
+            <CardContent className="p-0">
+              <div className="p-6">
+                <div className="flex items-center gap-4">
+                  <Avatar className="h-16 w-16">
+                    <AvatarImage src={user.avatar} alt={user.name} />
+                    <AvatarFallback>{user.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-semibold text-lg truncate">{user.name}</h3>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem>View Profile</DropdownMenuItem>
+                          <DropdownMenuItem>Edit</DropdownMenuItem>
+                          <DropdownMenuItem className="text-destructive">Deactivate</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
-                  </div>
-                  
-                  <div className="mt-4 grid grid-cols-2 gap-4">
-                    <div className="flex items-center gap-2 text-sm">
-                      <div className="rounded-full bg-muted p-1">
-                        <Mail className="h-3 w-3" />
-                      </div>
-                      <span className="truncate">{user.email}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <div className="rounded-full bg-muted p-1">
-                        <Phone className="h-3 w-3" />
-                      </div>
-                      <span className="truncate">{user.phone}</span>
+                    <div className="flex items-center gap-2 mt-1">
+                      {getRoleBadge(user.role)}
+                      {getTierBadge(user.tier)}
                     </div>
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-2 border-t border-border">
-                  <div className="p-4 text-center border-r border-border">
-                    <div className="text-2xl font-bold">{user.properties}</div>
-                    <div className="text-xs text-muted-foreground">Properties</div>
+                <div className="mt-4 grid grid-cols-2 gap-4">
+                  <div className="flex items-center gap-2 text-sm">
+                    <div className="rounded-full bg-muted p-1">
+                      <Mail className="h-3 w-3" />
+                    </div>
+                    <span className="truncate">{user.email}</span>
                   </div>
-                  <div className="p-4 text-center">
-                    <div className="text-2xl font-bold">{user.transactions}</div>
-                    <div className="text-xs text-muted-foreground">Transactions</div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <div className="rounded-full bg-muted p-1">
+                      <Phone className="h-3 w-3" />
+                    </div>
+                    <span className="truncate">{user.phone}</span>
                   </div>
                 </div>
-              </CardContent>
-            </Card>)}
-        </div>
+              </div>
+              
+              <div className="grid grid-cols-2 border-t border-border">
+                <div className="p-4 text-center border-r border-border">
+                  <div className="text-2xl font-bold">{user.properties}</div>
+                  <div className="text-xs text-muted-foreground">Properties</div>
+                </div>
+                <div className="p-4 text-center">
+                  <div className="text-2xl font-bold">{user.transactions}</div>
+                  <div className="text-xs text-muted-foreground">Transactions</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>)}
       </div>
-    </MainLayout>;
+    </div>
+  );
 };
 export default Team;
