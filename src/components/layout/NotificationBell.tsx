@@ -20,7 +20,8 @@ import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 
-import { useNotifications, Notification } from '@/context/NotificationContext';
+import { useNotifications } from '@/context/NotificationContext';
+import { Notification } from '@/types/notification';
 import { formatDistanceToNow } from 'date-fns';
 
 const NotificationBell: React.FC = () => {

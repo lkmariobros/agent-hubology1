@@ -9,12 +9,14 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PropertyTable } from '@/components/property/PropertyTable';
 import { PropertyGrid } from '@/components/property/PropertyGrid';
+import { Property } from '@/types';
 
-// Sample properties data
-const sampleProperties = [
+// Sample properties data that matches the Property type
+const sampleProperties: Property[] = [
   {
     id: '1',
     title: 'Modern Apartment',
+    description: 'Spacious modern apartment in downtown area',
     address: {
       street: '123 Main St',
       city: 'San Francisco',
@@ -26,16 +28,19 @@ const sampleProperties = [
     status: 'available',
     type: 'residential',
     subtype: 'apartment',
+    features: ['Central AC', 'Hardwood Floors', 'Balcony'],
     bedrooms: 2,
     bathrooms: 2,
     area: 1200,
     images: ['https://placehold.co/600x400'],
+    listedBy: 'John Doe',
     createdAt: '2023-01-01',
     updatedAt: '2023-01-01'
   },
   {
     id: '2',
     title: 'Downtown Office Space',
+    description: 'Prime commercial office space in business district',
     address: {
       street: '456 Market St',
       city: 'San Francisco',
@@ -47,10 +52,12 @@ const sampleProperties = [
     status: 'available',
     type: 'commercial',
     subtype: 'office',
+    features: ['24/7 Security', 'Parking', 'Conference Rooms'],
     bedrooms: 0,
     bathrooms: 2,
     area: 2500,
     images: ['https://placehold.co/600x400'],
+    listedBy: 'Jane Smith',
     createdAt: '2023-01-15',
     updatedAt: '2023-01-15'
   }
