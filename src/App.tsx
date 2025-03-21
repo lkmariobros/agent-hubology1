@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -54,7 +53,7 @@ function App() {
                 <Route path="/" element={<Index />} />
                 
                 {/* Agent Routes */}
-                <Route path="/" element={<MainLayout />}>
+                <Route element={<MainLayout />}>
                   <Route path="dashboard" element={<Dashboard />} />
                   <Route path="transactions" element={<Transactions />} />
                   <Route path="transactions/:id" element={<TransactionDetail />} />

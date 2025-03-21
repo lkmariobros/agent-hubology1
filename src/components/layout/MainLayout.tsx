@@ -1,9 +1,10 @@
 
 import React from 'react';
+import { Outlet } from 'react-router-dom';
 import { AppSidebar } from './AppSidebar';
 
 interface MainLayoutProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
@@ -11,7 +12,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     <div className="flex min-h-screen">
       <AppSidebar />
       <main className="flex-1 overflow-auto">
-        {children}
+        {children || <Outlet />}
       </main>
     </div>
   );
