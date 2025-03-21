@@ -1,28 +1,21 @@
-import React, { createContext, useContext, useReducer, ReactNode, useCallback } from 'react';
+
+import React, { createContext, useReducer, ReactNode, useCallback } from 'react';
 import { 
   TransactionFormState, 
   TransactionFormContextType, 
   TransactionFormData, 
   TransactionDocument, 
   TransactionType, 
-  CommissionBreakdown,
-  AgentRank
+  CommissionBreakdown
 } from './types';
 import { transactionFormReducer } from './reducer';
 import { initialTransactionFormState } from './initialState';
 import { saveFormAsDraft, submitTransactionForm } from './formSubmission';
+import { calculateCommission } from './commissionCalculator';
+import { validateStep } from './stepValidator';
 
 // Create context with undefined initial value
 const TransactionFormContext = createContext<TransactionFormContextType | undefined>(undefined);
-
-// Agent tier commission percentages
-const AGENT_TIER_PERCENTAGES: Record<AgentRank, number> = {
-  'Advisor': 70,
-  'Sales Leader': 80,
-  'Team Leader': 83,
-  'Group Leader': 85,
-  'Supreme Leader': 85
-};
 
 // Provider component
 export const TransactionFormProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -73,94 +66,7 @@ export const TransactionFormProvider: React.FC<{ children: ReactNode }> = ({ chi
 
   // Validate current step
   const validateCurrentStep = useCallback((): boolean => {
-    const errors: Record<string, string> = {};
-    const { formData, currentStep } = state;
-    
-    console.log('Validating step:', currentStep);
-    console.log('Form data:', formData);
-    
-    switch (currentStep) {
-      case 0: // Transaction Type
-        // No validation needed for transaction type selection
-        break;
-        
-      case 1: // Property Details
-        if (!formData.property?.title) {
-          errors.propertyTitle = 'Property title is required';
-        }
-        if (!formData.property?.address) {
-          errors.propertyAddress = 'Property address is required';
-        }
-        break;
-        
-      case 2: // Client Information
-        if (formData.transactionType === 'Sale' || formData.transactionType === 'Primary') {
-          if (!formData.buyer?.name) {
-            errors.buyerName = 'Buyer name is required';
-          }
-        }
-        
-        if (formData.transactionType === 'Sale') {
-          if (!formData.seller?.name) {
-            errors.sellerName = 'Seller name is required';
-          }
-        }
-        
-        if (formData.transactionType === 'Rent') {
-          if (!formData.landlord?.name) {
-            errors.landlordName = 'Landlord name is required';
-          }
-          if (!formData.tenant?.name) {
-            errors.tenantName = 'Tenant name is required';
-          }
-        }
-        
-        if (formData.transactionType === 'Primary') {
-          if (!formData.developer?.name) {
-            errors.developerName = 'Developer name is required';
-          }
-        }
-        break;
-        
-      case 3: // Co-Broking Setup
-        if (formData.coBroking?.enabled) {
-          if (!formData.coBroking.agentName) {
-            errors.coAgentName = 'Co-broker agent name is required';
-          }
-          if (!formData.coBroking.agentCompany) {
-            errors.coAgentCompany = 'Co-broker company is required';
-          }
-        }
-        break;
-        
-      case 4: // Commission Calculation
-        if (!formData.transactionValue || formData.transactionValue <= 0) {
-          errors.transactionValue = formData.transactionType === 'Rent' 
-            ? 'Monthly rental value must be greater than 0' 
-            : 'Transaction value must be greater than 0';
-        }
-        
-        if (formData.transactionType === 'Rent') {
-          if (!formData.commissionAmount || formData.commissionAmount <= 0) {
-            errors.commissionAmount = 'Owner commission amount must be greater than 0';
-          }
-        } else {
-          if (!formData.commissionRate || formData.commissionRate <= 0) {
-            errors.commissionRate = 'Commission rate must be greater than 0';
-          }
-        }
-        break;
-        
-      case 5: // Document Upload
-        // Documents are optional
-        break;
-        
-      case 6: // Review
-        // All validations should be done in previous steps
-        break;
-    }
-    
-    console.log('Validation errors:', errors);
+    const errors = validateStep(state);
     
     // Update the state with any validation errors
     dispatch({ type: 'SET_ERRORS', payload: errors });
@@ -205,57 +111,10 @@ export const TransactionFormProvider: React.FC<{ children: ReactNode }> = ({ chi
     }
   }, [state, resetForm, validateCurrentStep]);
 
-  // Helper function to get agent's commission percentage based on their tier
-  const getAgentCommissionPercentage = (tier: AgentRank): number => {
-    return AGENT_TIER_PERCENTAGES[tier] || 70; // Default to 70% if tier not found
-  };
-
-  // Calculate commission breakdown - updated to handle rental transactions
-  const calculateCommission = useCallback((): CommissionBreakdown => {
-    const { transactionValue, commissionRate, commissionAmount, transactionType, coBroking, agentTier = 'Advisor' } = state.formData;
-    
-    // Calculate basic values
-    const isRental = transactionType === 'Rent';
-    
-    // For rentals, use the commission amount directly (owner-provided commission)
-    // For sales/primary, calculate based on rate
-    const totalCommission = isRental 
-      ? (commissionAmount || 0) 
-      : (transactionValue * commissionRate) / 100;
-    
-    // Get the agent's commission percentage based on their tier
-    const agentTierPercentage = getAgentCommissionPercentage(agentTier);
-    const agencyTierPercentage = 100 - agentTierPercentage;
-    
-    // Calculate split percentages for co-broking scenario
-    const agencySplitPercentage = coBroking?.enabled ? (coBroking.commissionSplit || 50) : 100;
-    const coAgencySplitPercentage = coBroking?.enabled ? (100 - agencySplitPercentage) : 0;
-    
-    // Calculate our agency's portion of the commission
-    const ourAgencyCommission = totalCommission * (agencySplitPercentage / 100);
-    
-    // Calculate co-broker's agency portion
-    const coAgencyCommission = coBroking?.enabled 
-      ? totalCommission * (coAgencySplitPercentage / 100)
-      : 0;
-    
-    // From our agency's portion, calculate agent and agency shares
-    const agencyShare = ourAgencyCommission * (agencyTierPercentage / 100);
-    const agentShare = ourAgencyCommission * (agentTierPercentage / 100);
-    
-    return {
-      transactionValue: transactionValue || 0,
-      commissionRate: commissionRate || 0,
-      totalCommission,
-      agencyShare,
-      agentShare,
-      ourAgencyCommission,
-      coAgencyCommission,
-      agentTier,
-      agentCommissionPercentage: agentTierPercentage
-    };
+  // Wrapper for calculateCommission that uses the current form data
+  const calculateCommissionWithState = useCallback((): CommissionBreakdown => {
+    return calculateCommission(state.formData);
   }, [state.formData]);
-
   
   // Create context value object
   const contextValue: TransactionFormContextType = {
@@ -270,7 +129,7 @@ export const TransactionFormProvider: React.FC<{ children: ReactNode }> = ({ chi
     resetForm,
     saveForm,
     submitForm,
-    calculateCommission,
+    calculateCommission: calculateCommissionWithState,
     validateCurrentStep,
   };
 
@@ -279,17 +138,6 @@ export const TransactionFormProvider: React.FC<{ children: ReactNode }> = ({ chi
       {children}
     </TransactionFormContext.Provider>
   );
-};
-
-// Custom hook to use the TransactionForm context
-export const useTransactionForm = (): TransactionFormContextType => {
-  const context = useContext(TransactionFormContext);
-  
-  if (!context) {
-    throw new Error('useTransactionForm must be used within a TransactionFormProvider');
-  }
-  
-  return context;
 };
 
 // Export the context
