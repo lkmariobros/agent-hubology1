@@ -68,14 +68,16 @@ function App() {
                 </Route>
 
                 {/* Admin Routes */}
-                <Route path="/admin" element={<AdminLayout />} />
-                <Route path="/admin/commission" element={<AdminLayout><AdminCommission /></AdminLayout>} />
-                <Route path="/admin/commission/approvals" element={<AdminLayout><AdminCommissionApproval /></AdminLayout>} />
-                <Route path="/admin/commission/approvals/:id" element={<AdminLayout><AdminCommissionApproval /></AdminLayout>} />
-                <Route path="/admin/agents" element={<AdminLayout><AdminAgents /></AdminLayout>} />
-                <Route path="/admin/transactions" element={<AdminLayout><AdminTransactions /></AdminLayout>} />
-                <Route path="/admin/properties" element={<AdminLayout><AdminProperties /></AdminLayout>} />
-                <Route path="/admin/properties/:id" element={<AdminLayout><AdminPropertyDetail /></AdminLayout>} />
+                <Route path="/admin" element={<AdminLayout />}>
+                  <Route index element={<Navigate to="/admin/commission" replace />} />
+                  <Route path="commission" element={<AdminCommission />} />
+                  <Route path="commission/approvals" element={<AdminCommissionApproval />} />
+                  <Route path="commission/approvals/:id" element={<AdminCommissionApproval />} />
+                  <Route path="agents" element={<AdminAgents />} />
+                  <Route path="transactions" element={<AdminTransactions />} />
+                  <Route path="properties" element={<AdminProperties />} />
+                  <Route path="properties/:id" element={<AdminPropertyDetail />} />
+                </Route>
                 
                 {/* Fallback */}
                 <Route path="*" element={<Navigate to="/" replace />} />

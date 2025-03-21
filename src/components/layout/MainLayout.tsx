@@ -40,61 +40,59 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   }
 
   return (
-    <ThemeProvider>
-      <SidebarProvider>
-        <div className="flex h-full w-full bg-background text-foreground font-mono">
-          <AppSidebar />
-          
-          {/* Main content area */}
-          <SidebarInset className="flex flex-col h-full w-full">
-            {/* Fixed header */}
-            <header className="h-14 flex-shrink-0 border-b border-border/20 flex items-center justify-between px-4 bg-card">
-              <div className="flex items-center space-x-3">
-                <SidebarTrigger className="mr-2" />
-                <h1 className="text-lg font-normal ml-2">PropertyPro</h1>
-                <TeamSwitcher />
-              </div>
-              
-              <div className="flex items-center space-x-2">
-                <ThemeToggle />
-                
-                <Button variant="ghost" size="icon" className="text-muted-foreground">
-                  <BellRing className="h-5 w-5" />
-                </Button>
-                
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="rounded-full">
-                      <div className="h-8 w-8 rounded-full bg-accent/10 flex items-center justify-center">
-                        <span className="text-accent text-sm font-medium">
-                          {user?.name?.substring(0, 2).toUpperCase() || 'JD'}
-                        </span>
-                      </div>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>{user?.name || 'User'}</DropdownMenuLabel>
-                    <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
-                      {user?.email || 'user@example.com'}
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => window.location.href = '/profile'}>Profile</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => window.location.href = '/settings'}>Settings</DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={logout}>Logout</DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </header>
+    <SidebarProvider>
+      <div className="flex h-full w-full bg-background text-foreground font-mono">
+        <AppSidebar />
+        
+        {/* Main content area */}
+        <SidebarInset className="flex flex-col h-full w-full">
+          {/* Fixed header */}
+          <header className="h-14 flex-shrink-0 border-b border-border/20 flex items-center justify-between px-4 bg-card">
+            <div className="flex items-center space-x-3">
+              <SidebarTrigger className="mr-2" />
+              <h1 className="text-lg font-normal ml-2">PropertyPro</h1>
+              <TeamSwitcher />
+            </div>
             
-            {/* Main scrollable content */}
-            <main className="flex-1 overflow-y-auto bg-background p-6">
-              {children || <Outlet />}
-            </main>
-          </SidebarInset>
-        </div>
-      </SidebarProvider>
-    </ThemeProvider>
+            <div className="flex items-center space-x-2">
+              <ThemeToggle />
+              
+              <Button variant="ghost" size="icon" className="text-muted-foreground">
+                <BellRing className="h-5 w-5" />
+              </Button>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="rounded-full">
+                    <div className="h-8 w-8 rounded-full bg-accent/10 flex items-center justify-center">
+                      <span className="text-accent text-sm font-medium">
+                        {user?.name?.substring(0, 2).toUpperCase() || 'JD'}
+                      </span>
+                    </div>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>{user?.name || 'User'}</DropdownMenuLabel>
+                  <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
+                    {user?.email || 'user@example.com'}
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => window.location.href = '/profile'}>Profile</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => window.location.href = '/settings'}>Settings</DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={logout}>Logout</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </header>
+          
+          {/* Main scrollable content */}
+          <main className="flex-1 overflow-y-auto bg-background p-6">
+            {children || <Outlet />}
+          </main>
+        </SidebarInset>
+      </div>
+    </SidebarProvider>
   );
 }
 
