@@ -1,3 +1,4 @@
+
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -5,7 +6,7 @@ import { Toaster } from 'sonner';
 import { NotificationProvider } from './context/NotificationContext';
 
 // Pages
-import Home from './pages/Home';
+import Dashboard from './pages/Dashboard';
 import Transactions from './pages/Transactions';
 import TransactionDetail from './pages/TransactionDetail';
 import NewTransaction from './pages/NewTransaction';
@@ -42,7 +43,7 @@ function App() {
         <NotificationProvider>
           <Router>
             <Routes>
-              <Route path="/" element={<Home />} />
+              <Route path="/" element={<Dashboard />} />
               <Route path="/transactions" element={<Transactions />} />
               <Route path="/transactions/:id" element={<TransactionDetail />} />
               <Route path="/transactions/new" element={<NewTransaction />} />

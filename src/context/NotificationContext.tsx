@@ -75,7 +75,18 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
           filter: `user_id=eq.${user}`,
         },
         (payload) => {
-          const newNotification = payload.new as unknown as Notification;
+          // TypeScript will complain about any conversion here since the
+          // notifications table might not be in the types yet
+          const newNotification = {
+            id: payload.new.id,
+            userId: payload.new.user_id,
+            type: payload.new.type,
+            title: payload.new.title,
+            message: payload.new.message,
+            data: payload.new.data,
+            read: payload.new.read,
+            createdAt: payload.new.created_at
+          } as Notification;
           
           // Add to state
           setNotifications((current) => [newNotification, ...current]);
@@ -107,16 +118,16 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('notifications')
-        .select('*')
-        .eq('user_id', user)
-        .order('created_at', { ascending: false })
-        .limit(50);
+      // This is a bit of a workaround since TypeScript might complain about the notifications table
+      // We're using raw query or a function call here
+      const { data, error } = await supabase.rpc(
+        'get_user_notifications',
+        { user_id_param: user }
+      );
 
       if (error) throw error;
       
-      setNotifications(data as unknown as Notification[]);
+      setNotifications(data as Notification[]);
     } catch (error) {
       console.error('Error fetching notifications:', error);
     } finally {
@@ -126,10 +137,10 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   const markAsRead = async (id: string) => {
     try {
-      const { error } = await supabase
-        .from('notifications')
-        .update({ read: true })
-        .eq('id', id);
+      const { error } = await supabase.rpc(
+        'mark_notification_read',
+        { notification_id_param: id }
+      );
 
       if (error) throw error;
       
@@ -145,11 +156,10 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (!user) return;
 
     try {
-      const { error } = await supabase
-        .from('notifications')
-        .update({ read: true })
-        .eq('user_id', user)
-        .eq('read', false);
+      const { error } = await supabase.rpc(
+        'mark_all_notifications_read',
+        { user_id_param: user }
+      );
 
       if (error) throw error;
       
@@ -161,10 +171,10 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   const deleteNotification = async (id: string) => {
     try {
-      const { error } = await supabase
-        .from('notifications')
-        .delete()
-        .eq('id', id);
+      const { error } = await supabase.rpc(
+        'delete_notification',
+        { notification_id_param: id }
+      );
 
       if (error) throw error;
       
