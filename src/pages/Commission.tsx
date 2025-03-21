@@ -1,5 +1,5 @@
+
 import React, { useState } from 'react';
-import MainLayout from '@/components/layout/MainLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Users } from 'lucide-react';
@@ -132,6 +132,7 @@ const metricsData = {
     progress: 59.67
   }
 };
+
 const Commission = () => {
   const [currentTab, setCurrentTab] = useState('dashboard');
   const [selectedAgent, setSelectedAgent] = useState<AgentWithHierarchy | null>(null);
@@ -141,6 +142,7 @@ const Commission = () => {
     data: commissionTiersResponse,
     isLoading: isLoadingTiers
   } = useCommissionTiers();
+  
   const {
     data: agentHierarchyResponse,
     isLoading: isLoadingHierarchy
@@ -149,29 +151,41 @@ const Commission = () => {
   // Extract and provide fallbacks for API data
   const commissionTiers = commissionTiersResponse || fallbackTiers;
   const agentHierarchy = agentHierarchyResponse || fallbackAgentHierarchy;
+  
   const handleAgentClick = (agent: AgentWithHierarchy) => {
     setSelectedAgent(agent);
   };
-  return <MainLayout>
-      <div className="space-y-6 mx-0 px-[50px] py-[20px] my-0">
-        <CommissionHeader />
+  
+  return (
+    <div className="space-y-6 mx-0 px-[50px] py-[20px] my-0">
+      <CommissionHeader />
+      
+      <Tabs value={currentTab} onValueChange={setCurrentTab}>
+        <TabsList className="grid grid-cols-2 w-full sm:w-auto">
+          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+          <TabsTrigger value="team">Team Hierarchy</TabsTrigger>
+        </TabsList>
         
-        <Tabs value={currentTab} onValueChange={setCurrentTab}>
-          <TabsList className="grid grid-cols-2 w-full sm:w-auto">
-            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-            <TabsTrigger value="team">Team Hierarchy</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="dashboard" className="space-y-6">
-            <CommissionMetrics metrics={metricsData} />
-            <DashboardContent commissionTiers={commissionTiers} commissions={recentCommissions} agentHierarchy={agentHierarchy} />
-          </TabsContent>
-          
-          <TabsContent value="team" className="space-y-6">
-            <TeamContent agentHierarchy={agentHierarchy} selectedAgent={selectedAgent} onAgentClick={handleAgentClick} isLoading={isLoadingHierarchy} />
-          </TabsContent>
-        </Tabs>
-      </div>
-    </MainLayout>;
+        <TabsContent value="dashboard" className="space-y-6">
+          <CommissionMetrics metrics={metricsData} />
+          <DashboardContent 
+            commissionTiers={commissionTiers} 
+            commissions={recentCommissions} 
+            agentHierarchy={agentHierarchy} 
+          />
+        </TabsContent>
+        
+        <TabsContent value="team" className="space-y-6">
+          <TeamContent 
+            agentHierarchy={agentHierarchy} 
+            selectedAgent={selectedAgent} 
+            onAgentClick={handleAgentClick} 
+            isLoading={isLoadingHierarchy} 
+          />
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
 };
+
 export default Commission;
