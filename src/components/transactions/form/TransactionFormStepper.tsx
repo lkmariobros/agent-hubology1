@@ -27,28 +27,49 @@ const TransactionFormStepper: React.FC = () => {
     { id: 6, label: 'Review', icon: <ClipboardCheck className="h-4 w-4" /> },
   ];
 
+  // Calculate the total number of steps and segments
+  const totalSteps = steps.length;
+  const totalSegments = totalSteps - 1;
+
   return (
     <div className="mb-8">
       <div className="relative">
-        {/* This is the continuous background line that runs through all steps */}
-        <div className="absolute top-6 left-0 right-0 transform translate-y-(-50%) h-[2px] bg-muted"></div>
-        
-        {/* This is the progress line overlay that grows based on current step */}
-        <div 
-          className="absolute top-6 left-0 h-[2px] bg-primary transition-all duration-300 ease-in-out"
-          style={{ 
-            width: `${(currentStep / (steps.length - 1)) * 100}%`,
-          }}
-        ></div>
-        
-        {/* Step circles positioned above the line */}
+        {/* Step circles and labels positioned with proper spacing */}
         <div className="flex justify-between items-center relative">
-          {steps.map((step) => (
+          {steps.map((step, index) => (
             <div 
               key={step.id}
               className="flex flex-col items-center z-20 cursor-pointer"
               onClick={() => goToStep(step.id)}
             >
+              {/* Draw connecting lines between steps */}
+              {index > 0 && (
+                <>
+                  {/* Background line (muted) */}
+                  <div 
+                    className="absolute h-[2px] bg-muted"
+                    style={{
+                      left: `calc(${(index - 1) * (100 / totalSegments)}% + 6px)`, 
+                      right: `calc(${100 - (index * (100 / totalSegments))}% + 6px)`,
+                      top: '24px' // Centered with the circles (12px circle radius)
+                    }}
+                  ></div>
+                  
+                  {/* Progress line (filled when step is active/completed) */}
+                  {currentStep >= index && (
+                    <div 
+                      className="absolute h-[2px] bg-primary transition-all duration-300 ease-in-out"
+                      style={{
+                        left: `calc(${(index - 1) * (100 / totalSegments)}% + 6px)`, 
+                        right: `calc(${100 - (index * (100 / totalSegments))}% + 6px)`,
+                        top: '24px' // Centered with the circles
+                      }}
+                    ></div>
+                  )}
+                </>
+              )}
+
+              {/* Circle with icon */}
               <div 
                 className={`w-12 h-12 rounded-full border-2 flex items-center justify-center mb-2 transition-colors
                 ${step.id < currentStep 
@@ -59,6 +80,8 @@ const TransactionFormStepper: React.FC = () => {
               >
                 {step.id < currentStep ? <Check className="h-5 w-5" /> : step.icon}
               </div>
+              
+              {/* Step label */}
               <span 
                 className={`text-xs font-medium ${
                   step.id <= currentStep 
