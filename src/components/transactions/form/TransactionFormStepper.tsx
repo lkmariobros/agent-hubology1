@@ -2,13 +2,13 @@
 import React from 'react';
 import { useTransactionForm } from '@/context/TransactionForm';
 import { 
-  FileText, 
-  Home, 
+  Check, 
+  Building2, 
   Users, 
+  Handshake, 
   Calculator, 
-  Upload, 
-  Save, 
-  CreditCard 
+  FileText, 
+  ClipboardCheck 
 } from 'lucide-react';
 
 const TransactionFormStepper: React.FC = () => {
@@ -18,55 +18,57 @@ const TransactionFormStepper: React.FC = () => {
   console.log('TransactionFormStepper rendered with currentStep:', currentStep);
 
   const steps = [
-    { label: 'Transaction Type', icon: <CreditCard className="h-4 w-4" /> },
-    { label: 'Property', icon: <Home className="h-4 w-4" /> },
-    { label: 'Clients', icon: <Users className="h-4 w-4" /> },
-    { label: 'Co-Broking', icon: <FileText className="h-4 w-4" /> },
-    { label: 'Commission', icon: <Calculator className="h-4 w-4" /> },
-    { label: 'Documents', icon: <Upload className="h-4 w-4" /> },
-    { label: 'Review', icon: <Save className="h-4 w-4" /> },
+    { id: 0, label: 'Transaction Type', icon: <Check className="h-4 w-4" /> },
+    { id: 1, label: 'Property', icon: <Building2 className="h-4 w-4" /> },
+    { id: 2, label: 'Clients', icon: <Users className="h-4 w-4" /> },
+    { id: 3, label: 'Co-Broking', icon: <Handshake className="h-4 w-4" /> },
+    { id: 4, label: 'Commission', icon: <Calculator className="h-4 w-4" /> },
+    { id: 5, label: 'Documents', icon: <FileText className="h-4 w-4" /> },
+    { id: 6, label: 'Review', icon: <ClipboardCheck className="h-4 w-4" /> },
   ];
 
   return (
     <div className="mb-8">
-      <div className="flex justify-between relative">
-        {steps.map((step, index) => {
-          // Using this pattern instead of React.Fragment to avoid the data-lov-id prop warning
-          return [
+      <div className="flex items-center justify-between relative">
+        {/* Background line (unfilled) */}
+        <div className="absolute h-0.5 bg-muted top-6 left-6 right-6 z-0"></div>
+        
+        {/* Progress line (filled) */}
+        <div 
+          className="absolute h-0.5 bg-primary top-6 left-6 z-10 transition-all duration-300 ease-in-out"
+          style={{ 
+            width: `calc(${(currentStep / (steps.length - 1)) * 100}% - 6px)`,
+          }}
+        ></div>
+        
+        {/* Steps */}
+        {steps.map((step) => (
+          <div 
+            key={step.id}
+            className="flex flex-col items-center z-20 cursor-pointer" 
+            onClick={() => goToStep(step.id)}
+          >
             <div 
-              key={`step-${index}`}
-              className="flex flex-col items-center z-10 cursor-pointer" 
-              onClick={() => goToStep(index)}
+              className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 transition-colors
+              ${step.id <= currentStep 
+                ? 'bg-primary text-primary-foreground' 
+                : step.id === currentStep + 1 
+                  ? 'bg-muted/80 border border-muted-foreground/30'
+                  : 'bg-muted text-muted-foreground'}`}
             >
-              <div 
-                className={`flex items-center justify-center h-10 w-10 rounded-full transition-colors ${
-                  index <= currentStep ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'
-                }`}
-              >
-                {step.icon}
-              </div>
-              <span className={`mt-2 text-xs font-medium ${
-                index <= currentStep ? 'text-primary' : 'text-muted-foreground'
-              }`}>
-                {step.label}
-              </span>
-            </div>,
-            
-            // Only render the connector line if not the last item
-            index < steps.length - 1 ? (
-              <div 
-                key={`connector-${index}`}
-                className="flex-grow mx-2 h-0.5 self-center relative"
-              >
-                <div className="absolute inset-0 bg-muted"></div>
-                <div 
-                  className="absolute inset-0 bg-primary transition-all duration-200 ease-in-out"
-                  style={{ width: index < currentStep ? '100%' : '0%' }}
-                ></div>
-              </div>
-            ) : null
-          ];
-        }).flat().filter(Boolean)}
+              {step.icon}
+            </div>
+            <span 
+              className={`text-xs font-medium ${
+                step.id <= currentStep 
+                  ? 'text-primary' 
+                  : 'text-muted-foreground'
+              }`}
+            >
+              {step.label}
+            </span>
+          </div>
+        ))}
       </div>
     </div>
   );
