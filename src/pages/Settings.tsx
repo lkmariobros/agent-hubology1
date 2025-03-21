@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -182,115 +183,6 @@ export default function Settings() {
                                       <Pencil className="h-3 w-3" />
                                     </Button>
                                   )}
-                                  {isEditing ? (
-                                    <FormControl>
-                                      <Input {...field} />
-                                    </FormControl>
-                                  ) : (
-                                    <div className="py-2">{field.value}</div>
-                                  )}
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                            
-                            <FormField
-                              control={form.control}
-                              name="renNumber"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>REN Number</FormLabel>
-                                  <FormDescription>
-                                    Your Malaysian Estate Agent registration number
-                                  </FormDescription>
-                                  {isEditing ? (
-                                    <FormControl>
-                                      <Input {...field} />
-                                    </FormControl>
-                                  ) : (
-                                    <div className="py-2">{field.value}</div>
-                                  )}
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          
-                            <FormField
-                              control={form.control}
-                              name="email"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Email Address</FormLabel>
-                                  <FormDescription>
-                                    Business email recommended
-                                  </FormDescription>
-                                  {isEditing ? (
-                                    <FormControl>
-                                      <Input {...field} />
-                                    </FormControl>
-                                  ) : (
-                                    <div className="py-2">{field.value}</div>
-                                  )}
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                            
-                            <FormField
-                              control={form.control}
-                              name="phone"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Phone Number</FormLabel>
-                                  <FormDescription>
-                                    Business phone number recommended
-                                  </FormDescription>
-                                  {isEditing ? (
-                                    <FormControl>
-                                      <Input {...field} />
-                                    </FormControl>
-                                  ) : (
-                                    <div className="py-2">{field.value}</div>
-                                  )}
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-                        </div>
-                      </form>
-                    </Form>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-              
-              <TabsContent value="agency">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Agency Information</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <Form {...form}>
-                      <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                          <FormField
-                            control={form.control}
-                            name="agencyName"
-                            render={({ field }) => (
-                              <FormItem>
-                                <div className="flex justify-between">
-                                  <FormLabel>Agency Name</FormLabel>
-                                  {!isEditing && (
-                                    <Button 
-                                      type="button" 
-                                      variant="ghost" 
-                                      size="icon" 
-                                      onClick={toggleEdit}
-                                      className="h-5 w-5"
-                                    >
-                                      <Pencil className="h-3 w-3" />
-                                    </Button>
-                                  )}
                                 </div>
                                 {isEditing ? (
                                   <FormControl>
@@ -306,10 +198,55 @@ export default function Settings() {
                           
                           <FormField
                             control={form.control}
-                            name="agencyAddress"
+                            name="renNumber"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Agency Address</FormLabel>
+                                <FormLabel>REN Number</FormLabel>
+                                <FormDescription>
+                                  Your Malaysian Estate Agent registration number
+                                </FormDescription>
+                                {isEditing ? (
+                                  <FormControl>
+                                    <Input {...field} />
+                                  </FormControl>
+                                ) : (
+                                  <div className="py-2">{field.value}</div>
+                                )}
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        
+                          <FormField
+                            control={form.control}
+                            name="email"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Email Address</FormLabel>
+                                <FormDescription>
+                                  Business email recommended
+                                </FormDescription>
+                                {isEditing ? (
+                                  <FormControl>
+                                    <Input {...field} />
+                                  </FormControl>
+                                ) : (
+                                  <div className="py-2">{field.value}</div>
+                                )}
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          
+                          <FormField
+                            control={form.control}
+                            name="phone"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Phone Number</FormLabel>
+                                <FormDescription>
+                                  Business phone number recommended
+                                </FormDescription>
                                 {isEditing ? (
                                   <FormControl>
                                     <Input {...field} />
@@ -322,60 +259,124 @@ export default function Settings() {
                             )}
                           />
                         </div>
-                      </form>
-                    </Form>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-              
-              <TabsContent value="notifications">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Notification Preferences</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="font-medium">Email Notifications</h3>
-                          <p className="text-sm text-muted-foreground">
-                            Receive email about new listings and transactions
-                          </p>
-                        </div>
-                        <Switch defaultChecked />
                       </div>
-                      
-                      <Separator />
-                      
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="font-medium">SMS Notifications</h3>
-                          <p className="text-sm text-muted-foreground">
-                            Receive text messages for urgent updates
-                          </p>
-                        </div>
-                        <Switch defaultChecked />
+                    </form>
+                  </Form>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="agency">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Agency Information</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Form {...form}>
+                    <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <FormField
+                          control={form.control}
+                          name="agencyName"
+                          render={({ field }) => (
+                            <FormItem>
+                              <div className="flex justify-between">
+                                <FormLabel>Agency Name</FormLabel>
+                                {!isEditing && (
+                                  <Button 
+                                    type="button" 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    onClick={toggleEdit}
+                                    className="h-5 w-5"
+                                  >
+                                    <Pencil className="h-3 w-3" />
+                                  </Button>
+                                )}
+                              </div>
+                              {isEditing ? (
+                                <FormControl>
+                                  <Input {...field} />
+                                </FormControl>
+                              ) : (
+                                <div className="py-2">{field.value}</div>
+                              )}
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={form.control}
+                          name="agencyAddress"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Agency Address</FormLabel>
+                              {isEditing ? (
+                                <FormControl>
+                                  <Input {...field} />
+                                </FormControl>
+                              ) : (
+                                <div className="py-2">{field.value}</div>
+                              )}
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                       </div>
-                      
-                      <Separator />
-                      
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="font-medium">Commission Alerts</h3>
-                          <p className="text-sm text-muted-foreground">
-                            Get notified when you receive commission payments
-                          </p>
-                        </div>
-                        <Switch defaultChecked />
+                    </form>
+                  </Form>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="notifications">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Notification Preferences</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="font-medium">Email Notifications</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Receive email about new listings and transactions
+                        </p>
                       </div>
+                      <Switch defaultChecked />
                     </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
-          </div>
+                    
+                    <Separator />
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="font-medium">SMS Notifications</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Receive text messages for urgent updates
+                        </p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                    
+                    <Separator />
+                    
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="font-medium">Commission Alerts</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Get notified when you receive commission payments
+                        </p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
-    </MainLayout>
+    </div>
   );
 }

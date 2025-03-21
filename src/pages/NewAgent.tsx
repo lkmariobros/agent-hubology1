@@ -1,8 +1,8 @@
+
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import MainLayout from '@/components/layout/MainLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -320,84 +320,84 @@ const NewAgent = () => {
                         </div>
                       ))}
                     </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-              
-              <TabsContent value="credentials">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Credentials</CardTitle>
-                    <CardDescription>Enter the agent's licensing information</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="credentials">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Credentials</CardTitle>
+                  <CardDescription>Enter the agent's licensing information</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="licenseNumber"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>License Number</FormLabel>
+                        <FormControl>
+                          <Input placeholder="RE12345678" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
-                      name="licenseNumber"
+                      name="licensingAuthority"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>License Number</FormLabel>
-                          <FormControl>
-                            <Input placeholder="RE12345678" {...field} />
-                          </FormControl>
+                          <FormLabel>Licensing Authority</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select authority" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="ca_dre">California DRE</SelectItem>
+                              <SelectItem value="ny_dos">New York DOS</SelectItem>
+                              <SelectItem value="tx_trec">Texas TREC</SelectItem>
+                              <SelectItem value="fl_dbpr">Florida DBPR</SelectItem>
+                              <SelectItem value="other">Other</SelectItem>
+                            </SelectContent>
+                          </Select>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="licensingAuthority"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Licensing Authority</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select authority" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="ca_dre">California DRE</SelectItem>
-                                <SelectItem value="ny_dos">New York DOS</SelectItem>
-                                <SelectItem value="tx_trec">Texas TREC</SelectItem>
-                                <SelectItem value="fl_dbpr">Florida DBPR</SelectItem>
-                                <SelectItem value="other">Other</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="licenseExpiryDate"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>License Expiry Date</FormLabel>
-                            <FormControl>
-                              <Input type="date" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
-            
-            <div className="flex justify-end gap-3">
-              <Button type="button" variant="outline">Cancel</Button>
-              <Button type="submit">Create Agent</Button>
-            </div>
-          </form>
-        </Form>
-      </div>
-    </MainLayout>
+                    <FormField
+                      control={form.control}
+                      name="licenseExpiryDate"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>License Expiry Date</FormLabel>
+                          <FormControl>
+                            <Input type="date" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+          
+          <div className="flex justify-end gap-3">
+            <Button type="button" variant="outline">Cancel</Button>
+            <Button type="submit">Create Agent</Button>
+          </div>
+        </form>
+      </Form>
+    </div>
   );
 };
 

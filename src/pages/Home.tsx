@@ -1,5 +1,5 @@
+
 import React from 'react';
-import MainLayout from '@/components/layout/MainLayout';
 import MetricCard from '@/components/dashboard/MetricCard';
 import OpportunitiesBoard from '@/components/dashboard/OpportunitiesBoard';
 import RecentTransactions from '@/components/dashboard/RecentTransactions';
