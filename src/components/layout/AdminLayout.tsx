@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Outlet, Navigate } from 'react-router-dom';
+import { Outlet, Navigate, useLocation } from 'react-router-dom';
 import { BellRing } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAuth } from '@/providers/AuthProvider';
@@ -31,6 +31,7 @@ interface AdminLayoutProps {
 const AdminLayout = ({ children }: AdminLayoutProps) => {
   const isMobile = useIsMobile();
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
+  const location = useLocation();
   
   // Redirect to login if not authenticated or not an admin
   if (!isAuthenticated) {
@@ -40,6 +41,9 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
   if (!isAdmin) {
     return <Navigate to="/dashboard" replace />;
   }
+
+  // Check if this is being rendered directly (not via router outlet)
+  const isDirectRender = !!children;
 
   return (
     <div className="flex h-full w-full bg-background text-foreground font-mono">
@@ -92,7 +96,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
             {/* Main scrollable content - Improved with consistent minimum height */}
             <main className="flex-1 min-h-[calc(100vh-3.5rem-2rem)] overflow-y-auto bg-background p-6">
               <div className="content-container">
-                {children || <Outlet />}
+                {isDirectRender ? children : <Outlet />}
               </div>
             </main>
           </div>
