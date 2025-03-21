@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Outlet, Navigate } from 'react-router-dom';
+import { Outlet, Navigate, useLocation } from 'react-router-dom';
 import { BellRing } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAuth } from '@/providers/AuthProvider';
@@ -24,13 +24,10 @@ import { AppSidebar } from './AppSidebar';
 import { ThemeToggle } from '../theme/ThemeToggle';
 import { TeamSwitcher } from './TeamSwitcher';
 
-interface MainLayoutProps {
-  children?: React.ReactNode;
-}
-
-const MainLayout = ({ children }: MainLayoutProps) => {
+const MainLayout = () => {
   const isMobile = useIsMobile();
   const { user, isAuthenticated, logout } = useAuth();
+  const location = useLocation();
   
   // Redirect to login if not authenticated
   if (!isAuthenticated) {
@@ -86,7 +83,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
           
           {/* Main scrollable content */}
           <main className="flex-1 overflow-y-auto bg-background p-6">
-            {children || <Outlet />}
+            <Outlet />
           </main>
         </div>
       </SidebarProvider>
