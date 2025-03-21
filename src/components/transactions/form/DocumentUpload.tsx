@@ -1,6 +1,6 @@
 
 import React, { useState, useCallback } from 'react';
-import { useTransactionForm } from '@/context/TransactionForm/TransactionFormContext';
+import { useTransactionForm } from '@/context/TransactionForm'; // Updated import path
 import { FileUp, X, FileText, Check, AlertCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
