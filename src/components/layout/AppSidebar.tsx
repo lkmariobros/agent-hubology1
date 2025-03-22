@@ -15,7 +15,6 @@ import { NavAnalytics } from './sidebar/NavAnalytics';
 import { NavPreferences } from './sidebar/NavPreferences';
 import { SidebarProfile } from './sidebar/SidebarProfile';
 import { PortalSwitcher } from './PortalSwitcher';
-import NavUtilities from './sidebar/NavUtilities';
 
 export function AppSidebar() {
   return (
@@ -27,14 +26,13 @@ export function AppSidebar() {
         variant="sidebar"
       >
         <SidebarHeader className="flex flex-col gap-4">
-          <div className="flex items-center justify-between px-2 py-3">
+          <div className="flex items-center px-2 py-3">
             <Link to="/dashboard" className="flex items-center">
               <div className="flex items-center justify-center h-8 w-8 rounded-full bg-accent text-white">
                 <span className="font-bold text-sm">P</span>
               </div>
               <span className="ml-2 text-lg font-semibold">PropertyPro</span>
             </Link>
-            <NavUtilities />
           </div>
           <PortalSwitcher />
         </SidebarHeader>

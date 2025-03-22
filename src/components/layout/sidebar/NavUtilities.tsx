@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Settings } from 'lucide-react';
+import { Settings, Bell } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import NotificationBell from '../NotificationBell';
