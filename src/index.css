@@ -94,7 +94,7 @@
   }
   
   * {
-    @apply border-border selection:bg-accent/10 selection:text-foreground;
+    @apply border-border;
   }
   
   body {
@@ -238,5 +238,10 @@
   /* Ensure consistent borders for all content sections */
   .content-container {
     @apply min-h-[calc(100vh-6rem-3.5rem)] rounded-xl;
+  }
+
+  /* Add specific utility for text selection */
+  .selection-accent {
+    @apply selection:bg-accent/10 selection:text-foreground;
   }
 }
