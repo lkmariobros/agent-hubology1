@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Outlet, Navigate, useLocation } from 'react-router-dom';
-import { BellRing, Building, Shield, ChevronsUpDown } from 'lucide-react';
+import { BellRing } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAuth } from '@/providers/AuthProvider';
 
@@ -25,7 +25,7 @@ import { ThemeToggle } from '../theme/ThemeToggle';
 
 const AdminLayout = () => {
   const isMobile = useIsMobile();
-  const { user, isAuthenticated, isAdmin, logout, switchRole } = useAuth();
+  const { user, isAuthenticated, isAdmin, logout } = useAuth();
   const location = useLocation();
   
   // Redirect to login if not authenticated
@@ -38,9 +38,6 @@ const AdminLayout = () => {
     return <Navigate to="/dashboard" replace />;
   }
 
-  const currentRole = user?.activeRole;
-  const isAdminActive = currentRole === 'admin';
-
   return (
     <div className="flex h-full w-full bg-background text-foreground font-mono">
       <SidebarProvider>
@@ -52,39 +49,7 @@ const AdminLayout = () => {
           <header className="h-14 flex-shrink-0 border-b border-border/20 flex items-center justify-between px-4 bg-card">
             <div className="flex items-center gap-2">
               <SidebarTrigger className="mr-2" />
-              
-              {/* Logo/Brand as Portal Switcher */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-2 hover:text-primary transition-colors focus:outline-none">
-                    <div className="h-8 w-8 rounded-full bg-purple-600 flex items-center justify-center text-white font-medium">
-                      P
-                    </div>
-                    <span className="text-lg">PropertyPro</span>
-                    <ChevronsUpDown className="h-4 w-4 opacity-60" />
-                  </button>
-                </DropdownMenuTrigger>
-                
-                <DropdownMenuContent align="start" className="w-[180px] bg-popover">
-                  <DropdownMenuItem 
-                    onClick={() => switchRole('agent')}
-                    className={`flex items-center cursor-pointer ${!isAdminActive ? 'bg-accent/10' : ''}`}
-                  >
-                    <Building className="h-4 w-4 mr-2" />
-                    <span>Agent Portal</span>
-                  </DropdownMenuItem>
-                  
-                  <DropdownMenuSeparator />
-                  
-                  <DropdownMenuItem 
-                    onClick={() => switchRole('admin')}
-                    className={`flex items-center cursor-pointer ${isAdminActive ? 'bg-accent/10' : ''}`}
-                  >
-                    <Shield className="h-4 w-4 mr-2" />
-                    <span>Admin Portal</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              {/* Removed Portal Switcher from here */}
             </div>
             
             <div className="flex items-center space-x-2">
