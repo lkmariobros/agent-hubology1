@@ -54,9 +54,18 @@ export function ThemeProvider({
     // Add the theme-mono-scaled class for consistent font styling
     root.classList.add('theme-mono-scaled');
     
-    // Force setting dark mode globally to ensure consistency
+    // Force dark mode application
     if (theme === 'dark') {
-      console.log("Setting dark mode!");
+      // Force dark mode by setting CSS variables directly
+      document.body.style.setProperty('--background', '#161920');
+      document.body.style.setProperty('--card', '#1e2028');
+      document.body.style.setProperty('--sidebar-background', '#1f2128');
+      console.log("Setting dark mode with explicit background color: #161920");
+    } else {
+      // Reset any directly set properties
+      document.body.style.removeProperty('--background');
+      document.body.style.removeProperty('--card');
+      document.body.style.removeProperty('--sidebar-background');
     }
   }, [theme]);
 

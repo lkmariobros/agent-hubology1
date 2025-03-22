@@ -47,6 +47,15 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   // Load saved sidebar state from localStorage if available
   const savedState = localStorage.getItem("sidebar:state") === "false" ? false : true;
 
+  // Force dark mode on component mount
+  React.useEffect(() => {
+    document.documentElement.classList.add('dark');
+    document.body.style.setProperty('--background', '#161920');
+    document.body.style.setProperty('--card', '#1e2028');
+    document.body.style.setProperty('--sidebar-background', '#1f2128');
+    console.log("MainLayout mounted - forcing dark mode");
+  }, []);
+
   // Set up effect to save sidebar state changes
   React.useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
@@ -61,11 +70,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   
   return (
     <SidebarProvider defaultOpen={savedState}>
-      <div className="flex h-screen overflow-hidden w-full bg-background">
+      <div className="flex h-screen overflow-hidden w-full bg-dark-background dark:bg-dark-background">
         <AppSidebar />
-        <div className="flex-1 flex flex-col h-screen overflow-hidden">
+        <div className="flex-1 flex flex-col h-screen overflow-hidden dark:bg-dark-background" style={{backgroundColor: '#161920'}}>
           <Header />
-          <div className="flex-1 overflow-auto p-6 bg-background">
+          <div className="flex-1 overflow-auto p-6 dark:bg-dark-background" style={{backgroundColor: '#161920'}}>
             {children || <Outlet />}
           </div>
         </div>

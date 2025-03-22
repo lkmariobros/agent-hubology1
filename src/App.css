@@ -45,21 +45,27 @@
 
 /* Add background color to the sidebar */
 [data-expanded="true"].sidebar {
-  background-color: var(--sidebar-background);
+  background-color: var(--sidebar-background) !important;
 }
 
 [data-expanded="false"].sidebar {
-  background-color: var(--sidebar-background);
+  background-color: var(--sidebar-background) !important;
 }
 
 /* Main content area styling - darker charcoal background for dark mode */
 main, .flex-1 {
-  background-color: var(--background);
+  background-color: var(--background) !important;
 }
 
 /* Explicitly set the background for the entire content area */
 .flex-1 {
-  background-color: var(--background);
+  background-color: var(--background) !important;
+}
+
+/* Force dark theme application to the main layout */
+.dark body {
+  background-color: #161920 !important;
+  color: var(--foreground);
 }
 
 /* Card styling with slightly elevated background for contrast in dark mode */
@@ -86,17 +92,17 @@ main, .flex-1 {
 
 /* Additional dark mode fixes */
 .dark header {
-  background-color: var(--background);
+  background-color: var(--background) !important;
   border-color: rgba(255, 255, 255, 0.05);
 }
 
 .dark .bg-card {
-  background-color: var(--card);
+  background-color: var(--card) !important;
 }
 
 /* Force dark theme application */
 body:not(.light) {
-  background-color: var(--background);
+  background-color: var(--background) !important;
   color: var(--foreground);
 }
 
