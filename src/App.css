@@ -17,6 +17,19 @@
   letter-spacing: -0.02em;
 }
 
+/* Property Pro specific styles */
+.property-status-available {
+  @apply bg-status-green text-white rounded-full px-3 py-1 text-xs font-semibold;
+}
+
+.property-status-pending {
+  @apply bg-status-amber text-white rounded-full px-3 py-1 text-xs font-semibold;
+}
+
+.property-status-sold {
+  @apply bg-status-blue text-white rounded-full px-3 py-1 text-xs font-semibold;
+}
+
 /* Keep animation styles */
 @keyframes logo-spin {
   from {

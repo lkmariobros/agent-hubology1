@@ -79,6 +79,12 @@ export default {
           orange: "#fb8500",
           green: "#06d6a0",
         },
+        status: {
+          green: "oklch(var(--status-green))",
+          amber: "oklch(var(--status-amber))",
+          red: "oklch(var(--status-red))",
+          blue: "oklch(var(--status-blue))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

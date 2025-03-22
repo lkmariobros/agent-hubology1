@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -68,13 +69,13 @@ const AdminTransactions = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'completed':
-        return <Badge className="bg-green-500 hover:bg-green-600">Completed</Badge>;
+        return <Badge variant="success">Completed</Badge>;
       case 'pending':
-        return <Badge className="bg-amber-500 hover:bg-amber-600">Pending</Badge>;
+        return <Badge variant="warning">Pending</Badge>;
       case 'in-progress':
-        return <Badge className="bg-blue-500 hover:bg-blue-600">In Progress</Badge>;
+        return <Badge variant="info">In Progress</Badge>;
       case 'cancelled':
-        return <Badge className="bg-red-500 hover:bg-red-600">Cancelled</Badge>;
+        return <Badge variant="danger">Cancelled</Badge>;
       default:
         return <Badge>Unknown</Badge>;
     }
@@ -83,13 +84,13 @@ const AdminTransactions = () => {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'completed':
-        return <CheckCircle2 className="h-4 w-4 text-green-500" />;
+        return <CheckCircle2 className="h-4 w-4 text-status-green" />;
       case 'pending':
-        return <Clock className="h-4 w-4 text-amber-500" />;
+        return <Clock className="h-4 w-4 text-status-amber" />;
       case 'in-progress':
-        return <FileText className="h-4 w-4 text-blue-500" />;
+        return <FileText className="h-4 w-4 text-status-blue" />;
       case 'cancelled':
-        return <AlertCircle className="h-4 w-4 text-red-500" />;
+        return <AlertCircle className="h-4 w-4 text-status-red" />;
       default:
         return null;
     }
@@ -152,7 +153,7 @@ const AdminTransactions = () => {
                 <p className="text-sm text-muted-foreground">Pending Approval</p>
                 <p className="text-2xl font-bold">12</p>
               </div>
-              <Clock className="h-8 w-8 text-amber-500" />
+              <Clock className="h-8 w-8 text-status-amber" />
             </div>
           </CardContent>
         </Card>
@@ -164,7 +165,7 @@ const AdminTransactions = () => {
                 <p className="text-sm text-muted-foreground">Commission Total</p>
                 <p className="text-2xl font-bold">$1.57M</p>
               </div>
-              <DollarSign className="h-8 w-8 text-green-500" />
+              <DollarSign className="h-8 w-8 text-status-green" />
             </div>
           </CardContent>
         </Card>
@@ -174,30 +175,30 @@ const AdminTransactions = () => {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b">
+              <tr className="border-b bg-muted/30">
                 <th className="text-left p-4 font-medium">
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1 text-sm">
                     Transaction ID
                     <ArrowUpDown className="h-3 w-3" />
                   </div>
                 </th>
-                <th className="text-left p-4 font-medium">Property</th>
-                <th className="text-left p-4 font-medium">Agent</th>
+                <th className="text-left p-4 font-medium text-sm">Property</th>
+                <th className="text-left p-4 font-medium text-sm">Agent</th>
                 <th className="text-left p-4 font-medium">
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1 text-sm">
                     Date
                     <ArrowUpDown className="h-3 w-3" />
                   </div>
                 </th>
                 <th className="text-left p-4 font-medium">
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1 text-sm">
                     Amount
                     <ArrowUpDown className="h-3 w-3" />
                   </div>
                 </th>
-                <th className="text-left p-4 font-medium">Commission</th>
-                <th className="text-left p-4 font-medium">Status</th>
-                <th className="text-left p-4 font-medium">Type</th>
+                <th className="text-left p-4 font-medium text-sm">Commission</th>
+                <th className="text-left p-4 font-medium text-sm">Status</th>
+                <th className="text-left p-4 font-medium text-sm">Type</th>
                 <th className="text-left p-4 font-medium"></th>
               </tr>
             </thead>
