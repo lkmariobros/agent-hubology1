@@ -1,87 +1,148 @@
 
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { 
-  Building2, 
-  LayoutDashboard, 
-  FileText, 
-  Users, 
-  DollarSign
-} from 'lucide-react';
+import { NavLink } from 'react-router-dom';
 import {
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-} from "@/components/ui/sidebar";
+  Home,
+  Building2,
+  Receipt,
+  Users,
+  BarChart3,
+  Settings,
+  Bookmark,
+  Bell,
+  Palette
+} from 'lucide-react';
 
-// Main navigation data
-const mainNavItems = [
-  { 
-    icon: LayoutDashboard, 
-    label: 'Dashboard', 
-    href: '/dashboard',
-  },
-  { 
-    icon: Building2, 
-    label: 'Properties', 
-    href: '/properties' 
-  },
-  { 
-    icon: FileText, 
-    label: 'Transactions', 
-    href: '/transactions' 
-  },
-  { 
-    icon: Users, 
-    label: 'Team', 
-    href: '/team' 
-  },
-  { 
-    icon: DollarSign, 
-    label: 'Commission', 
-    href: '/commission' 
-  },
-];
-
-interface NavMainProps {
-  collapsed?: boolean;
-}
-
-export function NavMain({ collapsed }: NavMainProps) {
-  const location = useLocation();
-  const currentPath = location.pathname;
-  
+const NavMain = () => {
   return (
-    <SidebarGroup>
-      <SidebarGroupLabel>Main</SidebarGroupLabel>
-      <SidebarGroupContent>
-        <SidebarMenu>
-          {mainNavItems.map((item) => {
-            // Check if current path starts with this item's href (for nested routes)
-            const isActive = currentPath === item.href || 
-                           (item.href !== '/dashboard' && currentPath.startsWith(item.href));
-            
-            return (
-              <SidebarMenuItem key={item.label}>
-                <SidebarMenuButton 
-                  asChild 
-                  isActive={isActive}
-                  tooltip={item.label}
-                  size="default"
-                >
-                  <Link to={item.href} className={collapsed ? "justify-center" : ""}>
-                    <item.icon />
-                    {!collapsed && <span>{item.label}</span>}
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            );
-          })}
-        </SidebarMenu>
-      </SidebarGroupContent>
-    </SidebarGroup>
+    <div className="space-y-1">
+      <NavLink
+        to="/dashboard"
+        className={({ isActive }) =>
+          `flex items-center px-3 py-2 rounded-md text-sm ${
+            isActive
+              ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+              : 'text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground'
+          }`
+        }
+      >
+        <Home className="mr-2 h-4 w-4" />
+        Dashboard
+      </NavLink>
+      
+      <NavLink
+        to="/properties"
+        className={({ isActive }) =>
+          `flex items-center px-3 py-2 rounded-md text-sm ${
+            isActive
+              ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+              : 'text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground'
+          }`
+        }
+      >
+        <Building2 className="mr-2 h-4 w-4" />
+        Properties
+      </NavLink>
+      
+      <NavLink
+        to="/transactions"
+        className={({ isActive }) =>
+          `flex items-center px-3 py-2 rounded-md text-sm ${
+            isActive
+              ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+              : 'text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground'
+          }`
+        }
+      >
+        <Receipt className="mr-2 h-4 w-4" />
+        Transactions
+      </NavLink>
+      
+      <NavLink
+        to="/clients"
+        className={({ isActive }) =>
+          `flex items-center px-3 py-2 rounded-md text-sm ${
+            isActive
+              ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+              : 'text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground'
+          }`
+        }
+      >
+        <Users className="mr-2 h-4 w-4" />
+        Clients
+      </NavLink>
+      
+      <NavLink
+        to="/leaderboard/sales"
+        className={({ isActive }) =>
+          `flex items-center px-3 py-2 rounded-md text-sm ${
+            isActive
+              ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+              : 'text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground'
+          }`
+        }
+      >
+        <BarChart3 className="mr-2 h-4 w-4" />
+        Leaderboard
+      </NavLink>
+      
+      <NavLink
+        to="/commission"
+        className={({ isActive }) =>
+          `flex items-center px-3 py-2 rounded-md text-sm ${
+            isActive
+              ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+              : 'text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground'
+          }`
+        }
+      >
+        <Bookmark className="mr-2 h-4 w-4" />
+        Commission
+      </NavLink>
+      
+      <NavLink
+        to="/notifications"
+        className={({ isActive }) =>
+          `flex items-center px-3 py-2 rounded-md text-sm ${
+            isActive
+              ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+              : 'text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground'
+          }`
+        }
+      >
+        <Bell className="mr-2 h-4 w-4" />
+        Notifications
+      </NavLink>
+      
+      <NavLink
+        to="/settings"
+        className={({ isActive }) =>
+          `flex items-center px-3 py-2 rounded-md text-sm ${
+            isActive
+              ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+              : 'text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground'
+          }`
+        }
+      >
+        <Settings className="mr-2 h-4 w-4" />
+        Settings
+      </NavLink>
+
+      <NavLink
+        to="/style-guide"
+        className={({ isActive }) =>
+          `flex items-center px-3 py-2 rounded-md text-sm ${
+            isActive
+              ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+              : 'text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground'
+          }`
+        }
+      >
+        <Palette className="mr-2 h-4 w-4" />
+        Style Guide
+      </NavLink>
+    </div>
   );
-}
+};
+
+export default NavMain;
