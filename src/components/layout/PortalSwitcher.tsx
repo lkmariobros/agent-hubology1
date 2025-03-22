@@ -1,5 +1,11 @@
 
 import React from 'react';
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Button } from '@/components/ui/button';
 import { Building, Shield, ChevronDown } from 'lucide-react';
 import { useAuth, UserRole } from '@/providers/AuthProvider';
@@ -14,29 +20,47 @@ export function PortalSwitcher() {
   
   const currentRole = user.activeRole;
 
-  const handleRoleSwitch = () => {
-    // Toggle to the other role
-    const newRole: UserRole = currentRole === 'admin' ? 'agent' : 'admin';
-    switchRole(newRole);
+  // Define the portals available to switch between
+  const portals = [
+    { role: 'agent', label: 'Agent Portal', icon: <Building className="h-4 w-4 mr-2" /> },
+    { role: 'admin', label: 'Admin Portal', icon: <Shield className="h-4 w-4 mr-2" /> }
+  ];
+
+  // Get the current portal for display
+  const currentPortal = portals.find(p => p.role === currentRole);
+  
+  // Get the other portal option
+  const otherPortal = portals.find(p => p.role !== currentRole);
+
+  if (!currentPortal || !otherPortal) return null;
+
+  const handleRoleSwitch = (role: UserRole) => {
+    switchRole(role);
   };
 
-  // Determine icon and label based on current role
-  const icon = currentRole === 'admin' ? 
-    <Shield className="h-4 w-4 mr-1" /> : 
-    <Building className="h-4 w-4 mr-1" />;
-  
-  const label = currentRole === 'admin' ? 'Admin Portal' : 'Agent Portal';
-
   return (
-    <Button 
-      variant="ghost" 
-      size="sm"
-      onClick={handleRoleSwitch}
-      className="flex items-center text-sm font-medium hover:bg-accent/10"
-    >
-      {icon}
-      {label}
-      <ChevronDown className="h-3 w-3 ml-1 opacity-60" />
-    </Button>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button 
+          variant="ghost" 
+          size="sm"
+          className="flex items-center text-sm font-medium hover:bg-accent/10 ml-2"
+        >
+          {currentPortal.icon}
+          <span className="hidden sm:inline-block">{currentPortal.label}</span>
+          <ChevronDown className="h-3 w-3 ml-1 opacity-60" />
+        </Button>
+      </DropdownMenuTrigger>
+      
+      <DropdownMenuContent align="end" className="w-[180px] bg-popover p-2 shadow-md">
+        <DropdownMenuItem 
+          onClick={() => handleRoleSwitch(otherPortal.role as UserRole)}
+          className="flex items-center cursor-pointer px-3 py-2 rounded-sm hover:bg-accent"
+        >
+          {otherPortal.icon}
+          <span>Switch to {otherPortal.label}</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
