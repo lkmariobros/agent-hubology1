@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -93,9 +94,10 @@
     @apply text-sm text-muted-foreground mt-1;
   }
   
-  /* Fix the glass-card class by using bg-card instead of bg-card-bg */
+  /* Fix the glass-card class by using direct background-color instead of bg-card */
   .glass-card {
-    @apply backdrop-blur-xl bg-card border border-border shadow-[0_4px_12px_-2px_rgba(0,0,0,0.2)];
+    @apply backdrop-blur-xl border border-border shadow-[0_4px_12px_-2px_rgba(0,0,0,0.2)];
+    background-color: rgba(30, 33, 40, 0.8); /* Slightly transparent version of #1E2128 */
   }
 }
 

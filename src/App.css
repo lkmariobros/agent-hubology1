@@ -142,6 +142,23 @@ body .app-container > div:nth-child(2) > *:not(.card):not([role="region"]) {
   background-color: inherit;
 }
 
+/* Highly specific main content background fix */
+#root > div > div:not(.sidebar),
+.main-content,
+main,
+[data-page="dashboard"],
+[data-page="properties"],
+[data-page="transactions"] {
+  background-color: #161920 !important;
+}
+
+/* Target main content wrapper directly */
+.content-wrapper,
+.page-container,
+div[class*="layout-content"] {
+  background-color: #161920 !important;
+}
+
 /* Keep animation styles */
 @keyframes logo-spin {
   from {
