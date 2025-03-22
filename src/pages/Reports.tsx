@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { useAuth } from '@/providers/AuthProvider';
 import { Navigate } from 'react-router-dom';
+import { PageContainer, PageHeader, PageTitle, PageSubtitle } from '@/components/layout/PageContainer';
 
 // Sample data for line chart
 const salesData = [{
@@ -100,13 +101,13 @@ const Reports = () => {
   }
 
   return (
-    <div className="space-y-6 px-[44px] py-[36px]">
-      <div className="flex justify-between items-center">
+    <PageContainer>
+      <PageHeader>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Reports</h1>
-          <p className="text-muted-foreground">
+          <PageTitle>Reports</PageTitle>
+          <PageSubtitle>
             Analyze your agency's performance with detailed reports.
-          </p>
+          </PageSubtitle>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" className="gap-2">
@@ -118,7 +119,7 @@ const Reports = () => {
             Export
           </Button>
         </div>
-      </div>
+      </PageHeader>
       
       <Tabs defaultValue="sales">
         <TabsList className="grid w-full grid-cols-4">
@@ -306,7 +307,7 @@ const Reports = () => {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
+    </PageContainer>
   );
 };
 
