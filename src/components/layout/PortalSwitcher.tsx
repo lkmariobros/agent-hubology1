@@ -1,8 +1,14 @@
 
 import React from 'react';
-import { Toggle } from "@/components/ui/toggle";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import { Button } from '@/components/ui/button';
-import { Building, Shield, SwitchCamera } from 'lucide-react';
+import { Building, Shield, ChevronDown } from 'lucide-react';
 import { useAuth, UserRole } from '@/providers/AuthProvider';
 import { useNavigate } from 'react-router-dom';
 
@@ -16,21 +22,41 @@ export function PortalSwitcher() {
   const currentRole = user.activeRole;
   const isAdminActive = currentRole === 'admin';
 
-  const handleRoleSwitch = () => {
-    // Toggle to the other role
-    const newRole: UserRole = isAdminActive ? 'agent' : 'admin';
-    switchRole(newRole);
+  const handleRoleSwitch = (role: UserRole) => {
+    switchRole(role);
   };
 
   return (
-    <Button
-      variant="ghost"
-      size="icon"
-      onClick={handleRoleSwitch}
-      className="ml-2 rounded-full hover:bg-accent/10 focus:outline-none focus:ring-0"
-      title={isAdminActive ? "Switch to Agent Portal" : "Switch to Admin Portal"}
-    >
-      <SwitchCamera className="h-4 w-4" />
-    </Button>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button 
+          variant="ghost" 
+          className="flex items-center gap-1 h-auto p-0 font-normal text-lg hover:bg-transparent"
+        >
+          <span>PropertyPro</span>
+          <ChevronDown className="h-3 w-3 opacity-60" />
+        </Button>
+      </DropdownMenuTrigger>
+      
+      <DropdownMenuContent align="start" className="w-[180px]">
+        <DropdownMenuItem 
+          onClick={() => handleRoleSwitch('agent')}
+          className={`flex items-center cursor-pointer ${!isAdminActive ? 'bg-accent/10' : ''}`}
+        >
+          <Building className="h-4 w-4 mr-2" />
+          <span>Agent Portal</span>
+        </DropdownMenuItem>
+        
+        <DropdownMenuSeparator />
+        
+        <DropdownMenuItem 
+          onClick={() => handleRoleSwitch('admin')}
+          className={`flex items-center cursor-pointer ${isAdminActive ? 'bg-accent/10' : ''}`}
+        >
+          <Shield className="h-4 w-4 mr-2" />
+          <span>Admin Portal</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

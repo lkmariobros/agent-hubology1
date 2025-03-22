@@ -51,7 +51,6 @@ const AdminLayout = () => {
             <div className="flex items-center">
               <SidebarTrigger className="mr-2" />
               <div className="flex items-center">
-                <h1 className="text-lg font-normal">PropertyPro</h1>
                 <PortalSwitcher />
               </div>
             </div>
