@@ -203,7 +203,7 @@ const AdminTransactions = () => {
             </thead>
             <tbody>
               {transactions.map((transaction) => (
-                <tr key={transaction.id} className="border-b hover:bg-muted/50">
+                <tr key={transaction.id} className="border-b hover:bg-muted-20">
                   <td className="p-4">
                     <div className="flex items-center gap-2">
                       {getStatusIcon(transaction.status)}

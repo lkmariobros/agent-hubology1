@@ -219,7 +219,7 @@
   }
   
   .clean-table tr:hover {
-    @apply bg-muted/20;
+    @apply bg-muted-20;
   }
   
   /* Alignment utilities */
