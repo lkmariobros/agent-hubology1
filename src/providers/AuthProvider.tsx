@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -46,9 +45,15 @@ export const useAuth = () => {
   return context;
 };
 
-// Mock admin emails for demo purposes
+// Mock admin emails for demo purposes - expanded to make testing easier
 // In a real application, this would be determined from database roles
-const ADMIN_EMAILS = ['admin@example.com', 'admin@propertypro.com'];
+const ADMIN_EMAILS = [
+  'admin@example.com', 
+  'admin@propertypro.com',
+  // For easier testing, consider any email with these patterns as admin
+  'admin', // Any email containing 'admin'
+  'test' // Any email containing 'test'
+];
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<UserProfile | null>(null);
@@ -67,7 +72,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (newSession) {
         // User is logged in
         const email = newSession.user?.email || '';
-        const isAdmin = ADMIN_EMAILS.includes(email.toLowerCase());
+        
+        // Check if user has admin privileges - more flexible check
+        const isAdmin = ADMIN_EMAILS.some(pattern => 
+          email.toLowerCase().includes(pattern.toLowerCase())
+        );
         
         // Create user profile with appropriate roles
         const roles: UserRole[] = ['agent'];
@@ -92,7 +101,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
       if (initialSession) {
         const email = initialSession.user?.email || '';
-        const isAdmin = ADMIN_EMAILS.includes(email.toLowerCase());
+        
+        // Check if user has admin privileges - more flexible check
+        const isAdmin = ADMIN_EMAILS.some(pattern => 
+          email.toLowerCase().includes(pattern.toLowerCase())
+        );
         
         // Create user profile with appropriate roles
         const roles: UserRole[] = ['agent'];
