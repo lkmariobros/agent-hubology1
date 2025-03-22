@@ -10,7 +10,12 @@ import {
 import { Building, Shield, ChevronsUpDown } from 'lucide-react';
 import { useAuth, UserRole } from '@/providers/AuthProvider';
 
-export function PortalSwitcher() {
+interface PortalSwitcherProps {
+  showLabel?: boolean;
+  className?: string;
+}
+
+export function PortalSwitcher({ showLabel = true, className = "" }: PortalSwitcherProps) {
   const { user, switchRole, isAdmin } = useAuth();
   
   // Only show this component for users with admin privileges
@@ -27,9 +32,9 @@ export function PortalSwitcher() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button 
-          className="flex items-center gap-1 text-lg hover:text-primary transition-colors focus:outline-none"
+          className={`flex items-center gap-1 hover:text-primary transition-colors focus:outline-none ${className}`}
         >
-          <span>PropertyPro</span>
+          {showLabel && <span>PropertyPro</span>}
           <ChevronsUpDown className="h-4 w-4 opacity-60" />
         </button>
       </DropdownMenuTrigger>

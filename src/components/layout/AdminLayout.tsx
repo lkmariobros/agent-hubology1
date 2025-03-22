@@ -50,12 +50,12 @@ const AdminLayout = () => {
           <header className="h-14 flex-shrink-0 border-b border-border/20 flex items-center justify-between px-4 bg-card">
             <div className="flex items-center gap-2">
               <SidebarTrigger className="mr-2" />
-              <div className="flex items-center">
+              <div className="flex items-center gap-2">
                 <div className="h-8 w-8 rounded-full bg-purple-600 flex items-center justify-center text-white font-medium">
                   P
                 </div>
+                <PortalSwitcher showLabel={true} className="text-lg" />
               </div>
-              <PortalSwitcher />
             </div>
             
             <div className="flex items-center space-x-2">
