@@ -55,8 +55,8 @@ export function NavMain({ collapsed }: NavMainProps) {
   const currentPath = location.pathname;
   
   return (
-    <SidebarGroup>
-      <SidebarGroupLabel>Main</SidebarGroupLabel>
+    <SidebarGroup className="py-3">
+      <SidebarGroupLabel className="px-4">Main</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
           {mainNavItems.map((item) => {

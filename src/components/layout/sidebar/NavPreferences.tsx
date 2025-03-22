@@ -20,8 +20,8 @@ export function NavPreferences({ collapsed }: NavPreferencesProps) {
   const currentPath = location.pathname;
   
   return (
-    <SidebarGroup>
-      <SidebarGroupLabel>Preferences</SidebarGroupLabel>
+    <SidebarGroup className="py-1 mb-2">
+      <SidebarGroupLabel className="px-4">Preferences</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
           <SidebarMenuItem>

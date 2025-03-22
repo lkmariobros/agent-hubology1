@@ -29,7 +29,7 @@ export function SidebarProfile({ collapsed }: SidebarProfileProps) {
   return (
     <Link 
       to="/profile" 
-      className="flex items-center gap-3 p-2 rounded-md hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+      className="flex items-center gap-3 px-4 py-3 mx-2 mb-2 rounded-md hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
     >
       <div className="flex items-center justify-center h-8 w-8 rounded-full bg-muted text-foreground">
         <span className="font-medium text-sm">
