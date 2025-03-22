@@ -31,12 +31,11 @@ export function PortalSwitcher() {
           variant="ghost" 
           className="flex items-center gap-1 h-auto p-0 font-normal text-lg hover:bg-transparent"
         >
-          <span>PropertyPro</span>
-          <ChevronDown className="h-3 w-3 opacity-60" />
+          <ChevronDown className="h-4 w-4 opacity-60" />
         </Button>
       </DropdownMenuTrigger>
       
-      <DropdownMenuContent align="start" className="w-[180px]">
+      <DropdownMenuContent align="start" className="w-[180px] bg-popover">
         <DropdownMenuItem 
           onClick={() => handleRoleSwitch('agent')}
           className={`flex items-center cursor-pointer ${!isAdminActive ? 'bg-accent/10' : ''}`}
