@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { Outlet } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { AppSidebar } from './AppSidebar';
 import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
@@ -37,6 +37,16 @@ const Header = () => {
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   // Load saved sidebar state from localStorage if available
   const savedState = localStorage.getItem("sidebar:state") === "false" ? false : true;
+  const location = useLocation();
+  
+  // Add data-route attribute to body
+  useEffect(() => {
+    document.body.setAttribute('data-route', location.pathname);
+    
+    return () => {
+      document.body.removeAttribute('data-route');
+    };
+  }, [location.pathname]);
   
   // Set up effect to save sidebar state changes
   React.useEffect(() => {

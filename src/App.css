@@ -120,6 +120,28 @@ div[class*="content-section"] {
   background-color: inherit;
 }
 
+/* Highly specific selectors for main content area */
+body .app-container > div:nth-child(2),
+body [class*="dashboard-container"],
+body [class*="main-content"],
+body > div > div > main,
+body > div[id="root"] > div > div:not([class*="sidebar"]):last-child,
+body > div[id="root"] > div:nth-child(1) > div:nth-child(2) {
+  background-color: #161920 !important;
+}
+
+/* Target specific pages by route */
+body[data-route="/dashboard"] main,
+body[data-route="/properties"] main,
+body[data-route="/transactions"] main {
+  background-color: #161920 !important;
+}
+
+/* Override any nested containers that might redefine background */
+body .app-container > div:nth-child(2) > *:not(.card):not([role="region"]) {
+  background-color: inherit;
+}
+
 /* Keep animation styles */
 @keyframes logo-spin {
   from {
