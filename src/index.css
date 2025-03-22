@@ -1,14 +1,15 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    /* Modern color scheme using OKLCH format - updated for light theme */
-    --background: oklch(1 0 0);
+    /* Modern color scheme using OKLCH format - updated with grayish background */
+    --background: oklch(0.98 0.003 286.278); /* Light gray background instead of pure white */
     --foreground: oklch(0.2 0.005 285.823);
     
-    --card: oklch(0.98 0 0);
+    --card: oklch(0.99 0.002 286.278); /* Slightly lighter than background */
     --card-foreground: oklch(0.2 0.005 285.823);
     
     --popover: oklch(1 0 0);

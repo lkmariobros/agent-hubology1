@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -35,13 +36,13 @@ const PropertyList = ({ properties, isLoading = false, onViewAll }: PropertyList
   };
 
   return (
-    <Card className="glass-card">
+    <Card className="border border-border/50 shadow-sm">
       <CardHeader className="px-6 pt-6 pb-4 flex flex-row items-center justify-between">
         <CardTitle className="text-lg font-semibold">Latest Properties</CardTitle>
         <Button 
           variant="ghost" 
           size="sm" 
-          className="text-accent hover:text-accent/80"
+          className="text-accent-foreground hover:text-accent-foreground/80"
           onClick={onViewAll}
         >
           View all <ArrowRight className="ml-1 h-4 w-4" />
@@ -74,7 +75,7 @@ const PropertyList = ({ properties, isLoading = false, onViewAll }: PropertyList
             properties.map((property) => (
               <div 
                 key={property.id}
-                className="flex items-center space-x-4 p-3 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
+                className="flex items-center space-x-4 p-3 rounded-lg hover:bg-muted/20 transition-colors cursor-pointer border border-border/20"
                 onClick={() => handleViewProperty(property.id)}
               >
                 {property.images && property.images.length > 0 ? (
@@ -96,14 +97,14 @@ const PropertyList = ({ properties, isLoading = false, onViewAll }: PropertyList
                   <div className="flex items-center mt-1 space-x-2">
                     <Badge 
                       variant="outline" 
-                      className="text-[10px] py-0 h-5 border-white/10"
+                      className="text-[10px] py-0 h-5 border-border/40"
                     >
                       {property.type}
                     </Badge>
                     <Badge 
                       variant="outline"
                       className={cn(
-                        "text-[10px] py-0 h-5 border-white/10",
+                        "text-[10px] py-0 h-5 border-border/40",
                         property.status === 'available' ? 'text-green-400 border-green-400/30' : 
                         property.status === 'pending' ? 'text-yellow-400 border-yellow-400/30' : 
                         'text-red-400 border-red-400/30'

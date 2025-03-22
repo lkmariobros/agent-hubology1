@@ -28,13 +28,13 @@ const RecentTransactions = ({ transactions, isLoading = false, onViewAll }: Rece
   };
 
   return (
-    <Card className="glass-card">
+    <Card className="border border-border/50 shadow-sm">
       <CardHeader className="px-6 pt-6 pb-4 flex flex-row items-center justify-between">
         <CardTitle className="text-lg font-semibold">Recent Transactions</CardTitle>
         <Button 
           variant="ghost" 
           size="sm" 
-          className="text-accent hover:text-accent/80"
+          className="text-accent-foreground hover:text-accent-foreground/80"
           onClick={onViewAll}
         >
           View all <ArrowRight className="ml-1 h-4 w-4" />
@@ -64,11 +64,11 @@ const RecentTransactions = ({ transactions, isLoading = false, onViewAll }: Rece
             transactions.map((transaction) => (
               <div 
                 key={transaction.id}
-                className="flex items-center space-x-4 p-3 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
+                className="flex items-center space-x-4 p-3 rounded-lg hover:bg-muted/20 transition-colors cursor-pointer"
                 onClick={() => handleViewTransaction(transaction.id)}
               >
                 <div className="h-10 w-10 rounded-full bg-accent/10 flex items-center justify-center">
-                  <DollarSign className="h-5 w-5 text-accent" />
+                  <DollarSign className="h-5 w-5 text-accent-foreground" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-foreground truncate">
@@ -85,7 +85,7 @@ const RecentTransactions = ({ transactions, isLoading = false, onViewAll }: Rece
                   <Badge 
                     variant="outline"
                     className={cn(
-                      "text-[10px] py-0 h-5 mt-0.5 border-white/10",
+                      "text-[10px] py-0 h-5 mt-0.5 border-border/40",
                       transaction.status === 'completed' ? 'text-green-400 border-green-400/30' : 
                       transaction.status === 'pending' ? 'text-yellow-400 border-yellow-400/30' : 
                       'text-red-400 border-red-400/30'
