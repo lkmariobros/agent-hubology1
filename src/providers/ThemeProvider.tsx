@@ -23,7 +23,7 @@ const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
 
 export function ThemeProvider({
   children,
-  defaultTheme = 'light', // Keep light mode as default
+  defaultTheme = 'dark', // Changed to dark mode as default
   storageKey = 'property-pro-ui-theme',
   ...props
 }: ThemeProviderProps) {

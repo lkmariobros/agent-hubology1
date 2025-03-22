@@ -44,7 +44,7 @@ const SidebarProvider = ({
 
   return (
     <SidebarContext.Provider value={{ expanded, setExpanded }}>
-      <div className={cn("flex min-h-screen w-full", className)}>
+      <div className={cn("flex min-h-screen h-screen w-full", className)}>
         {children}
       </div>
     </SidebarContext.Provider>
@@ -64,7 +64,7 @@ const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(
       <aside
         ref={ref}
         className={cn(
-          "sidebar group relative flex h-screen flex-col border-r bg-[#232328] text-[#f5f5f7]",
+          "sidebar group relative flex h-full flex-col border-r bg-[var(--sidebar-background)] text-[var(--sidebar-foreground)]",
           expanded ? "w-64" : "w-14",
           "transition-width duration-300",
           className

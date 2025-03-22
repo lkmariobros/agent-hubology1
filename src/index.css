@@ -1,15 +1,14 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    /* Modern color scheme using OKLCH format - updated with grayish background */
-    --background: oklch(0.95 0.003 286.278); /* Light gray background #f5f5f7 */
+    /* Light mode colors (now secondary) */
+    --background: oklch(0.95 0.003 286.278);
     --foreground: oklch(0.2 0.005 285.823);
     
-    --card: oklch(0.99 0.002 286.278); /* White background for cards to contrast with gray */
+    --card: oklch(0.99 0.002 286.278);
     --card-foreground: oklch(0.2 0.005 285.823);
     
     --popover: oklch(1 0 0);
@@ -37,62 +36,62 @@
     
     --radius: 0.5rem;
 
-    /* Sidebar colors - using explicit color hex codes for better readability */
-    --sidebar-background: #232328; /* Lighter grey for better readability */
+    /* Sidebar colors - medium-dark gray for sidebar (lighter than content area) */
+    --sidebar-background: #1f2128;
     --sidebar-foreground: #f5f5f7;
     --sidebar-primary: #6359e8;
     --sidebar-primary-foreground: #ffffff;
-    --sidebar-accent: #3a3a40; /* Darker grey for menu items */
+    --sidebar-accent: #2a2c36;
     --sidebar-accent-foreground: #f5f5f7;
-    --sidebar-border: #3a3a40;
-    --sidebar-ring: #3a3a40;
+    --sidebar-border: #2a2c36;
+    --sidebar-ring: #2a2c36;
 
-    /* Status colors - making them more vibrant */
+    /* Status colors */
     --status-green: 142.69deg 76.53% 47.45%;
     --status-amber: 27.22deg 92.09% 55.29%;
     --status-red: 0deg 84.2% 60.2%;
     --status-blue: 217.22deg 91.22% 59.8%;
   }
 
-  /* Dark mode colors - adjusted to better match the sidebar */
+  /* Dark mode colors - darker charcoal for main content */
   .dark {
-    --background: oklch(0.15 0.006 285.885);
-    --foreground: oklch(0.95 0 0);
+    --background: oklch(0.1 0.006 285.885); /* Darker charcoal #161920 */
+    --foreground: oklch(0.95 0 0); /* Light text */
     
-    --card: oklch(0.2 0.006 285.885);
+    --card: oklch(0.15 0.006 285.885); /* Slightly lighter than background */
     --card-foreground: oklch(0.95 0 0);
     
-    --popover: oklch(0.2 0.006 285.885);
+    --popover: oklch(0.15 0.006 285.885);
     --popover-foreground: oklch(0.95 0 0);
     
     --primary: oklch(0.65 0.18 295);
     --primary-foreground: oklch(0.98 0.021 166.113);
     
-    --secondary: oklch(0.274 0.006 286.033);
+    --secondary: oklch(0.2 0.006 285.885);
     --secondary-foreground: oklch(0.95 0 0);
     
-    --muted: oklch(0.244 0.006 285.97);
+    --muted: oklch(0.18 0.006 285.97);
     --muted-foreground: oklch(0.705 0.015 286.067);
     
-    --accent: oklch(0.244 0.006 285.97);
+    --accent: oklch(0.18 0.006 285.97);
     --accent-foreground: oklch(0.95 0 0);
     
     --destructive: oklch(0.637 0.237 25.331);
     --destructive-foreground: oklch(0.95 0 0);
     
-    --border: oklch(0.29 0.009 285.83);
-    --input: oklch(0.29 0.009 285.83);
-    --ring: oklch(0.442 0.017 285.786);
+    --border: oklch(0.2 0.009 285.83);
+    --input: oklch(0.2 0.009 285.83);
+    --ring: oklch(0.35 0.017 285.786);
     
-    /* Sidebar colors for dark mode - consistent with light mode values */
-    --sidebar-background: #232328;
+    /* Sidebar colors for dark mode - medium-dark gray (lighter than content area) */
+    --sidebar-background: #1f2128; 
     --sidebar-foreground: #f5f5f7;
     --sidebar-primary: #6359e8;
     --sidebar-primary-foreground: #ffffff;
-    --sidebar-accent: #3a3a40;
+    --sidebar-accent: #2a2c36;
     --sidebar-accent-foreground: #f5f5f7;
-    --sidebar-border: #3a3a40;
-    --sidebar-ring: #3a3a40;
+    --sidebar-border: #2a2c36;
+    --sidebar-ring: #2a2c36;
   }
 
   /* Reset styles for full height layout */
@@ -100,7 +99,6 @@
     height: 100%;
     margin: 0;
     padding: 0;
-    background-color: #f5f5f7;
   }
   
   * {
@@ -111,12 +109,10 @@
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
     letter-spacing: -0.01em;
-    background-color: #f5f5f7;
   }
 
   html {
     @apply scroll-smooth;
-    background-color: #f5f5f7;
   }
   
   /* Consistent typography styling */
@@ -145,12 +141,10 @@
   /* Standardized page content containers */
   .page-container {
     @apply p-6 space-y-6;
-    background-color: #f5f5f7;
   }
   
   .page-container-narrow {
     @apply p-6 space-y-6 max-w-4xl mx-auto;
-    background-color: #f5f5f7;
   }
 
   .page-header {

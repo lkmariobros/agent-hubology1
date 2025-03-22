@@ -37,36 +37,51 @@
   @apply bg-status-blue text-white rounded-full px-3 py-1 text-xs font-semibold;
 }
 
-/* Sidebar styling - lighter grey for better readability */
+/* Dark mode sidebar styling */
 .sidebar-dark {
-  background-color: #232328;
-  color: #f5f5f7;
+  background-color: var(--sidebar-background);
+  color: var(--sidebar-foreground);
 }
 
 /* Add background color to the sidebar */
 [data-expanded="true"].sidebar {
-  background-color: #232328;
+  background-color: var(--sidebar-background);
 }
 
 [data-expanded="false"].sidebar {
-  background-color: #232328;
+  background-color: var(--sidebar-background);
 }
 
-/* Main content area styling - consistent grey background */
+/* Main content area styling - darker charcoal background for dark mode */
 main {
-  background-color: #f5f5f7;
+  background-color: var(--background);
 }
 
 /* Explicitly set the background for the entire content area */
 .flex-1 {
-  background-color: #f5f5f7;
+  background-color: var(--background);
 }
 
-/* Card styling with white background for contrast */
+/* Card styling with slightly elevated background for contrast in dark mode */
 .card {
-  background-color: white;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  background-color: var(--card);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* Dark mode specific overrides */
+.dark .card {
+  background-color: var(--card);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Subtle borders for sections in dark mode */
+.dark .border,
+.dark .border-b,
+.dark .border-t,
+.dark .border-l,
+.dark .border-r {
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 /* Keep animation styles */

@@ -44,20 +44,20 @@ export function AppSidebar() {
             </button>
           </DropdownMenuTrigger>
           
-          <DropdownMenuContent align="start" className="w-[180px] bg-[#232328] border-[#3a3a40] text-[#f5f5f7]">
+          <DropdownMenuContent align="start" className="w-[180px] bg-[var(--sidebar-background)] border-[var(--sidebar-border)] text-[var(--sidebar-foreground)]">
             <DropdownMenuItem 
               onClick={() => switchRole('agent')}
-              className={`flex items-center cursor-pointer ${isAgentActive ? 'bg-[#3a3a40]' : ''}`}
+              className={`flex items-center cursor-pointer ${isAgentActive ? 'bg-[var(--sidebar-accent)]' : ''}`}
             >
               <Building className="h-4 w-4 mr-2" />
               <span>Agent Portal</span>
             </DropdownMenuItem>
             
-            <DropdownMenuSeparator className="bg-[#3a3a40]" />
+            <DropdownMenuSeparator className="bg-[var(--sidebar-border)]" />
             
             <DropdownMenuItem 
               onClick={() => switchRole('admin')}
-              className={`flex items-center cursor-pointer ${!isAgentActive ? 'bg-[#3a3a40]' : ''}`}
+              className={`flex items-center cursor-pointer ${!isAgentActive ? 'bg-[var(--sidebar-accent)]' : ''}`}
             >
               <Shield className="h-4 w-4 mr-2" />
               <span>Admin Portal</span>
