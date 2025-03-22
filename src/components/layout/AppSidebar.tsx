@@ -24,7 +24,7 @@ export function AppSidebar() {
   return (
     <>
       <Sidebar 
-        className="border-none bg-[#0F0E11]" 
+        className="border-none bg-[#0F0E11] transition-all duration-300 ease-in-out" 
         collapsible="icon" 
         side="left" 
         variant="sidebar"
@@ -44,16 +44,16 @@ export function AppSidebar() {
         </SidebarHeader>
         
         <SidebarContent>
-          <NavMain />
-          <NavAnalytics />
-          <NavPreferences />
+          <NavMain collapsed={isCollapsed} />
+          <NavAnalytics collapsed={isCollapsed} />
+          <NavPreferences collapsed={isCollapsed} />
         </SidebarContent>
         
         <SidebarFooter>
-          <SidebarProfile />
+          <SidebarProfile collapsed={isCollapsed} />
         </SidebarFooter>
       </Sidebar>
-      <SidebarRail />
+      <SidebarRail className="group-hover:after:bg-accent-foreground/10" />
     </>
   );
 }

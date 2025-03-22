@@ -11,8 +11,13 @@ import {
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
 
-export function NavPreferences() {
+interface NavPreferencesProps {
+  collapsed?: boolean;
+}
+
+export function NavPreferences({ collapsed }: NavPreferencesProps) {
   const location = useLocation();
+  const currentPath = location.pathname;
   
   return (
     <SidebarGroup>
@@ -21,14 +26,13 @@ export function NavPreferences() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton 
-              asChild
-              isActive={location.pathname === '/settings'}
+              asChild 
+              isActive={currentPath === '/settings'}
               tooltip="Settings"
-              size="default"
             >
-              <Link to="/settings">
+              <Link to="/settings" className={collapsed ? "justify-center" : ""}>
                 <Settings />
-                <span>Settings</span>
+                {!collapsed && <span>Settings</span>}
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

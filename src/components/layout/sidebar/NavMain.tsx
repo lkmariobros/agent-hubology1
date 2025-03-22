@@ -46,7 +46,11 @@ const mainNavItems = [
   },
 ];
 
-export function NavMain() {
+interface NavMainProps {
+  collapsed?: boolean;
+}
+
+export function NavMain({ collapsed }: NavMainProps) {
   const location = useLocation();
   const currentPath = location.pathname;
   
@@ -68,9 +72,9 @@ export function NavMain() {
                   tooltip={item.label}
                   size="default"
                 >
-                  <Link to={item.href}>
+                  <Link to={item.href} className={collapsed ? "justify-center" : ""}>
                     <item.icon />
-                    <span>{item.label}</span>
+                    {!collapsed && <span>{item.label}</span>}
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

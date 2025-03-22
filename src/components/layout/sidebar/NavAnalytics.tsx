@@ -1,11 +1,10 @@
 
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { 
-  BarChart4,
-  Trophy,
-  TrendingUp,
-  DollarSign
+import {
+  BarChart,
+  LineChart,
+  Trophy
 } from 'lucide-react';
 import {
   SidebarGroup,
@@ -19,83 +18,67 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 
-// Analytics navigation data
-const reportsNavItems = [
-  { 
-    icon: Trophy, 
-    label: 'Leaderboard',
-    submenu: [
-      {
-        icon: TrendingUp,
-        label: 'Points',
-        href: '/leaderboard/points'
-      },
-      {
-        icon: DollarSign,
-        label: 'Sales',
-        href: '/leaderboard/sales'
-      }
-    ]
-  },
-  { 
-    icon: BarChart4, 
-    label: 'Reports', 
-    href: '/reports' 
-  },
-];
+interface NavAnalyticsProps {
+  collapsed?: boolean;
+}
 
-export function NavAnalytics() {
+export function NavAnalytics({ collapsed }: NavAnalyticsProps) {
   const location = useLocation();
+  const currentPath = location.pathname;
+  
+  const isLeaderboardPage = currentPath.startsWith('/leaderboard');
+  const isReportsPage = currentPath.startsWith('/reports');
   
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Analytics</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
-          {reportsNavItems.map((item) => 
-            !item.submenu ? (
-              <SidebarMenuItem key={item.label}>
-                <SidebarMenuButton 
-                  asChild
-                  isActive={location.pathname === item.href}
-                  tooltip={item.label}
-                  size="default"
-                >
-                  <Link to={item.href}>
-                    <item.icon />
-                    <span>{item.label}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ) : (
-              <SidebarMenuItem key={item.label}>
-                <SidebarMenuButton
-                  tooltip={item.label}
-                  isActive={item.submenu.some(sub => location.pathname === sub.href)}
-                  size="default"
-                >
-                  <item.icon />
-                  <span>{item.label}</span>
-                </SidebarMenuButton>
-                <SidebarMenuSub>
-                  {item.submenu.map(subItem => (
-                    <SidebarMenuSubItem key={subItem.href}>
-                      <SidebarMenuSubButton 
-                        asChild
-                        isActive={location.pathname === subItem.href}
-                        size="md"
-                      >
-                        <Link to={subItem.href}>
-                          <subItem.icon />
-                          <span>{subItem.label}</span>
-                        </Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                  ))}
-                </SidebarMenuSub>
-              </SidebarMenuItem>
-            )
-          )}
+          <SidebarMenuItem>
+            <SidebarMenuButton 
+              asChild 
+              isActive={isLeaderboardPage}
+              tooltip="Leaderboard"
+            >
+              <Link to="/leaderboard" className={collapsed ? "justify-center" : ""}>
+                <Trophy />
+                {!collapsed && <span>Leaderboard</span>}
+              </Link>
+            </SidebarMenuButton>
+            {!collapsed && isLeaderboardPage && (
+              <SidebarMenuSub>
+                <SidebarMenuSubItem>
+                  <SidebarMenuSubButton
+                    asChild
+                    isActive={currentPath === '/leaderboard/points'}
+                  >
+                    <Link to="/leaderboard/points">Points</Link>
+                  </SidebarMenuSubButton>
+                </SidebarMenuSubItem>
+                <SidebarMenuSubItem>
+                  <SidebarMenuSubButton
+                    asChild
+                    isActive={currentPath === '/leaderboard/sales'}
+                  >
+                    <Link to="/leaderboard/sales">Sales</Link>
+                  </SidebarMenuSubButton>
+                </SidebarMenuSubItem>
+              </SidebarMenuSub>
+            )}
+          </SidebarMenuItem>
+          
+          <SidebarMenuItem>
+            <SidebarMenuButton 
+              asChild 
+              isActive={isReportsPage}
+              tooltip="Reports"
+            >
+              <Link to="/reports" className={collapsed ? "justify-center" : ""}>
+                <BarChart />
+                {!collapsed && <span>Reports</span>}
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>

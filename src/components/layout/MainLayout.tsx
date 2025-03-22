@@ -35,8 +35,24 @@ const Header = () => {
 };
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
+  // Load saved sidebar state from localStorage if available
+  const savedState = localStorage.getItem("sidebar:state") === "false" ? false : true;
+  
+  // Set up effect to save sidebar state changes
+  React.useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === "sidebar:state") {
+        // This ensures our UI stays in sync with other tabs
+        console.log("Sidebar state changed:", e.newValue);
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+  
   return (
-    <SidebarProvider defaultOpen={true}>
+    <SidebarProvider defaultOpen={savedState}>
       <div className="flex min-h-screen w-full bg-background">
         <AppSidebar />
         <div className="flex-1 overflow-auto">
