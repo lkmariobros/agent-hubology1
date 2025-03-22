@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -14,7 +13,6 @@ import { useAuth, UserRole } from '@/providers/AuthProvider';
 
 export function PortalSwitcher() {
   const { user, switchRole, isAdmin } = useAuth();
-  const navigate = useNavigate();
   
   // Only show this component for users with admin privileges
   if (!user || !isAdmin) return null;
