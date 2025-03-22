@@ -53,6 +53,7 @@ const NavMain = () => {
               : 'text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground'
           }`
         }
+        end
       >
         <Receipt className="mr-2 h-4 w-4" />
         Transactions

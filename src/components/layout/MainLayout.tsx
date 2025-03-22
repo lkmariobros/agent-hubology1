@@ -47,28 +47,33 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   // Load saved sidebar state from localStorage if available
   const savedState = localStorage.getItem("sidebar:state") === "false" ? false : true;
 
-  // Force dark mode on component mount
+  // Force dark mode on component mount but prevent multiple applications
   React.useEffect(() => {
     // Force dark mode application
-    document.documentElement.classList.add('dark');
-    document.body.classList.add('dark-applied');
+    if (!document.documentElement.classList.contains('dark')) {
+      document.documentElement.classList.add('dark');
+    }
     
-    // Apply enhanced dark mode styles with proper contrast
-    document.body.style.setProperty('--background', '#0F1014');       // Deeper dark for main content
-    document.body.style.setProperty('--card', '#1a1d25');             // Slightly lighter than background
-    document.body.style.setProperty('--sidebar-background', '#1F232D'); // Lighter shade for sidebar
-    document.body.style.setProperty('--foreground', '#f8f9fa');
-    document.body.style.setProperty('--card-foreground', '#f8f9fa');
-    document.body.style.setProperty('--sidebar-foreground', '#f8f9fa');
-    document.body.style.setProperty('--muted-foreground', '#a1a1aa');
-    document.body.style.setProperty('--border', '#2a2d38');
-    document.body.style.setProperty('--input', '#252830');
-    document.body.style.setProperty('--ring', '#3e4251');
-    
-    console.log("MainLayout mounted - forcing enhanced dark mode styling");
+    if (!document.body.classList.contains('dark-applied')) {
+      document.body.classList.add('dark-applied');
+      
+      // Apply enhanced dark mode styles with proper contrast
+      document.body.style.setProperty('--background', '#0F1014');       // Deeper dark for main content
+      document.body.style.setProperty('--card', '#1a1d25');             // Slightly lighter than background
+      document.body.style.setProperty('--sidebar-background', '#1F232D'); // Lighter shade for sidebar
+      document.body.style.setProperty('--foreground', '#f8f9fa');
+      document.body.style.setProperty('--card-foreground', '#f8f9fa');
+      document.body.style.setProperty('--sidebar-foreground', '#f8f9fa');
+      document.body.style.setProperty('--muted-foreground', '#a1a1aa');
+      document.body.style.setProperty('--border', '#2a2d38');
+      document.body.style.setProperty('--input', '#252830');
+      document.body.style.setProperty('--ring', '#3e4251');
+      
+      console.log("MainLayout mounted - forcing enhanced dark mode styling");
+    }
     
     return () => {
-      document.body.classList.remove('dark-applied');
+      // Don't remove dark mode on unmount to avoid flashing
     };
   }, []);
 

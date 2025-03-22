@@ -22,6 +22,9 @@ import CommissionApproval from './pages/admin/CommissionApproval';
 import SalesLeaderboard from './pages/leaderboard/Sales';
 import PointsLeaderboard from './pages/leaderboard/Points';
 import StyleGuide from './pages/StyleGuide';
+import TransactionDetail from './pages/TransactionDetail';
+import TransactionNewEnhanced from './pages/TransactionNewEnhanced';
+import NewProperty from './pages/NewProperty';
 
 // CSS
 import './App.css';
@@ -51,6 +54,9 @@ function App() {
                   <Route path="/dashboard" element={<Dashboard />} />
                   <Route path="/properties" element={<Properties />} />
                   <Route path="/transactions" element={<Transactions />} />
+                  <Route path="/transactions/new" element={<TransactionNewEnhanced />} />
+                  <Route path="/transactions/:id" element={<TransactionDetail />} />
+                  <Route path="/properties/new" element={<NewProperty />} />
                   <Route path="/commission" element={<Commission />} />
                   <Route path="/leaderboard/sales" element={<SalesLeaderboard />} />
                   <Route path="/leaderboard/points" element={<PointsLeaderboard />} />
@@ -60,6 +66,7 @@ function App() {
                 {/* Admin Layout Routes */}
                 <Route path="/admin" element={<AdminLayout />}>
                   <Route index element={<AdminDashboard />} />
+                  <Route path="dashboard" element={<AdminDashboard />} />
                   <Route path="properties" element={<AdminProperties />} />
                   <Route path="transactions" element={<AdminTransactions />} />
                   <Route path="commission" element={<CommissionApproval />} />
