@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -50,6 +51,7 @@ export const useAuth = () => {
 const ADMIN_EMAILS = [
   'admin@example.com', 
   'admin@propertypro.com',
+  'josephkwantum@gmail.com', // User's specific email
   // For easier testing, consider any email with these patterns as admin
   'admin', // Any email containing 'admin'
   'test' // Any email containing 'test'
