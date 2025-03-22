@@ -86,8 +86,8 @@ const AdminLayout = () => {
             </div>
           </header>
           
-          {/* Main scrollable content without the duplicate wrapper */}
-          <main className="flex-1 overflow-y-auto bg-background p-6">
+          {/* Main scrollable content */}
+          <main className="flex-1 overflow-y-auto bg-background">
             <Outlet />
           </main>
         </div>
