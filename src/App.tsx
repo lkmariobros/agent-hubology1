@@ -4,6 +4,7 @@ import MainLayout from './components/layout/MainLayout';
 import AdminLayout from './components/layout/AdminLayout';
 import { ThemeProvider } from './providers/ThemeProvider';
 import { AuthProvider } from './providers/AuthProvider';
+import { NotificationProvider } from './context/NotificationContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from './components/ui/sonner';
 
@@ -40,34 +41,36 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Router>
         <AuthProvider>
-          <ThemeProvider>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              
-              {/* Main Layout Routes */}
-              <Route element={<MainLayout />}>
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/properties" element={<Properties />} />
-                <Route path="/transactions" element={<Transactions />} />
-                <Route path="/commission" element={<Commission />} />
-                <Route path="/leaderboard/sales" element={<SalesLeaderboard />} />
-                <Route path="/leaderboard/points" element={<PointsLeaderboard />} />
-                <Route path="/style-guide" element={<StyleGuide />} />
-              </Route>
-              
-              {/* Admin Layout Routes */}
-              <Route path="/admin" element={<AdminLayout />}>
-                <Route index element={<AdminDashboard />} />
-                <Route path="properties" element={<AdminProperties />} />
-                <Route path="transactions" element={<AdminTransactions />} />
-                <Route path="commission" element={<CommissionApproval />} />
-              </Route>
-              
-              {/* Fallback route */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            <Toaster />
-          </ThemeProvider>
+          <NotificationProvider>
+            <ThemeProvider>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                
+                {/* Main Layout Routes */}
+                <Route element={<MainLayout />}>
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/properties" element={<Properties />} />
+                  <Route path="/transactions" element={<Transactions />} />
+                  <Route path="/commission" element={<Commission />} />
+                  <Route path="/leaderboard/sales" element={<SalesLeaderboard />} />
+                  <Route path="/leaderboard/points" element={<PointsLeaderboard />} />
+                  <Route path="/style-guide" element={<StyleGuide />} />
+                </Route>
+                
+                {/* Admin Layout Routes */}
+                <Route path="/admin" element={<AdminLayout />}>
+                  <Route index element={<AdminDashboard />} />
+                  <Route path="properties" element={<AdminProperties />} />
+                  <Route path="transactions" element={<AdminTransactions />} />
+                  <Route path="commission" element={<CommissionApproval />} />
+                </Route>
+                
+                {/* Fallback route */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+              <Toaster />
+            </ThemeProvider>
+          </NotificationProvider>
         </AuthProvider>
       </Router>
     </QueryClientProvider>
