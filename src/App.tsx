@@ -38,9 +38,9 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <ThemeProvider>
-          <Router>
+      <Router>
+        <AuthProvider>
+          <ThemeProvider>
             <Routes>
               <Route path="/" element={<Index />} />
               
@@ -66,10 +66,10 @@ function App() {
               {/* Fallback route */}
               <Route path="*" element={<NotFound />} />
             </Routes>
-          </Router>
-          <Toaster />
-        </ThemeProvider>
-      </AuthProvider>
+            <Toaster />
+          </ThemeProvider>
+        </AuthProvider>
+      </Router>
     </QueryClientProvider>
   );
 }
