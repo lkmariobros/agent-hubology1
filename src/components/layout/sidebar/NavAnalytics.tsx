@@ -13,9 +13,6 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarMenuSub,
-  SidebarMenuSubItem,
-  SidebarMenuSubButton,
 } from "@/components/ui/sidebar";
 
 interface NavAnalyticsProps {
@@ -45,27 +42,34 @@ export function NavAnalytics({ collapsed }: NavAnalyticsProps) {
                 {!collapsed && <span>Leaderboard</span>}
               </Link>
             </SidebarMenuButton>
-            {!collapsed && isLeaderboardPage && (
-              <SidebarMenuSub>
-                <SidebarMenuSubItem>
-                  <SidebarMenuSubButton
-                    asChild
-                    isActive={currentPath === '/leaderboard/points'}
-                  >
-                    <Link to="/leaderboard/points">Points</Link>
-                  </SidebarMenuSubButton>
-                </SidebarMenuSubItem>
-                <SidebarMenuSubItem>
-                  <SidebarMenuSubButton
-                    asChild
-                    isActive={currentPath === '/leaderboard/sales'}
-                  >
-                    <Link to="/leaderboard/sales">Sales</Link>
-                  </SidebarMenuSubButton>
-                </SidebarMenuSubItem>
-              </SidebarMenuSub>
-            )}
           </SidebarMenuItem>
+          
+          {/* Points submenu - converted to separate menu items */}
+          {!collapsed && isLeaderboardPage && (
+            <>
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  asChild
+                  isActive={currentPath === '/leaderboard/points'}
+                >
+                  <Link to="/leaderboard/points" className="pl-8">
+                    <span>Points</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  asChild
+                  isActive={currentPath === '/leaderboard/sales'}
+                >
+                  <Link to="/leaderboard/sales" className="pl-8">
+                    <span>Sales</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </>
+          )}
           
           <SidebarMenuItem>
             <SidebarMenuButton 

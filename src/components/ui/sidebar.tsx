@@ -3,10 +3,11 @@
 
 import * as React from "react"
 import { forwardRef, useContext, createContext } from "react"
-import * as SidebarPrimitive from "rn-primitives"
+import { ChevronRight } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+// Create a context to track sidebar state
 const SidebarContext = createContext<{
   expanded: boolean
   setExpanded: React.Dispatch<React.SetStateAction<boolean>>
@@ -15,18 +16,31 @@ const SidebarContext = createContext<{
   setExpanded: () => { }
 })
 
+// Add a custom hook to access sidebar context
+export const useSidebar = () => {
+  const context = useContext(SidebarContext)
+  if (!context) {
+    throw new Error("useSidebar must be used within a SidebarProvider")
+  }
+  return {
+    open: context.expanded,
+    setOpen: context.setExpanded,
+    toggleSidebar: () => context.setExpanded((prev) => !prev)
+  }
+}
+
 interface SidebarProviderProps {
   children: React.ReactNode
-  defaultExpanded?: boolean
+  defaultOpen?: boolean
   className?: string
 }
 
 const SidebarProvider = ({
   children,
-  defaultExpanded = true,
+  defaultOpen = true,
   className
 }: SidebarProviderProps) => {
-  const [expanded, setExpanded] = React.useState(defaultExpanded)
+  const [expanded, setExpanded] = React.useState(defaultOpen)
 
   return (
     <SidebarContext.Provider value={{ expanded, setExpanded }}>
@@ -241,24 +255,37 @@ interface SidebarMenuButtonProps {
   children?: React.ReactNode
   className?: string
   asChild?: boolean
+  isActive?: boolean 
+  tooltip?: string
+  size?: "default" | "sm" | "lg"
 }
 
 const SidebarMenuButton = forwardRef<HTMLButtonElement, SidebarMenuButtonProps>(
-  ({ children, className, asChild, ...props }, ref) => {
+  ({ children, className, asChild, isActive, tooltip, size = "default", ...props }, ref) => {
     const { expanded } = useContext(SidebarContext)
-    const Comp = asChild ? SidebarPrimitive.Slot : "button"
+    const Comp = asChild ? React.Fragment : "button"
 
     return (
       <Comp
         ref={ref}
         className={cn(
-          "flex w-full cursor-pointer items-center rounded-md p-2 text-sm hover:bg-sidebar-accent outline-none transition-colors",
+          "flex w-full cursor-pointer items-center rounded-md p-2 text-sm outline-none transition-colors",
           expanded ? "justify-start" : "justify-center",
+          isActive ? "bg-accent text-accent-foreground" : "hover:bg-sidebar-accent text-sidebar-foreground",
+          size === "sm" && "text-xs",
+          size === "lg" && "text-base",
           className
         )}
         {...props}
       >
-        {children}
+        {asChild ? children : (
+          <>
+            {children}
+            {tooltip && !expanded && (
+              <span className="sr-only">{tooltip}</span>
+            )}
+          </>
+        )}
       </Comp>
     )
   }
@@ -288,7 +315,7 @@ const SidebarTrigger = forwardRef<HTMLButtonElement, SidebarTriggerProps>(
         {...props}
       >
         {children || (
-          <SidebarPrimitive.ChevronRight
+          <ChevronRight
             className={cn(
               "h-6 w-6 transition-transform",
               expanded ? "rotate-180" : "rotate-0",

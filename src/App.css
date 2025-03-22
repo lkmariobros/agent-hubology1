@@ -43,6 +43,15 @@
   color: white;
 }
 
+/* Add background color to the sidebar */
+[data-expanded="true"].sidebar {
+  background-color: #0F0E11;
+}
+
+[data-expanded="false"].sidebar {
+  background-color: #0F0E11;
+}
+
 /* Keep animation styles */
 @keyframes logo-spin {
   from {
