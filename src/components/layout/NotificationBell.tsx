@@ -1,15 +1,6 @@
 
 import React, { useState } from 'react';
-import { 
-  Bell, 
-  Check, 
-  Trash2, 
-  CheckCheck,
-  Clock,
-  AlertTriangle,
-  Ban,
-  CircleCheck
-} from 'lucide-react';
+import { Bell } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -21,8 +12,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 
 import { useNotifications } from '@/context/NotificationContext';
-import { Notification } from '@/types/notification';
-import { formatDistanceToNow } from 'date-fns';
 
 const NotificationBell: React.FC = () => {
   const [open, setOpen] = useState(false);
@@ -31,44 +20,8 @@ const NotificationBell: React.FC = () => {
     unreadCount, 
     markAsRead, 
     markAllAsRead, 
-    deleteNotification,
     refreshNotifications 
   } = useNotifications();
-
-  const handleMarkAsRead = async (id: string) => {
-    await markAsRead(id);
-  };
-
-  const handleDelete = async (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    await deleteNotification(id);
-  };
-
-  const getNotificationIcon = (type: string, data?: Record<string, any>) => {
-    if (type === 'approval') {
-      const status = data?.status || '';
-      switch (status) {
-        case 'Approved':
-          return <CircleCheck className="h-4 w-4 text-green-500" />;
-        case 'Under Review':
-          return <Clock className="h-4 w-4 text-blue-500" />;
-        case 'Rejected':
-          return <Ban className="h-4 w-4 text-red-500" />;
-        case 'Ready for Payment':
-          return <CircleCheck className="h-4 w-4 text-purple-500" />;
-        case 'Paid':
-          return <Check className="h-4 w-4 text-gray-500" />;
-        default:
-          return <Bell className="h-4 w-4 text-muted-foreground" />;
-      }
-    }
-    
-    if (type === 'system') {
-      return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
-    }
-    
-    return <Bell className="h-4 w-4 text-muted-foreground" />;
-  };
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -101,7 +54,6 @@ const NotificationBell: React.FC = () => {
           <h4 className="text-sm font-medium">Notifications</h4>
           {unreadCount > 0 && (
             <Button variant="ghost" size="sm" onClick={markAllAsRead}>
-              <CheckCheck className="h-4 w-4 mr-1" />
               Mark all as read
             </Button>
           )}
@@ -114,32 +66,19 @@ const NotificationBell: React.FC = () => {
             </div>
           ) : (
             <div>
-              {notifications.map((notification: Notification) => (
+              {notifications.map((notification) => (
                 <div 
                   key={notification.id} 
                   className={`px-4 py-3 border-b last:border-0 hover:bg-muted/50 cursor-pointer transition-colors ${notification.read ? '' : 'bg-muted/20'}`}
-                  onClick={() => handleMarkAsRead(notification.id)}
+                  onClick={() => markAsRead(notification.id)}
                 >
-                  <div className="flex items-start gap-3">
-                    <div className="mt-0.5">
-                      {getNotificationIcon(notification.type, notification.data)}
-                    </div>
+                  <div className="flex items-start">
                     <div className="flex-1">
-                      <div className="flex items-start justify-between">
-                        <p className={`text-sm font-medium ${notification.read ? 'text-muted-foreground' : ''}`}>
-                          {notification.title}
-                        </p>
-                        <div className="flex space-x-1">
-                          <button onClick={(e) => handleDelete(notification.id, e)} className="text-muted-foreground hover:text-foreground">
-                            <Trash2 className="h-3 w-3" />
-                          </button>
-                        </div>
-                      </div>
-                      <p className="text-xs mt-1 text-muted-foreground line-clamp-2">
-                        {notification.message}
+                      <p className={`text-sm font-medium ${notification.read ? 'text-muted-foreground' : ''}`}>
+                        {notification.title}
                       </p>
                       <p className="text-xs mt-1 text-muted-foreground">
-                        {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
+                        {notification.message}
                       </p>
                     </div>
                   </div>
