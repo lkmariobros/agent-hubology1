@@ -14,17 +14,17 @@ const CommissionBreakdown: React.FC<CommissionBreakdownProps> = ({
   totalCommission 
 }) => {
   return (
-    <Card>
+    <Card className="border-border bg-card shadow-sm">
       <CardHeader className="p-5">
         <CardTitle>Commission Breakdown</CardTitle>
       </CardHeader>
       <CardContent className="p-5 pt-0">
         <div className="space-y-4">
-          <div className="flex justify-between items-center py-3 border-b">
+          <div className="flex justify-between items-center py-3 border-b border-border">
             <span className="font-medium">Personal Sales Commission</span>
             <span className="text-xl font-bold">${personalCommission.toLocaleString()}</span>
           </div>
-          <div className="flex justify-between items-center py-3 border-b">
+          <div className="flex justify-between items-center py-3 border-b border-border">
             <span className="font-medium">Override Commission</span>
             <span className="text-xl font-bold">${overrideCommission.toLocaleString()}</span>
           </div>

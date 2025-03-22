@@ -1,21 +1,20 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    /* Modern color scheme using OKLCH format - updated to match the dark sidebar design */
-    --background: oklch(0.98 0 0);
+    /* Modern color scheme using OKLCH format - updated for light theme */
+    --background: oklch(1 0 0);
     --foreground: oklch(0.2 0.005 285.823);
     
-    --card: oklch(1 0 0);
+    --card: oklch(0.98 0 0);
     --card-foreground: oklch(0.2 0.005 285.823);
     
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.2 0.005 285.823);
     
-    /* Updated primary to match the theme */
+    /* Primary color */
     --primary: oklch(0.65 0.18 295);
     --primary-foreground: oklch(0.98 0.021 166.113);
     
@@ -38,7 +37,7 @@
     --radius: 0.5rem;
 
     /* Sidebar colors - much darker to match the screenshot */
-    --sidebar-background: oklch(0.10 0.005 285.823);
+    --sidebar-background: oklch(0.1 0 0);
     --sidebar-foreground: oklch(0.9 0.001 286.375);
     --sidebar-primary: oklch(0.65 0.18 295);
     --sidebar-primary-foreground: oklch(1 0 0);
@@ -84,8 +83,8 @@
     --input: oklch(0.29 0.009 285.83);
     --ring: oklch(0.442 0.017 285.786);
     
-    /* No changes needed here as sidebar already matches dark theme */
-    --sidebar-background: oklch(0.10 0.005 285.823);
+    /* Sidebar colors for dark mode */
+    --sidebar-background: oklch(0.1 0 0);
     --sidebar-foreground: oklch(0.9 0.001 286.375);
     --sidebar-primary: oklch(0.65 0.18 295);
     --sidebar-primary-foreground: oklch(1 0 0);
