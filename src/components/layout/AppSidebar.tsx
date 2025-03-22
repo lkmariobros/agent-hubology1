@@ -43,18 +43,17 @@ export function AppSidebar() {
           <PortalSwitcher />
         </SidebarHeader>
         
-        {/* Wrapper div with rounded corners and darker background */}
-        <div className="mx-2 rounded-xl bg-[#1A1F2C]/80 overflow-hidden flex flex-col flex-grow">
-          <SidebarContent className="px-0">
+        <SidebarContent>
+          <div className="mx-2 rounded-xl bg-[#1A1F2C]/80 overflow-hidden flex flex-col">
             <NavMain collapsed={isCollapsed} />
             <NavAnalytics collapsed={isCollapsed} />
             <NavPreferences collapsed={isCollapsed} />
-          </SidebarContent>
-          
-          <SidebarFooter className="px-0 mt-auto">
-            <SidebarProfile collapsed={isCollapsed} />
-          </SidebarFooter>
-        </div>
+          </div>
+        </SidebarContent>
+        
+        <SidebarFooter>
+          <SidebarProfile collapsed={isCollapsed} />
+        </SidebarFooter>
       </Sidebar>
       <SidebarRail className="group-hover:after:bg-accent-foreground/10" />
     </>
