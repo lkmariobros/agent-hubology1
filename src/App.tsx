@@ -33,6 +33,7 @@ import Profile from './pages/Profile';
 import Index from './pages/Index';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import Home from './pages/Home';
+import NotFound from './pages/NotFound';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -86,7 +87,7 @@ function App() {
                 </Route>
                 
                 {/* Fallback */}
-                <Route path="*" element={<Navigate to="/" replace />} />
+                <Route path="*" element={<NotFound />} />
               </Routes>
               <Toaster position="top-right" />
             </NotificationProvider>

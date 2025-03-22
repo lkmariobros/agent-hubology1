@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Session, User } from '@supabase/supabase-js';
@@ -62,6 +62,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
   
   // Initialize auth state and set up listener for auth changes
   useEffect(() => {
@@ -93,9 +94,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         };
         
         setUser(userProfile);
+        
+        // Navigate based on the current location
+        const path = location.pathname;
+        if (path === '/') {
+          navigate('/dashboard');
+        }
       } else {
         // User is logged out
         setUser(null);
+        
+        // Only navigate to login if not already there
+        if (location.pathname !== '/') {
+          navigate('/');
+        }
       }
     });
 
@@ -123,6 +135,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         setUser(userProfile);
         setSession(initialSession);
+        
+        // Navigate based on the current location
+        const path = location.pathname;
+        if (path === '/') {
+          navigate('/dashboard');
+        }
+      } else if (location.pathname !== '/') {
+        // If no session and not on login page, redirect to login
+        navigate('/');
       }
       
       setLoading(false);
@@ -132,7 +153,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [navigate, location.pathname]);
 
   // Login using Supabase Auth
   const login = async (email: string, password: string) => {
