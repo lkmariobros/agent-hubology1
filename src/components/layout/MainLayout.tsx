@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
@@ -5,29 +6,40 @@ import { AppSidebar } from './AppSidebar';
 import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
 import { Button } from '@/components/ui/button';
 import NavUtilities from './sidebar/NavUtilities';
+import { PortalSwitcher } from './PortalSwitcher';
+import { useAuth } from '@/providers/AuthProvider';
+
 interface MainLayoutProps {
   children?: React.ReactNode;
 }
 
 // Create a header component that has access to the sidebar context
 const Header = () => {
-  const {
-    open,
-    toggleSidebar
-  } = useSidebar();
-  return <div className="flex items-center justify-between px-6 py-3 border-b">
+  const { open, toggleSidebar } = useSidebar();
+  const { isAdmin } = useAuth();
+  
+  return (
+    <div className="flex items-center justify-between px-6 py-3 border-b">
       <div className="flex items-center gap-2">
-        <Button variant="ghost" size="icon" onClick={toggleSidebar} className="h-8 w-8 mr-2 z-20" aria-label={open ? "Collapse sidebar" : "Expand sidebar"}>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={toggleSidebar} 
+          className="h-8 w-8 mr-2 z-20" 
+          aria-label={open ? "Collapse sidebar" : "Expand sidebar"}
+        >
           {open ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeftOpen className="h-4 w-4" />}
         </Button>
         
+        {/* Add PortalSwitcher here for users with admin privileges */}
+        {isAdmin && <PortalSwitcher />}
       </div>
       <NavUtilities />
-    </div>;
+    </div>
+  );
 };
-const MainLayout: React.FC<MainLayoutProps> = ({
-  children
-}) => {
+
+const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   // Load saved sidebar state from localStorage if available
   const savedState = localStorage.getItem("sidebar:state") === "false" ? false : true;
 
@@ -42,7 +54,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
-  return <SidebarProvider defaultOpen={savedState}>
+  
+  return (
+    <SidebarProvider defaultOpen={savedState}>
       <div className="flex min-h-screen w-full bg-background">
         <AppSidebar />
         <div className="flex-1 overflow-auto">
@@ -52,6 +66,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           </div>
         </div>
       </div>
-    </SidebarProvider>;
+    </SidebarProvider>
+  );
 };
+
 export default MainLayout;
