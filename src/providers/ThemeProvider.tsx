@@ -23,7 +23,7 @@ const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
 
 export function ThemeProvider({
   children,
-  defaultTheme = 'light', // Changed to light as the screenshots show a light mode UI
+  defaultTheme = 'light', // This ensures light mode is the default
   storageKey = 'property-pro-ui-theme',
   ...props
 }: ThemeProviderProps) {
@@ -43,10 +43,16 @@ export function ThemeProvider({
         : 'light';
       
       root.classList.add(systemTheme);
+      
+      // Also add the theme-mono-scaled class for consistent font styling
+      root.classList.add('theme-mono-scaled');
       return;
     }
 
     root.classList.add(theme);
+    
+    // Add the theme-mono-scaled class for consistent font styling
+    root.classList.add('theme-mono-scaled');
   }, [theme]);
 
   const value = {

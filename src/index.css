@@ -1,11 +1,10 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    /* Modern color scheme using OKLCH format */
+    /* Modern color scheme using OKLCH format - updated to match the design */
     --background: oklch(0.98 0 0);
     --foreground: oklch(0.2 0.005 285.823);
     
@@ -15,7 +14,8 @@
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.2 0.005 285.823);
     
-    --primary: oklch(0.596 0.145 163.225);
+    /* Updated primary to match the purple theme */
+    --primary: oklch(0.65 0.18 295);
     --primary-foreground: oklch(0.98 0.021 166.113);
     
     --secondary: oklch(0.96 0.001 286.375);
@@ -36,24 +36,24 @@
     
     --radius: 0.5rem;
 
-    /* Sidebar colors - making it darker to match the design */
+    /* Sidebar colors - making it dark to match the design in screenshot */
     --sidebar-background: oklch(0.15 0.005 285.823);
-    --sidebar-foreground: oklch(0.8 0.002 286.375);
-    --sidebar-primary: oklch(0.8 0.002 286.375);
-    --sidebar-primary-foreground: oklch(0.15 0.005 285.823);
+    --sidebar-foreground: oklch(0.9 0.001 286.375);
+    --sidebar-primary: oklch(0.65 0.18 295);
+    --sidebar-primary-foreground: oklch(1 0 0);
     --sidebar-accent: oklch(0.2 0.006 285.885);
-    --sidebar-accent-foreground: oklch(0.9 0.001 286.375);
+    --sidebar-accent-foreground: oklch(0.96 0.001 286.375);
     --sidebar-border: oklch(0.25 0.006 285.885);
     --sidebar-ring: oklch(0.3 0.006 286.286);
 
-    /* Status colors */
+    /* Status colors - making them more vibrant */
     --status-green: 142.69deg 76.53% 47.45%;
     --status-amber: 27.22deg 92.09% 55.29%;
     --status-red: 0deg 84.2% 60.2%;
     --status-blue: 217.22deg 91.22% 59.8%;
   }
 
-  /* Dark mode colors - adjusted to better match the dark sidebar in screenshots */
+  /* Dark mode colors - adjusted to better match the sidebar */
   .dark {
     --background: oklch(0.15 0.006 285.885);
     --foreground: oklch(0.95 0 0);
@@ -64,7 +64,7 @@
     --popover: oklch(0.2 0.006 285.885);
     --popover-foreground: oklch(0.95 0 0);
     
-    --primary: oklch(0.596 0.145 163.225);
+    --primary: oklch(0.65 0.18 295);
     --primary-foreground: oklch(0.98 0.021 166.113);
     
     --secondary: oklch(0.274 0.006 286.033);
@@ -85,7 +85,7 @@
     
     --sidebar-background: oklch(0.15 0.006 285.885);
     --sidebar-foreground: oklch(0.9 0.001 286.375);
-    --sidebar-primary: oklch(0.596 0.145 163.225);
+    --sidebar-primary: oklch(0.65 0.18 295);
     --sidebar-primary-foreground: oklch(1 0 0);
     --sidebar-accent: oklch(0.274 0.006 286.033);
     --sidebar-accent-foreground: oklch(0.96 0.001 286.375);

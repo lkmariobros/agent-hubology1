@@ -46,9 +46,9 @@ export default {
           foreground: "oklch(var(--muted-foreground))",
           light: "oklch(0.92, 0.004, 286.32)",
           dark: "oklch(0.82, 0.004, 286.32)",
-          "20": "oklch(var(--muted) / 0.2)",  // Added for 20% opacity
-          "30": "oklch(var(--muted) / 0.3)",  // Added for 30% opacity 
-          "50": "oklch(var(--muted) / 0.5)"   // Added for 50% opacity
+          "20": "oklch(var(--muted) / 0.2)",
+          "30": "oklch(var(--muted) / 0.3)",
+          "50": "oklch(var(--muted) / 0.5)"
         },
         accent: {
           DEFAULT: "oklch(var(--accent))",

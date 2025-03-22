@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Clock, AlertTriangle, CheckCircle2, Banknote, Ban, HelpCircle } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface StatusBadgeProps {
   status: string;
@@ -13,21 +14,21 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({
   className = '',
   size = 'md'
 }) => {
-  // Get status badge style
+  // Get status badge style - updated to use our theme colors
   const getStatusBadgeClass = (status: string) => {
     switch(status) {
       case 'Pending':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'status-badge-amber';
       case 'Under Review':
-        return 'bg-blue-100 text-blue-800';
+        return 'status-badge-blue';
       case 'Approved':
-        return 'bg-green-100 text-green-800';
+        return 'status-badge-green';
       case 'Ready for Payment':
         return 'bg-purple-100 text-purple-800';
       case 'Paid':
         return 'bg-gray-100 text-gray-800';
       case 'Rejected':
-        return 'bg-red-100 text-red-800';
+        return 'status-badge-red';
       default:
         return 'bg-gray-100 text-gray-800';
     }
