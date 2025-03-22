@@ -60,12 +60,16 @@ export function ThemeProvider({
       document.body.style.setProperty('--background', '#161920');
       document.body.style.setProperty('--card', '#1e2028');
       document.body.style.setProperty('--sidebar-background', '#1f2128');
+      document.body.style.setProperty('--foreground', '#f5f5f7');
+      document.body.style.setProperty('--card-foreground', '#f5f5f7');
       console.log("Setting dark mode with explicit background color: #161920");
     } else {
       // Reset any directly set properties
       document.body.style.removeProperty('--background');
       document.body.style.removeProperty('--card');
       document.body.style.removeProperty('--sidebar-background');
+      document.body.style.removeProperty('--foreground');
+      document.body.style.removeProperty('--card-foreground');
     }
   }, [theme]);
 

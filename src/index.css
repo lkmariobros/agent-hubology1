@@ -57,28 +57,28 @@
   /* Dark mode colors - darker charcoal #161920 for main content */
   .dark {
     --background: #161920; /* Exact hex color for darker charcoal */
-    --foreground: oklch(0.95 0 0); /* Light text */
+    --foreground: #f5f5f7; /* Light text */
     
     --card: #1e2028; /* Slightly lighter than background */
-    --card-foreground: oklch(0.95 0 0);
+    --card-foreground: #f5f5f7;
     
     --popover: #1e2028;
-    --popover-foreground: oklch(0.95 0 0);
+    --popover-foreground: #f5f5f7;
     
     --primary: oklch(0.65 0.18 295);
     --primary-foreground: oklch(0.98 0.021 166.113);
     
     --secondary: oklch(0.2 0.006 285.885);
-    --secondary-foreground: oklch(0.95 0 0);
+    --secondary-foreground: #f5f5f7;
     
     --muted: #272a35;
     --muted-foreground: #a1a1aa;
     
     --accent: #272a35;
-    --accent-foreground: oklch(0.95 0 0);
+    --accent-foreground: #f5f5f7;
     
     --destructive: oklch(0.637 0.237 25.331);
-    --destructive-foreground: oklch(0.95 0 0);
+    --destructive-foreground: #f5f5f7;
     
     --border: #2a2d38;
     --input: #2a2d38;

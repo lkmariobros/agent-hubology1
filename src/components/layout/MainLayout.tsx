@@ -70,7 +70,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   
   return (
     <SidebarProvider defaultOpen={savedState}>
-      <div className="flex h-screen overflow-hidden w-full bg-dark-background dark:bg-dark-background">
+      <div className="flex h-screen overflow-hidden w-full dark:bg-dark-background">
         <AppSidebar />
         <div className="flex-1 flex flex-col h-screen overflow-hidden dark:bg-dark-background" style={{backgroundColor: '#161920'}}>
           <Header />
