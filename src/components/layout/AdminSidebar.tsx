@@ -36,7 +36,7 @@ export function AdminSidebar() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="flex items-center gap-2 px-2 py-3 w-full text-left hover:text-primary transition-colors focus:outline-none">
-              <div className="h-8 w-8 rounded-full bg-accent flex items-center justify-center text-white">
+              <div className="h-8 w-8 rounded-full bg-emerald-600 flex items-center justify-center text-white">
                 <span className="font-bold text-sm">P</span>
               </div>
               <span className="ml-2 text-lg font-semibold">PropertyPro</span>

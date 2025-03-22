@@ -1,10 +1,11 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    /* Modern color scheme using OKLCH format - updated to match the design */
+    /* Modern color scheme using OKLCH format - updated to match the dark sidebar design */
     --background: oklch(0.98 0 0);
     --foreground: oklch(0.2 0.005 285.823);
     
@@ -14,7 +15,7 @@
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.2 0.005 285.823);
     
-    /* Updated primary to match the purple theme */
+    /* Updated primary to match the theme */
     --primary: oklch(0.65 0.18 295);
     --primary-foreground: oklch(0.98 0.021 166.113);
     
@@ -36,14 +37,14 @@
     
     --radius: 0.5rem;
 
-    /* Sidebar colors - making it dark to match the design in screenshot */
-    --sidebar-background: oklch(0.15 0.005 285.823);
+    /* Sidebar colors - much darker to match the screenshot */
+    --sidebar-background: oklch(0.10 0.005 285.823);
     --sidebar-foreground: oklch(0.9 0.001 286.375);
     --sidebar-primary: oklch(0.65 0.18 295);
     --sidebar-primary-foreground: oklch(1 0 0);
     --sidebar-accent: oklch(0.2 0.006 285.885);
     --sidebar-accent-foreground: oklch(0.96 0.001 286.375);
-    --sidebar-border: oklch(0.25 0.006 285.885);
+    --sidebar-border: oklch(0.15 0.006 285.885);
     --sidebar-ring: oklch(0.3 0.006 286.286);
 
     /* Status colors - making them more vibrant */
@@ -83,13 +84,14 @@
     --input: oklch(0.29 0.009 285.83);
     --ring: oklch(0.442 0.017 285.786);
     
-    --sidebar-background: oklch(0.15 0.006 285.885);
+    /* No changes needed here as sidebar already matches dark theme */
+    --sidebar-background: oklch(0.10 0.005 285.823);
     --sidebar-foreground: oklch(0.9 0.001 286.375);
     --sidebar-primary: oklch(0.65 0.18 295);
     --sidebar-primary-foreground: oklch(1 0 0);
     --sidebar-accent: oklch(0.274 0.006 286.033);
     --sidebar-accent-foreground: oklch(0.96 0.001 286.375);
-    --sidebar-border: oklch(0.274 0.006 286.033);
+    --sidebar-border: oklch(0.15 0.006 286.033);
     --sidebar-ring: oklch(0.442 0.017 285.786);
   }
 

@@ -14,23 +14,27 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({
   className = '',
   size = 'md'
 }) => {
-  // Get status badge style - updated to use our theme colors
+  // Get status badge style - updated to match the second screenshot
   const getStatusBadgeClass = (status: string) => {
     switch(status) {
       case 'Pending':
-        return 'status-badge-amber';
+        return 'bg-amber-500 text-white';
       case 'Under Review':
-        return 'status-badge-blue';
+        return 'bg-blue-500 text-white';
       case 'Approved':
-        return 'status-badge-green';
+        return 'bg-emerald-500 text-white';
       case 'Ready for Payment':
-        return 'bg-purple-100 text-purple-800';
+        return 'bg-purple-500 text-white';
       case 'Paid':
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-500 text-white';
       case 'Rejected':
-        return 'status-badge-red';
+        return 'bg-red-500 text-white';
+      case 'Active':
+        return 'bg-emerald-500 text-white';
+      case 'Inactive':
+        return 'bg-gray-500 text-white';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-500 text-white';
     }
   };
   
@@ -48,6 +52,10 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({
       case 'Paid':
         return <CheckCircle2 className={`${size === 'sm' ? 'h-3 w-3' : size === 'lg' ? 'h-5 w-5' : 'h-4 w-4'}`} />;
       case 'Rejected':
+        return <Ban className={`${size === 'sm' ? 'h-3 w-3' : size === 'lg' ? 'h-5 w-5' : 'h-4 w-4'}`} />;
+      case 'Active':
+        return <CheckCircle2 className={`${size === 'sm' ? 'h-3 w-3' : size === 'lg' ? 'h-5 w-5' : 'h-4 w-4'}`} />;
+      case 'Inactive':
         return <Ban className={`${size === 'sm' ? 'h-3 w-3' : size === 'lg' ? 'h-5 w-5' : 'h-4 w-4'}`} />;
       default:
         return <HelpCircle className={`${size === 'sm' ? 'h-3 w-3' : size === 'lg' ? 'h-5 w-5' : 'h-4 w-4'}`} />;
