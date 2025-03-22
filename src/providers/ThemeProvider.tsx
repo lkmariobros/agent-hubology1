@@ -65,15 +65,15 @@ export function ThemeProvider({
     }
   }, [theme]);
   
-  // Enhanced dark mode style application with precise color values
+  // Enhanced dark mode style application with InnovaCraft design colors
   const applyDarkModeStyles = () => {
-    // Main background - deeper dark color for main content
-    document.body.style.setProperty('--background', '#0F1014');
+    // Main background - InnovaCraft content background
+    document.body.style.setProperty('--background', '#161920');
     
-    // Card and container backgrounds - slightly lighter than main background
-    document.body.style.setProperty('--card', '#1a1d25');
+    // Card and container backgrounds - InnovaCraft card background
+    document.body.style.setProperty('--card', '#1E2128');
     
-    // Sidebar background - lighter than content for contrast
+    // Sidebar background - InnovaCraft sidebar background
     document.body.style.setProperty('--sidebar-background', '#1F232D');
     
     // Text colors for maximum readability
@@ -85,7 +85,7 @@ export function ThemeProvider({
     document.body.style.setProperty('--muted-foreground', '#a1a1aa');
     
     // Border colors
-    document.body.style.setProperty('--border', '#2a2d38');
+    document.body.style.setProperty('--border', 'rgba(255, 255, 255, 0.06)');
     
     // Input field colors
     document.body.style.setProperty('--input', '#252830');
@@ -94,7 +94,7 @@ export function ThemeProvider({
     // Apply dark styles to body for inheritance
     document.body.classList.add('dark-applied');
     
-    console.log("Applied enhanced dark mode styling");
+    console.log("Applied InnovaCraft dark mode styling");
   };
   
   const resetCustomStyles = () => {

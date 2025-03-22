@@ -39,14 +39,14 @@ const AdminLayout = () => {
   }
 
   return (
-    <div className="flex h-full w-full bg-dark-background text-foreground font-mono">
+    <div className="flex h-full w-full bg-dark-background text-foreground font-mono app-container">
       <SidebarProvider>
         <AdminSidebar />
         
         {/* Main content */}
-        <div className="flex flex-col h-full w-full">
+        <div className="flex flex-col h-full w-full content-area">
           {/* Fixed header */}
-          <header className="h-14 flex-shrink-0 border-b border-border/20 flex items-center justify-between px-4 bg-dark-background">
+          <header className="h-14 flex-shrink-0 border-b border-[rgba(255,255,255,0.06)] flex items-center justify-between px-4 bg-dark-background">
             <div className="flex items-center gap-2">
               <SidebarTrigger className="mr-2" />
               {/* Removed Portal Switcher from here */}

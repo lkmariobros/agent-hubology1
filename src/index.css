@@ -1,10 +1,17 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
+    /* Base theme variables for InnovaCraft design */
+    --sidebar-bg: #1F232D;
+    --content-bg: #161920;
+    --card-bg: #1E2128;
+    --border-color: rgba(255, 255, 255, 0.06);
+    --text-primary: #f8f9fa;
+    --text-secondary: #a1a1aa;
+    
     /* Light mode colors (now secondary) */
     --background: oklch(0.95 0.003 286.278);
     --foreground: oklch(0.2 0.005 285.823);
@@ -38,13 +45,13 @@
     --radius: 0.5rem;
 
     /* Sidebar colors - lighter than content area for dark theme */
-    --sidebar-background: #1F232D;
-    --sidebar-foreground: #f5f5f7;
+    --sidebar-background: var(--sidebar-bg);
+    --sidebar-foreground: var(--text-primary);
     --sidebar-primary: #6359e8;
     --sidebar-primary-foreground: #ffffff;
     --sidebar-accent: #2a2c36;
-    --sidebar-accent-foreground: #f5f5f7;
-    --sidebar-border: #2a2c36;
+    --sidebar-accent-foreground: var(--text-primary);
+    --sidebar-border: var(--border-color);
     --sidebar-ring: #2a2c36;
 
     /* Status colors */
@@ -54,44 +61,44 @@
     --status-blue: 217.22deg 91.22% 59.8%;
   }
 
-  /* Dark mode colors - deeper dark #0F1014 for main content */
+  /* Dark mode colors - using InnovaCraft design */
   .dark {
-    --background: #0F1014; /* Deeper dark for main content */
-    --foreground: #f5f5f7; /* Light text */
+    --background: var(--content-bg);
+    --foreground: var(--text-primary);
     
-    --card: #1a1d25; /* Slightly lighter than background */
-    --card-foreground: #f5f5f7;
+    --card: var(--card-bg);
+    --card-foreground: var(--text-primary);
     
-    --popover: #1a1d25;
-    --popover-foreground: #f5f5f7;
+    --popover: var(--card-bg);
+    --popover-foreground: var(--text-primary);
     
     --primary: oklch(0.65 0.18 295);
     --primary-foreground: oklch(0.98 0.021 166.113);
     
     --secondary: #272a35;
-    --secondary-foreground: #f5f5f7;
+    --secondary-foreground: var(--text-primary);
     
     --muted: #272a35;
-    --muted-foreground: #a1a1aa;
+    --muted-foreground: var(--text-secondary);
     
     --accent: #272a35;
-    --accent-foreground: #f5f5f7;
+    --accent-foreground: var(--text-primary);
     
     --destructive: oklch(0.637 0.237 25.331);
-    --destructive-foreground: #f5f5f7;
+    --destructive-foreground: var(--text-primary);
     
-    --border: #2a2d38;
+    --border: var(--border-color);
     --input: #252830;
     --ring: #3e4251;
     
-    /* Sidebar colors - medium-dark gray (lighter than content area) */
-    --sidebar-background: #1F232D; 
-    --sidebar-foreground: #f5f5f7;
+    /* Sidebar colors - updated with InnovaCraft specs */
+    --sidebar-background: var(--sidebar-bg);
+    --sidebar-foreground: var(--text-primary);
     --sidebar-primary: #6359e8;
     --sidebar-primary-foreground: #ffffff;
     --sidebar-accent: #2a2c36;
-    --sidebar-accent-foreground: #f5f5f7;
-    --sidebar-border: #2a2c36;
+    --sidebar-accent-foreground: var(--text-primary);
+    --sidebar-border: var(--border-color);
     --sidebar-ring: #2a2c36;
   }
 
@@ -272,5 +279,18 @@
   
   .status-badge-blue {
     @apply bg-[oklch(var(--status-blue))] text-white;
+  }
+  
+  /* Updated color utility classes for InnovaCraft design */
+  .bg-dark-background {
+    background-color: var(--content-bg);
+  }
+
+  .bg-dark-sidebar {
+    background-color: var(--sidebar-bg);
+  }
+
+  .bg-dark-card {
+    background-color: var(--card-bg);
   }
 }

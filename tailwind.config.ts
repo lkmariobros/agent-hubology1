@@ -85,11 +85,11 @@ export default {
           red: "oklch(var(--status-red))",
           blue: "oklch(var(--status-blue))",
         },
-        // Add direct hex values for dark mode backgrounds
+        // InnovaCraft dark theme colors
         dark: {
-          background: "#0F1014", // Deeper dark for main content
-          sidebar: "#1F232D",    // Lighter shade for sidebar
-          card: "#1a1d25",       // Slightly lighter than background
+          background: "#161920", // InnovaCraft content background
+          sidebar: "#1F232D",    // InnovaCraft sidebar background
+          card: "#1E2128",       // InnovaCraft card background
         },
       },
       borderRadius: {

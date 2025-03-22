@@ -20,7 +20,7 @@ const Header = () => {
   const { isAdmin } = useAuth();
   
   return (
-    <div className="flex items-center justify-between px-6 py-3 border-b border-[rgba(255,255,255,0.08)] bg-dark-background">
+    <div className="flex items-center justify-between px-6 py-3 border-b border-[rgba(255,255,255,0.06)] bg-dark-background">
       <div className="flex items-center gap-2">
         <Button 
           variant="ghost" 
@@ -57,19 +57,19 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     if (!document.body.classList.contains('dark-applied')) {
       document.body.classList.add('dark-applied');
       
-      // Apply enhanced dark mode styles with proper contrast
-      document.body.style.setProperty('--background', '#0F1014');       // Deeper dark for main content
-      document.body.style.setProperty('--card', '#1a1d25');             // Slightly lighter than background
-      document.body.style.setProperty('--sidebar-background', '#1F232D'); // Lighter shade for sidebar
+      // Apply InnovaCraft dark mode styles with proper contrast
+      document.body.style.setProperty('--background', '#161920');       // InnovaCraft content background
+      document.body.style.setProperty('--card', '#1E2128');             // InnovaCraft card background
+      document.body.style.setProperty('--sidebar-background', '#1F232D'); // InnovaCraft sidebar background
       document.body.style.setProperty('--foreground', '#f8f9fa');
       document.body.style.setProperty('--card-foreground', '#f8f9fa');
       document.body.style.setProperty('--sidebar-foreground', '#f8f9fa');
       document.body.style.setProperty('--muted-foreground', '#a1a1aa');
-      document.body.style.setProperty('--border', '#2a2d38');
+      document.body.style.setProperty('--border', 'rgba(255, 255, 255, 0.06)');
       document.body.style.setProperty('--input', '#252830');
       document.body.style.setProperty('--ring', '#3e4251');
       
-      console.log("MainLayout mounted - forcing enhanced dark mode styling");
+      console.log("MainLayout mounted - forcing InnovaCraft dark mode styling");
     }
     
     return () => {
@@ -90,9 +90,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   
   return (
     <SidebarProvider defaultOpen={savedState}>
-      <div className="flex h-screen overflow-hidden w-full">
+      <div className="flex h-screen overflow-hidden w-full app-container">
         <AppSidebar />
-        <div className="flex-1 flex flex-col h-screen overflow-hidden bg-dark-background">
+        <div className="flex-1 flex flex-col h-screen overflow-hidden bg-dark-background content-area">
           <Header />
           <div className="flex-1 overflow-auto p-6 bg-dark-background">
             {children || <Outlet />}
