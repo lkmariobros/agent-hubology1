@@ -30,8 +30,8 @@ export function NavAnalytics({ collapsed }: NavAnalyticsProps) {
   const isReportsPage = currentPath.startsWith('/reports');
   
   return (
-    <SidebarGroup className="py-1 px-2">
-      <SidebarGroupLabel className="px-2">Analytics</SidebarGroupLabel>
+    <SidebarGroup>
+      <SidebarGroupLabel>Analytics</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
           <SidebarMenuItem>

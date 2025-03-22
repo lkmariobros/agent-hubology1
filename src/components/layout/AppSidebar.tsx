@@ -44,11 +44,9 @@ export function AppSidebar() {
         </SidebarHeader>
         
         <SidebarContent>
-          <div className="mx-2 rounded-xl bg-[#1A1F2C]/80 overflow-hidden flex flex-col">
-            <NavMain collapsed={isCollapsed} />
-            <NavAnalytics collapsed={isCollapsed} />
-            <NavPreferences collapsed={isCollapsed} />
-          </div>
+          <NavMain collapsed={isCollapsed} />
+          <NavAnalytics collapsed={isCollapsed} />
+          <NavPreferences collapsed={isCollapsed} />
         </SidebarContent>
         
         <SidebarFooter>
