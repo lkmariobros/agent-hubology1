@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { BarChartBig, TrendingUp, LayoutDashboard, LineChart } from 'lucide-react';
 import { 
   SidebarGroup, 
@@ -12,38 +12,56 @@ import {
 } from '@/components/ui/sidebar';
 
 export function NavReports() {
+  const location = useLocation();
+  
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Reports</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild tooltip="Overview">
-              <NavLink to="/admin/reports/overview" className={({ isActive }) => isActive ? 'data-[active=true]' : ''}>
+            <SidebarMenuButton 
+              asChild 
+              isActive={location.pathname.includes('/admin/reports/overview')}
+              tooltip="Overview"
+            >
+              <NavLink to="/admin/reports/overview">
                 <LayoutDashboard className="h-4 w-4" />
                 <span>Overview</span>
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild tooltip="Performance">
-              <NavLink to="/admin/reports/performance" className={({ isActive }) => isActive ? 'data-[active=true]' : ''}>
+            <SidebarMenuButton 
+              asChild 
+              isActive={location.pathname.includes('/admin/reports/performance')}
+              tooltip="Performance"
+            >
+              <NavLink to="/admin/reports/performance">
                 <TrendingUp className="h-4 w-4" />
                 <span>Performance</span>
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild tooltip="Sales Analytics">
-              <NavLink to="/admin/reports/sales" className={({ isActive }) => isActive ? 'data-[active=true]' : ''}>
+            <SidebarMenuButton 
+              asChild 
+              isActive={location.pathname.includes('/admin/reports/sales')}
+              tooltip="Sales Analytics"
+            >
+              <NavLink to="/admin/reports/sales">
                 <BarChartBig className="h-4 w-4" />
                 <span>Sales Analytics</span>
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild tooltip="Custom Reports">
-              <NavLink to="/admin/reports/custom" className={({ isActive }) => isActive ? 'data-[active=true]' : ''}>
+            <SidebarMenuButton 
+              asChild 
+              isActive={location.pathname.includes('/admin/reports/custom')}
+              tooltip="Custom Reports"
+            >
+              <NavLink to="/admin/reports/custom">
                 <LineChart className="h-4 w-4" />
                 <span>Custom Reports</span>
               </NavLink>
