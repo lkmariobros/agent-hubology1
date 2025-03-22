@@ -19,7 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { NavMain } from './sidebar/NavMain';
+import NavMain from './sidebar/NavMain';
 import { NavAnalytics } from './sidebar/NavAnalytics';
 import { NavPreferences } from './sidebar/NavPreferences';
 import { SidebarProfile } from './sidebar/SidebarProfile';
@@ -78,3 +78,4 @@ export function AppSidebar() {
     </Sidebar>
   );
 }
+
