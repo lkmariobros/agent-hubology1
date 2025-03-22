@@ -98,6 +98,28 @@ h1, h2, h3, h4, h5, h6, p, span {
   color: var(--text-secondary);
 }
 
+/* High specificity selectors for main content area - added for critical fix */
+.main-content,
+main,
+div[class*="content-area"],
+div[class*="dashboard"],
+body > div > div:not(.sidebar):not([class*="sidebar"]) {
+  background-color: #161920 !important; /* Using !important for critical fix */
+}
+
+/* Target specific sections with high specificity */
+.dashboard-container,
+div[class*="dashboard"],
+div[class*="content-section"] {
+  background-color: #161920 !important;
+}
+
+/* Ensure nested components inherit background unless specifically styled */
+.dashboard-container > div:not(.card):not([role="region"]),
+.main-content > div:not(.card):not([role="region"]) {
+  background-color: inherit;
+}
+
 /* Keep animation styles */
 @keyframes logo-spin {
   from {
