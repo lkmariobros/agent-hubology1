@@ -11,47 +11,49 @@ interface MetricCardProps {
 }
 
 const MetricCard = ({ metric, className }: MetricCardProps) => {
+  // Determine text color based on trend
+  const getTrendColor = () => {
+    if (metric.trend === 'up') return 'text-emerald-400';
+    if (metric.trend === 'down') return 'text-red-400';
+    return 'text-muted-foreground';
+  };
+  
+  const trendPercentClass = getTrendColor();
+  
   return (
-    <Card className={cn("border border-border/40 shadow-sm overflow-hidden", className)}>
-      <CardContent className="p-5 space-y-4">
-        <div className="flex justify-between items-start">
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-muted-foreground">
-              {metric.label}
-            </p>
-            <h3 className="text-2xl font-bold">
-              {metric.value}
-            </h3>
-          </div>
+    <Card className={cn("border-[rgba(255,255,255,0.06)] bg-[#1a1d25] overflow-hidden", className)}>
+      <CardContent className="p-5">
+        <div className="space-y-1 mb-3">
+          <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
+            {metric.label}
+          </p>
+        </div>
+        
+        <div className="flex items-baseline justify-between">
+          <h3 className="text-2xl font-bold text-foreground">
+            {metric.value}
+          </h3>
+          
           {metric.icon && (
-            <div className="rounded-full p-2 bg-accent/5 flex items-center justify-center">
+            <div className="rounded-full p-2 bg-[rgba(255,255,255,0.03)] flex items-center justify-center">
               {metric.icon}
             </div>
           )}
         </div>
         
         {metric.change !== undefined && (
-          <div className="flex items-center">
+          <div className="flex items-center mt-2">
             {metric.trend === 'up' ? (
-              <TrendingUp className="mr-2 h-4 w-4 text-green-400" />
+              <TrendingUp className="mr-1 h-3 w-3 text-emerald-400" />
             ) : metric.trend === 'down' ? (
-              <TrendingDown className="mr-2 h-4 w-4 text-red-400" />
+              <TrendingDown className="mr-1 h-3 w-3 text-red-400" />
             ) : null}
-            <span
-              className={cn(
-                "text-sm",
-                metric.trend === 'up'
-                  ? 'text-green-400'
-                  : metric.trend === 'down'
-                  ? 'text-red-400'
-                  : 'text-muted-foreground'
-              )}
-            >
+            <span className={`text-xs font-medium ${trendPercentClass}`}>
               {metric.change > 0 ? '+' : ''}
               {metric.change}%
             </span>
-            <span className="text-sm text-muted-foreground ml-1">
-              from last month
+            <span className="text-xs text-muted-foreground ml-1">
+              vs last week
             </span>
           </div>
         )}

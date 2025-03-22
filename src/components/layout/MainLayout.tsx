@@ -20,7 +20,7 @@ const Header = () => {
   const { isAdmin } = useAuth();
   
   return (
-    <div className="flex items-center justify-between px-6 py-3 border-b border-border/20 bg-background">
+    <div className="flex items-center justify-between px-6 py-3 border-b border-[rgba(255,255,255,0.06)]">
       <div className="flex items-center gap-2">
         <Button 
           variant="ghost" 
@@ -53,16 +53,21 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     document.documentElement.classList.add('dark');
     document.body.classList.add('dark-applied');
     
-    // Apply styles directly to ensure proper dark mode
-    document.body.style.setProperty('--background', '#161920');
-    document.body.style.setProperty('--card', '#1e2028');
-    document.body.style.setProperty('--sidebar-background', '#1f2128');
-    document.body.style.setProperty('--foreground', '#f5f5f7');
-    document.body.style.setProperty('--card-foreground', '#f5f5f7');
-    console.log("MainLayout mounted - forcing dark mode with consistent styling");
+    // Apply enhanced dark mode styles
+    document.body.style.setProperty('--background', '#121319');
+    document.body.style.setProperty('--card', '#1a1d25');
+    document.body.style.setProperty('--sidebar-background', '#1a1d25');
+    document.body.style.setProperty('--foreground', '#f8f9fa');
+    document.body.style.setProperty('--card-foreground', '#f8f9fa');
+    document.body.style.setProperty('--sidebar-foreground', '#f8f9fa');
+    document.body.style.setProperty('--muted-foreground', '#a1a1aa');
+    document.body.style.setProperty('--border', '#2a2d38');
+    document.body.style.setProperty('--input', '#252830');
+    document.body.style.setProperty('--ring', '#3e4251');
+    
+    console.log("MainLayout mounted - forcing enhanced dark mode styling");
     
     return () => {
-      // Clean up styles if component unmounts
       document.body.classList.remove('dark-applied');
     };
   }, []);
@@ -82,9 +87,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     <SidebarProvider defaultOpen={savedState}>
       <div className="flex h-screen overflow-hidden w-full">
         <AppSidebar />
-        <div className="flex-1 flex flex-col h-screen overflow-hidden" style={{backgroundColor: '#161920'}}>
+        <div className="flex-1 flex flex-col h-screen overflow-hidden bg-[#121319]">
           <Header />
-          <div className="flex-1 overflow-auto p-6" style={{backgroundColor: '#161920'}}>
+          <div className="flex-1 overflow-auto p-6 bg-[#121319]">
             {children || <Outlet />}
           </div>
         </div>

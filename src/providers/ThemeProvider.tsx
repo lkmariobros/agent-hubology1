@@ -23,7 +23,7 @@ const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
 
 export function ThemeProvider({
   children,
-  defaultTheme = 'dark', // Explicitly set dark mode as default
+  defaultTheme = 'dark', // Dark mode as default
   storageKey = 'property-pro-ui-theme',
   ...props
 }: ThemeProviderProps) {
@@ -43,9 +43,10 @@ export function ThemeProvider({
         : 'light';
       
       root.classList.add(systemTheme);
+      
+      // Apply custom theme class
       root.classList.add('theme-mono-scaled');
       
-      // Force dark mode application in system theme too
       if (systemTheme === 'dark') {
         applyDarkModeStyles();
       } else {
@@ -57,7 +58,6 @@ export function ThemeProvider({
     root.classList.add(theme);
     root.classList.add('theme-mono-scaled');
     
-    // Apply dark mode specific styles
     if (theme === 'dark') {
       applyDarkModeStyles();
     } else {
@@ -65,25 +65,38 @@ export function ThemeProvider({
     }
   }, [theme]);
   
-  // Function to apply dark mode styles
+  // Enhanced dark mode style application with precise color values
   const applyDarkModeStyles = () => {
-    // Set background colors
-    document.body.style.setProperty('--background', '#161920');
-    document.body.style.setProperty('--card', '#1e2028');
-    document.body.style.setProperty('--sidebar-background', '#1f2128');
+    // Main background - deep charcoal
+    document.body.style.setProperty('--background', '#121319');
     
-    // Set text colors
-    document.body.style.setProperty('--foreground', '#f5f5f7');
-    document.body.style.setProperty('--card-foreground', '#f5f5f7');
-    document.body.style.setProperty('--sidebar-foreground', '#f5f5f7');
+    // Card and container backgrounds - slightly lighter than main background
+    document.body.style.setProperty('--card', '#1a1d25');
+    
+    // Sidebar background - medium dark
+    document.body.style.setProperty('--sidebar-background', '#1a1d25');
+    
+    // Text colors for maximum readability
+    document.body.style.setProperty('--foreground', '#f8f9fa');
+    document.body.style.setProperty('--card-foreground', '#f8f9fa');
+    document.body.style.setProperty('--sidebar-foreground', '#f8f9fa');
+    
+    // Muted colors for secondary text
+    document.body.style.setProperty('--muted-foreground', '#a1a1aa');
+    
+    // Border colors
+    document.body.style.setProperty('--border', '#2a2d38');
+    
+    // Input field colors
+    document.body.style.setProperty('--input', '#252830');
+    document.body.style.setProperty('--ring', '#3e4251');
     
     // Apply dark styles to body for inheritance
     document.body.classList.add('dark-applied');
     
-    console.log("Applied dark mode with proper styling");
+    console.log("Applied enhanced dark mode styling");
   };
   
-  // Function to reset custom styles
   const resetCustomStyles = () => {
     document.body.style.removeProperty('--background');
     document.body.style.removeProperty('--card');
@@ -91,6 +104,10 @@ export function ThemeProvider({
     document.body.style.removeProperty('--foreground');
     document.body.style.removeProperty('--card-foreground');
     document.body.style.removeProperty('--sidebar-foreground');
+    document.body.style.removeProperty('--muted-foreground');
+    document.body.style.removeProperty('--border');
+    document.body.style.removeProperty('--input');
+    document.body.style.removeProperty('--ring');
     document.body.classList.remove('dark-applied');
   };
 

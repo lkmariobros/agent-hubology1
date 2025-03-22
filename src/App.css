@@ -37,39 +37,46 @@
   @apply bg-status-blue text-white rounded-full px-3 py-1 text-xs font-semibold;
 }
 
-/* Dark mode sidebar styling */
+/* Enhanced dark mode styling for all UI elements */
+
+/* Sidebar styling */
 .sidebar-dark {
-  background-color: var(--sidebar-background) !important;
-  color: var(--sidebar-foreground) !important;
+  background-color: var(--sidebar-background);
+  color: var(--sidebar-foreground);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-/* Add background color to the sidebar */
 [data-expanded="true"].sidebar {
-  background-color: var(--sidebar-background) !important;
+  background-color: var(--sidebar-background);
 }
 
 [data-expanded="false"].sidebar {
-  background-color: var(--sidebar-background) !important;
+  background-color: var(--sidebar-background);
 }
 
-/* Main content area styling with proper dark backgrounds */
+/* Main content area styling */
 main, 
 .flex-1, 
 body, 
 html {
-  background-color: var(--background) !important;
-  color: var(--foreground) !important;
+  background-color: var(--background);
+  color: var(--foreground);
 }
 
-/* Force dark theme application to the main layout */
+/* Dark mode application to the main layout */
 .dark body,
 .dark-applied body,
 body.dark {
-  background-color: #161920 !important;
-  color: #f5f5f7 !important;
+  background-color: #121319;
+  color: #f8f9fa;
 }
 
-/* Dark mode specific text color overrides for all elements */
+/* Typography and text color in dark mode */
+.dark,
+.dark-applied {
+  color-scheme: dark;
+}
+
 .dark h1, 
 .dark h2, 
 .dark h3, 
@@ -88,23 +95,39 @@ body.dark {
 .dark-applied p,
 .dark-applied span,
 .dark-applied div {
-  color: #f5f5f7 !important;
+  color: #f8f9fa;
 }
 
-/* Card styling with proper contrast in dark mode */
+/* Card styling with better dark mode aesthetics */
 .card {
-  background-color: var(--card) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
-  color: var(--card-foreground) !important;
+  background-color: var(--card);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  color: var(--card-foreground);
 }
 
-/* Dark mode specific card overrides */
 .dark .card,
 .dark-applied .card {
-  background-color: var(--card) !important;
-  border-color: rgba(255, 255, 255, 0.1) !important;
-  color: #f5f5f7 !important;
+  background-color: var(--card);
+  border-color: rgba(255, 255, 255, 0.06);
+  color: var(--card-foreground);
+}
+
+/* Table styling in dark mode */
+.dark .clean-table th,
+.dark-applied .clean-table th {
+  border-color: rgba(255, 255, 255, 0.06);
+  color: #a1a1aa;
+}
+
+.dark .clean-table td,
+.dark-applied .clean-table td {
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.dark .clean-table tr:hover,
+.dark-applied .clean-table tr:hover {
+  background-color: rgba(255, 255, 255, 0.03);
 }
 
 /* Subtle borders for sections in dark mode */
@@ -118,46 +141,51 @@ body.dark {
 .dark-applied .border-t,
 .dark-applied .border-l,
 .dark-applied .border-r {
-  border-color: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.06);
 }
 
-/* Additional dark mode fixes */
+/* Header in dark mode */
 .dark header,
 .dark-applied header {
-  background-color: var(--background) !important;
-  border-color: rgba(255, 255, 255, 0.05) !important;
+  background-color: var(--background);
+  border-color: rgba(255, 255, 255, 0.06);
 }
 
-.dark .bg-card,
-.dark-applied .bg-card {
-  background-color: var(--card) !important;
-}
-
-/* Dark theme text and background colors for inputs */
+/* Form elements in dark mode */
 .dark input,
 .dark select,
 .dark textarea,
 .dark-applied input,
 .dark-applied select,
 .dark-applied textarea {
-  background-color: #272a35 !important;
-  color: #f5f5f7 !important;
-  border-color: rgba(255, 255, 255, 0.1) !important;
+  background-color: #252830;
+  color: #f8f9fa;
+  border-color: rgba(255, 255, 255, 0.06);
 }
 
-/* Dark theme styling for buttons */
+.dark input:focus,
+.dark select:focus,
+.dark textarea:focus,
+.dark-applied input:focus,
+.dark-applied select:focus,
+.dark-applied textarea:focus {
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+/* Button styling in dark mode */
 .dark button,
 .dark-applied button {
-  color: #f5f5f7 !important;
+  color: #f8f9fa;
 }
 
-/* Status labels with better visibility */
+/* Enhanced status badges */
 .status-badge-green,
 .status-badge-amber,
 .status-badge-red,
 .status-badge-blue {
-  color: white !important;
-  font-weight: 600 !important;
+  color: white;
+  font-weight: 600;
 }
 
 /* Keep animation styles */

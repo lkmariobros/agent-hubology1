@@ -14,27 +14,27 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({
   className = '',
   size = 'md'
 }) => {
-  // Get status badge style - updated to match the second screenshot
+  // Get status badge style - matching the reference design
   const getStatusBadgeClass = (status: string) => {
     switch(status) {
       case 'Pending':
-        return 'bg-amber-500 text-white';
+        return 'bg-amber-500/90 text-white';
       case 'Under Review':
-        return 'bg-blue-500 text-white';
+        return 'bg-blue-500/90 text-white';
       case 'Approved':
-        return 'bg-emerald-500 text-white';
+        return 'bg-emerald-500/90 text-white';
       case 'Ready for Payment':
-        return 'bg-purple-500 text-white';
+        return 'bg-purple-500/90 text-white';
       case 'Paid':
-        return 'bg-gray-500 text-white';
+        return 'bg-gray-500/90 text-white';
       case 'Rejected':
-        return 'bg-red-500 text-white';
+        return 'bg-red-500/90 text-white';
       case 'Active':
-        return 'bg-emerald-500 text-white';
+        return 'bg-emerald-500/90 text-white';
       case 'Inactive':
-        return 'bg-gray-500 text-white';
+        return 'bg-[rgba(255,255,255,0.2)] text-white';
       default:
-        return 'bg-gray-500 text-white';
+        return 'bg-[rgba(255,255,255,0.2)] text-white';
     }
   };
   
