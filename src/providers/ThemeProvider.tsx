@@ -67,14 +67,14 @@ export function ThemeProvider({
   
   // Enhanced dark mode style application with precise color values
   const applyDarkModeStyles = () => {
-    // Main background - deep charcoal
-    document.body.style.setProperty('--background', '#121319');
+    // Main background - deeper dark color for main content
+    document.body.style.setProperty('--background', '#0F1014');
     
     // Card and container backgrounds - slightly lighter than main background
     document.body.style.setProperty('--card', '#1a1d25');
     
-    // Sidebar background - medium dark
-    document.body.style.setProperty('--sidebar-background', '#1a1d25');
+    // Sidebar background - lighter than before
+    document.body.style.setProperty('--sidebar-background', '#1f232d');
     
     // Text colors for maximum readability
     document.body.style.setProperty('--foreground', '#f8f9fa');

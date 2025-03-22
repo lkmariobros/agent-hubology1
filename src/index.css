@@ -38,7 +38,7 @@
     --radius: 0.5rem;
 
     /* Sidebar colors - lighter than content area for dark theme */
-    --sidebar-background: #1f2128;
+    --sidebar-background: #1f232d;
     --sidebar-foreground: #f5f5f7;
     --sidebar-primary: #6359e8;
     --sidebar-primary-foreground: #ffffff;
@@ -54,15 +54,15 @@
     --status-blue: 217.22deg 91.22% 59.8%;
   }
 
-  /* Dark mode colors - darker charcoal #161920 for main content */
+  /* Dark mode colors - deeper dark #0F1014 for main content */
   .dark {
-    --background: #161920; /* Exact hex color for darker charcoal */
+    --background: #0F1014; /* Deeper dark for main content */
     --foreground: #f5f5f7; /* Light text */
     
-    --card: #1e2028; /* Slightly lighter than background */
+    --card: #1a1d25; /* Slightly lighter than background */
     --card-foreground: #f5f5f7;
     
-    --popover: #1e2028;
+    --popover: #1a1d25;
     --popover-foreground: #f5f5f7;
     
     --primary: oklch(0.65 0.18 295);
@@ -85,7 +85,7 @@
     --ring: #3e4251;
     
     /* Sidebar colors - medium-dark gray (lighter than content area) */
-    --sidebar-background: #1f2128; 
+    --sidebar-background: #1f232d; 
     --sidebar-foreground: #f5f5f7;
     --sidebar-primary: #6359e8;
     --sidebar-primary-foreground: #ffffff;

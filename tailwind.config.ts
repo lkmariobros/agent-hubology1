@@ -86,9 +86,9 @@ export default {
         },
         // Add direct hex values for dark mode backgrounds
         dark: {
-          background: "#161920", // Darker charcoal for main content
-          sidebar: "#1f2128",    // Medium-dark gray for sidebar
-          card: "#1e2028",       // Slightly lighter than background
+          background: "#0F1014", // Deeper dark for main content
+          sidebar: "#1f232d",    // Lighter shade for sidebar
+          card: "#1a1d25",       // Slightly lighter than background
         },
       },
       borderRadius: {

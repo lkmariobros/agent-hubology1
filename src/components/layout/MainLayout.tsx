@@ -20,7 +20,7 @@ const Header = () => {
   const { isAdmin } = useAuth();
   
   return (
-    <div className="flex items-center justify-between px-6 py-3 border-b border-[rgba(255,255,255,0.06)]">
+    <div className="flex items-center justify-between px-6 py-3 border-b border-[rgba(255,255,255,0.08)]">
       <div className="flex items-center gap-2">
         <Button 
           variant="ghost" 
@@ -54,9 +54,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     document.body.classList.add('dark-applied');
     
     // Apply enhanced dark mode styles
-    document.body.style.setProperty('--background', '#121319');
+    document.body.style.setProperty('--background', '#0F1014');
     document.body.style.setProperty('--card', '#1a1d25');
-    document.body.style.setProperty('--sidebar-background', '#1a1d25');
+    document.body.style.setProperty('--sidebar-background', '#1f232d');
     document.body.style.setProperty('--foreground', '#f8f9fa');
     document.body.style.setProperty('--card-foreground', '#f8f9fa');
     document.body.style.setProperty('--sidebar-foreground', '#f8f9fa');
@@ -87,9 +87,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     <SidebarProvider defaultOpen={savedState}>
       <div className="flex h-screen overflow-hidden w-full">
         <AppSidebar />
-        <div className="flex-1 flex flex-col h-screen overflow-hidden bg-[#121319]">
+        <div className="flex-1 flex flex-col h-screen overflow-hidden bg-[#0F1014]">
           <Header />
-          <div className="flex-1 overflow-auto p-6 bg-[#121319]">
+          <div className="flex-1 overflow-auto p-6 bg-[#0F1014]">
             {children || <Outlet />}
           </div>
         </div>
