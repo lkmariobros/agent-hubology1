@@ -54,7 +54,6 @@ const AdminLayout = () => {
                 <div className="h-8 w-8 rounded-full bg-purple-600 flex items-center justify-center text-white font-medium">
                   P
                 </div>
-                <span className="ml-2 text-lg">PropertyPro</span>
               </div>
               <PortalSwitcher />
             </div>

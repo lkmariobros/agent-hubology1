@@ -7,8 +7,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { Button } from '@/components/ui/button';
-import { Building, Shield, ChevronDown } from 'lucide-react';
+import { Building, Shield, ChevronUpDown } from 'lucide-react';
 import { useAuth, UserRole } from '@/providers/AuthProvider';
 
 export function PortalSwitcher() {
@@ -27,12 +26,12 @@ export function PortalSwitcher() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button 
-          variant="ghost" 
-          className="flex items-center gap-1 h-auto p-0 font-normal text-lg hover:bg-transparent"
+        <button 
+          className="flex items-center gap-1 text-lg hover:text-primary transition-colors focus:outline-none"
         >
-          <ChevronDown className="h-4 w-4 opacity-60" />
-        </Button>
+          <span>PropertyPro</span>
+          <ChevronUpDown className="h-4 w-4 opacity-60" />
+        </button>
       </DropdownMenuTrigger>
       
       <DropdownMenuContent align="start" className="w-[180px] bg-popover">
