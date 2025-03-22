@@ -30,7 +30,7 @@ export function AdminSidebar() {
   const isAdminActive = currentRole === 'admin';
 
   return (
-    <Sidebar className="border-none bg-[#0F0E11]">
+    <Sidebar className="border-none bg-[#1F232D] AdminSidebar">
       <SidebarHeader>
         {/* Portal Switcher integrated in the sidebar header */}
         <DropdownMenu>

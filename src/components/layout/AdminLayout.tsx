@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Outlet, Navigate, useLocation } from 'react-router-dom';
 import { BellRing } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -28,6 +28,15 @@ const AdminLayout = () => {
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
   const location = useLocation();
   
+  // Add data-route attribute to body
+  useEffect(() => {
+    document.body.setAttribute('data-route', location.pathname);
+    
+    return () => {
+      document.body.removeAttribute('data-route');
+    };
+  }, [location.pathname]);
+  
   // Redirect to login if not authenticated
   if (!isAuthenticated) {
     return <Navigate to="/" state={{ from: location }} replace />;
@@ -39,7 +48,7 @@ const AdminLayout = () => {
   }
 
   return (
-    <div className="flex h-full w-full bg-background text-foreground font-mono app-container">
+    <div className="flex h-full w-full bg-background text-foreground font-mono app-container AdminLayout-container">
       <SidebarProvider>
         <AdminSidebar />
         

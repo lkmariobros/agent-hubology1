@@ -133,7 +133,12 @@ body > div[id="root"] > div:nth-child(1) > div:nth-child(2) {
 /* Target specific pages by route */
 body[data-route="/dashboard"] main,
 body[data-route="/properties"] main,
-body[data-route="/transactions"] main {
+body[data-route="/transactions"] main,
+body[data-route="/admin"] main,
+body[data-route="/admin/properties"] main,
+body[data-route="/admin/transactions"] main,
+body[data-route="/admin/agents"] main,
+body[data-route="/admin/commission"] main {
   background-color: #161920 !important;
 }
 
@@ -157,6 +162,30 @@ main,
 .page-container,
 div[class*="layout-content"] {
   background-color: #161920 !important;
+}
+
+/* Admin-specific portal styling fixes */
+.AdminLayout-container,
+.AdminLayout-container main,
+.AdminLayout-container .main-content,
+.AdminLayout-container div[class*="content-area"],
+div[id="root"] > div > .AdminLayout-container,
+div[id="root"] > .AdminLayout-container {
+  background-color: #161920 !important;
+}
+
+/* Admin sidebar fixes */
+.AdminLayout-container .sidebar,
+.AdminSidebar,
+div[class*="AdminSidebar"] {
+  background-color: #1F232D !important;
+  border-right: 1px solid var(--border-color);
+}
+
+/* Admin header fixes */
+.AdminLayout-container header {
+  background-color: #1F232D !important;
+  border-color: var(--border-color);
 }
 
 /* Keep animation styles */
