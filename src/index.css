@@ -93,6 +93,11 @@
   .page-subtitle {
     @apply text-sm text-muted-foreground mt-1;
   }
+  
+  /* Fix the glass-card class by using bg-card-bg instead of bg-card */
+  .glass-card {
+    @apply backdrop-blur-xl bg-card-bg border border-border shadow-[0_4px_12px_-2px_rgba(0,0,0,0.2)];
+  }
 }
 
 @layer utilities {
@@ -103,10 +108,6 @@
   
   .scrollbar-none::-webkit-scrollbar {
     display: none;
-  }
-
-  .glass-card {
-    @apply backdrop-blur-xl bg-card border border-border shadow-[0_4px_12px_-2px_rgba(0,0,0,0.2)];
   }
   
   .neo-blur {
