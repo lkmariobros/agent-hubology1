@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Property } from "@/types";
-import PropertyCardBasicInfo from "../property/PropertyCardBasicInfo";
+import { PropertyCardBasicInfo } from "../property/PropertyCardBasicInfo";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -47,6 +47,7 @@ const PropertyList: React.FC<PropertyListProps> = ({
               <PropertyCardBasicInfo
                 key={property.id}
                 property={property}
+                isOpen={false}
                 className="p-4"
               />
             ))}
