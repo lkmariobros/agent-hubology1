@@ -18,23 +18,23 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({
   const getStatusBadgeClass = (status: string) => {
     switch(status) {
       case 'Pending':
-        return 'bg-amber-500/90 text-white';
+        return 'bg-amber-500 text-white';
       case 'Under Review':
-        return 'bg-blue-500/90 text-white';
+        return 'bg-blue-500 text-white';
       case 'Approved':
-        return 'bg-emerald-500/90 text-white';
+        return 'bg-emerald-500 text-white';
       case 'Ready for Payment':
-        return 'bg-purple-500/90 text-white';
+        return 'bg-purple-500 text-white';
       case 'Paid':
-        return 'bg-gray-500/90 text-white';
+        return 'bg-gray-600 text-white';
       case 'Rejected':
-        return 'bg-red-500/90 text-white';
+        return 'bg-red-500 text-white';
       case 'Active':
-        return 'bg-emerald-500/90 text-white';
+        return 'bg-emerald-500 text-white';
       case 'Inactive':
-        return 'bg-[rgba(255,255,255,0.2)] text-white';
+        return 'bg-[rgba(255,255,255,0.15)] text-white';
       default:
-        return 'bg-[rgba(255,255,255,0.2)] text-white';
+        return 'bg-[rgba(255,255,255,0.15)] text-white';
     }
   };
   
@@ -63,15 +63,20 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({
   };
   
   const sizeClass = {
-    sm: 'px-1.5 py-0.5 text-xs',
-    md: 'px-2.5 py-0.5 text-xs',
-    lg: 'px-3 py-1 text-sm'
+    sm: 'px-1.5 py-0.5 text-xs gap-1',
+    md: 'px-2.5 py-1 text-xs gap-1.5',
+    lg: 'px-3 py-1.5 text-sm gap-1.5'
   };
   
   return (
-    <span className={`inline-flex items-center rounded-full font-medium ${sizeClass[size]} ${getStatusBadgeClass(status)} ${className}`}>
+    <span className={cn(
+      "inline-flex items-center rounded-full font-semibold shadow-sm", 
+      sizeClass[size], 
+      getStatusBadgeClass(status), 
+      className
+    )}>
       {getStatusIcon(status)}
-      <span className={`ml-${size === 'sm' ? '0.5' : '1'}`}>{status}</span>
+      <span>{status}</span>
     </span>
   );
 };

@@ -21,8 +21,8 @@ const MetricCard = ({ metric, className }: MetricCardProps) => {
   const trendPercentClass = getTrendColor();
   
   return (
-    <Card className={cn("border-[rgba(255,255,255,0.06)] bg-[#1a1d25] overflow-hidden", className)}>
-      <CardContent className="p-5">
+    <Card className={cn("border-[rgba(255,255,255,0.08)] bg-[#1a1d25] shadow-sm", className)}>
+      <CardContent className="p-6">
         <div className="space-y-1 mb-3">
           <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
             {metric.label}
@@ -30,19 +30,19 @@ const MetricCard = ({ metric, className }: MetricCardProps) => {
         </div>
         
         <div className="flex items-baseline justify-between">
-          <h3 className="text-2xl font-bold text-foreground">
+          <h3 className="text-2xl font-bold text-white">
             {metric.value}
           </h3>
           
           {metric.icon && (
-            <div className="rounded-full p-2 bg-[rgba(255,255,255,0.03)] flex items-center justify-center">
+            <div className="rounded-full p-2.5 bg-[rgba(255,255,255,0.05)] flex items-center justify-center">
               {metric.icon}
             </div>
           )}
         </div>
         
         {metric.change !== undefined && (
-          <div className="flex items-center mt-2">
+          <div className="flex items-center mt-2.5">
             {metric.trend === 'up' ? (
               <TrendingUp className="mr-1 h-3 w-3 text-emerald-400" />
             ) : metric.trend === 'down' ? (
