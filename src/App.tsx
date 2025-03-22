@@ -33,6 +33,9 @@ import Profile from './pages/Profile';
 import Index from './pages/Index';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import Home from './pages/Home';
+import Reports from './pages/Reports';
+import PointsLeaderboard from './pages/leaderboard/Points';
+import SalesLeaderboard from './pages/leaderboard/Sales';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -71,6 +74,12 @@ function App() {
                   <Route path="profile" element={<Profile />} />
                   <Route path="settings" element={<Settings />} />
                   <Route path="team" element={<Home />} /> {/* Temporary placeholder */}
+                  {/* Adding Leaderboard routes */}
+                  <Route path="leaderboard" element={<Navigate to="/leaderboard/points" replace />} />
+                  <Route path="leaderboard/points" element={<PointsLeaderboard />} />
+                  <Route path="leaderboard/sales" element={<SalesLeaderboard />} />
+                  {/* Adding Reports route */}
+                  <Route path="reports" element={<Reports />} />
                 </Route>
 
                 {/* Admin Routes */}

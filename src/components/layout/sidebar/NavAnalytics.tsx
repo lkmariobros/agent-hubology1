@@ -14,8 +14,8 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarMenuSub,
-  SidebarMenuSubButton,
   SidebarMenuSubItem,
+  SidebarMenuSubButton,
 } from "@/components/ui/sidebar";
 
 interface NavAnalyticsProps {
@@ -41,7 +41,7 @@ export function NavAnalytics({ collapsed }: NavAnalyticsProps) {
               tooltip="Leaderboard"
             >
               <Link to="/leaderboard" className={collapsed ? "justify-center" : ""}>
-                <Trophy />
+                <Trophy className="h-4 w-4" />
                 {!collapsed && <span>Leaderboard</span>}
               </Link>
             </SidebarMenuButton>
@@ -74,7 +74,7 @@ export function NavAnalytics({ collapsed }: NavAnalyticsProps) {
               tooltip="Reports"
             >
               <Link to="/reports" className={collapsed ? "justify-center" : ""}>
-                <BarChart />
+                <BarChart className="h-4 w-4" />
                 {!collapsed && <span>Reports</span>}
               </Link>
             </SidebarMenuButton>

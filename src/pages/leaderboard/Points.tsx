@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { User } from '@/types';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/providers/AuthProvider';
+import { Navigate } from 'react-router-dom';
 
 // Sample users data
 const users: User[] = [{
@@ -76,10 +78,17 @@ const users: User[] = [{
   tier: 'senior',
   avatar: 'https://randomuser.me/api/portraits/women/10.jpg'
 }];
+
 type TimeFrame = 'week' | 'month' | 'year' | 'all-time';
 
 const PointsLeaderboard = () => {
   const [timeFrame, setTimeFrame] = React.useState<TimeFrame>('month');
+  const { isAuthenticated } = useAuth();
+
+  // Redirect to login if not authenticated
+  if (!isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
 
   // Sort users by random points (in a real app, this would be actual data)
   const sortedUsers = React.useMemo(() => {

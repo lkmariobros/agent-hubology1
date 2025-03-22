@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { User } from '@/types';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
-import MainLayout from '@/components/layout/MainLayout';
+import { useAuth } from '@/providers/AuthProvider';
+import { Navigate } from 'react-router-dom';
 
 // Sample users data
 const users: User[] = [{
@@ -77,7 +78,9 @@ const users: User[] = [{
   tier: 'senior',
   avatar: 'https://randomuser.me/api/portraits/women/10.jpg'
 }];
+
 type TimeFrame = 'week' | 'month' | 'year' | 'all-time';
+
 const formatCurrency = (value: number) => {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -85,8 +88,15 @@ const formatCurrency = (value: number) => {
     maximumFractionDigits: 0
   }).format(value);
 };
+
 const SalesLeaderboard = () => {
   const [timeFrame, setTimeFrame] = React.useState<TimeFrame>('month');
+  const { isAuthenticated } = useAuth();
+
+  // Redirect to login if not authenticated
+  if (!isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
 
   // Sort users by random sales (in a real app, this would be actual data)
   const sortedUsers = React.useMemo(() => {
