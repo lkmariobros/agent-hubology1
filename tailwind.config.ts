@@ -44,6 +44,8 @@ export default {
         muted: {
           DEFAULT: "oklch(var(--muted))",
           foreground: "oklch(var(--muted-foreground))",
+          light: "oklch(0.92, 0.004, 286.32)",
+          dark: "oklch(0.82, 0.004, 286.32)"
         },
         accent: {
           DEFAULT: "oklch(var(--accent))",

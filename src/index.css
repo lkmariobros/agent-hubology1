@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -216,7 +215,7 @@
   }
   
   .clean-table td {
-    @apply py-3 px-4 border-b border-muted/50;
+    @apply py-3 px-4 border-b border-muted;
   }
   
   .clean-table tr:hover {
