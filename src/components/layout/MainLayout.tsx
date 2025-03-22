@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import NavUtilities from './sidebar/NavUtilities';
 import { PortalSwitcher } from './PortalSwitcher';
 import { useAuth } from '@/providers/AuthProvider';
+import { ThemeToggle } from '../theme/ThemeToggle';
 
 interface MainLayoutProps {
   children?: React.ReactNode;
@@ -19,7 +20,7 @@ const Header = () => {
   const { isAdmin } = useAuth();
   
   return (
-    <div className="flex items-center justify-between px-6 py-3 border-b border-border/20 bg-card/30">
+    <div className="flex items-center justify-between px-6 py-3 border-b border-border/20 bg-background">
       <div className="flex items-center gap-2">
         <Button 
           variant="ghost" 
@@ -34,7 +35,10 @@ const Header = () => {
         {/* Only render PortalSwitcher for users with admin privileges */}
         {isAdmin && <PortalSwitcher />}
       </div>
-      <NavUtilities />
+      <div className="flex items-center gap-2">
+        <ThemeToggle />
+        <NavUtilities />
+      </div>
     </div>
   );
 };
@@ -61,7 +65,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
         <AppSidebar />
         <div className="flex-1 flex flex-col h-screen overflow-hidden">
           <Header />
-          <div className="flex-1 overflow-auto p-6">
+          <div className="flex-1 overflow-auto p-6 bg-background">
             {children || <Outlet />}
           </div>
         </div>

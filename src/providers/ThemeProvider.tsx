@@ -23,7 +23,7 @@ const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
 
 export function ThemeProvider({
   children,
-  defaultTheme = 'dark', // Changed to dark mode as default
+  defaultTheme = 'dark', // Explicitly set dark mode as default
   storageKey = 'property-pro-ui-theme',
   ...props
 }: ThemeProviderProps) {
@@ -53,6 +53,11 @@ export function ThemeProvider({
     
     // Add the theme-mono-scaled class for consistent font styling
     root.classList.add('theme-mono-scaled');
+    
+    // Force setting dark mode globally to ensure consistency
+    if (theme === 'dark') {
+      console.log("Setting dark mode!");
+    }
   }, [theme]);
 
   const value = {

@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -84,6 +83,12 @@ export default {
           amber: "oklch(var(--status-amber))",
           red: "oklch(var(--status-red))",
           blue: "oklch(var(--status-blue))",
+        },
+        // Add direct hex values for dark mode backgrounds
+        dark: {
+          background: "#161920", // Darker charcoal for main content
+          sidebar: "#1f2128",    // Medium-dark gray for sidebar
+          card: "#1e2028",       // Slightly lighter than background
         },
       },
       borderRadius: {

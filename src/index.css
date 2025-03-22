@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -36,7 +37,7 @@
     
     --radius: 0.5rem;
 
-    /* Sidebar colors - medium-dark gray for sidebar (lighter than content area) */
+    /* Sidebar colors - lighter than content area for dark theme */
     --sidebar-background: #1f2128;
     --sidebar-foreground: #f5f5f7;
     --sidebar-primary: #6359e8;
@@ -53,15 +54,15 @@
     --status-blue: 217.22deg 91.22% 59.8%;
   }
 
-  /* Dark mode colors - darker charcoal for main content */
+  /* Dark mode colors - darker charcoal #161920 for main content */
   .dark {
-    --background: oklch(0.1 0.006 285.885); /* Darker charcoal #161920 */
+    --background: #161920; /* Exact hex color for darker charcoal */
     --foreground: oklch(0.95 0 0); /* Light text */
     
-    --card: oklch(0.15 0.006 285.885); /* Slightly lighter than background */
+    --card: #1e2028; /* Slightly lighter than background */
     --card-foreground: oklch(0.95 0 0);
     
-    --popover: oklch(0.15 0.006 285.885);
+    --popover: #1e2028;
     --popover-foreground: oklch(0.95 0 0);
     
     --primary: oklch(0.65 0.18 295);
@@ -70,20 +71,20 @@
     --secondary: oklch(0.2 0.006 285.885);
     --secondary-foreground: oklch(0.95 0 0);
     
-    --muted: oklch(0.18 0.006 285.97);
-    --muted-foreground: oklch(0.705 0.015 286.067);
+    --muted: #272a35;
+    --muted-foreground: #a1a1aa;
     
-    --accent: oklch(0.18 0.006 285.97);
+    --accent: #272a35;
     --accent-foreground: oklch(0.95 0 0);
     
     --destructive: oklch(0.637 0.237 25.331);
     --destructive-foreground: oklch(0.95 0 0);
     
-    --border: oklch(0.2 0.009 285.83);
-    --input: oklch(0.2 0.009 285.83);
-    --ring: oklch(0.35 0.017 285.786);
+    --border: #2a2d38;
+    --input: #2a2d38;
+    --ring: #3e4251;
     
-    /* Sidebar colors for dark mode - medium-dark gray (lighter than content area) */
+    /* Sidebar colors - medium-dark gray (lighter than content area) */
     --sidebar-background: #1f2128; 
     --sidebar-foreground: #f5f5f7;
     --sidebar-primary: #6359e8;
