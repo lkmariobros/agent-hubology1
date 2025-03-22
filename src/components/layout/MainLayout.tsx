@@ -57,11 +57,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   
   return (
     <SidebarProvider defaultOpen={savedState}>
-      <div className="flex min-h-screen w-full bg-background">
+      <div className="flex min-h-screen w-full bg-[#f5f5f7]">
         <AppSidebar />
-        <div className="flex-1 overflow-auto">
+        <div className="flex-1 overflow-auto bg-[#f5f5f7]">
           <Header />
-          <div className="p-6">
+          <div className="p-6 bg-[#f5f5f7]">
             {children || <Outlet />}
           </div>
         </div>
