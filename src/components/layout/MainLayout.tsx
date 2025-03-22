@@ -45,7 +45,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
   // Set up effect to save sidebar state changes
   React.useEffect(() => {
-    const handleStorageChange = (e) => {
+    const handleStorageChange = (e: StorageEvent) => {
       if (e.key === "sidebar:state") {
         // This ensures our UI stays in sync with other tabs
         console.log("Sidebar state changed:", e.newValue);

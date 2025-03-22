@@ -183,13 +183,13 @@
     @apply backdrop-blur-2xl bg-black/40 border border-white/10;
   }
   
-  /* Fixed text-gradient utility classes */
+  /* Fixed text-gradient utility classes without opacity modifiers */
   .text-gradient {
-    @apply bg-gradient-to-br from-foreground to-foreground/60 bg-clip-text text-transparent;
+    @apply bg-gradient-to-br from-foreground bg-clip-text text-transparent;
   }
   
   .text-gradient-accent {
-    @apply bg-gradient-to-br from-accent to-accent/60 bg-clip-text text-transparent;
+    @apply bg-gradient-to-br from-accent bg-clip-text text-transparent;
   }
 
   .animate-in {
