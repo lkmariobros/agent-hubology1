@@ -22,7 +22,7 @@ const Header = () => {
           variant="ghost" 
           size="icon" 
           onClick={toggleSidebar} 
-          className="h-8 w-8 mr-2"
+          className="h-8 w-8 mr-2 z-20"
           aria-label={open ? "Collapse sidebar" : "Expand sidebar"}
         >
           {open ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeftOpen className="h-4 w-4" />}

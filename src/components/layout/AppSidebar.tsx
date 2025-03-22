@@ -8,6 +8,7 @@ import {
   SidebarFooter,
   SidebarHeader,
   SidebarRail,
+  useSidebar,
 } from "@/components/ui/sidebar";
 
 import { NavMain } from './sidebar/NavMain';
@@ -17,6 +18,9 @@ import { SidebarProfile } from './sidebar/SidebarProfile';
 import { PortalSwitcher } from './PortalSwitcher';
 
 export function AppSidebar() {
+  const { state } = useSidebar();
+  const isCollapsed = state === "collapsed";
+  
   return (
     <>
       <Sidebar 
@@ -31,7 +35,9 @@ export function AppSidebar() {
               <div className="flex items-center justify-center h-8 w-8 rounded-full bg-accent text-white">
                 <span className="font-bold text-sm">P</span>
               </div>
-              <span className="ml-2 text-lg font-semibold">PropertyPro</span>
+              {!isCollapsed && (
+                <span className="ml-2 text-lg font-semibold transition-opacity">PropertyPro</span>
+              )}
             </Link>
           </div>
           <PortalSwitcher />
