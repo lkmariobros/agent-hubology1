@@ -185,11 +185,11 @@
   
   /* Fixed text-gradient utility classes */
   .text-gradient {
-    @apply bg-gradient-to-br from-foreground via-foreground/80 to-foreground/60 bg-clip-text text-transparent;
+    @apply bg-gradient-to-br from-foreground to-foreground/60 bg-clip-text text-transparent;
   }
   
   .text-gradient-accent {
-    @apply bg-gradient-to-br from-accent via-accent/80 to-accent/60 bg-clip-text text-transparent;
+    @apply bg-gradient-to-br from-accent to-accent/60 bg-clip-text text-transparent;
   }
 
   .animate-in {
