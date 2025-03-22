@@ -5,84 +5,44 @@
 
 @layer base {
   :root {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
+    --background: 220 15% 8%; /* #161920 */
+    --foreground: 210 5% 98%; /* #f8f9fa */
     
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
+    --card: 220 12% 14%; /* #1E2128 */
+    --card-foreground: 210 5% 98%; /* #f8f9fa */
     
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 220 12% 14%; /* #1E2128 */
+    --popover-foreground: 210 5% 98%; /* #f8f9fa */
     
-    --primary: 240 5.9% 90%;
-    --primary-foreground: 240 5.9% 10%;
+    --primary: 210 5% 98%; /* #f8f9fa */
+    --primary-foreground: 220 15% 8%; /* #161920 */
     
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 220 13% 18%; /* #232731 */
+    --secondary-foreground: 210 5% 98%; /* #f8f9fa */
     
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
+    --muted: 220 13% 18%; /* #232731 */
+    --muted-foreground: 217 10% 65%; /* #a1a1aa */
     
-    --accent: 264 70% 50%;
-    --accent-foreground: 0 0% 98%;
+    --accent: 264 70% 50%; /* Keep original accent */
+    --accent-foreground: 210 5% 98%; /* #f8f9fa */
     
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%; /* Keep original destructive */
+    --destructive-foreground: 210 5% 98%; /* #f8f9fa */
     
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
+    --border: 0 0% 100% / 0.06; /* rgba(255, 255, 255, 0.06) */
+    --input: 220 13% 18%; /* #232731 */
+    --ring: 240 4.9% 83.9%; /* Keep original ring */
     
     --radius: 0.5rem;
 
-    --sidebar-background: 240 10% 3.9%;
-    --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 264 70% 50%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 0 0% 0% / 0;
-    --sidebar-ring: 240 4.9% 83.9%;
-  }
-
-  /* Light mode colors - will be used when .light class is applied */
-  .light {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
-    
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
-    
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    
-    --primary: 240 5.9% 10%;
-    --primary-foreground: 0 0% 98%;
-    
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    
-    --accent: 264 70% 50%;
-    --accent-foreground: 0 0% 98%;
-    
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 240 5.9% 10%;
-    
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 240 10% 3.9%;
-    --sidebar-primary: 264 70% 50%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 0 0% 0% / 0;
-    --sidebar-ring: 240 5.9% 10%;
+    --sidebar-background: 215 15% 15%; /* #1F232D */
+    --sidebar-foreground: 210 5% 98%; /* #f8f9fa */
+    --sidebar-primary: 264 70% 50%; /* Keep original sidebar primary */
+    --sidebar-primary-foreground: 0 0% 100%; /* Keep white */
+    --sidebar-accent: 220 13% 18%; /* #232731 */
+    --sidebar-accent-foreground: 210 5% 98%; /* #f8f9fa */
+    --sidebar-border: 0 0% 100% / 0.06; /* rgba(255, 255, 255, 0.06) */
+    --sidebar-ring: 240 4.9% 83.9%; /* Keep original ring */
   }
 
   /* Reset styles for full height layout */
@@ -146,7 +106,7 @@
   }
 
   .glass-card {
-    @apply backdrop-blur-xl bg-white/5 border border-white/10 shadow-[0_4px_12px_-2px_rgba(0,0,0,0.2)];
+    @apply backdrop-blur-xl bg-card border border-border shadow-[0_4px_12px_-2px_rgba(0,0,0,0.2)];
   }
   
   .neo-blur {

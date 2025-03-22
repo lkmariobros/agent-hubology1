@@ -66,6 +66,7 @@ export default {
           "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
+          bg: "#1F232D", // Direct color value for easier reference
         },
         property: {
           blue: "#4361ee",
@@ -73,6 +74,12 @@ export default {
           pink: "#f72585",
           orange: "#fb8500",
           green: "#06d6a0",
+        },
+        content: {
+          bg: "#161920", // Direct color value for easier reference
+        },
+        card: {
+          bg: "#1E2128", // Direct color value for easier reference 
         },
       },
       borderRadius: {

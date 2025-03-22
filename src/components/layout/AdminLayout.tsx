@@ -39,14 +39,14 @@ const AdminLayout = () => {
   }
 
   return (
-    <div className="flex h-full w-full bg-background text-foreground font-mono">
+    <div className="flex h-full w-full bg-background text-foreground font-mono app-container">
       <SidebarProvider>
         <AdminSidebar />
         
         {/* Main content */}
-        <div className="flex flex-col h-full w-full">
+        <div className="flex flex-col h-full w-full main-content">
           {/* Fixed header */}
-          <header className="h-14 flex-shrink-0 border-b border-border/20 flex items-center justify-between px-4 bg-card">
+          <header className="h-14 flex-shrink-0 border-b border-border flex items-center justify-between px-4 bg-sidebar-bg">
             <div className="flex items-center gap-2">
               <SidebarTrigger className="mr-2" />
               {/* Removed Portal Switcher from here */}
@@ -85,7 +85,7 @@ const AdminLayout = () => {
           </header>
           
           {/* Main scrollable content */}
-          <main className="flex-1 overflow-y-auto bg-background">
+          <main className="flex-1 overflow-y-auto bg-background content-area">
             <Outlet />
           </main>
         </div>

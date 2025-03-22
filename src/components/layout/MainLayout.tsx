@@ -16,7 +16,7 @@ const Header = () => {
   const { open, toggleSidebar } = useSidebar();
   
   return (
-    <div className="flex items-center justify-between px-6 py-3 border-b">
+    <div className="flex items-center justify-between px-6 py-3 border-b border-border">
       <div className="flex items-center gap-2">
         <Button 
           variant="ghost" 
@@ -27,7 +27,7 @@ const Header = () => {
         >
           {open ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeftOpen className="h-4 w-4" />}
         </Button>
-        <h1 className="text-2xl font-semibold">Dashboard</h1>
+        <h1 className="text-2xl font-semibold text-primary">Dashboard</h1>
       </div>
       <NavUtilities />
     </div>
@@ -53,11 +53,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   
   return (
     <SidebarProvider defaultOpen={savedState}>
-      <div className="flex min-h-screen w-full bg-background">
+      <div className="flex min-h-screen w-full bg-background app-container">
         <AppSidebar />
-        <div className="flex-1 overflow-auto">
+        <div className="flex-1 overflow-auto main-content">
           <Header />
-          <div className="p-6">
+          <div className="p-6 content-area">
             {children || <Outlet />}
           </div>
         </div>
