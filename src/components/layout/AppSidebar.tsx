@@ -9,6 +9,8 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
+  SidebarRail,
+  useSidebar,
 } from "@/components/ui/sidebar";
 
 import {
@@ -19,63 +21,89 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import NavMain from './sidebar/NavMain';
+import { NavMain } from './sidebar/NavMain';
 import { NavAnalytics } from './sidebar/NavAnalytics';
 import { NavPreferences } from './sidebar/NavPreferences';
 import { SidebarProfile } from './sidebar/SidebarProfile';
 
 export function AppSidebar() {
-  const { user, switchRole } = useAuth();
+  const { state } = useSidebar();
+  const isCollapsed = state === "collapsed";
+  const { user, switchRole, isAdmin } = useAuth();
   const currentRole = user?.activeRole;
-  const isAgentActive = currentRole === 'agent';
-
+  const isAdminActive = currentRole === 'admin';
+  
   return (
-    <Sidebar className="border-none">
-      <SidebarHeader>
-        {/* Portal Switcher integrated in the sidebar header */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-2 px-2 py-3 w-full text-left hover:text-white transition-colors focus:outline-none">
-              <div className="h-8 w-8 rounded-full bg-emerald-600 flex items-center justify-center text-white">
-                <span className="font-bold text-sm">P</span>
-              </div>
-              <span className="ml-2 text-lg font-semibold">PropertyPro</span>
-              <ChevronsUpDown className="h-4 w-4 opacity-60 ml-auto" />
-            </button>
-          </DropdownMenuTrigger>
-          
-          <DropdownMenuContent align="start" className="w-[180px] bg-[var(--sidebar-background)] border-[var(--sidebar-border)] text-[var(--sidebar-foreground)]">
-            <DropdownMenuItem 
-              onClick={() => switchRole('agent')}
-              className={`flex items-center cursor-pointer ${isAgentActive ? 'bg-[var(--sidebar-accent)]' : ''}`}
-            >
-              <Building className="h-4 w-4 mr-2" />
-              <span>Agent Portal</span>
-            </DropdownMenuItem>
-            
-            <DropdownMenuSeparator className="bg-[var(--sidebar-border)]" />
-            
-            <DropdownMenuItem 
-              onClick={() => switchRole('admin')}
-              className={`flex items-center cursor-pointer ${!isAgentActive ? 'bg-[var(--sidebar-accent)]' : ''}`}
-            >
-              <Shield className="h-4 w-4 mr-2" />
-              <span>Admin Portal</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </SidebarHeader>
-      
-      <SidebarContent>
-        <NavMain />
-        <NavAnalytics />
-        <NavPreferences />
-      </SidebarContent>
-      
-      <SidebarFooter>
-        <SidebarProfile />
-      </SidebarFooter>
-    </Sidebar>
+    <>
+      <Sidebar 
+        className="border-none bg-[#0F0E11] transition-all duration-300 ease-in-out" 
+        collapsible="icon" 
+        side="left" 
+        variant="sidebar"
+      >
+        <SidebarHeader>
+          {/* Portal Switcher integrated in the sidebar header */}
+          {isAdmin ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-2 px-2 py-3 w-full text-left hover:text-primary transition-colors focus:outline-none">
+                  <div className="h-8 w-8 rounded-full bg-accent flex items-center justify-center text-white">
+                    <span className="font-bold text-sm">P</span>
+                  </div>
+                  {!isCollapsed && (
+                    <>
+                      <span className="ml-2 text-lg font-semibold">PropertyPro</span>
+                      <ChevronsUpDown className="h-4 w-4 opacity-60 ml-auto" />
+                    </>
+                  )}
+                </button>
+              </DropdownMenuTrigger>
+              
+              <DropdownMenuContent align="start" className="w-[180px] bg-popover">
+                <DropdownMenuItem 
+                  onClick={() => switchRole('agent')}
+                  className={`flex items-center cursor-pointer ${!isAdminActive ? 'bg-accent/10' : ''}`}
+                >
+                  <Building className="h-4 w-4 mr-2" />
+                  <span>Agent Portal</span>
+                </DropdownMenuItem>
+                
+                <DropdownMenuSeparator />
+                
+                <DropdownMenuItem 
+                  onClick={() => switchRole('admin')}
+                  className={`flex items-center cursor-pointer ${isAdminActive ? 'bg-accent/10' : ''}`}
+                >
+                  <Shield className="h-4 w-4 mr-2" />
+                  <span>Admin Portal</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <div className="flex items-center px-2 py-3">
+              <Link to="/dashboard" className="flex items-center">
+                <div className="flex items-center justify-center h-8 w-8 rounded-full bg-accent text-white">
+                  <span className="font-bold text-sm">P</span>
+                </div>
+                {!isCollapsed && (
+                  <span className="ml-2 text-lg font-semibold transition-opacity">PropertyPro</span>
+                )}
+              </Link>
+            </div>
+          )}
+        </SidebarHeader>
+        
+        <SidebarContent>
+          <NavMain collapsed={isCollapsed} />
+          <NavAnalytics collapsed={isCollapsed} />
+          <NavPreferences collapsed={isCollapsed} />
+        </SidebarContent>
+        
+        <SidebarFooter>
+          <SidebarProfile collapsed={isCollapsed} />
+        </SidebarFooter>
+      </Sidebar>
+      <SidebarRail className="group-hover:after:bg-accent-foreground/10" />
+    </>
   );
 }
-

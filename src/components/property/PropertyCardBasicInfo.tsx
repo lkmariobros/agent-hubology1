@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, CornerUpRight } from 'lucide-react';
 import { CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Property } from '@/types';
 import { formatPrice } from '@/utils/propertyUtils';
@@ -12,15 +12,13 @@ interface PropertyCardBasicInfoProps {
   isOpen: boolean;
   onCardClick?: () => void;
   className?: string;
-  hasCollapsible?: boolean; // Add prop to determine if CollapsibleTrigger should be used
 }
 
 export function PropertyCardBasicInfo({ 
   property, 
   isOpen, 
   onCardClick,
-  className,
-  hasCollapsible = false // Default to false for standalone usage
+  className 
 }: PropertyCardBasicInfoProps) {
   return (
     <div 
@@ -38,44 +36,24 @@ export function PropertyCardBasicInfo({
             <h3 className="font-medium text-white text-lg tracking-tight truncate">
               {property.title}
             </h3>
-            {hasCollapsible ? (
-              <CollapsibleTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="h-6 w-6 p-0 ml-2 rounded-full text-neutral-400 hover:bg-transparent hover:text-white shrink-0 transition-transform duration-300"
-                  onClick={(e) => {
-                    // Prevent the click from bubbling to the parent div
-                    e.stopPropagation();
-                  }}
-                >
-                  {isOpen ? (
-                    <ChevronUp className="h-4 w-4" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4" />
-                  )}
-                </Button>
-              </CollapsibleTrigger>
-            ) : (
-              isOpen !== undefined && (
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="h-6 w-6 p-0 ml-2 rounded-full text-neutral-400 hover:bg-transparent hover:text-white shrink-0 transition-transform duration-300"
-                  onClick={(e) => {
-                    // Prevent the click from bubbling to the parent div
-                    e.stopPropagation();
-                    if (onCardClick) onCardClick();
-                  }}
-                >
-                  {isOpen ? (
-                    <ChevronUp className="h-4 w-4" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4" />
-                  )}
-                </Button>
-              )
-            )}
+            <CollapsibleTrigger asChild>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-6 w-6 p-0 ml-2 rounded-full text-neutral-400 hover:bg-transparent hover:text-white shrink-0 transition-transform duration-300"
+                onClick={(e) => {
+                  // Prevent the click from bubbling to the parent div
+                  // which would toggle the expanded state twice
+                  e.stopPropagation();
+                }}
+              >
+                {isOpen ? (
+                  <ChevronUp className="h-4 w-4" />
+                ) : (
+                  <ChevronDown className="h-4 w-4" />
+                )}
+              </Button>
+            </CollapsibleTrigger>
           </div>
           
           <span className="text-sm text-neutral-400 font-normal mt-0.5 block capitalize">
@@ -99,7 +77,7 @@ export function PropertyCardBasicInfo({
               <div className="text-sm flex items-center gap-1">
                 <span className="text-white">{property.stock} units</span>
                 {property.stock > 10 && (
-                  <span className="text-emerald-500">↗</span>
+                  <CornerUpRight className="h-3.5 w-3.5 text-emerald-500" />
                 )}
               </div>
             </div>

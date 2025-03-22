@@ -23,7 +23,7 @@ const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
 
 export function ThemeProvider({
   children,
-  defaultTheme = 'dark', // Dark mode as default
+  defaultTheme = 'system',
   storageKey = 'property-pro-ui-theme',
   ...props
 }: ThemeProviderProps) {
@@ -43,73 +43,11 @@ export function ThemeProvider({
         : 'light';
       
       root.classList.add(systemTheme);
-      
-      // Apply custom theme class
-      root.classList.add('theme-mono-scaled');
-      
-      if (systemTheme === 'dark') {
-        applyDarkModeStyles();
-      } else {
-        resetCustomStyles();
-      }
       return;
     }
 
     root.classList.add(theme);
-    root.classList.add('theme-mono-scaled');
-    
-    if (theme === 'dark') {
-      applyDarkModeStyles();
-    } else {
-      resetCustomStyles();
-    }
   }, [theme]);
-  
-  // Enhanced dark mode style application with InnovaCraft design colors
-  const applyDarkModeStyles = () => {
-    // Main background - InnovaCraft content background
-    document.body.style.setProperty('--background', '#161920');
-    
-    // Card and container backgrounds - InnovaCraft card background
-    document.body.style.setProperty('--card', '#1E2128');
-    
-    // Sidebar background - InnovaCraft sidebar background
-    document.body.style.setProperty('--sidebar-background', '#1F232D');
-    
-    // Text colors for maximum readability
-    document.body.style.setProperty('--foreground', '#f8f9fa');
-    document.body.style.setProperty('--card-foreground', '#f8f9fa');
-    document.body.style.setProperty('--sidebar-foreground', '#f8f9fa');
-    
-    // Muted colors for secondary text
-    document.body.style.setProperty('--muted-foreground', '#a1a1aa');
-    
-    // Border colors
-    document.body.style.setProperty('--border', 'rgba(255, 255, 255, 0.06)');
-    
-    // Input field colors
-    document.body.style.setProperty('--input', '#252830');
-    document.body.style.setProperty('--ring', '#3e4251');
-    
-    // Apply dark styles to body for inheritance
-    document.body.classList.add('dark-applied');
-    
-    console.log("Applied InnovaCraft dark mode styling");
-  };
-  
-  const resetCustomStyles = () => {
-    document.body.style.removeProperty('--background');
-    document.body.style.removeProperty('--card');
-    document.body.style.removeProperty('--sidebar-background');
-    document.body.style.removeProperty('--foreground');
-    document.body.style.removeProperty('--card-foreground');
-    document.body.style.removeProperty('--sidebar-foreground');
-    document.body.style.removeProperty('--muted-foreground');
-    document.body.style.removeProperty('--border');
-    document.body.style.removeProperty('--input');
-    document.body.style.removeProperty('--ring');
-    document.body.classList.remove('dark-applied');
-  };
 
   const value = {
     theme,

@@ -36,7 +36,7 @@ const CommissionTiers = ({
   const progress = nextTierObj ? (transactionsCompleted / nextTierObj.minTransactions) * 100 : 100;
 
   return (
-    <Card className="border-border bg-card shadow-sm">
+    <Card className="glass-card">
       <CardHeader className="p-5">
         <CardTitle className="text-lg font-semibold">Commission Tiers</CardTitle>
       </CardHeader>
@@ -44,7 +44,7 @@ const CommissionTiers = ({
         <div className="flex items-center justify-between gap-4">
           <div className="space-y-2">
             <p className="text-sm font-medium text-foreground">Current Tier</p>
-            <h3 className="text-2xl font-bold">
+            <h3 className="text-2xl font-bold text-gradient">
               {currentTierObj.tier}
             </h3>
             <p className="text-xs text-muted-foreground">
@@ -79,7 +79,7 @@ const CommissionTiers = ({
               key={tier.tier} 
               className={cn(
                 "flex flex-col items-center text-center transition-all rounded-lg py-3 px-2",
-                currentTier === tier.tier ? "bg-accent/10 ring-1 ring-accent/20" : "bg-transparent hover:bg-accent/5",
+                currentTier === tier.tier ? "glass-card ring-1 ring-white/20" : "bg-transparent hover:bg-white/5",
                 index < tiers.findIndex(t => t.tier === currentTier) && "opacity-70"
               )}
             >

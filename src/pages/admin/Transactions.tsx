@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -69,13 +68,13 @@ const AdminTransactions = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'completed':
-        return <Badge variant="success">Completed</Badge>;
+        return <Badge className="bg-green-500 hover:bg-green-600">Completed</Badge>;
       case 'pending':
-        return <Badge variant="warning">Pending</Badge>;
+        return <Badge className="bg-amber-500 hover:bg-amber-600">Pending</Badge>;
       case 'in-progress':
-        return <Badge variant="info">In Progress</Badge>;
+        return <Badge className="bg-blue-500 hover:bg-blue-600">In Progress</Badge>;
       case 'cancelled':
-        return <Badge variant="danger">Cancelled</Badge>;
+        return <Badge className="bg-red-500 hover:bg-red-600">Cancelled</Badge>;
       default:
         return <Badge>Unknown</Badge>;
     }
@@ -84,13 +83,13 @@ const AdminTransactions = () => {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'completed':
-        return <CheckCircle2 className="h-4 w-4 text-status-green" />;
+        return <CheckCircle2 className="h-4 w-4 text-green-500" />;
       case 'pending':
-        return <Clock className="h-4 w-4 text-status-amber" />;
+        return <Clock className="h-4 w-4 text-amber-500" />;
       case 'in-progress':
-        return <FileText className="h-4 w-4 text-status-blue" />;
+        return <FileText className="h-4 w-4 text-blue-500" />;
       case 'cancelled':
-        return <AlertCircle className="h-4 w-4 text-status-red" />;
+        return <AlertCircle className="h-4 w-4 text-red-500" />;
       default:
         return null;
     }
@@ -153,7 +152,7 @@ const AdminTransactions = () => {
                 <p className="text-sm text-muted-foreground">Pending Approval</p>
                 <p className="text-2xl font-bold">12</p>
               </div>
-              <Clock className="h-8 w-8 text-status-amber" />
+              <Clock className="h-8 w-8 text-amber-500" />
             </div>
           </CardContent>
         </Card>
@@ -165,7 +164,7 @@ const AdminTransactions = () => {
                 <p className="text-sm text-muted-foreground">Commission Total</p>
                 <p className="text-2xl font-bold">$1.57M</p>
               </div>
-              <DollarSign className="h-8 w-8 text-status-green" />
+              <DollarSign className="h-8 w-8 text-green-500" />
             </div>
           </CardContent>
         </Card>
@@ -175,36 +174,36 @@ const AdminTransactions = () => {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b bg-muted/30">
+              <tr className="border-b">
                 <th className="text-left p-4 font-medium">
-                  <div className="flex items-center gap-1 text-sm">
+                  <div className="flex items-center gap-1">
                     Transaction ID
                     <ArrowUpDown className="h-3 w-3" />
                   </div>
                 </th>
-                <th className="text-left p-4 font-medium text-sm">Property</th>
-                <th className="text-left p-4 font-medium text-sm">Agent</th>
+                <th className="text-left p-4 font-medium">Property</th>
+                <th className="text-left p-4 font-medium">Agent</th>
                 <th className="text-left p-4 font-medium">
-                  <div className="flex items-center gap-1 text-sm">
+                  <div className="flex items-center gap-1">
                     Date
                     <ArrowUpDown className="h-3 w-3" />
                   </div>
                 </th>
                 <th className="text-left p-4 font-medium">
-                  <div className="flex items-center gap-1 text-sm">
+                  <div className="flex items-center gap-1">
                     Amount
                     <ArrowUpDown className="h-3 w-3" />
                   </div>
                 </th>
-                <th className="text-left p-4 font-medium text-sm">Commission</th>
-                <th className="text-left p-4 font-medium text-sm">Status</th>
-                <th className="text-left p-4 font-medium text-sm">Type</th>
+                <th className="text-left p-4 font-medium">Commission</th>
+                <th className="text-left p-4 font-medium">Status</th>
+                <th className="text-left p-4 font-medium">Type</th>
                 <th className="text-left p-4 font-medium"></th>
               </tr>
             </thead>
             <tbody>
               {transactions.map((transaction) => (
-                <tr key={transaction.id} className="border-b hover:bg-muted-20">
+                <tr key={transaction.id} className="border-b hover:bg-muted/50">
                   <td className="p-4">
                     <div className="flex items-center gap-2">
                       {getStatusIcon(transaction.status)}

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Outlet, Navigate, useLocation, Link } from 'react-router-dom';
+import { Outlet, Navigate, useLocation } from 'react-router-dom';
 import { BellRing } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAuth } from '@/providers/AuthProvider';
@@ -39,14 +39,14 @@ const AdminLayout = () => {
   }
 
   return (
-    <div className="flex h-full w-full bg-dark-background text-foreground font-mono app-container">
+    <div className="flex h-full w-full bg-background text-foreground font-mono">
       <SidebarProvider>
         <AdminSidebar />
         
         {/* Main content */}
-        <div className="flex flex-col h-full w-full content-area">
+        <div className="flex flex-col h-full w-full">
           {/* Fixed header */}
-          <header className="h-14 flex-shrink-0 border-b border-[rgba(255,255,255,0.06)] flex items-center justify-between px-4 bg-dark-background">
+          <header className="h-14 flex-shrink-0 border-b border-border/20 flex items-center justify-between px-4 bg-card">
             <div className="flex items-center gap-2">
               <SidebarTrigger className="mr-2" />
               {/* Removed Portal Switcher from here */}
@@ -75,12 +75,8 @@ const AdminLayout = () => {
                     {user?.email || 'admin@example.com'}
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>
-                    <Link to="/admin/settings" className="w-full">Admin Settings</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Link to="/admin/system" className="w-full">System Configuration</Link>
-                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => window.location.href = '/admin/settings'}>Admin Settings</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => window.location.href = '/admin/system'}>System Configuration</DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={logout}>Logout</DropdownMenuItem>
                 </DropdownMenuContent>
@@ -89,7 +85,7 @@ const AdminLayout = () => {
           </header>
           
           {/* Main scrollable content */}
-          <main className="flex-1 overflow-y-auto bg-dark-background">
+          <main className="flex-1 overflow-y-auto bg-background">
             <Outlet />
           </main>
         </div>

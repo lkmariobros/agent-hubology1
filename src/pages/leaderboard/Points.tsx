@@ -3,9 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { User } from '@/types';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
-import { useAuth } from '@/providers/AuthProvider';
-import { Navigate } from 'react-router-dom';
-import { PageContainer, PageHeader, PageTitle, PageSubtitle } from '@/components/layout/PageContainer';
 
 // Sample users data
 const users: User[] = [{
@@ -79,17 +76,10 @@ const users: User[] = [{
   tier: 'senior',
   avatar: 'https://randomuser.me/api/portraits/women/10.jpg'
 }];
-
 type TimeFrame = 'week' | 'month' | 'year' | 'all-time';
 
 const PointsLeaderboard = () => {
   const [timeFrame, setTimeFrame] = React.useState<TimeFrame>('month');
-  const { isAuthenticated } = useAuth();
-
-  // Redirect to login if not authenticated
-  if (!isAuthenticated) {
-    return <Navigate to="/" replace />;
-  }
 
   // Sort users by random points (in a real app, this would be actual data)
   const sortedUsers = React.useMemo(() => {
@@ -100,16 +90,14 @@ const PointsLeaderboard = () => {
   }, [timeFrame]); // Recalculate when timeFrame changes
 
   return (
-    <PageContainer>
+    <div className="space-y-6 px-[42px] py-[19px] my-0 mx-[50px]">
       {/* Page Title */}
-      <PageHeader>
-        <div>
-          <PageTitle>Points Leaderboard</PageTitle>
-          <PageSubtitle>
-            Track agent performance based on achievement points.
-          </PageSubtitle>
-        </div>
-      </PageHeader>
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight">Points Leaderboard</h1>
+        <p className="text-muted-foreground">
+          Track agent performance based on achievement points.
+        </p>
+      </div>
 
       {/* Time Frame Selector */}
       <div className="flex space-x-2">
@@ -135,8 +123,7 @@ const PointsLeaderboard = () => {
         
         <CardContent className="px-6 py-0 pb-6">
           <div className="space-y-4">
-            {sortedUsers.map((user, index) => (
-              <div key={user.id} className="flex items-center space-x-4 p-3 rounded-lg hover:bg-white/5 transition-colors">
+            {sortedUsers.map((user, index) => <div key={user.id} className="flex items-center space-x-4 p-3 rounded-lg hover:bg-white/5 transition-colors">
                 <div className="w-8 text-center">
                   <div className={cn("w-6 h-6 mx-auto rounded-full flex items-center justify-center text-xs font-medium", index === 0 ? "bg-property-orange text-white" : index === 1 ? "bg-property-purple text-white" : index === 2 ? "bg-property-pink text-white" : "bg-sidebar-accent text-sidebar-accent-foreground")}>
                     {index + 1}
@@ -166,12 +153,11 @@ const PointsLeaderboard = () => {
                   </p>
                   <p className="text-xs text-muted-foreground">points</p>
                 </div>
-              </div>
-            ))}
+              </div>)}
           </div>
         </CardContent>
       </Card>
-    </PageContainer>
+    </div>
   );
 };
 

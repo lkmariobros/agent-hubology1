@@ -157,13 +157,13 @@ const Commission = () => {
   };
   
   return (
-    <div className="space-y-6 mx-0 px-[50px] py-[20px] my-0 bg-background">
+    <div className="space-y-6 mx-0 px-[50px] py-[20px] my-0">
       <CommissionHeader />
       
-      <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
-        <TabsList className="grid grid-cols-2 w-full sm:w-[400px] mb-6">
-          <TabsTrigger value="dashboard" className="text-sm">Dashboard</TabsTrigger>
-          <TabsTrigger value="team" className="text-sm">Team Hierarchy</TabsTrigger>
+      <Tabs value={currentTab} onValueChange={setCurrentTab}>
+        <TabsList className="grid grid-cols-2 w-full sm:w-auto">
+          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+          <TabsTrigger value="team">Team Hierarchy</TabsTrigger>
         </TabsList>
         
         <TabsContent value="dashboard" className="space-y-6">

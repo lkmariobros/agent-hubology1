@@ -31,7 +31,7 @@ const CommissionMetrics: React.FC<CommissionMetricsProps> = ({ metrics }) => {
   
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <Card className="border-[rgba(255,255,255,0.08)] bg-[#1a1d25] shadow-sm">
+      <Card>
         <CardHeader className="p-5">
           <CardTitle className="text-sm font-medium">Current Month</CardTitle>
         </CardHeader>
@@ -54,7 +54,7 @@ const CommissionMetrics: React.FC<CommissionMetricsProps> = ({ metrics }) => {
         </CardContent>
       </Card>
       
-      <Card className="border-[rgba(255,255,255,0.08)] bg-[#1a1d25] shadow-sm">
+      <Card>
         <CardHeader className="p-5">
           <CardTitle className="text-sm font-medium">Previous Month</CardTitle>
         </CardHeader>
@@ -77,7 +77,7 @@ const CommissionMetrics: React.FC<CommissionMetricsProps> = ({ metrics }) => {
         </CardContent>
       </Card>
       
-      <Card className="border-[rgba(255,255,255,0.08)] bg-[#1a1d25] shadow-sm">
+      <Card>
         <CardHeader className="p-5">
           <CardTitle className="text-sm font-medium">Year to Date</CardTitle>
         </CardHeader>

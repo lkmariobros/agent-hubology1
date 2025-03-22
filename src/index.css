@@ -1,105 +1,88 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    /* Base theme variables for InnovaCraft design */
-    --sidebar-bg: #1F232D;
-    --content-bg: #161920;
-    --card-bg: #1E2128;
-    --border-color: rgba(255, 255, 255, 0.06);
-    --text-primary: #f8f9fa;
-    --text-secondary: #a1a1aa;
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
     
-    /* Light mode colors (now secondary) */
-    --background: oklch(0.95 0.003 286.278);
-    --foreground: oklch(0.2 0.005 285.823);
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
     
-    --card: oklch(0.99 0.002 286.278);
-    --card-foreground: oklch(0.2 0.005 285.823);
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
     
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.2 0.005 285.823);
+    --primary: 240 5.9% 90%;
+    --primary-foreground: 240 5.9% 10%;
     
-    /* Primary color */
-    --primary: oklch(0.65 0.18 295);
-    --primary-foreground: oklch(0.98 0.021 166.113);
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
     
-    --secondary: oklch(0.96 0.001 286.375);
-    --secondary-foreground: oklch(0.25 0.006 285.885);
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
     
-    --muted: oklch(0.96 0.001 286.375);
-    --muted-foreground: oklch(0.55 0.016 285.938);
+    --accent: 264 70% 50%;
+    --accent-foreground: 0 0% 98%;
     
-    --accent: oklch(0.96 0.001 286.375);
-    --accent-foreground: oklch(0.25 0.006 285.885);
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
     
-    --destructive: oklch(0.637 0.237 25.331);
-    --destructive-foreground: oklch(0.95 0 0);
-    
-    --border: oklch(0.92 0.004 286.32);
-    --input: oklch(0.871 0.006 286.286);
-    --ring: oklch(0.871 0.006 286.286);
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
     
     --radius: 0.5rem;
 
-    /* Sidebar colors - lighter than content area for dark theme */
-    --sidebar-background: var(--sidebar-bg);
-    --sidebar-foreground: var(--text-primary);
-    --sidebar-primary: #6359e8;
-    --sidebar-primary-foreground: #ffffff;
-    --sidebar-accent: #2a2c36;
-    --sidebar-accent-foreground: var(--text-primary);
-    --sidebar-border: var(--border-color);
-    --sidebar-ring: #2a2c36;
-
-    /* Status colors */
-    --status-green: 142.69deg 76.53% 47.45%;
-    --status-amber: 27.22deg 92.09% 55.29%;
-    --status-red: 0deg 84.2% 60.2%;
-    --status-blue: 217.22deg 91.22% 59.8%;
+    --sidebar-background: 240 10% 3.9%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 264 70% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 0 0% 0% / 0;
+    --sidebar-ring: 240 4.9% 83.9%;
   }
 
-  /* Dark mode colors - using InnovaCraft design */
-  .dark {
-    --background: var(--content-bg);
-    --foreground: var(--text-primary);
+  /* Light mode colors - will be used when .light class is applied */
+  .light {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
     
-    --card: var(--card-bg);
-    --card-foreground: var(--text-primary);
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
     
-    --popover: var(--card-bg);
-    --popover-foreground: var(--text-primary);
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
     
-    --primary: oklch(0.65 0.18 295);
-    --primary-foreground: oklch(0.98 0.021 166.113);
+    --primary: 240 5.9% 10%;
+    --primary-foreground: 0 0% 98%;
     
-    --secondary: #272a35;
-    --secondary-foreground: var(--text-primary);
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
     
-    --muted: #272a35;
-    --muted-foreground: var(--text-secondary);
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
     
-    --accent: #272a35;
-    --accent-foreground: var(--text-primary);
+    --accent: 264 70% 50%;
+    --accent-foreground: 0 0% 98%;
     
-    --destructive: oklch(0.637 0.237 25.331);
-    --destructive-foreground: var(--text-primary);
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
     
-    --border: var(--border-color);
-    --input: #252830;
-    --ring: #3e4251;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 5.9% 10%;
     
-    /* Sidebar colors - updated with InnovaCraft specs */
-    --sidebar-background: var(--sidebar-bg);
-    --sidebar-foreground: var(--text-primary);
-    --sidebar-primary: #6359e8;
-    --sidebar-primary-foreground: #ffffff;
-    --sidebar-accent: #2a2c36;
-    --sidebar-accent-foreground: var(--text-primary);
-    --sidebar-border: var(--border-color);
-    --sidebar-ring: #2a2c36;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 240 10% 3.9%;
+    --sidebar-primary: 264 70% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 0 0% 0% / 0;
+    --sidebar-ring: 240 5.9% 10%;
   }
 
   /* Reset styles for full height layout */
@@ -107,12 +90,11 @@
     height: 100%;
     margin: 0;
     padding: 0;
-    background-color: var(--background);
-    color: var(--foreground);
+    /* Remove overflow: hidden to allow scrolling */
   }
   
   * {
-    @apply border-border;
+    @apply border-border selection:bg-accent/10 selection:text-white;
   }
   
   body {
@@ -125,25 +107,8 @@
     @apply scroll-smooth;
   }
   
-  /* Consistent typography styling */
-  h1 {
-    @apply text-2xl font-medium tracking-tight mb-2;
-  }
-  
-  h2 {
-    @apply text-xl font-medium tracking-tight mb-2;
-  }
-  
-  h3 {
-    @apply text-lg font-medium tracking-tight mb-2;
-  }
-  
-  h4, h5, h6 {
-    @apply text-base font-medium tracking-tight mb-2;
-  }
-  
-  p {
-    @apply text-base leading-relaxed mb-4;
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-medium tracking-tight;
   }
 }
 
@@ -158,28 +123,15 @@
   }
 
   .page-header {
-    @apply flex justify-between items-center mb-6;
+    @apply flex justify-between items-center;
   }
   
   .page-title {
-    @apply text-2xl font-semibold tracking-tight;
+    @apply text-xl font-semibold tracking-tight;
   }
   
   .page-subtitle {
     @apply text-sm text-muted-foreground mt-1;
-  }
-  
-  /* Consistent form styling */
-  .form-group {
-    @apply space-y-2 mb-4;
-  }
-  
-  .form-label {
-    @apply block text-sm font-medium;
-  }
-  
-  .form-input {
-    @apply w-full rounded-md border border-input px-3 py-2 bg-background text-foreground;
   }
 }
 
@@ -201,13 +153,12 @@
     @apply backdrop-blur-2xl bg-black/40 border border-white/10;
   }
   
-  /* Fixed text-gradient utility classes without opacity modifiers */
   .text-gradient {
-    @apply bg-gradient-to-br from-foreground to-foreground bg-clip-text text-transparent;
+    @apply bg-gradient-to-br from-white via-white/90 to-white/70 bg-clip-text text-transparent;
   }
   
   .text-gradient-accent {
-    @apply bg-gradient-to-br from-accent to-accent bg-clip-text text-transparent;
+    @apply bg-gradient-to-br from-accent via-accent/80 to-accent/60 bg-clip-text text-transparent;
   }
 
   .animate-in {
@@ -234,63 +185,20 @@
   }
   
   .clean-table td {
-    @apply py-3 px-4 border-b border-muted;
+    @apply py-3 px-4 border-b border-muted/50;
   }
   
   .clean-table tr:hover {
-    @apply bg-muted-20;
+    @apply bg-muted/20;
   }
   
-  /* Alignment utilities */
-  .content-centered {
-    @apply flex items-center justify-center;
-  }
-  
-  .content-start {
-    @apply flex items-start justify-start;
-  }
-  
-  .content-between {
-    @apply flex items-center justify-between;
+  /* Custom border style for sidebar */
+  .border-sidebar-border\/5 {
+    border-color: hsla(var(--sidebar-border) / 0.05);
   }
   
   /* Ensure consistent borders for all content sections */
   .content-container {
     @apply min-h-[calc(100vh-6rem-3.5rem)] rounded-xl;
-  }
-
-  /* Add specific utility for text selection */
-  .selection-accent {
-    @apply selection:bg-accent/10 selection:text-foreground;
-  }
-
-  /* Status badge colors matching the design */
-  .status-badge-green {
-    @apply bg-[oklch(var(--status-green))] text-white;
-  }
-  
-  .status-badge-amber {
-    @apply bg-[oklch(var(--status-amber))] text-white;
-  }
-  
-  .status-badge-red {
-    @apply bg-[oklch(var(--status-red))] text-white;
-  }
-  
-  .status-badge-blue {
-    @apply bg-[oklch(var(--status-blue))] text-white;
-  }
-  
-  /* Updated color utility classes for InnovaCraft design */
-  .bg-dark-background {
-    background-color: var(--content-bg);
-  }
-
-  .bg-dark-sidebar {
-    background-color: var(--sidebar-bg);
-  }
-
-  .bg-dark-card {
-    background-color: var(--card-bg);
   }
 }

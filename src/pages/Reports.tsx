@@ -1,12 +1,10 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Download, Calendar, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { useAuth } from '@/providers/AuthProvider';
-import { Navigate } from 'react-router-dom';
-import { PageContainer, PageHeader, PageTitle, PageSubtitle } from '@/components/layout/PageContainer';
 
 // Sample data for line chart
 const salesData = [{
@@ -93,21 +91,14 @@ const propertyTypeData = [{
 const COLORS = ['#6366f1', '#8b5cf6', '#ec4899', '#f97316'];
 
 const Reports = () => {
-  const { isAuthenticated } = useAuth();
-
-  // Redirect to login if not authenticated
-  if (!isAuthenticated) {
-    return <Navigate to="/" replace />;
-  }
-
   return (
-    <PageContainer>
-      <PageHeader>
+    <div className="space-y-6 px-[44px] py-[36px]">
+      <div className="flex justify-between items-center">
         <div>
-          <PageTitle>Reports</PageTitle>
-          <PageSubtitle>
+          <h1 className="text-2xl font-bold tracking-tight">Reports</h1>
+          <p className="text-muted-foreground">
             Analyze your agency's performance with detailed reports.
-          </PageSubtitle>
+          </p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" className="gap-2">
@@ -119,7 +110,7 @@ const Reports = () => {
             Export
           </Button>
         </div>
-      </PageHeader>
+      </div>
       
       <Tabs defaultValue="sales">
         <TabsList className="grid w-full grid-cols-4">
@@ -307,7 +298,7 @@ const Reports = () => {
           </Card>
         </TabsContent>
       </Tabs>
-    </PageContainer>
+    </div>
   );
 };
 

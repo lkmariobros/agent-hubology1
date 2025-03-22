@@ -1,9 +1,19 @@
+
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Transaction } from '@/types';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Search, Filter, Download, Plus, ArrowUpDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from "@/components/ui/table";
 import { Badge } from '@/components/ui/badge';
 
 // Sample transactions data
@@ -98,16 +108,18 @@ const Transactions = () => {
             <Download size={16} />
             Export
           </Button>
-          <Link to="/transactions/new">
-            <Button size="sm" className="gap-2">
-              <Plus size={16} />
-              Add Transaction
-            </Button>
-          </Link>
+          <Button 
+            size="sm"
+            className="gap-2"
+            onClick={() => navigate('/transactions/new')}
+          >
+            <Plus size={16} />
+            Add Transaction
+          </Button>
         </div>
       </div>
       
-      <div className="p-4 bg-dark-card rounded-lg border border-[rgba(255,255,255,0.08)]">
+      <Card className="p-4">
         <div className="flex flex-wrap gap-4">
           <div className="flex-1 min-w-[200px]">
             <Input placeholder="Search by property, agent..." className="w-full h-9" />
@@ -118,9 +130,9 @@ const Transactions = () => {
           </Button>
           <Button size="sm">Search</Button>
         </div>
-      </div>
+      </Card>
       
-      <div className="bg-dark-card overflow-hidden rounded-lg border border-[rgba(255,255,255,0.08)]">
+      <Card className="overflow-hidden">
         <table className="clean-table">
           <thead>
             <tr>
@@ -181,17 +193,22 @@ const Transactions = () => {
                   </Badge>
                 </td>
                 <td>
-                  <Link to={`/transactions/${transaction.id}/edit`} onClick={(e) => e.stopPropagation()}>
-                    <Button variant="ghost" size="sm">
-                      Edit
-                    </Button>
-                  </Link>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/transactions/${transaction.id}/edit`);
+                    }}
+                  >
+                    Edit
+                  </Button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-      </div>
+      </Card>
     </div>
   );
 };

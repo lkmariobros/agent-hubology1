@@ -111,7 +111,7 @@ const Dashboard = () => {
       </div>
       
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-24">
         {/* Properties List */}
         <div className="md:col-span-2">
           <PropertyList 
@@ -121,13 +121,21 @@ const Dashboard = () => {
           />
         </div>
         
-        {/* Grid for Opportunities and Transactions */}
-        <OpportunitiesBoard onViewAll={handleViewAllOpportunities} />
-        <RecentTransactions 
-          transactions={transactionsData?.data || []} 
-          isLoading={isLoadingTransactions}
-          onViewAll={handleViewAllTransactions}
-        />
+        {/* Opportunities Board */}
+        <div>
+          <OpportunitiesBoard 
+            onViewAll={handleViewAllOpportunities}
+          />
+        </div>
+        
+        {/* Recent Transactions */}
+        <div>
+          <RecentTransactions 
+            transactions={transactionsData?.data || []} 
+            isLoading={isLoadingTransactions}
+            onViewAll={handleViewAllTransactions}
+          />
+        </div>
       </div>
     </div>
   );

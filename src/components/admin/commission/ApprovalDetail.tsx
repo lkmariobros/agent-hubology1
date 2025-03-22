@@ -89,7 +89,7 @@ const ApprovalDetail: React.FC<ApprovalDetailProps> = ({ id: approvalId }) => {
   const deleteCommentMutation = useDeleteApprovalComment();
   
   // Add the sendNotification hook
-  const sendNotificationMutation = useSendNotification();
+  const sendNotification = useSendNotification();
   
   if (isLoading) {
     return (
@@ -199,7 +199,7 @@ const ApprovalDetail: React.FC<ApprovalDetailProps> = ({ id: approvalId }) => {
               notificationMessage = `Your commission status has been updated to ${targetStatus}.`;
           }
           
-          sendNotificationMutation.mutate({
+          sendNotification.mutate({
             userId: approval.submitted_by,
             type: 'approval',
             title: notificationTitle,

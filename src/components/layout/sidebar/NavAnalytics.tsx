@@ -13,6 +13,9 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 
 interface NavAnalyticsProps {
@@ -38,38 +41,31 @@ export function NavAnalytics({ collapsed }: NavAnalyticsProps) {
               tooltip="Leaderboard"
             >
               <Link to="/leaderboard" className={collapsed ? "justify-center" : ""}>
-                <Trophy className="h-4 w-4" />
+                <Trophy />
                 {!collapsed && <span>Leaderboard</span>}
               </Link>
             </SidebarMenuButton>
+            {!collapsed && isLeaderboardPage && (
+              <SidebarMenuSub>
+                <SidebarMenuSubItem>
+                  <SidebarMenuSubButton
+                    asChild
+                    isActive={currentPath === '/leaderboard/points'}
+                  >
+                    <Link to="/leaderboard/points">Points</Link>
+                  </SidebarMenuSubButton>
+                </SidebarMenuSubItem>
+                <SidebarMenuSubItem>
+                  <SidebarMenuSubButton
+                    asChild
+                    isActive={currentPath === '/leaderboard/sales'}
+                  >
+                    <Link to="/leaderboard/sales">Sales</Link>
+                  </SidebarMenuSubButton>
+                </SidebarMenuSubItem>
+              </SidebarMenuSub>
+            )}
           </SidebarMenuItem>
-          
-          {/* Points submenu - converted to separate menu items */}
-          {!collapsed && isLeaderboardPage && (
-            <>
-              <SidebarMenuItem>
-                <SidebarMenuButton 
-                  asChild
-                  isActive={currentPath === '/leaderboard/points'}
-                >
-                  <Link to="/leaderboard/points" className="pl-8">
-                    <span>Points</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              
-              <SidebarMenuItem>
-                <SidebarMenuButton 
-                  asChild
-                  isActive={currentPath === '/leaderboard/sales'}
-                >
-                  <Link to="/leaderboard/sales" className="pl-8">
-                    <span>Sales</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </>
-          )}
           
           <SidebarMenuItem>
             <SidebarMenuButton 
@@ -78,7 +74,7 @@ export function NavAnalytics({ collapsed }: NavAnalyticsProps) {
               tooltip="Reports"
             >
               <Link to="/reports" className={collapsed ? "justify-center" : ""}>
-                <BarChart className="h-4 w-4" />
+                <BarChart />
                 {!collapsed && <span>Reports</span>}
               </Link>
             </SidebarMenuButton>

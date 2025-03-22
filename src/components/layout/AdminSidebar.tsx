@@ -30,13 +30,13 @@ export function AdminSidebar() {
   const isAdminActive = currentRole === 'admin';
 
   return (
-    <Sidebar className="border-none">
+    <Sidebar className="border-none bg-[#0F0E11]">
       <SidebarHeader>
         {/* Portal Switcher integrated in the sidebar header */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-2 px-2 py-3 w-full text-left hover:text-white transition-colors focus:outline-none">
-              <div className="h-8 w-8 rounded-full bg-emerald-600 flex items-center justify-center text-white">
+            <button className="flex items-center gap-2 px-2 py-3 w-full text-left hover:text-primary transition-colors focus:outline-none">
+              <div className="h-8 w-8 rounded-full bg-accent flex items-center justify-center text-white">
                 <span className="font-bold text-sm">P</span>
               </div>
               <span className="ml-2 text-lg font-semibold">PropertyPro</span>
@@ -44,20 +44,20 @@ export function AdminSidebar() {
             </button>
           </DropdownMenuTrigger>
           
-          <DropdownMenuContent align="start" className="w-[180px] bg-[var(--sidebar-background)] border-[var(--sidebar-border)] text-[var(--sidebar-foreground)]">
+          <DropdownMenuContent align="start" className="w-[180px] bg-popover">
             <DropdownMenuItem 
               onClick={() => switchRole('agent')}
-              className={`flex items-center cursor-pointer ${!isAdminActive ? 'bg-[var(--sidebar-accent)]' : ''}`}
+              className={`flex items-center cursor-pointer ${!isAdminActive ? 'bg-accent/10' : ''}`}
             >
               <Building className="h-4 w-4 mr-2" />
               <span>Agent Portal</span>
             </DropdownMenuItem>
             
-            <DropdownMenuSeparator className="bg-[var(--sidebar-border)]" />
+            <DropdownMenuSeparator />
             
             <DropdownMenuItem 
               onClick={() => switchRole('admin')}
-              className={`flex items-center cursor-pointer ${isAdminActive ? 'bg-[var(--sidebar-accent)]' : ''}`}
+              className={`flex items-center cursor-pointer ${isAdminActive ? 'bg-accent/10' : ''}`}
             >
               <Shield className="h-4 w-4 mr-2" />
               <span>Admin Portal</span>

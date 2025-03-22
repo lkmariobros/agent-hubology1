@@ -14,23 +14,23 @@ const CommissionBreakdown: React.FC<CommissionBreakdownProps> = ({
   totalCommission 
 }) => {
   return (
-    <Card className="border-[rgba(255,255,255,0.06)] shadow-sm bg-dark-card">
-      <CardHeader className="p-6">
-        <CardTitle className="text-white">Commission Breakdown</CardTitle>
+    <Card>
+      <CardHeader className="p-5">
+        <CardTitle>Commission Breakdown</CardTitle>
       </CardHeader>
-      <CardContent className="p-6 pt-0">
+      <CardContent className="p-5 pt-0">
         <div className="space-y-4">
-          <div className="flex justify-between items-center py-3 border-b border-[rgba(255,255,255,0.06)]">
-            <span className="font-medium text-white">Personal Sales Commission</span>
-            <span className="text-xl font-bold text-white">${personalCommission.toLocaleString()}</span>
+          <div className="flex justify-between items-center py-3 border-b">
+            <span className="font-medium">Personal Sales Commission</span>
+            <span className="text-xl font-bold">${personalCommission.toLocaleString()}</span>
           </div>
-          <div className="flex justify-between items-center py-3 border-b border-[rgba(255,255,255,0.06)]">
-            <span className="font-medium text-white">Override Commission</span>
-            <span className="text-xl font-bold text-white">${overrideCommission.toLocaleString()}</span>
+          <div className="flex justify-between items-center py-3 border-b">
+            <span className="font-medium">Override Commission</span>
+            <span className="text-xl font-bold">${overrideCommission.toLocaleString()}</span>
           </div>
           <div className="flex justify-between items-center py-3">
-            <span className="font-medium text-white">Total Commission (YTD)</span>
-            <span className="text-2xl font-bold text-white">${totalCommission.toLocaleString()}</span>
+            <span className="font-medium">Total Commission (YTD)</span>
+            <span className="text-2xl font-bold">${totalCommission.toLocaleString()}</span>
           </div>
         </div>
       </CardContent>

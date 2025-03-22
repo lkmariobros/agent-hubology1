@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Clock, AlertTriangle, CheckCircle2, Banknote, Ban, HelpCircle } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 interface StatusBadgeProps {
   status: string;
@@ -14,27 +13,23 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({
   className = '',
   size = 'md'
 }) => {
-  // Get status badge style - matching the reference design
+  // Get status badge style
   const getStatusBadgeClass = (status: string) => {
     switch(status) {
       case 'Pending':
-        return 'bg-amber-500 text-white';
+        return 'bg-yellow-100 text-yellow-800';
       case 'Under Review':
-        return 'bg-blue-500 text-white';
+        return 'bg-blue-100 text-blue-800';
       case 'Approved':
-        return 'bg-emerald-500 text-white';
+        return 'bg-green-100 text-green-800';
       case 'Ready for Payment':
-        return 'bg-purple-500 text-white';
+        return 'bg-purple-100 text-purple-800';
       case 'Paid':
-        return 'bg-gray-600 text-white';
+        return 'bg-gray-100 text-gray-800';
       case 'Rejected':
-        return 'bg-red-500 text-white';
-      case 'Active':
-        return 'bg-emerald-500 text-white';
-      case 'Inactive':
-        return 'bg-[rgba(255,255,255,0.15)] text-white';
+        return 'bg-red-100 text-red-800';
       default:
-        return 'bg-[rgba(255,255,255,0.15)] text-white';
+        return 'bg-gray-100 text-gray-800';
     }
   };
   
@@ -53,30 +48,21 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({
         return <CheckCircle2 className={`${size === 'sm' ? 'h-3 w-3' : size === 'lg' ? 'h-5 w-5' : 'h-4 w-4'}`} />;
       case 'Rejected':
         return <Ban className={`${size === 'sm' ? 'h-3 w-3' : size === 'lg' ? 'h-5 w-5' : 'h-4 w-4'}`} />;
-      case 'Active':
-        return <CheckCircle2 className={`${size === 'sm' ? 'h-3 w-3' : size === 'lg' ? 'h-5 w-5' : 'h-4 w-4'}`} />;
-      case 'Inactive':
-        return <Ban className={`${size === 'sm' ? 'h-3 w-3' : size === 'lg' ? 'h-5 w-5' : 'h-4 w-4'}`} />;
       default:
         return <HelpCircle className={`${size === 'sm' ? 'h-3 w-3' : size === 'lg' ? 'h-5 w-5' : 'h-4 w-4'}`} />;
     }
   };
   
   const sizeClass = {
-    sm: 'px-1.5 py-0.5 text-xs gap-1',
-    md: 'px-2.5 py-1 text-xs gap-1.5',
-    lg: 'px-3 py-1.5 text-sm gap-1.5'
+    sm: 'px-1.5 py-0.5 text-xs',
+    md: 'px-2.5 py-0.5 text-xs',
+    lg: 'px-3 py-1 text-sm'
   };
   
   return (
-    <span className={cn(
-      "inline-flex items-center rounded-full font-semibold shadow-sm", 
-      sizeClass[size], 
-      getStatusBadgeClass(status), 
-      className
-    )}>
+    <span className={`inline-flex items-center rounded-full font-medium ${sizeClass[size]} ${getStatusBadgeClass(status)} ${className}`}>
       {getStatusIcon(status)}
-      <span>{status}</span>
+      <span className={`ml-${size === 'sm' ? '0.5' : '1'}`}>{status}</span>
     </span>
   );
 };
