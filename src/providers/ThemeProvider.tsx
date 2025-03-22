@@ -73,8 +73,8 @@ export function ThemeProvider({
     // Card and container backgrounds - slightly lighter than main background
     document.body.style.setProperty('--card', '#1a1d25');
     
-    // Sidebar background - lighter than before
-    document.body.style.setProperty('--sidebar-background', '#1f232d');
+    // Sidebar background - lighter than content for contrast
+    document.body.style.setProperty('--sidebar-background', '#1F232D');
     
     // Text colors for maximum readability
     document.body.style.setProperty('--foreground', '#f8f9fa');

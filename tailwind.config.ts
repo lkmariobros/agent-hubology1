@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -87,7 +88,7 @@ export default {
         // Add direct hex values for dark mode backgrounds
         dark: {
           background: "#0F1014", // Deeper dark for main content
-          sidebar: "#1f232d",    // Lighter shade for sidebar
+          sidebar: "#1F232D",    // Lighter shade for sidebar
           card: "#1a1d25",       // Slightly lighter than background
         },
       },

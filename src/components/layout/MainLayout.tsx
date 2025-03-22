@@ -53,10 +53,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     document.documentElement.classList.add('dark');
     document.body.classList.add('dark-applied');
     
-    // Apply enhanced dark mode styles
-    document.body.style.setProperty('--background', '#0F1014');
-    document.body.style.setProperty('--card', '#1a1d25');
-    document.body.style.setProperty('--sidebar-background', '#1f232d');
+    // Apply enhanced dark mode styles with proper contrast
+    document.body.style.setProperty('--background', '#0F1014');       // Deeper dark for main content
+    document.body.style.setProperty('--card', '#1a1d25');             // Slightly lighter than background
+    document.body.style.setProperty('--sidebar-background', '#1F232D'); // Lighter shade for sidebar
     document.body.style.setProperty('--foreground', '#f8f9fa');
     document.body.style.setProperty('--card-foreground', '#f8f9fa');
     document.body.style.setProperty('--sidebar-foreground', '#f8f9fa');
