@@ -48,7 +48,7 @@ const OpportunitiesBoard: React.FC<OpportunitiesBoardProps> = ({ onViewAll }) =>
 
   if (isLoading) {
     return (
-      <Card className="border border-border/50 shadow-sm">
+      <Card className="border border-border/40 shadow-sm bg-white">
         <CardHeader>
           <CardTitle className="text-xl">Opportunities Board</CardTitle>
           <CardDescription>Client needs posted by agents</CardDescription>
@@ -78,7 +78,7 @@ const OpportunitiesBoard: React.FC<OpportunitiesBoardProps> = ({ onViewAll }) =>
   }
 
   return (
-    <Card className="border border-border/50 shadow-sm">
+    <Card className="border border-border/40 shadow-sm bg-white">
       <CardHeader>
         <CardTitle className="text-xl">Opportunities Board</CardTitle>
         <CardDescription>Client needs posted by agents</CardDescription>
@@ -86,7 +86,7 @@ const OpportunitiesBoard: React.FC<OpportunitiesBoardProps> = ({ onViewAll }) =>
       <CardContent>
         <div className="space-y-4">
           {opportunities.map((opportunity) => (
-            <Card key={opportunity.id} className="hover:bg-muted/20 transition-colors border border-border/40">
+            <Card key={opportunity.id} className="hover:bg-muted/20 transition-colors border border-border/40 bg-white">
               <CardHeader className="p-4 pb-2">
                 <div className="flex justify-between items-start">
                   <CardTitle className="text-base">{opportunity.title}</CardTitle>

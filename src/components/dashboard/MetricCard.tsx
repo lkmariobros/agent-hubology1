@@ -12,7 +12,7 @@ interface MetricCardProps {
 
 const MetricCard = ({ metric, className }: MetricCardProps) => {
   return (
-    <Card className={cn("border border-border/50 shadow-sm overflow-hidden", className)}>
+    <Card className={cn("border border-border/40 shadow-sm overflow-hidden bg-white", className)}>
       <CardContent className="p-5 space-y-4">
         <div className="flex justify-between items-start">
           <div className="space-y-2">
