@@ -12,6 +12,20 @@ export function SidebarProfile({ collapsed }: SidebarProfileProps) {
   
   if (!user) return null;
   
+  // Extract first and last initials from the name or email
+  const getInitials = () => {
+    if (user.name) {
+      // Try to get initials from name
+      const nameParts = user.name.split(' ');
+      if (nameParts.length > 1) {
+        return `${nameParts[0][0]}${nameParts[1][0]}`;
+      }
+      return user.name[0];
+    }
+    // Fallback to email initial
+    return user.email[0];
+  };
+  
   return (
     <Link 
       to="/profile" 
@@ -19,14 +33,14 @@ export function SidebarProfile({ collapsed }: SidebarProfileProps) {
     >
       <div className="flex items-center justify-center h-8 w-8 rounded-full bg-muted text-foreground">
         <span className="font-medium text-sm">
-          {user.firstName?.[0]}{user.lastName?.[0]}
+          {getInitials()}
         </span>
       </div>
       
       {!collapsed && (
         <div className="flex flex-col overflow-hidden">
-          <span className="font-medium">{user.firstName} {user.lastName}</span>
-          <span className="text-xs text-muted-foreground truncate">{user.role || 'Agent'}</span>
+          <span className="font-medium">{user.name || user.email.split('@')[0]}</span>
+          <span className="text-xs text-muted-foreground truncate">{user.activeRole}</span>
         </div>
       )}
     </Link>
