@@ -31,7 +31,7 @@ const Header = () => {
           {open ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeftOpen className="h-4 w-4" />}
         </Button>
         
-        {/* Add PortalSwitcher here for users with admin privileges */}
+        {/* Only render PortalSwitcher for users with admin privileges */}
         {isAdmin && <PortalSwitcher />}
       </div>
       <NavUtilities />
@@ -45,7 +45,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
   // Set up effect to save sidebar state changes
   React.useEffect(() => {
-    const handleStorageChange = e => {
+    const handleStorageChange = (e) => {
       if (e.key === "sidebar:state") {
         // This ensures our UI stays in sync with other tabs
         console.log("Sidebar state changed:", e.newValue);
