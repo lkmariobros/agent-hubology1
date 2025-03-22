@@ -39,7 +39,7 @@ export function useNotificationActions() {
   const markAsRead = useCallback(async (notificationId: string): Promise<boolean> => {
     console.log('Marking notification as read:', notificationId);
     // In a real app, this would make an API call
-    // For now, we'll just simulate success
+    toast.success('Notification marked as read');
     return true;
   }, []);
 
@@ -47,7 +47,7 @@ export function useNotificationActions() {
   const markAllAsRead = useCallback(async (userId: string): Promise<boolean> => {
     console.log('Marking all notifications as read for user:', userId);
     // In a real app, this would make an API call
-    // For now, we'll just simulate success
+    toast.success('All notifications marked as read');
     return true;
   }, []);
 
@@ -55,7 +55,7 @@ export function useNotificationActions() {
   const deleteNotification = useCallback(async (notificationId: string): Promise<boolean> => {
     console.log('Deleting notification:', notificationId);
     // In a real app, this would make an API call
-    // For now, we'll just simulate success
+    toast.success('Notification deleted');
     return true;
   }, []);
 
@@ -63,7 +63,6 @@ export function useNotificationActions() {
   const refreshNotifications = useCallback(async (userId: string | null): Promise<Notification[]> => {
     console.log('Fetching notifications for user:', userId);
     // In a real app, this would make an API call to fetch notifications
-    // For now, we'll just return our mock data
     return MOCK_NOTIFICATIONS;
   }, []);
 

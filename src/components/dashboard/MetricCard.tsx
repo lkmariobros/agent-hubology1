@@ -1,63 +1,51 @@
 
 import React from 'react';
-import { Card, CardContent } from "@/components/ui/card";
-import { TrendingDown, TrendingUp } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import { DashboardMetric } from '@/types';
-import { cn } from '@/lib/utils';
+import { ArrowDown, ArrowUp } from 'lucide-react';
 
 interface MetricCardProps {
   metric: DashboardMetric;
   className?: string;
 }
 
-const MetricCard = ({ metric, className }: MetricCardProps) => {
-  // Determine text color based on trend
-  const getTrendColor = () => {
-    if (metric.trend === 'up') return 'text-emerald-400';
-    if (metric.trend === 'down') return 'text-red-400';
-    return 'text-muted-foreground';
-  };
-  
-  const trendPercentClass = getTrendColor();
+const MetricCard: React.FC<MetricCardProps> = ({ metric, className }) => {
+  // Determine trend indicator and styling
+  const showTrendIndicator = metric.change !== undefined && metric.change !== 0;
+  const isPositiveTrend = metric.trend === 'up';
+  const trendColor = isPositiveTrend ? 'text-emerald-500' : 'text-red-500';
   
   return (
-    <Card className={cn("border-[rgba(255,255,255,0.08)] bg-[#1a1d25] shadow-sm", className)}>
-      <CardContent className="p-6">
-        <div className="space-y-1 mb-3">
-          <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
-            {metric.label}
-          </p>
+    <Card className={cn(
+      "relative border border-[rgba(255,255,255,0.08)] bg-[#1a1d25] shadow-sm overflow-hidden p-6",
+      className
+    )}>
+      <div className="space-y-2">
+        <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
+          {metric.label}
+        </p>
+        
+        <div className="flex justify-between items-center">
+          <h3 className="text-2xl font-bold">{metric.value}</h3>
+          <span className="text-muted-foreground/80">
+            {metric.icon}
+          </span>
         </div>
         
-        <div className="flex items-baseline justify-between">
-          <h3 className="text-2xl font-bold text-white">
-            {metric.value}
-          </h3>
-          
-          {metric.icon && (
-            <div className="rounded-full p-2.5 bg-[rgba(255,255,255,0.05)] flex items-center justify-center">
-              {metric.icon}
-            </div>
-          )}
-        </div>
-        
-        {metric.change !== undefined && (
-          <div className="flex items-center mt-2.5">
-            {metric.trend === 'up' ? (
-              <TrendingUp className="mr-1 h-3 w-3 text-emerald-400" />
-            ) : metric.trend === 'down' ? (
-              <TrendingDown className="mr-1 h-3 w-3 text-red-400" />
-            ) : null}
-            <span className={`text-xs font-medium ${trendPercentClass}`}>
-              {metric.change > 0 ? '+' : ''}
-              {metric.change}%
-            </span>
-            <span className="text-xs text-muted-foreground ml-1">
-              vs last week
+        {showTrendIndicator && (
+          <div className={cn("flex items-center text-xs gap-1", trendColor)}>
+            {isPositiveTrend ? (
+              <ArrowUp className="h-3 w-3" />
+            ) : (
+              <ArrowDown className="h-3 w-3" />
+            )}
+            <span className="font-medium">
+              {Math.abs(metric.change)}% vs last week
             </span>
           </div>
         )}
-      </CardContent>
+      </div>
     </Card>
   );
 };
