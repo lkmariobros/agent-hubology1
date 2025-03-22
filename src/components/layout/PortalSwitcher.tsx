@@ -10,11 +10,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { Building, Shield, ChevronDown } from 'lucide-react';
 import { useAuth, UserRole } from '@/providers/AuthProvider';
-import { useNavigate } from 'react-router-dom';
 
 export function PortalSwitcher() {
   const { user, switchRole, isAdmin } = useAuth();
-  const navigate = useNavigate();
   
   // Only show this component for users with admin privileges
   if (!user || !isAdmin) return null;
