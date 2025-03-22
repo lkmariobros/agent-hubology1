@@ -30,12 +30,12 @@ export function AdminSidebar() {
   const isAdminActive = currentRole === 'admin';
 
   return (
-    <Sidebar className="border-none bg-[#0F0E11]">
+    <Sidebar className="border-none">
       <SidebarHeader>
         {/* Portal Switcher integrated in the sidebar header */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-2 px-2 py-3 w-full text-left hover:text-primary transition-colors focus:outline-none">
+            <button className="flex items-center gap-2 px-2 py-3 w-full text-left hover:text-white transition-colors focus:outline-none">
               <div className="h-8 w-8 rounded-full bg-emerald-600 flex items-center justify-center text-white">
                 <span className="font-bold text-sm">P</span>
               </div>
@@ -44,20 +44,20 @@ export function AdminSidebar() {
             </button>
           </DropdownMenuTrigger>
           
-          <DropdownMenuContent align="start" className="w-[180px] bg-popover">
+          <DropdownMenuContent align="start" className="w-[180px] bg-[#232328] border-[#3a3a40] text-[#f5f5f7]">
             <DropdownMenuItem 
               onClick={() => switchRole('agent')}
-              className={`flex items-center cursor-pointer ${!isAdminActive ? 'bg-accent/10' : ''}`}
+              className={`flex items-center cursor-pointer ${!isAdminActive ? 'bg-[#3a3a40]' : ''}`}
             >
               <Building className="h-4 w-4 mr-2" />
               <span>Agent Portal</span>
             </DropdownMenuItem>
             
-            <DropdownMenuSeparator />
+            <DropdownMenuSeparator className="bg-[#3a3a40]" />
             
             <DropdownMenuItem 
               onClick={() => switchRole('admin')}
-              className={`flex items-center cursor-pointer ${isAdminActive ? 'bg-accent/10' : ''}`}
+              className={`flex items-center cursor-pointer ${isAdminActive ? 'bg-[#3a3a40]' : ''}`}
             >
               <Shield className="h-4 w-4 mr-2" />
               <span>Admin Portal</span>

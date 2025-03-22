@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -63,14 +62,14 @@ export default {
           foreground: "oklch(var(--card-foreground))",
         },
         sidebar: {
-          DEFAULT: "oklch(var(--sidebar-background))",
-          foreground: "oklch(var(--sidebar-foreground))",
-          primary: "oklch(var(--sidebar-primary))",
-          "primary-foreground": "oklch(var(--sidebar-primary-foreground))",
-          accent: "oklch(var(--sidebar-accent))",
-          "accent-foreground": "oklch(var(--sidebar-accent-foreground))",
-          border: "oklch(var(--sidebar-border))",
-          ring: "oklch(var(--sidebar-ring))",
+          DEFAULT: "#232328", /* Explicit color for reliable rendering */
+          foreground: "#f5f5f7",
+          primary: "#6359e8",
+          "primary-foreground": "#ffffff",
+          accent: "#3a3a40",
+          "accent-foreground": "#f5f5f7",
+          border: "#3a3a40",
+          ring: "#3a3a40",
         },
         property: {
           blue: "#4361ee",

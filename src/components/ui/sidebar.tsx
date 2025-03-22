@@ -64,7 +64,7 @@ const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(
       <aside
         ref={ref}
         className={cn(
-          "sidebar group relative flex h-screen flex-col border-r bg-sidebar text-sidebar-foreground",
+          "sidebar group relative flex h-screen flex-col border-r bg-[#232328] text-[#f5f5f7]",
           expanded ? "w-64" : "w-14",
           "transition-width duration-300",
           className
@@ -93,7 +93,7 @@ const SidebarHeader = forwardRef<HTMLDivElement, SidebarHeaderProps>(
       <div
         ref={ref}
         className={cn(
-          "flex h-14 items-center border-b px-4",
+          "flex h-14 items-center border-b border-[#3a3a40] px-4",
           expanded ? "justify-between" : "justify-center",
           className
         )}
@@ -134,7 +134,7 @@ const SidebarFooter = forwardRef<HTMLDivElement, SidebarFooterProps>(
     return (
       <div
         ref={ref}
-        className={cn("border-t px-4 py-2", className)}
+        className={cn("border-t border-[#3a3a40] px-4 py-2", className)}
         {...props}
       >
         {children}
@@ -182,7 +182,7 @@ const SidebarGroupLabel = forwardRef<HTMLDivElement, SidebarGroupLabelProps>(
         ref={ref}
         className={cn(
           "mb-2 px-2",
-          expanded ? "text-xs uppercase" : "sr-only",
+          expanded ? "text-xs uppercase font-medium text-[#9e9ea1]" : "sr-only",
           className
         )}
         {...props}
@@ -271,7 +271,9 @@ const SidebarMenuButton = forwardRef<HTMLButtonElement, SidebarMenuButtonProps>(
         className={cn(
           "flex w-full cursor-pointer items-center rounded-md p-2 text-sm outline-none transition-colors",
           expanded ? "justify-start" : "justify-center",
-          isActive ? "bg-accent text-accent-foreground" : "hover:bg-sidebar-accent text-sidebar-foreground",
+          isActive 
+            ? "bg-[#3a3a40] text-white" 
+            : "hover:bg-[#3a3a40] text-[#f5f5f7]",
           size === "sm" && "text-xs",
           size === "lg" && "text-base",
           className
@@ -307,7 +309,7 @@ const SidebarTrigger = forwardRef<HTMLButtonElement, SidebarTriggerProps>(
       <button
         ref={ref}
         className={cn(
-          "inline-flex h-10 items-center justify-center rounded-md text-sidebar-foreground transition-colors hover:bg-sidebar-accent",
+          "inline-flex h-10 items-center justify-center rounded-md text-[#f5f5f7] transition-colors hover:bg-[#3a3a40]",
           direction === "right" ? "ml-auto" : "mr-auto",
           className
         )}
