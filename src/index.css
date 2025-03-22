@@ -5,6 +5,7 @@
 
 @layer base {
   :root {
+    /* Keep existing color variables but with more consistent values */
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
     
@@ -14,8 +15,8 @@
     --popover: 240 10% 3.9%;
     --popover-foreground: 0 0% 98%;
     
-    --primary: 240 5.9% 90%;
-    --primary-foreground: 240 5.9% 10%;
+    --primary: 264 70% 50%;
+    --primary-foreground: 0 0% 100%;
     
     --secondary: 240 3.7% 15.9%;
     --secondary-foreground: 0 0% 98%;
@@ -45,7 +46,7 @@
     --sidebar-ring: 240 4.9% 83.9%;
   }
 
-  /* Light mode colors - will be used when .light class is applied */
+  /* Light mode colors */
   .light {
     --background: 0 0% 100%;
     --foreground: 240 10% 3.9%;
@@ -56,8 +57,8 @@
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
     
-    --primary: 240 5.9% 10%;
-    --primary-foreground: 0 0% 98%;
+    --primary: 264 70% 50%;
+    --primary-foreground: 0 0% 100%;
     
     --secondary: 240 4.8% 95.9%;
     --secondary-foreground: 240 5.9% 10%;
@@ -90,7 +91,6 @@
     height: 100%;
     margin: 0;
     padding: 0;
-    /* Remove overflow: hidden to allow scrolling */
   }
   
   * {
@@ -107,8 +107,25 @@
     @apply scroll-smooth;
   }
   
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-medium tracking-tight;
+  /* Consistent typography styling */
+  h1 {
+    @apply text-2xl font-medium tracking-tight mb-2;
+  }
+  
+  h2 {
+    @apply text-xl font-medium tracking-tight mb-2;
+  }
+  
+  h3 {
+    @apply text-lg font-medium tracking-tight mb-2;
+  }
+  
+  h4, h5, h6 {
+    @apply text-base font-medium tracking-tight mb-2;
+  }
+  
+  p {
+    @apply text-base leading-relaxed mb-4;
   }
 }
 
@@ -123,15 +140,28 @@
   }
 
   .page-header {
-    @apply flex justify-between items-center;
+    @apply flex justify-between items-center mb-6;
   }
   
   .page-title {
-    @apply text-xl font-semibold tracking-tight;
+    @apply text-2xl font-semibold tracking-tight;
   }
   
   .page-subtitle {
     @apply text-sm text-muted-foreground mt-1;
+  }
+  
+  /* Consistent form styling */
+  .form-group {
+    @apply space-y-2 mb-4;
+  }
+  
+  .form-label {
+    @apply block text-sm font-medium;
+  }
+  
+  .form-input {
+    @apply w-full rounded-md border border-input px-3 py-2 bg-background text-foreground;
   }
 }
 
@@ -192,9 +222,17 @@
     @apply bg-muted/20;
   }
   
-  /* Custom border style for sidebar */
-  .border-sidebar-border\/5 {
-    border-color: hsla(var(--sidebar-border) / 0.05);
+  /* Alignment utilities */
+  .content-centered {
+    @apply flex items-center justify-center;
+  }
+  
+  .content-start {
+    @apply flex items-start justify-start;
+  }
+  
+  .content-between {
+    @apply flex items-center justify-between;
   }
   
   /* Ensure consistent borders for all content sections */
