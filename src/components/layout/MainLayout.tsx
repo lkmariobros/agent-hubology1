@@ -49,18 +49,28 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
 
   // Force dark mode on component mount
   React.useEffect(() => {
+    // Force dark mode application
     document.documentElement.classList.add('dark');
+    document.body.classList.add('dark-applied');
+    
+    // Apply styles directly to ensure proper dark mode
     document.body.style.setProperty('--background', '#161920');
     document.body.style.setProperty('--card', '#1e2028');
     document.body.style.setProperty('--sidebar-background', '#1f2128');
-    console.log("MainLayout mounted - forcing dark mode");
+    document.body.style.setProperty('--foreground', '#f5f5f7');
+    document.body.style.setProperty('--card-foreground', '#f5f5f7');
+    console.log("MainLayout mounted - forcing dark mode with consistent styling");
+    
+    return () => {
+      // Clean up styles if component unmounts
+      document.body.classList.remove('dark-applied');
+    };
   }, []);
 
   // Set up effect to save sidebar state changes
   React.useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === "sidebar:state") {
-        // This ensures our UI stays in sync with other tabs
         console.log("Sidebar state changed:", e.newValue);
       }
     };
@@ -70,11 +80,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   
   return (
     <SidebarProvider defaultOpen={savedState}>
-      <div className="flex h-screen overflow-hidden w-full dark:bg-dark-background">
+      <div className="flex h-screen overflow-hidden w-full">
         <AppSidebar />
-        <div className="flex-1 flex flex-col h-screen overflow-hidden dark:bg-dark-background" style={{backgroundColor: '#161920'}}>
+        <div className="flex-1 flex flex-col h-screen overflow-hidden" style={{backgroundColor: '#161920'}}>
           <Header />
-          <div className="flex-1 overflow-auto p-6 dark:bg-dark-background" style={{backgroundColor: '#161920'}}>
+          <div className="flex-1 overflow-auto p-6" style={{backgroundColor: '#161920'}}>
             {children || <Outlet />}
           </div>
         </div>

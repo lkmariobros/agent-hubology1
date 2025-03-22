@@ -43,35 +43,56 @@ export function ThemeProvider({
         : 'light';
       
       root.classList.add(systemTheme);
-      
-      // Also add the theme-mono-scaled class for consistent font styling
       root.classList.add('theme-mono-scaled');
+      
+      // Force dark mode application in system theme too
+      if (systemTheme === 'dark') {
+        applyDarkModeStyles();
+      } else {
+        resetCustomStyles();
+      }
       return;
     }
 
     root.classList.add(theme);
-    
-    // Add the theme-mono-scaled class for consistent font styling
     root.classList.add('theme-mono-scaled');
     
-    // Force dark mode application
+    // Apply dark mode specific styles
     if (theme === 'dark') {
-      // Force dark mode by setting CSS variables directly
-      document.body.style.setProperty('--background', '#161920');
-      document.body.style.setProperty('--card', '#1e2028');
-      document.body.style.setProperty('--sidebar-background', '#1f2128');
-      document.body.style.setProperty('--foreground', '#f5f5f7');
-      document.body.style.setProperty('--card-foreground', '#f5f5f7');
-      console.log("Setting dark mode with explicit background color: #161920");
+      applyDarkModeStyles();
     } else {
-      // Reset any directly set properties
-      document.body.style.removeProperty('--background');
-      document.body.style.removeProperty('--card');
-      document.body.style.removeProperty('--sidebar-background');
-      document.body.style.removeProperty('--foreground');
-      document.body.style.removeProperty('--card-foreground');
+      resetCustomStyles();
     }
   }, [theme]);
+  
+  // Function to apply dark mode styles
+  const applyDarkModeStyles = () => {
+    // Set background colors
+    document.body.style.setProperty('--background', '#161920');
+    document.body.style.setProperty('--card', '#1e2028');
+    document.body.style.setProperty('--sidebar-background', '#1f2128');
+    
+    // Set text colors
+    document.body.style.setProperty('--foreground', '#f5f5f7');
+    document.body.style.setProperty('--card-foreground', '#f5f5f7');
+    document.body.style.setProperty('--sidebar-foreground', '#f5f5f7');
+    
+    // Apply dark styles to body for inheritance
+    document.body.classList.add('dark-applied');
+    
+    console.log("Applied dark mode with proper styling");
+  };
+  
+  // Function to reset custom styles
+  const resetCustomStyles = () => {
+    document.body.style.removeProperty('--background');
+    document.body.style.removeProperty('--card');
+    document.body.style.removeProperty('--sidebar-background');
+    document.body.style.removeProperty('--foreground');
+    document.body.style.removeProperty('--card-foreground');
+    document.body.style.removeProperty('--sidebar-foreground');
+    document.body.classList.remove('dark-applied');
+  };
 
   const value = {
     theme,
