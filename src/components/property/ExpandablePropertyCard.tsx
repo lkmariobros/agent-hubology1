@@ -139,6 +139,7 @@ export function ExpandablePropertyCard({
               property={property} 
               isOpen={isOpen}
               onCardClick={() => handleOpenChange(!isOpen)}
+              hasCollapsible={true} // Set to true since this is within a Collapsible
             />
             
             {/* Expandable content */}
