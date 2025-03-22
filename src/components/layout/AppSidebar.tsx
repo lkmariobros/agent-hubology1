@@ -18,7 +18,7 @@ import { SidebarProfile } from './sidebar/SidebarProfile';
 export function AppSidebar() {
   return (
     <SidebarProvider defaultOpen={true}>
-      <Sidebar className="border-none bg-[#0F0E11]">
+      <Sidebar className="border-none bg-[#0F0E11]" collapsible="icon" side="left" variant="sidebar">
         <SidebarHeader>
           <Link to="/dashboard" className="flex items-center px-2 py-3">
             <div className="flex items-center justify-center h-8 w-8 rounded-full bg-accent text-white">
