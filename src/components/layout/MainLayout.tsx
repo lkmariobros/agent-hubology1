@@ -20,7 +20,7 @@ const Header = () => {
   const { isAdmin } = useAuth();
   
   return (
-    <div className="flex items-center justify-between px-6 py-3 border-b border-[rgba(255,255,255,0.08)]">
+    <div className="flex items-center justify-between px-6 py-3 border-b border-[rgba(255,255,255,0.08)] bg-dark-background">
       <div className="flex items-center gap-2">
         <Button 
           variant="ghost" 
@@ -87,9 +87,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     <SidebarProvider defaultOpen={savedState}>
       <div className="flex h-screen overflow-hidden w-full">
         <AppSidebar />
-        <div className="flex-1 flex flex-col h-screen overflow-hidden bg-[#0F1014]">
+        <div className="flex-1 flex flex-col h-screen overflow-hidden bg-dark-background">
           <Header />
-          <div className="flex-1 overflow-auto p-6 bg-[#0F1014]">
+          <div className="flex-1 overflow-auto p-6 bg-dark-background">
             {children || <Outlet />}
           </div>
         </div>

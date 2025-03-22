@@ -14,7 +14,7 @@ const CommissionBreakdown: React.FC<CommissionBreakdownProps> = ({
   totalCommission 
 }) => {
   return (
-    <Card className="border-[rgba(255,255,255,0.08)] shadow-sm bg-[#1e2028]">
+    <Card className="border-[rgba(255,255,255,0.08)] shadow-sm bg-dark-card">
       <CardHeader className="p-6">
         <CardTitle className="text-white">Commission Breakdown</CardTitle>
       </CardHeader>

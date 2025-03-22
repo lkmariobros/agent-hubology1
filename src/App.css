@@ -41,17 +41,17 @@
 
 /* Sidebar styling */
 .sidebar-dark {
-  background-color: var(--sidebar-background);
+  background-color: #1F232D !important;
   color: var(--sidebar-foreground);
   border-right: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 [data-expanded="true"].sidebar {
-  background-color: var(--sidebar-background);
+  background-color: #1F232D !important;
 }
 
 [data-expanded="false"].sidebar {
-  background-color: var(--sidebar-background);
+  background-color: #1F232D !important;
 }
 
 /* Main content area styling */
@@ -59,7 +59,7 @@ main,
 .flex-1, 
 body, 
 html {
-  background-color: var(--background);
+  background-color: #0F1014;
   color: var(--foreground);
 }
 
@@ -67,7 +67,7 @@ html {
 .dark body,
 .dark-applied body,
 body.dark {
-  background-color: #0F1014;
+  background-color: #0F1014 !important;
   color: #f8f9fa;
 }
 
@@ -100,7 +100,7 @@ body.dark {
 
 /* Card styling with better dark mode aesthetics */
 .card {
-  background-color: var(--card);
+  background-color: #1a1d25 !important;
   border: 1px solid rgba(255, 255, 255, 0.06);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
   color: var(--card-foreground);
@@ -108,7 +108,7 @@ body.dark {
 
 .dark .card,
 .dark-applied .card {
-  background-color: var(--card);
+  background-color: #1a1d25 !important;
   border-color: rgba(255, 255, 255, 0.06);
   color: var(--card-foreground);
 }
@@ -147,7 +147,7 @@ body.dark {
 /* Header in dark mode */
 .dark header,
 .dark-applied header {
-  background-color: var(--background);
+  background-color: #0F1014 !important;
   border-color: rgba(255, 255, 255, 0.06);
 }
 
@@ -177,6 +177,19 @@ body.dark {
 .dark button,
 .dark-applied button {
   color: #f8f9fa;
+}
+
+/* Apply color scheme directly to sidebar and main content */
+.bg-dark-background {
+  background-color: #0F1014 !important;
+}
+
+.bg-dark-sidebar {
+  background-color: #1F232D !important;
+}
+
+.bg-dark-card {
+  background-color: #1a1d25 !important;
 }
 
 /* Enhanced status badges */

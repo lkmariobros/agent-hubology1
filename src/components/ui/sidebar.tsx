@@ -64,7 +64,7 @@ const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(
       <aside
         ref={ref}
         className={cn(
-          "sidebar group relative flex h-full flex-col border-r bg-[var(--sidebar-background)] text-[var(--sidebar-foreground)]",
+          "sidebar group relative flex h-full flex-col border-r border-[rgba(255,255,255,0.08)] bg-dark-sidebar text-[var(--sidebar-foreground)]",
           expanded ? "w-64" : "w-14",
           "transition-width duration-300",
           className
