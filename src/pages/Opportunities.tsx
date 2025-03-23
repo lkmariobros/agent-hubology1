@@ -22,7 +22,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from '@/lib/utils';
-import MainLayout from '@/components/layout/MainLayout';
 
 // Define opportunity type
 interface Opportunity {
@@ -217,81 +216,80 @@ const Opportunities = () => {
   };
 
   return (
-    <MainLayout>
-      <div className="space-y-6">
-        {/* Page Title */}
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">Opportunities Board</h1>
-            <p className="text-muted-foreground">
-              Browse and connect with potential clients looking for properties
-            </p>
-          </div>
-          <Button size="sm" className="gap-1">
-            <PlusCircle className="h-4 w-4" />
-            New Opportunity
-          </Button>
+    <div className="space-y-6">
+      {/* Page Title */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Opportunities Board</h1>
+          <p className="text-muted-foreground">
+            Browse and connect with potential clients looking for properties
+          </p>
         </div>
-        
-        {/* Filters and Search */}
-        <Card className="glass-card">
-          <CardContent className="p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="relative">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search opportunities..."
-                className="pl-8 bg-background"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            
-            <Select value={sortOption} onValueChange={setSortOption}>
-              <SelectTrigger className="bg-background">
-                <div className="flex items-center gap-2">
-                  <ArrowDownUp className="h-4 w-4" />
-                  <span>Sort by</span>
-                </div>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="newest">Newest first</SelectItem>
-                <SelectItem value="oldest">Oldest first</SelectItem>
-                <SelectItem value="urgent">Urgent first</SelectItem>
-              </SelectContent>
-            </Select>
-            
-            <Select defaultValue="All">
-              <SelectTrigger className="bg-background">
-                <div className="flex items-center gap-2">
-                  <Filter className="h-4 w-4" />
-                  <span>Filter by status</span>
-                </div>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="All">All statuses</SelectItem>
-                <SelectItem value="Urgent">Urgent</SelectItem>
-                <SelectItem value="New">New</SelectItem>
-                <SelectItem value="Featured">Featured</SelectItem>
-                <SelectItem value="Regular">Regular</SelectItem>
-              </SelectContent>
-            </Select>
-          </CardContent>
-        </Card>
-        
-        {/* Main Content */}
-        <Tabs defaultValue="All" value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid grid-cols-5 mb-4">
-            <TabsTrigger value="All">All</TabsTrigger>
-            <TabsTrigger value="Residential">Residential</TabsTrigger>
-            <TabsTrigger value="Commercial">Commercial</TabsTrigger>
-            <TabsTrigger value="Industrial">Industrial</TabsTrigger>
-            <TabsTrigger value="Land">Land</TabsTrigger>
-          </TabsList>
+        <Button size="sm" className="gap-1">
+          <PlusCircle className="h-4 w-4" />
+          New Opportunity
+        </Button>
+      </div>
+      
+      {/* Filters and Search */}
+      <Card className="glass-card">
+        <CardContent className="p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search opportunities..."
+              className="pl-8 bg-background"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
           
-          <TabsContent value={activeTab} className="mt-0">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {filteredOpportunities.map((opportunity) => (
-                <Card key={opportunity.id} className="overflow-hidden border-border/40 hover:border-border transition-all">
+          <Select value={sortOption} onValueChange={setSortOption}>
+            <SelectTrigger className="bg-background">
+              <div className="flex items-center gap-2">
+                <ArrowDownUp className="h-4 w-4" />
+                <span>Sort by</span>
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="newest">Newest first</SelectItem>
+              <SelectItem value="oldest">Oldest first</SelectItem>
+              <SelectItem value="urgent">Urgent first</SelectItem>
+            </SelectContent>
+          </Select>
+          
+          <Select defaultValue="All">
+            <SelectTrigger className="bg-background">
+              <div className="flex items-center gap-2">
+                <Filter className="h-4 w-4" />
+                <span>Filter by status</span>
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="All">All statuses</SelectItem>
+              <SelectItem value="Urgent">Urgent</SelectItem>
+              <SelectItem value="New">New</SelectItem>
+              <SelectItem value="Featured">Featured</SelectItem>
+              <SelectItem value="Regular">Regular</SelectItem>
+            </SelectContent>
+          </Select>
+        </CardContent>
+      </Card>
+      
+      {/* Main Content */}
+      <Tabs defaultValue="All" value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid grid-cols-5 mb-4">
+          <TabsTrigger value="All">All</TabsTrigger>
+          <TabsTrigger value="Residential">Residential</TabsTrigger>
+          <TabsTrigger value="Commercial">Commercial</TabsTrigger>
+          <TabsTrigger value="Industrial">Industrial</TabsTrigger>
+          <TabsTrigger value="Land">Land</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value={activeTab} className="mt-0">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {filteredOpportunities.map((opportunity) => (
+              <Card key={opportunity.id} className="overflow-hidden border-border/40 hover:border-border transition-all">
                   <CardContent className="p-4">
                     <div className="flex justify-between items-start mb-3">
                       <Badge variant="outline" className={cn("rounded-md flex gap-1 items-center", getStatusBadgeStyle(opportunity.status))}>
@@ -329,12 +327,11 @@ const Opportunities = () => {
                     </Button>
                   </CardContent>
                 </Card>
-              ))}
-            </div>
-          </TabsContent>
-        </Tabs>
-      </div>
-    </MainLayout>
+            ))}
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };
 
