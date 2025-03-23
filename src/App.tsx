@@ -34,6 +34,7 @@ import Index from './pages/Index';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import Home from './pages/Home';
 import NotFound from './pages/NotFound';
+import Opportunities from './pages/Opportunities';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -72,6 +73,7 @@ function App() {
                   <Route path="profile" element={<Profile />} />
                   <Route path="settings" element={<Settings />} />
                   <Route path="team" element={<Home />} /> {/* Temporary placeholder */}
+                  <Route path="opportunities" element={<Opportunities />} />
                 </Route>
 
                 {/* Admin Routes */}
