@@ -122,6 +122,82 @@ const PropertyShowcase = () => {
             <TabsTrigger value="hot-properties">Hot Properties</TabsTrigger>
             <TabsTrigger value="new-projects">New Projects</TabsTrigger>
           </TabsList>
+          
+          {/* Property Cards - moved inside Tabs component */}
+          <TabsContent value="my-listings" className="m-0">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {sampleProperties.map((property) => (
+                <Card
+                  key={property.id}
+                  className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer bg-[#161920] border-neutral-800"
+                  onClick={() => handleViewProperty(property.id)}
+                >
+                  {/* Property Image with Status Badge */}
+                  <div className="relative h-48">
+                    <img
+                      src={property.image}
+                      alt={property.title}
+                      className="w-full h-full object-cover"
+                    />
+                    <Badge 
+                      className={cn(
+                        "absolute top-2 right-2 font-medium",
+                        getStatusBadgeStyle(property.status)
+                      )}
+                    >
+                      {property.status}
+                    </Badge>
+                  </div>
+                  
+                  {/* Property Info */}
+                  <div className="p-4 space-y-3">
+                    {/* Title and Address */}
+                    <div>
+                      <h3 className="font-bold text-lg truncate">{property.title}</h3>
+                      <p className="text-sm text-muted-foreground truncate">{property.address}</p>
+                    </div>
+                    
+                    {/* Price */}
+                    <p className="text-xl font-bold">${formatPrice(property.price)}</p>
+                    
+                    {/* Specifications */}
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-1">
+                        <Bed className="h-4 w-4" />
+                        <span className="text-sm">{property.bedrooms} beds</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Bath className="h-4 w-4" />
+                        <span className="text-sm">{property.bathrooms} baths</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Square className="h-4 w-4" />
+                        <span className="text-sm">{property.squareFeet} sqft</span>
+                      </div>
+                    </div>
+                    
+                    {/* Days on Market */}
+                    <div className="flex justify-end items-center text-xs text-muted-foreground">
+                      <Calendar className="h-3 w-3 mr-1" />
+                      <span>{property.daysOnMarket} days on market</span>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="hot-properties">
+            <div className="p-3 text-center text-muted-foreground">
+              Hot properties will be displayed here
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="new-projects">
+            <div className="p-3 text-center text-muted-foreground">
+              New projects will be displayed here
+            </div>
+          </TabsContent>
         </Tabs>
         
         <div className="flex gap-2 w-full sm:w-auto">
@@ -136,70 +212,6 @@ const PropertyShowcase = () => {
           </Button>
         </div>
       </div>
-      
-      {/* Property Cards */}
-      <TabsContent value={activeTab} className="m-0">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {sampleProperties.map((property) => (
-            <Card
-              key={property.id}
-              className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer bg-[#161920] border-neutral-800"
-              onClick={() => handleViewProperty(property.id)}
-            >
-              {/* Property Image with Status Badge */}
-              <div className="relative h-48">
-                <img
-                  src={property.image}
-                  alt={property.title}
-                  className="w-full h-full object-cover"
-                />
-                <Badge 
-                  className={cn(
-                    "absolute top-2 right-2 font-medium",
-                    getStatusBadgeStyle(property.status)
-                  )}
-                >
-                  {property.status}
-                </Badge>
-              </div>
-              
-              {/* Property Info */}
-              <div className="p-4 space-y-3">
-                {/* Title and Address */}
-                <div>
-                  <h3 className="font-bold text-lg truncate">{property.title}</h3>
-                  <p className="text-sm text-muted-foreground truncate">{property.address}</p>
-                </div>
-                
-                {/* Price */}
-                <p className="text-xl font-bold">${formatPrice(property.price)}</p>
-                
-                {/* Specifications */}
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-1">
-                    <Bed className="h-4 w-4" />
-                    <span className="text-sm">{property.bedrooms} beds</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Bath className="h-4 w-4" />
-                    <span className="text-sm">{property.bathrooms} baths</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Square className="h-4 w-4" />
-                    <span className="text-sm">{property.squareFeet} sqft</span>
-                  </div>
-                </div>
-                
-                {/* Days on Market */}
-                <div className="flex justify-end items-center text-xs text-muted-foreground">
-                  <Calendar className="h-3 w-3 mr-1" />
-                  <span>{property.daysOnMarket} days on market</span>
-                </div>
-              </div>
-            </Card>
-          ))}
-        </div>
-      </TabsContent>
     </div>
   );
 };
