@@ -4,10 +4,10 @@ import { Plus, Bed, Bath, Square, Calendar, ChevronDown } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Card } from "@/components/ui/card";
 import { cn } from '@/lib/utils';
 import { formatPrice } from '@/utils/propertyUtils';
 import { useNavigate } from 'react-router-dom';
+import { Card, CardContent } from '@/components/ui/component';
 
 type PropertyStatus = 'Active' | 'Under Contract' | 'Pending' | 'Sold' | 'New';
 
@@ -105,7 +105,7 @@ const PropertyShowcase = () => {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 mb-8">
       {/* Header with navigation and filters in one row */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
@@ -142,11 +142,12 @@ const PropertyShowcase = () => {
       {/* Property Cards */}
       <Tabs value={activeTab} className="w-full">
         <TabsContent value="my-listings" className="m-0">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-4">
             {sampleProperties.map((property) => (
               <Card
                 key={property.id}
-                className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer bg-[#161920] border-neutral-800"
+                variant="neubrutalism"
+                className="overflow-hidden cursor-pointer bg-[#161920] border-white/70"
                 onClick={() => handleViewProperty(property.id)}
               >
                 {/* Property Image with Status Badge */}
@@ -166,8 +167,7 @@ const PropertyShowcase = () => {
                   </Badge>
                 </div>
                 
-                {/* Property Info */}
-                <div className="p-4 space-y-3">
+                <CardContent className="space-y-3">
                   {/* Title and Address */}
                   <div>
                     <h3 className="font-bold text-lg truncate">{property.title}</h3>
@@ -198,7 +198,7 @@ const PropertyShowcase = () => {
                     <Calendar className="h-3 w-3 mr-1" />
                     <span>{property.daysOnMarket} days on market</span>
                   </div>
-                </div>
+                </CardContent>
               </Card>
             ))}
           </div>
