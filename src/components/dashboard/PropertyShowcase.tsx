@@ -107,32 +107,50 @@ const PropertyShowcase = () => {
   };
 
   return (
-    <Card variant="neubrutalism" className="bg-[#161920] dark:bg-[#161920] border-neutral-800">
+    <Card 
+      variant="neubrutalism" 
+      className="bg-[#161920] dark:bg-[#161920] border-neutral-800 rounded-xl overflow-hidden"
+    >
       <Tabs defaultValue="my-listings" value={activeTab} onValueChange={setActiveTab} className="w-full">
         {/* Header with navigation and filters in one row */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 p-6 border-b border-neutral-800">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            <h2 className="text-xl font-bold">Property Showcase</h2>
+            <h2 className="text-xl font-bold text-white">Property Showcase</h2>
             
             <TabsList className="grid grid-cols-3 w-full sm:w-auto bg-neutral-800/50">
-              <TabsTrigger value="my-listings">My Listings</TabsTrigger>
-              <TabsTrigger value="hot-properties">Hot Properties</TabsTrigger>
-              <TabsTrigger value="new-projects">New Projects</TabsTrigger>
+              <TabsTrigger 
+                value="my-listings" 
+                className="data-[state=active]:bg-orange-500 data-[state=active]:text-white"
+              >
+                My Listings
+              </TabsTrigger>
+              <TabsTrigger 
+                value="hot-properties"
+                className="data-[state=active]:bg-orange-500 data-[state=active]:text-white"
+              >
+                Hot Properties
+              </TabsTrigger>
+              <TabsTrigger 
+                value="new-projects"
+                className="data-[state=active]:bg-orange-500 data-[state=active]:text-white"
+              >
+                New Projects
+              </TabsTrigger>
             </TabsList>
           </div>
           
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" className="bg-transparent border-neutral-700">
+          <div className="flex flex-wrap items-center gap-2">
+            <Button variant="outline" size="sm" className="bg-transparent border-neutral-700 text-neutral-300">
               All Types <Plus className="h-3.5 w-3.5 ml-1" />
             </Button>
-            <Button variant="outline" size="sm" className="bg-transparent border-neutral-700">
+            <Button variant="outline" size="sm" className="bg-transparent border-neutral-700 text-neutral-300">
               All Prices <Plus className="h-3.5 w-3.5 ml-1" />
             </Button>
-            <Button variant="outline" size="sm" className="bg-transparent border-neutral-700">
+            <Button variant="outline" size="sm" className="bg-transparent border-neutral-700 text-neutral-300">
               All Locations <Plus className="h-3.5 w-3.5 ml-1" />
             </Button>
             
-            <Button onClick={handleAddProperty} className="bg-orange-500 hover:bg-orange-600">
+            <Button onClick={handleAddProperty} className="bg-orange-500 hover:bg-orange-600 text-white">
               <Plus className="h-4 w-4 mr-1" /> Add Property
             </Button>
           </div>
@@ -144,7 +162,7 @@ const PropertyShowcase = () => {
             {sampleProperties.map((property) => (
               <PropertyCard
                 key={property.id}
-                className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer bg-[#161920] border-neutral-800"
+                className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer bg-[#1E2128] border-neutral-800"
                 onClick={() => handleViewProperty(property.id)}
               >
                 {/* Property Image with Status Badge */}
