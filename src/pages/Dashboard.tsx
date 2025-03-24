@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Building2, BarChart4, Users, DollarSign, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -5,6 +6,7 @@ import MetricCard from '@/components/dashboard/MetricCard';
 import PropertyList from '@/components/dashboard/PropertyList';
 import RecentTransactions from '@/components/dashboard/RecentTransactions';
 import OpportunitiesBoard from '@/components/dashboard/OpportunitiesBoard';
+import PropertyShowcase from '@/components/dashboard/PropertyShowcase';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useMetrics, useRecentProperties, useRecentTransactions } from '@/hooks/useDashboard';
@@ -109,17 +111,11 @@ const Dashboard = () => {
         )}
       </div>
       
+      {/* Property Showcase Section */}
+      <PropertyShowcase />
+      
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-24">
-        {/* Properties List */}
-        <div className="md:col-span-2">
-          <PropertyList 
-            properties={propertiesData?.data || []} 
-            isLoading={isLoadingProperties}
-            onViewAll={handleViewAllProperties}
-          />
-        </div>
-        
         {/* Opportunities Board */}
         <div>
           <OpportunitiesBoard 
