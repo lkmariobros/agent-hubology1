@@ -97,23 +97,14 @@ const PropertyShowcase = () => {
         
         {/* Navigation and filters row */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <Tabs defaultValue="my-listings" value={activeTab} onValueChange={setActiveTab} className="w-full sm:w-auto">
+          <div className="w-full"></div> {/* Spacer to push the tabs to the right */}
+          <Tabs defaultValue="my-listings" value={activeTab} onValueChange={setActiveTab} className="w-full sm:w-auto ml-auto">
             <TabsList className="grid grid-cols-3 w-full sm:w-auto">
               <TabsTrigger value="my-listings">My Listings</TabsTrigger>
               <TabsTrigger value="hot-properties">Hot Properties</TabsTrigger>
               <TabsTrigger value="new-projects">New Projects</TabsTrigger>
             </TabsList>
           </Tabs>
-          
-          <div className="flex items-center gap-2 w-full md:w-auto">
-            <div className="flex gap-2 flex-wrap">
-              
-              
-              
-            </div>
-            
-            
-          </div>
         </div>
       </div>
       
@@ -181,4 +172,5 @@ const PropertyShowcase = () => {
       </Tabs>
     </div>;
 };
+
 export default PropertyShowcase;
