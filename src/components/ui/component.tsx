@@ -116,6 +116,20 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
       )
     }
 
+    const content = (
+      <CardContent>
+        {title && (
+          <h3 className="text-lg font-bold mb-1 text-gray-900 dark:text-gray-100">
+            {title}
+          </h3>
+        )}
+        {description && (
+          <p className="text-gray-700 dark:text-gray-300">{description}</p>
+        )}
+        {children}
+      </CardContent>
+    )
+
     const GradientLines = () => (
       <>
         <div className="absolute left-0 top-4 -z-0 h-px w-full bg-gradient-to-l from-zinc-200 via-zinc-400 to-zinc-600 dark:from-zinc-900 dark:via-zinc-700 dark:to-zinc-500 sm:top-6 md:top-8" />
@@ -213,20 +227,6 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
       if (variant === "corners") return <CornerBorders />
       return null
     }
-
-    const content = (
-      <CardContent>
-        {title && (
-          <h3 className="text-lg font-bold mb-1 text-gray-900 dark:text-gray-100">
-            {title}
-          </h3>
-        )}
-        {description && (
-          <p className="text-gray-700 dark:text-gray-300">{description}</p>
-        )}
-        {children}
-      </CardContent>
-    )
 
     if (variant === "dots") {
       return (
