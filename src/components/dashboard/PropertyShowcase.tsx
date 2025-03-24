@@ -4,7 +4,7 @@ import { Plus, Bed, Bath, Square, Calendar } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Card } from "@/components/ui/component"; // Only importing from component.tsx
+import { Card } from "@/components/ui/component";
 import { cn } from '@/lib/utils';
 import { formatPrice } from '@/utils/propertyUtils';
 import { useNavigate } from 'react-router-dom';
@@ -181,14 +181,14 @@ const PropertyShowcase = () => {
           </div>
         </div>
         
-        {/* Property Cards */}
+        {/* Property Cards - Updated to match image design */}
         <Tabs defaultValue="my-listings" value={activeTab} className="w-full">
           <TabsContent value="my-listings" className="mt-0">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {sampleProperties.map((property) => (
                 <div
                   key={property.id}
-                  className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer bg-[#1E2128] border border-neutral-800 rounded-md"
+                  className="bg-[#1E2128] border border-neutral-800 rounded-xl overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
                   onClick={() => handleViewProperty(property.id)}
                 >
                   {/* Property Image with Status Badge */}
