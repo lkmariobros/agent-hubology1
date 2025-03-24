@@ -73,6 +73,20 @@ CardContent.displayName = "CardContent"
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
   ({ className, variant, title, description, children, ...props }, ref) => {
+    const content = (
+      <CardContent>
+        {title && (
+          <h3 className="text-lg font-bold mb-1 text-gray-900 dark:text-gray-100">
+            {title}
+          </h3>
+        )}
+        {description && (
+          <p className="text-gray-700 dark:text-gray-300">{description}</p>
+        )}
+        {children}
+      </CardContent>
+    )
+
     const DotsPattern = () => {
       const sharedClasses =
         "rounded-full outline outline-8 dark:outline-gray-950 sm:my-6 md:my-8 size-1 my-4 outline-gray-50 bg-green-400"
@@ -115,20 +129,6 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
         </>
       )
     }
-
-    const content = (
-      <CardContent>
-        {title && (
-          <h3 className="text-lg font-bold mb-1 text-gray-900 dark:text-gray-100">
-            {title}
-          </h3>
-        )}
-        {description && (
-          <p className="text-gray-700 dark:text-gray-300">{description}</p>
-        )}
-        {children}
-      </CardContent>
-    )
 
     const GradientLines = () => (
       <>
