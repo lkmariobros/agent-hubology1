@@ -105,12 +105,13 @@ const PropertyShowcase = () => {
   };
 
   return (
-    <div className="space-y-4">
-      {/* Header with navigation and filters in one row */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-          <h2 className="text-xl font-bold">Property Showcase</h2>
-          
+    <div className="space-y-4 border border-border rounded-lg p-5 bg-card/50">
+      {/* Header with title */}
+      <div className="flex flex-col gap-4">
+        <h2 className="text-xl font-bold">Property Showcase</h2>
+        
+        {/* Navigation and filters row */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <Tabs defaultValue="my-listings" value={activeTab} onValueChange={setActiveTab} className="w-full sm:w-auto">
             <TabsList className="grid grid-cols-3 w-full sm:w-auto">
               <TabsTrigger value="my-listings">My Listings</TabsTrigger>
@@ -118,24 +119,24 @@ const PropertyShowcase = () => {
               <TabsTrigger value="new-projects">New Projects</TabsTrigger>
             </TabsList>
           </Tabs>
-        </div>
-        
-        <div className="flex items-center space-x-2">
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm">
-              All Types <ChevronDown className="h-3.5 w-3.5 ml-1" />
-            </Button>
-            <Button variant="outline" size="sm">
-              All Prices <ChevronDown className="h-3.5 w-3.5 ml-1" />
-            </Button>
-            <Button variant="outline" size="sm">
-              All Locations <ChevronDown className="h-3.5 w-3.5 ml-1" />
+          
+          <div className="flex items-center gap-2 w-full md:w-auto">
+            <div className="flex gap-2 flex-wrap">
+              <Button variant="outline" size="sm">
+                All Types <ChevronDown className="h-3.5 w-3.5 ml-1" />
+              </Button>
+              <Button variant="outline" size="sm">
+                All Prices <ChevronDown className="h-3.5 w-3.5 ml-1" />
+              </Button>
+              <Button variant="outline" size="sm">
+                All Locations <ChevronDown className="h-3.5 w-3.5 ml-1" />
+              </Button>
+            </div>
+            
+            <Button onClick={handleAddProperty}>
+              <Plus className="h-4 w-4 mr-1" /> Add Property
             </Button>
           </div>
-          
-          <Button onClick={handleAddProperty}>
-            <Plus className="h-4 w-4 mr-1" /> Add Property
-          </Button>
         </div>
       </div>
       
