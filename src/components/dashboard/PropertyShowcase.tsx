@@ -105,13 +105,11 @@ const PropertyShowcase = () => {
     }
   };
 
-  // Debugging - Log to ensure component is being rendered
-  console.log("Rendering PropertyShowcase with Card from component.tsx");
-
   return (
     <Card 
       variant="neubrutalism" 
-      className="bg-[#161920] dark:bg-[#161920] border-neutral-800 rounded-xl overflow-hidden"
+      className="border border-white/70 rounded-lg overflow-hidden"
+      style={{ backgroundColor: "#161920" }}
     >
       <div className="p-6 md:p-8">
         <div className="flex flex-col lg:flex-row justify-between items-start mb-8">
@@ -181,14 +179,15 @@ const PropertyShowcase = () => {
           </div>
         </div>
         
-        {/* Property Cards - Updated to match image design */}
+        {/* Property Cards - Using neubrutalism style for individual cards */}
         <Tabs defaultValue="my-listings" value={activeTab} className="w-full">
           <TabsContent value="my-listings" className="mt-0">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {sampleProperties.map((property) => (
-                <div
+                <Card
                   key={property.id}
-                  className="bg-[#1E2128] border border-neutral-800 rounded-xl overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+                  variant="neubrutalism" 
+                  className="overflow-hidden cursor-pointer bg-[#1E2128] border-white/70 hover:shadow-lg"
                   onClick={() => handleViewProperty(property.id)}
                 >
                   {/* Property Image with Status Badge */}
@@ -241,7 +240,7 @@ const PropertyShowcase = () => {
                       <span>{property.daysOnMarket} days on market</span>
                     </div>
                   </div>
-                </div>
+                </Card>
               ))}
             </div>
           </TabsContent>
