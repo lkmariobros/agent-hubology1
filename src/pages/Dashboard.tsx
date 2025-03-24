@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Building2, BarChart4, Users, DollarSign, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -11,14 +10,22 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useMetrics, useRecentProperties, useRecentTransactions } from '@/hooks/useDashboard';
 import { DashboardMetric } from '@/types';
-
 const Dashboard = () => {
   const navigate = useNavigate();
 
   // Fetch dashboard data with React Query - using hooks with improved error handling
-  const { data: metricsData, isLoading: isLoadingMetrics } = useMetrics();
-  const { data: propertiesData, isLoading: isLoadingProperties } = useRecentProperties();
-  const { data: transactionsData, isLoading: isLoadingTransactions } = useRecentTransactions();
+  const {
+    data: metricsData,
+    isLoading: isLoadingMetrics
+  } = useMetrics();
+  const {
+    data: propertiesData,
+    isLoading: isLoadingProperties
+  } = useRecentProperties();
+  const {
+    data: transactionsData,
+    isLoading: isLoadingTransactions
+  } = useRecentTransactions();
 
   // Map the icon names to actual icon components
   const getIconComponent = (iconName: string) => {
@@ -46,25 +53,19 @@ const Dashboard = () => {
   const handleAddProperty = () => {
     navigate('/properties/new');
   };
-
   const handleAddTransaction = () => {
     navigate('/transactions/new');
   };
-
   const handleViewAllProperties = () => {
     navigate('/properties');
   };
-
   const handleViewAllTransactions = () => {
     navigate('/transactions');
   };
-
   const handleViewAllOpportunities = () => {
     navigate('/opportunities');
   };
-
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       {/* Page Title */}
       <div className="flex justify-between items-center">
         <div>
@@ -74,9 +75,7 @@ const Dashboard = () => {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={handleAddProperty} className="gap-1">
-            <Plus className="h-4 w-4" /> Add Property
-          </Button>
+          
           <Button onClick={handleAddTransaction} variant="outline" className="gap-1">
             <Plus className="h-4 w-4" /> Add Transaction
           </Button>
@@ -85,30 +84,11 @@ const Dashboard = () => {
       
       {/* Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {isLoadingMetrics ? (
-          // Skeleton loading states for metrics
-          Array(4).fill(0).map((_, index) => (
-            <div 
-              key={index} 
-              className={cn(
-                "animate-pulse h-32 bg-card/50 rounded-lg",
-                index === 0 ? "sm:col-span-2 lg:col-span-1" : ""
-              )} 
-            />
-          ))
-        ) : (
-          // Actual metrics
-          metrics.map((metric, index) => (
-            <MetricCard 
-              key={metric.label} 
-              metric={metric} 
-              className={cn(
-                "animate-fade-in",
-                index === 0 ? "sm:col-span-2 lg:col-span-1" : ""
-              )} 
-            />
-          ))
-        )}
+        {isLoadingMetrics ?
+      // Skeleton loading states for metrics
+      Array(4).fill(0).map((_, index) => <div key={index} className={cn("animate-pulse h-32 bg-card/50 rounded-lg", index === 0 ? "sm:col-span-2 lg:col-span-1" : "")} />) :
+      // Actual metrics
+      metrics.map((metric, index) => <MetricCard key={metric.label} metric={metric} className={cn("animate-fade-in", index === 0 ? "sm:col-span-2 lg:col-span-1" : "")} />)}
       </div>
       
       {/* Property Showcase Section */}
@@ -118,22 +98,14 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-24">
         {/* Opportunities Board */}
         <div>
-          <OpportunitiesBoard 
-            onViewAll={handleViewAllOpportunities}
-          />
+          <OpportunitiesBoard onViewAll={handleViewAllOpportunities} />
         </div>
         
         {/* Recent Transactions */}
         <div>
-          <RecentTransactions 
-            transactions={transactionsData?.data || []} 
-            isLoading={isLoadingTransactions}
-            onViewAll={handleViewAllTransactions}
-          />
+          <RecentTransactions transactions={transactionsData?.data || []} isLoading={isLoadingTransactions} onViewAll={handleViewAllTransactions} />
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Dashboard;
