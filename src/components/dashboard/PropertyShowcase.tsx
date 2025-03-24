@@ -7,7 +7,9 @@ import { Card } from "@/components/ui/card";
 import { cn } from '@/lib/utils';
 import { formatPrice } from '@/utils/propertyUtils';
 import { useNavigate } from 'react-router-dom';
+
 type PropertyStatus = 'Active' | 'Under Contract' | 'Pending' | 'Sold' | 'New';
+
 interface ShowcaseProperty {
   id: string;
   title: string;
@@ -20,6 +22,7 @@ interface ShowcaseProperty {
   status: PropertyStatus;
   image: string;
 }
+
 const sampleProperties: ShowcaseProperty[] = [{
   id: '1',
   title: 'Modern Apartment with Ocean View',
@@ -65,15 +68,19 @@ const sampleProperties: ShowcaseProperty[] = [{
   status: 'Active',
   image: '/lovable-uploads/0a671412-da45-4d5e-b18a-33d4da167c78.png'
 }];
+
 const PropertyShowcase = () => {
   const [activeTab, setActiveTab] = useState("my-listings");
   const navigate = useNavigate();
+  
   const handleAddProperty = () => {
     navigate('/properties/new');
   };
+  
   const handleViewProperty = (id: string) => {
     navigate(`/properties/${id}`);
   };
+  
   const getStatusBadgeStyle = (status: PropertyStatus) => {
     switch (status) {
       case 'Active':
@@ -90,29 +97,32 @@ const PropertyShowcase = () => {
         return 'bg-slate-500 text-white';
     }
   };
-  return <div className="space-y-4 border border-border rounded-lg p-5 bg-card/50">
-      {/* Header with title */}
-      <div className="flex flex-col gap-4">
+  
+  return (
+    <div className="space-y-4 border border-border rounded-lg p-5 bg-card/50">
+      {/* Header with title and tabs in same row */}
+      <div className="flex flex-row justify-between items-center">
         <h2 className="text-xl font-bold">Property Showcase</h2>
         
-        {/* Navigation and filters row */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div className="w-full"></div> {/* Spacer to push the tabs to the right */}
-          <Tabs defaultValue="my-listings" value={activeTab} onValueChange={setActiveTab} className="w-full sm:w-auto ml-auto">
-            <TabsList className="grid grid-cols-3 w-full sm:w-auto">
-              <TabsTrigger value="my-listings">My Listings</TabsTrigger>
-              <TabsTrigger value="hot-properties">Hot Properties</TabsTrigger>
-              <TabsTrigger value="new-projects">New Projects</TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </div>
+        <Tabs defaultValue="my-listings" value={activeTab} onValueChange={setActiveTab} className="w-auto">
+          <TabsList className="grid grid-cols-3 w-auto">
+            <TabsTrigger value="my-listings" className="px-4 py-1.5 h-10">My Listings</TabsTrigger>
+            <TabsTrigger value="hot-properties" className="px-4 py-1.5 h-10">Hot Properties</TabsTrigger>
+            <TabsTrigger value="new-projects" className="px-4 py-1.5 h-10">New Projects</TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
       
       {/* Property Cards */}
       <Tabs value={activeTab} className="w-full">
         <TabsContent value="my-listings" className="m-0">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {sampleProperties.map(property => <Card key={property.id} className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer bg-[#161920] border-neutral-800" onClick={() => handleViewProperty(property.id)}>
+            {sampleProperties.map(property => (
+              <Card 
+                key={property.id} 
+                className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer bg-[#161920] border-neutral-800" 
+                onClick={() => handleViewProperty(property.id)}
+              >
                 {/* Property Image with Status Badge */}
                 <div className="relative h-48">
                   <img src={property.image} alt={property.title} className="w-full h-full object-cover" />
@@ -154,7 +164,8 @@ const PropertyShowcase = () => {
                     <span>{property.daysOnMarket} days on market</span>
                   </div>
                 </div>
-              </Card>)}
+              </Card>
+            ))}
           </div>
         </TabsContent>
         
@@ -170,7 +181,8 @@ const PropertyShowcase = () => {
           </div>
         </TabsContent>
       </Tabs>
-    </div>;
+    </div>
+  );
 };
 
 export default PropertyShowcase;
