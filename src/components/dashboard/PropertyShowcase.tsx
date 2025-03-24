@@ -1,8 +1,8 @@
+
 import React, { useState } from 'react';
 import { Plus, Bed, Bath, Square, Calendar, ChevronDown } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { cn } from '@/lib/utils';
 import { formatPrice } from '@/utils/propertyUtils';
@@ -97,25 +97,61 @@ const PropertyShowcase = () => {
         return 'bg-slate-500 text-white';
     }
   };
+
+  // Custom Tab Component
+  const CustomTabs = () => {
+    return (
+      <div className="flex justify-end">
+        <div className="flex rounded-md bg-[#171923]/80 backdrop-blur-sm border border-white/5 overflow-hidden">
+          <button
+            onClick={() => setActiveTab("my-listings")}
+            className={cn(
+              "px-6 py-2 text-sm font-medium transition-colors",
+              activeTab === "my-listings" 
+                ? "bg-[#171923] text-white" 
+                : "text-gray-400 hover:text-white"
+            )}
+          >
+            My Listings
+          </button>
+          <button
+            onClick={() => setActiveTab("hot-properties")}
+            className={cn(
+              "px-6 py-2 text-sm font-medium transition-colors",
+              activeTab === "hot-properties" 
+                ? "bg-[#171923] text-white" 
+                : "text-gray-400 hover:text-white"
+            )}
+          >
+            Hot Properties
+          </button>
+          <button
+            onClick={() => setActiveTab("new-projects")}
+            className={cn(
+              "px-6 py-2 text-sm font-medium transition-colors",
+              activeTab === "new-projects" 
+                ? "bg-[#171923] text-white" 
+                : "text-gray-400 hover:text-white"
+            )}
+          >
+            New Projects
+          </button>
+        </div>
+      </div>
+    );
+  };
   
   return (
     <div className="space-y-4 border border-border rounded-lg p-5 bg-card/50">
       {/* Header with title and tabs in same row */}
       <div className="flex flex-row justify-between items-center">
         <h2 className="text-xl font-bold">Property Showcase</h2>
-        
-        <Tabs defaultValue="my-listings" value={activeTab} onValueChange={setActiveTab} className="w-auto">
-          <TabsList className="grid grid-cols-3 w-auto">
-            <TabsTrigger value="my-listings" className="px-4 py-1.5 h-10">My Listings</TabsTrigger>
-            <TabsTrigger value="hot-properties" className="px-4 py-1.5 h-10">Hot Properties</TabsTrigger>
-            <TabsTrigger value="new-projects" className="px-4 py-1.5 h-10">New Projects</TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <CustomTabs />
       </div>
       
       {/* Property Cards */}
-      <Tabs value={activeTab} className="w-full">
-        <TabsContent value="my-listings" className="m-0">
+      <div className="mt-6">
+        {activeTab === "my-listings" && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {sampleProperties.map(property => (
               <Card 
@@ -167,20 +203,20 @@ const PropertyShowcase = () => {
               </Card>
             ))}
           </div>
-        </TabsContent>
+        )}
         
-        <TabsContent value="hot-properties">
+        {activeTab === "hot-properties" && (
           <div className="p-3 text-center text-muted-foreground">
             Hot properties will be displayed here
           </div>
-        </TabsContent>
+        )}
         
-        <TabsContent value="new-projects">
+        {activeTab === "new-projects" && (
           <div className="p-3 text-center text-muted-foreground">
             New projects will be displayed here
           </div>
-        </TabsContent>
-      </Tabs>
+        )}
+      </div>
     </div>
   );
 };
