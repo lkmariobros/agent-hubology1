@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Plus, Bed, Bath, Square, Calendar, ChevronDown } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -8,9 +7,7 @@ import { Card } from "@/components/ui/card";
 import { cn } from '@/lib/utils';
 import { formatPrice } from '@/utils/propertyUtils';
 import { useNavigate } from 'react-router-dom';
-
 type PropertyStatus = 'Active' | 'Under Contract' | 'Pending' | 'Sold' | 'New';
-
 interface ShowcaseProperty {
   id: string;
   title: string;
@@ -23,70 +20,60 @@ interface ShowcaseProperty {
   status: PropertyStatus;
   image: string;
 }
-
-const sampleProperties: ShowcaseProperty[] = [
-  {
-    id: '1',
-    title: 'Modern Apartment with Ocean View',
-    address: '123 Coastal Drive, Seaside',
-    price: 750000,
-    bedrooms: 2,
-    bathrooms: 2,
-    squareFeet: 1200,
-    daysOnMarket: 7,
-    status: 'Active',
-    image: '/lovable-uploads/0a671412-da45-4d5e-b18a-33d4da167c78.png'
-  },
-  {
-    id: '2',
-    title: 'Luxury Villa with Private Pool',
-    address: '456 Hilltop Road, Highlands',
-    price: 2500000,
-    bedrooms: 5,
-    bathrooms: 4,
-    squareFeet: 4500,
-    daysOnMarket: 14,
-    status: 'Active',
-    image: '/lovable-uploads/0a671412-da45-4d5e-b18a-33d4da167c78.png'
-  },
-  {
-    id: '3',
-    title: 'Downtown Penthouse Suite',
-    address: '789 Central Avenue, Downtown',
-    price: 1200000,
-    bedrooms: 3,
-    bathrooms: 3,
-    squareFeet: 2200,
-    daysOnMarket: 21,
-    status: 'Under Contract',
-    image: '/lovable-uploads/0a671412-da45-4d5e-b18a-33d4da167c78.png'
-  },
-  {
-    id: '4',
-    title: 'Cozy Suburban Family Home',
-    address: '101 Maple Street, Suburbia',
-    price: 550000,
-    bedrooms: 4,
-    bathrooms: 2,
-    squareFeet: 2800,
-    daysOnMarket: 10,
-    status: 'Active',
-    image: '/lovable-uploads/0a671412-da45-4d5e-b18a-33d4da167c78.png'
-  }
-];
-
+const sampleProperties: ShowcaseProperty[] = [{
+  id: '1',
+  title: 'Modern Apartment with Ocean View',
+  address: '123 Coastal Drive, Seaside',
+  price: 750000,
+  bedrooms: 2,
+  bathrooms: 2,
+  squareFeet: 1200,
+  daysOnMarket: 7,
+  status: 'Active',
+  image: '/lovable-uploads/0a671412-da45-4d5e-b18a-33d4da167c78.png'
+}, {
+  id: '2',
+  title: 'Luxury Villa with Private Pool',
+  address: '456 Hilltop Road, Highlands',
+  price: 2500000,
+  bedrooms: 5,
+  bathrooms: 4,
+  squareFeet: 4500,
+  daysOnMarket: 14,
+  status: 'Active',
+  image: '/lovable-uploads/0a671412-da45-4d5e-b18a-33d4da167c78.png'
+}, {
+  id: '3',
+  title: 'Downtown Penthouse Suite',
+  address: '789 Central Avenue, Downtown',
+  price: 1200000,
+  bedrooms: 3,
+  bathrooms: 3,
+  squareFeet: 2200,
+  daysOnMarket: 21,
+  status: 'Under Contract',
+  image: '/lovable-uploads/0a671412-da45-4d5e-b18a-33d4da167c78.png'
+}, {
+  id: '4',
+  title: 'Cozy Suburban Family Home',
+  address: '101 Maple Street, Suburbia',
+  price: 550000,
+  bedrooms: 4,
+  bathrooms: 2,
+  squareFeet: 2800,
+  daysOnMarket: 10,
+  status: 'Active',
+  image: '/lovable-uploads/0a671412-da45-4d5e-b18a-33d4da167c78.png'
+}];
 const PropertyShowcase = () => {
   const [activeTab, setActiveTab] = useState("my-listings");
   const navigate = useNavigate();
-
   const handleAddProperty = () => {
     navigate('/properties/new');
   };
-
   const handleViewProperty = (id: string) => {
     navigate(`/properties/${id}`);
   };
-
   const getStatusBadgeStyle = (status: PropertyStatus) => {
     switch (status) {
       case 'Active':
@@ -103,9 +90,7 @@ const PropertyShowcase = () => {
         return 'bg-slate-500 text-white';
     }
   };
-
-  return (
-    <div className="space-y-4 border border-border rounded-lg p-5 bg-card/50">
+  return <div className="space-y-4 border border-border rounded-lg p-5 bg-card/50">
       {/* Header with title */}
       <div className="flex flex-col gap-4">
         <h2 className="text-xl font-bold">Property Showcase</h2>
@@ -133,9 +118,7 @@ const PropertyShowcase = () => {
               </Button>
             </div>
             
-            <Button onClick={handleAddProperty}>
-              <Plus className="h-4 w-4 mr-1" /> Add Property
-            </Button>
+            
           </div>
         </div>
       </div>
@@ -144,25 +127,11 @@ const PropertyShowcase = () => {
       <Tabs value={activeTab} className="w-full">
         <TabsContent value="my-listings" className="m-0">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {sampleProperties.map((property) => (
-              <Card
-                key={property.id}
-                className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer bg-[#161920] border-neutral-800"
-                onClick={() => handleViewProperty(property.id)}
-              >
+            {sampleProperties.map(property => <Card key={property.id} className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer bg-[#161920] border-neutral-800" onClick={() => handleViewProperty(property.id)}>
                 {/* Property Image with Status Badge */}
                 <div className="relative h-48">
-                  <img
-                    src={property.image}
-                    alt={property.title}
-                    className="w-full h-full object-cover"
-                  />
-                  <Badge 
-                    className={cn(
-                      "absolute top-2 right-2 font-medium",
-                      getStatusBadgeStyle(property.status)
-                    )}
-                  >
+                  <img src={property.image} alt={property.title} className="w-full h-full object-cover" />
+                  <Badge className={cn("absolute top-2 right-2 font-medium", getStatusBadgeStyle(property.status))}>
                     {property.status}
                   </Badge>
                 </div>
@@ -200,8 +169,7 @@ const PropertyShowcase = () => {
                     <span>{property.daysOnMarket} days on market</span>
                   </div>
                 </div>
-              </Card>
-            ))}
+              </Card>)}
           </div>
         </TabsContent>
         
@@ -217,8 +185,6 @@ const PropertyShowcase = () => {
           </div>
         </TabsContent>
       </Tabs>
-    </div>
-  );
+    </div>;
 };
-
 export default PropertyShowcase;
