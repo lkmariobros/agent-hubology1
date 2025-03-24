@@ -1,10 +1,10 @@
+
 import React, { useState } from 'react';
 import { Plus, Bed, Bath, Square, Calendar } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Card as PropertyCard } from "@/components/ui/card";
-import { Card as NeubrutalistCard } from "@/components/ui/component";
+import { Card } from "@/components/ui/component"; // Only importing from component.tsx
 import { cn } from '@/lib/utils';
 import { formatPrice } from '@/utils/propertyUtils';
 import { useNavigate } from 'react-router-dom';
@@ -106,10 +106,10 @@ const PropertyShowcase = () => {
   };
 
   // Debugging - Log to ensure component is being rendered
-  console.log("Rendering PropertyShowcase with NeubrutalistCard");
+  console.log("Rendering PropertyShowcase with Card from component.tsx");
 
   return (
-    <NeubrutalistCard 
+    <Card 
       variant="neubrutalism" 
       className="bg-[#161920] dark:bg-[#161920] border-neutral-800 rounded-xl overflow-hidden"
     >
@@ -186,9 +186,9 @@ const PropertyShowcase = () => {
           <TabsContent value="my-listings" className="mt-0">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {sampleProperties.map((property) => (
-                <PropertyCard
+                <div
                   key={property.id}
-                  className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer bg-[#1E2128] border-neutral-800 rounded-md"
+                  className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer bg-[#1E2128] border border-neutral-800 rounded-md"
                   onClick={() => handleViewProperty(property.id)}
                 >
                   {/* Property Image with Status Badge */}
@@ -241,7 +241,7 @@ const PropertyShowcase = () => {
                       <span>{property.daysOnMarket} days on market</span>
                     </div>
                   </div>
-                </PropertyCard>
+                </div>
               ))}
             </div>
           </TabsContent>
@@ -259,7 +259,7 @@ const PropertyShowcase = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </NeubrutalistCard>
+    </Card>
   );
 };
 
