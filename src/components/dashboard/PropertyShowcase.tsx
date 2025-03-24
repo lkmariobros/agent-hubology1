@@ -180,7 +180,7 @@ const PropertyShowcase = () => {
         </div>
         
         {/* Property Cards */}
-        <Tabs.Root defaultValue="my-listings" value={activeTab} className="w-full">
+        <Tabs defaultValue="my-listings" value={activeTab} className="w-full">
           <TabsContent value="my-listings" className="mt-0">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {sampleProperties.map((property) => (
@@ -255,7 +255,7 @@ const PropertyShowcase = () => {
               New projects will be displayed here
             </div>
           </TabsContent>
-        </Tabs.Root>
+        </Tabs>
       </div>
     </Card>
   );
