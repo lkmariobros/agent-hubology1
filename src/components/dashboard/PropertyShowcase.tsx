@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Plus, Bed, Bath, Square, Calendar } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -105,6 +104,9 @@ const PropertyShowcase = () => {
         return 'bg-slate-500 text-white';
     }
   };
+
+  // Debugging - Log to ensure component is being rendered
+  console.log("Rendering PropertyShowcase with NeubrutalistCard");
 
   return (
     <NeubrutalistCard 
