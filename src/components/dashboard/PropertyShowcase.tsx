@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card as PropertyCard } from "@/components/ui/card";
-import { Card } from "@/components/ui/component";
+import { Card as NeubrutalistCard } from "@/components/ui/component";
 import { cn } from '@/lib/utils';
 import { formatPrice } from '@/utils/propertyUtils';
 import { useNavigate } from 'react-router-dom';
@@ -107,7 +107,7 @@ const PropertyShowcase = () => {
   };
 
   return (
-    <Card 
+    <NeubrutalistCard 
       variant="neubrutalism" 
       className="bg-[#161920] dark:bg-[#161920] border-neutral-800 rounded-xl overflow-hidden"
     >
@@ -257,7 +257,7 @@ const PropertyShowcase = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </Card>
+    </NeubrutalistCard>
   );
 };
 
