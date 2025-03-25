@@ -1,4 +1,3 @@
-
 import { getPublicImageUrl } from '@/integrations/supabase/storage';
 import { Property } from '@/types';
 
@@ -140,7 +139,6 @@ export const getPropertyStats = (properties: Property[]) => {
 
 /**
  * Format price with appropriate suffixes (K, M)
- * This function is needed by components like PropertyShowcase.tsx
  */
 export const formatPrice = (price: number): string => {
   if (price >= 1000000) {

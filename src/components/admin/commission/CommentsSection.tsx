@@ -3,58 +3,55 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { MessageSquare, Trash2 } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { CommissionApprovalComment, useAddApprovalComment, useDeleteApprovalComment } from '@/hooks/useCommissionApproval';
+import { MessageSquare, Send, Trash, Loader2 } from 'lucide-react';
+import { 
+  useAddCommissionApprovalComment,
+  useDeleteCommissionApprovalComment 
+} from '@/hooks/useCommissionApproval';
 import { toast } from 'sonner';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAuth } from '@/hooks/useAuth';
+import { CommissionApprovalComment } from '@/types';
 
 interface CommentsSectionProps {
   approvalId: string;
   comments: CommissionApprovalComment[];
-  isLoading?: boolean;
 }
 
-const CommentsSection: React.FC<CommentsSectionProps> = ({ approvalId, comments, isLoading }) => {
+const CommentsSection: React.FC<CommentsSectionProps> = ({ approvalId, comments }) => {
   const [newComment, setNewComment] = useState('');
-  const { user } = useAuth();
-  const addCommentMutation = useAddApprovalComment();
-  const deleteCommentMutation = useDeleteApprovalComment();
+  const { user, isAdmin } = useAuth();
+  const addCommentMutation = useAddCommissionApprovalComment();
+  const deleteCommentMutation = useDeleteCommissionApprovalComment();
   
-  const handleAddComment = async () => {
-    if (!newComment.trim()) {
-      toast.error("Comment cannot be empty");
-      return;
-    }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newComment.trim()) return;
     
     try {
       await addCommentMutation.mutateAsync({
         approvalId,
-        content: newComment
+        content: newComment.trim()
       });
+      
       setNewComment('');
     } catch (error) {
       console.error('Error adding comment:', error);
+      toast.error('Failed to add comment');
     }
   };
   
-  const handleDeleteComment = async (commentId: string) => {
-    if (window.confirm('Are you sure you want to delete this comment?')) {
-      try {
-        await deleteCommentMutation.mutateAsync({
-          commentId,
-          approvalId
-        });
-      } catch (error) {
-        console.error('Error deleting comment:', error);
-      }
+  const handleDelete = async (commentId: string) => {
+    try {
+      await deleteCommentMutation.mutateAsync(commentId);
+      toast.success('Comment deleted successfully');
+    } catch (error) {
+      console.error('Error deleting comment:', error);
+      toast.error('Failed to delete comment');
     }
   };
   
-  // Format date string
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString('en-US', {
+    return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -63,116 +60,79 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ approvalId, comments,
     });
   };
   
-  // Generate user initials from email or ID
-  const getUserInitials = (userString: string) => {
-    if (!userString) return 'U';
-    
-    // If it's an email address
-    if (userString.includes('@')) {
-      const parts = userString.split('@')[0].split(/[._-]/);
-      return parts.length > 1 
-        ? (parts[0][0] + parts[1][0]).toUpperCase()
-        : userString.slice(0, 2).toUpperCase();
-    }
-    
-    // If it's a UUID
-    return userString.slice(0, 2).toUpperCase();
-  };
-  
-  const getUserColor = (userString: string) => {
-    const colors = [
-      'bg-blue-500', 'bg-green-500', 'bg-purple-500', 
-      'bg-amber-500', 'bg-red-500', 'bg-indigo-500'
-    ];
-    
-    // Simple hash for consistent color per user
-    const hash = userString.split('').reduce((acc, char) => {
-      return acc + char.charCodeAt(0);
-    }, 0);
-    
-    return colors[hash % colors.length];
-  };
-  
-  if (isLoading) {
-    return (
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-md flex items-center">
-            <MessageSquare className="h-4 w-4 mr-2" />
-            Comments
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex justify-center py-6">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-  
   return (
-    <Card className="h-full flex flex-col">
+    <Card>
       <CardHeader className="pb-2">
         <CardTitle className="text-md flex items-center">
           <MessageSquare className="h-4 w-4 mr-2" />
-          Comments
+          Discussion
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col h-full">
-        <ScrollArea className="flex-grow mb-4 max-h-[400px]">
+      <CardContent>
+        <div className="space-y-4">
           {comments && comments.length > 0 ? (
-            <div className="space-y-4">
+            <div className="space-y-4 mb-4">
               {comments.map((comment) => (
-                <div key={comment.id} className="flex items-start gap-3">
-                  <Avatar className="h-8 w-8">
-                    <AvatarFallback className={getUserColor(comment.created_by)}>
-                      {getUserInitials(comment.created_by)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 bg-muted p-3 rounded-lg text-sm">
-                    <div className="flex justify-between items-start">
-                      <span className="font-medium text-xs text-muted-foreground">
-                        {formatDate(comment.created_at)}
-                      </span>
-                      {user?.id === comment.created_by && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6"
-                          onClick={() => handleDeleteComment(comment.id)}
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      )}
+                <div key={comment.id} className="bg-muted/50 p-3 rounded-md">
+                  <div className="flex justify-between items-start">
+                    <div className="font-medium text-sm">
+                      {comment.user?.name || 'User'}
                     </div>
-                    <p className="mt-1 whitespace-pre-wrap">{comment.content}</p>
+                    {(user?.id === comment.created_by || isAdmin) && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 w-6 p-0"
+                        onClick={() => handleDelete(comment.id)}
+                        disabled={deleteCommentMutation.isPending}
+                      >
+                        {deleteCommentMutation.isPending ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <Trash className="h-3 w-3 text-muted-foreground" />
+                        )}
+                      </Button>
+                    )}
                   </div>
+                  <p className="text-sm mt-1">{comment.content}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {formatDate(comment.created_at)}
+                  </p>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-center py-4 text-sm text-muted-foreground">
-              No comments yet
-            </p>
+            <div className="text-center py-6">
+              <MessageSquare className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
+              <p className="text-muted-foreground">No comments yet</p>
+            </div>
           )}
-        </ScrollArea>
-        
-        <div className="mt-auto">
-          <Textarea
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            placeholder="Add a comment..."
-            className="min-h-[80px] mb-2"
-          />
-          <div className="flex justify-end">
+          
+          <form onSubmit={handleSubmit}>
+            <Textarea
+              placeholder="Add a comment..."
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              className="min-h-24 resize-none"
+            />
             <Button
-              onClick={handleAddComment}
-              disabled={addCommentMutation.isPending || !newComment.trim()}
+              type="submit"
+              className="mt-2"
+              disabled={!newComment.trim() || addCommentMutation.isPending}
             >
-              {addCommentMutation.isPending ? 'Posting...' : 'Post Comment'}
+              {addCommentMutation.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <Send className="h-4 w-4 mr-2" />
+                  Send
+                </>
+              )}
             </Button>
-          </div>
+          </form>
         </div>
       </CardContent>
     </Card>

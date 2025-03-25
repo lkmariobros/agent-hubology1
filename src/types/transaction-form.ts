@@ -1,92 +1,113 @@
 
-// Transaction form types
-export interface TransactionFormData {
-  id?: string;
-  transactionType: TransactionType;
-  transactionDate: Date;
-  closingDate?: Date;
-  propertyId: string;
-  status: TransactionStatus;
-  property?: PropertyInfo;
-  buyer?: ClientInfo;
-  seller?: ClientInfo;
-  landlord?: ClientInfo;
-  tenant?: ClientInfo;
-  developer?: DeveloperInfo;
+export interface TransactionFormValues {
+  transactionType: string;
+  transactionInformation: {
+    transactionDate: Date | string;
+    spaDate?: Date | string;
+    price: number;
+    address: string;
+    propertyType: string;
+  };
+  clientInformation: {
+    name: string;
+    email: string;
+    phone: string;
+    idNumber?: string;
+  };
+  sellerInformation?: {
+    name: string;
+    email: string;
+    phone: string;
+    idNumber?: string;
+  };
+  agentDetails: {
+    agentId: string;
+    commissionRate: number;
+    commissionAmount: number;
+    commissionSplit: boolean;
+    coAgentId?: string;
+    coAgentCommissionPercentage?: number;
+  };
+  documents: Array<{
+    id: string;
+    name: string;
+    path: string;
+    type: string;
+  }>;
+  additionalNotes?: string;
+}
+
+export interface TransactionStepProps {
+  onNext: () => void;
+  onPrevious: () => void;
+}
+
+export interface CommissionCalculatorData {
   transactionValue: number;
   commissionRate: number;
-  commissionAmount: number;
-  agentTier?: AgentRank;
-  coBroking?: CoBrokingInfo;
-  notes?: string;
+  agentTier: number;
+  commissionSplit: boolean;
+  coAgentPercentage?: number;
 }
 
-export interface PropertyInfo {
+export interface CommissionApproval {
   id: string;
-  title: string;
-  address?: string;
-  type?: string;
-  price?: number;
-  rentalRate?: number;
-}
-
-export interface ClientInfo {
-  name: string;
-  email?: string;
-  phone?: string;
+  transaction_id: string;
+  status: string;
+  submitted_by: string;
+  reviewer_id?: string;
+  reviewed_at?: string;
+  threshold_exceeded: boolean;
   notes?: string;
+  created_at: string;
+  updated_at: string;
+  property_transactions: {
+    transaction_value: number;
+    commission_amount: number;
+    transaction_date: string;
+    property_id: string;
+    commission_rate: number;
+    agent_id: string;
+    notes?: string;
+    property?: {
+      id: string;
+      title: string;
+    };
+  };
+  agent?: {
+    id: string;
+    name: string;
+  };
 }
 
-export interface DeveloperInfo {
-  name: string;
-  company?: string;
-  email?: string;
-  phone?: string;
+export interface CommissionApprovalHistory {
+  id: string;
+  approval_id: string;
+  previous_status: string;
+  new_status: string;
+  changed_by?: string;
   notes?: string;
+  created_at: string;
 }
 
-export interface CoBrokingInfo {
-  enabled: boolean;
-  agentName?: string;
-  agentCompany?: string;
-  agentContact?: string;
-  commissionSplit: number;
-  credentialsVerified?: boolean;
+export interface CommissionApprovalComment {
+  id: string;
+  approval_id: string;
+  content: string;
+  created_by: string;
+  created_at: string;
+  user?: {
+    name: string;
+  };
 }
 
-export type TransactionType = 'Sale' | 'Rent' | 'Developer';
-export type TransactionStatus = 'Draft' | 'Pending' | 'In Progress' | 'Completed' | 'Cancelled';
-export type AgentRank = 'Advisor' | 'Sales Leader' | 'Team Leader' | 'Group Leader' | 'Supreme Leader';
-export type DocumentType = 'Contract' | 'Agreement' | 'Invoice' | 'Receipt' | 'Other';
-
-export interface TransactionDocument {
-  id?: string;
-  name: string;
-  documentType: DocumentType;
-  file?: File;
-  url?: string;
-}
-
-export interface CommissionBreakdown {
-  totalCommission: number;
-  agencyShare: number;
-  agentShare: number;
-  ourAgencyCommission?: number;
-  coAgencyCommission?: number;
-  agentTier?: AgentRank;
-  agentCommissionPercentage?: number;
-  // These are used for display purposes in CommissionBreakdownCard
-  transactionValue?: number;
-  commissionRate?: number;
-}
-
-export interface TransactionFormState {
-  formData: TransactionFormData;
-  documents: TransactionDocument[];
-  errors: Record<string, string>;
-  // Additional state properties
-  currentStep: number;
-  isSubmitting: boolean;
-  isDirty: boolean;
-  lastSaved: Date | null;
+export interface CommissionApprovalStats {
+  pending: number;
+  underReview: number;
+  approved: number;
+  readyForPayment: number;
+  paid: number;
+  pendingValue: number;
+  approvedValue: number;
+  paidValue: number;
 }

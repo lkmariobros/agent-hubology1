@@ -1,21 +1,27 @@
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { 
-  Clock, 
-  AlertCircle,
-  CheckCircle, 
-  Banknote, 
-  CheckCheck 
-} from 'lucide-react';
 import { useCommissionApprovalStats } from '@/hooks/useCommissionApproval';
-import { formatCurrency } from '@/utils/format';
+import { formatCurrency } from '@/utils/propertyUtils';
+import { Clock, CheckCircle, Banknote, XCircle, Loader2 } from 'lucide-react';
 
 const SummaryCards: React.FC = () => {
   const { data, isLoading } = useCommissionApprovalStats();
   
-  // Get stats if available, or use default values for loading state
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {[...Array(4)].map((_, i) => (
+          <Card key={i} className="bg-muted/50">
+            <CardContent className="p-4 h-24 flex items-center justify-center">
+              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+  
   const stats = data?.stats || {
     pending: 0,
     underReview: 0,
@@ -27,104 +33,71 @@ const SummaryCards: React.FC = () => {
     paidValue: 0
   };
   
-  if (isLoading) {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        {[1, 2, 3, 4, 5].map((i) => (
-          <Card key={i}>
-            <CardContent className="p-4">
-              <Skeleton className="h-5 w-28 mb-2" />
-              <Skeleton className="h-8 w-16" />
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    );
-  }
-  
-  const summaryItems = [
-    {
-      label: 'Pending Approval',
-      value: stats.pending,
-      icon: Clock,
-      color: 'text-yellow-500 bg-yellow-100 dark:bg-yellow-950/50'
-    },
-    {
-      label: 'Under Review',
-      value: stats.underReview,
-      icon: AlertCircle,
-      color: 'text-blue-500 bg-blue-100 dark:bg-blue-950/50'
-    },
-    {
-      label: 'Approved',
-      value: stats.approved,
-      icon: CheckCircle,
-      color: 'text-green-500 bg-green-100 dark:bg-green-950/50'
-    },
-    {
-      label: 'Ready for Payment',
-      value: stats.readyForPayment,
-      icon: Banknote,
-      color: 'text-purple-500 bg-purple-100 dark:bg-purple-950/50'
-    },
-    {
-      label: 'Paid',
-      value: stats.paid,
-      icon: CheckCheck,
-      color: 'text-emerald-500 bg-emerald-100 dark:bg-emerald-950/50'
-    }
-  ];
-  
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-      {summaryItems.map((item, i) => (
-        <Card key={i}>
-          <CardContent className="p-4">
-            <div className="flex items-center">
-              <div className={`p-2 rounded-full mr-3 ${item.color}`}>
-                <item.icon className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">{item.label}</p>
-                <p className="text-2xl font-bold">{item.value}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-      
-      {/* Additional value summary cards */}
-      <Card className="col-span-1 md:col-span-2 lg:col-span-5">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <Card>
         <CardContent className="p-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="flex items-center">
-              <div className="p-2 rounded-full mr-3 text-yellow-500 bg-yellow-100 dark:bg-yellow-950/50">
-                <Clock className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Pending Value</p>
-                <p className="text-xl font-bold">{formatCurrency(stats.pendingValue)}</p>
-              </div>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Pending Approvals</p>
+              <h2 className="text-2xl font-bold">{stats.pending + stats.underReview}</h2>
+              <p className="text-xs text-muted-foreground mt-1">
+                Value: {formatCurrency(stats.pendingValue)}
+              </p>
             </div>
-            
-            <div className="flex items-center">
-              <div className="p-2 rounded-full mr-3 text-green-500 bg-green-100 dark:bg-green-950/50">
-                <CheckCircle className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Approved Value</p>
-                <p className="text-xl font-bold">{formatCurrency(stats.approvedValue)}</p>
-              </div>
+            <div className="h-10 w-10 bg-amber-100 rounded-full flex items-center justify-center">
+              <Clock className="h-5 w-5 text-amber-600" />
             </div>
-            
-            <div className="flex items-center">
-              <div className="p-2 rounded-full mr-3 text-emerald-500 bg-emerald-100 dark:bg-emerald-950/50">
-                <CheckCheck className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Paid Value</p>
-                <p className="text-xl font-bold">{formatCurrency(stats.paidValue)}</p>
-              </div>
+          </div>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Approved</p>
+              <h2 className="text-2xl font-bold">{stats.approved}</h2>
+              <p className="text-xs text-muted-foreground mt-1">
+                Value: {formatCurrency(stats.approvedValue)}
+              </p>
+            </div>
+            <div className="h-10 w-10 bg-green-100 rounded-full flex items-center justify-center">
+              <CheckCircle className="h-5 w-5 text-green-600" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Ready for Payment</p>
+              <h2 className="text-2xl font-bold">{stats.readyForPayment}</h2>
+              <p className="text-xs text-muted-foreground mt-1">
+                Ready to process
+              </p>
+            </div>
+            <div className="h-10 w-10 bg-purple-100 rounded-full flex items-center justify-center">
+              <Banknote className="h-5 w-5 text-purple-600" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground">Paid</p>
+              <h2 className="text-2xl font-bold">{stats.paid}</h2>
+              <p className="text-xs text-muted-foreground mt-1">
+                Value: {formatCurrency(stats.paidValue)}
+              </p>
+            </div>
+            <div className="h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center">
+              <CheckCircle className="h-5 w-5 text-blue-600" />
             </div>
           </div>
         </CardContent>

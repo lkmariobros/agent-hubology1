@@ -3,71 +3,74 @@ import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { 
   Clock, 
-  AlertCircle, 
-  CheckCircle, 
-  Banknote, 
-  CheckCheck,
-  XCircle
+  CheckCircle2, 
+  XCircle, 
+  AlertTriangle, 
+  Banknote 
 } from 'lucide-react';
 
 interface StatusBadgeProps {
   status: string;
+  className?: string;
 }
 
-const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
-  // Define icon and styling based on status
-  const getStatusConfig = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'pending':
+const StatusBadge: React.FC<StatusBadgeProps> = ({ status, className }) => {
+  // Get status style
+  const getStatusStyle = (status: string) => {
+    switch(status) {
+      case 'Pending':
         return {
-          icon: Clock,
-          variant: 'outline',
-          className: 'border-yellow-500 text-yellow-500 bg-yellow-50 dark:bg-yellow-950/30'
+          bg: 'bg-yellow-100',
+          text: 'text-yellow-800',
+          icon: <Clock className="h-3.5 w-3.5 mr-1" />
         };
-      case 'under review':
+      case 'Under Review':
         return {
-          icon: AlertCircle,
-          variant: 'outline',
-          className: 'border-blue-500 text-blue-500 bg-blue-50 dark:bg-blue-950/30'
+          bg: 'bg-blue-100',
+          text: 'text-blue-800',
+          icon: <AlertTriangle className="h-3.5 w-3.5 mr-1" />
         };
-      case 'approved':
+      case 'Approved':
         return {
-          icon: CheckCircle,
-          variant: 'outline',
-          className: 'border-green-500 text-green-500 bg-green-50 dark:bg-green-950/30'
+          bg: 'bg-green-100',
+          text: 'text-green-800',
+          icon: <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
         };
-      case 'ready for payment':
+      case 'Ready for Payment':
         return {
-          icon: Banknote,
-          variant: 'outline',
-          className: 'border-purple-500 text-purple-500 bg-purple-50 dark:bg-purple-950/30'
+          bg: 'bg-purple-100',
+          text: 'text-purple-800',
+          icon: <Banknote className="h-3.5 w-3.5 mr-1" />
         };
-      case 'paid':
+      case 'Paid':
         return {
-          icon: CheckCheck,
-          variant: 'outline',
-          className: 'border-emerald-500 text-emerald-500 bg-emerald-50 dark:bg-emerald-950/30'
+          bg: 'bg-gray-100',
+          text: 'text-gray-800',
+          icon: <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
         };
-      case 'rejected':
+      case 'Rejected':
         return {
-          icon: XCircle,
-          variant: 'outline',
-          className: 'border-red-500 text-red-500 bg-red-50 dark:bg-red-950/30'
+          bg: 'bg-red-100',
+          text: 'text-red-800',
+          icon: <XCircle className="h-3.5 w-3.5 mr-1" />
         };
       default:
         return {
-          icon: Clock,
-          variant: 'outline',
-          className: 'border-gray-500 text-gray-500'
+          bg: 'bg-gray-100',
+          text: 'text-gray-800',
+          icon: <Clock className="h-3.5 w-3.5 mr-1" />
         };
     }
   };
   
-  const { icon: Icon, className } = getStatusConfig(status);
+  const { bg, text, icon } = getStatusStyle(status);
   
   return (
-    <Badge variant="outline" className={className}>
-      <Icon className="h-3 w-3 mr-1" />
+    <Badge 
+      variant="outline" 
+      className={`${bg} ${text} flex items-center ${className}`}
+    >
+      {icon}
       {status}
     </Badge>
   );
