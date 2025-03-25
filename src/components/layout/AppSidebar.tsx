@@ -22,7 +22,15 @@ import { PortalSwitcher } from './PortalSwitcher';
 export function AppSidebar() {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, switchRole } = useAuth();
+  
+  const handleLogoClick = () => {
+    if (isAdmin) {
+      // Toggle between agent and admin portals
+      const currentRole = window.location.pathname.startsWith('/admin') ? 'admin' : 'agent';
+      switchRole(currentRole === 'admin' ? 'agent' : 'admin');
+    }
+  };
   
   return (
     <>
@@ -37,15 +45,22 @@ export function AppSidebar() {
             <PortalSwitcher showLabel={!isCollapsed} className="px-2 py-3 w-full" />
           ) : (
             <div className="flex items-center px-2 py-3">
-              <div className="flex items-center">
-                <div className="flex items-center justify-center h-8 w-8 rounded-full bg-purple-600 text-white">
-                  <span className="font-bold text-sm">P</span>
+              <button 
+                onClick={handleLogoClick}
+                className="flex items-center justify-between w-full hover:opacity-80 transition-opacity focus:outline-none"
+              >
+                <div className="flex items-center">
+                  <div className="flex items-center justify-center h-8 w-8 rounded-full bg-purple-600 text-white">
+                    <span className="font-bold text-sm">P</span>
+                  </div>
+                  {!isCollapsed && (
+                    <span className="ml-2 text-lg font-semibold transition-opacity">PropertyPro</span>
+                  )}
                 </div>
-                {!isCollapsed && (
-                  <span className="ml-2 text-lg font-semibold transition-opacity">PropertyPro</span>
+                {isAdmin && (
+                  <ChevronsUpDown className="h-4 w-4 opacity-60" />
                 )}
-                <ChevronsUpDown className="h-4 w-4 opacity-60 ml-1" />
-              </div>
+              </button>
             </div>
           )}
         </SidebarHeader>

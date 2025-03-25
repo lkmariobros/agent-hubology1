@@ -28,20 +28,18 @@ export function PortalSwitcher({ showLabel = true, className = "" }: PortalSwitc
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button 
-          className={`flex items-center gap-1 hover:text-primary transition-colors focus:outline-none ${className}`}
+          className={`flex items-center justify-between w-full hover:opacity-80 transition-colors focus:outline-none ${className}`}
           aria-label="Switch between portals"
         >
           <div className="flex items-center">
+            <div className="h-8 w-8 rounded-full bg-purple-600 flex items-center justify-center text-white">
+              <span className="font-bold text-sm">P</span>
+            </div>
             {showLabel && (
-              <>
-                <div className="h-8 w-8 rounded-full bg-purple-600 flex items-center justify-center text-white mr-2">
-                  <span className="font-bold text-sm">P</span>
-                </div>
-                <span>PropertyPro</span>
-              </>
+              <span className="ml-2 text-lg font-semibold">PropertyPro</span>
             )}
-            <ChevronsUpDown className="h-4 w-4 opacity-60 ml-1" />
           </div>
+          <ChevronsUpDown className="h-4 w-4 opacity-60" />
         </button>
       </DropdownMenuTrigger>
       
