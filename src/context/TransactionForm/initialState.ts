@@ -77,7 +77,6 @@ export const getInitialTransactionData = (transactionType: TransactionType): Tra
     default:
       return {
         ...commonData,
-        propertyId: '',
       } as TransactionFormData;
   }
 };

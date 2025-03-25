@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useTransactionForm } from '@/context/TransactionFormContext';
 import { Input } from '@/components/ui/input';
@@ -286,7 +285,7 @@ const ClientInformation: React.FC = () => {
           </div>
         );
 
-      case 'Primary':
+      case 'Developer':
         return (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Buyer Information */}

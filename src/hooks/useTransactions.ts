@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Transaction } from '@/types';
@@ -150,8 +149,8 @@ export const useTransactions = () => {
       const { data, error } = await supabase
         .from('property_transactions')
         .insert({
-          transaction_type_id: formData.transactionType === 'Primary' ? 
-            (await getTransactionTypeId('Primary')) : 
+          transaction_type_id: formData.transactionType === 'Developer' ? 
+            (await getTransactionTypeId('Developer')) : 
             (formData.transactionType === 'Rent' ? 
               (await getTransactionTypeId('Rent')) : 
               (await getTransactionTypeId('Sale'))),
@@ -231,8 +230,8 @@ export const useTransactions = () => {
         .from('property_transactions')
         .update({
           transaction_type_id: formData.transactionType ? 
-            (formData.transactionType === 'Primary' ? 
-              (await getTransactionTypeId('Primary')) : 
+            (formData.transactionType === 'Developer' ? 
+              (await getTransactionTypeId('Developer')) : 
               (formData.transactionType === 'Rent' ? 
                 (await getTransactionTypeId('Rent')) : 
                 (await getTransactionTypeId('Sale')))) : undefined,

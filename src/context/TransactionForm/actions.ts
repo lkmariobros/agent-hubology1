@@ -72,7 +72,7 @@ export const useTransactionFormActions = () => {
         break;
         
       case 2: // Client Information
-        if (formData.transactionType === 'Sale' || formData.transactionType === 'Primary') {
+        if (formData.transactionType === 'Sale' || formData.transactionType === 'Developer') {
           if (!formData.buyer?.name) {
             errors.buyerName = 'Buyer name is required';
           }
@@ -93,7 +93,7 @@ export const useTransactionFormActions = () => {
           }
         }
         
-        if (formData.transactionType === 'Primary') {
+        if (formData.transactionType === 'Developer') {
           if (!formData.developer?.name) {
             errors.developerName = 'Developer name is required';
           }
@@ -229,8 +229,6 @@ export const useTransactionFormActions = () => {
     const agencyShare = ourAgencyCommission * ((100 - agentTierPercentage) / 100);
     
     return {
-      transactionValue: transactionValue || 0,
-      commissionRate: commissionRate || 0,
       totalCommission,
       agencyShare,
       agentShare,
@@ -238,6 +236,9 @@ export const useTransactionFormActions = () => {
       coAgencyCommission,
       agentTier,
       agentCommissionPercentage: agentTierPercentage,
+      // Add these for display purposes in CommissionBreakdownCard
+      transactionValue: transactionValue || 0,
+      commissionRate: commissionRate || 0
     };
   }, [state.formData]);
 
