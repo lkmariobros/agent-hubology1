@@ -32,25 +32,23 @@ export const useAuth = () => {
     user: auth.user
   });
   
-  // Determine admin status based on email
-  const isAdmin = !!auth.user && isAdminByEmail;
-  
-  // Infer roles from email patterns (temporary until DB-backed roles)
-  const roles: UserRole[] = ['agent'];
-  if (isAdmin) roles.push('admin');
-  
+  // Create a compatible interface between the two auth systems
   return {
     ...auth,
-    isAdmin,
-    roles,
+    // Provide properties expected by components using context/AuthContext.tsx
+    signIn: auth.login,
+    signUp: async (email: string, password: string) => {
+      // In the future, this could be modified to create initial user profile data
+      return auth.login(email, password);
+    },
+    signOut: auth.logout,
+    resetPassword: async (email: string) => {
+      console.log('Password reset requested for:', email);
+      // This would need to be implemented in the AuthProvider
+    },
+    loading: false, // Add loading state expected by components
+    // Use existing properties from providers/AuthProvider
+    roles: auth.user?.roles || ['agent'],
     activeRole: isAdminRoute ? 'admin' : 'agent',
-    switchRole: (role: 'agent' | 'admin') => {
-      console.log(`Switching to ${role} role`);
-      if (role === 'admin') {
-        window.location.href = '/admin';
-      } else {
-        window.location.href = '/dashboard';
-      }
-    }
   };
 };

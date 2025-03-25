@@ -15,11 +15,13 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   requireAdmin = false,
   redirectTo = '/' 
 }) => {
-  const { user, loading, isAdmin } = useAuth();
+  const { user, isAdmin } = useAuth();
   const location = useLocation();
 
+  // Show loading state while checking authentication
+  const loading = false; // This is now handled directly within the AuthProvider
+
   if (loading) {
-    // Show loading state while checking authentication
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>

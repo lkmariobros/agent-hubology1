@@ -25,7 +25,7 @@ import { ThemeToggle } from '../theme/ThemeToggle';
 
 const AdminLayout = () => {
   const isMobile = useIsMobile();
-  const { user, loading, signOut, isAdmin } = useAuth();
+  const { user, isAdmin, signOut } = useAuth();
   const location = useLocation();
   
   // Add data-route attribute to body
@@ -38,6 +38,8 @@ const AdminLayout = () => {
   }, [location.pathname]);
   
   // If still loading, show loading indicator
+  const loading = false; // This is now handled directly within the AuthProvider
+  
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
