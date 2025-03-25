@@ -1,69 +1,75 @@
 
 import React from 'react';
-import { Clock, AlertTriangle, CheckCircle2, Banknote, Ban, HelpCircle } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { 
+  Clock, 
+  AlertCircle, 
+  CheckCircle, 
+  Banknote, 
+  CheckCheck,
+  XCircle
+} from 'lucide-react';
 
 interface StatusBadgeProps {
   status: string;
-  className?: string;
-  size?: 'sm' | 'md' | 'lg';
 }
 
-const StatusBadge: React.FC<StatusBadgeProps> = ({ 
-  status,
-  className = '',
-  size = 'md'
-}) => {
-  // Get status badge style
-  const getStatusBadgeClass = (status: string) => {
-    switch(status) {
-      case 'Pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'Under Review':
-        return 'bg-blue-100 text-blue-800';
-      case 'Approved':
-        return 'bg-green-100 text-green-800';
-      case 'Ready for Payment':
-        return 'bg-purple-100 text-purple-800';
-      case 'Paid':
-        return 'bg-gray-100 text-gray-800';
-      case 'Rejected':
-        return 'bg-red-100 text-red-800';
+const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
+  // Define icon and styling based on status
+  const getStatusConfig = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'pending':
+        return {
+          icon: Clock,
+          variant: 'outline',
+          className: 'border-yellow-500 text-yellow-500 bg-yellow-50 dark:bg-yellow-950/30'
+        };
+      case 'under review':
+        return {
+          icon: AlertCircle,
+          variant: 'outline',
+          className: 'border-blue-500 text-blue-500 bg-blue-50 dark:bg-blue-950/30'
+        };
+      case 'approved':
+        return {
+          icon: CheckCircle,
+          variant: 'outline',
+          className: 'border-green-500 text-green-500 bg-green-50 dark:bg-green-950/30'
+        };
+      case 'ready for payment':
+        return {
+          icon: Banknote,
+          variant: 'outline',
+          className: 'border-purple-500 text-purple-500 bg-purple-50 dark:bg-purple-950/30'
+        };
+      case 'paid':
+        return {
+          icon: CheckCheck,
+          variant: 'outline',
+          className: 'border-emerald-500 text-emerald-500 bg-emerald-50 dark:bg-emerald-950/30'
+        };
+      case 'rejected':
+        return {
+          icon: XCircle,
+          variant: 'outline',
+          className: 'border-red-500 text-red-500 bg-red-50 dark:bg-red-950/30'
+        };
       default:
-        return 'bg-gray-100 text-gray-800';
+        return {
+          icon: Clock,
+          variant: 'outline',
+          className: 'border-gray-500 text-gray-500'
+        };
     }
   };
   
-  // Get status icon
-  const getStatusIcon = (status: string) => {
-    switch(status) {
-      case 'Pending':
-        return <Clock className={`${size === 'sm' ? 'h-3 w-3' : size === 'lg' ? 'h-5 w-5' : 'h-4 w-4'}`} />;
-      case 'Under Review':
-        return <AlertTriangle className={`${size === 'sm' ? 'h-3 w-3' : size === 'lg' ? 'h-5 w-5' : 'h-4 w-4'}`} />;
-      case 'Approved':
-        return <CheckCircle2 className={`${size === 'sm' ? 'h-3 w-3' : size === 'lg' ? 'h-5 w-5' : 'h-4 w-4'}`} />;
-      case 'Ready for Payment':
-        return <Banknote className={`${size === 'sm' ? 'h-3 w-3' : size === 'lg' ? 'h-5 w-5' : 'h-4 w-4'}`} />;
-      case 'Paid':
-        return <CheckCircle2 className={`${size === 'sm' ? 'h-3 w-3' : size === 'lg' ? 'h-5 w-5' : 'h-4 w-4'}`} />;
-      case 'Rejected':
-        return <Ban className={`${size === 'sm' ? 'h-3 w-3' : size === 'lg' ? 'h-5 w-5' : 'h-4 w-4'}`} />;
-      default:
-        return <HelpCircle className={`${size === 'sm' ? 'h-3 w-3' : size === 'lg' ? 'h-5 w-5' : 'h-4 w-4'}`} />;
-    }
-  };
-  
-  const sizeClass = {
-    sm: 'px-1.5 py-0.5 text-xs',
-    md: 'px-2.5 py-0.5 text-xs',
-    lg: 'px-3 py-1 text-sm'
-  };
+  const { icon: Icon, className } = getStatusConfig(status);
   
   return (
-    <span className={`inline-flex items-center rounded-full font-medium ${sizeClass[size]} ${getStatusBadgeClass(status)} ${className}`}>
-      {getStatusIcon(status)}
-      <span className={`ml-${size === 'sm' ? '0.5' : '1'}`}>{status}</span>
-    </span>
+    <Badge variant="outline" className={className}>
+      <Icon className="h-3 w-3 mr-1" />
+      {status}
+    </Badge>
   );
 };
 

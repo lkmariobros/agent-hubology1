@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useProperty, useDeleteProperty } from '@/hooks/useProperties';
@@ -56,6 +56,13 @@ const PropertyDetail = () => {
 
   return (
     <div className="p-6">
+      <div className="mb-6">
+        <Button variant="ghost" onClick={() => navigate('/properties')}>
+          <ChevronLeft className="mr-2 h-4 w-4" />
+          Back to Properties
+        </Button>
+      </div>
+
       {isLoading ? (
         <PropertyDetailSkeleton />
       ) : property ? (

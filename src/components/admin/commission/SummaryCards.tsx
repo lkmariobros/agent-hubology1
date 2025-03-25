@@ -1,157 +1,131 @@
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Clock, CheckCircle2, AlertTriangle, Banknote } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { formatCurrency } from '@/utils/propertyUtils';
+import { Skeleton } from '@/components/ui/skeleton';
+import { 
+  Clock, 
+  AlertCircle,
+  CheckCircle, 
+  Banknote, 
+  CheckCheck 
+} from 'lucide-react';
+import { useCommissionApprovalStats } from '@/hooks/useCommissionApproval';
+import { formatCurrency } from '@/utils/format';
 
-const SummaryCards = () => {
-  // Fetch status counts
-  const { data: statusCounts, isLoading: isLoadingCounts } = useQuery({
-    queryKey: ['approval-status-counts'],
-    queryFn: async () => {
-      const { data, error } = await supabase.functions.invoke('get_approval_status_counts');
-      
-      if (error) {
-        console.error('Error fetching status counts:', error);
-        throw error;
-      }
-      
-      return data;
-    }
-  });
+const SummaryCards: React.FC = () => {
+  const { data, isLoading } = useCommissionApprovalStats();
   
-  // Fetch pending commission total
-  const { data: pendingTotal, isLoading: isLoadingPending } = useQuery({
-    queryKey: ['pending-commission-total'],
-    queryFn: async () => {
-      const { data, error } = await supabase.functions.invoke('get_pending_commission_total');
-      
-      if (error) {
-        console.error('Error fetching pending commission total:', error);
-        throw error;
-      }
-      
-      return data?.total || 0;
-    }
-  });
-  
-  // Fetch approved commission total
-  const { data: approvedTotal, isLoading: isLoadingApproved } = useQuery({
-    queryKey: ['approved-commission-total'],
-    queryFn: async () => {
-      const { data, error } = await supabase.functions.invoke('get_approved_commission_total');
-      
-      if (error) {
-        console.error('Error fetching approved commission total:', error);
-        throw error;
-      }
-      
-      return data?.total || 0;
-    }
-  });
-  
-  // Default values for loading state
-  const counts = statusCounts || {
+  // Get stats if available, or use default values for loading state
+  const stats = data?.stats || {
     pending: 0,
-    under_review: 0,
+    underReview: 0,
     approved: 0,
-    ready_for_payment: 0,
+    readyForPayment: 0,
     paid: 0,
-    rejected: 0
+    pendingValue: 0,
+    approvedValue: 0,
+    paidValue: 0
   };
   
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        {[1, 2, 3, 4, 5].map((i) => (
+          <Card key={i}>
+            <CardContent className="p-4">
+              <Skeleton className="h-5 w-28 mb-2" />
+              <Skeleton className="h-8 w-16" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+  
+  const summaryItems = [
+    {
+      label: 'Pending Approval',
+      value: stats.pending,
+      icon: Clock,
+      color: 'text-yellow-500 bg-yellow-100 dark:bg-yellow-950/50'
+    },
+    {
+      label: 'Under Review',
+      value: stats.underReview,
+      icon: AlertCircle,
+      color: 'text-blue-500 bg-blue-100 dark:bg-blue-950/50'
+    },
+    {
+      label: 'Approved',
+      value: stats.approved,
+      icon: CheckCircle,
+      color: 'text-green-500 bg-green-100 dark:bg-green-950/50'
+    },
+    {
+      label: 'Ready for Payment',
+      value: stats.readyForPayment,
+      icon: Banknote,
+      color: 'text-purple-500 bg-purple-100 dark:bg-purple-950/50'
+    },
+    {
+      label: 'Paid',
+      value: stats.paid,
+      icon: CheckCheck,
+      color: 'text-emerald-500 bg-emerald-100 dark:bg-emerald-950/50'
+    }
+  ];
+  
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground mb-1">Pending Approvals</p>
-              <h3 className="text-2xl font-bold">
-                {isLoadingCounts ? (
-                  <div className="h-8 w-16 bg-muted animate-pulse rounded" />
-                ) : (
-                  counts.pending
-                )}
-              </h3>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      {summaryItems.map((item, i) => (
+        <Card key={i}>
+          <CardContent className="p-4">
+            <div className="flex items-center">
+              <div className={`p-2 rounded-full mr-3 ${item.color}`}>
+                <item.icon className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">{item.label}</p>
+                <p className="text-2xl font-bold">{item.value}</p>
+              </div>
             </div>
-            <div className="h-12 w-12 rounded-full bg-amber-100 flex items-center justify-center">
-              <Clock className="h-6 w-6 text-amber-600" />
-            </div>
-          </div>
-          <div className="mt-4 text-sm text-muted-foreground">
-            Awaiting initial review
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      ))}
       
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground mb-1">Under Review</p>
-              <h3 className="text-2xl font-bold">
-                {isLoadingCounts ? (
-                  <div className="h-8 w-16 bg-muted animate-pulse rounded" />
-                ) : (
-                  counts.under_review
-                )}
-              </h3>
+      {/* Additional value summary cards */}
+      <Card className="col-span-1 md:col-span-2 lg:col-span-5">
+        <CardContent className="p-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="flex items-center">
+              <div className="p-2 rounded-full mr-3 text-yellow-500 bg-yellow-100 dark:bg-yellow-950/50">
+                <Clock className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Pending Value</p>
+                <p className="text-xl font-bold">{formatCurrency(stats.pendingValue)}</p>
+              </div>
             </div>
-            <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
-              <AlertTriangle className="h-6 w-6 text-blue-600" />
+            
+            <div className="flex items-center">
+              <div className="p-2 rounded-full mr-3 text-green-500 bg-green-100 dark:bg-green-950/50">
+                <CheckCircle className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Approved Value</p>
+                <p className="text-xl font-bold">{formatCurrency(stats.approvedValue)}</p>
+              </div>
             </div>
-          </div>
-          <div className="mt-4 text-sm text-muted-foreground">
-            Being reviewed by admin
-          </div>
-        </CardContent>
-      </Card>
-      
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground mb-1">Pending Value</p>
-              <h3 className="text-2xl font-bold">
-                {isLoadingPending ? (
-                  <div className="h-8 w-24 bg-muted animate-pulse rounded" />
-                ) : (
-                  formatCurrency(pendingTotal)
-                )}
-              </h3>
+            
+            <div className="flex items-center">
+              <div className="p-2 rounded-full mr-3 text-emerald-500 bg-emerald-100 dark:bg-emerald-950/50">
+                <CheckCheck className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Paid Value</p>
+                <p className="text-xl font-bold">{formatCurrency(stats.paidValue)}</p>
+              </div>
             </div>
-            <div className="h-12 w-12 rounded-full bg-indigo-100 flex items-center justify-center">
-              <Banknote className="h-6 w-6 text-indigo-600" />
-            </div>
-          </div>
-          <div className="mt-4 text-sm text-muted-foreground">
-            Total pending commission value
-          </div>
-        </CardContent>
-      </Card>
-      
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground mb-1">Approved Value</p>
-              <h3 className="text-2xl font-bold">
-                {isLoadingApproved ? (
-                  <div className="h-8 w-24 bg-muted animate-pulse rounded" />
-                ) : (
-                  formatCurrency(approvedTotal)
-                )}
-              </h3>
-            </div>
-            <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
-              <CheckCircle2 className="h-6 w-6 text-green-600" />
-            </div>
-          </div>
-          <div className="mt-4 text-sm text-muted-foreground">
-            Ready for payment
           </div>
         </CardContent>
       </Card>

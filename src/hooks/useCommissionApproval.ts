@@ -3,242 +3,239 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-// Types for commission approval
-export interface CommissionApproval {
-  id: string;
-  transaction_id: string;
-  status: 'Pending' | 'Under Review' | 'Approved' | 'Ready for Payment' | 'Paid' | 'Rejected';
-  submitted_by: string;
-  reviewed_by?: string;
-  threshold_exceeded: boolean;
-  notes?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface CommissionApprovalHistory {
-  id: string;
-  approval_id: string;
-  previous_status: string;
-  new_status: string;
-  changed_by: string;
-  notes?: string;
-  created_at: string;
-}
-
-export interface CommissionApprovalComment {
-  id: string;
-  approval_id: string;
-  content: string;
-  created_by: string;
-  created_at: string;
-}
-
-export interface TransactionDetails {
-  transaction_value: number;
-  commission_amount: number;
-  transaction_date: string;
-  property_id?: string;
-  commission_rate?: number;
-  agent_id?: string;
-  notes?: string;
-}
-
-// Helper to make RPC calls with proper typing
-const makeRpcCall = async <T>(functionName: string, params?: Record<string, any>): Promise<T> => {
-  const { data, error } = await supabase.functions.invoke<T>(functionName, {
-    body: params
-  });
-  
-  if (error) {
-    console.error(`Error calling RPC ${functionName}:`, error);
-    throw error;
-  }
-  
-  return data as T;
-};
-
-// Fetch approvals with filters
-export const useCommissionApprovals = (
-  status?: string,
-  isAdmin = false,
-  userId?: string,
-  page = 1,
-  pageSize = 10
-) => {
-  const queryKey = ['commission-approvals', status, isAdmin, userId, page, pageSize];
-  
+// Get all commission approvals with optional filtering by status
+export const useCommissionApprovals = (status?: string, isAdmin = false, userId?: string, page = 1, pageSize = 10) => {
   return useQuery({
-    queryKey,
+    queryKey: ['commission-approvals', status, isAdmin, userId, page, pageSize],
     queryFn: async () => {
-      // Use RPC function instead of direct table access
-      const params = {
-        p_status: status,
-        p_user_id: !isAdmin && userId ? userId : null,
-        p_limit: pageSize,
-        p_offset: (page - 1) * pageSize
-      };
+      let query = supabase
+        .from('commission_approvals')
+        .select(`
+          *,
+          property_transactions (
+            id,
+            property_id,
+            transaction_value,
+            commission_amount,
+            commission_rate,
+            property:property_id (
+              id,
+              title
+            )
+          ),
+          agent:agent_id (
+            id,
+            name
+          )
+        `)
+        .order('created_at', { ascending: false })
+        .range((page - 1) * pageSize, page * pageSize - 1);
       
-      const approvalData = await makeRpcCall<any[]>('get_commission_approvals', params);
-      
-      // Validate and transform the data
-      const approvals = approvalData ? approvalData : [];
-      
-      return {
-        approvals: approvals as (CommissionApproval & {
-          property_transactions: TransactionDetails;
-        })[],
-        totalCount: approvals.length
-      };
-    },
-    enabled: !!userId
-  });
-};
-
-// Fetch a single approval with history and comments
-export const useCommissionApprovalDetail = (approvalId?: string, isAdmin = false) => {
-  return useQuery({
-    queryKey: ['commission-approval', approvalId, isAdmin],
-    queryFn: async () => {
-      if (!approvalId) throw new Error("Approval ID is required");
-      
-      // Fetch approval details using RPC
-      const approvalData = await makeRpcCall<any>('get_commission_approval_detail', {
-        p_approval_id: approvalId
-      });
-      
-      if (!approvalData) {
-        throw new Error("Approval not found");
+      // Apply status filter if provided
+      if (status) {
+        query = query.eq('status', status);
       }
       
-      // Fetch history using RPC
-      const historyData = await makeRpcCall<any[]>('get_commission_approval_history', {
-        p_approval_id: approvalId
-      });
+      // If not admin, only show user's own approvals
+      if (!isAdmin && userId) {
+        query = query.eq('agent_id', userId);
+      }
       
-      // Fetch comments using RPC
-      const commentsData = await makeRpcCall<any[]>('get_commission_approval_comments', {
-        p_approval_id: approvalId 
-      });
+      const { data, error } = await query;
       
-      // Process and type-cast the data
-      const approval = approvalData as unknown as CommissionApproval & { 
-        property_transactions: TransactionDetails 
-      };
+      if (error) {
+        console.error('Error fetching commission approvals:', error);
+        throw new Error(error.message);
+      }
       
-      const history = historyData ? 
-        (historyData as unknown as CommissionApprovalHistory[]) : 
-        [];
+      return { approvals: data || [] };
+    },
+  });
+};
+
+// Get pending commission approvals for bulk actions
+export const usePendingCommissionApprovals = () => {
+  return useQuery({
+    queryKey: ['pending-commission-approvals'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('commission_approvals')
+        .select(`
+          *,
+          property_transactions (
+            id,
+            property_id,
+            transaction_value,
+            commission_amount,
+            commission_rate,
+            property:property_id (
+              id,
+              title
+            )
+          ),
+          agent:agent_id (
+            id,
+            name
+          )
+        `)
+        .eq('status', 'Pending')
+        .order('created_at', { ascending: false });
       
-      const comments = commentsData ? 
-        (commentsData as unknown as CommissionApprovalComment[]) : 
-        [];
+      if (error) {
+        console.error('Error fetching pending approvals:', error);
+        throw new Error(error.message);
+      }
+      
+      return { approvals: data || [] };
+    },
+  });
+};
+
+// Get commission approval stats
+export const useCommissionApprovalStats = () => {
+  return useQuery({
+    queryKey: ['commission-approval-stats'],
+    queryFn: async () => {
+      // Get counts by status
+      const { data: statusData, error: statusError } = await supabase
+        .from('commission_approvals')
+        .select('status, count')
+        .select('status')
+        .is('deleted_at', null);
+      
+      if (statusError) {
+        console.error('Error fetching approval stats:', statusError);
+        throw new Error(statusError.message);
+      }
+      
+      // Get pending value
+      const { data: pendingValue, error: pendingError } = await supabase
+        .from('commission_approvals')
+        .select(`
+          property_transactions!inner (
+            commission_amount
+          )
+        `)
+        .in('status', ['Pending', 'Under Review'])
+        .is('deleted_at', null);
+      
+      if (pendingError) {
+        console.error('Error fetching pending value:', pendingError);
+        throw new Error(pendingError.message);
+      }
+      
+      // Get approved value
+      const { data: approvedValue, error: approvedError } = await supabase
+        .from('commission_approvals')
+        .select(`
+          property_transactions!inner (
+            commission_amount
+          )
+        `)
+        .eq('status', 'Approved')
+        .is('deleted_at', null);
+      
+      if (approvedError) {
+        console.error('Error fetching approved value:', approvedError);
+        throw new Error(approvedError.message);
+      }
+      
+      // Get paid value
+      const { data: paidValue, error: paidError } = await supabase
+        .from('commission_approvals')
+        .select(`
+          property_transactions!inner (
+            commission_amount
+          )
+        `)
+        .eq('status', 'Paid')
+        .is('deleted_at', null);
+      
+      if (paidError) {
+        console.error('Error fetching paid value:', paidError);
+        throw new Error(paidError.message);
+      }
+      
+      // Count statuses
+      const pending = statusData.filter(item => item.status === 'Pending').length;
+      const underReview = statusData.filter(item => item.status === 'Under Review').length;
+      const approved = statusData.filter(item => item.status === 'Approved').length;
+      const readyForPayment = statusData.filter(item => item.status === 'Ready for Payment').length;
+      const paid = statusData.filter(item => item.status === 'Paid').length;
+      
+      // Calculate total values
+      const pendingAmount = pendingValue.reduce((sum, item) => sum + (item.property_transactions?.commission_amount || 0), 0);
+      const approvedAmount = approvedValue.reduce((sum, item) => sum + (item.property_transactions?.commission_amount || 0), 0);
+      const paidAmount = paidValue.reduce((sum, item) => sum + (item.property_transactions?.commission_amount || 0), 0);
       
       return {
-        approval,
-        history,
-        comments
+        stats: {
+          pending,
+          underReview,
+          approved,
+          readyForPayment,
+          paid,
+          pendingValue: pendingAmount,
+          approvedValue: approvedAmount,
+          paidValue: paidAmount
+        }
       };
     },
-    enabled: !!approvalId
   });
 };
 
-// Update approval status
-export const useUpdateApprovalStatus = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: async ({ 
-      approvalId, 
-      status, 
-      notes 
-    }: { 
-      approvalId: string; 
-      status: string; 
-      notes?: string 
-    }) => {
-      const result = await makeRpcCall<any>('update_commission_approval_status', {
-        p_approval_id: approvalId,
-        p_new_status: status,
-        p_notes: notes || null
-      });
+// Get a single commission approval by ID
+export const useCommissionApproval = (id: string) => {
+  return useQuery({
+    queryKey: ['commission-approval', id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('commission_approvals')
+        .select(`
+          *,
+          property_transactions (
+            *,
+            property:property_id (
+              *
+            ),
+            agent:agent_id (
+              *
+            ),
+            co_agent:co_agent_id (
+              *
+            )
+          ),
+          agent:agent_id (
+            *
+          ),
+          reviewed_by:reviewer_id (
+            *
+          ),
+          approval_comments (
+            *,
+            created_by (
+              name
+            )
+          )
+        `)
+        .eq('id', id)
+        .single();
       
-      return result;
-    },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['commission-approval', variables.approvalId] });
-      queryClient.invalidateQueries({ queryKey: ['commission-approvals'] });
+      if (error) {
+        console.error(`Error fetching commission approval ${id}:`, error);
+        throw new Error(error.message);
+      }
       
-      toast.success(`Approval status updated to ${variables.status}`);
+      return { approval: data };
     },
-    onError: (error) => {
-      toast.error(`Error updating approval status: ${error.message}`);
-    }
+    enabled: !!id,
   });
 };
 
-// Add comment to approval
-export const useAddApprovalComment = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: async ({
-      approvalId,
-      content
-    }: {
-      approvalId: string;
-      content: string;
-    }) => {
-      const result = await makeRpcCall<any>('add_commission_approval_comment', {
-        p_approval_id: approvalId,
-        p_content: content
-      });
-      
-      return result;
-    },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['commission-approval', variables.approvalId] });
-      toast.success('Comment added successfully');
-    },
-    onError: (error) => {
-      toast.error(`Error adding comment: ${error.message}`);
-    }
-  });
-};
-
-// Delete comment from approval
-export const useDeleteApprovalComment = () => {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: async ({
-      commentId,
-      approvalId
-    }: {
-      commentId: string;
-      approvalId: string;
-    }) => {
-      const result = await makeRpcCall<any>('delete_commission_approval_comment', {
-        p_comment_id: commentId
-      });
-      
-      return { success: true };
-    },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['commission-approval', variables.approvalId] });
-      toast.success('Comment deleted');
-    },
-    onError: (error) => {
-      toast.error(`Error deleting comment: ${error.message}`);
-    }
-  });
-};
-
-// Get system configuration value
+// Get system configuration
 export const useSystemConfiguration = (key: string) => {
   return useQuery({
-    queryKey: ['system-configuration', key],
+    queryKey: ['system-config', key],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('system_configuration')
@@ -247,54 +244,199 @@ export const useSystemConfiguration = (key: string) => {
         .single();
       
       if (error) {
-        console.error(`Error fetching configuration for ${key}:`, error);
-        throw error;
+        console.error(`Error fetching system config ${key}:`, error);
+        return { data: null };
       }
       
-      return data?.value;
-    }
+      return { data: data?.value };
+    },
   });
 };
 
-// Update system configuration value (admin only)
-export const useUpdateSystemConfiguration = () => {
+// Bulk approve commissions
+export const useBulkApproveCommissions = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async ({
-      key,
-      value,
-      description
-    }: {
-      key: string;
-      value: string;
-      description?: string;
-    }) => {
-      const { data, error } = await supabase
-        .from('system_configuration')
-        .upsert({
-          key,
-          value,
-          description,
-          updated_at: new Date().toISOString(),
-          updated_by: (await supabase.auth.getUser()).data.user?.id
-        })
-        .select()
-        .single();
+    mutationFn: async (ids: string[]) => {
+      // Get the current user for reviewer ID
+      const { data: userData, error: userError } = await supabase.auth.getUser();
       
-      if (error) {
-        console.error('Error updating system configuration:', error);
-        throw error;
+      if (userError) {
+        throw new Error('Authentication error. Please sign in again.');
       }
       
-      return data;
+      const reviewerId = userData.user?.id;
+      
+      // Update all selected commissions
+      const { data, error } = await supabase
+        .from('commission_approvals')
+        .update({
+          status: 'Approved',
+          reviewer_id: reviewerId,
+          reviewed_at: new Date().toISOString()
+        })
+        .in('id', ids);
+      
+      if (error) {
+        console.error('Error approving commissions:', error);
+        throw new Error(error.message);
+      }
+      
+      return { success: true };
     },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['system-configuration', variables.key] });
-      toast.success(`Configuration ${variables.key} updated successfully`);
+    onSuccess: () => {
+      // Invalidate relevant queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ['commission-approvals'] });
+      queryClient.invalidateQueries({ queryKey: ['pending-commission-approvals'] });
+      queryClient.invalidateQueries({ queryKey: ['commission-approval-stats'] });
     },
-    onError: (error) => {
-      toast.error(`Error updating configuration: ${error.message}`);
-    }
+  });
+};
+
+// Bulk reject commissions
+export const useBulkRejectCommissions = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (ids: string[]) => {
+      // Get the current user for reviewer ID
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      
+      if (userError) {
+        throw new Error('Authentication error. Please sign in again.');
+      }
+      
+      const reviewerId = userData.user?.id;
+      
+      // Update all selected commissions
+      const { data, error } = await supabase
+        .from('commission_approvals')
+        .update({
+          status: 'Rejected',
+          reviewer_id: reviewerId,
+          reviewed_at: new Date().toISOString()
+        })
+        .in('id', ids);
+      
+      if (error) {
+        console.error('Error rejecting commissions:', error);
+        throw new Error(error.message);
+      }
+      
+      return { success: true };
+    },
+    onSuccess: () => {
+      // Invalidate relevant queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ['commission-approvals'] });
+      queryClient.invalidateQueries({ queryKey: ['pending-commission-approvals'] });
+      queryClient.invalidateQueries({ queryKey: ['commission-approval-stats'] });
+    },
+  });
+};
+
+// Add a comment to a commission approval
+export const useAddApprovalComment = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ approvalId, comment }: { approvalId: string, comment: string }) => {
+      // Get the current user
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      
+      if (userError) {
+        throw new Error('Authentication error. Please sign in again.');
+      }
+      
+      const userId = userData.user?.id;
+      
+      // Add comment
+      const { data, error } = await supabase
+        .from('approval_comments')
+        .insert({
+          approval_id: approvalId,
+          comment_text: comment,
+          created_by: userId
+        });
+      
+      if (error) {
+        console.error('Error adding comment:', error);
+        throw new Error(error.message);
+      }
+      
+      return { success: true };
+    },
+    onSuccess: (_data, variables) => {
+      // Invalidate the specific commission approval query
+      queryClient.invalidateQueries({ queryKey: ['commission-approval', variables.approvalId] });
+      toast.success('Comment added successfully');
+    },
+  });
+};
+
+// Change commission approval status
+export const useChangeApprovalStatus = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async ({ 
+      approvalId, 
+      status, 
+      comment 
+    }: { 
+      approvalId: string, 
+      status: string, 
+      comment?: string 
+    }) => {
+      // Get the current user
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      
+      if (userError) {
+        throw new Error('Authentication error. Please sign in again.');
+      }
+      
+      const userId = userData.user?.id;
+      
+      // Update approval status
+      const { data, error } = await supabase
+        .from('commission_approvals')
+        .update({
+          status: status,
+          reviewer_id: userId,
+          reviewed_at: new Date().toISOString()
+        })
+        .eq('id', approvalId);
+      
+      if (error) {
+        console.error('Error updating approval status:', error);
+        throw new Error(error.message);
+      }
+      
+      // Add comment if provided
+      if (comment) {
+        const { error: commentError } = await supabase
+          .from('approval_comments')
+          .insert({
+            approval_id: approvalId,
+            comment_text: comment,
+            created_by: userId
+          });
+        
+        if (commentError) {
+          console.error('Error adding comment:', commentError);
+          // Don't throw here, consider it a partial success
+        }
+      }
+      
+      return { success: true };
+    },
+    onSuccess: (_data, variables) => {
+      // Invalidate queries
+      queryClient.invalidateQueries({ queryKey: ['commission-approval', variables.approvalId] });
+      queryClient.invalidateQueries({ queryKey: ['commission-approvals'] });
+      queryClient.invalidateQueries({ queryKey: ['commission-approval-stats'] });
+      
+      toast.success(`Status changed to ${variables.status}`);
+    },
   });
 };

@@ -49,6 +49,13 @@ export const mapPropertyData = (rawProperty: any): Property => {
     area: rawProperty.land_size || rawProperty.land_area || 0,
     bedrooms: rawProperty.bedrooms || 0,
     bathrooms: rawProperty.bathrooms || 0,
+    // Add stock data if this is a development property
+    stock: rawProperty.stock_total 
+      ? {
+          total: rawProperty.stock_total || 0,
+          available: rawProperty.stock_available || 0,
+        }
+      : undefined,
   };
 };
 
@@ -79,4 +86,54 @@ export const getPropertyCoverImage = (property: Property): string => {
   }
   
   return coverImage;
+};
+
+/**
+ * Calculate the percentage of available stock
+ */
+export const calculateStockPercentage = (available: number, total: number): number => {
+  if (total === 0) return 0;
+  return Math.round((available / total) * 100);
+};
+
+/**
+ * Get a label for stock status based on percentage
+ */
+export const getStockStatusLabel = (percentage: number): string => {
+  if (percentage === 0) return 'Sold Out';
+  if (percentage <= 25) return 'Limited';
+  if (percentage <= 50) return 'Selling Fast';
+  if (percentage <= 75) return 'Available';
+  return 'Good Availability';
+};
+
+/**
+ * Get property statistics for dashboard
+ */
+export const getPropertyStats = (properties: Property[]) => {
+  const stats = {
+    total: properties.length,
+    residential: 0,
+    commercial: 0,
+    industrial: 0,
+    land: 0,
+    available: 0,
+    pending: 0,
+    sold: 0,
+  };
+
+  properties.forEach(property => {
+    // Count by type
+    if (property.type.toLowerCase() === 'residential') stats.residential++;
+    else if (property.type.toLowerCase() === 'commercial') stats.commercial++;
+    else if (property.type.toLowerCase() === 'industrial') stats.industrial++;
+    else if (property.type.toLowerCase() === 'land') stats.land++;
+
+    // Count by status
+    if (property.status.toLowerCase() === 'available') stats.available++;
+    else if (property.status.toLowerCase() === 'pending') stats.pending++;
+    else if (property.status.toLowerCase() === 'sold') stats.sold++;
+  });
+
+  return stats;
 };
