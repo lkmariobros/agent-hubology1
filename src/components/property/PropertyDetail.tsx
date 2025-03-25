@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
@@ -17,7 +16,7 @@ import {
   Share, 
   Heart, 
   Package, 
-  External, 
+  ExternalLink, 
   SquareCheck 
 } from 'lucide-react';
 import { Property } from '@/types';
@@ -321,7 +320,7 @@ const PropertyDetail: React.FC<PropertyDetailProps> = ({ property, onEdit, onDel
               </div>
               
               <Button className="w-full">
-                <External className="h-4 w-4 mr-2" />
+                <ExternalLink className="h-4 w-4 mr-2" />
                 View Listing
               </Button>
               
