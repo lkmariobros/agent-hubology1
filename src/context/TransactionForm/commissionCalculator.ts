@@ -1,39 +1,45 @@
 
-import { CommissionBreakdown, TransactionFormData, AgentRank } from './types';
-import { getAgentCommissionPercentage } from './agentTiers';
+import { TransactionFormData, CommissionBreakdown, AgentRank } from './types';
 
-// Calculate commission breakdown - handles both rental and sales transactions
+// Agent tier commission percentages
+const AGENT_TIER_PERCENTAGES: Record<AgentRank, number> = {
+  'Advisor': 70,
+  'Sales Leader': 80,
+  'Team Leader': 83,
+  'Group Leader': 85,
+  'Supreme Leader': 85
+};
+
+// Calculate commission breakdown for a transaction
 export const calculateCommission = (formData: TransactionFormData): CommissionBreakdown => {
-  const { transactionValue, commissionRate, commissionAmount, transactionType, coBroking, agentTier = 'Advisor' } = formData;
+  const { 
+    transactionValue = 0, 
+    commissionRate = 0, 
+    coBroking, 
+    agentTier = 'Advisor' 
+  } = formData;
   
-  // Calculate basic values
-  const isRental = transactionType === 'Rent';
+  // Calculate total commission
+  const totalCommission = (transactionValue * commissionRate) / 100;
   
-  // For rentals, use the commission amount directly (owner-provided commission)
-  // For sales/primary, calculate based on rate
-  const totalCommission = isRental 
-    ? (commissionAmount || 0) 
-    : (transactionValue * commissionRate) / 100;
-  
-  // Get the agent's commission percentage based on their tier
-  const agentTierPercentage = getAgentCommissionPercentage(agentTier);
-  const agencyTierPercentage = 100 - agentTierPercentage;
+  // Get agent's tier-based percentage
+  const agentTierPercentage = AGENT_TIER_PERCENTAGES[agentTier] || 70;
   
   // Calculate split percentages for co-broking scenario
   const agencySplitPercentage = coBroking?.enabled ? (coBroking.commissionSplit || 50) : 100;
   const coAgencySplitPercentage = coBroking?.enabled ? (100 - agencySplitPercentage) : 0;
   
-  // Calculate our agency's portion of the commission
+  // Our agency's portion of the total commission
   const ourAgencyCommission = totalCommission * (agencySplitPercentage / 100);
   
-  // Calculate co-broker's agency portion
+  // Co-broker agency's portion
   const coAgencyCommission = coBroking?.enabled 
     ? totalCommission * (coAgencySplitPercentage / 100)
-    : 0;
+    : undefined;
   
   // From our agency's portion, calculate agent and agency shares
-  const agencyShare = ourAgencyCommission * (agencyTierPercentage / 100);
   const agentShare = ourAgencyCommission * (agentTierPercentage / 100);
+  const agencyShare = ourAgencyCommission * ((100 - agentTierPercentage) / 100);
   
   return {
     totalCommission,
@@ -43,8 +49,8 @@ export const calculateCommission = (formData: TransactionFormData): CommissionBr
     coAgencyCommission,
     agentTier,
     agentCommissionPercentage: agentTierPercentage,
-    // Add these for display purposes in CommissionBreakdownCard
-    transactionValue: transactionValue || 0,
-    commissionRate: commissionRate || 0
+    // Add these for display purposes
+    transactionValue,
+    commissionRate
   };
 };

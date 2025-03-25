@@ -1,107 +1,44 @@
 
-import { TransactionFormData, TransactionFormState, TransactionType } from "./types";
+import { TransactionFormState, TransactionFormData, TransactionType } from './types';
 
-// Initial transaction data based on transaction type
+// Default commission rates by transaction type
+const DEFAULT_COMMISSION_RATES = {
+  'Sale': 2.75,    // 2.75% for property sales
+  'Rent': 1.0,     // 1.0% for rentals (or flat fee)
+  'Developer': 3.0 // 3.0% for developer projects
+};
+
+// Function to get default commission rate by transaction type
+export const getDefaultCommissionRate = (type: TransactionType): number => {
+  return DEFAULT_COMMISSION_RATES[type] || 2.75;
+};
+
+// Create initial form data based on transaction type
 export const getInitialTransactionData = (transactionType: TransactionType): TransactionFormData => {
-  const commonData = {
-    transactionType: transactionType,
-    status: 'Draft' as const,
+  const commissionRate = getDefaultCommissionRate(transactionType);
+  
+  return {
+    transactionType,
     transactionDate: new Date(),
+    propertyId: '',
+    status: 'Draft',
     transactionValue: 0,
-    commissionRate: getDefaultCommissionRate(transactionType),
+    commissionRate,
     commissionAmount: 0,
-    notes: '',
-    propertyId: '', // Add default empty propertyId
     coBroking: {
       enabled: false,
-      agentName: '',
-      agentCompany: '',
-      agentContact: '',
-      commissionSplit: 50,
-      credentialsVerified: false,
-    },
+      commissionSplit: 50 // Default 50/50 split
+    }
   };
-
-  switch (transactionType) {
-    case 'Sale':
-      return {
-        ...commonData,
-        buyer: {
-          name: '',
-          email: '',
-          phone: '',
-          notes: '',
-        },
-        seller: {
-          name: '',
-          email: '',
-          phone: '',
-          notes: '',
-        },
-      };
-    case 'Rent':
-      return {
-        ...commonData,
-        landlord: {
-          name: '',
-          email: '',
-          phone: '',
-          notes: '',
-        },
-        tenant: {
-          name: '',
-          email: '',
-          phone: '',
-          notes: '',
-        },
-        // For rentals, we initialize with the default values appropriate for rentals
-        commissionRate: 0, // Not used for rentals
-        commissionAmount: 0, // Will be set to match the owner's commission input
-      };
-    case 'Developer':
-      return {
-        ...commonData,
-        buyer: {
-          name: '',
-          email: '',
-          phone: '',
-          notes: '',
-        },
-        developer: {
-          name: '',
-          email: '',
-          phone: '',
-          notes: '',
-        },
-      };
-    default:
-      return {
-        ...commonData,
-      } as TransactionFormData;
-  }
 };
 
-// Get default commission rate based on transaction type
-export const getDefaultCommissionRate = (transactionType: TransactionType): number => {
-  switch (transactionType) {
-    case 'Sale':
-      return 2; // 2% for sales
-    case 'Rent':
-      return 0; // Not applicable for rentals (we use direct commission amount)
-    case 'Developer':
-      return 3; // 3% for primary project sales
-    default:
-      return 2;
-  }
-};
-
-// Initial state
+// Initial state for the transaction form
 export const initialTransactionFormState: TransactionFormState = {
   formData: getInitialTransactionData('Sale'),
   documents: [],
+  errors: {},
   currentStep: 0,
   isSubmitting: false,
   isDirty: false,
-  lastSaved: null,
-  errors: {},
+  lastSaved: null
 };
