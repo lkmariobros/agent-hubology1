@@ -190,9 +190,9 @@ const PropertyDetail = () => {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-0">
       {/* Header with navigation and actions */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
         <div className="flex items-center space-x-4">
           <Button variant="ghost" onClick={() => navigate('/properties')}>
             <ChevronLeft className="mr-2 h-4 w-4" />
@@ -228,7 +228,7 @@ const PropertyDetail = () => {
       ) : property ? (
         <>
           {/* First Row: Property Images and Info */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
             {/* Left column - Image gallery (3 column spans) */}
             <div className="lg:col-span-2">
               <div className="space-y-4">
@@ -446,7 +446,7 @@ const PropertyDetail = () => {
           </div>
           
           {/* Second Row: Team Notes and Content Sections */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
             {/* Team Notes Section - (2 column spans) */}
             <div className="lg:col-span-2">
               <TeamNotes 
