@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { PropertyFormData } from '@/types/property-form';
 
 // Define the filters interface to avoid TypeScript errors
-interface PropertyFilters {
+export interface PropertyFilters {
   propertyType?: string;
   transactionType?: string;
   status?: string;
@@ -55,6 +55,11 @@ export function useProperties(page = 1, pageSize = 10, filters: PropertyFilters 
         
         if (filters.maxPrice) {
           query = query.lte('price', filters.maxPrice);
+        }
+        
+        // Handle title search
+        if (filters.title) {
+          query = query.ilike('title', `%${filters.title}%`);
         }
       }
       

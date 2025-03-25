@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -11,6 +10,7 @@ import { PropertyGrid } from '@/components/property/PropertyGrid';
 import { useProperties } from '@/hooks/useProperties';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { mapPropertyData } from '@/utils/propertyUtils';
+import { Property } from '@/types';
 
 const AdminProperties = () => {
   const [page, setPage] = useState(1);
@@ -28,7 +28,7 @@ const AdminProperties = () => {
   const propertiesRaw = data?.properties || [];
   
   // Map the API data structure to the format expected by components
-  const properties = propertiesRaw.map(property => mapPropertyData(property));
+  const properties: Property[] = propertiesRaw.map(property => mapPropertyData(property));
 
   // Handle property type change
   const handlePropertyTypeChange = (value: string) => {
