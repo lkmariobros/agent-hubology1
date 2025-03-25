@@ -18,12 +18,28 @@ interface PortalSwitcherProps {
 export function PortalSwitcher({ showLabel = true, className = "" }: PortalSwitcherProps) {
   const { isAdmin, switchRole } = useAuth();
   
-  // Only show this component for users with admin privileges
-  if (!isAdmin) return null;
-  
   const currentRole = window.location.pathname.startsWith('/admin') ? 'admin' : 'agent';
   const isAdminActive = currentRole === 'admin';
+  
+  console.log('PortalSwitcher rendering with isAdmin:', isAdmin);
 
+  // For non-admin users, just show the logo without dropdown functionality
+  if (!isAdmin) {
+    return (
+      <div className={`flex items-center px-2 py-2 ${className}`}>
+        <div className="flex items-center gap-2">
+          <div className="h-8 w-8 rounded-full bg-purple-600 flex items-center justify-center text-white">
+            <span className="font-bold text-sm">P</span>
+          </div>
+          {showLabel && (
+            <span className="text-lg font-semibold">PropertyPro</span>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // For admin users, show the dropdown
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

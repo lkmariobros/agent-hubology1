@@ -1,7 +1,5 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Building, Shield } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
 import {
@@ -24,6 +22,8 @@ export function AppSidebar() {
   const isCollapsed = state === "collapsed";
   const { isAdmin } = useAuth();
   
+  console.log('AppSidebar rendering with isAdmin:', isAdmin);
+  
   return (
     <>
       <Sidebar 
@@ -33,21 +33,8 @@ export function AppSidebar() {
         variant="sidebar"
       >
         <SidebarHeader>
-          {/* Use PortalSwitcher for both admin and non-admin users */}
-          {isAdmin ? (
-            <PortalSwitcher showLabel={!isCollapsed} className="px-0" />
-          ) : (
-            <div className="flex items-center px-2 py-3">
-              <div className="flex items-center">
-                <div className="flex items-center justify-center h-8 w-8 rounded-full bg-purple-600 text-white">
-                  <span className="font-bold text-sm">P</span>
-                </div>
-                {!isCollapsed && (
-                  <span className="ml-2 text-lg font-semibold">PropertyPro</span>
-                )}
-              </div>
-            </div>
-          )}
+          {/* Always use PortalSwitcher whether admin or not, but it will only show the dropdown for admins */}
+          <PortalSwitcher showLabel={!isCollapsed} className="px-2 py-3" />
         </SidebarHeader>
         
         <SidebarContent>
