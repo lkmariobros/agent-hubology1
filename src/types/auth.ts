@@ -1,12 +1,22 @@
 
+import { UserRole } from '@/providers/AuthProvider';
+
 export interface User {
   id: string;
   email: string;
-  name?: string;
+  name: string;
   avatar?: string;
-  role?: 'admin' | 'agent' | 'manager';
+  role: string;
   agentTier?: string;
-  teams?: string[];
+  team?: string;
+  joinDate?: string | Date;
+  tier?: string;
+  phone?: string;
+  properties?: any[];
+  sales?: number;
+  transactions?: number;
+  points?: number;
+  badges?: string[];
 }
 
 export interface AuthContextType {
@@ -18,5 +28,5 @@ export interface AuthContextType {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
-  switchRole: (role: 'admin' | 'agent' | 'manager') => void;
+  switchRole: (role: UserRole) => void;
 }

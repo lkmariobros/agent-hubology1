@@ -1,206 +1,235 @@
 
-import React, { useState } from 'react';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Upload, X, CheckCircle, AlertCircle, Loader2, Image } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import React, { useState, useRef, ChangeEvent } from 'react';
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { 
+  X, 
+  Upload, 
+  Image as ImageIcon, 
+  AlertCircle, 
+  CheckCircle, 
+  Loader2 
+} from "lucide-react";
 
-interface ImageUploaderProps {
-  onUpload: (files: File[]) => void;
-  maxSize?: number; // in MB
-  maxFiles?: number;
-  label?: string;
-  description?: string;
+// Interface for image object
+interface ImageFile {
+  id?: string;
+  name: string;
+  file?: File;
+  url?: string;
+  path?: string;
+  uploadStatus?: 'uploading' | 'success' | 'error' | 'completed';
+  progress?: number;
+  errorMessage?: string;
 }
 
-interface UploadedImage {
-  file: File;
-  status: 'uploading' | 'success' | 'error' | 'completed'; // Added 'completed' as a valid status
-  progress: number;
-  preview: string;
-  error?: string;
+interface ImageUploaderProps {
+  images: ImageFile[];
+  onAddImages: (images: ImageFile[]) => void;
+  onRemoveImage: (index: number) => void;
+  maxSize?: number; // in MB
+  maxFiles?: number;
+  disabled?: boolean;
 }
 
 const ImageUploader: React.FC<ImageUploaderProps> = ({
-  onUpload,
+  images,
+  onAddImages,
+  onRemoveImage,
   maxSize = 5, // 5MB default
   maxFiles = 10,
-  label = 'Upload Images',
-  description = 'Upload JPEG, PNG, or WebP images'
+  disabled = false,
 }) => {
-  const [isDragging, setIsDragging] = useState(false);
-  const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
+  const [dragActive, setDragActive] = useState<boolean>(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDrag = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
-    setIsDragging(true);
+    e.stopPropagation();
+    
+    if (e.type === 'dragenter' || e.type === 'dragover') {
+      setDragActive(true);
+    } else if (e.type === 'dragleave') {
+      setDragActive(false);
+    }
   };
   
-  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(false);
+  const validateFile = (file: File): { valid: boolean; error?: string } => {
+    // Check file size
+    if (file.size > maxSize * 1024 * 1024) {
+      return { valid: false, error: `File is too large. Maximum size is ${maxSize}MB.` };
+    }
+    
+    // Check file type
+    const fileType = file.type;
+    if (!fileType.startsWith('image/')) {
+      return { valid: false, error: 'File must be an image.' };
+    }
+    
+    return { valid: true };
+  };
+  
+  const processFiles = (files: FileList | null) => {
+    if (!files) return;
+    
+    // Check max files
+    if (images.length + files.length > maxFiles) {
+      alert(`You can only upload a maximum of ${maxFiles} images.`);
+      return;
+    }
+    
+    const newImages: ImageFile[] = [];
+    
+    Array.from(files).forEach(file => {
+      const validation = validateFile(file);
+      
+      if (validation.valid) {
+        // Create a new image object
+        const newImage: ImageFile = {
+          name: file.name,
+          file: file,
+          uploadStatus: 'completed', // Set as success since we're just mocking here
+          progress: 100,
+          url: URL.createObjectURL(file), // Create a temporary preview URL
+        };
+        
+        newImages.push(newImage);
+      } else {
+        // Handle invalid file
+        alert(validation.error);
+      }
+    });
+    
+    if (newImages.length > 0) {
+      onAddImages(newImages);
+    }
   };
   
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
-    setIsDragging(false);
+    e.stopPropagation();
+    setDragActive(false);
     
-    const files = Array.from(e.dataTransfer.files).filter(file => 
-      file.type.startsWith('image/')
-    );
+    if (disabled) return;
     
-    if (files.length === 0) {
-      alert('Please drop image files only.');
-      return;
-    }
-    
-    handleFiles(files);
+    processFiles(e.dataTransfer.files);
   };
   
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const files = Array.from(e.target.files);
-      handleFiles(files);
-    }
+  const handleFileInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    processFiles(e.target.files);
+    // Reset the input value so the same file can be uploaded again if needed
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
   
-  const handleFiles = (files: File[]) => {
-    if (uploadedImages.length + files.length > maxFiles) {
-      alert(`You can only upload up to ${maxFiles} images.`);
-      return;
+  const handleChooseFiles = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
     }
-    
-    const validFiles = files.filter(file => {
-      const sizeInMB = file.size / (1024 * 1024);
-      return sizeInMB <= maxSize;
-    });
-    
-    if (validFiles.length !== files.length) {
-      alert(`Some files were too large. Maximum file size is ${maxSize}MB.`);
-    }
-    
-    const newUploadedImages = [
-      ...uploadedImages,
-      ...validFiles.map(file => ({
-        file,
-        status: 'uploading' as const,
-        progress: 0,
-        preview: URL.createObjectURL(file)
-      }))
-    ];
-    
-    setUploadedImages(newUploadedImages);
-    onUpload(validFiles);
-    
-    // Simulate upload progress and completion
-    validFiles.forEach((file, index) => {
-      const fileIndex = uploadedImages.length + index;
-      
-      const simulateProgress = () => {
-        setUploadedImages(prev => {
-          const updated = [...prev];
-          if (updated[fileIndex]) {
-            updated[fileIndex].progress += 10;
-            
-            if (updated[fileIndex].progress >= 100) {
-              updated[fileIndex].status = 'completed';
-              clearInterval(intervalId);
-            }
-          }
-          return updated;
-        });
-      };
-      
-      const intervalId = setInterval(simulateProgress, 300);
-    });
-  };
-  
-  const removeImage = (index: number) => {
-    URL.revokeObjectURL(uploadedImages[index].preview);
-    setUploadedImages(prev => prev.filter((_, i) => i !== index));
   };
   
   return (
     <div className="space-y-4">
-      <div>
-        <Label>{label}</Label>
-        <div 
-          className={cn(
-            "mt-2 border-2 border-dashed rounded-md p-6 text-center cursor-pointer hover:bg-accent/50 transition-colors",
-            isDragging && "border-primary bg-accent/50",
-            "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-          )}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-          onClick={() => document.getElementById('image-upload')?.click()}
-          tabIndex={0}
-          role="button"
-          aria-label="Upload images"
-        >
-          <input 
-            type="file" 
-            id="image-upload" 
-            className="hidden" 
-            accept="image/*" 
-            multiple 
-            onChange={handleFileChange}
-          />
-          <div className="flex flex-col items-center">
-            <Image className="h-10 w-10 text-muted-foreground mb-2" />
-            <p className="text-sm font-medium">
-              {isDragging ? 'Drop images here' : 'Drag and drop or click to upload'}
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              {description}
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Maximum file size: {maxSize}MB
-            </p>
-          </div>
-        </div>
+      <div
+        onDragEnter={handleDrag}
+        onDragLeave={handleDrag}
+        onDragOver={handleDrag}
+        onDrop={handleDrop}
+        className={`
+          border-2 border-dashed rounded-lg p-6 
+          ${dragActive ? 'border-primary bg-primary/5' : 'border-gray-200'} 
+          ${disabled ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}
+          transition-colors duration-200
+          flex flex-col items-center justify-center text-center space-y-2
+        `}
+        onClick={disabled ? undefined : handleChooseFiles}
+      >
+        <Upload className="h-8 w-8 text-muted-foreground mb-2" />
+        <h3 className="font-medium text-lg">Drag & Drop Images</h3>
+        <p className="text-sm text-muted-foreground">
+          or click to browse your files
+        </p>
+        <p className="text-xs text-muted-foreground mt-1">
+          Supported formats: JPG, JPEG, PNG, WebP
+        </p>
+        <p className="text-xs text-muted-foreground">
+          Maximum file size: {maxSize}MB
+        </p>
+        
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          onChange={handleFileInputChange}
+          accept="image/jpeg,image/png,image/jpg,image/webp"
+          disabled={disabled}
+          className="hidden"
+        />
       </div>
       
-      {uploadedImages.length > 0 && (
-        <div className="space-y-2">
-          <p className="text-sm font-medium">Uploaded Images</p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            {uploadedImages.map((image, index) => (
+      {/* Image Gallery */}
+      {images.length > 0 && (
+        <div>
+          <p className="text-sm font-medium mb-2">Uploaded Images ({images.length}/{maxFiles})</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+            {images.map((image, index) => (
               <div key={index} className="relative group">
-                <div className="aspect-square rounded-md overflow-hidden bg-muted">
-                  <img 
-                    src={image.preview} 
-                    alt={`Preview ${index + 1}`} 
-                    className="object-cover w-full h-full"
-                  />
-                </div>
-                
-                <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    className="h-8 w-8 p-0"
-                    onClick={() => removeImage(index)}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-                
-                <div className="absolute top-2 right-2">
-                  {image.status === 'uploading' ? (
-                    <div className="bg-white rounded-full p-1">
-                      <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                <div className="aspect-square rounded-md overflow-hidden bg-gray-100 border">
+                  {/* Image Preview */}
+                  {(image.url || image.path) && (
+                    <img 
+                      src={image.url || image.path} 
+                      alt={image.name} 
+                      className="w-full h-full object-cover"
+                    />
+                  )}
+                  
+                  {!image.url && !image.path && (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <ImageIcon className="h-8 w-8 text-muted-foreground" />
                     </div>
-                  ) : image.status === 'error' ? (
-                    <div className="bg-white rounded-full p-1">
-                      <AlertCircle className="h-4 w-4 text-destructive" />
+                  )}
+                  
+                  {/* Upload Status Overlay */}
+                  {image.uploadStatus === 'uploading' && (
+                    <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center p-2">
+                      <Loader2 className="h-6 w-6 animate-spin text-white mb-2" />
+                      <Progress value={image.progress} className="w-full h-1.5" />
+                      <p className="text-xs text-white mt-1">{image.progress}%</p>
                     </div>
-                  ) : (
-                    <div className="bg-white rounded-full p-1">
-                      <CheckCircle className="h-4 w-4 text-green-500" />
+                  )}
+                  
+                  {image.uploadStatus === 'error' && (
+                    <div className="absolute inset-0 bg-red-500/70 flex items-center justify-center">
+                      <div className="text-white text-center">
+                        <AlertCircle className="h-6 w-6 mx-auto mb-1" />
+                        <p className="text-xs">Upload failed</p>
+                      </div>
                     </div>
                   )}
                 </div>
+                
+                {/* Success Indicator */}
+                {(image.uploadStatus === 'success' || image.uploadStatus === 'completed') && (
+                  <div className="absolute top-1 left-1">
+                    <div className="bg-green-100 rounded-full p-0.5">
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                    </div>
+                  </div>
+                )}
+                
+                {/* Remove Button */}
+                <Button
+                  variant="destructive"
+                  size="icon"
+                  className="h-6 w-6 absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={() => onRemoveImage(index)}
+                  disabled={disabled || image.uploadStatus === 'uploading'}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+                
+                {/* Image Name (truncated) */}
+                <p className="text-xs truncate mt-1">{image.name}</p>
               </div>
             ))}
           </div>

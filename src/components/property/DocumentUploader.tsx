@@ -1,216 +1,247 @@
 
-import React, { useState } from 'react';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Upload, File, X, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import React, { useState, useRef, ChangeEvent } from 'react';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { 
+  X, 
+  Upload, 
+  FileText, 
+  AlertCircle, 
+  CheckCircle, 
+  Loader2 
+} from "lucide-react";
 
-interface DocumentUploaderProps {
-  onUpload: (files: File[]) => void;
-  accept?: string;
-  maxSize?: number; // in MB
-  maxFiles?: number;
-  label?: string;
-  description?: string;
+// Interface for document object
+interface Document {
+  id?: string;
+  name: string;
+  path?: string;
+  file?: File;
+  type: string;
+  uploadStatus?: 'uploading' | 'success' | 'error' | 'completed';
+  progress?: number;
+  errorMessage?: string;
 }
 
-interface UploadedFile {
-  file: File;
-  status: 'uploading' | 'success' | 'error' | 'completed'; // Added 'completed' as a valid status
-  progress: number;
-  error?: string;
+interface DocumentUploaderProps {
+  documents: Document[];
+  onAddDocument: (document: Document) => void;
+  onRemoveDocument: (index: number) => void;
+  allowedTypes?: string[];
+  maxSize?: number; // in MB
+  maxFiles?: number;
+  disabled?: boolean;
 }
 
 const DocumentUploader: React.FC<DocumentUploaderProps> = ({
-  onUpload,
-  accept = '.pdf,.doc,.docx,.xlsx,.xls',
+  documents,
+  onAddDocument,
+  onRemoveDocument,
+  allowedTypes = ['.pdf', '.doc', '.docx', '.jpg', '.jpeg', '.png'],
   maxSize = 10, // 10MB default
-  maxFiles = 5,
-  label = 'Upload Documents',
-  description = 'Upload PDF, Word, or Excel documents'
+  maxFiles = 10,
+  disabled = false,
 }) => {
-  const [isDragging, setIsDragging] = useState(false);
-  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
+  const [dragActive, setDragActive] = useState<boolean>(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+  // Simplify allowed types for display
+  const displayAllowedTypes = allowedTypes
+    .map(type => type.replace('.', '').toUpperCase())
+    .join(', ');
+  
+  const handleDrag = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
-    setIsDragging(true);
+    e.stopPropagation();
+    
+    if (e.type === 'dragenter' || e.type === 'dragover') {
+      setDragActive(true);
+    } else if (e.type === 'dragleave') {
+      setDragActive(false);
+    }
   };
   
-  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDragging(false);
+  const validateFile = (file: File): { valid: boolean; error?: string } => {
+    // Check file size
+    if (file.size > maxSize * 1024 * 1024) {
+      return { valid: false, error: `File is too large. Maximum size is ${maxSize}MB.` };
+    }
+    
+    // Check file type
+    const fileExtension = `.${file.name.split('.').pop()?.toLowerCase()}`;
+    if (!allowedTypes.includes(fileExtension) && !allowedTypes.includes('*')) {
+      return { valid: false, error: `File type not allowed. Allowed types: ${displayAllowedTypes}` };
+    }
+    
+    return { valid: true };
+  };
+  
+  const processFiles = (files: FileList | null) => {
+    if (!files) return;
+    
+    // Check max files
+    if (documents.length + files.length > maxFiles) {
+      alert(`You can only upload a maximum of ${maxFiles} files.`);
+      return;
+    }
+    
+    Array.from(files).forEach(file => {
+      const validation = validateFile(file);
+      
+      if (validation.valid) {
+        // Create a new document object
+        const newDocument: Document = {
+          name: file.name,
+          file: file,
+          type: file.type,
+          uploadStatus: 'completed', // Set as success since we're not actually uploading in this example
+          progress: 100,
+        };
+        
+        onAddDocument(newDocument);
+      } else {
+        // Handle invalid file
+        alert(validation.error);
+      }
+    });
   };
   
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
-    setIsDragging(false);
+    e.stopPropagation();
+    setDragActive(false);
     
-    const files = Array.from(e.dataTransfer.files);
-    handleFiles(files);
+    if (disabled) return;
+    
+    processFiles(e.dataTransfer.files);
   };
   
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const files = Array.from(e.target.files);
-      handleFiles(files);
-    }
+  const handleFileInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    processFiles(e.target.files);
+    // Reset the input value so the same file can be uploaded again if needed
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
   
-  const handleFiles = (files: File[]) => {
-    if (uploadedFiles.length + files.length > maxFiles) {
-      alert(`You can only upload up to ${maxFiles} files.`);
-      return;
-    }
-    
-    const validFiles = files.filter(file => {
-      const sizeInMB = file.size / (1024 * 1024);
-      return sizeInMB <= maxSize;
-    });
-    
-    if (validFiles.length !== files.length) {
-      alert(`Some files were too large. Maximum file size is ${maxSize}MB.`);
-    }
-    
-    const newUploadedFiles = [
-      ...uploadedFiles,
-      ...validFiles.map(file => ({
-        file,
-        status: 'uploading' as const,
-        progress: 0
-      }))
-    ];
-    
-    setUploadedFiles(newUploadedFiles);
-    onUpload(validFiles);
-    
-    // Simulate upload progress and completion
-    validFiles.forEach((file, index) => {
-      const fileIndex = uploadedFiles.length + index;
-      
-      const simulateProgress = () => {
-        setUploadedFiles(prev => {
-          const updated = [...prev];
-          if (updated[fileIndex]) {
-            updated[fileIndex].progress += 10;
-            
-            if (updated[fileIndex].progress >= 100) {
-              updated[fileIndex].status = 'completed';
-              clearInterval(intervalId);
-            }
-          }
-          return updated;
-        });
-      };
-      
-      const intervalId = setInterval(simulateProgress, 300);
-    });
-  };
-  
-  const removeFile = (index: number) => {
-    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
-  };
-  
-  const getFileIcon = (fileName: string) => {
-    const extension = fileName.split('.').pop()?.toLowerCase();
-    
-    switch (extension) {
-      case 'pdf':
-        return <File className="h-4 w-4 text-red-500" />;
-      case 'doc':
-      case 'docx':
-        return <File className="h-4 w-4 text-blue-500" />;
-      case 'xls':
-      case 'xlsx':
-        return <File className="h-4 w-4 text-green-500" />;
-      default:
-        return <File className="h-4 w-4 text-gray-500" />;
+  const handleChooseFiles = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
     }
   };
   
   return (
     <div className="space-y-4">
-      <div>
-        <Label>{label}</Label>
-        <div 
-          className={cn(
-            "mt-2 border-2 border-dashed rounded-md p-6 text-center cursor-pointer hover:bg-accent/50 transition-colors",
-            isDragging && "border-primary bg-accent/50",
-            "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-          )}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-          onClick={() => document.getElementById('file-upload')?.click()}
-          tabIndex={0}
-          role="button"
-          aria-label="Upload documents"
-        >
-          <input 
-            type="file" 
-            id="file-upload" 
-            className="hidden" 
-            accept={accept} 
-            multiple 
-            onChange={handleFileChange}
-          />
-          <div className="flex flex-col items-center">
-            <Upload className="h-10 w-10 text-muted-foreground mb-2" />
-            <p className="text-sm font-medium">
-              {isDragging ? 'Drop files here' : 'Drag and drop or click to upload'}
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              {description}
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Maximum file size: {maxSize}MB
-            </p>
-          </div>
-        </div>
+      <div
+        onDragEnter={handleDrag}
+        onDragLeave={handleDrag}
+        onDragOver={handleDrag}
+        onDrop={handleDrop}
+        className={`
+          border-2 border-dashed rounded-lg p-6 
+          ${dragActive ? 'border-primary bg-primary/5' : 'border-gray-200'} 
+          ${disabled ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}
+          transition-colors duration-200
+          flex flex-col items-center justify-center text-center space-y-2
+        `}
+        onClick={disabled ? undefined : handleChooseFiles}
+      >
+        <Upload className="h-8 w-8 text-muted-foreground mb-2" />
+        <h3 className="font-medium text-lg">Drag & Drop Documents</h3>
+        <p className="text-sm text-muted-foreground">
+          or click to browse your files
+        </p>
+        <p className="text-xs text-muted-foreground mt-1">
+          Supported formats: {displayAllowedTypes}
+        </p>
+        <p className="text-xs text-muted-foreground">
+          Maximum file size: {maxSize}MB
+        </p>
+        
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          onChange={handleFileInputChange}
+          accept={allowedTypes.join(',')}
+          disabled={disabled}
+          className="hidden"
+        />
       </div>
       
-      {uploadedFiles.length > 0 && (
+      {/* File List */}
+      {documents.length > 0 && (
         <div className="space-y-2">
-          <p className="text-sm font-medium">Uploaded Documents</p>
-          <div className="divide-y">
-            {uploadedFiles.map((uploadedFile, index) => (
-              <div key={index} className="py-2 flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  {getFileIcon(uploadedFile.file.name)}
-                  <div>
-                    <p className="text-sm font-medium truncate">{uploadedFile.file.name}</p>
+          <Label>Uploaded Documents ({documents.length}/{maxFiles})</Label>
+          <div className="border rounded-md divide-y">
+            {documents.map((doc, index) => (
+              <div key={index} className="flex items-center justify-between p-3">
+                <div className="flex items-center space-x-3">
+                  <FileText className="h-5 w-5 text-blue-500" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{doc.name}</p>
                     <p className="text-xs text-muted-foreground">
-                      {(uploadedFile.file.size / (1024 * 1024)).toFixed(2)} MB
+                      {doc.type ? doc.type.split('/').pop()?.toUpperCase() : 'Document'}
                     </p>
                   </div>
                 </div>
                 
-                <div className="flex items-center">
-                  {uploadedFile.status === 'uploading' ? (
-                    <div className="flex items-center space-x-2">
-                      <div className="w-20 h-1 bg-gray-200 rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-primary"
-                          style={{ width: `${uploadedFile.progress}%` }}
-                        ></div>
-                      </div>
-                      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                    </div>
-                  ) : uploadedFile.status === 'error' ? (
-                    <AlertCircle className="h-5 w-5 text-destructive" />
-                  ) : (
-                    <CheckCircle className="h-5 w-5 text-green-500" />
-                  )}
-                  
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="ml-2 h-8 w-8 p-0"
-                    onClick={() => removeFile(index)}
+                {doc.uploadStatus && (
+                  <div className="flex items-center space-x-2">
+                    {doc.uploadStatus === 'uploading' && (
+                      <>
+                        <Progress value={doc.progress} className="w-20 h-2" />
+                        <span className="text-xs text-muted-foreground">{doc.progress}%</span>
+                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                      </>
+                    )}
+                    
+                    {doc.uploadStatus === 'error' && (
+                      <>
+                        <Badge variant="destructive" className="flex items-center space-x-1">
+                          <AlertCircle className="h-3 w-3" />
+                          <span>Error</span>
+                        </Badge>
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          className="h-6 px-2"
+                          onClick={() => onRemoveDocument(index)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </>
+                    )}
+                    
+                    {(doc.uploadStatus === 'success' || doc.uploadStatus === 'completed') && (
+                      <>
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          className="h-6 px-2"
+                          onClick={() => onRemoveDocument(index)}
+                          disabled={disabled}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                )}
+                
+                {!doc.uploadStatus && (
+                  <Button 
+                    size="sm" 
+                    variant="ghost" 
+                    className="h-6 px-2"
+                    onClick={() => onRemoveDocument(index)}
+                    disabled={disabled}
                   >
                     <X className="h-4 w-4" />
                   </Button>
-                </div>
+                )}
               </div>
             ))}
           </div>

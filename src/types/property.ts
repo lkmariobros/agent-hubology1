@@ -2,42 +2,25 @@
 export interface Property {
   id: string;
   title: string;
-  description?: string;
+  description: string;
+  price: number;
+  address?: {
+    street: string;
+    city: string;
+    state: string;
+    zip: string;
+    country: string;
+  };
   type: string;
   subtype?: string;
-  status: string;
-  transactionType: string;
-  price: number;
-  rentalRate?: number;
-  address: {
-    street?: string;
-    city?: string;
-    state?: string;
-    zip?: string;
-    country?: string;
-  };
-  features?: {
-    bedrooms?: number;
-    bathrooms?: number;
-    squareFeet?: number;
-    landSize?: number;
-  };
-  agent?: {
-    id: string;
-    name: string;
-  };
+  features?: string[];
   images?: string[];
-  createdAt: string;
-  updatedAt: string;
-  featured: boolean;
-  size?: number;
-  area?: number;
+  status?: string;
   bedrooms?: number;
   bathrooms?: number;
-  stock?: {
-    total: number;
-    available: number;
-  };
+  size?: number;
+  createdAt?: string;
+  updatedAt?: string;
   listedBy?: {
     id: string;
     name: string;
@@ -45,23 +28,18 @@ export interface Property {
   };
 }
 
-export interface PropertyFormValues {
-  title: string;
-  description: string;
-  type: 'residential' | 'commercial' | 'industrial' | 'land';
-  subtype: string;
-  price: number;
-  status: 'available' | 'pending' | 'sold';
-  address: {
-    street: string;
-    city: string;
-    state: string;
-    zip: string;
-    country: string;
-  };
-  area: number;
+export interface PropertyFilters {
+  type?: string;
+  status?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  minBedrooms?: number;
+  minBathrooms?: number;
+  location?: string;
+  features?: string[];
+  searchQuery?: string;
+  title?: string;
   bedrooms?: number;
+  propertyType?: string;
   bathrooms?: number;
-  features: string[];
-  images?: any[];
 }

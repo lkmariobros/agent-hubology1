@@ -12,18 +12,18 @@ export interface PropertyFilters {
   location?: string;
   features?: string[];
   searchQuery?: string;
-  title?: string; // Added missing property
-  bedrooms?: number; // Added missing property
-  propertyType?: string; // Added missing property
-  bathrooms?: number; // Added as it's used in the code
+  title?: string;
+  bedrooms?: number;
+  propertyType?: string;
+  bathrooms?: number;
 }
 
 export const useProperties = () => {
   const [filters, setFilters] = useState<PropertyFilters>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [data, setData] = useState<Property[]>([]); // Added missing data state
-
+  const [data, setData] = useState<Property[]>([]);
+  
   const updateFilters = (newFilters: Partial<PropertyFilters>) => {
     setFilters(prev => ({ ...prev, ...newFilters }));
   };
@@ -43,7 +43,9 @@ export const useProperties = () => {
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Return mock data
-      return [];
+      const mockData: Property[] = [];
+      setData(mockData);
+      return mockData;
     } catch (err) {
       setError('Failed to fetch properties');
       return [];
@@ -59,18 +61,67 @@ export const useProperties = () => {
     fetchProperties,
     loading,
     error,
-    data, // Added missing data property
-    isLoading: loading // Added to match expected property name
+    data,
+    isLoading: loading
   };
 };
 
-// Add missing functions
-export const useProperty = () => {
-  // Implementation
-  return { data: null, isLoading: false, error: null };
+// Add property detail hook
+export const useProperty = (id?: string) => {
+  const [data, setData] = useState<Property | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchProperty = async () => {
+    if (!id) return null;
+    
+    setIsLoading(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Mock property data
+      const mockProperty: Property = {
+        id,
+        title: "Sample Property",
+        description: "This is a sample property",
+        price: 500000,
+        type: "residential",
+        images: ["/placeholder.jpg"],
+        bedrooms: 3,
+        bathrooms: 2,
+        size: 1500
+      };
+      
+      setData(mockProperty);
+      return mockProperty;
+    } catch (err) {
+      setError('Failed to fetch property');
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  return { data, isLoading, error, fetchProperty };
 };
 
+// Add delete property hook
 export const useDeleteProperty = () => {
-  // Implementation
-  return { mutateAsync: async () => {}, isLoading: false };
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const mutateAsync = async (id: string) => {
+    setIsLoading(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      return true;
+    } catch (err) {
+      throw new Error('Failed to delete property');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  return { mutateAsync, isLoading };
 };

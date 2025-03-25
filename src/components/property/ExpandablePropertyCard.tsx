@@ -1,161 +1,48 @@
 
-import React, { useState, useEffect, useRef } from 'react';
-import { Card } from "@/components/ui/card";
-import { Property } from '@/types';
+import React, { useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
-import { PropertyCardHeader } from './PropertyCardHeader';
-import { PropertyCardBasicInfo } from './PropertyCardBasicInfo';
-import { PropertyCardDetails } from './PropertyCardDetails';
+import { Property } from '@/types/property';
+import PropertyCardDetails from './PropertyCardDetails';
 
 interface ExpandablePropertyCardProps {
   property: Property;
-  onFavorite?: (id: string) => void;
-  onShare?: (id: string) => void;
-  onEdit?: (id: string) => void;
-  onExpand?: (isExpanded: boolean) => void;
-  isExpanded?: boolean;
   className?: string;
 }
 
-export function ExpandablePropertyCard({ 
+const ExpandablePropertyCard: React.FC<ExpandablePropertyCardProps> = ({ 
   property, 
-  onFavorite, 
-  onShare, 
-  onEdit,
-  onExpand,
-  isExpanded = false,
-  className = ''
-}: ExpandablePropertyCardProps) {
-  const [isOpen, setIsOpen] = useState(isExpanded);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [isFavorited, setIsFavorited] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const cardRef = useRef<HTMLDivElement>(null);
-
-  // Sync internal state with external control
-  useEffect(() => {
-    setIsOpen(isExpanded);
-  }, [isExpanded]);
-
-  // Notify parent component when expansion state changes
-  const handleOpenChange = (open: boolean) => {
-    setIsOpen(open);
-    if (onExpand) {
-      onExpand(open);
-    }
-  };
-
-  // Handle mouse down for drag-based image navigation
-  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!property.images || property.images.length <= 1) return;
-    
-    setIsDragging(true);
-    setStartX(e.clientX);
-  };
-
-  // Handle mouse move for drag-based image navigation
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!isDragging || !property.images || property.images.length <= 1) return;
-    
-    const deltaX = e.clientX - startX;
-    const threshold = 50; // Pixels needed to move to change image
-    
-    if (deltaX > threshold) {
-      // Move to previous image
-      setCurrentImageIndex(prev => 
-        prev === 0 ? property.images!.length - 1 : prev - 1
-      );
-      setStartX(e.clientX);
-    } else if (deltaX < -threshold) {
-      // Move to next image
-      setCurrentImageIndex(prev => 
-        prev === property.images!.length - 1 ? 0 : prev + 1
-      );
-      setStartX(e.clientX);
-    }
-  };
-
-  // Handle mouse up to end dragging
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
-  // Handle mouse leave to end dragging if cursor leaves the element
-  const handleMouseLeave = () => {
-    setIsDragging(false);
-  };
-
-  const handleFavoriteClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent card expansion when clicking favorite
-    setIsFavorited(!isFavorited);
-    if (onFavorite) onFavorite(property.id);
-  };
-
+  className 
+}) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  
+  const toggleExpand = () => setIsExpanded(!isExpanded);
+  
   return (
-    <div className="w-full" ref={cardRef}>
-      <Collapsible
-        open={isOpen}
-        onOpenChange={handleOpenChange}
-        className="w-full"
-      >
-        <Card 
-          className={cn(
-            "transition-all duration-300 ease-in-out border border-neutral-800/60 bg-[#121212] overflow-hidden shadow-lg", 
-            "rounded-xl",
-            className
-          )}
+    <Card className={cn('overflow-hidden transition-all duration-200', className)}>
+      <CardContent className="p-0">
+        <div 
+          className="p-4 cursor-pointer flex justify-between items-center"
+          onClick={toggleExpand}
         >
-          {/* Image section with 4:3 aspect ratio */}
-          <div 
-            className="aspect-[4/3] w-full overflow-hidden select-none" 
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseLeave}
-          >
-            <PropertyCardHeader
-              property={property}
-              currentImageIndex={currentImageIndex}
-              isFavorited={isFavorited}
-              onFavoriteClick={handleFavoriteClick}
-              onShare={(id) => {
-                if (onShare) {
-                  onShare(id);
-                }
-              }}
-              isDragging={isDragging}
-            />
-          </div>
-          
-          {/* Inner card with fully rounded corners when expanded */}
-          <div className={cn(
-            "bg-[#121212] overflow-hidden transition-all duration-300 ease-in-out",
-            isOpen ? "rounded-xl mx-2 my-2 border border-neutral-800" : "rounded-b-xl"
-          )}>
-            {/* Basic info section - This will be clickable for expansion */}
-            <PropertyCardBasicInfo 
-              property={property} 
-              isOpen={isOpen}
-              onCardClick={() => handleOpenChange(!isOpen)}
-            />
-            
-            {/* Expandable content */}
-            <CollapsibleContent
-              className={cn(
-                "data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up",
-                "overflow-hidden"
-              )}
-            >
-              <PropertyCardDetails 
-                property={property}
-                onEdit={onEdit}
-              />
-            </CollapsibleContent>
-          </div>
-        </Card>
-      </Collapsible>
-    </div>
+          <h3 className="font-medium text-lg truncate">{property.title}</h3>
+          {isExpanded ? (
+            <ChevronUpIcon className="h-5 w-5 text-muted-foreground" />
+          ) : (
+            <ChevronDownIcon className="h-5 w-5 text-muted-foreground" />
+          )}
+        </div>
+        
+        <div className={cn(
+          "transition-all duration-200 max-h-0 overflow-hidden",
+          isExpanded && "max-h-[1000px]" // Set a large enough value to accommodate content
+        )}>
+          <PropertyCardDetails property={property} />
+        </div>
+      </CardContent>
+    </Card>
   );
-}
+};
+
+export default ExpandablePropertyCard;

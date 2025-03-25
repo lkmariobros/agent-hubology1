@@ -3,29 +3,9 @@ export interface Notification {
   id: string;
   title: string;
   message: string;
+  type: 'transaction' | 'commission' | 'property' | 'system' | 'message';
   read: boolean;
-  createdAt: Date;
-  userId: string;
-  type: NotificationType;
-  link?: string;
-  metadata?: Record<string, any>;
-}
-
-export type NotificationType = 
-  | 'info' 
-  | 'warning' 
-  | 'error' 
-  | 'success'
-  | 'transaction'
-  | 'property'
-  | 'commission'
-  | 'system';
-
-export interface NotificationPreferences {
-  email: boolean;
-  push: boolean;
-  inApp: boolean;
-  types: {
-    [key in NotificationType]: boolean;
-  };
+  createdAt: string;
+  relatedId?: string;
+  data?: Record<string, any>;
 }

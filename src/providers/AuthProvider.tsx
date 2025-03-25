@@ -7,6 +7,17 @@ export type UserRole = 'admin' | 'agent' | 'manager';
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
+// Create and export the useAuth hook directly from this file
+export const useAuth = (): AuthContextType => {
+  const context = useContext(AuthContext);
+  
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  
+  return context;
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ 
   children 
 }) => {

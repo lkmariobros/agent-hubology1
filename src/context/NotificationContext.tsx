@@ -1,117 +1,127 @@
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { toast } from 'sonner';
-import { useAuth } from '@/providers/AuthProvider';
-import { useNotificationSubscription } from '@/hooks/useNotificationSubscription';
-import { useNotificationActions } from '@/hooks/useNotificationActions';
+import React, { createContext, useState, useContext, useEffect } from 'react';
 import { Notification } from '@/types/notification';
+import { useAuth } from '@/providers/AuthProvider';
 
 interface NotificationContextType {
   notifications: Notification[];
   unreadCount: number;
-  markAsRead: (id: string) => Promise<void>;
-  markAllAsRead: () => Promise<void>;
-  deleteNotification: (id: string) => Promise<void>;
-  refreshNotifications: () => Promise<void>;
-  loading: boolean;
+  markAsRead: (id: string) => void;
+  markAllAsRead: () => void;
+  addNotification: (notification: Omit<Notification, 'id' | 'createdAt'>) => void;
+  deleteNotification: (id: string) => void;
+  clearAll: () => void;
+  isLoading: boolean;
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
-  const { 
-    markAsRead: markAsReadAction, 
-    markAllAsRead: markAllAsReadAction,
-    deleteNotification: deleteNotificationAction,
-    refreshNotifications: refreshNotificationsAction,
-    isLoading
-  } = useNotificationActions();
-
-  // Subscribe to real-time notifications
-  useNotificationSubscription(user?.id || null, (notification: Notification) => {
-    setNotifications(prev => [notification, ...prev]);
-    
-    // Show toast for new notifications
-    toast(notification.title, {
-      description: notification.message,
-      action: {
-        label: "View",
-        onClick: () => markAsRead(notification.id),
-      },
-    });
-  });
-
-  // Load initial notifications
+  
+  // Get unread count
+  const unreadCount = notifications.filter(notification => !notification.read).length;
+  
+  // Load notifications when user changes
   useEffect(() => {
-    if (user?.id) {
-      refreshNotifications();
-    } else {
-      setNotifications([]);
-    }
-  }, [user?.id]);
-
-  // Calculate unread count
-  const unreadCount = notifications.filter(n => !n.read).length;
-
-  // Mark a notification as read
-  const markAsRead = async (id: string) => {
-    const success = await markAsReadAction(id);
+    const fetchNotifications = async () => {
+      if (!user) {
+        setNotifications([]);
+        return;
+      }
+      
+      setIsLoading(true);
+      try {
+        // In a real app, fetch from an API
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Demo notifications
+        const mockNotifications: Notification[] = [
+          {
+            id: '1',
+            title: 'New transaction',
+            message: 'A new transaction has been submitted for your approval',
+            type: 'transaction',
+            read: false,
+            createdAt: new Date(Date.now() - 3600000).toISOString(),
+          },
+          {
+            id: '2',
+            title: 'Commission approved',
+            message: 'Your commission for Property XYZ has been approved',
+            type: 'commission',
+            read: true,
+            createdAt: new Date(Date.now() - 86400000).toISOString(),
+          },
+        ];
+        
+        setNotifications(mockNotifications);
+      } catch (error) {
+        console.error('Error fetching notifications:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
     
-    if (success) {
-      setNotifications(prev => 
-        prev.map(notification => 
-          notification.id === id 
-            ? { ...notification, read: true } 
-            : notification
-        )
-      );
-    }
+    fetchNotifications();
+  }, [user]);
+  
+  // Mark notification as read
+  const markAsRead = (id: string) => {
+    setNotifications(prev => 
+      prev.map(notification => 
+        notification.id === id 
+          ? { ...notification, read: true } 
+          : notification
+      )
+    );
   };
-
+  
   // Mark all notifications as read
-  const markAllAsRead = async () => {
-    if (!user?.id) return;
-    
-    const success = await markAllAsReadAction(user.id);
-    
-    if (success) {
-      setNotifications(prev => 
-        prev.map(notification => ({ ...notification, read: true }))
-      );
-    }
+  const markAllAsRead = () => {
+    setNotifications(prev => 
+      prev.map(notification => ({ ...notification, read: true }))
+    );
   };
-
+  
+  // Add a new notification
+  const addNotification = (notification: Omit<Notification, 'id' | 'createdAt'>) => {
+    const newNotification: Notification = {
+      ...notification,
+      id: Math.random().toString(36).substring(2, 9),
+      createdAt: new Date().toISOString(),
+    };
+    
+    setNotifications(prev => [newNotification, ...prev]);
+  };
+  
   // Delete a notification
-  const deleteNotification = async (id: string) => {
-    const success = await deleteNotificationAction(id);
-    
-    if (success) {
-      setNotifications(prev => 
-        prev.filter(notification => notification.id !== id)
-      );
-    }
+  const deleteNotification = (id: string) => {
+    setNotifications(prev => 
+      prev.filter(notification => notification.id !== id)
+    );
   };
-
-  // Refresh notifications
-  const refreshNotifications = async () => {
-    if (!user?.id) return;
-    
-    const freshNotifications = await refreshNotificationsAction(user.id);
-    setNotifications(freshNotifications);
+  
+  // Clear all notifications
+  const clearAll = () => {
+    setNotifications([]);
   };
-
+  
   return (
-    <NotificationContext.Provider value={{
-      notifications,
-      unreadCount,
-      markAsRead,
-      markAllAsRead,
-      deleteNotification,
-      refreshNotifications,
-      loading: isLoading
-    }}>
+    <NotificationContext.Provider
+      value={{
+        notifications,
+        unreadCount,
+        markAsRead,
+        markAllAsRead,
+        addNotification,
+        deleteNotification,
+        clearAll,
+        isLoading,
+      }}
+    >
       {children}
     </NotificationContext.Provider>
   );
@@ -119,10 +129,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
 export const useNotifications = () => {
   const context = useContext(NotificationContext);
-  
   if (context === undefined) {
     throw new Error('useNotifications must be used within a NotificationProvider');
   }
-  
   return context;
 };

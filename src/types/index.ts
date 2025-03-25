@@ -11,7 +11,7 @@ export interface DashboardMetric {
   timeframe?: string;
   icon?: React.ReactNode;
   trend?: 'up' | 'down' | 'neutral';
-  change?: number; // Added missing property
+  change?: number;
 }
 
 // Agent Types
@@ -27,8 +27,8 @@ export interface AgentWithHierarchy {
   personalCommission: number;
   overrideCommission: number;
   totalCommission: number;
-  salesVolume?: number; // Added missing property
-  upline?: AgentWithHierarchy; // Added missing property
+  salesVolume?: number;
+  upline?: AgentWithHierarchy;
   downline?: AgentWithHierarchy[];
 }
 
@@ -40,20 +40,20 @@ export interface CommissionTier {
   percentage: number;
   requirements: string[];
   requiredSales: number;
-  tier: string; // Added missing property
-  rate: number; // Added missing property
-  minTransactions: number; // Added missing property
-  color: string; // Added missing property
+  tier: string;
+  rate: number;
+  minTransactions: number;
+  color: string;
 }
 
 export interface RankRequirement {
   rank: AgentRank;
   salesTarget: number;
   transactionCount: number;
-  minTransactions?: number; // Added missing property
-  minSalesVolume?: number; // Added missing property 
-  personalSales?: number; // Added missing property
-  recruitedAgents?: number; // Added missing property
+  minTransactions?: number;
+  minSalesVolume?: number;
+  personalSales?: number;
+  recruitedAgents?: number;
   additionalRequirements?: string[];
 }
 
@@ -86,12 +86,12 @@ export interface CommissionBreakdownProps {
   agentCommission: number;
   personalCommission?: number;
   overrideCommission?: number;
-  agentShare?: number; // Added missing property
-  agencyShare?: number; // Added missing property
-  commissionRate?: number; // Added missing property
-  transactionValue?: number; // Added missing property
-  ourAgencyCommission?: number; // Added missing property
-  coAgencyCommission?: number; // Added missing property
+  agentShare?: number;
+  agencyShare?: number;
+  commissionRate?: number;
+  transactionValue?: number;
+  ourAgencyCommission?: number;
+  coAgencyCommission?: number;
   overrides?: {
     id: string;
     name: string;
@@ -116,7 +116,7 @@ export interface Transaction {
       state: string;
     };
   };
-  propertyId?: string; // Added missing property
+  propertyId?: string;
   client: {
     id: string;
     name: string;
@@ -124,14 +124,14 @@ export interface Transaction {
   agent: {
     id: string;
     name: string;
-    email?: string; // Added missing property
+    email?: string;
   };
-  price?: number; // Added missing property
-  commission?: number; // Added missing property
-  buyer?: any; // Added missing property
-  seller?: any; // Added missing property
-  notes?: string; // Added missing property
-  documents?: any[]; // Added missing property
+  price?: number;
+  commission?: number;
+  buyer?: any;
+  seller?: any;
+  notes?: string;
+  documents?: any[];
 }
 
 // User Types
@@ -141,16 +141,17 @@ export interface User {
   email: string;
   avatar?: string;
   role: string;
-  team: string;
-  joinDate: string | Date;
+  team?: string;
+  joinDate?: string | Date;
   rank?: string;
-  tier?: string; // Added missing property
-  phone?: string; // Added missing property
-  properties?: any[]; // Added missing property
+  tier?: string;
+  phone?: string;
+  properties?: any[];
   sales?: number;
   transactions?: number;
   points?: number;
   badges?: string[];
+  agentTier?: string;
 }
 
 // Opportunity Types
@@ -176,8 +177,8 @@ export interface ApiResponse<T> {
   data: T;
   error: string | null;
   status: number;
-  message?: string; // Added missing property
-  success?: boolean; // Added missing property
+  message?: string;
+  success?: boolean;
 }
 
 export interface PaginatedResponse<T> {
