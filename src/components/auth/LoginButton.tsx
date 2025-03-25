@@ -14,7 +14,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { supabase } from '@/integrations/supabase/client';
 
 export function LoginButton() {
   const [open, setOpen] = useState(false);
@@ -22,7 +21,7 @@ export function LoginButton() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [isRegister, setIsRegister] = useState(false);
-  const { login, isAuthenticated, logout } = useAuth();
+  const { signIn, signUp, signOut, user } = useAuth();
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,17 +33,7 @@ export function LoginButton() {
     
     try {
       setLoading(true);
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-      });
-      
-      if (error) throw error;
-      
-      if (data.user?.identities?.length === 0) {
-        toast.error('An account with this email already exists.');
-        return;
-      }
+      await signUp(email, password);
       
       toast.success('Registration successful! Please check your email for verification.');
       setIsRegister(false); // Switch back to login view
@@ -54,7 +43,7 @@ export function LoginButton() {
       setPassword('');
     } catch (error: any) {
       console.error('Registration error:', error);
-      toast.error(error.message || 'Registration failed. Please try again.');
+      // Error handling done in signUp function
     } finally {
       setLoading(false);
     }
@@ -70,14 +59,14 @@ export function LoginButton() {
     
     try {
       setLoading(true);
-      await login(email, password);
+      await signIn(email, password);
       setOpen(false);
       // Reset form
       setEmail('');
       setPassword('');
     } catch (error) {
       console.error('Login error:', error);
-      // Error handling done in login function
+      // Error handling done in signIn function
     } finally {
       setLoading(false);
     }
@@ -86,7 +75,7 @@ export function LoginButton() {
   const handleLogout = async () => {
     try {
       setLoading(true);
-      await logout();
+      await signOut();
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
@@ -94,7 +83,7 @@ export function LoginButton() {
     }
   };
 
-  if (isAuthenticated) {
+  if (user) {
     return (
       <Button 
         variant="outline" 
