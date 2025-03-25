@@ -55,7 +55,7 @@ const ApprovalInfo: React.FC<ApprovalInfoProps> = ({
       </CardHeader>
       <CardContent>
         {exceedsThreshold ? (
-          <Alert variant="warning">
+          <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Approval Required</AlertTitle>
             <AlertDescription>
@@ -70,7 +70,7 @@ const ApprovalInfo: React.FC<ApprovalInfoProps> = ({
             </AlertDescription>
           </Alert>
         ) : (
-          <Alert variant="success">
+          <Alert>
             <CheckCircle className="h-4 w-4" />
             <AlertTitle>No Approval Required</AlertTitle>
             <AlertDescription>
