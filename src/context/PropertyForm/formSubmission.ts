@@ -177,18 +177,6 @@ export const submitPropertyForm = async (state: PropertyFormState): Promise<void
     
     // 5. Upload and save images
     if (state.images.length > 0) {
-      // Ensure the storage bucket exists
-      try {
-        const { data: buckets } = await supabase.storage.listBuckets();
-        if (!buckets?.find(b => b.name === 'property-images')) {
-          await supabase.storage.createBucket('property-images', {
-            public: true
-          });
-        }
-      } catch (error) {
-        console.log('Note: Could not check/create bucket. Using existing bucket.', error);
-      }
-      
       // Upload each image file
       const imagesToInsert = [];
       
@@ -243,18 +231,6 @@ export const submitPropertyForm = async (state: PropertyFormState): Promise<void
     
     // 6. Upload and save documents
     if (state.documents.length > 0) {
-      // Ensure the storage bucket exists
-      try {
-        const { data: buckets } = await supabase.storage.listBuckets();
-        if (!buckets?.find(b => b.name === 'property-documents')) {
-          await supabase.storage.createBucket('property-documents', {
-            public: false // Documents are private
-          });
-        }
-      } catch (error) {
-        console.log('Note: Could not check/create bucket. Using existing bucket.', error);
-      }
-      
       // Upload each document file
       const documentsToInsert = [];
       
