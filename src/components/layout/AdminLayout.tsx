@@ -83,7 +83,7 @@ const AdminLayout = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>{user?.email?.split('@')[0] || 'Admin'}</DropdownMenuLabel>
+                  <DropdownMenuLabel>{user?.name || user?.email?.split('@')[0] || 'Admin'}</DropdownMenuLabel>
                   <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
                     {user?.email || 'admin@example.com'}
                   </DropdownMenuLabel>

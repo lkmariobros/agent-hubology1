@@ -15,7 +15,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   requireAdmin = false,
   redirectTo = '/' 
 }) => {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, isAuthenticated } = useAuth();
   const location = useLocation();
 
   // Show loading state while checking authentication
@@ -30,7 +30,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   // If user is not authenticated, show auth form
-  if (!user) {
+  if (!isAuthenticated) {
     return (
       <div className="max-w-md mx-auto my-8">
         <h1 className="text-2xl font-semibold mb-6 text-center">Authentication Required</h1>

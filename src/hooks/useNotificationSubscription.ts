@@ -1,8 +1,9 @@
 
 import { useEffect, useRef } from 'react';
+import { Notification } from '@/types/notification';
 
-export const useNotificationSubscription = (userId: string | null, callback: Function) => {
-  const callbackRef = useRef<Function>(callback);
+export const useNotificationSubscription = (userId: string | null, callback: (notification: Notification) => void) => {
+  const callbackRef = useRef<(notification: Notification) => void>(callback);
   
   // Update callback ref whenever the callback changes
   useEffect(() => {
@@ -17,7 +18,7 @@ export const useNotificationSubscription = (userId: string | null, callback: Fun
     // In a real implementation, this would set up a subscription to a real-time service
     // For demonstration, let's setup a mock notification every 30 seconds
     const mockNotificationInterval = setInterval(() => {
-      const mockNotification = {
+      const mockNotification: Notification = {
         id: `notification-${Date.now()}`,
         title: 'New Activity',
         message: 'You have a new notification.',
