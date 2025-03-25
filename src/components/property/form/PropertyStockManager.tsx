@@ -6,19 +6,29 @@ import { UseFormReturn } from 'react-hook-form';
 import { PropertyFormValues } from '@/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { AlertTriangle } from 'lucide-react';
+import { PropertyFormData } from '@/types/property-form';
 
 interface PropertyStockManagerProps {
-  form: UseFormReturn<PropertyFormValues>;
+  form: UseFormReturn<PropertyFormData>;
 }
 
 export function PropertyStockManager({ form }: PropertyStockManagerProps) {
   // Get the current property type (to show this only for development properties)
-  const propertyType = form.watch('propertyType');
   const transactionType = form.watch('transactionType');
   
   // Only show stock manager for new developments (Primary market properties)
   if (transactionType !== 'Primary') {
     return null;
+  }
+
+  // Initialize stock if it doesn't exist
+  if (!form.getValues('stock')) {
+    form.setValue('stock', {
+      total: 0,
+      available: 0,
+      reserved: 0,
+      sold: 0
+    });
   }
 
   // Get the current values for validation

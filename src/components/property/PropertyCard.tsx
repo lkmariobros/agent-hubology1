@@ -28,7 +28,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, showFullDe
   const isDevelopment = property.stock && property.stock.total > 1;
   
   // Calculate stock percentage if this is a development
-  const stockPercentage = isDevelopment ? 
+  const stockPercentage = isDevelopment && property.stock ? 
     calculateStockPercentage(property.stock.available, property.stock.total) : 
     null;
   
@@ -72,7 +72,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, showFullDe
           )}
           
           {/* Stock badge - Only shown for developments with stock */}
-          {isDevelopment && stockLabel && (
+          {isDevelopment && stockLabel && property.stock && (
             <Badge 
               variant="outline" 
               className={cn(
@@ -113,7 +113,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, showFullDe
         </div>
         
         {/* Stock information for developments */}
-        {isDevelopment && (
+        {isDevelopment && property.stock && (
           <div className="mt-2 text-sm text-muted-foreground flex items-center">
             <Package className="h-3.5 w-3.5 mr-1.5" />
             <span>{property.stock.available} of {property.stock.total} units available</span>

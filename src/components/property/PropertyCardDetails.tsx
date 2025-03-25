@@ -7,7 +7,7 @@ import {
   DollarSign,
   Check
 } from 'lucide-react';
-import { Property } from '@/types';
+import { Property, PropertyStock } from '@/types';
 import { Badge } from '../ui/badge';
 import { cn } from '@/lib/utils';
 import { formatCurrency } from '@/utils/propertyUtils';

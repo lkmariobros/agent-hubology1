@@ -99,12 +99,13 @@ export const mapPropertyData = (property: any) => {
     listedBy: property.agent_id || 'Unknown',
     agent: { id: property.agent_id || '', name: 'Agent' },
     transactionType: property.transaction_types?.name || property.transactionType || 'Sale',
-    stock: {
-      total: property.stock_total || property.stock || 0,
-      available: property.stock_available || property.stock || 0,
-      reserved: property.stock_reserved || 0,
-      sold: property.stock_sold || 0
-    }
+    stock: property.stock ? property.stock : 
+           (property.stock_total ? {
+              total: property.stock_total || 0,
+              available: property.stock_available || 0,
+              reserved: property.stock_reserved || 0,
+              sold: property.stock_sold || 0
+           } : undefined)
   };
   
   return mappedProperty;

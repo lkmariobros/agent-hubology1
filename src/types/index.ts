@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 export interface DashboardMetric {
@@ -24,6 +25,13 @@ export interface PropertyFeatures {
   // Add any other feature properties here
 }
 
+export interface PropertyStock {
+  total: number;
+  available: number;
+  reserved?: number;
+  sold?: number;
+}
+
 export interface Property {
   id: string;
   title: string;
@@ -48,7 +56,7 @@ export interface Property {
   area?: number;
   bedrooms?: number; // Added for direct access
   bathrooms?: number; // Added for direct access
-  stock?: number; // Added to fix PropertyCardBasicInfo errors
+  stock?: PropertyStock; // Changed to use PropertyStock interface
   listedBy?: string; // Added to match usage in data files
 }
 

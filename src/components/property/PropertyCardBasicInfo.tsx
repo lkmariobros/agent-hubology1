@@ -71,12 +71,12 @@ export function PropertyCardBasicInfo({
             </div>
           </div>
           
-          {property.stock !== undefined && (
+          {property.stock && (
             <div className="text-right">
               <div className="text-xs text-neutral-500 mb-1.5">Stock</div>
               <div className="text-sm flex items-center gap-1">
-                <span className="text-white">{property.stock} units</span>
-                {property.stock > 10 && (
+                <span className="text-white">{property.stock.available} units</span>
+                {property.stock.available > 10 && (
                   <CornerUpRight className="h-3.5 w-3.5 text-emerald-500" />
                 )}
               </div>

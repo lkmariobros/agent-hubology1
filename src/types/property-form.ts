@@ -1,11 +1,10 @@
-
 import { z } from 'zod';
 
 // Common property fields validation schema
 export const commonPropertySchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters'),
   description: z.string().min(20, 'Description must be at least 20 characters'),
-  transactionType: z.enum(['Sale', 'Rent']),
+  transactionType: z.enum(['Sale', 'Rent', 'Primary']),
   propertyType: z.enum(['Residential', 'Commercial', 'Industrial', 'Land']),
   featured: z.boolean().default(false),
   status: z.enum(['Available', 'Under Offer', 'Pending', 'Sold', 'Rented']),
@@ -33,6 +32,14 @@ export const commonPropertySchema = z.object({
     phone: z.string().optional(),
     email: z.string().email('Invalid email').optional(),
   })).default([]),
+  
+  // Stock information for development properties
+  stock: z.object({
+    total: z.number().int().min(0).default(0),
+    available: z.number().int().min(0).default(0),
+    reserved: z.number().int().min(0).default(0),
+    sold: z.number().int().min(0).default(0)
+  }).optional(),
 });
 
 // Residential property specific fields
@@ -75,11 +82,19 @@ export interface OwnerContact {
   email?: string;
 }
 
+// Stock information type
+export interface PropertyStock {
+  total: number;
+  available: number;
+  reserved: number;
+  sold: number;
+}
+
 // Union type for all property types
 export type PropertyFormData = {
   title: string;
   description: string;
-  transactionType: 'Sale' | 'Rent';
+  transactionType: 'Sale' | 'Rent' | 'Primary';
   propertyType: 'Residential' | 'Commercial' | 'Industrial' | 'Land';
   featured: boolean;
   status: 'Available' | 'Under Offer' | 'Pending' | 'Sold' | 'Rented';
@@ -94,6 +109,9 @@ export type PropertyFormData = {
   rentalRate: number | null;
   agentNotes: string;
   ownerContacts: OwnerContact[];
+  
+  // Stock information for development properties
+  stock?: PropertyStock;
   
   // Residential specific fields
   bedrooms?: number;
