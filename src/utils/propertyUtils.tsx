@@ -36,6 +36,23 @@ export const isPropertyAvailable = (status: string): boolean => {
   return status.toLowerCase() === 'available';
 };
 
+// Helper function to calculate stock availability percentage
+export const calculateStockPercentage = (available: number, total: number): number => {
+  if (total === 0) return 0;
+  return Math.round((available / total) * 100);
+};
+
+// Helper function to get stock status label
+export const getStockStatusLabel = (available: number, total: number): string => {
+  const percentage = calculateStockPercentage(available, total);
+  
+  if (percentage === 0) return 'Sold Out';
+  if (percentage <= 25) return 'Low Stock';
+  if (percentage <= 50) return 'Selling Fast';
+  if (percentage <= 75) return 'Available';
+  return 'Fully Available';
+};
+
 // Helper function to map property data structures
 export const mapPropertyData = (property: any) => {
   // Handle different property structures (from API vs mock data)
