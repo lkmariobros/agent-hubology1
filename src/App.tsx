@@ -35,6 +35,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import Home from './pages/Home';
 import NotFound from './pages/NotFound';
 import Opportunities from './pages/Opportunities';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -57,7 +58,11 @@ function App() {
                 <Route path="/" element={<Index />} />
                 
                 {/* Agent Routes */}
-                <Route path="/" element={<MainLayout />}>
+                <Route path="/" element={
+                  <ProtectedRoute>
+                    <MainLayout />
+                  </ProtectedRoute>
+                }>
                   <Route path="dashboard" element={<Dashboard />} />
                   <Route path="home" element={<Home />} />
                   <Route path="transactions" element={<Transactions />} />
@@ -77,7 +82,11 @@ function App() {
                 </Route>
 
                 {/* Admin Routes */}
-                <Route path="/admin" element={<AdminLayout />}>
+                <Route path="/admin" element={
+                  <ProtectedRoute requireAdmin={true}>
+                    <AdminLayout />
+                  </ProtectedRoute>
+                }>
                   <Route index element={<AdminDashboard />} />
                   <Route path="commission" element={<AdminCommission />} />
                   <Route path="commission/approvals" element={<AdminCommissionApproval />} />

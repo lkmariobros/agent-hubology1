@@ -1,19 +1,22 @@
 
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import AuthForm from '../AuthForm';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
+  requireAdmin?: boolean;
   redirectTo?: string;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
   children, 
-  redirectTo = '/login' 
+  requireAdmin = false,
+  redirectTo = '/' 
 }) => {
   const { user, loading } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     // Show loading state while checking authentication
@@ -37,7 +40,12 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
   }
 
-  // If user is authenticated, render the children
+  // If admin is required but user is not admin, redirect
+  if (requireAdmin && !user.roles.includes('admin')) {
+    return <Navigate to="/dashboard" state={{ from: location }} replace />;
+  }
+
+  // If user is authenticated and meets role requirements, render the children
   return <>{children}</>;
 };
 

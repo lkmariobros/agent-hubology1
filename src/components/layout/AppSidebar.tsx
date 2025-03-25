@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Building, Shield, ChevronsUpDown } from 'lucide-react';
-import { useAuth } from '@/providers/AuthProvider';
+import { useAuth } from '@/hooks/useAuth';
 
 import {
   Sidebar,
@@ -29,8 +29,11 @@ import { SidebarProfile } from './sidebar/SidebarProfile';
 export function AppSidebar() {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
-  const { user, switchRole, isAdmin } = useAuth();
-  const currentRole = user?.activeRole;
+  const { user, switchRole } = useAuth();
+  
+  // Check if user has admin privileges
+  const isAdmin = user?.roles.includes('admin') || false;
+  const currentRole = user?.activeRole || 'agent';
   const isAdminActive = currentRole === 'admin';
   
   return (

@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import { Outlet, Navigate, useLocation } from 'react-router-dom';
 import { BellRing } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useAuth } from '@/providers/AuthProvider';
+import { useAuth } from '@/hooks/useAuth';
 
 import {
   SidebarProvider,
@@ -25,7 +25,7 @@ import { ThemeToggle } from '../theme/ThemeToggle';
 
 const AdminLayout = () => {
   const isMobile = useIsMobile();
-  const { user, isAuthenticated, isAdmin, logout } = useAuth();
+  const { user, loading, signOut } = useAuth();
   const location = useLocation();
   
   // Add data-route attribute to body
@@ -37,12 +37,18 @@ const AdminLayout = () => {
     };
   }, [location.pathname]);
   
-  // Redirect to login if not authenticated
-  if (!isAuthenticated) {
-    return <Navigate to="/" state={{ from: location }} replace />;
+  // If still loading, show loading indicator
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
   }
   
-  // Redirect to agent dashboard if not an admin
+  // Check if user has admin role
+  const isAdmin = user?.roles.includes('admin');
+  
   if (!isAdmin) {
     return <Navigate to="/dashboard" replace />;
   }
@@ -87,7 +93,7 @@ const AdminLayout = () => {
                   <DropdownMenuItem onClick={() => window.location.href = '/admin/settings'}>Admin Settings</DropdownMenuItem>
                   <DropdownMenuItem onClick={() => window.location.href = '/admin/system'}>System Configuration</DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={logout}>Logout</DropdownMenuItem>
+                  <DropdownMenuItem onClick={signOut}>Logout</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>

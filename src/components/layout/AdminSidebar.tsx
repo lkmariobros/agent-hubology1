@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Building, Shield, ChevronsUpDown } from 'lucide-react';
-import { useAuth } from '@/providers/AuthProvider';
+import { useAuth } from '@/hooks/useAuth';
 
 import {
   Sidebar,
@@ -26,7 +26,7 @@ import { AdminProfile } from './sidebar/AdminProfile';
 
 export function AdminSidebar() {
   const { user, switchRole } = useAuth();
-  const currentRole = user?.activeRole;
+  const currentRole = user?.activeRole || 'agent';
   const isAdminActive = currentRole === 'admin';
 
   return (
