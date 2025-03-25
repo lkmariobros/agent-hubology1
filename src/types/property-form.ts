@@ -126,6 +126,7 @@ export interface PropertyImage {
   url: string;
   displayOrder: number;
   isCover: boolean;
+  storagePath?: string; // Added missing property
 }
 
 // Property document type
@@ -135,6 +136,7 @@ export interface PropertyDocument {
   name: string;
   documentType: string;
   url?: string;
+  storagePath?: string; // Added missing property
 }
 
 // Property form state interface

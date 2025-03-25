@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { PropertyFormState } from '@/types/property-form';
+import { PropertyFormState, PropertyFormData } from '@/types/property-form';
 import { toast } from 'sonner';
 
 // Save form as draft
@@ -221,7 +221,7 @@ export const submitPropertyForm = async (state: PropertyFormState): Promise<void
     if (uploadedImages.length > 0) {
       const imagesToInsert = uploadedImages.map((image) => ({
         property_id: propertyResult.id,
-        storage_path: image.storagePath,
+        storage_path: image.storagePath || '',
         display_order: image.displayOrder,
         is_cover: image.isCover,
       }));
@@ -238,7 +238,7 @@ export const submitPropertyForm = async (state: PropertyFormState): Promise<void
       const documentsToInsert = uploadedDocuments.map((doc) => ({
         property_id: propertyResult.id,
         name: doc.name,
-        storage_path: doc.storagePath,
+        storage_path: doc.storagePath || '',
         document_type: doc.documentType,
       }));
       
