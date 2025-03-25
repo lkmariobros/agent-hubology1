@@ -6,7 +6,8 @@ import {
   TransactionFormData, 
   TransactionDocument, 
   TransactionType, 
-  CommissionBreakdown
+  CommissionBreakdown,
+  ApprovalStatus
 } from './types';
 import { transactionFormReducer } from './reducer';
 import { initialTransactionFormState } from './initialState';
@@ -112,11 +113,42 @@ export const TransactionFormProvider: React.FC<{ children: ReactNode }> = ({ chi
   }, [state, resetForm, validateCurrentStep]);
 
   // Wrapper for calculateCommission that uses the current form data
-  const calculateCommissionWithState = useCallback((): CommissionBreakdown => {
+  const calculateCommissionValue = useCallback((): CommissionBreakdown => {
     return calculateCommission(state.formData);
   }, [state.formData]);
-  
-  // Create context value object
+
+  // Mock function to initiate approval process
+  const initiateApprovalProcess = useCallback(async (): Promise<void> => {
+    const commissionBreakdown = calculateCommissionValue();
+    console.log('Initiating approval process for commission:', commissionBreakdown);
+    
+    // In a real implementation, this would call an API to initiate the approval process
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        console.log('Approval process initiated successfully');
+        resolve();
+      }, 1000);
+    });
+  }, [calculateCommissionValue]);
+
+  // Mock function to check approval status
+  const checkApprovalStatus = useCallback(async (): Promise<ApprovalStatus> => {
+    console.log('Checking approval status');
+    
+    // In a real implementation, this would call an API to check the status
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const statuses: ApprovalStatus[] = [
+          'Pending', 'Under Review', 'Approved', 'Ready for Payment', 'Paid', 'Rejected'
+        ];
+        const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+        console.log('Approval status:', randomStatus);
+        resolve(randomStatus);
+      }, 500);
+    });
+  }, []);
+
+  // Create context value
   const contextValue: TransactionFormContextType = {
     state,
     updateFormData,
@@ -129,8 +161,10 @@ export const TransactionFormProvider: React.FC<{ children: ReactNode }> = ({ chi
     resetForm,
     saveForm,
     submitForm,
-    calculateCommission: calculateCommissionWithState,
+    calculateCommission: calculateCommissionValue,
     validateCurrentStep,
+    initiateApprovalProcess,
+    checkApprovalStatus
   };
 
   return (
@@ -140,5 +174,4 @@ export const TransactionFormProvider: React.FC<{ children: ReactNode }> = ({ chi
   );
 };
 
-// Export the context
 export { TransactionFormContext };

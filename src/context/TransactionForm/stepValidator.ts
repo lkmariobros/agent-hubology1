@@ -1,8 +1,8 @@
 
 import { TransactionFormState } from './types';
 
-// Validate current step
-export const validateStep = (state: TransactionFormState): Record<string, string> => {
+// Validate a specific form step
+export function validateStep(state: TransactionFormState): Record<string, string> {
   const errors: Record<string, string> = {};
   const { formData, currentStep } = state;
   
@@ -52,43 +52,43 @@ export const validateStep = (state: TransactionFormState): Record<string, string
       break;
       
     case 3: // Co-Broking Setup
+      // Only validate if co-broking is enabled
       if (formData.coBroking?.enabled) {
-        if (!formData.coBroking.agentName) {
+        if (!formData.coBroking.agentName || formData.coBroking.agentName.trim() === '') {
           errors.coAgentName = 'Co-broker agent name is required';
         }
-        if (!formData.coBroking.agentCompany) {
+        if (!formData.coBroking.agentCompany || formData.coBroking.agentCompany.trim() === '') {
           errors.coAgentCompany = 'Co-broker company is required';
+        }
+        if (!formData.coBroking.commissionSplit || formData.coBroking.commissionSplit <= 0 || formData.coBroking.commissionSplit > 100) {
+          errors.coAgentCommissionSplit = 'Commission split must be between 1 and 100';
         }
       }
       break;
       
     case 4: // Commission Calculation
       if (!formData.transactionValue || formData.transactionValue <= 0) {
-        errors.transactionValue = formData.transactionType === 'Rent' 
-          ? 'Monthly rental value must be greater than 0' 
-          : 'Transaction value must be greater than 0';
+        errors.transactionValue = 'Transaction value must be greater than 0';
       }
-      
-      if (formData.transactionType === 'Rent') {
-        if (!formData.commissionAmount || formData.commissionAmount <= 0) {
-          errors.commissionAmount = 'Owner commission amount must be greater than 0';
-        }
-      } else {
-        if (!formData.commissionRate || formData.commissionRate <= 0) {
-          errors.commissionRate = 'Commission rate must be greater than 0';
-        }
+      if (!formData.commissionRate || formData.commissionRate <= 0) {
+        errors.commissionRate = 'Commission rate must be greater than 0';
+      }
+      if (!formData.agentTier) {
+        errors.agentTier = 'Agent tier must be selected';
       }
       break;
       
     case 5: // Document Upload
-      // Documents are optional
+      // Documents are optional, but can validate document types if needed
       break;
       
     case 6: // Review
       // All validations should be done in previous steps
+      // Can add a final validation here if needed
       break;
   }
   
   console.log('Validation errors:', errors);
+  
   return errors;
-};
+}

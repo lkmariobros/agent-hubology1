@@ -1,27 +1,29 @@
 
 import React from 'react';
-import { useSystemConfiguration } from '@/hooks/useCommissionApproval';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertTriangle, CheckCircle, Info } from 'lucide-react';
-import { Separator } from '@/components/ui/separator';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AlertCircle, CheckCircle, Clock } from 'lucide-react';
+import { useSystemConfiguration } from '@/hooks/useCommissionApproval';
 
 interface ApprovalInfoProps {
   commissionAmount: number;
+  status?: string;
 }
 
-const ApprovalInfo: React.FC<ApprovalInfoProps> = ({ commissionAmount }) => {
-  const { data: thresholdConfig, isLoading } = useSystemConfiguration('commission_approval_threshold');
+const ApprovalInfo: React.FC<ApprovalInfoProps> = ({ 
+  commissionAmount, 
+  status = 'pending'
+}) => {
+  // Get the threshold value from system configuration
+  const { data: thresholdValue, isLoading } = useSystemConfiguration('commission_approval_threshold');
   
-  if (isLoading) {
-    return null;
-  }
-  
-  const threshold = thresholdConfig ? parseFloat(thresholdConfig) : 10000;
+  // Parse the threshold value
+  const threshold = thresholdValue ? parseFloat(thresholdValue) : 10000;
   const exceedsThreshold = commissionAmount > threshold;
   
   // Format currency
-  const formatCurrency = (amount: number) => {
-    return amount.toLocaleString('en-US', {
+  const formatCurrency = (value: number) => {
+    return value.toLocaleString('en-US', {
       style: 'currency',
       currency: 'USD',
       minimumFractionDigits: 0,
@@ -29,48 +31,63 @@ const ApprovalInfo: React.FC<ApprovalInfoProps> = ({ commissionAmount }) => {
     });
   };
   
+  // If still loading the threshold value
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Commission Approval</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center space-x-2">
+            <Clock className="h-5 w-5 text-muted-foreground" />
+            <p>Loading approval information...</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+  
   return (
     <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base">Commission Approval Information</CardTitle>
+      <CardHeader>
+        <CardTitle>Commission Approval Information</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-3">
-          <div className={`flex items-start gap-3 p-3 rounded-md ${exceedsThreshold ? 'bg-yellow-50' : 'bg-green-50'}`}>
-            {exceedsThreshold ? (
-              <AlertTriangle className="h-5 w-5 text-yellow-500 mt-0.5 flex-shrink-0" />
-            ) : (
-              <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-            )}
-            
-            <div>
-              <p className={`font-medium ${exceedsThreshold ? 'text-yellow-800' : 'text-green-800'}`}>
-                {exceedsThreshold ? 'Additional Approval Required' : 'Standard Approval Process'}
-              </p>
-              
-              <p className={`text-sm mt-1 ${exceedsThreshold ? 'text-yellow-700' : 'text-green-700'}`}>
-                {exceedsThreshold
-                  ? `This commission amount (${formatCurrency(commissionAmount)}) exceeds the threshold of ${formatCurrency(threshold)} and will require additional verification.`
-                  : `This commission amount (${formatCurrency(commissionAmount)}) falls within the standard approval threshold of ${formatCurrency(threshold)}.`
-                }
-              </p>
-            </div>
-          </div>
-          
-          <Separator />
-          
-          <div className="flex items-start gap-3">
-            <Info className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-            <div className="text-xs text-muted-foreground">
+        {exceedsThreshold ? (
+          <Alert variant="warning">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Approval Required</AlertTitle>
+            <AlertDescription>
               <p>
-                All transactions are subject to approval before commission payment. When this transaction is marked as completed, it will be automatically submitted to the approval workflow.
+                This commission of {formatCurrency(commissionAmount)} exceeds the approval threshold 
+                of {formatCurrency(threshold)} and will require management approval.
               </p>
-              <p className="mt-1">
-                You will be able to track the approval status in the transaction details page.
+              <p className="mt-2 text-sm text-muted-foreground">
+                The approval process typically takes 1-2 business days. You will receive a notification
+                once the status changes.
               </p>
-            </div>
+            </AlertDescription>
+          </Alert>
+        ) : (
+          <Alert variant="success">
+            <CheckCircle className="h-4 w-4" />
+            <AlertTitle>No Approval Required</AlertTitle>
+            <AlertDescription>
+              This commission is below the approval threshold of {formatCurrency(threshold)} and 
+              does not require additional approval.
+            </AlertDescription>
+          </Alert>
+        )}
+        
+        {status && status !== 'pending' && (
+          <div className="mt-4 p-4 border rounded-md">
+            <h4 className="font-medium mb-2">Current Status: {status}</h4>
+            <p className="text-sm text-muted-foreground">
+              The approval status will be updated automatically as it progresses through the workflow.
+            </p>
           </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   );

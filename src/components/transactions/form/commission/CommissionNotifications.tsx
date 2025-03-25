@@ -1,79 +1,64 @@
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { useSystemConfiguration } from '@/hooks/useCommissionApproval';
-import { Bell, ChevronRight, CheckCircle2, Clock } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CheckCircle, AlertTriangle, HelpCircle } from 'lucide-react';
 
 interface CommissionNotificationsProps {
   commissionAmount: number;
-  isSubmitting?: boolean;
+  isSubmitting: boolean;
 }
 
 const CommissionNotifications: React.FC<CommissionNotificationsProps> = ({ 
-  commissionAmount,
-  isSubmitting 
+  commissionAmount, 
+  isSubmitting
 }) => {
-  const navigate = useNavigate();
-  const { data: thresholdConfig, isLoading } = useSystemConfiguration('commission_approval_threshold');
-  
-  if (isLoading || isSubmitting) return null;
-  
-  const threshold = thresholdConfig ? parseFloat(thresholdConfig) : 10000;
-  const exceedsThreshold = commissionAmount > threshold;
-  
-  // Format currency
-  const formatCurrency = (amount: number) => {
-    return amount.toLocaleString('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    });
+  // For demonstration purposes only
+  const getNotificationContent = () => {
+    // Mock check based on commission amount
+    if (commissionAmount > 50000) {
+      return {
+        icon: <AlertTriangle className="h-5 w-5 text-amber-500" />,
+        title: 'High Commission Alert',
+        message: 'This commission exceeds the typical range for this transaction type. Please verify all details before submission.'
+      };
+    } else if (commissionAmount > 10000) {
+      return {
+        icon: <HelpCircle className="h-5 w-5 text-blue-500" />,
+        title: 'Commission Information',
+        message: 'This commission is within expected range and will be processed according to standard procedures.'
+      };
+    } else {
+      return {
+        icon: <CheckCircle className="h-5 w-5 text-green-500" />,
+        title: 'Normal Commission Range',
+        message: 'This commission is within the normal range for this transaction type.'
+      };
+    }
   };
   
+  const notification = getNotificationContent();
+  
   return (
-    <Card className={`${exceedsThreshold ? 'border-amber-200 bg-amber-50/30' : 'border-green-200 bg-green-50/30'}`}>
-      <CardContent className="p-4">
-        <div className="flex items-start gap-3">
-          <div className={`rounded-full p-2 ${exceedsThreshold ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'}`}>
-            {exceedsThreshold ? (
-              <Clock className="h-5 w-5" />
-            ) : (
-              <CheckCircle2 className="h-5 w-5" />
-            )}
+    <Card>
+      <CardHeader>
+        <CardTitle>Commission Notes</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="flex items-start space-x-3">
+          <div className="mt-0.5">
+            {notification.icon}
           </div>
-          
-          <div className="flex-1">
-            <h3 className={`text-base font-semibold ${exceedsThreshold ? 'text-amber-800' : 'text-green-800'}`}>
-              {exceedsThreshold 
-                ? 'Additional Approval Required' 
-                : 'Standard Approval Process'}
-            </h3>
-            
-            <p className={`text-sm mt-1 ${exceedsThreshold ? 'text-amber-700' : 'text-green-700'}`}>
-              {exceedsThreshold
-                ? `This commission amount (${formatCurrency(commissionAmount)}) exceeds the ${formatCurrency(threshold)} threshold and will require additional verification.`
-                : `This commission will follow the standard approval process.`
-              }
+          <div>
+            <h4 className="font-medium mb-1">{notification.title}</h4>
+            <p className="text-sm text-muted-foreground">
+              {notification.message}
             </p>
             
-            <div className="mt-3 flex items-center">
-              <Bell className="h-4 w-4 mr-1 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">
-                You'll be notified about the approval status changes.
-              </span>
-            </div>
-            
-            <Button 
-              variant="link" 
-              className={`p-0 mt-2 ${exceedsThreshold ? 'text-amber-700' : 'text-green-700'}`}
-              onClick={() => navigate('/transactions')}
-            >
-              View your approvals
-              <ChevronRight className="h-4 w-4 ml-1" />
-            </Button>
+            {isSubmitting && (
+              <p className="mt-2 text-sm italic">
+                Your transaction is being submitted. Notifications will be sent when the commission is approved.
+              </p>
+            )}
           </div>
         </div>
       </CardContent>
