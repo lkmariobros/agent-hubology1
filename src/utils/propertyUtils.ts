@@ -137,3 +137,25 @@ export const getPropertyStats = (properties: Property[]) => {
 
   return stats;
 };
+
+/**
+ * Format price with appropriate suffixes (K, M)
+ * This function is needed by components like PropertyShowcase.tsx
+ */
+export const formatPrice = (price: number): string => {
+  if (price >= 1000000) {
+    return (price / 1000000).toFixed(1) + 'M';
+  } else if (price >= 1000) {
+    return (price / 1000).toFixed(0) + 'K';
+  }
+  return price.toString();
+};
+
+/**
+ * Get stock status class
+ */
+export const getStockStatusClass = (percentage: number): string => {
+  if (percentage >= 70) return 'text-green-500';
+  if (percentage >= 30) return 'text-yellow-500';
+  return 'text-red-500';
+};
