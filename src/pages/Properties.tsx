@@ -6,7 +6,7 @@ import { Plus, Search, Filter, SortDesc, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { PropertyGrid } from '@/components/property/PropertyGrid';
+import PropertyGrid from '@/components/property/PropertyGrid';
 import { useProperties } from '@/hooks/useProperties';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { mapPropertyData } from '@/utils/propertyUtils';
@@ -24,8 +24,8 @@ const Properties = () => {
     ...(selectedPropertyType !== 'all' && { propertyType: selectedPropertyType })
   };
   
-  const { data, isLoading, error } = useProperties(page, pageSize, filters);
-  const propertiesRaw = data?.properties || [];
+  const { data, isLoading, error } = useProperties();
+  const propertiesRaw = data?.data || [];
   
   // Map the API data structure to the format expected by components
   const properties: Property[] = propertiesRaw.map(property => mapPropertyData(property));
