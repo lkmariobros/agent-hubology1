@@ -80,3 +80,55 @@ export const initializeStorage = async () => {
   const success = await ensureStorageBuckets();
   console.log('Storage initialization ' + (success ? 'successful' : 'failed'));
 };
+
+/**
+ * Get public URL for an image
+ */
+export const getPublicImageUrl = (path: string): string => {
+  if (!path) return '';
+  
+  const { data } = supabase.storage
+    .from('property-images')
+    .getPublicUrl(path);
+    
+  return data.publicUrl;
+};
+
+/**
+ * Get a signed URL for a private document
+ */
+export const getSignedDocumentUrl = async (path: string): Promise<string> => {
+  if (!path) return '';
+  
+  const { data, error } = await supabase.storage
+    .from('property-documents')
+    .createSignedUrl(path, 60 * 60); // 1 hour expiry
+    
+  if (error) {
+    console.error('Error creating signed URL:', error);
+    return '';
+  }
+  
+  return data.signedUrl;
+};
+
+/**
+ * Delete a file from storage
+ */
+export const deleteStorageFile = async (bucket: string, path: string): Promise<boolean> => {
+  try {
+    const { error } = await supabase.storage
+      .from(bucket)
+      .remove([path]);
+      
+    if (error) {
+      console.error(`Error deleting file from ${bucket}:`, error);
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error(`Error deleting file from ${bucket}:`, error);
+    return false;
+  }
+};
