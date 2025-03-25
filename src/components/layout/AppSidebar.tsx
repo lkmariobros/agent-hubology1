@@ -37,14 +37,15 @@ export function AppSidebar() {
             <PortalSwitcher showLabel={!isCollapsed} className="px-2 py-3 w-full" />
           ) : (
             <div className="flex items-center px-2 py-3">
-              <Link to="/dashboard" className="flex items-center">
+              <div className="flex items-center">
                 <div className="flex items-center justify-center h-8 w-8 rounded-full bg-purple-600 text-white">
                   <span className="font-bold text-sm">P</span>
                 </div>
                 {!isCollapsed && (
                   <span className="ml-2 text-lg font-semibold transition-opacity">PropertyPro</span>
                 )}
-              </Link>
+                <ChevronsUpDown className="h-4 w-4 opacity-60 ml-1" />
+              </div>
             </div>
           )}
         </SidebarHeader>
