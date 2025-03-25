@@ -1,11 +1,10 @@
 
-import React, { useCallback, useState, useMemo, useEffect } from 'react';
+import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Card, CardContent } from '@/components/ui/card';
+import { Slider } from '@/components/ui/slider';
+import { Switch } from '@/components/ui/switch';
 import { CoBrokingInfo } from '@/types/transaction-form';
-import CommissionSplitSelector from './CommissionSplitSelector';
 
 interface CoBrokingFormProps {
   coBroking: CoBrokingInfo;
@@ -13,107 +12,90 @@ interface CoBrokingFormProps {
   onFieldChange: (field: string, value: string | number | boolean) => void;
 }
 
-const CoBrokingForm: React.FC<CoBrokingFormProps> = ({
-  coBroking,
+const CoBrokingForm: React.FC<CoBrokingFormProps> = ({ 
+  coBroking, 
   errors,
   onFieldChange
 }) => {
-  // Local state to reduce parent re-renders
-  const [isCredentialsVerified, setIsCredentialsVerified] = useState(
-    coBroking.credentialsVerified || false
-  );
-
-  // Update local state when props change
-  useEffect(() => {
-    setIsCredentialsVerified(coBroking.credentialsVerified || false);
-  }, [coBroking.credentialsVerified]);
-
-  // Memoized callbacks to prevent unnecessary re-renders
-  const handleCredentialsVerified = useCallback((checked: boolean) => {
-    setIsCredentialsVerified(checked);
-    onFieldChange('credentialsVerified', checked);
-  }, [onFieldChange]);
-
-  const handleSplitChange = useCallback((value: number) => {
-    onFieldChange('commissionSplit', value);
-  }, [onFieldChange]);
-
-  const handleTextChange = useCallback((field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    onFieldChange(field, e.target.value);
-  }, [onFieldChange]);
-
-  // Memoize error messages to prevent unnecessary re-renders
-  const nameError = useMemo(() => errors?.coAgentName, [errors?.coAgentName]);
-  const companyError = useMemo(() => errors?.coAgentCompany, [errors?.coAgentCompany]);
-
   return (
-    <Card className="mt-4">
-      <CardContent className="pt-6 space-y-4">
-        <div>
-          <Label htmlFor="agentName">
-            Co-Agent Name
-          </Label>
-          <Input
-            id="agentName"
-            value={coBroking?.agentName || ''}
-            onChange={handleTextChange('agentName')}
-            placeholder="Enter co-broker agent name"
-            className={nameError ? 'border-destructive' : ''}
-          />
-          {nameError && (
-            <p className="text-sm text-destructive mt-1">{nameError}</p>
-          )}
-        </div>
-        
-        <div>
-          <Label htmlFor="agentCompany">
-            Co-Agent Company
-          </Label>
-          <Input
-            id="agentCompany"
-            value={coBroking?.agentCompany || ''}
-            onChange={handleTextChange('agentCompany')}
-            placeholder="Enter co-broker company name"
-            className={companyError ? 'border-destructive' : ''}
-          />
-          {companyError && (
-            <p className="text-sm text-destructive mt-1">{companyError}</p>
-          )}
-        </div>
-        
-        <div>
-          <Label htmlFor="agentContact">
-            Co-Agent Contact
-          </Label>
-          <Input
-            id="agentContact"
-            value={coBroking?.agentContact || ''}
-            onChange={handleTextChange('agentContact')}
-            placeholder="Enter co-broker contact information"
-          />
-        </div>
-        
-        <CommissionSplitSelector 
-          value={coBroking?.commissionSplit || 50}
-          onChange={handleSplitChange}
-        />
-        
-        <div className="mt-6 border-t pt-4">
-          <div className="flex items-center space-x-2">
-            <Checkbox 
-              id="verified" 
-              checked={isCredentialsVerified}
-              onCheckedChange={handleCredentialsVerified}
+    <div className="space-y-6 mt-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="agentName">Co-broker Agent Name</Label>
+            <Input
+              id="agentName"
+              value={coBroking.agentName || ''}
+              onChange={(e) => onFieldChange('agentName', e.target.value)}
+              placeholder="Enter co-broker agent name"
+              className={errors.coAgentName ? 'border-destructive' : ''}
             />
-            <Label htmlFor="verified" className="text-sm">
-              I confirm that I have verified the co-broker's license and credentials
-            </Label>
+            {errors.coAgentName && (
+              <p className="text-sm text-destructive mt-1">{errors.coAgentName}</p>
+            )}
+          </div>
+          
+          <div>
+            <Label htmlFor="agentCompany">Co-broker Company</Label>
+            <Input
+              id="agentCompany"
+              value={coBroking.agentCompany || ''}
+              onChange={(e) => onFieldChange('agentCompany', e.target.value)}
+              placeholder="Enter co-broker company name"
+              className={errors.coAgentCompany ? 'border-destructive' : ''}
+            />
+            {errors.coAgentCompany && (
+              <p className="text-sm text-destructive mt-1">{errors.coAgentCompany}</p>
+            )}
+          </div>
+          
+          <div>
+            <Label htmlFor="agentContact">Co-broker Contact Information</Label>
+            <Input
+              id="agentContact"
+              value={coBroking.agentContact || ''}
+              onChange={(e) => onFieldChange('agentContact', e.target.value)}
+              placeholder="Enter contact information (phone, email)"
+            />
           </div>
         </div>
-      </CardContent>
-    </Card>
+        
+        <div className="space-y-6">
+          <div>
+            <div className="flex justify-between mb-2">
+              <Label htmlFor="commissionSplit">Commission Split</Label>
+              <span className="text-sm">
+                Our Agency: {coBroking.commissionSplit}% | Co-broker: {100 - (coBroking.commissionSplit || 0)}%
+              </span>
+            </div>
+            <Slider
+              id="commissionSplit"
+              value={[coBroking.commissionSplit || 50]}
+              onValueChange={(values) => onFieldChange('commissionSplit', values[0])}
+              min={0}
+              max={100}
+              step={5}
+              className="my-4"
+            />
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>0%</span>
+              <span>50%</span>
+              <span>100%</span>
+            </div>
+          </div>
+          
+          <div className="flex items-center space-x-2 mt-8">
+            <Switch 
+              id="credentialsVerified" 
+              checked={!!coBroking.credentialsVerified}
+              onCheckedChange={(checked) => onFieldChange('credentialsVerified', checked)}
+            />
+            <Label htmlFor="credentialsVerified">Co-broker credentials verified</Label>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
-// Use React.memo to prevent unnecessary re-renders
-export default React.memo(CoBrokingForm);
+export default CoBrokingForm;

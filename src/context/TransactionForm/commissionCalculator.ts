@@ -36,14 +36,15 @@ export const calculateCommission = (formData: TransactionFormData): CommissionBr
   const agentShare = ourAgencyCommission * (agentTierPercentage / 100);
   
   return {
-    transactionValue: transactionValue || 0,
-    commissionRate: commissionRate || 0,
     totalCommission,
     agencyShare,
     agentShare,
     ourAgencyCommission,
     coAgencyCommission,
     agentTier,
-    agentCommissionPercentage: agentTierPercentage
+    agentCommissionPercentage: agentTierPercentage,
+    // Add these for display purposes in CommissionBreakdownCard
+    transactionValue: transactionValue || 0,
+    commissionRate: commissionRate || 0
   };
 };

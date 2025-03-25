@@ -23,7 +23,7 @@ export const validateStep = (state: TransactionFormState): Record<string, string
       break;
       
     case 2: // Client Information
-      if (formData.transactionType === 'Sale' || formData.transactionType === 'Primary') {
+      if (formData.transactionType === 'Sale' || formData.transactionType === 'Developer') {
         if (!formData.buyer?.name) {
           errors.buyerName = 'Buyer name is required';
         }
@@ -44,7 +44,7 @@ export const validateStep = (state: TransactionFormState): Record<string, string
         }
       }
       
-      if (formData.transactionType === 'Primary') {
+      if (formData.transactionType === 'Developer') {
         if (!formData.developer?.name) {
           errors.developerName = 'Developer name is required';
         }

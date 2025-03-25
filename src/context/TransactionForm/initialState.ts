@@ -11,6 +11,7 @@ export const getInitialTransactionData = (transactionType: TransactionType): Tra
     commissionRate: getDefaultCommissionRate(transactionType),
     commissionAmount: 0,
     notes: '',
+    propertyId: '', // Add default empty propertyId
     coBroking: {
       enabled: false,
       agentName: '',
@@ -29,11 +30,13 @@ export const getInitialTransactionData = (transactionType: TransactionType): Tra
           name: '',
           email: '',
           phone: '',
+          notes: '',
         },
         seller: {
           name: '',
           email: '',
           phone: '',
+          notes: '',
         },
       };
     case 'Rent':
@@ -43,32 +46,39 @@ export const getInitialTransactionData = (transactionType: TransactionType): Tra
           name: '',
           email: '',
           phone: '',
+          notes: '',
         },
         tenant: {
           name: '',
           email: '',
           phone: '',
+          notes: '',
         },
         // For rentals, we initialize with the default values appropriate for rentals
         commissionRate: 0, // Not used for rentals
         commissionAmount: 0, // Will be set to match the owner's commission input
       };
-    case 'Primary':
+    case 'Developer':
       return {
         ...commonData,
         buyer: {
           name: '',
           email: '',
           phone: '',
+          notes: '',
         },
         developer: {
           name: '',
           email: '',
           phone: '',
+          notes: '',
         },
       };
     default:
-      return commonData as TransactionFormData;
+      return {
+        ...commonData,
+        propertyId: '',
+      } as TransactionFormData;
   }
 };
 
@@ -79,7 +89,7 @@ export const getDefaultCommissionRate = (transactionType: TransactionType): numb
       return 2; // 2% for sales
     case 'Rent':
       return 0; // Not applicable for rentals (we use direct commission amount)
-    case 'Primary':
+    case 'Developer':
       return 3; // 3% for primary project sales
     default:
       return 2;

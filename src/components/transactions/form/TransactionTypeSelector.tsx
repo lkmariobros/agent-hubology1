@@ -35,7 +35,7 @@ const transactionTypes: {
     commissionInfo: '1% standard commission'
   },
   {
-    type: 'Primary',
+    type: 'Developer',
     title: 'Developer Project',
     description: 'Primary market sale from a developer to a buyer',
     icon: <Building className="h-8 w-8" />,

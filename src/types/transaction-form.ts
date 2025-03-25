@@ -7,50 +7,51 @@ export interface TransactionFormData {
   closingDate?: Date;
   propertyId: string;
   status: TransactionStatus;
-  property?: {
-    id: string;
-    title: string;
-    address?: string;
-    type?: string;
-  };
-  buyer?: {
-    name: string;
-    email?: string;
-    phone?: string;
-  };
-  seller?: {
-    name: string;
-    email?: string;
-    phone?: string;
-  };
-  landlord?: {
-    name: string;
-    email?: string;
-    phone?: string;
-  };
-  tenant?: {
-    name: string;
-    email?: string;
-    phone?: string;
-  };
-  developer?: {
-    name: string;
-    company?: string;
-    email?: string;
-    phone?: string;
-  };
+  property?: PropertyInfo;
+  buyer?: ClientInfo;
+  seller?: ClientInfo;
+  landlord?: ClientInfo;
+  tenant?: ClientInfo;
+  developer?: DeveloperInfo;
   transactionValue: number;
   commissionRate: number;
   commissionAmount: number;
   agentTier?: AgentRank;
-  coBroking?: {
-    enabled: boolean;
-    agentName?: string;
-    agentCompany?: string;
-    agentContact?: string;
-    commissionSplit: number;
-  };
+  coBroking?: CoBrokingInfo;
   notes?: string;
+}
+
+export interface PropertyInfo {
+  id: string;
+  title: string;
+  address?: string;
+  type?: string;
+  price?: number;
+  rentalRate?: number;
+}
+
+export interface ClientInfo {
+  name: string;
+  email?: string;
+  phone?: string;
+  notes?: string;
+}
+
+export interface DeveloperInfo {
+  name: string;
+  company?: string;
+  email?: string;
+  phone?: string;
+  notes?: string;
+}
+
+export interface CoBrokingInfo {
+  enabled: boolean;
+  agentName?: string;
+  agentCompany?: string;
+  agentContact?: string;
+  commissionSplit: number;
+  credentialsVerified?: boolean;
 }
 
 export type TransactionType = 'Sale' | 'Rent' | 'Developer';
@@ -72,11 +73,20 @@ export interface CommissionBreakdown {
   agentShare: number;
   ourAgencyCommission?: number;
   coAgencyCommission?: number;
+  agentTier?: AgentRank;
+  agentCommissionPercentage?: number;
+  // These are used for display purposes in CommissionBreakdownCard
+  transactionValue?: number;
+  commissionRate?: number;
 }
 
 export interface TransactionFormState {
-  step: number;
   formData: TransactionFormData;
   documents: TransactionDocument[];
   errors: Record<string, string>;
+  // Additional state properties
+  currentStep: number;
+  isSubmitting: boolean;
+  isDirty: boolean;
+  lastSaved: Date | null;
 }
