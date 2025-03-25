@@ -33,9 +33,26 @@ export const propertyFormReducer = (
         isDirty: true,
       };
     case 'UPDATE_PROPERTY_TYPE':
+      // Preserve original values for common fields when changing property type
+      const commonFields = {
+        title: state.formData.title,
+        description: state.formData.description,
+        transactionType: state.formData.transactionType,
+        featured: state.formData.featured,
+        status: state.formData.status,
+        address: state.formData.address,
+        price: state.formData.price,
+        rentalRate: state.formData.rentalRate,
+        agentNotes: state.formData.agentNotes,
+        ownerContacts: state.formData.ownerContacts,
+      };
+      
       return {
         ...state,
-        formData: getInitialPropertyData(action.payload),
+        formData: {
+          ...getInitialPropertyData(action.payload),
+          ...commonFields
+        },
         isDirty: true,
       };
     case 'UPDATE_TRANSACTION_TYPE': {
