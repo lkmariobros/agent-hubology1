@@ -526,23 +526,34 @@ const PropertyDetail = () => {
               <TabsContent value="features" className="mt-4">
                 <Card className="overflow-hidden border-neutral-800 bg-card/90">
                   <CardContent className="p-4">
-                    {property.features && property.features.length > 0 ? (
-                      <div className="space-y-3">
-                        <h3 className="text-lg font-semibold">Features</h3>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-y-3">
-                          {property.features.map((feature, index) => (
-                            <div key={index} className="flex items-center">
-                              <div className="h-2 w-2 rounded-full bg-primary mr-2"></div>
-                              <span className="text-sm">{feature}</span>
+                    {property.features && (
+                      (() => {
+                        // Convert features object to array for rendering
+                        const featureArray = Array.isArray(property.features) ? 
+                          property.features : 
+                          Object.entries(property.features)
+                            .filter(([_, value]) => value !== undefined && value !== null && value !== 0)
+                            .map(([key, value]) => `${key}: ${value}`);
+                            
+                        return featureArray.length > 0 ? (
+                          <div className="space-y-3">
+                            <h3 className="text-lg font-semibold">Features</h3>
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-y-3">
+                              {featureArray.map((feature, index) => (
+                                <div key={index} className="flex items-center">
+                                  <div className="h-2 w-2 rounded-full bg-primary mr-2"></div>
+                                  <span className="text-sm">{feature}</span>
+                                </div>
+                              ))}
                             </div>
-                          ))}
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="text-center py-4">
-                        <Tag className="mx-auto h-12 w-12 text-muted-foreground opacity-30" />
-                        <p className="mt-2 text-sm text-muted-foreground">No features listed</p>
-                      </div>
+                          </div>
+                        ) : (
+                          <div className="text-center py-4">
+                            <Tag className="mx-auto h-12 w-12 text-muted-foreground opacity-30" />
+                            <p className="mt-2 text-sm text-muted-foreground">No features listed</p>
+                          </div>
+                        );
+                      })()
                     )}
                   </CardContent>
                 </Card>

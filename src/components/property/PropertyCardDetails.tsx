@@ -15,6 +15,15 @@ interface PropertyCardDetailsProps {
 }
 
 export function PropertyCardDetails({ property, onEdit, className }: PropertyCardDetailsProps) {
+  // Convert features object to array for rendering if needed
+  const featureArray = property.features ? 
+    (Array.isArray(property.features) ? 
+      property.features : 
+      Object.entries(property.features)
+        .filter(([_, value]) => value !== undefined && value !== null && value !== 0)
+        .map(([key, value]) => `${key}: ${value}`)) : 
+    [];
+
   return (
     <div className={cn(
       "px-4 pb-4 pt-2 rounded-xl transition-all duration-300 ease-in-out bg-[#121212]",
@@ -65,11 +74,11 @@ export function PropertyCardDetails({ property, onEdit, className }: PropertyCar
       </Button>
       
       {/* Additional property stats if needed - optional section */}
-      {property.features && property.features.length > 0 && (
+      {featureArray.length > 0 && (
         <div className="pt-4 mt-4 border-t border-dashed border-neutral-700/40">
           <h4 className="text-xs text-neutral-500 mb-2">Features</h4>
           <div className="flex flex-wrap gap-1.5">
-            {property.features.map((feature, index) => (
+            {featureArray.map((feature, index) => (
               <Badge 
                 key={index}
                 variant="outline" 

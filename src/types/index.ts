@@ -21,6 +21,7 @@ export interface PropertyFeatures {
   bathrooms?: number;
   squareFeet: number;
   landSize?: number;
+  // Add any other feature properties here
 }
 
 export interface Property {
@@ -47,6 +48,8 @@ export interface Property {
   area?: number;
   bedrooms?: number; // Added for direct access
   bathrooms?: number; // Added for direct access
+  stock?: number; // Added to fix PropertyCardBasicInfo errors
+  listedBy?: string; // Added to match usage in data files
 }
 
 export interface User {

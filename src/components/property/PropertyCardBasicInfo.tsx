@@ -71,7 +71,7 @@ export function PropertyCardBasicInfo({
             </div>
           </div>
           
-          {property.stock && (
+          {property.stock !== undefined && (
             <div className="text-right">
               <div className="text-xs text-neutral-500 mb-1.5">Stock</div>
               <div className="text-sm flex items-center gap-1">

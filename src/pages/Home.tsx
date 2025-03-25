@@ -1,4 +1,3 @@
-
 import React from 'react';
 import MetricCard from '@/components/dashboard/MetricCard';
 import OpportunitiesBoard from '@/components/dashboard/OpportunitiesBoard';
@@ -76,15 +75,22 @@ const Home = () => {
       address: { street: '123 Main St', city: 'San Francisco', state: 'CA', zip: '94101', country: 'USA' }, 
       type: 'residential', 
       subtype: 'apartment',
-      features: ['pool', 'gym'],
+      features: {
+        bedrooms: 2,
+        bathrooms: 2,
+        squareFeet: 1200,
+        landSize: 0
+      },
       bedrooms: 2,
       bathrooms: 2,
       area: 1200,
       images: [],
       status: 'available',
       listedBy: 'Agent 1',
+      agent: { id: '1', name: 'Agent 1' },
       createdAt: '2023-01-01',
-      updatedAt: '2023-01-01'
+      updatedAt: '2023-01-01',
+      transactionType: 'Sale'
     },
     { 
       id: '2', 
@@ -94,15 +100,22 @@ const Home = () => {
       address: { street: '456 Oak St', city: 'Boston', state: 'MA', zip: '02108', country: 'USA' }, 
       type: 'residential', 
       subtype: 'single-family',
-      features: ['garden', 'fireplace'],
+      features: {
+        bedrooms: 4,
+        bathrooms: 3,
+        squareFeet: 2500,
+        landSize: 3500
+      },
       bedrooms: 4,
       bathrooms: 3,
       area: 2500,
       images: [],
       status: 'available',
       listedBy: 'Agent 2',
+      agent: { id: '2', name: 'Agent 2' },
       createdAt: '2023-01-02',
-      updatedAt: '2023-01-02'
+      updatedAt: '2023-01-02',
+      transactionType: 'Sale'
     },
     { 
       id: '3', 
@@ -112,15 +125,22 @@ const Home = () => {
       address: { street: '789 State St', city: 'Chicago', state: 'IL', zip: '60601', country: 'USA' }, 
       type: 'residential', 
       subtype: 'loft',
-      features: ['high ceiling', 'exposed brick'],
+      features: {
+        bedrooms: 1,
+        bathrooms: 2,
+        squareFeet: 1800,
+        landSize: 0
+      },
       bedrooms: 1,
       bathrooms: 2,
       area: 1800,
       images: [],
       status: 'pending',
       listedBy: 'Agent 1',
+      agent: { id: '1', name: 'Agent 1' },
       createdAt: '2023-01-03',
-      updatedAt: '2023-01-03'
+      updatedAt: '2023-01-03',
+      transactionType: 'Sale'
     }
   ];
 
