@@ -7,6 +7,7 @@ import App from './App';
 import './index.css';
 import { ThemeProvider } from './providers/ThemeProvider';
 import { AuthProvider } from './providers/AuthProvider';
+import { NotificationProvider } from './context/NotificationContext';
 import { Toaster } from '@/components/ui/sonner';
 import { initializeApp } from './utils/initializeApp';
 
@@ -29,8 +30,10 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <ThemeProvider>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
-            <App />
-            <Toaster />
+            <NotificationProvider>
+              <App />
+              <Toaster />
+            </NotificationProvider>
           </AuthProvider>
         </QueryClientProvider>
       </ThemeProvider>

@@ -1,9 +1,8 @@
 
 import React, { useEffect } from 'react';
 import { Outlet, Navigate, useLocation } from 'react-router-dom';
-import { BellRing } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/providers/AuthProvider';
 
 import {
   SidebarProvider,
@@ -22,10 +21,11 @@ import {
 import { Button } from '@/components/ui/button';
 import { AdminSidebar } from './AdminSidebar';
 import { ThemeToggle } from '../theme/ThemeToggle';
+import NotificationBell from './NotificationBell';
 
 const AdminLayout = () => {
   const isMobile = useIsMobile();
-  const { user, isAdmin, signOut } = useAuth();
+  const { user, isAdmin, logout } = useAuth();
   const location = useLocation();
   
   // Add data-route attribute to body
@@ -70,9 +70,7 @@ const AdminLayout = () => {
             <div className="flex items-center space-x-2">
               <ThemeToggle />
               
-              <Button variant="ghost" size="icon" className="text-muted-foreground">
-                <BellRing className="h-5 w-5" />
-              </Button>
+              <NotificationBell />
               
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -93,7 +91,7 @@ const AdminLayout = () => {
                   <DropdownMenuItem onClick={() => window.location.href = '/admin/settings'}>Admin Settings</DropdownMenuItem>
                   <DropdownMenuItem onClick={() => window.location.href = '/admin/system'}>System Configuration</DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={signOut}>Logout</DropdownMenuItem>
+                  <DropdownMenuItem onClick={logout}>Logout</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
