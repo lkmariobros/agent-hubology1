@@ -1,4 +1,3 @@
-
 import { Property } from '@/types';
 
 /**
@@ -18,6 +17,36 @@ export const formatPrice = (price: number): string => {
 export const formatCurrency = (price: number | null | undefined): string => {
   if (price === null || price === undefined) return 'RM 0';
   return `RM ${price.toLocaleString()}`;
+};
+
+/**
+ * Calculate stock availability percentage
+ */
+export const calculateStockPercentage = (available: number, total: number): number => {
+  if (total === 0) return 0;
+  return Math.round((available / total) * 100);
+};
+
+/**
+ * Get stock status label based on percentage
+ */
+export const getStockStatusLabel = (percentage: number): string => {
+  if (percentage === 0) return 'Sold Out';
+  if (percentage <= 25) return 'Low Stock';
+  if (percentage <= 50) return 'Selling Fast';
+  if (percentage <= 75) return 'Available';
+  return 'Fully Available';
+};
+
+/**
+ * Get CSS class for stock status based on percentage
+ */
+export const getStockStatusClass = (percentage: number): string => {
+  if (percentage === 0) return 'text-red-500 bg-red-500/10 border-red-500/20';
+  if (percentage <= 25) return 'text-orange-500 bg-orange-500/10 border-orange-500/20';
+  if (percentage <= 50) return 'text-yellow-500 bg-yellow-500/10 border-yellow-500/20';
+  if (percentage <= 75) return 'text-blue-500 bg-blue-500/10 border-blue-500/20';
+  return 'text-green-500 bg-green-500/10 border-green-500/20';
 };
 
 /**
@@ -84,7 +113,3 @@ export const mapPropertyData = (propertyData: any): Property => {
     bathrooms: propertyData.bathrooms || 0
   };
 };
-
-// Make sure we don't overwrite existing functions in propertyUtils.tsx
-// Functions like truncateText, getPropertyTypeIcon, formatArea, etc.
-// are already defined there

@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Bed, Bath, Grid2X2, Home, Building, MapPin, Tag, Package } from 'lucide-react';
-import { formatCurrency, calculateStockPercentage, getStockStatusLabel } from '@/utils/propertyUtils';
+import { formatCurrency, calculateStockPercentage, getStockStatusLabel } from '@/utils/propertyUtils.tsx';
 import { Property } from '@/types';
 import { cn } from '@/lib/utils';
 

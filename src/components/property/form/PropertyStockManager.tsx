@@ -3,7 +3,6 @@ import React from 'react';
 import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from 'react-hook-form';
-import { PropertyFormValues } from '@/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { AlertTriangle } from 'lucide-react';
 import { PropertyFormData } from '@/types/property-form';
