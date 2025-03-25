@@ -1,5 +1,5 @@
 
-import { useAuth as useAuthFromContext } from '@/context/AuthContext';
+import { useAuth as useAuthFromContext } from '@/providers/AuthProvider';
 import { UserRole } from '@/providers/AuthProvider';
 
 /**

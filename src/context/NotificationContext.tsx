@@ -1,6 +1,6 @@
 
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/providers/AuthProvider';
 import { Notification } from '@/types/notification';
 import { useNotificationActions } from '@/hooks/useNotificationActions';
 import { useNotificationSubscription } from '@/hooks/useNotificationSubscription';
