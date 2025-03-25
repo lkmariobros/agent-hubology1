@@ -10,6 +10,7 @@ interface PropertyTableProps {
   properties: Property[];
 }
 
+// Export as a named export
 export const PropertyTable: React.FC<PropertyTableProps> = ({ properties }) => {
   const navigate = useNavigate();
 
@@ -120,5 +121,5 @@ export const PropertyTable: React.FC<PropertyTableProps> = ({ properties }) => {
   );
 };
 
-// Add default export to support both import styles
+// Add a proper default export that points to the component
 export default PropertyTable;

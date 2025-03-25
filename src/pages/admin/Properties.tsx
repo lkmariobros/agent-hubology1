@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -5,6 +6,7 @@ import { Plus, Search, Filter, SortDesc, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+// Import as named export to match the component export
 import { PropertyTable } from '@/components/property/PropertyTable';
 import PropertyGrid from '@/components/property/PropertyGrid';
 import { useProperties } from '@/hooks/useProperties';
