@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useProperty } from '@/hooks/useProperties';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   ChevronLeft, 
@@ -22,11 +22,11 @@ import {
   User,
   Building2, 
   Tag, 
-  Maximize 
+  MessageSquare
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
-import { Avatar } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 
 const PropertyDetail = () => {
@@ -68,6 +68,30 @@ const PropertyDetail = () => {
     phone: "+60123456789",
     email: "ahmad@example.com"
   };
+
+  // Mock team notes data
+  const teamNotes = [
+    {
+      id: 1,
+      author: {
+        name: "John Doe",
+        initials: "JD",
+        avatarColor: "bg-blue-500"
+      },
+      date: "Jun 15, 2023",
+      content: "Client is very interested in this property but concerned about the price. Might be open to offers 5% below asking."
+    },
+    {
+      id: 2,
+      author: {
+        name: "Lisa Park",
+        initials: "LP",
+        avatarColor: "bg-green-500"
+      },
+      date: "May 28, 2023",
+      content: "Owner mentioned they can expedite the closing process if needed. Also willing to leave some furniture if buyer is interested."
+    }
+  ];
 
   return (
     <div className="space-y-6">
@@ -218,11 +242,11 @@ const PropertyDetail = () => {
                       <div className="flex items-center">
                         <Avatar className="h-10 w-10 mr-3">
                           {contact.avatar ? (
-                            <img src={contact.avatar} alt={contact.name} />
+                            <AvatarImage src={contact.avatar} alt={contact.name} />
                           ) : (
-                            <div className="bg-primary text-primary-foreground h-full w-full flex items-center justify-center text-sm font-medium">
+                            <AvatarFallback className="bg-primary text-primary-foreground">
                               {contact.initials}
-                            </div>
+                            </AvatarFallback>
                           )}
                         </Avatar>
                         <div>
@@ -242,10 +266,44 @@ const PropertyDetail = () => {
                   </div>
                 </CardContent>
               </Card>
+              
+              {/* Team Notes section - directly visible instead of in a tab */}
+              <Card className="overflow-hidden border-neutral-800 bg-card/90 backdrop-blur-sm">
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center">
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    Team Notes
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="space-y-4">
+                    {teamNotes.map((note) => (
+                      <div key={note.id} className="bg-muted/50 p-4 rounded-lg">
+                        <div className="flex items-center mb-2">
+                          <Avatar className="h-6 w-6 mr-2">
+                            <AvatarFallback className={note.author.avatarColor + " text-white"}>
+                              {note.author.initials}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="text-sm font-medium">{note.author.name}</span>
+                          <span className="text-xs text-muted-foreground ml-auto">{note.date}</span>
+                        </div>
+                        <p className="text-sm">{note.content}</p>
+                      </div>
+                    ))}
+                    
+                    {/* Add note button */}
+                    <Button variant="outline" size="sm" className="w-full mt-2">
+                      <User className="h-4 w-4 mr-2" />
+                      Add Note
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
           
-          {/* Tabs section */}
+          {/* Tabs section - with Team Notes removed since it's shown above */}
           <Tabs defaultValue="overview" className="mt-6">
             <TabsList className="w-full border-b rounded-none bg-transparent h-12 p-0">
               <TabsTrigger 
@@ -266,12 +324,6 @@ const PropertyDetail = () => {
               >
                 Documents
               </TabsTrigger>
-              <TabsTrigger 
-                value="team-notes" 
-                className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-12 px-4"
-              >
-                Team Notes
-              </TabsTrigger>
             </TabsList>
             
             <TabsContent value="overview" className="mt-6 space-y-6">
@@ -290,20 +342,16 @@ const PropertyDetail = () => {
                 </CardContent>
               </Card>
               
-              {/* Map section */}
+              {/* Map section replaced with "Coming Soon" notice */}
               <Card className="overflow-hidden border-neutral-800 bg-card/90">
                 <CardContent className="p-6">
                   <div className="flex justify-between items-center mb-4">
                     <h3 className="text-lg font-semibold">Location</h3>
-                    <Button variant="outline" size="sm">
-                      <Maximize className="h-4 w-4 mr-2" />
-                      View larger map
-                    </Button>
                   </div>
-                  <div className="h-[300px] bg-muted rounded-lg overflow-hidden">
-                    {/* Map will be implemented here */}
-                    <div className="w-full h-full flex items-center justify-center bg-secondary/30">
-                      <MapPin className="h-12 w-12 text-primary opacity-30" />
+                  <div className="h-[200px] bg-muted rounded-lg overflow-hidden">
+                    <div className="w-full h-full flex flex-col items-center justify-center bg-secondary/30">
+                      <MapPin className="h-12 w-12 text-primary opacity-30 mb-4" />
+                      <p className="text-muted-foreground">Map integration coming soon</p>
                     </div>
                   </div>
                 </CardContent>
@@ -345,41 +393,6 @@ const PropertyDetail = () => {
                 </CardContent>
               </Card>
             </TabsContent>
-            
-            <TabsContent value="team-notes" className="mt-6">
-              <Card className="overflow-hidden border-neutral-800 bg-card/90">
-                <CardContent className="p-6">
-                  <h3 className="text-lg font-semibold mb-4">Team Notes</h3>
-                  <div className="space-y-4">
-                    <div className="bg-muted/50 p-4 rounded-lg">
-                      <div className="flex items-center mb-2">
-                        <Avatar className="h-6 w-6 mr-2">
-                          <div className="bg-blue-500 text-white h-full w-full flex items-center justify-center text-xs font-medium">
-                            JD
-                          </div>
-                        </Avatar>
-                        <span className="text-sm font-medium">John Doe</span>
-                        <span className="text-xs text-muted-foreground ml-auto">Jun 15, 2023</span>
-                      </div>
-                      <p className="text-sm">Client is very interested in this property but concerned about the price. Might be open to offers 5% below asking.</p>
-                    </div>
-                    
-                    <div className="bg-muted/50 p-4 rounded-lg">
-                      <div className="flex items-center mb-2">
-                        <Avatar className="h-6 w-6 mr-2">
-                          <div className="bg-green-500 text-white h-full w-full flex items-center justify-center text-xs font-medium">
-                            LP
-                          </div>
-                        </Avatar>
-                        <span className="text-sm font-medium">Lisa Park</span>
-                        <span className="text-xs text-muted-foreground ml-auto">May 28, 2023</span>
-                      </div>
-                      <p className="text-sm">Owner mentioned they can expedite the closing process if needed. Also willing to leave some furniture if buyer is interested.</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
           </Tabs>
         </>
       ) : (
@@ -409,8 +422,9 @@ const PropertyDetailSkeleton = () => {
           </div>
         </div>
         
-        <div className="lg:col-span-2">
-          <Skeleton className="h-[400px] w-full rounded-lg" />
+        <div className="lg:col-span-2 space-y-6">
+          <Skeleton className="h-[300px] w-full rounded-lg" />
+          <Skeleton className="h-[200px] w-full rounded-lg" />
         </div>
       </div>
       
