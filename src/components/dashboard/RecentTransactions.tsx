@@ -8,15 +8,28 @@ import { Transaction } from '@/types';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useNavigate } from 'react-router-dom';
+import { useTransactions } from '@/hooks/useTransactions';
 
 interface RecentTransactionsProps {
-  transactions: Transaction[];
+  transactions?: Transaction[];
   isLoading?: boolean;
   onViewAll?: () => void;
+  limit?: number;
 }
 
-const RecentTransactions = ({ transactions, isLoading = false, onViewAll }: RecentTransactionsProps) => {
+const RecentTransactions = ({ transactions: propTransactions, isLoading: propIsLoading = false, onViewAll, limit = 5 }: RecentTransactionsProps) => {
   const navigate = useNavigate();
+  const { useTransactionsQuery } = useTransactions();
+  
+  // Use provided transactions or fetch them
+  const { data, isLoading: queryIsLoading } = useTransactionsQuery({
+    limit: limit,
+    page: 0
+  });
+  
+  // Use props if provided, otherwise use query results
+  const transactions = propTransactions || data?.transactions || [];
+  const isLoading = propIsLoading || queryIsLoading;
 
   const handleViewTransaction = (id: string) => {
     navigate(`/transactions/${id}`);
@@ -35,7 +48,7 @@ const RecentTransactions = ({ transactions, isLoading = false, onViewAll }: Rece
           variant="ghost" 
           size="sm" 
           className="text-accent hover:text-accent/80"
-          onClick={onViewAll}
+          onClick={onViewAll || (() => navigate('/transactions'))}
         >
           View all <ArrowRight className="ml-1 h-4 w-4" />
         </Button>

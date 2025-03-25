@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { Loader2, Save, ArrowLeft, ArrowRight } from 'lucide-react';
+import { useTransactions } from '@/hooks/useTransactions';
 
 // Step components
 import TransactionFormStepper from './form/TransactionFormStepper';
@@ -19,8 +20,10 @@ import TransactionReview from './form/TransactionReview';
 
 const TransactionFormSteps: React.FC = () => {
   const { state, prevStep, nextStep, saveForm, submitForm, validateCurrentStep } = useTransactionForm();
-  const { currentStep, isSubmitting, lastSaved, errors } = state;
+  const { currentStep, isSubmitting, lastSaved, errors, formData, documents } = state;
   const navigate = useNavigate();
+  const { useCreateTransactionMutation } = useTransactions();
+  const createMutation = useCreateTransactionMutation();
 
   console.log('TransactionFormSteps rendered with currentStep:', currentStep);
 
@@ -43,7 +46,12 @@ const TransactionFormSteps: React.FC = () => {
         return;
       }
       
-      await submitForm();
+      // Use the mutation function to create the transaction
+      await createMutation.mutateAsync({
+        formData: formData,
+        documents: documents
+      });
+      
       toast.success('Transaction created successfully!');
       navigate('/transactions');
     } catch (error) {
@@ -117,7 +125,7 @@ const TransactionFormSteps: React.FC = () => {
                 type="button"
                 variant="outline"
                 onClick={handleSaveDraft}
-                disabled={isSubmitting}
+                disabled={isSubmitting || createMutation.isPending}
               >
                 <Save className="h-4 w-4 mr-2" />
                 Save Draft
@@ -127,7 +135,7 @@ const TransactionFormSteps: React.FC = () => {
                 <Button
                   type="button"
                   onClick={handleNextStep}
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || createMutation.isPending}
                 >
                   Next
                   <ArrowRight className="h-4 w-4 ml-2" />
@@ -136,9 +144,9 @@ const TransactionFormSteps: React.FC = () => {
                 <Button
                   type="button"
                   onClick={handleSubmit}
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || createMutation.isPending}
                 >
-                  {isSubmitting ? (
+                  {isSubmitting || createMutation.isPending ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                       Submitting...
