@@ -1,33 +1,28 @@
 
 import { useAuth as useAuthFromContext } from '@/context/AuthContext';
 
-// List of admin email patterns
-const ADMIN_EMAILS = [
-  'admin@example.com',
-  'admin@propertypro.com', 
-  'josephkwantum@gmail.com',
-  'admin',
-  'test'
-];
-
-// Extend the useAuth hook to include additional role-related functionality
+/**
+ * Enhanced authentication hook that extends the base useAuth context
+ * with additional role-related functionality.
+ */
 export const useAuth = () => {
+  // Get the base auth context
   const auth = useAuthFromContext();
+  
+  // Determine if the current route is in the admin section
+  const isAdminRoute = window.location.pathname.startsWith('/admin');
   
   // Add role checking capability with better null safety
   const isAdmin = auth.user?.email ? 
-    ADMIN_EMAILS.some(pattern => 
-      auth.user?.email?.toLowerCase().includes(pattern.toLowerCase())
-    ) : false;
+    auth.isAdmin : false;
   
   return {
     ...auth,
     isAdmin,
-    roles: auth.user ? ['agent', ...(isAdmin ? ['admin'] : [])] : [],
-    activeRole: window.location.pathname.startsWith('/admin') ? 'admin' : 'agent',
+    roles: auth.user ? auth.roles || [] : [],
+    activeRole: isAdminRoute ? 'admin' : 'agent',
     switchRole: (role: 'agent' | 'admin') => {
       console.log(`Switching to ${role} role`);
-      // In the current implementation, we redirect based on role
       if (role === 'admin') {
         window.location.href = '/admin';
       } else {
