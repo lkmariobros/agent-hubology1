@@ -36,27 +36,49 @@ const DocumentUploader: React.FC<DocumentUploaderProps> = ({
 
     try {
       for (const file of acceptedFiles) {
+        const previewUrl = URL.createObjectURL(file);
+        
         // Add to form state immediately with required properties
         addDocument({
           file,
           name: file.name,
           documentType,
-          url: URL.createObjectURL(file), // Use temporary URL for preview
+          url: previewUrl, // Use temporary URL for preview
           uploadStatus: 'uploading'
         });
 
         try {
           // If connected to Supabase, try uploading
           if (window.location.hostname !== 'localhost') {
-            await uploadFile(file, {
+            console.log('Uploading document to Supabase:', file.name);
+            const result = await uploadFile(file, {
               bucket: 'property-documents',
               path: 'temp',
               maxSizeMB,
-              acceptedFileTypes: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+              acceptedFileTypes: [
+                'application/pdf', 
+                'application/msword', 
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'image/jpeg',
+                'image/png'
+              ]
+            });
+            
+            console.log('Document upload result:', result);
+            
+            // Update the document with the real URL from Supabase
+            removeDocument(state.documents.length - 1);
+            addDocument({
+              file,
+              name: file.name,
+              documentType,
+              url: result.url,
+              storagePath: result.path,
+              uploadStatus: 'completed'
             });
           }
         } catch (error) {
-          console.error('Error uploading file:', error);
+          console.error('Error uploading document:', error);
           toast.error(`Failed to upload ${file.name}`);
         }
       }
@@ -64,7 +86,7 @@ const DocumentUploader: React.FC<DocumentUploaderProps> = ({
       // Remove files from processing state
       setProcessingFiles(prev => prev.filter(name => !fileNames.includes(name)));
     }
-  }, [state.documents, addDocument, documentType, maxDocuments, maxSizeMB, uploadFile]);
+  }, [state.documents, addDocument, removeDocument, documentType, maxDocuments, maxSizeMB, uploadFile]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -80,6 +102,11 @@ const DocumentUploader: React.FC<DocumentUploaderProps> = ({
   });
 
   const handleRemoveDocument = (index: number) => {
+    // Revoke object URL if it exists to prevent memory leaks
+    const doc = state.documents[index];
+    if (doc.url && doc.url.startsWith('blob:')) {
+      URL.revokeObjectURL(doc.url);
+    }
     removeDocument(index);
   };
 

@@ -10,6 +10,9 @@ export const initializeApp = async () => {
     // Initialize storage buckets
     if (window.location.hostname !== 'localhost') {
       await initializeStorage();
+      console.log('Storage initialization completed');
+    } else {
+      console.log('Storage initialization skipped in localhost environment');
     }
 
     // Add other initialization tasks here

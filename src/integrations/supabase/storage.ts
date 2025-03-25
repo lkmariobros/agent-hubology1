@@ -16,9 +16,14 @@ export const ensureStorageBuckets = async (): Promise<boolean> => {
     }
     
     const existingBuckets = buckets?.map(bucket => bucket.name) || [];
+    console.log('Existing buckets:', existingBuckets);
     
-    // Check and create property-images bucket if needed
+    // Check if buckets exist, but don't try to create them if they do
+    // This avoids the duplicate key errors we saw
+    
+    // property-images bucket
     if (!existingBuckets.includes('property-images')) {
+      console.log('Need to create property-images bucket');
       const { error: imagesBucketError } = await supabase.storage.createBucket('property-images', {
         public: true,
         fileSizeLimit: 10485760, // 10MB
@@ -31,10 +36,13 @@ export const ensureStorageBuckets = async (): Promise<boolean> => {
       }
       
       console.log('Created property-images bucket');
+    } else {
+      console.log('property-images bucket already exists');
     }
     
-    // Check and create property-documents bucket if needed
+    // property-documents bucket
     if (!existingBuckets.includes('property-documents')) {
+      console.log('Need to create property-documents bucket');
       const { error: docsBucketError } = await supabase.storage.createBucket('property-documents', {
         public: false,
         fileSizeLimit: 20971520, // 20MB
@@ -53,6 +61,8 @@ export const ensureStorageBuckets = async (): Promise<boolean> => {
       }
       
       console.log('Created property-documents bucket');
+    } else {
+      console.log('property-documents bucket already exists');
     }
     
     return true;

@@ -39,7 +39,17 @@ export const useStorageUpload = () => {
       const bucketExists = buckets?.some(b => b.name === options.bucket);
       
       if (!bucketExists) {
-        throw new Error(`Bucket ${options.bucket} does not exist`);
+        console.warn(`Bucket ${options.bucket} does not exist, attempting to create it`);
+        
+        // Try to create the bucket if it doesn't exist
+        const { error: createError } = await supabase.storage.createBucket(options.bucket, {
+          public: options.bucket === 'property-images', // Make property-images public, others private
+          fileSizeLimit: (options.maxSizeMB || 10) * 1024 * 1024
+        });
+        
+        if (createError) {
+          throw new Error(`Failed to create bucket ${options.bucket}: ${createError.message}`);
+        }
       }
       
       // Validate file size
@@ -56,6 +66,8 @@ export const useStorageUpload = () => {
       const fileExt = file.name.split('.').pop();
       const filePath = `${options.path || ''}${options.path ? '/' : ''}${uuidv4()}.${fileExt}`;
       
+      console.log(`Uploading file to ${options.bucket}/${filePath}`);
+      
       // Upload the file
       const { data, error: uploadError } = await supabase.storage
         .from(options.bucket)
@@ -65,13 +77,18 @@ export const useStorageUpload = () => {
         });
         
       if (uploadError) {
+        console.error('Upload error:', uploadError);
         throw uploadError;
       }
+      
+      console.log('Upload successful, getting public URL');
       
       // Get the public URL
       const { data: { publicUrl } } = supabase.storage
         .from(options.bucket)
         .getPublicUrl(filePath);
+      
+      console.log('Public URL:', publicUrl);
       
       setProgress(100);
       return { 
@@ -81,6 +98,7 @@ export const useStorageUpload = () => {
       };
     } catch (err: any) {
       const errorMessage = err.message || 'Failed to upload file';
+      console.error('Upload error:', errorMessage);
       setError(err);
       throw new Error(errorMessage);
     } finally {

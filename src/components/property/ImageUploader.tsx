@@ -49,11 +49,26 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
         try {
           // If connected to Supabase, try uploading
           if (window.location.hostname !== 'localhost') {
-            await uploadFile(file, {
+            console.log('Uploading file to Supabase:', file.name);
+            const result = await uploadFile(file, {
               bucket: 'property-images',
               path: 'temp',
               maxSizeMB,
               acceptedFileTypes: ['image/jpeg', 'image/png', 'image/webp']
+            });
+            
+            console.log('Upload result:', result);
+            
+            // Update the image with the real URL from Supabase
+            removeImage(state.images.length - 1);
+            addImage({
+              file,
+              url: result.url,
+              storagePath: result.path,
+              displayOrder: state.images.length - 1,
+              isCover: state.images.length === 1, // First image is cover by default
+              previewUrl,
+              uploadStatus: 'completed'
             });
           }
         } catch (error) {
@@ -65,7 +80,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
       // Remove files from processing state
       setProcessingFiles(prev => prev.filter(name => !fileNames.includes(name)));
     }
-  }, [state.images, addImage, maxImages, maxSizeMB, uploadFile]);
+  }, [state.images, addImage, removeImage, maxImages, maxSizeMB, uploadFile]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -79,6 +94,11 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   });
 
   const handleRemoveImage = (index: number) => {
+    // If the image has a preview URL, revoke it to prevent memory leaks
+    const image = state.images[index];
+    if (image.previewUrl) {
+      URL.revokeObjectURL(image.previewUrl);
+    }
     removeImage(index);
   };
 
@@ -129,6 +149,11 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
               {image.isCover && (
                 <div className="absolute bottom-2 left-2 text-xs font-semibold bg-primary text-primary-foreground px-2 py-1 rounded-md">
                   Cover
+                </div>
+              )}
+              {image.uploadStatus === 'uploading' && (
+                <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                  <Loader2 className="h-6 w-6 animate-spin text-white" />
                 </div>
               )}
             </div>
