@@ -16,24 +16,37 @@ export interface Address {
   country: string;
 }
 
+export interface PropertyFeatures {
+  bedrooms?: number;
+  bathrooms?: number;
+  squareFeet: number;
+  landSize?: number;
+}
+
 export interface Property {
   id: string;
   title: string;
   description: string;
+  type: string;
+  status: string; // Changed from enum to string to handle different cases
+  transactionType: string;
   price: number;
+  rentalRate?: number;
   address: Address;
-  type: 'residential' | 'commercial' | 'industrial' | 'land';
-  subtype: string;
-  features: string[];
-  bedrooms?: number;
-  bathrooms?: number;
-  area: number;
+  features: PropertyFeatures;
+  agent: {
+    id: string;
+    name: string;
+  };
   images: string[];
-  status: 'available' | 'pending' | 'sold';
-  listedBy: string;
   createdAt: string;
   updatedAt: string;
-  stock?: number; // Adding stock property as optional
+  featured: boolean;
+  subtype?: string;
+  size?: number; // Added to match usage in PropertyDetail
+  area?: number;
+  bedrooms?: number; // Added for direct access
+  bathrooms?: number; // Added for direct access
 }
 
 export interface User {

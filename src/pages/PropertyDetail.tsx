@@ -249,7 +249,9 @@ const PropertyDetail = () => {
                     </div>
                   )}
                   <div className="absolute top-4 left-4 flex space-x-2">
-                    <Badge className={property.status === 'Available' ? 'bg-green-500 hover:bg-green-600' : property.status === 'Pending' ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-red-500 hover:bg-red-600'}>
+                    <Badge className={property.status === 'Available' || property.status === 'available' ? 'bg-green-500 hover:bg-green-600' : 
+                              (property.status === 'Pending' || property.status === 'pending' || property.status === 'Under Offer') ? 'bg-yellow-500 hover:bg-yellow-600' : 
+                              'bg-red-500 hover:bg-red-600'}>
                       {property.status}
                     </Badge>
                     <Badge variant="outline" className="bg-black/50 backdrop-blur-sm">
@@ -312,7 +314,7 @@ const PropertyDetail = () => {
                     <div className="flex flex-col items-center p-2 rounded-md bg-secondary/50">
                       <Square className="h-5 w-5 mb-1" />
                       <span className="text-xs text-muted-foreground">Size</span>
-                      <span className="text-sm font-medium">{property.size} sqft</span>
+                      <span className="text-sm font-medium">{property.size || property.features.squareFeet} sqft</span>
                     </div>
                     
                     <div className="flex flex-col items-center p-2 rounded-md bg-secondary/50">

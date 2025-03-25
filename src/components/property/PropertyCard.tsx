@@ -5,9 +5,10 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Bed, Bath, Grid2X2, Home, Building, MapPin, Tag } from 'lucide-react';
 import { formatCurrency } from '@/utils/propertyUtils';
+import { Property } from '@/types';
 
 interface PropertyCardProps {
-  property: any; // Using any temporarily, should be properly typed
+  property: Property;
   showFullDetails?: boolean;
 }
 
@@ -42,8 +43,8 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, showFullDe
           
           {formattedStatus && (
             <Badge className="absolute top-2 right-2" variant={
-              formattedStatus === 'Available' ? 'default' :
-              formattedStatus === 'Sold' || formattedStatus === 'Rented' ? 'destructive' :
+              formattedStatus.toLowerCase() === 'available' ? 'default' :
+              formattedStatus.toLowerCase() === 'sold' || formattedStatus.toLowerCase() === 'rented' ? 'destructive' :
               'secondary'
             }>
               {formattedStatus}
@@ -76,7 +77,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, showFullDe
         
         <div className="mt-3 text-lg font-bold">
           {formatCurrency(property.price)}
-          {(property.transactionType === 'rent' || property.transactionType === 'rental') ? '/month' : ''}
+          {(property.transactionType.toLowerCase() === 'rent' || property.transactionType.toLowerCase() === 'rental') ? '/month' : ''}
         </div>
         
         {showFullDetails && property.description && (
@@ -88,7 +89,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, showFullDe
       
       <CardFooter className="p-4 pt-0 flex flex-wrap gap-2 text-sm">
         {/* Show details based on property type */}
-        {property.type === 'residential' && (
+        {property.type.toLowerCase() === 'residential' && (
           <>
             {property.features?.bedrooms > 0 && (
               <div className="flex items-center mr-3">
@@ -113,7 +114,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, showFullDe
           </>
         )}
         
-        {(property.type === 'commercial' || property.type === 'industrial') && (
+        {(property.type.toLowerCase() === 'commercial' || property.type.toLowerCase() === 'industrial') && (
           <>
             {property.features?.squareFeet > 0 && (
               <div className="flex items-center mr-3">
@@ -124,7 +125,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, showFullDe
           </>
         )}
         
-        {property.type === 'land' && property.features?.landSize > 0 && (
+        {property.type.toLowerCase() === 'land' && property.features?.landSize > 0 && (
           <div className="flex items-center">
             <Grid2X2 className="h-4 w-4 mr-1" />
             <span>{property.features.landSize} sq.ft</span>

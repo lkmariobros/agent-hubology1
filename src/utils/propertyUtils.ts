@@ -53,8 +53,8 @@ export const mapPropertyData = (propertyData: any): Property => {
     title: propertyData.title,
     description: propertyData.description || '',
     type: propertyType,
-    status: status.toLowerCase(),
-    transactionType: transactionType.toLowerCase(),
+    status: status,
+    transactionType: transactionType,
     price: propertyData.price || propertyData.rental_rate || 0,
     rentalRate: propertyData.rental_rate || 0,
     address: {
@@ -77,6 +77,14 @@ export const mapPropertyData = (propertyData: any): Property => {
     images: images,
     createdAt: propertyData.created_at || new Date().toISOString(),
     updatedAt: propertyData.updated_at || new Date().toISOString(),
-    featured: propertyData.featured || false
+    featured: propertyData.featured || false,
+    // Add these fields for direct access
+    size: propertyData.built_up_area || propertyData.floor_area || propertyData.land_area || 0,
+    bedrooms: propertyData.bedrooms || 0,
+    bathrooms: propertyData.bathrooms || 0
   };
 };
+
+// Make sure we don't overwrite existing functions in propertyUtils.tsx
+// Functions like truncateText, getPropertyTypeIcon, formatArea, etc.
+// are already defined there

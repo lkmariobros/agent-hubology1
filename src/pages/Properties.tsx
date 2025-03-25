@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { PropertyFilterBar } from '@/components/property/PropertyFilterBar';
@@ -225,9 +224,10 @@ const Properties = () => {
   // Calculate summary statistics from real data
   const summaryStats = React.useMemo(() => {
     const total = properties.length;
-    const active = properties.filter(p => p.status === 'Available').length;
+    const active = properties.filter(p => p.status === 'Available' || p.status.toLowerCase() === 'available').length;
     const pending = properties.filter(p => 
-      p.status === 'Under Offer' || p.status === 'Pending').length;
+      p.status === 'Under Offer' || p.status === 'Pending' || 
+      p.status.toLowerCase() === 'pending').length;
     const value = properties.reduce((sum, p) => sum + p.price, 0);
     
     // Simulated weekly changes
