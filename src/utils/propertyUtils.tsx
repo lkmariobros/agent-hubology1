@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { calculateStockPercentage, getStockStatusLabel, getStockStatusClass, formatCurrency, formatPrice } from './propertyUtils';
 
 // Function to truncate text with ellipsis
 export const truncateText = (text: string, maxLength: number): string => {
@@ -25,13 +24,47 @@ export const isPropertyAvailable = (status: string): boolean => {
   return status.toLowerCase() === 'available';
 };
 
-// Re-export the functions from propertyUtils.ts for backwards compatibility
-export { 
-  calculateStockPercentage, 
-  getStockStatusLabel, 
-  getStockStatusClass,
-  formatCurrency,
-  formatPrice
+// Format currency for display
+export const formatCurrency = (amount: number): string => {
+  return new Intl.NumberFormat('en-MY', {
+    style: 'currency',
+    currency: 'MYR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount);
+};
+
+// Format price with appropriate suffixes (K, M)
+export const formatPrice = (price: number): string => {
+  if (price >= 1000000) {
+    return (price / 1000000).toFixed(1) + 'M';
+  } else if (price >= 1000) {
+    return (price / 1000).toFixed(0) + 'K';
+  }
+  return price.toString();
+};
+
+// Calculate stock percentage
+export const calculateStockPercentage = (
+  available: number, 
+  total: number
+): number => {
+  if (total === 0) return 0;
+  return Math.round((available / total) * 100);
+};
+
+// Get stock status label
+export const getStockStatusLabel = (percentage: number): string => {
+  if (percentage >= 70) return 'High availability';
+  if (percentage >= 30) return 'Medium availability';
+  return 'Low availability';
+};
+
+// Get stock status class
+export const getStockStatusClass = (percentage: number): string => {
+  if (percentage >= 70) return 'text-green-500';
+  if (percentage >= 30) return 'text-yellow-500';
+  return 'text-red-500';
 };
 
 // Helper function to map property data structures

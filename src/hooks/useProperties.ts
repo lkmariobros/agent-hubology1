@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -15,6 +16,9 @@ export interface PropertyFilters {
   bathrooms?: number;
   agentId?: string;
   featured?: boolean;
+  sortBy?: string;
+  sortDirection?: 'asc' | 'desc';
+  createdAfter?: string;
   [key: string]: any;
 }
 
@@ -34,8 +38,12 @@ export function useProperties(page = 1, pageSize = 10, filters: PropertyFilters 
           transaction_types(name),
           property_statuses(name),
           property_images(id, storage_path, is_cover, display_order)
-        `)
-        .order('created_at', { ascending: false });
+        `);
+        
+      // Apply sort order - default to newest first
+      const sortBy = filters.sortBy || 'created_at';
+      const sortDirection = filters.sortDirection || 'desc';
+      query = query.order(sortBy, { ascending: sortDirection === 'asc' });
         
       // Apply filters if provided
       if (filters) {
@@ -114,6 +122,11 @@ export function useProperties(page = 1, pageSize = 10, filters: PropertyFilters 
         if (filters.featured) {
           query = query.eq('featured', true);
         }
+        
+        // Filter by creation date
+        if (filters.createdAfter) {
+          query = query.gte('created_at', filters.createdAfter);
+        }
       }
       
       // Apply pagination
@@ -149,8 +162,45 @@ export function useProperties(page = 1, pageSize = 10, filters: PropertyFilters 
           }
         }
         
-        // Transaction type filter (etc. - duplicate all the filters from above)
-        // Similar logic for other filters...
+        // Handle all other filters the same way as the main query
+        // Handle price range filters
+        if (filters.minPrice) {
+          countQuery.gte('price', filters.minPrice);
+        }
+        
+        if (filters.maxPrice) {
+          countQuery.lte('price', filters.maxPrice);
+        }
+        
+        // Handle title search
+        if (filters.title) {
+          countQuery.ilike('title', `%${filters.title}%`);
+        }
+        
+        // Filter by number of bedrooms
+        if (filters.bedrooms) {
+          countQuery.gte('bedrooms', filters.bedrooms);
+        }
+        
+        // Filter by number of bathrooms
+        if (filters.bathrooms) {
+          countQuery.gte('bathrooms', filters.bathrooms);
+        }
+        
+        // Filter by agent
+        if (filters.agentId) {
+          countQuery.eq('agent_id', filters.agentId);
+        }
+        
+        // Filter for featured properties
+        if (filters.featured) {
+          countQuery.eq('featured', true);
+        }
+        
+        // Filter by creation date
+        if (filters.createdAfter) {
+          countQuery.gte('created_at', filters.createdAfter);
+        }
       }
       
       const { count: totalCount, error: countError } = await countQuery;

@@ -1,9 +1,10 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, X, Filter } from "lucide-react";
 import { PropertyFilterDrawer } from './PropertyFilterDrawer';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 interface PropertySearchBarProps {
   onSearch: (query: string) => void;
@@ -11,16 +12,49 @@ interface PropertySearchBarProps {
 }
 
 export function PropertySearchBar({ onSearch, showAdvancedFilters = true }: PropertySearchBarProps) {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // Initialize search query from URL parameters on component mount
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const searchParam = params.get('search');
+    if (searchParam) {
+      setSearchQuery(searchParam);
+    }
+  }, [location.search]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     onSearch(searchQuery);
+    
+    // Update URL with search query
+    const params = new URLSearchParams(location.search);
+    if (searchQuery) {
+      params.set('search', searchQuery);
+    } else {
+      params.delete('search');
+    }
+    
+    navigate({
+      pathname: location.pathname,
+      search: params.toString()
+    }, { replace: true });
   };
 
   const handleClear = () => {
     setSearchQuery('');
     onSearch('');
+    
+    // Remove search parameter from URL
+    const params = new URLSearchParams(location.search);
+    params.delete('search');
+    
+    navigate({
+      pathname: location.pathname,
+      search: params.toString()
+    }, { replace: true });
   };
 
   return (

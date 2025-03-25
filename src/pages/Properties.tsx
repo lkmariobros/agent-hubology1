@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { PropertyFilterBar } from '@/components/property/PropertyFilterBar';
@@ -8,8 +9,6 @@ import { PropertyGrid } from '@/components/property/PropertyGrid';
 import { PropertyMap } from '@/components/property/PropertyMap';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ViewMode } from '@/components/property/PropertyFilterBar';
-import { PropertyFilterDrawer, FilterOptions } from '@/components/property/filters/PropertyFilterDrawer';
-import { SlidersHorizontal } from 'lucide-react';
 import { useProperties, PropertyFilters } from '@/hooks/useProperties';
 import { mapPropertyData } from '@/utils/propertyUtils';
 import { Property } from '@/types';
@@ -25,54 +24,41 @@ const Properties = () => {
   
   // State for view mode and filters
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
-  const [timeFilter, setTimeFilter] = useState<TimeFilter>('all');
-  const [sortOption, setSortOption] = useState<SortOption>('newest');
-  const [page, setPage] = useState(1);
+  const [timeFilter, setTimeFilter] = useState<TimeFilter>(queryParams.get('time') as TimeFilter || 'all');
+  const [sortOption, setSortOption] = useState<SortOption>(queryParams.get('sort') as SortOption || 'newest');
+  const [page, setPage] = useState(Number(queryParams.get('page')) || 1);
   const [pageSize] = useState(12);
   const [filters, setFilters] = useState<PropertyFilters>({});
-  const [drawerFilters, setDrawerFilters] = useState<FilterOptions>({
-    priceRange: [0, 5000000],
-    features: []
-  });
   
   // Initialize filters from URL on component mount
   useEffect(() => {
     const initialFilters: PropertyFilters = {};
     
+    // Search term
     if (queryParams.get('search')) {
       initialFilters.title = queryParams.get('search') || undefined;
     }
     
+    // Property type
     if (queryParams.get('type') && queryParams.get('type') !== 'all') {
       initialFilters.propertyType = queryParams.get('type') || undefined;
     }
     
+    // Transaction type
     if (queryParams.get('transaction') && queryParams.get('transaction') !== 'all') {
       initialFilters.transactionType = queryParams.get('transaction') || undefined;
     }
     
+    // Price range
     if (queryParams.get('minPrice')) {
       initialFilters.minPrice = Number(queryParams.get('minPrice'));
-      
-      if (drawerFilters.priceRange) {
-        setDrawerFilters({
-          ...drawerFilters,
-          priceRange: [Number(queryParams.get('minPrice')), drawerFilters.priceRange[1]]
-        });
-      }
     }
     
     if (queryParams.get('maxPrice')) {
       initialFilters.maxPrice = Number(queryParams.get('maxPrice'));
-      
-      if (drawerFilters.priceRange) {
-        setDrawerFilters({
-          ...drawerFilters,
-          priceRange: [drawerFilters.priceRange[0], Number(queryParams.get('maxPrice'))]
-        });
-      }
     }
     
+    // Room filters
     if (queryParams.get('bedrooms')) {
       initialFilters.bedrooms = Number(queryParams.get('bedrooms'));
     }
@@ -81,6 +67,7 @@ const Properties = () => {
       initialFilters.bathrooms = Number(queryParams.get('bathrooms'));
     }
     
+    // Featured properties
     if (queryParams.get('featured') === 'true') {
       initialFilters.featured = true;
     }
@@ -98,93 +85,31 @@ const Properties = () => {
   // Handle view mode change
   const handleViewChange = (newView: ViewMode) => {
     setViewMode(newView);
-  };
-  
-  // Handle search filters
-  const handleFilter = (newFilters: PropertyFilters) => {
-    setFilters(newFilters);
-    setPage(1); // Reset to first page when changing filters
-  };
-  
-  // Handle advanced filters from drawer
-  const handleDrawerFiltersChange = (newDrawerFilters: FilterOptions) => {
-    setDrawerFilters(newDrawerFilters);
-  };
-  
-  // Apply advanced filters from drawer
-  const handleApplyFilters = () => {
-    const updatedFilters = { ...filters };
     
-    if (drawerFilters.priceRange) {
-      updatedFilters.minPrice = drawerFilters.priceRange[0];
-      updatedFilters.maxPrice = drawerFilters.priceRange[1];
-      
-      // Update URL
-      const params = new URLSearchParams(location.search);
-      params.set('minPrice', drawerFilters.priceRange[0].toString());
-      params.set('maxPrice', drawerFilters.priceRange[1].toString());
-      
-      navigate({
-        pathname: location.pathname,
-        search: params.toString()
-      });
-    }
-    
-    if (drawerFilters.bedrooms) {
-      updatedFilters.bedrooms = drawerFilters.bedrooms;
-      
-      // Update URL
-      const params = new URLSearchParams(location.search);
-      params.set('bedrooms', drawerFilters.bedrooms.toString());
-      
-      navigate({
-        pathname: location.pathname,
-        search: params.toString()
-      });
-    }
-    
-    if (drawerFilters.bathrooms) {
-      updatedFilters.bathrooms = drawerFilters.bathrooms;
-      
-      // Update URL
-      const params = new URLSearchParams(location.search);
-      params.set('bathrooms', drawerFilters.bathrooms.toString());
-      
-      navigate({
-        pathname: location.pathname,
-        search: params.toString()
-      });
-    }
-    
-    setFilters(updatedFilters);
-    setPage(1); // Reset to first page when applying filters
-  };
-  
-  // Clear all drawer filters
-  const handleClearFilters = () => {
-    const defaultPriceRange: [number, number] = [0, 5000000];
-    setDrawerFilters({
-      priceRange: defaultPriceRange,
-      features: []
-    });
-    
-    // Remove filter parameters from URL
+    // Update URL
     const params = new URLSearchParams(location.search);
-    params.delete('minPrice');
-    params.delete('maxPrice');
-    params.delete('bedrooms');
-    params.delete('bathrooms');
-    params.delete('features');
+    params.set('view', newView);
     
     navigate({
       pathname: location.pathname,
       search: params.toString()
-    });
+    }, { replace: true });
+  };
+  
+  // Handle search filters
+  const handleFilter = (newFilters: PropertyFilters) => {
+    console.log('Applying filters:', newFilters);
+    setFilters(newFilters);
+    setPage(1); // Reset to first page when changing filters
     
-    // Remove these properties from filters
-    const { minPrice, maxPrice, bedrooms, bathrooms, ...restFilters } = filters;
-    setFilters(restFilters);
-    setPage(1); // Reset to first page when clearing filters
+    // Update page param in URL
+    const params = new URLSearchParams(location.search);
+    params.set('page', '1');
+    
+    navigate({
+      pathname: location.pathname,
+      search: params.toString()
+    }, { replace: true });
   };
   
   // Handle sort options
@@ -198,10 +123,33 @@ const Properties = () => {
     navigate({
       pathname: location.pathname,
       search: params.toString()
-    });
+    }, { replace: true });
     
     // In a real implementation, this would update the API query order
-    toast.info(`Sorting by ${value} is not yet implemented with the API`);
+    toast.info(`Sorting by ${value}`);
+    
+    // Apply sort filter
+    const newFilters = { ...filters };
+    switch (value) {
+      case 'newest':
+        newFilters.sortBy = 'created_at';
+        newFilters.sortDirection = 'desc';
+        break;
+      case 'oldest':
+        newFilters.sortBy = 'created_at';
+        newFilters.sortDirection = 'asc';
+        break;
+      case 'price-asc':
+        newFilters.sortBy = 'price';
+        newFilters.sortDirection = 'asc';
+        break;
+      case 'price-desc':
+        newFilters.sortBy = 'price';
+        newFilters.sortDirection = 'desc';
+        break;
+    }
+    
+    setFilters(newFilters);
   };
   
   // Handle time filter change
@@ -215,10 +163,48 @@ const Properties = () => {
     navigate({
       pathname: location.pathname,
       search: params.toString()
-    });
+    }, { replace: true });
     
-    // In a real implementation, this would update the API query with date filters
-    toast.info(`Time filtering by ${value} is not yet implemented with the API`);
+    // Apply time filter to API query
+    const newFilters = { ...filters };
+    const now = new Date();
+    
+    switch (value) {
+      case '7days':
+        const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        newFilters.createdAfter = sevenDaysAgo.toISOString();
+        break;
+      case '30days':
+        const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        newFilters.createdAfter = thirtyDaysAgo.toISOString();
+        break;
+      case '90days':
+        const ninetyDaysAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+        newFilters.createdAfter = ninetyDaysAgo.toISOString();
+        break;
+      case 'all':
+        delete newFilters.createdAfter;
+        break;
+    }
+    
+    setFilters(newFilters);
+  };
+  
+  // Handle page change
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+    
+    // Update URL
+    const params = new URLSearchParams(location.search);
+    params.set('page', newPage.toString());
+    
+    navigate({
+      pathname: location.pathname,
+      search: params.toString()
+    }, { replace: true });
+    
+    // Scroll to top
+    window.scrollTo(0, 0);
   };
   
   // Calculate summary statistics from real data
@@ -300,7 +286,8 @@ const Properties = () => {
           <PropertyFilterBar 
             onFilter={handleFilter} 
             onViewChange={handleViewChange} 
-            currentView={viewMode} 
+            currentView={viewMode}
+            filters={filters}
           />
         </div>
         
@@ -328,20 +315,6 @@ const Properties = () => {
               <SelectItem value="price-desc">Price: High to Low</SelectItem>
             </SelectContent>
           </Select>
-          
-          {/* Filter button now located on the far right */}
-          <PropertyFilterDrawer 
-            filters={drawerFilters}
-            onFiltersChange={handleDrawerFiltersChange}
-            onApplyFilters={handleApplyFilters}
-            onClearFilters={handleClearFilters}
-            trigger={
-              <Button variant="outline" size="sm" className="gap-2">
-                <SlidersHorizontal size={16} />
-                Filters
-              </Button>
-            }
-          />
         </div>
       </div>
       
@@ -380,7 +353,7 @@ const Properties = () => {
                 <div className="flex space-x-2">
                   <Button 
                     variant="outline" 
-                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                    onClick={() => handlePageChange(page - 1)}
                     disabled={page === 1}
                   >
                     Previous
@@ -390,7 +363,7 @@ const Properties = () => {
                   </span>
                   <Button 
                     variant="outline" 
-                    onClick={() => setPage(p => p + 1)}
+                    onClick={() => handlePageChange(page + 1)}
                     disabled={page >= Math.ceil(data.totalCount / pageSize)}
                   >
                     Next

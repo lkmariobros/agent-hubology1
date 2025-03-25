@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { SlidersHorizontal } from "lucide-react";
 import {
@@ -41,7 +41,7 @@ export function PropertyFilterDrawer({
   onClearFilters,
   trigger
 }: PropertyFilterDrawerProps) {
-  const [isOpen, setIsOpen] = React.useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const handleTypeChange = (type: PropertyType) => {
     onFiltersChange({
