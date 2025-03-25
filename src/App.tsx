@@ -1,7 +1,6 @@
 
 import { Routes, Route } from 'react-router-dom';
 import { Toaster } from 'sonner';
-import { NotificationProvider } from './context/NotificationContext';
 
 // Layouts
 import MainLayout from './components/layout/MainLayout';
@@ -36,7 +35,7 @@ import ProtectedRoute from './components/auth/ProtectedRoute';
 
 function App() {
   return (
-    <NotificationProvider>
+    <>
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Index />} />
@@ -85,7 +84,7 @@ function App() {
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster position="top-right" />
-    </NotificationProvider>
+    </>
   );
 }
 
