@@ -38,6 +38,11 @@ export interface Property {
     total: number;
     available: number;
   };
+  listedBy?: {
+    id: string;
+    name: string;
+    avatar?: string;
+  };
 }
 
 export interface PropertyFormValues {
@@ -58,4 +63,5 @@ export interface PropertyFormValues {
   bedrooms?: number;
   bathrooms?: number;
   features: string[];
+  images?: any[];
 }

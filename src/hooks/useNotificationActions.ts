@@ -1,24 +1,20 @@
 
-import { Notification } from '@/types/notification';
 import { useState } from 'react';
-
-// Mock storage for notifications
-const mockNotifications: Record<string, Notification[]> = {};
+import { Notification } from '@/types/notification';
 
 export const useNotificationActions = () => {
   const [isLoading, setIsLoading] = useState(false);
   
   // Mark a notification as read
   const markAsRead = async (id: string): Promise<boolean> => {
-    console.log(`Marking notification ${id} as read`);
     setIsLoading(true);
-    
     try {
-      // In a real implementation, this would be an API call
-      // For now, we'll just simulate with a timeout
+      // In a real app, this would be an API call
+      console.log(`Marking notification ${id} as read`);
+      
+      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 300));
       
-      // Success
       return true;
     } catch (error) {
       console.error('Error marking notification as read:', error);
@@ -27,18 +23,17 @@ export const useNotificationActions = () => {
       setIsLoading(false);
     }
   };
-
+  
   // Mark all notifications as read for a user
   const markAllAsRead = async (userId: string): Promise<boolean> => {
-    console.log(`Marking all notifications as read for user ${userId}`);
     setIsLoading(true);
-    
     try {
-      // In a real implementation, this would be an API call
-      // For now, we'll just simulate with a timeout
+      // In a real app, this would be an API call
+      console.log(`Marking all notifications as read for user ${userId}`);
+      
+      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      // Success
       return true;
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
@@ -47,18 +42,17 @@ export const useNotificationActions = () => {
       setIsLoading(false);
     }
   };
-
+  
   // Delete a notification
   const deleteNotification = async (id: string): Promise<boolean> => {
-    console.log(`Deleting notification ${id}`);
     setIsLoading(true);
-    
     try {
-      // In a real implementation, this would be an API call
-      // For now, we'll just simulate with a timeout
+      // In a real app, this would be an API call
+      console.log(`Deleting notification ${id}`);
+      
+      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 300));
       
-      // Success
       return true;
     } catch (error) {
       console.error('Error deleting notification:', error);
@@ -67,24 +61,40 @@ export const useNotificationActions = () => {
       setIsLoading(false);
     }
   };
-
+  
   // Refresh notifications for a user
   const refreshNotifications = async (userId: string): Promise<Notification[]> => {
-    console.log(`Refreshing notifications for user ${userId}`);
     setIsLoading(true);
-    
     try {
-      // In a real implementation, this would be an API call
-      // For now, we'll just return mock data
+      // In a real app, this would be an API call
+      console.log(`Refreshing notifications for user ${userId}`);
+      
+      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      // Get existing mock notifications or create empty array
-      if (!mockNotifications[userId]) {
-        mockNotifications[userId] = [];
-      }
+      // Return mock notifications
+      const mockNotifications: Notification[] = [
+        {
+          id: '1',
+          title: 'New Transaction',
+          message: 'A new transaction has been added to your dashboard',
+          read: false,
+          createdAt: new Date(),
+          userId: userId,
+          type: 'transaction'
+        },
+        {
+          id: '2',
+          title: 'Commission Approved',
+          message: 'Your commission has been approved and is ready for payment',
+          read: true,
+          createdAt: new Date(Date.now() - 86400000), // 1 day ago
+          userId: userId,
+          type: 'commission'
+        }
+      ];
       
-      // Return the notifications
-      return mockNotifications[userId];
+      return mockNotifications;
     } catch (error) {
       console.error('Error refreshing notifications:', error);
       return [];
@@ -92,7 +102,7 @@ export const useNotificationActions = () => {
       setIsLoading(false);
     }
   };
-
+  
   return {
     markAsRead,
     markAllAsRead,
