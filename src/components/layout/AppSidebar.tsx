@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Building, Shield, ChevronsUpDown } from 'lucide-react';
+import { Building, Shield } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
 import {
@@ -22,15 +22,7 @@ import { PortalSwitcher } from './PortalSwitcher';
 export function AppSidebar() {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
-  const { user, isAdmin, switchRole } = useAuth();
-  
-  const handleLogoClick = () => {
-    if (isAdmin) {
-      // Toggle between agent and admin portals
-      const currentRole = window.location.pathname.startsWith('/admin') ? 'admin' : 'agent';
-      switchRole(currentRole === 'admin' ? 'agent' : 'admin');
-    }
-  };
+  const { isAdmin } = useAuth();
   
   return (
     <>
@@ -41,26 +33,19 @@ export function AppSidebar() {
         variant="sidebar"
       >
         <SidebarHeader>
+          {/* Use PortalSwitcher for both admin and non-admin users */}
           {isAdmin ? (
-            <PortalSwitcher showLabel={!isCollapsed} className="px-2 py-3 w-full" />
+            <PortalSwitcher showLabel={!isCollapsed} className="px-0" />
           ) : (
             <div className="flex items-center px-2 py-3">
-              <button 
-                onClick={handleLogoClick}
-                className="flex items-center justify-between w-full hover:opacity-80 transition-opacity focus:outline-none"
-              >
-                <div className="flex items-center">
-                  <div className="flex items-center justify-center h-8 w-8 rounded-full bg-purple-600 text-white">
-                    <span className="font-bold text-sm">P</span>
-                  </div>
-                  {!isCollapsed && (
-                    <span className="ml-2 text-lg font-semibold transition-opacity">PropertyPro</span>
-                  )}
+              <div className="flex items-center">
+                <div className="flex items-center justify-center h-8 w-8 rounded-full bg-purple-600 text-white">
+                  <span className="font-bold text-sm">P</span>
                 </div>
-                {isAdmin && (
-                  <ChevronsUpDown className="h-4 w-4 opacity-60" />
+                {!isCollapsed && (
+                  <span className="ml-2 text-lg font-semibold">PropertyPro</span>
                 )}
-              </button>
+              </div>
             </div>
           )}
         </SidebarHeader>
