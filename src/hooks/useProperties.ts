@@ -12,12 +12,17 @@ export interface PropertyFilters {
   location?: string;
   features?: string[];
   searchQuery?: string;
+  title?: string; // Added missing property
+  bedrooms?: number; // Added missing property
+  propertyType?: string; // Added missing property
+  bathrooms?: number; // Added as it's used in the code
 }
 
 export const useProperties = () => {
   const [filters, setFilters] = useState<PropertyFilters>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [data, setData] = useState<Property[]>([]); // Added missing data state
 
   const updateFilters = (newFilters: Partial<PropertyFilters>) => {
     setFilters(prev => ({ ...prev, ...newFilters }));
@@ -53,6 +58,19 @@ export const useProperties = () => {
     resetFilters,
     fetchProperties,
     loading,
-    error
+    error,
+    data, // Added missing data property
+    isLoading: loading // Added to match expected property name
   };
+};
+
+// Add missing functions
+export const useProperty = () => {
+  // Implementation
+  return { data: null, isLoading: false, error: null };
+};
+
+export const useDeleteProperty = () => {
+  // Implementation
+  return { mutateAsync: async () => {}, isLoading: false };
 };

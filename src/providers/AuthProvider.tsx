@@ -1,111 +1,127 @@
 
-import React, { createContext, useState, useEffect } from 'react';
-import { AuthContextType, User } from '@/types/auth';
+import React, { createContext, useState, useEffect, useContext } from 'react';
+import { User, AuthContextType } from '@/types/auth';
 
-// Create the auth context
+// Define UserRole type for export
+export type UserRole = 'admin' | 'agent' | 'manager';
+
 export const AuthContext = createContext<AuthContextType | null>(null);
 
-interface AuthProviderProps {
-  children: React.ReactNode;
-}
-
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ 
+  children 
+}) => {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Check if user is authenticated on component mount
+  
   useEffect(() => {
+    // Check for existing user session
+    // For demo purposes, we'll just simulate a loading delay
     const checkAuth = async () => {
+      setIsLoading(true);
       try {
-        // Here you would normally check with your auth service
-        // For now, we'll just set a mock user after a delay
+        // Simulate API call
         await new Promise(resolve => setTimeout(resolve, 1000));
         
-        // Mock a logged in user for development
-        setUser({
-          id: '1',
-          email: 'user@example.com',
+        // For demo, create a mock user - in a real app this would come from your auth system
+        const mockUser: User = {
+          id: '123',
+          email: 'demo@example.com',
           name: 'Demo User',
+          avatar: 'https://ui-avatars.com/api/?name=Demo+User',
           role: 'agent',
-          agentTier: 'Team Leader',
-          teams: ['Sales A']
-        });
+          agentTier: 'Silver'
+        };
+        
+        setUser(mockUser);
+        setError(null);
       } catch (err) {
-        console.error('Error checking authentication:', err);
         setError('Failed to authenticate');
+        setUser(null);
       } finally {
         setIsLoading(false);
       }
     };
-
+    
     checkAuth();
   }, []);
-
-  // Sign in function
-  const signIn = async (email: string, password: string) => {
+  
+  const signIn = async (email: string, password: string): Promise<void> => {
     setIsLoading(true);
-    setError(null);
-    
     try {
-      // Here you would normally authenticate with your auth service
-      console.log('Signing in with:', email, password);
-      
-      // Simulate auth delay
+      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Set mock user
-      setUser({
-        id: '1',
+      // For demo, create a mock user - in a real app this would be the response from your auth API
+      const mockUser: User = {
+        id: '123',
         email,
         name: 'Demo User',
+        avatar: 'https://ui-avatars.com/api/?name=Demo+User',
         role: 'agent',
-        agentTier: 'Team Leader',
-        teams: ['Sales A']
-      });
+        agentTier: 'Silver'
+      };
+      
+      setUser(mockUser);
+      setError(null);
     } catch (err) {
-      console.error('Error signing in:', err);
       setError('Invalid email or password');
       throw new Error('Invalid email or password');
     } finally {
       setIsLoading(false);
     }
   };
-
-  // Sign out function
-  const signOut = async () => {
+  
+  const signUp = async (email: string, password: string): Promise<void> => {
     setIsLoading(true);
-    
     try {
-      // Here you would normally sign out from your auth service
-      console.log('Signing out');
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Simulate auth delay
+      // For demo, create a mock user - in a real app this would be the response from your auth API
+      const mockUser: User = {
+        id: '123',
+        email,
+        name: 'Demo User',
+        avatar: 'https://ui-avatars.com/api/?name=Demo+User',
+        role: 'agent',
+        agentTier: 'Silver'
+      };
+      
+      setUser(mockUser);
+      setError(null);
+    } catch (err) {
+      setError('Failed to create account');
+      throw new Error('Failed to create account');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  const signOut = async (): Promise<void> => {
+    setIsLoading(true);
+    try {
+      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      // Clear user
       setUser(null);
+      setError(null);
     } catch (err) {
-      console.error('Error signing out:', err);
       setError('Failed to sign out');
       throw new Error('Failed to sign out');
     } finally {
       setIsLoading(false);
     }
   };
-
-  // Switch role function (for development/testing)
-  const switchRole = (role: 'admin' | 'agent' | 'manager') => {
+  
+  const switchRole = (role: UserRole) => {
     if (user) {
-      setUser({
-        ...user,
-        role
-      });
+      setUser({ ...user, role });
     }
   };
-
+  
   return (
-    <AuthContext.Provider
+    <AuthContext.Provider 
       value={{
         user,
         isAuthenticated: !!user,
@@ -113,7 +129,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         isLoading,
         error,
         signIn,
-        signUp: signIn, // For now, just use signIn for signUp as well
+        signUp,
         signOut,
         switchRole
       }}
@@ -121,14 +137,4 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       {children}
     </AuthContext.Provider>
   );
-};
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  
-  return context;
 };

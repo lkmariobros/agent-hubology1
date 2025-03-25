@@ -1,182 +1,212 @@
 
-import React, { useCallback, useState } from 'react';
-import { useDropzone } from 'react-dropzone';
-import { UploadCloud, FileText, X, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { usePropertyForm } from '@/context/PropertyForm/PropertyFormContext';
-import { useStorageUpload } from '@/hooks/useStorageUpload';
-import { toast } from 'sonner';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import React, { useState } from 'react';
 import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Upload, File, X, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface DocumentUploaderProps {
-  maxDocuments?: number;
-  maxSizeMB?: number;
+  onUpload: (files: File[]) => void;
+  accept?: string;
+  maxSize?: number; // in MB
+  maxFiles?: number;
+  label?: string;
+  description?: string;
+}
+
+interface UploadedFile {
+  file: File;
+  status: 'uploading' | 'success' | 'error' | 'completed'; // Added 'completed' as a valid status
+  progress: number;
+  error?: string;
 }
 
 const DocumentUploader: React.FC<DocumentUploaderProps> = ({
-  maxDocuments = 20,
-  maxSizeMB = 10
+  onUpload,
+  accept = '.pdf,.doc,.docx,.xlsx,.xls',
+  maxSize = 10, // 10MB default
+  maxFiles = 5,
+  label = 'Upload Documents',
+  description = 'Upload PDF, Word, or Excel documents'
 }) => {
-  const { state, addDocument, removeDocument } = usePropertyForm();
-  const { uploadFile, isUploading, progress } = useStorageUpload();
-  const [documentType, setDocumentType] = useState<string>('Contract');
-  const [processingFiles, setProcessingFiles] = useState<string[]>([]);
-
-  const onDrop = useCallback(async (acceptedFiles: File[]) => {
-    // Check if we're already at maximum documents
-    if (state.documents.length + acceptedFiles.length > maxDocuments) {
-      toast.error(`You can only upload a maximum of ${maxDocuments} documents`);
+  const [isDragging, setIsDragging] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
+  
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+  
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+  
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+    
+    const files = Array.from(e.dataTransfer.files);
+    handleFiles(files);
+  };
+  
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+      handleFiles(files);
+    }
+  };
+  
+  const handleFiles = (files: File[]) => {
+    if (uploadedFiles.length + files.length > maxFiles) {
+      alert(`You can only upload up to ${maxFiles} files.`);
       return;
     }
-
-    // Track files being processed
-    const fileNames = acceptedFiles.map(file => file.name);
-    setProcessingFiles(prev => [...prev, ...fileNames]);
-
-    try {
-      for (const file of acceptedFiles) {
-        const previewUrl = URL.createObjectURL(file);
-        
-        // Add to form state immediately with required properties
-        addDocument({
-          file,
-          name: file.name,
-          documentType,
-          url: previewUrl, // Use temporary URL for preview
-          uploadStatus: 'uploading'
-        });
-
-        try {
-          // If connected to Supabase, try uploading
-          if (window.location.hostname !== 'localhost') {
-            console.log('Uploading document to Supabase:', file.name);
-            const result = await uploadFile(file, {
-              bucket: 'property-documents',
-              path: 'temp',
-              maxSizeMB,
-              acceptedFileTypes: [
-                'application/pdf', 
-                'application/msword', 
-                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                'image/jpeg',
-                'image/png'
-              ]
-            });
+    
+    const validFiles = files.filter(file => {
+      const sizeInMB = file.size / (1024 * 1024);
+      return sizeInMB <= maxSize;
+    });
+    
+    if (validFiles.length !== files.length) {
+      alert(`Some files were too large. Maximum file size is ${maxSize}MB.`);
+    }
+    
+    const newUploadedFiles = [
+      ...uploadedFiles,
+      ...validFiles.map(file => ({
+        file,
+        status: 'uploading' as const,
+        progress: 0
+      }))
+    ];
+    
+    setUploadedFiles(newUploadedFiles);
+    onUpload(validFiles);
+    
+    // Simulate upload progress and completion
+    validFiles.forEach((file, index) => {
+      const fileIndex = uploadedFiles.length + index;
+      
+      const simulateProgress = () => {
+        setUploadedFiles(prev => {
+          const updated = [...prev];
+          if (updated[fileIndex]) {
+            updated[fileIndex].progress += 10;
             
-            console.log('Document upload result:', result);
-            
-            // Update the document with the real URL from Supabase
-            removeDocument(state.documents.length - 1);
-            addDocument({
-              file,
-              name: file.name,
-              documentType,
-              url: result.url,
-              storagePath: result.path,
-              uploadStatus: 'completed'
-            });
+            if (updated[fileIndex].progress >= 100) {
+              updated[fileIndex].status = 'completed';
+              clearInterval(intervalId);
+            }
           }
-        } catch (error) {
-          console.error('Error uploading document:', error);
-          toast.error(`Failed to upload ${file.name}`);
-        }
-      }
-    } finally {
-      // Remove files from processing state
-      setProcessingFiles(prev => prev.filter(name => !fileNames.includes(name)));
-    }
-  }, [state.documents, addDocument, removeDocument, documentType, maxDocuments, maxSizeMB, uploadFile]);
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: {
-      'application/pdf': ['.pdf'],
-      'application/msword': ['.doc'],
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
-      'image/jpeg': ['.jpg', '.jpeg'],
-      'image/png': ['.png']
-    },
-    maxSize: maxSizeMB * 1024 * 1024, // Convert MB to bytes
-    disabled: isUploading
-  });
-
-  const handleRemoveDocument = (index: number) => {
-    // Revoke object URL if it exists to prevent memory leaks
-    const doc = state.documents[index];
-    if (doc.url && doc.url.startsWith('blob:')) {
-      URL.revokeObjectURL(doc.url);
-    }
-    removeDocument(index);
+          return updated;
+        });
+      };
+      
+      const intervalId = setInterval(simulateProgress, 300);
+    });
   };
-
+  
+  const removeFile = (index: number) => {
+    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+  
+  const getFileIcon = (fileName: string) => {
+    const extension = fileName.split('.').pop()?.toLowerCase();
+    
+    switch (extension) {
+      case 'pdf':
+        return <File className="h-4 w-4 text-red-500" />;
+      case 'doc':
+      case 'docx':
+        return <File className="h-4 w-4 text-blue-500" />;
+      case 'xls':
+      case 'xlsx':
+        return <File className="h-4 w-4 text-green-500" />;
+      default:
+        return <File className="h-4 w-4 text-gray-500" />;
+    }
+  };
+  
   return (
     <div className="space-y-4">
-      <div className="mb-4">
-        <Label htmlFor="documentType">Document Type</Label>
-        <Select value={documentType} onValueChange={(value) => setDocumentType(value)}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select document type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="Contract">Contract</SelectItem>
-            <SelectItem value="Agreement">Agreement</SelectItem>
-            <SelectItem value="Brochure">Brochure</SelectItem>
-            <SelectItem value="FloorPlan">Floor Plan</SelectItem>
-            <SelectItem value="LegalDocument">Legal Document</SelectItem>
-            <SelectItem value="Other">Other</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div 
-        {...getRootProps()} 
-        className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
-          isDragActive ? 'border-primary bg-primary/5' : 'border-muted-foreground/25 hover:border-primary/50'
-        }`}
-      >
-        <input {...getInputProps()} />
-        <div className="flex flex-col items-center justify-center space-y-2">
-          <UploadCloud className="h-12 w-12 text-muted-foreground" />
-          <h3 className="text-lg font-medium">Drag & drop property documents</h3>
-          <p className="text-sm text-muted-foreground">
-            or click to browse (max {maxSizeMB}MB per document)
-          </p>
-          {isUploading && (
-            <div className="mt-2 flex items-center gap-2">
-              <Loader2 className="h-5 w-5 animate-spin text-primary" />
-              <span>Uploading... {progress}%</span>
-            </div>
+      <div>
+        <Label>{label}</Label>
+        <div 
+          className={cn(
+            "mt-2 border-2 border-dashed rounded-md p-6 text-center cursor-pointer hover:bg-accent/50 transition-colors",
+            isDragging && "border-primary bg-accent/50",
+            "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
           )}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          onClick={() => document.getElementById('file-upload')?.click()}
+          tabIndex={0}
+          role="button"
+          aria-label="Upload documents"
+        >
+          <input 
+            type="file" 
+            id="file-upload" 
+            className="hidden" 
+            accept={accept} 
+            multiple 
+            onChange={handleFileChange}
+          />
+          <div className="flex flex-col items-center">
+            <Upload className="h-10 w-10 text-muted-foreground mb-2" />
+            <p className="text-sm font-medium">
+              {isDragging ? 'Drop files here' : 'Drag and drop or click to upload'}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {description}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Maximum file size: {maxSize}MB
+            </p>
+          </div>
         </div>
       </div>
-
-      {/* Documents Preview */}
-      {state.documents.length > 0 && (
+      
+      {uploadedFiles.length > 0 && (
         <div className="space-y-2">
-          <h4 className="text-sm font-medium mb-2">Uploaded Documents</h4>
-          <div className="space-y-2">
-            {state.documents.map((doc, index) => (
-              <div 
-                key={index} 
-                className="flex items-center justify-between p-3 bg-muted rounded-md"
-              >
-                <div className="flex items-center">
-                  <FileText className="h-5 w-5 mr-2 text-muted-foreground" />
+          <p className="text-sm font-medium">Uploaded Documents</p>
+          <div className="divide-y">
+            {uploadedFiles.map((uploadedFile, index) => (
+              <div key={index} className="py-2 flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  {getFileIcon(uploadedFile.file.name)}
                   <div>
-                    <p className="text-sm font-medium">{doc.name}</p>
-                    <p className="text-xs text-muted-foreground">{doc.documentType}</p>
+                    <p className="text-sm font-medium truncate">{uploadedFile.file.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {(uploadedFile.file.size / (1024 * 1024)).toFixed(2)} MB
+                    </p>
                   </div>
                 </div>
+                
                 <div className="flex items-center">
-                  {doc.uploadStatus === 'uploading' && (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin text-muted-foreground" />
+                  {uploadedFile.status === 'uploading' ? (
+                    <div className="flex items-center space-x-2">
+                      <div className="w-20 h-1 bg-gray-200 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-primary"
+                          style={{ width: `${uploadedFile.progress}%` }}
+                        ></div>
+                      </div>
+                      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                    </div>
+                  ) : uploadedFile.status === 'error' ? (
+                    <AlertCircle className="h-5 w-5 text-destructive" />
+                  ) : (
+                    <CheckCircle className="h-5 w-5 text-green-500" />
                   )}
-                  <Button 
-                    variant="ghost" 
+                  
+                  <Button
+                    variant="ghost"
                     size="sm"
-                    className="h-8 w-8 p-0"
-                    onClick={() => handleRemoveDocument(index)}
+                    className="ml-2 h-8 w-8 p-0"
+                    onClick={() => removeFile(index)}
                   >
                     <X className="h-4 w-4" />
                   </Button>
