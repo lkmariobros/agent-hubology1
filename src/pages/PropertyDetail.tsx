@@ -427,7 +427,7 @@ const PropertyDetail = () => {
             </div>
           </div>
           
-          {/* Second row layout with map */}
+          {/* Second row layout - Map and Team Notes side-by-side */}
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 mt-4">
             {/* Map section */}
             <Card className="lg:col-span-3 overflow-hidden border-neutral-800 bg-card/90">
@@ -437,37 +437,17 @@ const PropertyDetail = () => {
                   Location
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-6">
+              <CardContent className="p-4">
                 <div className="bg-muted rounded-lg overflow-hidden">
-                  <div className="w-full h-full flex flex-col items-center justify-center bg-secondary/30 py-8">
+                  <div className="w-full h-[180px] flex flex-col items-center justify-center bg-secondary/30">
                     <MapPin className="h-12 w-12 text-primary opacity-30 mb-4" />
                     <p className="text-muted-foreground">Map integration coming soon</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
-          </div>
-          
-          {/* Third row layout with overview and team notes side by side */}
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 mt-4">
-            {/* Overview section */}
-            <Card className="lg:col-span-3 overflow-hidden border-neutral-800 bg-card/90">
-              <CardHeader className="pb-2">
-                <CardTitle>Overview</CardTitle>
-              </CardHeader>
-              <CardContent className="p-6">
-                {property.description ? (
-                  <p className="text-muted-foreground whitespace-pre-line">{property.description}</p>
-                ) : (
-                  <div className="text-center py-8">
-                    <FileText className="mx-auto h-12 w-12 text-muted-foreground opacity-30" />
-                    <p className="mt-2 text-sm text-muted-foreground">No description available</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
             
-            {/* Team Notes section */}
+            {/* Team Notes section - Moved up to be side-by-side with map */}
             <Card className="lg:col-span-2 overflow-hidden border-neutral-800 bg-card/90 backdrop-blur-sm h-full flex flex-col">
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center">
@@ -475,11 +455,11 @@ const PropertyDetail = () => {
                   Team Notes
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-6 flex-grow overflow-auto">
-                <div className="space-y-4">
+              <CardContent className="p-4 flex-grow overflow-auto">
+                <div className="space-y-3">
                   {teamNotes.map((note) => (
-                    <div key={note.id} className="bg-muted/50 p-4 rounded-lg">
-                      <div className="flex items-center mb-2">
+                    <div key={note.id} className="bg-muted/50 p-3 rounded-lg">
+                      <div className="flex items-center mb-1">
                         <Avatar className="h-6 w-6 mr-2">
                           <AvatarFallback className={note.author.avatarColor + " text-white"}>
                             {note.author.initials}
@@ -498,6 +478,25 @@ const PropertyDetail = () => {
                     Add Note
                   </Button>
                 </div>
+              </CardContent>
+            </Card>
+          </div>
+          
+          {/* Third row layout with overview section */}
+          <div className="mt-4">
+            <Card className="overflow-hidden border-neutral-800 bg-card/90">
+              <CardHeader className="pb-2">
+                <CardTitle>Overview</CardTitle>
+              </CardHeader>
+              <CardContent className="p-4">
+                {property.description ? (
+                  <p className="text-muted-foreground whitespace-pre-line">{property.description}</p>
+                ) : (
+                  <div className="text-center py-4">
+                    <FileText className="mx-auto h-12 w-12 text-muted-foreground opacity-30" />
+                    <p className="mt-2 text-sm text-muted-foreground">No description available</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -528,11 +527,11 @@ const PropertyDetail = () => {
               
               <TabsContent value="features" className="mt-4">
                 <Card className="overflow-hidden border-neutral-800 bg-card/90">
-                  <CardContent className="p-6">
+                  <CardContent className="p-4">
                     {property.features && property.features.length > 0 ? (
-                      <div className="space-y-4">
+                      <div className="space-y-3">
                         <h3 className="text-lg font-semibold">Features</h3>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-y-4">
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-y-3">
                           {property.features.map((feature, index) => (
                             <div key={index} className="flex items-center">
                               <div className="h-2 w-2 rounded-full bg-primary mr-2"></div>
@@ -542,7 +541,7 @@ const PropertyDetail = () => {
                         </div>
                       </div>
                     ) : (
-                      <div className="text-center py-8">
+                      <div className="text-center py-4">
                         <Tag className="mx-auto h-12 w-12 text-muted-foreground opacity-30" />
                         <p className="mt-2 text-sm text-muted-foreground">No features listed</p>
                       </div>
@@ -553,8 +552,8 @@ const PropertyDetail = () => {
               
               <TabsContent value="documents" className="mt-4">
                 <Card className="overflow-hidden border-neutral-800 bg-card/90">
-                  <CardContent className="p-6">
-                    <div className="text-center py-8">
+                  <CardContent className="p-4">
+                    <div className="text-center py-4">
                       <FileText className="mx-auto h-12 w-12 text-muted-foreground opacity-30" />
                       <p className="mt-2 text-sm text-muted-foreground">No documents available</p>
                     </div>
@@ -564,8 +563,8 @@ const PropertyDetail = () => {
               
               <TabsContent value="history" className="mt-4">
                 <Card className="overflow-hidden border-neutral-800 bg-card/90">
-                  <CardContent className="p-6">
-                    <div className="text-center py-8">
+                  <CardContent className="p-4">
+                    <div className="text-center py-4">
                       <Calendar className="mx-auto h-12 w-12 text-muted-foreground opacity-30" />
                       <p className="mt-2 text-sm text-muted-foreground">No history available</p>
                     </div>
@@ -609,16 +608,14 @@ const PropertyDetailSkeleton = () => {
       
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
         <Skeleton className="lg:col-span-3 h-[200px] w-full rounded-lg" />
-      </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-        <Skeleton className="lg:col-span-3 h-[200px] w-full rounded-lg" />
         <Skeleton className="lg:col-span-2 h-[200px] w-full rounded-lg" />
       </div>
       
+      <Skeleton className="h-[200px] w-full rounded-lg" />
+      
       <Skeleton className="h-12 w-full rounded-lg" />
       
-      <Skeleton className="h-[300px] w-full rounded-lg" />
+      <Skeleton className="h-[150px] w-full rounded-lg" />
     </div>
   );
 };
