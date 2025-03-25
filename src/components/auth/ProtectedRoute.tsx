@@ -1,8 +1,8 @@
 
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
-import AuthForm from './AuthForm';
+import { useAuth } from '@/hooks/useAuth';
+import AuthForm from '../AuthForm';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;

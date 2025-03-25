@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
 
 const AuthForm = () => {
@@ -14,6 +14,7 @@ const AuthForm = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { signIn, signUp } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,19 +26,11 @@ const AuthForm = () => {
     
     try {
       setLoading(true);
-      
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      
-      if (error) throw error;
-      
-      toast.success('Logged in successfully');
+      await signIn(email, password);
       navigate('/dashboard');
-    } catch (error: any) {
+    } catch (error) {
       console.error('Login error:', error);
-      toast.error(error.message || 'Login failed. Please try again.');
+      // Error handling already done in signIn function
     } finally {
       setLoading(false);
     }
@@ -53,24 +46,11 @@ const AuthForm = () => {
     
     try {
       setLoading(true);
-      
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-      });
-      
-      if (error) throw error;
-      
-      if (data.user?.identities?.length === 0) {
-        toast.error('An account with this email already exists.');
-        return;
-      }
-      
-      toast.success('Registration successful! Please check your email for verification.');
+      await signUp(email, password);
       setIsLogin(true); // Switch to login view
-    } catch (error: any) {
+    } catch (error) {
       console.error('Registration error:', error);
-      toast.error(error.message || 'Registration failed. Please try again.');
+      // Error handling already done in signUp function
     } finally {
       setLoading(false);
     }
@@ -110,7 +90,18 @@ const AuthForm = () => {
           <div className="flex items-center justify-between">
             <Label htmlFor="password" className="text-white">Password</Label>
             {isLogin && (
-              <button type="button" className="text-xs text-purple-500 hover:text-purple-400 transition-colors">
+              <button 
+                type="button" 
+                className="text-xs text-purple-500 hover:text-purple-400 transition-colors"
+                onClick={() => {
+                  const email = prompt('Enter your email to reset password');
+                  if (email) {
+                    const { resetPassword } = useAuth();
+                    resetPassword(email)
+                      .catch(err => console.error('Error sending reset email:', err));
+                  }
+                }}
+              >
                 Forgot password?
               </button>
             )}
