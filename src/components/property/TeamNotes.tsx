@@ -28,7 +28,7 @@ export interface TeamNote {
   };
   date: string;
   content: string;
-  action?: string;
+  action?: string; // Keeping this for backward compatibility
 }
 
 interface TeamNotesProps {
@@ -60,7 +60,7 @@ export const TeamNotes: React.FC<TeamNotesProps> = ({
           avatarColor: "bg-blue-500"
         },
         content: newNote,
-        action: "added a note"
+        action: "commented on" // Always set as "commented on"
       });
     }
 
@@ -101,7 +101,7 @@ export const TeamNotes: React.FC<TeamNotesProps> = ({
                     <span className="font-medium text-sm text-foreground">{note.author.name}</span>
                     {" "}
                     <span className="text-muted-foreground text-sm">
-                      {note.action || "commented"}
+                      commented on
                     </span>
                   </TimelineTitle>
                 </TimelineHeader>
