@@ -10,6 +10,7 @@ import { PropertyTable } from '@/components/property/PropertyTable';
 import { PropertyGrid } from '@/components/property/PropertyGrid';
 import { useProperties } from '@/hooks/useProperties';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { mapPropertyData } from '@/utils/propertyUtils';
 
 const AdminProperties = () => {
   const [page, setPage] = useState(1);
@@ -24,8 +25,10 @@ const AdminProperties = () => {
   };
   
   const { data, isLoading, error } = useProperties(page, pageSize, filters);
-  const properties = data?.properties || [];
-  const totalCount = data?.totalCount || 0;
+  const propertiesRaw = data?.properties || [];
+  
+  // Map the API data structure to the format expected by components
+  const properties = propertiesRaw.map(property => mapPropertyData(property));
 
   // Handle property type change
   const handlePropertyTypeChange = (value: string) => {
@@ -139,7 +142,7 @@ const AdminProperties = () => {
           </>
         )}
         
-        {totalCount > pageSize && (
+        {data && data.totalCount > pageSize && (
           <div className="flex justify-center mt-6">
             <div className="flex space-x-2">
               <Button 
@@ -150,12 +153,12 @@ const AdminProperties = () => {
                 Previous
               </Button>
               <span className="py-2 px-4 bg-muted rounded">
-                Page {page} of {Math.ceil(totalCount / pageSize)}
+                Page {page} of {Math.ceil(data.totalCount / pageSize)}
               </span>
               <Button 
                 variant="outline" 
                 onClick={() => setPage(p => p + 1)}
-                disabled={page >= Math.ceil(totalCount / pageSize)}
+                disabled={page >= Math.ceil(data.totalCount / pageSize)}
               >
                 Next
               </Button>

@@ -31,6 +31,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { TeamNotes, TeamNote } from '@/components/property/TeamNotes';
+import { mapPropertyData } from '@/utils/propertyUtils';
 
 // Mock contact information (would be fetched from API in real implementation)
 const mockContacts = [
@@ -134,7 +135,9 @@ const PropertyDetail = () => {
     );
   }
 
-  const property = propertyData?.data;
+  // Map the raw property data to our expected format
+  const rawProperty = propertyData?.data;
+  const property = rawProperty ? mapPropertyData(rawProperty) : null;
 
   // Handle thumbnail click
   const handleThumbnailClick = (index: number) => {
@@ -246,8 +249,8 @@ const PropertyDetail = () => {
                     </div>
                   )}
                   <div className="absolute top-4 left-4 flex space-x-2">
-                    <Badge className={property.status === 'available' ? 'bg-green-500 hover:bg-green-600' : property.status === 'pending' ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-red-500 hover:bg-red-600'}>
-                      {property.status.charAt(0).toUpperCase() + property.status.slice(1)}
+                    <Badge className={property.status === 'Available' ? 'bg-green-500 hover:bg-green-600' : property.status === 'Pending' ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-red-500 hover:bg-red-600'}>
+                      {property.status}
                     </Badge>
                     <Badge variant="outline" className="bg-black/50 backdrop-blur-sm">
                       {property.type}

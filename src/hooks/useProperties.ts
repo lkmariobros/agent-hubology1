@@ -1,11 +1,21 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { PropertyFormData } from '@/types/property-form';
 
+// Define the filters interface to avoid TypeScript errors
+interface PropertyFilters {
+  propertyType?: string;
+  transactionType?: string;
+  status?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  title?: string;
+  [key: string]: any;
+}
+
 // Get all properties with filtering and pagination
-export function useProperties(page = 1, pageSize = 10, filters = {}) {
+export function useProperties(page = 1, pageSize = 10, filters: PropertyFilters = {}) {
   return useQuery({
     queryKey: ['properties', page, pageSize, filters],
     queryFn: async () => {
@@ -26,15 +36,15 @@ export function useProperties(page = 1, pageSize = 10, filters = {}) {
       // Apply filters if provided
       if (filters) {
         // Example filter handling - expand as needed
-        if (filters.propertyType) {
+        if (filters.propertyType && filters.propertyType !== 'all') {
           query = query.eq('property_type_id', filters.propertyType);
         }
         
-        if (filters.transactionType) {
+        if (filters.transactionType && filters.transactionType !== 'all') {
           query = query.eq('transaction_type_id', filters.transactionType);
         }
         
-        if (filters.status) {
+        if (filters.status && filters.status !== 'all') {
           query = query.eq('status_id', filters.status);
         }
         
@@ -101,7 +111,7 @@ export function useProperty(id: string) {
       return { 
         success: true, 
         message: 'Property retrieved successfully', 
-        data: data 
+        data
       };
     },
     enabled: !!id,

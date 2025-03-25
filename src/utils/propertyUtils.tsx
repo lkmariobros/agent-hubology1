@@ -1,6 +1,7 @@
+import React from 'react';
 
-// Function to format currency values
-export const formatCurrency = (value: number): string => {
+// Function to format currency values (renamed to formatPrice for consistency)
+export const formatPrice = (value: number): string => {
   return new Intl.NumberFormat('en-MY', {
     style: 'currency',
     currency: 'MYR',
@@ -8,6 +9,9 @@ export const formatCurrency = (value: number): string => {
     maximumFractionDigits: 0
   }).format(value);
 };
+
+// Keep formatCurrency for backward compatibility
+export const formatCurrency = formatPrice;
 
 // Function to truncate text with ellipsis
 export const truncateText = (text: string, maxLength: number): string => {
@@ -24,4 +28,49 @@ export const getPropertyTypeIcon = (type: string): JSX.Element => {
 // Convert area to standard format
 export const formatArea = (area: number, unit: string = 'sq.ft'): string => {
   return `${area.toLocaleString()} ${unit}`;
+};
+
+// Helper function to map property data structures
+export const mapPropertyData = (property: any) => {
+  // Handle different property structures (from API vs mock data)
+  return {
+    id: property.id,
+    title: property.title,
+    description: property.description || property.agent_notes,
+    price: property.price || 0,
+    address: {
+      street: property.street || '',
+      city: property.city || '',
+      state: property.state || '',
+    },
+    type: property.property_types?.name || property.type || 'Residential',
+    subtype: property.subtype || property.property_subtype || '',
+    status: property.property_statuses?.name || property.status || 'Available',
+    size: property.built_up_area || property.size || 0,
+    bedrooms: property.bedrooms || 0,
+    bathrooms: property.bathrooms || 0,
+    features: property.features || [],
+    images: property.property_images 
+      ? property.property_images.map((img: any) => 
+          img.storage_path ? getImageUrl(img.storage_path) : ''
+        ).filter(Boolean)
+      : property.images || [],
+    updatedAt: property.updated_at || new Date().toISOString(),
+    featured: property.featured || false
+  };
+};
+
+// Get public URL for a storage path
+export const getImageUrl = (storage_path: string | null) => {
+  if (!storage_path) return '/placeholder.svg';
+  
+  // This function would typically use Supabase to get the URL
+  // For now, we'll return a placeholder or the path itself
+  try {
+    const { publicUrl = '/placeholder.svg' } = { publicUrl: `/api/images/${storage_path}` };
+    return publicUrl;
+  } catch (error) {
+    console.error('Error getting image URL:', error);
+    return '/placeholder.svg';
+  }
 };
