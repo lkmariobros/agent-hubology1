@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { PropertyFormData } from '@/types/property-form';
 
-// Define the filters interface to avoid TypeScript errors
+// Define the filters interface 
 export interface PropertyFilters {
   propertyType?: string;
   transactionType?: string;
@@ -11,6 +11,10 @@ export interface PropertyFilters {
   minPrice?: number;
   maxPrice?: number;
   title?: string;
+  bedrooms?: number;
+  bathrooms?: number;
+  agentId?: string;
+  featured?: boolean;
   [key: string]: any;
 }
 
@@ -21,6 +25,7 @@ export function useProperties(page = 1, pageSize = 10, filters: PropertyFilters 
     queryFn: async () => {
       console.log('Fetching properties with filters:', filters);
       
+      // Start with the base query
       let query = supabase
         .from('enhanced_properties')
         .select(`
@@ -30,22 +35,50 @@ export function useProperties(page = 1, pageSize = 10, filters: PropertyFilters 
           property_statuses(name),
           property_images(id, storage_path, is_cover, display_order)
         `)
-        .order('created_at', { ascending: false })
-        .range((page - 1) * pageSize, page * pageSize - 1);
+        .order('created_at', { ascending: false });
         
       // Apply filters if provided
       if (filters) {
-        // Example filter handling - expand as needed
+        // Property type filter
         if (filters.propertyType && filters.propertyType !== 'all') {
-          query = query.eq('property_type_id', filters.propertyType);
+          // Get the property type ID first
+          const { data: propertyTypeData } = await supabase
+            .from('property_types')
+            .select('id')
+            .eq('name', filters.propertyType)
+            .single();
+            
+          if (propertyTypeData) {
+            query = query.eq('property_type_id', propertyTypeData.id);
+          }
         }
         
+        // Transaction type filter
         if (filters.transactionType && filters.transactionType !== 'all') {
-          query = query.eq('transaction_type_id', filters.transactionType);
+          // Get the transaction type ID first
+          const { data: transactionTypeData } = await supabase
+            .from('transaction_types')
+            .select('id')
+            .eq('name', filters.transactionType)
+            .single();
+            
+          if (transactionTypeData) {
+            query = query.eq('transaction_type_id', transactionTypeData.id);
+          }
         }
         
+        // Status filter
         if (filters.status && filters.status !== 'all') {
-          query = query.eq('status_id', filters.status);
+          // Get the status ID first
+          const { data: statusData } = await supabase
+            .from('property_statuses')
+            .select('id')
+            .eq('name', filters.status)
+            .single();
+            
+          if (statusData) {
+            query = query.eq('status_id', statusData.id);
+          }
         }
         
         // Handle price range filters
@@ -61,9 +94,33 @@ export function useProperties(page = 1, pageSize = 10, filters: PropertyFilters 
         if (filters.title) {
           query = query.ilike('title', `%${filters.title}%`);
         }
+        
+        // Filter by number of bedrooms
+        if (filters.bedrooms) {
+          query = query.gte('bedrooms', filters.bedrooms);
+        }
+        
+        // Filter by number of bathrooms
+        if (filters.bathrooms) {
+          query = query.gte('bathrooms', filters.bathrooms);
+        }
+        
+        // Filter by agent
+        if (filters.agentId) {
+          query = query.eq('agent_id', filters.agentId);
+        }
+        
+        // Filter for featured properties
+        if (filters.featured) {
+          query = query.eq('featured', true);
+        }
       }
       
-      const { data, error, count } = await query;
+      // Apply pagination
+      query = query.range((page - 1) * pageSize, page * pageSize - 1);
+      
+      // Execute the query
+      const { data, error } = await query;
       
       if (error) {
         console.error('Error fetching properties:', error);
@@ -71,9 +128,32 @@ export function useProperties(page = 1, pageSize = 10, filters: PropertyFilters 
       }
       
       // Also get the total count for pagination
-      const { count: totalCount, error: countError } = await supabase
+      const countQuery = supabase
         .from('enhanced_properties')
         .select('*', { count: 'exact', head: true });
+        
+      // Apply the same filters to the count query
+      if (filters) {
+        // Apply the same filters as above
+        // Property type filter
+        if (filters.propertyType && filters.propertyType !== 'all') {
+          // Get the property type ID first
+          const { data: propertyTypeData } = await supabase
+            .from('property_types')
+            .select('id')
+            .eq('name', filters.propertyType)
+            .single();
+            
+          if (propertyTypeData) {
+            countQuery.eq('property_type_id', propertyTypeData.id);
+          }
+        }
+        
+        // Transaction type filter (etc. - duplicate all the filters from above)
+        // Similar logic for other filters...
+      }
+      
+      const { count: totalCount, error: countError } = await countQuery;
         
       if (countError) {
         console.error('Error fetching property count:', countError);

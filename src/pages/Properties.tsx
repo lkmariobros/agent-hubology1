@@ -1,118 +1,247 @@
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { PropertyFilterBar } from '@/components/property/PropertyFilterBar';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
-import { Card } from '@/components/ui/card';
-import { Property } from '@/types';
+import { Plus, Loader2 } from 'lucide-react';
 import { PropertyTable } from '@/components/property/PropertyTable';
 import { PropertyGrid } from '@/components/property/PropertyGrid';
 import { PropertyMap } from '@/components/property/PropertyMap';
-import { sampleProperties } from '@/data/sampleProperties';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-// Import ViewMode type from PropertyFilterBar
 import { ViewMode } from '@/components/property/PropertyFilterBar';
 import { PropertyFilterDrawer, FilterOptions } from '@/components/property/filters/PropertyFilterDrawer';
 import { SlidersHorizontal } from 'lucide-react';
+import { useProperties, PropertyFilters } from '@/hooks/useProperties';
+import { mapPropertyData } from '@/utils/propertyUtils';
+import { Property } from '@/types';
+import { toast } from 'sonner';
 
 type TimeFilter = '7days' | '30days' | '90days' | 'all';
+type SortOption = 'newest' | 'oldest' | 'price-asc' | 'price-desc';
 
 const Properties = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  
+  // State for view mode and filters
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('all');
-  const [properties, setProperties] = useState<Property[]>(sampleProperties);
-  const [filteredProperties, setFilteredProperties] = useState<Property[]>(sampleProperties);
-  const [filters, setFilters] = useState<FilterOptions>({
+  const [sortOption, setSortOption] = useState<SortOption>('newest');
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(12);
+  const [filters, setFilters] = useState<PropertyFilters>({});
+  const [drawerFilters, setDrawerFilters] = useState<FilterOptions>({
     priceRange: [0, 5000000],
     features: []
   });
-  const [summaryStats, setSummaryStats] = useState({
-    total: 0,
-    active: 0,
-    pending: 0,
-    value: 0,
-    change: {
-      total: 0,
-      active: 0
-    }
-  });
-
-  useEffect(() => {
-    // Calculate summary statistics
-    const total = properties.length;
-    const active = properties.filter(p => p.status === 'available').length;
-    const pending = properties.filter(p => p.status === 'pending').length;
-    const value = properties.reduce((sum, p) => sum + p.price, 0);
-
-    // Simulate weekly changes (in a real app, this would come from API)
-    const change = {
-      total: Math.floor(Math.random() * 10) + 1,
-      // +1 to +10
-      active: Math.round(Math.random() * 6 - 3) // -3% to +3%
-    };
-    setSummaryStats({
-      total,
-      active,
-      pending,
-      value,
-      change
-    });
-  }, [properties]);
-
-  // Filter properties based on time
-  useEffect(() => {
-    if (timeFilter === 'all') {
-      setFilteredProperties(properties);
-      return;
-    }
-    const now = new Date();
-    let daysAgo;
-    switch (timeFilter) {
-      case '7days':
-        daysAgo = 7;
-        break;
-      case '30days':
-        daysAgo = 30;
-        break;
-      case '90days':
-        daysAgo = 90;
-        break;
-      default:
-        daysAgo = 0;
-    }
-    const filterDate = new Date();
-    filterDate.setDate(now.getDate() - daysAgo);
-    const filtered = properties.filter(property => {
-      const createdDate = new Date(property.createdAt);
-      return createdDate >= filterDate;
-    });
-    setFilteredProperties(filtered);
-  }, [timeFilter, properties]);
   
+  // Initialize filters from URL on component mount
+  useEffect(() => {
+    const initialFilters: PropertyFilters = {};
+    
+    if (queryParams.get('search')) {
+      initialFilters.title = queryParams.get('search') || undefined;
+    }
+    
+    if (queryParams.get('type') && queryParams.get('type') !== 'all') {
+      initialFilters.propertyType = queryParams.get('type') || undefined;
+    }
+    
+    if (queryParams.get('transaction') && queryParams.get('transaction') !== 'all') {
+      initialFilters.transactionType = queryParams.get('transaction') || undefined;
+    }
+    
+    if (queryParams.get('minPrice')) {
+      initialFilters.minPrice = Number(queryParams.get('minPrice'));
+      
+      if (drawerFilters.priceRange) {
+        setDrawerFilters({
+          ...drawerFilters,
+          priceRange: [Number(queryParams.get('minPrice')), drawerFilters.priceRange[1]]
+        });
+      }
+    }
+    
+    if (queryParams.get('maxPrice')) {
+      initialFilters.maxPrice = Number(queryParams.get('maxPrice'));
+      
+      if (drawerFilters.priceRange) {
+        setDrawerFilters({
+          ...drawerFilters,
+          priceRange: [drawerFilters.priceRange[0], Number(queryParams.get('maxPrice'))]
+        });
+      }
+    }
+    
+    if (queryParams.get('bedrooms')) {
+      initialFilters.bedrooms = Number(queryParams.get('bedrooms'));
+    }
+    
+    if (queryParams.get('bathrooms')) {
+      initialFilters.bathrooms = Number(queryParams.get('bathrooms'));
+    }
+    
+    if (queryParams.get('featured') === 'true') {
+      initialFilters.featured = true;
+    }
+    
+    setFilters(initialFilters);
+  }, []);
+  
+  // Fetch properties with filters
+  const { data, isLoading, error } = useProperties(page, pageSize, filters);
+  const propertiesRaw = data?.properties || [];
+  
+  // Map the API data structure to the format expected by components
+  const properties: Property[] = propertiesRaw.map(property => mapPropertyData(property));
+  
+  // Handle view mode change
   const handleViewChange = (newView: ViewMode) => {
     setViewMode(newView);
   };
   
-  const handleFilter = (newFilters: FilterOptions) => {
-    console.log('Applying filters:', newFilters);
+  // Handle search filters
+  const handleFilter = (newFilters: PropertyFilters) => {
     setFilters(newFilters);
-    // In a real app, this would filter the properties based on the filters
+    setPage(1); // Reset to first page when changing filters
   };
-
+  
+  // Handle advanced filters from drawer
+  const handleDrawerFiltersChange = (newDrawerFilters: FilterOptions) => {
+    setDrawerFilters(newDrawerFilters);
+  };
+  
+  // Apply advanced filters from drawer
   const handleApplyFilters = () => {
-    console.log('Applying filters:', filters);
-    // Implementation for filtering properties would go here
+    const updatedFilters = { ...filters };
+    
+    if (drawerFilters.priceRange) {
+      updatedFilters.minPrice = drawerFilters.priceRange[0];
+      updatedFilters.maxPrice = drawerFilters.priceRange[1];
+      
+      // Update URL
+      const params = new URLSearchParams(location.search);
+      params.set('minPrice', drawerFilters.priceRange[0].toString());
+      params.set('maxPrice', drawerFilters.priceRange[1].toString());
+      
+      navigate({
+        pathname: location.pathname,
+        search: params.toString()
+      });
+    }
+    
+    if (drawerFilters.bedrooms) {
+      updatedFilters.bedrooms = drawerFilters.bedrooms;
+      
+      // Update URL
+      const params = new URLSearchParams(location.search);
+      params.set('bedrooms', drawerFilters.bedrooms.toString());
+      
+      navigate({
+        pathname: location.pathname,
+        search: params.toString()
+      });
+    }
+    
+    if (drawerFilters.bathrooms) {
+      updatedFilters.bathrooms = drawerFilters.bathrooms;
+      
+      // Update URL
+      const params = new URLSearchParams(location.search);
+      params.set('bathrooms', drawerFilters.bathrooms.toString());
+      
+      navigate({
+        pathname: location.pathname,
+        search: params.toString()
+      });
+    }
+    
+    setFilters(updatedFilters);
+    setPage(1); // Reset to first page when applying filters
   };
-
+  
+  // Clear all drawer filters
   const handleClearFilters = () => {
     const defaultPriceRange: [number, number] = [0, 5000000];
-    setFilters({
+    setDrawerFilters({
       priceRange: defaultPriceRange,
       features: []
     });
+    
+    // Remove filter parameters from URL
+    const params = new URLSearchParams(location.search);
+    params.delete('minPrice');
+    params.delete('maxPrice');
+    params.delete('bedrooms');
+    params.delete('bathrooms');
+    params.delete('features');
+    
+    navigate({
+      pathname: location.pathname,
+      search: params.toString()
+    });
+    
+    // Remove these properties from filters
+    const { minPrice, maxPrice, bedrooms, bathrooms, ...restFilters } = filters;
+    setFilters(restFilters);
+    setPage(1); // Reset to first page when clearing filters
   };
+  
+  // Handle sort options
+  const handleSortChange = (value: string) => {
+    setSortOption(value as SortOption);
+    
+    // Update URL
+    const params = new URLSearchParams(location.search);
+    params.set('sort', value);
+    
+    navigate({
+      pathname: location.pathname,
+      search: params.toString()
+    });
+    
+    // In a real implementation, this would update the API query order
+    toast.info(`Sorting by ${value} is not yet implemented with the API`);
+  };
+  
+  // Handle time filter change
+  const handleTimeFilterChange = (value: string) => {
+    setTimeFilter(value as TimeFilter);
+    
+    // Update URL
+    const params = new URLSearchParams(location.search);
+    params.set('time', value);
+    
+    navigate({
+      pathname: location.pathname,
+      search: params.toString()
+    });
+    
+    // In a real implementation, this would update the API query with date filters
+    toast.info(`Time filtering by ${value} is not yet implemented with the API`);
+  };
+  
+  // Calculate summary statistics from real data
+  const summaryStats = React.useMemo(() => {
+    const total = properties.length;
+    const active = properties.filter(p => p.status === 'Available').length;
+    const pending = properties.filter(p => 
+      p.status === 'Under Offer' || p.status === 'Pending').length;
+    const value = properties.reduce((sum, p) => sum + p.price, 0);
+    
+    // Simulated weekly changes
+    return {
+      total,
+      active,
+      pending,
+      value,
+      change: {
+        total: Math.floor(Math.random() * 10) + 1,
+        active: Math.round(Math.random() * 6 - 3)
+      }
+    };
+  }, [properties]);
   
   return (
     <div className="page-container">
@@ -176,7 +305,7 @@ const Properties = () => {
         </div>
         
         <div className="flex items-center gap-3">
-          <Select value={timeFilter} onValueChange={value => setTimeFilter(value as TimeFilter)}>
+          <Select value={timeFilter} onValueChange={handleTimeFilterChange}>
             <SelectTrigger className="w-[130px] h-10 rounded-lg bg-neutral-800 border-neutral-700">
               <SelectValue placeholder="All time" />
             </SelectTrigger>
@@ -188,7 +317,7 @@ const Properties = () => {
             </SelectContent>
           </Select>
           
-          <Select defaultValue="newest">
+          <Select value={sortOption} onValueChange={handleSortChange}>
             <SelectTrigger className="w-[130px] h-10 rounded-lg bg-neutral-800 border-neutral-700">
               <SelectValue placeholder="Newest" />
             </SelectTrigger>
@@ -202,8 +331,8 @@ const Properties = () => {
           
           {/* Filter button now located on the far right */}
           <PropertyFilterDrawer 
-            filters={filters}
-            onFiltersChange={setFilters}
+            filters={drawerFilters}
+            onFiltersChange={handleDrawerFiltersChange}
             onApplyFilters={handleApplyFilters}
             onClearFilters={handleClearFilters}
             trigger={
@@ -216,11 +345,61 @@ const Properties = () => {
         </div>
       </div>
       
-      {/* Property content - removed the background/border */}
+      {/* Property content */}
       <div className="min-h-[60vh] relative">
-        {viewMode === 'grid' && <PropertyGrid properties={filteredProperties} />}
-        {viewMode === 'table' && <PropertyTable properties={filteredProperties} />}
-        {viewMode === 'map' && <PropertyMap properties={filteredProperties} />}
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center h-[50vh]">
+            <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
+            <p className="text-lg text-muted-foreground">Loading properties...</p>
+          </div>
+        ) : error ? (
+          <div className="flex flex-col items-center justify-center h-[50vh]">
+            <p className="text-lg text-destructive mb-2">Error loading properties</p>
+            <p className="text-sm text-muted-foreground">Please try refreshing the page</p>
+          </div>
+        ) : properties.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-[50vh]">
+            <p className="text-lg mb-4">No properties found</p>
+            <Button 
+              onClick={() => navigate('/properties/new')}
+              variant="outline"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add New Property
+            </Button>
+          </div>
+        ) : (
+          <>
+            {viewMode === 'grid' && <PropertyGrid properties={properties} />}
+            {viewMode === 'table' && <PropertyTable properties={properties} />}
+            {viewMode === 'map' && <PropertyMap properties={properties} />}
+            
+            {/* Pagination */}
+            {data && data.totalCount > pageSize && (
+              <div className="flex justify-center mt-6">
+                <div className="flex space-x-2">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                    disabled={page === 1}
+                  >
+                    Previous
+                  </Button>
+                  <span className="py-2 px-4 bg-neutral-800 rounded">
+                    Page {page} of {Math.ceil(data.totalCount / pageSize)}
+                  </span>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setPage(p => p + 1)}
+                    disabled={page >= Math.ceil(data.totalCount / pageSize)}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );
