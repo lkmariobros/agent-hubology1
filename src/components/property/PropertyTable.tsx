@@ -119,3 +119,6 @@ export const PropertyTable: React.FC<PropertyTableProps> = ({ properties }) => {
     </div>
   );
 };
+
+// Add default export to support both import styles
+export default PropertyTable;
