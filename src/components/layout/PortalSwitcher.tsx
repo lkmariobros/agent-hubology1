@@ -8,7 +8,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Building, Shield, ChevronsUpDown } from 'lucide-react';
-import { useAuth, UserRole } from '@/providers/AuthProvider';
+import { useAuth } from '@/hooks/useAuth';
 
 interface PortalSwitcherProps {
   showLabel?: boolean;
@@ -16,17 +16,13 @@ interface PortalSwitcherProps {
 }
 
 export function PortalSwitcher({ showLabel = true, className = "" }: PortalSwitcherProps) {
-  const { user, switchRole, isAdmin } = useAuth();
+  const { isAdmin, switchRole } = useAuth();
   
   // Only show this component for users with admin privileges
-  if (!user || !isAdmin) return null;
+  if (!isAdmin) return null;
   
-  const currentRole = user.activeRole;
+  const currentRole = window.location.pathname.startsWith('/admin') ? 'admin' : 'agent';
   const isAdminActive = currentRole === 'admin';
-
-  const handleRoleSwitch = (role: UserRole) => {
-    switchRole(role);
-  };
 
   return (
     <DropdownMenu>
@@ -41,7 +37,7 @@ export function PortalSwitcher({ showLabel = true, className = "" }: PortalSwitc
       
       <DropdownMenuContent align="start" className="w-[180px] bg-popover">
         <DropdownMenuItem 
-          onClick={() => handleRoleSwitch('agent')}
+          onClick={() => switchRole('agent')}
           className={`flex items-center cursor-pointer ${!isAdminActive ? 'bg-accent/10' : ''}`}
         >
           <Building className="h-4 w-4 mr-2" />
@@ -51,7 +47,7 @@ export function PortalSwitcher({ showLabel = true, className = "" }: PortalSwitc
         <DropdownMenuSeparator />
         
         <DropdownMenuItem 
-          onClick={() => handleRoleSwitch('admin')}
+          onClick={() => switchRole('admin')}
           className={`flex items-center cursor-pointer ${isAdminActive ? 'bg-accent/10' : ''}`}
         >
           <Shield className="h-4 w-4 mr-2" />

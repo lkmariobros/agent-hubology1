@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '@/providers/AuthProvider';
+import { useAuth } from '@/hooks/useAuth';
 
 interface SidebarProfileProps {
   collapsed?: boolean;
@@ -12,18 +12,12 @@ export function SidebarProfile({ collapsed }: SidebarProfileProps) {
   
   if (!user) return null;
   
-  // Extract first and last initials from the name or email
+  // Extract initials from email
   const getInitials = () => {
-    if (user.name) {
-      // Try to get initials from name
-      const nameParts = user.name.split(' ');
-      if (nameParts.length > 1) {
-        return `${nameParts[0][0]}${nameParts[1][0]}`;
-      }
-      return user.name[0];
+    if (user.email) {
+      return user.email.substring(0, 2).toUpperCase();
     }
-    // Fallback to email initial
-    return user.email[0];
+    return 'U';
   };
   
   return (
@@ -39,8 +33,8 @@ export function SidebarProfile({ collapsed }: SidebarProfileProps) {
       
       {!collapsed && (
         <div className="flex flex-col overflow-hidden">
-          <span className="font-medium">{user.name || user.email.split('@')[0]}</span>
-          <span className="text-xs text-muted-foreground truncate">{user.activeRole}</span>
+          <span className="font-medium">{user.email ? user.email.split('@')[0] : 'User'}</span>
+          <span className="text-xs text-muted-foreground truncate">agent</span>
         </div>
       )}
     </Link>

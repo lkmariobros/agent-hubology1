@@ -29,12 +29,11 @@ import { SidebarProfile } from './sidebar/SidebarProfile';
 export function AppSidebar() {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
-  const { user, switchRole } = useAuth();
+  const { user, switchRole, isAdmin } = useAuth();
   
-  // Check if user has admin privileges
-  const isAdmin = user?.roles.includes('admin') || false;
-  const currentRole = user?.activeRole || 'agent';
-  const isAdminActive = currentRole === 'admin';
+  // Current role is always 'agent' in the agent portal
+  const currentRole = 'agent';
+  const isAdminActive = false;
   
   return (
     <>

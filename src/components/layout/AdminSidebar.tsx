@@ -26,7 +26,7 @@ import { AdminProfile } from './sidebar/AdminProfile';
 
 export function AdminSidebar() {
   const { user, switchRole } = useAuth();
-  const currentRole = user?.activeRole || 'agent';
+  const currentRole = 'admin'; // In admin sidebar, always show admin as active role
   const isAdminActive = currentRole === 'admin';
 
   return (

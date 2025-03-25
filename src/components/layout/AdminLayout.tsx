@@ -25,7 +25,7 @@ import { ThemeToggle } from '../theme/ThemeToggle';
 
 const AdminLayout = () => {
   const isMobile = useIsMobile();
-  const { user, loading, signOut } = useAuth();
+  const { user, loading, signOut, isAdmin } = useAuth();
   const location = useLocation();
   
   // Add data-route attribute to body
@@ -47,8 +47,6 @@ const AdminLayout = () => {
   }
   
   // Check if user has admin role
-  const isAdmin = user?.roles.includes('admin');
-  
   if (!isAdmin) {
     return <Navigate to="/dashboard" replace />;
   }
@@ -79,13 +77,13 @@ const AdminLayout = () => {
                   <Button variant="ghost" size="icon" className="rounded-full">
                     <div className="h-8 w-8 rounded-full bg-accent/10 flex items-center justify-center">
                       <span className="text-accent text-sm font-medium">
-                        {user?.name?.substring(0, 2).toUpperCase() || 'AD'}
+                        {user?.email?.substring(0, 2).toUpperCase() || 'AD'}
                       </span>
                     </div>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>{user?.name || 'Admin'}</DropdownMenuLabel>
+                  <DropdownMenuLabel>{user?.email?.split('@')[0] || 'Admin'}</DropdownMenuLabel>
                   <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
                     {user?.email || 'admin@example.com'}
                   </DropdownMenuLabel>

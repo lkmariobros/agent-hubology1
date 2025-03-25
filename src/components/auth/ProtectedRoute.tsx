@@ -15,7 +15,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   requireAdmin = false,
   redirectTo = '/' 
 }) => {
-  const { user, loading } = useAuth();
+  const { user, loading, isAdmin } = useAuth();
   const location = useLocation();
 
   if (loading) {
@@ -41,7 +41,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   // If admin is required but user is not admin, redirect
-  if (requireAdmin && !user.roles.includes('admin')) {
+  if (requireAdmin && !isAdmin) {
     return <Navigate to="/dashboard" state={{ from: location }} replace />;
   }
 
