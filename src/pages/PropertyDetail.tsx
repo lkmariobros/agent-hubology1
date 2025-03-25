@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -446,9 +445,9 @@ const PropertyDetail = () => {
             </div>
           </div>
           
-          {/* Second Row: Team Notes and Map */}
+          {/* Second Row: Team Notes and Content Sections */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            {/* Team Notes Section - (1 column span) */}
+            {/* Team Notes Section - (2 column spans) */}
             <div className="lg:col-span-2">
               <TeamNotes 
                 notes={notes} 
@@ -456,9 +455,27 @@ const PropertyDetail = () => {
               />
             </div>
             
-            {/* Map Section - (1 column span) */}
-            <div className="lg:col-span-1">
-              <Card className="overflow-hidden border-neutral-800 bg-card/90 backdrop-blur-sm h-full">
+            {/* Right column for Overview and Map - (1 column span) */}
+            <div className="lg:col-span-1 space-y-4">
+              {/* Overview Section */}
+              <Card className="overflow-hidden border-neutral-800 bg-card/90">
+                <CardHeader className="pb-2">
+                  <CardTitle>Overview</CardTitle>
+                </CardHeader>
+                <CardContent className="p-4">
+                  {property.description ? (
+                    <p className="text-muted-foreground whitespace-pre-line">{property.description}</p>
+                  ) : (
+                    <div className="text-center py-2">
+                      <FileText className="mx-auto h-12 w-12 text-muted-foreground opacity-30" />
+                      <p className="mt-2 text-sm text-muted-foreground">No description available</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+              
+              {/* Map Section */}
+              <Card className="overflow-hidden border-neutral-800 bg-card/90">
                 <CardHeader className="pb-2">
                   <CardTitle className="flex items-center">
                     <MapPin className="h-4 w-4 mr-2" />
@@ -466,7 +483,7 @@ const PropertyDetail = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-4">
-                  <div className="bg-muted rounded-lg overflow-hidden h-[250px]">
+                  <div className="bg-muted rounded-lg overflow-hidden h-[200px]">
                     <div className="w-full h-full flex flex-col items-center justify-center bg-secondary/30">
                       <MapPin className="h-12 w-12 text-primary opacity-30 mb-4" />
                       <p className="text-muted-foreground">Map integration coming soon</p>
@@ -475,25 +492,6 @@ const PropertyDetail = () => {
                 </CardContent>
               </Card>
             </div>
-          </div>
-          
-          {/* Third Row: Overview Section */}
-          <div className="mt-0">
-            <Card className="overflow-hidden border-neutral-800 bg-card/90">
-              <CardHeader className="pb-2">
-                <CardTitle>Overview</CardTitle>
-              </CardHeader>
-              <CardContent className="p-4">
-                {property.description ? (
-                  <p className="text-muted-foreground whitespace-pre-line">{property.description}</p>
-                ) : (
-                  <div className="text-center py-4">
-                    <FileText className="mx-auto h-12 w-12 text-muted-foreground opacity-30" />
-                    <p className="mt-2 text-sm text-muted-foreground">No description available</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
           </div>
           
           {/* Fourth row layout with tabs section */}
