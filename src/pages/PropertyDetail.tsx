@@ -303,6 +303,21 @@ const PropertyDetail = () => {
             </div>
           </div>
           
+          {/* Map section now moved here - underneath the property details */}
+          <Card className="overflow-hidden border-neutral-800 bg-card/90">
+            <CardContent className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">Location</h3>
+              </div>
+              <div className="h-[200px] bg-muted rounded-lg overflow-hidden">
+                <div className="w-full h-full flex flex-col items-center justify-center bg-secondary/30">
+                  <MapPin className="h-12 w-12 text-primary opacity-30 mb-4" />
+                  <p className="text-muted-foreground">Map integration coming soon</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
           {/* Tabs section - with Team Notes removed since it's shown above */}
           <Tabs defaultValue="overview" className="mt-6">
             <TabsList className="w-full border-b rounded-none bg-transparent h-12 p-0">
@@ -326,7 +341,7 @@ const PropertyDetail = () => {
               </TabsTrigger>
             </TabsList>
             
-            <TabsContent value="overview" className="mt-6 space-y-6">
+            <TabsContent value="overview" className="mt-6">
               {/* Description section */}
               <Card className="overflow-hidden border-neutral-800 bg-card/90">
                 <CardContent className="p-6">
@@ -339,21 +354,6 @@ const PropertyDetail = () => {
                       <p className="mt-2 text-sm text-muted-foreground">No description available</p>
                     </div>
                   )}
-                </CardContent>
-              </Card>
-              
-              {/* Map section replaced with "Coming Soon" notice */}
-              <Card className="overflow-hidden border-neutral-800 bg-card/90">
-                <CardContent className="p-6">
-                  <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-lg font-semibold">Location</h3>
-                  </div>
-                  <div className="h-[200px] bg-muted rounded-lg overflow-hidden">
-                    <div className="w-full h-full flex flex-col items-center justify-center bg-secondary/30">
-                      <MapPin className="h-12 w-12 text-primary opacity-30 mb-4" />
-                      <p className="text-muted-foreground">Map integration coming soon</p>
-                    </div>
-                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
