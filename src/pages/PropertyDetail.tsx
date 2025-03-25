@@ -190,9 +190,9 @@ const PropertyDetail = () => {
   };
 
   return (
-    <div className="space-y-0">
+    <div className="space-y-4">
       {/* Header with navigation and actions */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex items-center space-x-4">
           <Button variant="ghost" onClick={() => navigate('/properties')}>
             <ChevronLeft className="mr-2 h-4 w-4" />
@@ -228,7 +228,7 @@ const PropertyDetail = () => {
       ) : property ? (
         <>
           {/* First Row: Property Images and Info */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             {/* Left column - Image gallery (3 column spans) */}
             <div className="lg:col-span-2">
               <div className="space-y-4">
@@ -446,7 +446,7 @@ const PropertyDetail = () => {
           </div>
           
           {/* Second Row: Team Notes and Content Sections */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             {/* Team Notes Section - (2 column spans) */}
             <div className="lg:col-span-2">
               <TeamNotes 
@@ -495,75 +495,77 @@ const PropertyDetail = () => {
           </div>
           
           {/* Fourth row layout with tabs section */}
-          <Tabs defaultValue="features" className="w-full">
-            <TabsList className="w-full border-b rounded-none bg-transparent h-12 p-0">
-              <TabsTrigger 
-                value="features" 
-                className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-12 px-4"
-              >
-                Features
-              </TabsTrigger>
-              <TabsTrigger 
-                value="documents" 
-                className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-12 px-4"
-              >
-                Documents
-              </TabsTrigger>
-              <TabsTrigger 
-                value="history" 
-                className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-12 px-4"
-              >
-                History
-              </TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="features" className="mt-4">
-              <Card className="overflow-hidden border-neutral-800 bg-card/90">
-                <CardContent className="p-4">
-                  {property.features && property.features.length > 0 ? (
-                    <div className="space-y-3">
-                      <h3 className="text-lg font-semibold">Features</h3>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-y-3">
-                        {property.features.map((feature, index) => (
-                          <div key={index} className="flex items-center">
-                            <div className="h-2 w-2 rounded-full bg-primary mr-2"></div>
-                            <span className="text-sm">{feature}</span>
-                          </div>
-                        ))}
+          <div className="mt-4">
+            <Tabs defaultValue="features" className="w-full">
+              <TabsList className="w-full border-b rounded-none bg-transparent h-12 p-0">
+                <TabsTrigger 
+                  value="features" 
+                  className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-12 px-4"
+                >
+                  Features
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="documents" 
+                  className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-12 px-4"
+                >
+                  Documents
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="history" 
+                  className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-12 px-4"
+                >
+                  History
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="features" className="mt-4">
+                <Card className="overflow-hidden border-neutral-800 bg-card/90">
+                  <CardContent className="p-4">
+                    {property.features && property.features.length > 0 ? (
+                      <div className="space-y-3">
+                        <h3 className="text-lg font-semibold">Features</h3>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-y-3">
+                          {property.features.map((feature, index) => (
+                            <div key={index} className="flex items-center">
+                              <div className="h-2 w-2 rounded-full bg-primary mr-2"></div>
+                              <span className="text-sm">{feature}</span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  ) : (
+                    ) : (
+                      <div className="text-center py-4">
+                        <Tag className="mx-auto h-12 w-12 text-muted-foreground opacity-30" />
+                        <p className="mt-2 text-sm text-muted-foreground">No features listed</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              
+              <TabsContent value="documents" className="mt-4">
+                <Card className="overflow-hidden border-neutral-800 bg-card/90">
+                  <CardContent className="p-4">
                     <div className="text-center py-4">
-                      <Tag className="mx-auto h-12 w-12 text-muted-foreground opacity-30" />
-                      <p className="mt-2 text-sm text-muted-foreground">No features listed</p>
+                      <FileText className="mx-auto h-12 w-12 text-muted-foreground opacity-30" />
+                      <p className="mt-2 text-sm text-muted-foreground">No documents available</p>
                     </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="documents" className="mt-4">
-              <Card className="overflow-hidden border-neutral-800 bg-card/90">
-                <CardContent className="p-4">
-                  <div className="text-center py-4">
-                    <FileText className="mx-auto h-12 w-12 text-muted-foreground opacity-30" />
-                    <p className="mt-2 text-sm text-muted-foreground">No documents available</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="history" className="mt-4">
-              <Card className="overflow-hidden border-neutral-800 bg-card/90">
-                <CardContent className="p-4">
-                  <div className="text-center py-4">
-                    <Calendar className="mx-auto h-12 w-12 text-muted-foreground opacity-30" />
-                    <p className="mt-2 text-sm text-muted-foreground">No history available</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              
+              <TabsContent value="history" className="mt-4">
+                <Card className="overflow-hidden border-neutral-800 bg-card/90">
+                  <CardContent className="p-4">
+                    <div className="text-center py-4">
+                      <Calendar className="mx-auto h-12 w-12 text-muted-foreground opacity-30" />
+                      <p className="mt-2 text-sm text-muted-foreground">No history available</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          </div>
         </>
       ) : (
         <div className="text-center py-12">
