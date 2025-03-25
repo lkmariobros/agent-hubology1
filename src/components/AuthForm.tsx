@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
 const AuthForm = () => {
@@ -14,7 +14,7 @@ const AuthForm = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, resetPassword } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,6 +51,23 @@ const AuthForm = () => {
     } catch (error) {
       console.error('Registration error:', error);
       // Error handling already done in signUp function
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const handleResetPassword = async () => {
+    if (!email) {
+      toast.error('Please enter your email address');
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      await resetPassword(email);
+    } catch (error) {
+      console.error('Reset password error:', error);
+      // Error handling already done in resetPassword function
     } finally {
       setLoading(false);
     }
@@ -93,14 +110,7 @@ const AuthForm = () => {
               <button 
                 type="button" 
                 className="text-xs text-purple-500 hover:text-purple-400 transition-colors"
-                onClick={() => {
-                  const email = prompt('Enter your email to reset password');
-                  if (email) {
-                    const { resetPassword } = useAuth();
-                    resetPassword(email)
-                      .catch(err => console.error('Error sending reset email:', err));
-                  }
-                }}
+                onClick={handleResetPassword}
               >
                 Forgot password?
               </button>

@@ -1,13 +1,24 @@
 
 import React from 'react';
-import EnhancedPropertyForm from '@/components/property/EnhancedPropertyForm';
+import PropertyFormWrapper from '@/components/property/PropertyFormWrapper';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
 
 const NewProperty = () => {
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6">Add New Property</h1>
-      <EnhancedPropertyForm />
-    </div>
+    <ProtectedRoute>
+      <div className="p-6">
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>Add New Property</CardTitle>
+            <CardDescription>Create a new property listing with detailed information</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <PropertyFormWrapper />
+          </CardContent>
+        </Card>
+      </div>
+    </ProtectedRoute>
   );
 };
 
