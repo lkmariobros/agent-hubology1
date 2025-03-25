@@ -1,126 +1,104 @@
 
-import React, { useState, useEffect } from 'react';
-import { useTransactionForm } from '@/context/TransactionForm';
-import { Calculator } from 'lucide-react';
-import { getCurrentAgentTier, AGENT_TIERS } from './commission/AgentTierSelector';
-import { isRentalTransaction, formatCurrency } from './commission/utils';
+import React from 'react';
+import { useTransactionForm } from '@/context/TransactionFormContext';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
 import AgentTierSelector from './commission/AgentTierSelector';
 import CommissionInputs from './commission/CommissionInputs';
-import CommissionBreakdownCard from './commission/CommissionBreakdownCard';
-import ApprovalInfo from './commission/ApprovalInfo';
-import CoBrokingInfoCard from './commission/CoBrokingInfoCard';
 import AgentTierInfo from './commission/AgentTierInfo';
-import { AgentRank } from '@/types/transaction-form';
+import CommissionBreakdownCard from './commission/CommissionBreakdownCard';
+import CoBrokingInfoCard from './commission/CoBrokingInfoCard';
+import CommissionVisualizer from './commission/CommissionVisualizer';
+import CommissionNotifications from './commission/CommissionNotifications';
+import ApprovalInfo from './commission/ApprovalInfo';
 
 const CommissionCalculation: React.FC = () => {
-  const {
-    state,
-    updateFormData,
-    calculateCommission
-  } = useTransactionForm();
-  
+  const { state, updateFormData, calculateCommission } = useTransactionForm();
   const { formData, errors } = state;
-  const [agentTier, setAgentTier] = useState(getCurrentAgentTier());
-  const [isRental, setIsRental] = useState(formData.transactionType === 'Rent');
-  const [ownerCommissionAmount, setOwnerCommissionAmount] = useState<number>(
-    // Initialize with transaction value if it's a rental (1 month rent)
-    isRental && formData.transactionValue ? formData.transactionValue : 0
-  );
   
-  // Check if the transaction is a rental and update state
-  useEffect(() => {
-    setIsRental(formData.transactionType === 'Rent');
-  }, [formData.transactionType]);
-
-  // Get the tier-based agent percentage (how much of agency's portion goes to agent)
-  const agentPortionPercentage = agentTier.agentPercentage;
-  const agencyPortionPercentage = 100 - agentPortionPercentage;
-
-  // Calculate agency split for co-broking (default to 50%)
-  const agencySplitPercentage = formData.coBroking?.enabled ? formData.coBroking?.commissionSplit || 50 : 100;
-  const coAgencySplitPercentage = formData.coBroking?.enabled ? 100 - agencySplitPercentage : 0;
-
-  // Calculate the commissions based on the business rules
-  const commissionBreakdown = calculateCommission();
-
-  // Update agent tier when form data changes
-  useEffect(() => {
-    if (formData.agentTier) {
-      // Make sure to cast the string to AgentRank type
-      const tierValue = formData.agentTier as AgentRank;
-      const tier = AGENT_TIERS.find(t => t.rank === tierValue);
-      if (tier) {
-        setAgentTier(tier);
-      }
-    }
-  }, [formData.agentTier]);
+  const {
+    transactionValue = 0,
+    commissionRate = 0,
+    agentTier
+  } = formData;
   
-  // Handle agent tier change
-  const handleAgentTierChange = (tier: AgentRank) => {
-    updateFormData({ agentTier: tier });
+  const handleTransactionValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    updateFormData({ transactionValue: value });
   };
-
-  // Update commission amount in the form data for non-rental transactions
-  useEffect(() => {
-    if (!isRental) {
-      updateFormData({
-        commissionAmount: commissionBreakdown.totalCommission
-      });
-    }
-  }, [commissionBreakdown.totalCommission, updateFormData, isRental]);
-
+  
+  const handleCommissionRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    updateFormData({ commissionRate: value });
+  };
+  
+  const handleAgentTierChange = (tier: string) => {
+    updateFormData({ agentTier: tier as any });
+  };
+  
+  // Calculate commission
+  const commissionBreakdown = calculateCommission();
+  const totalCommission = commissionBreakdown.totalCommission || 0;
+  
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold">Commission Calculation</h2>
-      <p className="text-muted-foreground">
-        {isRental 
-          ? "Set the monthly rental value and owner commission amount for this rental transaction."
-          : "Set the transaction value and commission rate to calculate the commission breakdown."
-        }
-      </p>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-4">
-          {/* Commission Inputs Component */}
-          <CommissionInputs 
-            isRental={isRental}
-            ownerCommissionAmount={ownerCommissionAmount}
-            setOwnerCommissionAmount={setOwnerCommissionAmount}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Commission Calculation</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <CommissionInputs 
+                transactionValue={transactionValue}
+                commissionRate={commissionRate}
+                onTransactionValueChange={handleTransactionValueChange}
+                onCommissionRateChange={handleCommissionRateChange}
+                transactionType={formData.transactionType}
+                errors={errors}
+              />
+              
+              {errors.transactionValue && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    {errors.transactionValue}
+                  </AlertDescription>
+                </Alert>
+              )}
+              
+              <div className="pt-4 border-t">
+                <AgentTierSelector 
+                  value={agentTier || 'Advisor'} 
+                  onChange={handleAgentTierChange} 
+                />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <ApprovalInfo commissionAmount={totalCommission} />
+          
+          <CommissionNotifications 
+            commissionAmount={totalCommission}
+            isSubmitting={state.isSubmitting}
           />
           
-          {/* Co-Broking Information */}
-          <CoBrokingInfoCard 
-            enabled={!!formData.coBroking?.enabled}
-            agencySplitPercentage={agencySplitPercentage}
-            coAgencySplitPercentage={coAgencySplitPercentage}
-          />
-          
-          {/* Agent Tier Selection */}
-          <AgentTierSelector
-            value={formData.agentTier}
-            onChange={handleAgentTierChange}
-          />
-          
-          {/* Agent Tier Info Card */}
-          <AgentTierInfo agentTier={agentTier} />
-          
-          {/* Approval Info Component */}
-          <ApprovalInfo commissionAmount={commissionBreakdown.totalCommission} />
+          {formData.coBroking?.enabled && (
+            <CoBrokingInfoCard
+              coBroking={formData.coBroking}
+              commissionSplit={formData.coBroking.commissionSplit}
+            />
+          )}
         </div>
         
-        {/* Commission Breakdown Card */}
-        <CommissionBreakdownCard 
-          commissionBreakdown={commissionBreakdown}
-          agentTier={agentTier.name}
-          agentPortionPercentage={agentPortionPercentage}
-          agencyPortionPercentage={agencyPortionPercentage}
-          coBroking={{
-            enabled: !!formData.coBroking?.enabled,
-            commissionSplit: formData.coBroking?.commissionSplit || 50
-          }}
-          formatCurrency={formatCurrency}
-          isRental={isRental}
-        />
+        <div className="space-y-6">
+          <CommissionBreakdownCard breakdown={commissionBreakdown} />
+          <CommissionVisualizer breakdown={commissionBreakdown} />
+          <AgentTierInfo currentTier={agentTier || 'Advisor'} />
+        </div>
       </div>
     </div>
   );

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -8,8 +7,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useTransactions } from '@/hooks/useTransactions';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Edit, Trash2, FileDown, Calendar, DollarSign, User, Home } from 'lucide-react';
+import { ArrowLeft, Edit, Trash2, FileDown, Calendar, DollarSign, User, Home, MessageSquare } from 'lucide-react';
 import { formatCurrency } from '@/utils/propertyUtils';
+import ApprovalStatus from '@/components/commission/ApprovalStatus';
+import { TeamNotes, TeamNote } from '@/components/property/TeamNotes';
 
 const TransactionDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -18,6 +19,39 @@ const TransactionDetail = () => {
   
   const { data: transaction, isLoading, isError } = useTransactionQuery(id || '');
   const deleteMutation = useDeleteTransactionMutation();
+
+  // Mock team notes for demonstration
+  const [notes, setNotes] = React.useState<TeamNote[]>([
+    {
+      id: 1,
+      author: {
+        name: "Jane Cooper",
+        initials: "JC",
+        avatarColor: "bg-blue-500"
+      },
+      date: "2 days ago",
+      content: "Verified all documents with the seller. Everything looks good to proceed."
+    },
+    {
+      id: 2,
+      author: {
+        name: "Devon Lane",
+        initials: "DL",
+        avatarColor: "bg-green-500"
+      },
+      date: "1 day ago",
+      content: "Buyer requested additional time to secure financing. We should follow up next week."
+    }
+  ]);
+
+  const handleAddNote = (note: Omit<TeamNote, 'id' | 'date'>) => {
+    const newNote: TeamNote = {
+      id: Date.now(),
+      date: "Just now",
+      ...note
+    };
+    setNotes([newNote, ...notes]);
+  };
 
   const handleDelete = async () => {
     if (window.confirm('Are you sure you want to delete this transaction? This action cannot be undone.')) {
@@ -144,6 +178,7 @@ const TransactionDetail = () => {
               <TabsTrigger value="property">Property</TabsTrigger>
               <TabsTrigger value="commission">Commission</TabsTrigger>
               <TabsTrigger value="documents">Documents</TabsTrigger>
+              <TabsTrigger value="notes">Notes</TabsTrigger>
             </TabsList>
             
             <TabsContent value="details">
@@ -260,6 +295,8 @@ const TransactionDetail = () => {
                       </div>
                     </div>
                   </div>
+                  
+                  <ApprovalStatus transactionId={id} />
                 </div>
               </div>
             </TabsContent>
@@ -291,6 +328,15 @@ const TransactionDetail = () => {
                 ) : (
                   <p className="text-muted-foreground">No documents attached to this transaction.</p>
                 )}
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="notes">
+              <div className="grid grid-cols-1 gap-6">
+                <TeamNotes 
+                  notes={notes} 
+                  onAddNote={handleAddNote}
+                />
               </div>
             </TabsContent>
             
