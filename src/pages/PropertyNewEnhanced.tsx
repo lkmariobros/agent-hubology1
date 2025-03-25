@@ -1,6 +1,7 @@
 
 import React from 'react';
 import EnhancedPropertyForm from '@/components/property/EnhancedPropertyForm';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
 
 const PropertyNewEnhanced = () => {
   return (
@@ -11,7 +12,9 @@ const PropertyNewEnhanced = () => {
           Enter the property details step by step. Fields will adapt based on the property type.
         </p>
       </div>
-      <EnhancedPropertyForm />
+      <ProtectedRoute>
+        <EnhancedPropertyForm />
+      </ProtectedRoute>
     </div>
   );
 };

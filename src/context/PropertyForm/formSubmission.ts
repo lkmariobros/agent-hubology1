@@ -29,18 +29,24 @@ export const submitPropertyForm = async (state: PropertyFormState): Promise<void
         if (image.file) {
           const fileExt = image.file.name.split('.').pop();
           const fileName = `${Date.now()}-${index}.${fileExt}`;
-          const filePath = `properties/${fileName}`;
+          const filePath = `${state.formData.propertyType.toLowerCase()}/${fileName}`;
           
           const { data, error } = await supabase.storage
-            .from('property-assets')
+            .from('property-images')
             .upload(filePath, image.file);
             
           if (error) throw error;
           
+          // Get public URL for the image
+          const { data: publicUrlData } = supabase.storage
+            .from('property-images')
+            .getPublicUrl(filePath);
+            
           return {
             ...image,
-            url: filePath,
+            url: publicUrlData.publicUrl,
             displayOrder: index,
+            storagePath: filePath
           };
         }
         return image;
@@ -53,10 +59,10 @@ export const submitPropertyForm = async (state: PropertyFormState): Promise<void
         if (document.file) {
           const fileExt = document.file.name.split('.').pop();
           const fileName = `${Date.now()}-${index}.${fileExt}`;
-          const filePath = `documents/${fileName}`;
+          const filePath = `${state.formData.propertyType.toLowerCase()}/${fileName}`;
           
           const { data, error } = await supabase.storage
-            .from('property-assets')
+            .from('property-documents')
             .upload(filePath, document.file);
             
           if (error) throw error;
@@ -64,6 +70,7 @@ export const submitPropertyForm = async (state: PropertyFormState): Promise<void
           return {
             ...document,
             url: filePath,
+            storagePath: filePath
           };
         }
         return document;
@@ -71,34 +78,79 @@ export const submitPropertyForm = async (state: PropertyFormState): Promise<void
     );
     
     // 3. Get reference data IDs
-    // Fetch property type ID
-    const { data: propertyTypeData } = await supabase
+    // Get or create property type
+    let propertyTypeId;
+    const { data: existingPropertyType } = await supabase
       .from('property_types')
       .select('id')
       .eq('name', state.formData.propertyType)
-      .single();
+      .maybeSingle();
       
-    // Fetch transaction type ID
-    const { data: transactionTypeData } = await supabase
+    if (existingPropertyType) {
+      propertyTypeId = existingPropertyType.id;
+    } else {
+      // Create new property type
+      const { data: newPropertyType, error } = await supabase
+        .from('property_types')
+        .insert({ name: state.formData.propertyType })
+        .select()
+        .single();
+        
+      if (error) throw error;
+      propertyTypeId = newPropertyType.id;
+    }
+      
+    // Get or create transaction type
+    let transactionTypeId;
+    const { data: existingTransactionType } = await supabase
       .from('transaction_types')
       .select('id')
       .eq('name', state.formData.transactionType)
-      .single();
+      .maybeSingle();
       
-    // Fetch status ID
-    const { data: statusData } = await supabase
+    if (existingTransactionType) {
+      transactionTypeId = existingTransactionType.id;
+    } else {
+      // Create new transaction type
+      const { data: newTransactionType, error } = await supabase
+        .from('transaction_types')
+        .insert({ name: state.formData.transactionType })
+        .select()
+        .single();
+        
+      if (error) throw error;
+      transactionTypeId = newTransactionType.id;
+    }
+      
+    // Get or create status
+    let statusId;
+    const { data: existingStatus } = await supabase
       .from('property_statuses')
       .select('id')
       .eq('name', state.formData.status)
-      .single();
+      .maybeSingle();
+      
+    if (existingStatus) {
+      statusId = existingStatus.id;
+    } else {
+      // Create new status
+      const { data: newStatus, error } = await supabase
+        .from('property_statuses')
+        .insert({ name: state.formData.status })
+        .select()
+        .single();
+        
+      if (error) throw error;
+      statusId = newStatus.id;
+    }
     
     // 4. Build property data object based on property type
     // Extract common fields
     const commonPropertyData = {
       title: state.formData.title,
-      property_type_id: propertyTypeData?.id,
-      transaction_type_id: transactionTypeData?.id,
-      status_id: statusData?.id,
+      property_type_id: propertyTypeId,
+      transaction_type_id: transactionTypeId,
+      status_id: statusId,
       description: state.formData.description,
       price: state.formData.transactionType === 'Sale' ? state.formData.price : null,
       rental_rate: state.formData.transactionType === 'Rent' ? state.formData.rentalRate : null,
@@ -109,6 +161,8 @@ export const submitPropertyForm = async (state: PropertyFormState): Promise<void
       zip: state.formData.address.zip,
       country: state.formData.address.country,
       agent_notes: state.formData.agentNotes,
+      // Get current agent ID from auth
+      agent_id: (await supabase.auth.getUser()).data.user?.id,
     };
     
     // Add type-specific fields
@@ -167,7 +221,7 @@ export const submitPropertyForm = async (state: PropertyFormState): Promise<void
     if (uploadedImages.length > 0) {
       const imagesToInsert = uploadedImages.map((image) => ({
         property_id: propertyResult.id,
-        storage_path: image.url,
+        storage_path: image.storagePath,
         display_order: image.displayOrder,
         is_cover: image.isCover,
       }));
@@ -184,7 +238,7 @@ export const submitPropertyForm = async (state: PropertyFormState): Promise<void
       const documentsToInsert = uploadedDocuments.map((doc) => ({
         property_id: propertyResult.id,
         name: doc.name,
-        storage_path: doc.url,
+        storage_path: doc.storagePath,
         document_type: doc.documentType,
       }));
       
@@ -198,10 +252,9 @@ export const submitPropertyForm = async (state: PropertyFormState): Promise<void
     // 8. Insert owner contacts
     if (state.formData.ownerContacts.length > 0) {
       // In a real implementation, contacts would be inserted into a property_contacts table
-      console.log('Inserting contacts:', state.formData.ownerContacts);
+      console.log('Owner contacts to be saved:', state.formData.ownerContacts);
       
-      // This is a placeholder for the actual implementation
-      // which would insert into a dedicated contacts table
+      // This would be implemented when a contacts table is created
       /*
       const { error: contactsError } = await supabase
         .from('property_contacts')

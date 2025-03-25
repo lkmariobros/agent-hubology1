@@ -1,6 +1,7 @@
 
 import React from 'react';
 import PropertyForm from '@/components/property/PropertyForm';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
 
 const PropertyNew = () => {
   return (
@@ -11,7 +12,9 @@ const PropertyNew = () => {
           Enter the essential details below to create a new property listing. You can always edit and add more information later.
         </p>
       </div>
-      <PropertyForm />
+      <ProtectedRoute>
+        <PropertyForm />
+      </ProtectedRoute>
     </div>
   );
 };
