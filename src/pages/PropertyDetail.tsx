@@ -1,19 +1,39 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useProperty } from '@/hooks/useProperties';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ChevronLeft, Building2, Edit, Trash2, MapPin, Calendar, DollarSign, Tag, Info, Home, FileText } from 'lucide-react';
+import { 
+  ChevronLeft, 
+  Edit, 
+  Trash2, 
+  MapPin, 
+  Calendar, 
+  Home,
+  Square, 
+  Bed, 
+  Bath,
+  FileText, 
+  Phone, 
+  Mail,
+  User,
+  Building2, 
+  Tag, 
+  Maximize 
+} from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
+import { Avatar } from '@/components/ui/avatar';
+import { Separator } from '@/components/ui/separator';
 
 const PropertyDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: propertyData, isLoading, error } = useProperty(id || '');
+  const [activeImage, setActiveImage] = useState(0);
 
   if (error) {
     toast.error("Failed to load property details");
@@ -33,6 +53,21 @@ const PropertyDetail = () => {
   }
 
   const property = propertyData?.data;
+
+  // Handle thumbnail click
+  const handleThumbnailClick = (index: number) => {
+    setActiveImage(index);
+  };
+
+  // Mock contact information (would be fetched from API in real implementation)
+  const contact = {
+    name: "Ahmad Razali",
+    role: "Owner",
+    avatar: null,
+    initials: "AR",
+    phone: "+60123456789",
+    email: "ahmad@example.com"
+  };
 
   return (
     <div className="space-y-6">
@@ -72,125 +107,180 @@ const PropertyDetail = () => {
         <PropertyDetailSkeleton />
       ) : property ? (
         <>
-          {/* Property hero section */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
-              <div className="relative rounded-lg overflow-hidden h-[300px] md:h-[400px] bg-muted">
-                {property.images && property.images.length > 0 ? (
-                  <img src={property.images[0]} alt={property.title} className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-secondary">
-                    <Building2 className="h-24 w-24 text-muted-foreground opacity-20" />
-                  </div>
-                )}
-                <div className="absolute top-4 right-4 flex space-x-2">
-                  <Badge className={property.status === 'available' ? 'bg-green-500 hover:bg-green-600' : property.status === 'pending' ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-red-500 hover:bg-red-600'}>
-                    {property.status.charAt(0).toUpperCase() + property.status.slice(1)}
-                  </Badge>
-                  <Badge variant="outline" className="bg-black/50 backdrop-blur-sm">
-                    {property.type}
-                  </Badge>
-                </div>
-              </div>
-            </div>
-            
-            <Card className="glass-card">
-              <CardContent className="p-6 space-y-4">
-                <div className="space-y-2">
-                  <h1 className="text-2xl font-bold tracking-tight">{property.title}</h1>
-                  <div className="flex items-center space-x-2 text-muted-foreground">
-                    <MapPin className="h-4 w-4" />
-                    <p className="text-sm">
-                      {property.address.street}, {property.address.city}, {property.address.state}
-                    </p>
+          {/* Property detail - two column layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+            {/* Left column - Image gallery (60-65% width) */}
+            <div className="lg:col-span-3">
+              <div className="space-y-4">
+                {/* Main image with status badges */}
+                <div className="relative rounded-lg overflow-hidden h-[400px] bg-muted">
+                  {property.images && property.images.length > 0 ? (
+                    <img 
+                      src={property.images[activeImage]} 
+                      alt={property.title} 
+                      className="w-full h-full object-cover" 
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-secondary">
+                      <Building2 className="h-24 w-24 text-muted-foreground opacity-20" />
+                    </div>
+                  )}
+                  <div className="absolute top-4 left-4 flex space-x-2">
+                    <Badge className={property.status === 'available' ? 'bg-green-500 hover:bg-green-600' : property.status === 'pending' ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-red-500 hover:bg-red-600'}>
+                      {property.status.charAt(0).toUpperCase() + property.status.slice(1)}
+                    </Badge>
+                    <Badge variant="outline" className="bg-black/50 backdrop-blur-sm">
+                      {property.type}
+                    </Badge>
                   </div>
                 </div>
                 
-                <div className="pt-2">
-                  <div className="flex justify-between items-center mb-2">
-                    <div className="flex items-center">
-                      <DollarSign className="h-5 w-5 mr-1 text-primary" />
-                      <span className="text-xl font-bold">${property.price.toLocaleString()}</span>
+                {/* Thumbnail strip */}
+                {property.images && property.images.length > 0 && (
+                  <div className="grid grid-cols-4 gap-2">
+                    {property.images.slice(0, 3).map((image, index) => (
+                      <div 
+                        key={index}
+                        className={`h-24 relative rounded-md overflow-hidden cursor-pointer border-2 ${activeImage === index ? 'border-primary' : 'border-transparent'}`}
+                        onClick={() => handleThumbnailClick(index)}
+                      >
+                        <img src={image} alt={`Thumbnail ${index + 1}`} className="w-full h-full object-cover" />
+                      </div>
+                    ))}
+                    {property.images.length > 3 && (
+                      <div className="h-24 bg-muted rounded-md flex items-center justify-center cursor-pointer">
+                        <span className="text-lg font-semibold">+{property.images.length - 3}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            {/* Right column - Property details (35-40% width) */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Property info card */}
+              <Card className="overflow-hidden border-neutral-800 bg-card/90 backdrop-blur-sm">
+                <CardContent className="p-6 space-y-4">
+                  {/* Title and location */}
+                  <div className="space-y-2">
+                    <h1 className="text-2xl font-bold tracking-tight">{property.title}</h1>
+                    <div className="flex items-center text-muted-foreground">
+                      <MapPin className="h-4 w-4 mr-1 flex-shrink-0" />
+                      <p className="text-sm">
+                        {property.address.street}, {property.address.city}, {property.address.state}
+                      </p>
                     </div>
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Calendar className="h-4 w-4 mr-1" />
+                  </div>
+                  
+                  {/* Price and updated date */}
+                  <div className="flex justify-between items-center">
+                    <div className="text-2xl font-bold">
+                      ${property.price.toLocaleString()}
+                    </div>
+                    <div className="flex items-center text-xs text-muted-foreground">
+                      <Calendar className="h-3 w-3 mr-1" />
                       <span>Updated {new Date(property.updatedAt).toLocaleDateString()}</span>
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-2 mt-4">
-                    {property.size && (
-                      <div className="flex items-center space-x-2">
-                        <div className="h-8 w-8 rounded-md bg-secondary flex items-center justify-center">
-                          <Info className="h-4 w-4" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-muted-foreground">Size</p>
-                          <p className="text-sm font-medium">{property.size} sqft</p>
-                        </div>
-                      </div>
-                    )}
+                  {/* Property specifications grid */}
+                  <div className="grid grid-cols-4 gap-3 pt-2">
+                    <div className="flex flex-col items-center p-2 rounded-md bg-secondary/50">
+                      <Square className="h-5 w-5 mb-1" />
+                      <span className="text-xs text-muted-foreground">Size</span>
+                      <span className="text-sm font-medium">{property.size} sqft</span>
+                    </div>
                     
-                    {property.bedrooms && (
-                      <div className="flex items-center space-x-2">
-                        <div className="h-8 w-8 rounded-md bg-secondary flex items-center justify-center">
-                          <Home className="h-4 w-4" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-muted-foreground">Bedrooms</p>
-                          <p className="text-sm font-medium">{property.bedrooms}</p>
-                        </div>
-                      </div>
-                    )}
+                    <div className="flex flex-col items-center p-2 rounded-md bg-secondary/50">
+                      <Bed className="h-5 w-5 mb-1" />
+                      <span className="text-xs text-muted-foreground">Beds</span>
+                      <span className="text-sm font-medium">{property.bedrooms || 'N/A'}</span>
+                    </div>
                     
-                    {property.bathrooms && (
-                      <div className="flex items-center space-x-2">
-                        <div className="h-8 w-8 rounded-md bg-secondary flex items-center justify-center">
-                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
-                            <path d="M9 6 6.5 3.5a1.5 1.5 0 0 0-1-.5C4.683 3 4 3.683 4 4.5V17a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"></path>
-                            <line x1="10" y1="16" x2="14" y2="16"></line>
-                            <path d="M15 6V3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v6.5"></path>
-                            <path d="M17 14c-2 2-4.5 2.5-6.5 1.5S8 12 10 10s4.5-2.5 6.5-1.5c2 1 2.5 3.5.5 5.5z"></path>
-                          </svg>
-                        </div>
-                        <div>
-                          <p className="text-xs text-muted-foreground">Bathrooms</p>
-                          <p className="text-sm font-medium">{property.bathrooms}</p>
-                        </div>
-                      </div>
-                    )}
+                    <div className="flex flex-col items-center p-2 rounded-md bg-secondary/50">
+                      <Bath className="h-5 w-5 mb-1" />
+                      <span className="text-xs text-muted-foreground">Baths</span>
+                      <span className="text-sm font-medium">{property.bathrooms || 'N/A'}</span>
+                    </div>
                     
-                    <div className="flex items-center space-x-2">
-                      <div className="h-8 w-8 rounded-md bg-secondary flex items-center justify-center">
-                        <Tag className="h-4 w-4" />
+                    <div className="flex flex-col items-center p-2 rounded-md bg-secondary/50">
+                      <Home className="h-5 w-5 mb-1" />
+                      <span className="text-xs text-muted-foreground">Type</span>
+                      <span className="text-sm font-medium">{property.subtype || 'N/A'}</span>
+                    </div>
+                  </div>
+                  
+                  {/* Contact information */}
+                  <div>
+                    <h3 className="text-sm font-medium mb-2">PRIMARY CONTACT</h3>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <Avatar className="h-10 w-10 mr-3">
+                          {contact.avatar ? (
+                            <img src={contact.avatar} alt={contact.name} />
+                          ) : (
+                            <div className="bg-primary text-primary-foreground h-full w-full flex items-center justify-center text-sm font-medium">
+                              {contact.initials}
+                            </div>
+                          )}
+                        </Avatar>
+                        <div>
+                          <p className="text-sm font-medium">{contact.name}</p>
+                          <p className="text-xs text-muted-foreground">{contact.role}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">Subtype</p>
-                        <p className="text-sm font-medium">{property.subtype || 'N/A'}</p>
+                      <div className="flex space-x-1">
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <Phone className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <Mail className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
           </div>
           
-          {/* Property details tabs */}
+          {/* Tabs section */}
           <Tabs defaultValue="overview" className="mt-6">
-            <TabsList className="w-full sm:w-auto">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="features">Features</TabsTrigger>
-              <TabsTrigger value="documents">Documents</TabsTrigger>
+            <TabsList className="w-full border-b rounded-none bg-transparent h-12 p-0">
+              <TabsTrigger 
+                value="overview" 
+                className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-12 px-4"
+              >
+                Overview
+              </TabsTrigger>
+              <TabsTrigger 
+                value="features" 
+                className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-12 px-4"
+              >
+                Features
+              </TabsTrigger>
+              <TabsTrigger 
+                value="documents" 
+                className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-12 px-4"
+              >
+                Documents
+              </TabsTrigger>
+              <TabsTrigger 
+                value="team-notes" 
+                className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-12 px-4"
+              >
+                Team Notes
+              </TabsTrigger>
             </TabsList>
             
-            <TabsContent value="overview" className="mt-6">
-              <Card className="glass-card">
+            <TabsContent value="overview" className="mt-6 space-y-6">
+              {/* Description section */}
+              <Card className="overflow-hidden border-neutral-800 bg-card/90">
                 <CardContent className="p-6">
+                  <h3 className="text-lg font-semibold mb-4">Description</h3>
                   {property.description ? (
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-semibold">Description</h3>
-                      <p className="text-muted-foreground whitespace-pre-line">{property.description}</p>
-                    </div>
+                    <p className="text-muted-foreground whitespace-pre-line">{property.description}</p>
                   ) : (
                     <div className="text-center py-8">
                       <FileText className="mx-auto h-12 w-12 text-muted-foreground opacity-30" />
@@ -199,18 +289,37 @@ const PropertyDetail = () => {
                   )}
                 </CardContent>
               </Card>
+              
+              {/* Map section */}
+              <Card className="overflow-hidden border-neutral-800 bg-card/90">
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold">Location</h3>
+                    <Button variant="outline" size="sm">
+                      <Maximize className="h-4 w-4 mr-2" />
+                      View larger map
+                    </Button>
+                  </div>
+                  <div className="h-[300px] bg-muted rounded-lg overflow-hidden">
+                    {/* Map will be implemented here */}
+                    <div className="w-full h-full flex items-center justify-center bg-secondary/30">
+                      <MapPin className="h-12 w-12 text-primary opacity-30" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </TabsContent>
             
             <TabsContent value="features" className="mt-6">
-              <Card className="glass-card">
+              <Card className="overflow-hidden border-neutral-800 bg-card/90">
                 <CardContent className="p-6">
                   {property.features && property.features.length > 0 ? (
                     <div className="space-y-4">
                       <h3 className="text-lg font-semibold">Features</h3>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-y-4">
                         {property.features.map((feature, index) => (
-                          <div key={index} className="flex items-center space-x-2">
-                            <div className="h-2 w-2 rounded-full bg-primary"></div>
+                          <div key={index} className="flex items-center">
+                            <div className="h-2 w-2 rounded-full bg-primary mr-2"></div>
                             <span className="text-sm">{feature}</span>
                           </div>
                         ))}
@@ -218,7 +327,7 @@ const PropertyDetail = () => {
                     </div>
                   ) : (
                     <div className="text-center py-8">
-                      <Info className="mx-auto h-12 w-12 text-muted-foreground opacity-30" />
+                      <Tag className="mx-auto h-12 w-12 text-muted-foreground opacity-30" />
                       <p className="mt-2 text-sm text-muted-foreground">No features listed</p>
                     </div>
                   )}
@@ -227,11 +336,46 @@ const PropertyDetail = () => {
             </TabsContent>
             
             <TabsContent value="documents" className="mt-6">
-              <Card className="glass-card">
+              <Card className="overflow-hidden border-neutral-800 bg-card/90">
                 <CardContent className="p-6">
                   <div className="text-center py-8">
                     <FileText className="mx-auto h-12 w-12 text-muted-foreground opacity-30" />
                     <p className="mt-2 text-sm text-muted-foreground">No documents available</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="team-notes" className="mt-6">
+              <Card className="overflow-hidden border-neutral-800 bg-card/90">
+                <CardContent className="p-6">
+                  <h3 className="text-lg font-semibold mb-4">Team Notes</h3>
+                  <div className="space-y-4">
+                    <div className="bg-muted/50 p-4 rounded-lg">
+                      <div className="flex items-center mb-2">
+                        <Avatar className="h-6 w-6 mr-2">
+                          <div className="bg-blue-500 text-white h-full w-full flex items-center justify-center text-xs font-medium">
+                            JD
+                          </div>
+                        </Avatar>
+                        <span className="text-sm font-medium">John Doe</span>
+                        <span className="text-xs text-muted-foreground ml-auto">Jun 15, 2023</span>
+                      </div>
+                      <p className="text-sm">Client is very interested in this property but concerned about the price. Might be open to offers 5% below asking.</p>
+                    </div>
+                    
+                    <div className="bg-muted/50 p-4 rounded-lg">
+                      <div className="flex items-center mb-2">
+                        <Avatar className="h-6 w-6 mr-2">
+                          <div className="bg-green-500 text-white h-full w-full flex items-center justify-center text-xs font-medium">
+                            LP
+                          </div>
+                        </Avatar>
+                        <span className="text-sm font-medium">Lisa Park</span>
+                        <span className="text-xs text-muted-foreground ml-auto">May 28, 2023</span>
+                      </div>
+                      <p className="text-sm">Owner mentioned they can expedite the closing process if needed. Also willing to leave some furniture if buyer is interested.</p>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -255,34 +399,24 @@ const PropertyDetail = () => {
 const PropertyDetailSkeleton = () => {
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <Skeleton className="h-[300px] md:h-[400px] w-full rounded-lg" />
-        </div>
-        
-        <div className="space-y-4">
-          <Skeleton className="h-8 w-3/4" />
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-6 w-1/2 mt-4" />
-          
-          <div className="grid grid-cols-2 gap-2 mt-6">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        <div className="lg:col-span-3">
+          <Skeleton className="h-[400px] w-full rounded-lg" />
+          <div className="grid grid-cols-4 gap-2 mt-4">
             {[1, 2, 3, 4].map(i => (
-              <div key={i} className="flex items-center space-x-2">
-                <Skeleton className="h-8 w-8 rounded-md" />
-                <div>
-                  <Skeleton className="h-3 w-16 mb-1" />
-                  <Skeleton className="h-4 w-12" />
-                </div>
-              </div>
+              <Skeleton key={i} className="h-24 w-full rounded-lg" />
             ))}
           </div>
         </div>
+        
+        <div className="lg:col-span-2">
+          <Skeleton className="h-[400px] w-full rounded-lg" />
+        </div>
       </div>
       
-      <div className="mt-6">
-        <Skeleton className="h-10 w-64 rounded-lg mb-6" />
-        <Skeleton className="h-64 w-full rounded-lg" />
-      </div>
+      <Skeleton className="h-12 w-full rounded-lg" />
+      
+      <Skeleton className="h-[300px] w-full rounded-lg" />
     </div>
   );
 };
