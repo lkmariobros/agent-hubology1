@@ -36,11 +36,13 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
         // Convert the file to a fake URL for preview
         const previewUrl = URL.createObjectURL(file);
 
-        // Add to form state immediately for preview
+        // Add to form state immediately for preview with required properties
         addImage({
           file,
-          previewUrl,
+          url: previewUrl, // Use preview URL as temporary URL
+          displayOrder: state.images.length, // Set the display order based on current image count
           isCover: state.images.length === 0, // First image is cover by default
+          previewUrl,
           uploadStatus: 'uploading'
         });
 
@@ -111,7 +113,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
             <div key={index} className="relative group">
               <div className="overflow-hidden rounded-lg aspect-square">
                 <img 
-                  src={image.previewUrl} 
+                  src={image.previewUrl || image.url} 
                   alt={`Property preview ${index + 1}`}
                   className="w-full h-full object-cover transition-transform group-hover:scale-105"
                 />

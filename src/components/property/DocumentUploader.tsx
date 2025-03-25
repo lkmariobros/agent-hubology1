@@ -1,40 +1,32 @@
 
 import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { FileText, X, Loader2 } from 'lucide-react';
+import { UploadCloud, FileText, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { usePropertyForm } from '@/context/PropertyForm/PropertyFormContext';
 import { useStorageUpload } from '@/hooks/useStorageUpload';
 import { toast } from 'sonner';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 
 interface DocumentUploaderProps {
-  maxFiles?: number;
+  maxDocuments?: number;
   maxSizeMB?: number;
 }
 
-const documentTypes = [
-  { value: 'floorPlan', label: 'Floor Plan' },
-  { value: 'titleDeed', label: 'Title Deed' },
-  { value: 'legalDocument', label: 'Legal Document' },
-  { value: 'propertyInfo', label: 'Property Information' },
-  { value: 'otherDocument', label: 'Other' }
-];
-
-const DocumentUploader: React.FC<DocumentUploaderProps> = ({ 
-  maxFiles = 10,
+const DocumentUploader: React.FC<DocumentUploaderProps> = ({
+  maxDocuments = 20,
   maxSizeMB = 10
 }) => {
   const { state, addDocument, removeDocument } = usePropertyForm();
   const { uploadFile, isUploading, progress } = useStorageUpload();
+  const [documentType, setDocumentType] = useState<string>('Contract');
   const [processingFiles, setProcessingFiles] = useState<string[]>([]);
-  
+
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     // Check if we're already at maximum documents
-    if (state.documents.length + acceptedFiles.length > maxFiles) {
-      toast.error(`You can only upload a maximum of ${maxFiles} documents`);
+    if (state.documents.length + acceptedFiles.length > maxDocuments) {
+      toast.error(`You can only upload a maximum of ${maxDocuments} documents`);
       return;
     }
 
@@ -44,11 +36,12 @@ const DocumentUploader: React.FC<DocumentUploaderProps> = ({
 
     try {
       for (const file of acceptedFiles) {
-        // Add to form state immediately
+        // Add to form state immediately with required properties
         addDocument({
           file,
           name: file.name,
-          documentType: 'otherDocument', // Default type
+          documentType,
+          url: URL.createObjectURL(file), // Use temporary URL for preview
           uploadStatus: 'uploading'
         });
 
@@ -71,42 +64,20 @@ const DocumentUploader: React.FC<DocumentUploaderProps> = ({
       // Remove files from processing state
       setProcessingFiles(prev => prev.filter(name => !fileNames.includes(name)));
     }
-  }, [state.documents, addDocument, maxFiles, maxSizeMB, uploadFile]);
+  }, [state.documents, addDocument, documentType, maxDocuments, maxSizeMB, uploadFile]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
       'application/pdf': ['.pdf'],
       'application/msword': ['.doc'],
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx']
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
+      'image/jpeg': ['.jpg', '.jpeg'],
+      'image/png': ['.png']
     },
     maxSize: maxSizeMB * 1024 * 1024, // Convert MB to bytes
     disabled: isUploading
   });
-
-  const handleUpdateDocumentType = (index: number, type: string) => {
-    const updatedDocuments = [...state.documents];
-    updatedDocuments[index] = {
-      ...updatedDocuments[index],
-      documentType: type
-    };
-    
-    // Update in context
-    removeDocument(index);
-    addDocument(updatedDocuments[index]);
-  };
-
-  const handleUpdateDocumentName = (index: number, name: string) => {
-    const updatedDocuments = [...state.documents];
-    updatedDocuments[index] = {
-      ...updatedDocuments[index],
-      name
-    };
-    
-    // Update in context
-    removeDocument(index);
-    addDocument(updatedDocuments[index]);
-  };
 
   const handleRemoveDocument = (index: number) => {
     removeDocument(index);
@@ -114,6 +85,23 @@ const DocumentUploader: React.FC<DocumentUploaderProps> = ({
 
   return (
     <div className="space-y-4">
+      <div className="mb-4">
+        <Label htmlFor="documentType">Document Type</Label>
+        <Select value={documentType} onValueChange={(value) => setDocumentType(value)}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select document type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Contract">Contract</SelectItem>
+            <SelectItem value="Agreement">Agreement</SelectItem>
+            <SelectItem value="Brochure">Brochure</SelectItem>
+            <SelectItem value="FloorPlan">Floor Plan</SelectItem>
+            <SelectItem value="LegalDocument">Legal Document</SelectItem>
+            <SelectItem value="Other">Other</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
       <div 
         {...getRootProps()} 
         className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
@@ -122,10 +110,10 @@ const DocumentUploader: React.FC<DocumentUploaderProps> = ({
       >
         <input {...getInputProps()} />
         <div className="flex flex-col items-center justify-center space-y-2">
-          <FileText className="h-12 w-12 text-muted-foreground" />
+          <UploadCloud className="h-12 w-12 text-muted-foreground" />
           <h3 className="text-lg font-medium">Drag & drop property documents</h3>
           <p className="text-sm text-muted-foreground">
-            PDF, Word documents (max {maxSizeMB}MB per file)
+            or click to browse (max {maxSizeMB}MB per document)
           </p>
           {isUploading && (
             <div className="mt-2 flex items-center gap-2">
@@ -136,70 +124,39 @@ const DocumentUploader: React.FC<DocumentUploaderProps> = ({
         </div>
       </div>
 
-      {/* Document List */}
+      {/* Documents Preview */}
       {state.documents.length > 0 && (
-        <div className="space-y-3">
-          {state.documents.map((doc, index) => (
-            <div key={index} className="border rounded-lg p-4 flex flex-col md:flex-row gap-4 relative">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute top-2 right-2 h-7 w-7 opacity-80"
-                onClick={() => handleRemoveDocument(index)}
+        <div className="space-y-2">
+          <h4 className="text-sm font-medium mb-2">Uploaded Documents</h4>
+          <div className="space-y-2">
+            {state.documents.map((doc, index) => (
+              <div 
+                key={index} 
+                className="flex items-center justify-between p-3 bg-muted rounded-md"
               >
-                <X className="h-4 w-4" />
-              </Button>
-              
-              <div className="flex-1 space-y-3">
-                <div className="space-y-1">
-                  <Label htmlFor={`doc-name-${index}`}>Document Name</Label>
-                  <Input 
-                    id={`doc-name-${index}`}
-                    value={doc.name} 
-                    onChange={(e) => handleUpdateDocumentName(index, e.target.value)}
-                  />
+                <div className="flex items-center">
+                  <FileText className="h-5 w-5 mr-2 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm font-medium">{doc.name}</p>
+                    <p className="text-xs text-muted-foreground">{doc.documentType}</p>
+                  </div>
                 </div>
-                
-                <div className="space-y-1">
-                  <Label htmlFor={`doc-type-${index}`}>Document Type</Label>
-                  <Select 
-                    value={doc.documentType} 
-                    onValueChange={(value) => handleUpdateDocumentType(index, value)}
+                <div className="flex items-center">
+                  {doc.uploadStatus === 'uploading' && (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin text-muted-foreground" />
+                  )}
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    className="h-8 w-8 p-0"
+                    onClick={() => handleRemoveDocument(index)}
                   >
-                    <SelectTrigger id={`doc-type-${index}`}>
-                      <SelectValue placeholder="Select document type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {documentTypes.map((type) => (
-                        <SelectItem key={type.value} value={type.value}>
-                          {type.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    <X className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
-              
-              <div className="flex items-center text-sm text-muted-foreground">
-                {doc.uploadStatus === 'uploading' ? (
-                  <div className="flex items-center gap-2">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    <span>Uploading...</span>
-                  </div>
-                ) : doc.file ? (
-                  <div className="flex items-center gap-2">
-                    <FileText className="h-4 w-4" />
-                    <span>{doc.file.name} ({Math.round(doc.file.size / 1024)} KB)</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <FileText className="h-4 w-4" />
-                    <span>{doc.name || 'Document'}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
     </div>
