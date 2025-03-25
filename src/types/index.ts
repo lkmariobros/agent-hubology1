@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { TransactionFormData, TransactionDocument } from './transaction-form';
 
@@ -258,3 +257,6 @@ export interface CommissionHistory {
   type: 'personal' | 'override';
   source?: string; // Name of the agent who generated the override commission
 }
+
+// Add approval status
+export type ApprovalStatus = 'Pending' | 'Under Review' | 'Approved' | 'Ready for Payment' | 'Paid' | 'Rejected';

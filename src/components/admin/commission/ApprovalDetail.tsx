@@ -1,130 +1,63 @@
-import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { 
-  useCommissionApprovalDetail, 
-  useUpdateApprovalStatus,
-  useAddApprovalComment,
-  useDeleteApprovalComment,
-  useSystemConfiguration
-} from '@/hooks/useCommissionApproval';
-import { useSendNotification } from '@/hooks/useSendNotification';
-import { Button } from '@/components/ui/button';
-import { 
-  Card, 
-  CardContent, 
-  CardHeader, 
-  CardTitle, 
-  CardDescription, 
-  CardFooter 
-} from '@/components/ui/card';
-import { 
-  Tabs, 
-  TabsContent, 
-  TabsList, 
-  TabsTrigger 
-} from '@/components/ui/tabs';
-import { Textarea } from '@/components/ui/textarea';
-import { Separator } from '@/components/ui/separator';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import ApprovalWorkflow from './ApprovalWorkflow';
-import {
-  ArrowLeft,
-  CheckCircle,
-  Ban,
-  MessageSquare,
-  Clock,
-  CalendarClock,
-  MoreHorizontal,
-  AlertTriangle,
-  GripHorizontal,
-  Trash2,
-  Banknote,
-  Info
-} from 'lucide-react';
-import { toast } from 'sonner';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import StatusBadge from './StatusBadge';
 
-// Update the prop name from approvalId to id
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
+import { 
+  ArrowLeft, 
+  CheckCircle2, 
+  XCircle, 
+  AlertTriangle, 
+  Clock, 
+  Banknote,
+  MessageSquare,
+  History,
+  DollarSign,
+  Building,
+  User
+} from 'lucide-react';
+import { formatCurrency } from '@/utils/propertyUtils';
+import { useCommissionApprovalDetail, useUpdateApprovalStatus, useAddApprovalComment } from '@/hooks/useCommissionApproval';
+
 interface ApprovalDetailProps {
-  id?: string;
+  id: string;
 }
 
-const ApprovalDetail: React.FC<ApprovalDetailProps> = ({ id: approvalId }) => {
-  const { id: urlId } = useParams<{ id: string }>();
+const ApprovalDetail: React.FC<ApprovalDetailProps> = ({ id }) => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('details');
-  const [comment, setComment] = useState('');
-  const [statusNotes, setStatusNotes] = useState('');
-  const [targetStatus, setTargetStatus] = useState<string | null>(null);
-  const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
+  const [commentText, setCommentText] = useState('');
+  const [notes, setNotes] = useState('');
   
-  // Use the approvalId prop or the id from the URL params
-  const currentApprovalId = approvalId || urlId;
+  const { 
+    data, 
+    isLoading,
+    error 
+  } = useCommissionApprovalDetail(id, true);
   
-  // Get approval details with history and comments
-  const { data, isLoading, error } = useCommissionApprovalDetail(currentApprovalId, true);
-  
-  // Get threshold configuration
-  const { data: thresholdConfig } = useSystemConfiguration('commission_approval_threshold');
-  
-  // Mutations for updating status, adding comments, and deleting comments
   const updateStatusMutation = useUpdateApprovalStatus();
   const addCommentMutation = useAddApprovalComment();
-  const deleteCommentMutation = useDeleteApprovalComment();
   
-  // Add the sendNotification hook
-  const sendNotification = useSendNotification();
+  const handleUpdateStatus = async (status: string) => {
+    if (window.confirm(`Are you sure you want to mark this approval as ${status}?`)) {
+      await updateStatusMutation.mutateAsync({
+        approvalId: id,
+        status,
+        notes
+      });
+    }
+  };
   
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        <p className="ml-3">Loading approval details...</p>
-      </div>
-    );
-  }
-  
-  if (error || !data) {
-    return (
-      <div className="text-center py-8 text-destructive">
-        <p>Error loading approval details. Please try again.</p>
-        <Button 
-          variant="outline" 
-          className="mt-4"
-          onClick={() => navigate('/admin/commission/approvals')}
-        >
-          Go Back
-        </Button>
-      </div>
-    );
-  }
-  
-  const { approval, history, comments } = data;
-  
-  // Format currency
-  const formatCurrency = (amount: number | null) => {
-    if (amount === null) return '-';
-    return amount.toLocaleString('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 2
-    });
+  const handleAddComment = async () => {
+    if (commentText.trim()) {
+      await addCommentMutation.mutateAsync({
+        approvalId: id,
+        content: commentText
+      });
+      setCommentText('');
+    }
   };
   
   // Format date
@@ -138,155 +71,207 @@ const ApprovalDetail: React.FC<ApprovalDetailProps> = ({ id: approvalId }) => {
     });
   };
   
-  // Get initials for avatar
-  const getInitials = (name: string = 'User') => {
-    return name.split(' ').map(part => part[0]).join('').toUpperCase();
-  };
-  
-  // Handle comment submission
-  const handleSubmitComment = () => {
-    if (!comment.trim()) {
-      toast.error('Please enter a comment');
-      return;
+  // Get status badge style
+  const getStatusBadgeClass = (status: string) => {
+    switch(status) {
+      case 'Pending':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'Under Review':
+        return 'bg-blue-100 text-blue-800';
+      case 'Approved':
+        return 'bg-green-100 text-green-800';
+      case 'Ready for Payment':
+        return 'bg-purple-100 text-purple-800';
+      case 'Paid':
+        return 'bg-gray-100 text-gray-800';
+      case 'Rejected':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
-    
-    addCommentMutation.mutate({
-      approvalId: currentApprovalId as string,
-      content: comment
-    }, {
-      onSuccess: () => {
-        setComment('');
-      }
-    });
   };
   
-  // Handle status update with notification
-  const handleStatusUpdate = () => {
-    if (!targetStatus) return;
-    
-    updateStatusMutation.mutate({
-      approvalId: currentApprovalId as string,
-      status: targetStatus,
-      notes: statusNotes
-    }, {
-      onSuccess: () => {
-        setStatusNotes('');
-        setTargetStatus(null);
-        setIsStatusDialogOpen(false);
+  // Get status icon
+  const getStatusIcon = (status: string) => {
+    switch(status) {
+      case 'Pending':
+        return <Clock className="h-4 w-4" />;
+      case 'Under Review':
+        return <AlertTriangle className="h-4 w-4" />;
+      case 'Approved':
+        return <CheckCircle2 className="h-4 w-4" />;
+      case 'Ready for Payment':
+        return <Banknote className="h-4 w-4" />;
+      case 'Paid':
+        return <CheckCircle2 className="h-4 w-4" />;
+      case 'Rejected':
+        return <XCircle className="h-4 w-4" />;
+      default:
+        return <Clock className="h-4 w-4" />;
+    }
+  };
+  
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => navigate('/admin/commission/approvals')}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
+          <div className="h-6 w-48 bg-muted animate-pulse rounded" />
+        </div>
         
-        // Send notification to the agent
-        if (approval.submitted_by) {
-          const notificationTitle = `Commission ${targetStatus}`;
-          let notificationMessage = '';
-          
-          switch (targetStatus) {
-            case 'Approved':
-              notificationMessage = `Your commission for transaction #${approval.transaction_id} has been approved.`;
-              break;
-            case 'Rejected':
-              notificationMessage = `Your commission for transaction #${approval.transaction_id} has been rejected. ${statusNotes ? `Reason: ${statusNotes}` : ''}`;
-              break;
-            case 'Under Review':
-              notificationMessage = `Your commission for transaction #${approval.transaction_id} is now under review.`;
-              break;
-            case 'Ready for Payment':
-              notificationMessage = `Your commission for transaction #${approval.transaction_id} is now ready for payment.`;
-              break;
-            case 'Paid':
-              notificationMessage = `Your commission for transaction #${approval.transaction_id} has been paid.`;
-              break;
-            default:
-              notificationMessage = `Your commission status has been updated to ${targetStatus}.`;
-          }
-          
-          sendNotification.mutate({
-            userId: approval.submitted_by,
-            type: 'approval',
-            title: notificationTitle,
-            message: notificationMessage,
-            data: {
-              approvalId: approval.id,
-              transactionId: approval.transaction_id,
-              status: targetStatus
-            }
-          });
-        }
-      }
-    });
-  };
+        <Card>
+          <CardHeader>
+            <div className="h-6 w-32 bg-muted animate-pulse rounded mb-2" />
+            <div className="h-4 w-48 bg-muted animate-pulse rounded" />
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              {Array(3).fill(0).map((_, index) => (
+                <div key={index} className="h-24 w-full bg-muted animate-pulse rounded" />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
   
-  // Handle delete comment
-  const handleDeleteComment = (commentId: string) => {
-    if (window.confirm('Are you sure you want to delete this comment?')) {
-      deleteCommentMutation.mutate({
-        commentId,
-        approvalId: currentApprovalId as string
-      });
-    }
-  };
+  if (error || !data) {
+    return (
+      <div className="space-y-6">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={() => navigate('/admin/commission/approvals')}
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Approvals
+        </Button>
+        
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-center py-8">
+              <AlertTriangle className="h-12 w-12 text-destructive mx-auto mb-4" />
+              <p className="text-destructive font-medium mb-4">
+                Error loading approval details
+              </p>
+              <p className="text-muted-foreground mb-6">
+                The requested approval could not be found or you may not have permission to view it.
+              </p>
+              <Button onClick={() => navigate('/admin/commission/approvals')}>
+                Return to Approvals
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
   
-  // Status controls based on current status
-  const renderStatusControls = () => {
-    const currentStatus = approval.status;
-    
-    const openStatusDialog = (status: string) => {
-      setTargetStatus(status);
-      setIsStatusDialogOpen(true);
-    };
-    
-    switch (currentStatus) {
+  const { approval, history, comments } = data;
+  const transaction = approval.property_transactions;
+  
+  // Determine available actions based on current status
+  const getAvailableActions = () => {
+    switch(approval.status) {
       case 'Pending':
         return (
-          <div className="flex gap-2 mt-4">
-            <Button onClick={() => openStatusDialog('Under Review')}>
+          <>
+            <Button 
+              className="flex-1" 
+              variant="outline" 
+              onClick={() => handleUpdateStatus('Under Review')}
+              disabled={updateStatusMutation.isPending}
+            >
               <AlertTriangle className="h-4 w-4 mr-2" />
-              Start Review
+              Mark as Under Review
             </Button>
-            <Button variant="secondary" onClick={() => openStatusDialog('Approved')}>
-              <CheckCircle className="h-4 w-4 mr-2" />
+            <Button 
+              className="flex-1" 
+              variant="default" 
+              onClick={() => handleUpdateStatus('Approved')}
+              disabled={updateStatusMutation.isPending}
+            >
+              <CheckCircle2 className="h-4 w-4 mr-2" />
               Approve
             </Button>
-            <Button variant="destructive" onClick={() => openStatusDialog('Rejected')}>
-              <Ban className="h-4 w-4 mr-2" />
+            <Button 
+              className="flex-1" 
+              variant="destructive" 
+              onClick={() => handleUpdateStatus('Rejected')}
+              disabled={updateStatusMutation.isPending}
+            >
+              <XCircle className="h-4 w-4 mr-2" />
               Reject
             </Button>
-          </div>
+          </>
         );
-      
       case 'Under Review':
         return (
-          <div className="flex gap-2 mt-4">
-            <Button onClick={() => openStatusDialog('Approved')}>
-              <CheckCircle className="h-4 w-4 mr-2" />
+          <>
+            <Button 
+              className="flex-1" 
+              variant="default" 
+              onClick={() => handleUpdateStatus('Approved')}
+              disabled={updateStatusMutation.isPending}
+            >
+              <CheckCircle2 className="h-4 w-4 mr-2" />
               Approve
             </Button>
-            <Button variant="destructive" onClick={() => openStatusDialog('Rejected')}>
-              <Ban className="h-4 w-4 mr-2" />
+            <Button 
+              className="flex-1" 
+              variant="destructive" 
+              onClick={() => handleUpdateStatus('Rejected')}
+              disabled={updateStatusMutation.isPending}
+            >
+              <XCircle className="h-4 w-4 mr-2" />
               Reject
             </Button>
-          </div>
+          </>
         );
-        
       case 'Approved':
         return (
-          <div className="flex gap-2 mt-4">
-            <Button onClick={() => openStatusDialog('Ready for Payment')}>
-              <Banknote className="h-4 w-4 mr-2" />
-              Mark Ready for Payment
-            </Button>
-          </div>
+          <Button 
+            className="flex-1" 
+            variant="default" 
+            onClick={() => handleUpdateStatus('Ready for Payment')}
+            disabled={updateStatusMutation.isPending}
+          >
+            <Banknote className="h-4 w-4 mr-2" />
+            Mark Ready for Payment
+          </Button>
         );
-        
       case 'Ready for Payment':
         return (
-          <div className="flex gap-2 mt-4">
-            <Button onClick={() => openStatusDialog('Paid')}>
-              <CheckCircle className="h-4 w-4 mr-2" />
-              Mark as Paid
-            </Button>
+          <Button 
+            className="flex-1" 
+            variant="default" 
+            onClick={() => handleUpdateStatus('Paid')}
+            disabled={updateStatusMutation.isPending}
+          >
+            <CheckCircle2 className="h-4 w-4 mr-2" />
+            Mark as Paid
+          </Button>
+        );
+      case 'Paid':
+        return (
+          <div className="text-center text-sm text-muted-foreground py-2">
+            This commission has been marked as paid and no further actions are available.
           </div>
         );
-        
+      case 'Rejected':
+        return (
+          <div className="text-center text-sm text-muted-foreground py-2">
+            This commission has been rejected. No further actions are available.
+          </div>
+        );
       default:
         return null;
     }
@@ -294,414 +279,327 @@ const ApprovalDetail: React.FC<ApprovalDetailProps> = ({ id: approvalId }) => {
   
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <Button 
-            variant="ghost" 
-            size="icon"
+            variant="outline" 
+            size="sm" 
             onClick={() => navigate('/admin/commission/approvals')}
           >
-            <ArrowLeft className="h-5 w-5" />
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
           </Button>
-          
-          <div>
-            <h1 className="text-2xl font-bold flex items-center gap-2">
-              Commission Approval
-              <StatusBadge status={approval.status} />
-            </h1>
-            <p className="text-muted-foreground">
-              Transaction ID: {approval.transaction_id}
-            </p>
-          </div>
+          <h1 className="text-xl font-semibold">Commission Approval</h1>
         </div>
         
         <div className="flex items-center gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                className="cursor-pointer"
-                onClick={() => window.print()}
-              >
-                Print Approval Details
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="cursor-pointer"
-                onClick={() => navigate(`/transactions/${approval.transaction_id}`)}
-              >
-                View Original Transaction
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusBadgeClass(approval.status)}`}>
+            {getStatusIcon(approval.status)}
+            <span className="ml-1">{approval.status}</span>
+          </span>
         </div>
       </div>
       
-      {/* Approval Workflow */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Approval Workflow</CardTitle>
-          <CardDescription>Track the current status in the approval process</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ApprovalWorkflow currentStatus={approval.status} />
-        </CardContent>
-      </Card>
-      
-      {/* Main content */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-2">
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="details">Details</TabsTrigger>
-              <TabsTrigger value="history">
-                History
-                <span className="ml-1 bg-muted text-muted-foreground rounded-full px-2 py-0.5 text-xs">
-                  {history?.length || 0}
-                </span>
-              </TabsTrigger>
-              <TabsTrigger value="comments">
-                Comments
-                <span className="ml-1 bg-muted text-muted-foreground rounded-full px-2 py-0.5 text-xs">
-                  {comments?.length || 0}
-                </span>
-              </TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="details" className="space-y-4 pt-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Transaction Details</CardTitle>
-                  <CardDescription>
-                    Information about the associated transaction
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Property</p>
-                      <p className="text-base">
-                        {approval.property_transactions.property_id || 'N/A'}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Transaction Date</p>
-                      <p className="text-base">
-                        {formatDate(approval.property_transactions.transaction_date)}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Transaction Value</p>
-                      <p className="text-base">
-                        {formatCurrency(approval.property_transactions.transaction_value)}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Commission Amount</p>
-                      <p className="text-base font-semibold">
-                        {formatCurrency(approval.property_transactions.commission_amount)}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Commission Rate</p>
-                      <p className="text-base">
-                        {approval.property_transactions.commission_rate}%
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground">Agent</p>
-                      <p className="text-base">
-                        {approval.property_transactions.agent_id || 'N/A'}
-                      </p>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Commission Details</CardTitle>
+              <CardDescription>
+                Submitted on {formatDate(approval.created_at)}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="details">
+                <TabsList>
+                  <TabsTrigger value="details">Transaction Details</TabsTrigger>
+                  <TabsTrigger value="history">Approval History</TabsTrigger>
+                  <TabsTrigger value="comments">Comments</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="details" className="space-y-6 pt-4">
+                  <div>
+                    <h3 className="text-lg font-medium mb-4 flex items-center">
+                      <DollarSign className="h-5 w-5 mr-2 text-muted-foreground" />
+                      Commission Information
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-2">
+                          <span className="text-muted-foreground">Transaction ID:</span>
+                          <span>{approval.transaction_id}</span>
+                        </div>
+                        <div className="grid grid-cols-2">
+                          <span className="text-muted-foreground">Commission Amount:</span>
+                          <span className="font-medium">{formatCurrency(transaction.commission_amount)}</span>
+                        </div>
+                        <div className="grid grid-cols-2">
+                          <span className="text-muted-foreground">Transaction Value:</span>
+                          <span>{formatCurrency(transaction.transaction_value)}</span>
+                        </div>
+                        <div className="grid grid-cols-2">
+                          <span className="text-muted-foreground">Commission Rate:</span>
+                          <span>{transaction.commission_rate}%</span>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-2">
+                          <span className="text-muted-foreground">Transaction Date:</span>
+                          <span>{new Date(transaction.transaction_date).toLocaleDateString()}</span>
+                        </div>
+                        <div className="grid grid-cols-2">
+                          <span className="text-muted-foreground">High Value:</span>
+                          <span>{approval.threshold_exceeded ? 
+                            <span className="text-amber-600 font-medium flex items-center">
+                              <AlertTriangle className="h-4 w-4 mr-1" /> Yes
+                            </span> : 
+                            'No'
+                          }</span>
+                        </div>
+                        <div className="grid grid-cols-2">
+                          <span className="text-muted-foreground">Submitted By:</span>
+                          <span>{approval.submitted_by}</span>
+                        </div>
+                        <div className="grid grid-cols-2">
+                          <span className="text-muted-foreground">Reviewed By:</span>
+                          <span>{approval.reviewed_by || 'Not yet reviewed'}</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                   
                   <Separator />
                   
                   <div>
-                    <p className="text-sm font-medium text-muted-foreground mb-1">Additional Notes</p>
-                    <p className="text-sm">
-                      {approval.property_transactions.notes || 'No additional notes provided.'}
-                    </p>
-                  </div>
-                  
-                  {approval.threshold_exceeded && thresholdConfig && (
-                    <div className="bg-yellow-50 border border-yellow-100 rounded p-4 flex items-start">
-                      <AlertTriangle className="h-5 w-5 text-yellow-500 mt-0.5 mr-3 flex-shrink-0" />
-                      <div>
-                        <p className="font-medium text-yellow-800">Threshold Exceeded</p>
-                        <p className="text-sm text-yellow-700 mt-1">
-                          This commission exceeds the approval threshold of {formatCurrency(parseFloat(thresholdConfig))} and requires additional verification.
-                        </p>
+                    <h3 className="text-lg font-medium mb-4 flex items-center">
+                      <Building className="h-5 w-5 mr-2 text-muted-foreground" />
+                      Property Information
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-2">
+                          <span className="text-muted-foreground">Property ID:</span>
+                          <span>{transaction.property_id || 'N/A'}</span>
+                        </div>
                       </div>
                     </div>
+                  </div>
+                  
+                  <Separator />
+                  
+                  <div>
+                    <h3 className="text-lg font-medium mb-4 flex items-center">
+                      <User className="h-5 w-5 mr-2 text-muted-foreground" />
+                      Agent Information
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-2">
+                          <span className="text-muted-foreground">Agent ID:</span>
+                          <span>{transaction.agent_id || 'N/A'}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {transaction.notes && (
+                    <>
+                      <Separator />
+                      <div>
+                        <h3 className="text-lg font-medium mb-2">Transaction Notes</h3>
+                        <p className="text-muted-foreground whitespace-pre-line">
+                          {transaction.notes}
+                        </p>
+                      </div>
+                    </>
                   )}
-                </CardContent>
-              </Card>
-              
-              {renderStatusControls()}
-            </TabsContent>
-            
-            <TabsContent value="history" className="space-y-4 pt-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Approval History</CardTitle>
-                  <CardDescription>
-                    Timeline of status changes and actions
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {history.length === 0 ? (
-                    <p className="text-muted-foreground text-center py-4">
-                      No history records found for this approval.
-                    </p>
-                  ) : (
-                    <div className="relative pl-6 border-l pt-2">
-                      {history.map((event, index) => (
-                        <div 
-                          key={event.id} 
-                          className={`relative pb-8 ${index === history.length - 1 ? '' : ''}`}
-                        >
-                          <div className="absolute -left-3 mt-1.5 h-5 w-5 rounded-full border bg-card flex items-center justify-center">
-                            <GripHorizontal className="h-3 w-3 text-muted-foreground" />
-                          </div>
-                          
-                          <div className="flex flex-col">
-                            <div className="flex items-center">
-                              <StatusBadge status={event.new_status} size="sm" />
-                              <span className="ml-2 text-sm text-muted-foreground">
-                                from {event.previous_status || 'Initial Status'}
+                  
+                  {approval.notes && (
+                    <>
+                      <Separator />
+                      <div>
+                        <h3 className="text-lg font-medium mb-2">Approval Notes</h3>
+                        <p className="text-muted-foreground whitespace-pre-line">
+                          {approval.notes}
+                        </p>
+                      </div>
+                    </>
+                  )}
+                </TabsContent>
+                
+                <TabsContent value="history" className="pt-4">
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-medium flex items-center">
+                      <History className="h-5 w-5 mr-2 text-muted-foreground" />
+                      Approval History
+                    </h3>
+                    
+                    {history.length === 0 ? (
+                      <p className="text-muted-foreground py-4">No history records found.</p>
+                    ) : (
+                      <div className="space-y-4">
+                        {history.map((record) => (
+                          <div key={record.id} className="border rounded-md p-4">
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center">
+                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeClass(record.new_status)}`}>
+                                  {getStatusIcon(record.new_status)}
+                                  <span className="ml-1">{record.new_status}</span>
+                                </span>
+                                <span className="mx-2 text-muted-foreground">from</span>
+                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeClass(record.previous_status)}`}>
+                                  {getStatusIcon(record.previous_status)}
+                                  <span className="ml-1">{record.previous_status}</span>
+                                </span>
+                              </div>
+                              <span className="text-xs text-muted-foreground">
+                                {formatDate(record.created_at)}
                               </span>
                             </div>
                             
-                            <p className="text-xs text-muted-foreground mt-1 flex items-center">
-                              <CalendarClock className="h-3 w-3 mr-1" />
-                              {formatDate(event.created_at)}
-                            </p>
-                            
-                            {event.notes && (
-                              <p className="text-sm mt-2 bg-muted/50 p-2 rounded">
-                                {event.notes}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="comments" className="space-y-4 pt-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Comments</CardTitle>
-                  <CardDescription>
-                    Discussion and notes about this approval
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {comments.length === 0 ? (
-                      <p className="text-muted-foreground text-center py-4">
-                        No comments yet. Be the first to comment!
-                      </p>
-                    ) : (
-                      comments.map((comment) => (
-                        <div key={comment.id} className="flex gap-3 pb-4 border-b last:border-0">
-                          <Avatar className="h-8 w-8">
-                            <AvatarFallback className="bg-primary/10 text-primary">
-                              {getInitials()}
-                            </AvatarFallback>
-                          </Avatar>
-                          
-                          <div className="flex-1">
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <p className="text-sm font-medium">User {comment.created_by.slice(0, 6)}</p>
-                                <p className="text-xs text-muted-foreground">
-                                  {formatDate(comment.created_at)}
-                                </p>
-                              </div>
-                              
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6"
-                                onClick={() => handleDeleteComment(comment.id)}
-                              >
-                                <Trash2 className="h-3 w-3 text-muted-foreground" />
-                              </Button>
+                            <div className="flex items-center text-sm">
+                              <span className="text-muted-foreground">Changed by:</span>
+                              <span className="ml-2">{record.changed_by}</span>
                             </div>
                             
-                            <p className="text-sm mt-2">
-                              {comment.content}
-                            </p>
+                            {record.notes && (
+                              <div className="mt-2 text-sm whitespace-pre-line">
+                                <span className="text-muted-foreground">Notes:</span>
+                                <p className="mt-1 pl-4 border-l-2 border-muted">{record.notes}</p>
+                              </div>
+                            )}
                           </div>
-                        </div>
-                      ))
+                        ))}
+                      </div>
                     )}
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="comments" className="pt-4">
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-medium flex items-center">
+                      <MessageSquare className="h-5 w-5 mr-2 text-muted-foreground" />
+                      Comments
+                    </h3>
                     
-                    <div className="pt-2">
+                    <div className="space-y-4 max-h-[400px] overflow-y-auto mb-4">
+                      {comments.length === 0 ? (
+                        <p className="text-muted-foreground py-4">No comments yet.</p>
+                      ) : (
+                        comments.map((comment) => (
+                          <div key={comment.id} className="border rounded-md p-4">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="font-medium">{comment.created_by}</span>
+                              <span className="text-xs text-muted-foreground">
+                                {formatDate(comment.created_at)}
+                              </span>
+                            </div>
+                            <p className="whitespace-pre-line">{comment.content}</p>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                    
+                    <div className="space-y-2">
                       <Textarea
                         placeholder="Add a comment..."
                         className="min-h-[100px]"
-                        value={comment}
-                        onChange={(e) => setComment(e.target.value)}
+                        value={commentText}
+                        onChange={(e) => setCommentText(e.target.value)}
                       />
                       <Button 
-                        className="mt-2"
-                        onClick={handleSubmitComment}
-                        disabled={!comment.trim() || addCommentMutation.isPending}
+                        onClick={handleAddComment} 
+                        disabled={!commentText.trim() || addCommentMutation.isPending}
+                        className="w-full"
                       >
-                        <MessageSquare className="h-4 w-4 mr-2" />
-                        {addCommentMutation.isPending ? 'Posting...' : 'Post Comment'}
+                        {addCommentMutation.isPending ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent mr-2" />
+                            Adding Comment...
+                          </>
+                        ) : (
+                          <>
+                            <MessageSquare className="h-4 w-4 mr-2" />
+                            Add Comment
+                          </>
+                        )}
                       </Button>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
         </div>
         
-        <div>
+        <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Approval Status</CardTitle>
+              <CardTitle>Status Actions</CardTitle>
               <CardDescription>
-                Current status and next steps
+                Update the approval status
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="flex flex-col items-center py-4">
-                  <StatusBadge status={approval.status} size="lg" />
-                  
-                  <p className="text-sm text-muted-foreground mt-4 text-center">
-                    Last updated {formatDate(approval.updated_at)}
-                  </p>
+                <div className="flex flex-wrap gap-2">
+                  {getAvailableActions()}
                 </div>
                 
-                <Separator />
-                
-                <div>
-                  <p className="text-sm font-medium mb-1">Next Steps:</p>
-                  
-                  {approval.status === 'Pending' && (
-                    <Alert className="mt-2">
-                      <Info className="h-4 w-4" />
-                      <AlertDescription>
-                        Begin review by clicking "Start Review" or approve/reject directly if decision is clear.
-                      </AlertDescription>
-                    </Alert>
-                  )}
-                  
-                  {approval.status === 'Under Review' && (
-                    <Alert className="mt-2">
-                      <Info className="h-4 w-4" />
-                      <AlertDescription>
-                        After verifying all details, either approve or reject this commission.
-                      </AlertDescription>
-                    </Alert>
-                  )}
-                  
-                  {approval.status === 'Approved' && (
-                    <Alert className="mt-2">
-                      <Info className="h-4 w-4" />
-                      <AlertDescription>
-                        Click "Mark Ready for Payment" to notify the finance department.
-                      </AlertDescription>
-                    </Alert>
-                  )}
-                  
-                  {approval.status === 'Ready for Payment' && (
-                    <Alert className="mt-2">
-                      <Info className="h-4 w-4" />
-                      <AlertDescription>
-                        Once payment has been processed, mark as "Paid" to complete the workflow.
-                      </AlertDescription>
-                    </Alert>
-                  )}
-                  
-                  {approval.status === 'Paid' && (
-                    <p className="text-sm">
-                      This commission has been paid. No further action is required.
-                    </p>
-                  )}
-                  
-                  {approval.status === 'Rejected' && (
-                    <p className="text-sm">
-                      This commission has been rejected. No further action is required.
-                    </p>
-                  )}
-                </div>
-                
-                <div className="bg-muted rounded p-3">
-                  <p className="text-xs font-medium">Notes:</p>
-                  <p className="text-xs mt-1">
-                    {approval.notes || 'No additional notes.'}
-                  </p>
-                </div>
+                {['Pending', 'Under Review'].includes(approval.status) && (
+                  <div className="space-y-2 mt-4">
+                    <label className="text-sm font-medium">
+                      Notes (will be visible in history)
+                    </label>
+                    <Textarea
+                      placeholder="Add notes about this decision..."
+                      className="min-h-[100px]"
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                    />
+                  </div>
+                )}
               </div>
             </CardContent>
-            <CardFooter>
-              {renderStatusControls()}
-            </CardFooter>
+          </Card>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle>Status Timeline</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="relative pl-6 pb-6 border-l-2 border-muted">
+                  <div className="absolute top-0 left-[-8px] h-4 w-4 rounded-full bg-green-500"></div>
+                  <div className="font-medium">Submitted</div>
+                  <div className="text-sm text-muted-foreground">{formatDate(approval.created_at)}</div>
+                </div>
+                
+                {history.map((record, index) => (
+                  <div key={index} className="relative pl-6 pb-6 border-l-2 border-muted">
+                    <div className={`absolute top-0 left-[-8px] h-4 w-4 rounded-full ${
+                      record.new_status === 'Rejected' ? 'bg-red-500' : 
+                      record.new_status === 'Approved' ? 'bg-green-500' :
+                      record.new_status === 'Ready for Payment' ? 'bg-purple-500' :
+                      record.new_status === 'Paid' ? 'bg-blue-500' : 'bg-amber-500'
+                    }`}></div>
+                    <div className="font-medium">{record.new_status}</div>
+                    <div className="text-sm text-muted-foreground">{formatDate(record.created_at)}</div>
+                  </div>
+                ))}
+                
+                {history.length === 0 && (
+                  <div className="relative pl-6 pb-6 border-l-2 border-dashed border-muted">
+                    <div className="absolute top-0 left-[-8px] h-4 w-4 rounded-full bg-muted"></div>
+                    <div className="font-medium text-muted-foreground">Awaiting Next Step</div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
           </Card>
         </div>
       </div>
-      
-      {/* Status update dialog */}
-      <Dialog open={isStatusDialogOpen} onOpenChange={setIsStatusDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Update Approval Status</DialogTitle>
-            <DialogDescription>
-              Change the status from <StatusBadge status={approval.status} size="sm" /> to <StatusBadge status={targetStatus || ''} size="sm" />
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="statusNotes">Additional Notes (Optional)</Label>
-              <Textarea
-                id="statusNotes"
-                placeholder="Enter any relevant notes about this status change..."
-                value={statusNotes}
-                onChange={(e) => setStatusNotes(e.target.value)}
-              />
-            </div>
-          </div>
-          
-          <DialogFooter>
-            <Button 
-              variant="outline" 
-              onClick={() => setIsStatusDialogOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button 
-              onClick={handleStatusUpdate}
-              disabled={updateStatusMutation.isPending}
-            >
-              {updateStatusMutation.isPending ? (
-                <>
-                  <Clock className="mr-2 h-4 w-4 animate-spin" />
-                  Updating...
-                </>
-              ) : (
-                'Update Status'
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
