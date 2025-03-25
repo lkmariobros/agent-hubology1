@@ -16,7 +16,7 @@ const Timeline = React.forwardRef<HTMLDivElement, TimelineProps>(
         data-orientation={orientation}
         className={cn(
           "group/timeline relative",
-          orientation === "vertical" && "space-y-4",
+          orientation === "vertical" && "space-y-6",
           orientation === "horizontal" && "flex space-x-4",
           className
         )}
@@ -29,7 +29,7 @@ const Timeline = React.forwardRef<HTMLDivElement, TimelineProps>(
 Timeline.displayName = "Timeline";
 
 interface TimelineItemProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   step?: number | string;
   completed?: boolean;
   className?: string;
@@ -43,7 +43,7 @@ const TimelineItem = React.forwardRef<HTMLDivElement, TimelineItemProps>(
         data-step={step}
         data-completed={completed}
         className={cn(
-          "group/timeline-item relative",
+          "group/timeline-item relative pl-10",
           className
         )}
       >
@@ -74,7 +74,7 @@ interface TimelineTitleProps {
 
 const TimelineTitle = ({ children, className }: TimelineTitleProps) => {
   return (
-    <h3 className={cn("font-medium", className)}>
+    <h3 className={cn("text-sm text-muted-foreground", className)}>
       {children}
     </h3>
   );
@@ -88,7 +88,7 @@ const TimelineSeparator = ({ className }: TimelineSeparatorProps) => {
   return (
     <div
       className={cn(
-        "absolute inset-y-0 left-3 w-0.5 bg-border",
+        "absolute left-3.5 top-7 bottom-0 w-px bg-border",
         className
       )}
     />
@@ -104,7 +104,7 @@ const TimelineIndicator = ({ children, className }: TimelineIndicatorProps) => {
   return (
     <div
       className={cn(
-        "absolute left-0 top-0 z-10 flex h-6 w-6 items-center justify-center rounded-full border border-input bg-background",
+        "absolute left-0 top-0 z-10 flex h-7 w-7 items-center justify-center rounded-full border border-input bg-background",
         className
       )}
     >
@@ -120,7 +120,7 @@ interface TimelineContentProps {
 
 const TimelineContent = ({ children, className }: TimelineContentProps) => {
   return (
-    <div className={cn("ml-2", className)}>
+    <div className={cn("mt-2", className)}>
       {children}
     </div>
   );

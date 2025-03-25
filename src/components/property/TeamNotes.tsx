@@ -80,29 +80,33 @@ export const TeamNotes: React.FC<TeamNotesProps> = ({
       <CardContent className="p-4 flex-grow overflow-auto">
         {notes.length > 0 ? (
           <Timeline>
-            {notes.map((note) => (
-              <TimelineItem key={note.id} className="pb-5 last:pb-0">
+            {notes.map((note, index) => (
+              <TimelineItem key={note.id} className="pb-0 last:pb-0">
+                <TimelineIndicator>
+                  <Avatar className="h-7 w-7">
+                    {note.author.avatar ? (
+                      <AvatarImage src={note.author.avatar} alt={note.author.name} />
+                    ) : (
+                      <AvatarFallback className={note.author.avatarColor}>
+                        {note.author.initials}
+                      </AvatarFallback>
+                    )}
+                  </Avatar>
+                </TimelineIndicator>
+                
+                {index !== notes.length - 1 && <TimelineSeparator />}
+                
                 <TimelineHeader>
-                  <TimelineSeparator className="left-3 h-full" />
-                  <TimelineTitle className="font-medium text-sm">
-                    {note.author.name}{" "}
-                    <span className="text-muted-foreground text-xs font-normal">
+                  <TimelineTitle>
+                    <span className="font-medium text-sm text-foreground">{note.author.name}</span>
+                    {" "}
+                    <span className="text-muted-foreground text-sm">
                       {note.action || "commented"}
                     </span>
                   </TimelineTitle>
-                  <TimelineIndicator className="left-0 top-0">
-                    <Avatar className="h-6 w-6">
-                      {note.author.avatar ? (
-                        <AvatarImage src={note.author.avatar} alt={note.author.name} />
-                      ) : (
-                        <AvatarFallback className={note.author.avatarColor}>
-                          {note.author.initials}
-                        </AvatarFallback>
-                      )}
-                    </Avatar>
-                  </TimelineIndicator>
                 </TimelineHeader>
-                <TimelineContent className="mt-2 ml-9">
+                
+                <TimelineContent>
                   <div className="rounded-lg border border-neutral-800 bg-black/20 px-4 py-3 text-sm">
                     {note.content}
                     <TimelineDate>{note.date}</TimelineDate>
