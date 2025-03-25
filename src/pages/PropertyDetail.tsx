@@ -31,7 +31,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Separator } from '@/components/ui/separator';
+import { TeamNotes, TeamNote } from '@/components/property/TeamNotes';
 
 // Mock contact information (would be fetched from API in real implementation)
 const mockContacts = [
@@ -56,7 +56,7 @@ const mockContacts = [
 ];
 
 // Mock team notes data
-const teamNotes = [
+const teamNotes: TeamNote[] = [
   {
     id: 1,
     author: {
@@ -65,7 +65,8 @@ const teamNotes = [
       avatarColor: "bg-blue-500"
     },
     date: "Jun 15, 2023",
-    content: "Client is very interested in this property but concerned about the price. Might be open to offers 5% below asking."
+    content: "Client is very interested in this property but concerned about the price. Might be open to offers 5% below asking.",
+    action: "opened a new issue"
   },
   {
     id: 2,
@@ -75,7 +76,8 @@ const teamNotes = [
       avatarColor: "bg-green-500"
     },
     date: "May 28, 2023",
-    content: "Owner mentioned they can expedite the closing process if needed. Also willing to leave some furniture if buyer is interested."
+    content: "Owner mentioned they can expedite the closing process if needed. Also willing to leave some furniture if buyer is interested.",
+    action: "commented on"
   },
   {
     id: 3,
@@ -85,7 +87,8 @@ const teamNotes = [
       avatarColor: "bg-purple-500"
     },
     date: "May 15, 2023",
-    content: "Had a viewing with a potential buyer who likes the location but needs more information about the building maintenance history."
+    content: "Had a viewing with a potential buyer who likes the location but needs more information about the building maintenance history.",
+    action: "assigned you to"
   },
   {
     id: 4,
@@ -95,7 +98,8 @@ const teamNotes = [
       avatarColor: "bg-amber-500"
     },
     date: "May 10, 2023",
-    content: "Spoke with building management. They confirmed that the roof was replaced last year and all plumbing was updated. This could be a good selling point."
+    content: "Spoke with building management. They confirmed that the roof was replaced last year and all plumbing was updated. This could be a good selling point.",
+    action: "closed the issue"
   }
 ];
 
@@ -106,6 +110,7 @@ const PropertyDetail = () => {
   const [activeImage, setActiveImage] = useState(0);
   const [contacts, setContacts] = useState(mockContacts);
   const [showAddContact, setShowAddContact] = useState(false);
+  const [notes, setNotes] = useState(teamNotes);
   const [newContact, setNewContact] = useState({
     name: '',
     role: '',
@@ -171,6 +176,20 @@ const PropertyDetail = () => {
     toast.success("Contact removed");
   };
 
+  const handleAddNote = (note: Omit<TeamNote, 'id' | 'date'>) => {
+    const newNote: TeamNote = {
+      ...note,
+      id: notes.length + 1,
+      date: new Date().toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric', 
+        year: 'numeric'
+      })
+    };
+    
+    setNotes([newNote, ...notes]);
+  };
+
   return (
     <div className="space-y-4">
       {/* Header with navigation and actions */}
@@ -209,10 +228,10 @@ const PropertyDetail = () => {
         <PropertyDetailSkeleton />
       ) : property ? (
         <>
-          {/* Property detail - two column layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-            {/* Left column - Image gallery (60-65% width) */}
-            <div className="lg:col-span-3">
+          {/* First Row: Property Images and Info */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            {/* Left column - Image gallery (3 column spans) */}
+            <div className="lg:col-span-2">
               <div className="space-y-4">
                 {/* Main image with status badges */}
                 <div className="relative rounded-lg overflow-hidden h-[400px] bg-muted">
@@ -259,10 +278,10 @@ const PropertyDetail = () => {
               </div>
             </div>
             
-            {/* Right column - Property details (35-40% width) */}
-            <div className="lg:col-span-2 space-y-4">
+            {/* Right column - Property details (1 column span) */}
+            <div className="lg:col-span-1">
               {/* Property info card */}
-              <Card className="overflow-hidden border-neutral-800 bg-card/90 backdrop-blur-sm">
+              <Card className="overflow-hidden border-neutral-800 bg-card/90 backdrop-blur-sm h-full">
                 <CardContent className="p-6 space-y-4">
                   {/* Title and location */}
                   <div className="space-y-2">
@@ -377,11 +396,11 @@ const PropertyDetail = () => {
                     )}
                     
                     {/* Contact list */}
-                    <div className="space-y-3">
+                    <div className="space-y-2 max-h-40 overflow-y-auto">
                       {contacts.map((contact) => (
                         <div key={contact.id} className="flex items-center justify-between bg-muted/20 p-2 rounded-md">
                           <div className="flex items-center">
-                            <Avatar className="h-10 w-10 mr-3">
+                            <Avatar className="h-8 w-8 mr-2">
                               {contact.avatar ? (
                                 <AvatarImage src={contact.avatar} alt={contact.name} />
                               ) : (
@@ -396,20 +415,20 @@ const PropertyDetail = () => {
                             </div>
                           </div>
                           <div className="flex items-center space-x-1">
-                            <Button variant="ghost" size="icon" className="h-8 w-8" title="Call">
-                              <Phone className="h-4 w-4" />
+                            <Button variant="ghost" size="icon" className="h-7 w-7" title="Call">
+                              <Phone className="h-3.5 w-3.5" />
                             </Button>
-                            <Button variant="ghost" size="icon" className="h-8 w-8" title="Email">
-                              <Mail className="h-4 w-4" />
+                            <Button variant="ghost" size="icon" className="h-7 w-7" title="Email">
+                              <Mail className="h-3.5 w-3.5" />
                             </Button>
                             <Button 
                               variant="ghost" 
                               size="icon" 
-                              className="h-8 w-8 text-destructive hover:text-destructive/90" 
+                              className="h-7 w-7 text-destructive hover:text-destructive/90" 
                               title="Remove contact"
                               onClick={() => handleRemoveContact(contact.id)}
                             >
-                              <X className="h-4 w-4" />
+                              <X className="h-3.5 w-3.5" />
                             </Button>
                           </div>
                         </div>
@@ -427,63 +446,39 @@ const PropertyDetail = () => {
             </div>
           </div>
           
-          {/* Second row layout - Map and Team Notes side-by-side */}
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 mt-4">
-            {/* Map section */}
-            <Card className="lg:col-span-3 overflow-hidden border-neutral-800 bg-card/90">
-              <CardHeader className="pb-2">
-                <CardTitle className="flex items-center">
-                  <MapPin className="h-4 w-4 mr-2" />
-                  Location
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-4">
-                <div className="bg-muted rounded-lg overflow-hidden">
-                  <div className="w-full h-[180px] flex flex-col items-center justify-center bg-secondary/30">
-                    <MapPin className="h-12 w-12 text-primary opacity-30 mb-4" />
-                    <p className="text-muted-foreground">Map integration coming soon</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+          {/* Second Row: Team Notes and Map */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            {/* Team Notes Section - (1 column span) */}
+            <div className="lg:col-span-2">
+              <TeamNotes 
+                notes={notes} 
+                onAddNote={handleAddNote}
+              />
+            </div>
             
-            {/* Team Notes section - Moved up to be side-by-side with map */}
-            <Card className="lg:col-span-2 overflow-hidden border-neutral-800 bg-card/90 backdrop-blur-sm h-full flex flex-col">
-              <CardHeader className="pb-2">
-                <CardTitle className="flex items-center">
-                  <MessageSquare className="h-4 w-4 mr-2" />
-                  Team Notes
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-4 flex-grow overflow-auto">
-                <div className="space-y-3">
-                  {teamNotes.map((note) => (
-                    <div key={note.id} className="bg-muted/50 p-3 rounded-lg">
-                      <div className="flex items-center mb-1">
-                        <Avatar className="h-6 w-6 mr-2">
-                          <AvatarFallback className={note.author.avatarColor + " text-white"}>
-                            {note.author.initials}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span className="text-sm font-medium">{note.author.name}</span>
-                        <span className="text-xs text-muted-foreground ml-auto">{note.date}</span>
-                      </div>
-                      <p className="text-sm">{note.content}</p>
+            {/* Map Section - (1 column span) */}
+            <div className="lg:col-span-1">
+              <Card className="overflow-hidden border-neutral-800 bg-card/90 backdrop-blur-sm h-full">
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center">
+                    <MapPin className="h-4 w-4 mr-2" />
+                    Location
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-4">
+                  <div className="bg-muted rounded-lg overflow-hidden h-[250px]">
+                    <div className="w-full h-full flex flex-col items-center justify-center bg-secondary/30">
+                      <MapPin className="h-12 w-12 text-primary opacity-30 mb-4" />
+                      <p className="text-muted-foreground">Map integration coming soon</p>
                     </div>
-                  ))}
-                  
-                  {/* Add note button */}
-                  <Button variant="outline" size="sm" className="w-full mt-2">
-                    <User className="h-4 w-4 mr-2" />
-                    Add Note
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
           
-          {/* Third row layout with overview section */}
-          <div className="mt-4">
+          {/* Third Row: Overview Section */}
+          <div className="mt-0">
             <Card className="overflow-hidden border-neutral-800 bg-card/90">
               <CardHeader className="pb-2">
                 <CardTitle>Overview</CardTitle>
@@ -591,8 +586,8 @@ const PropertyDetail = () => {
 const PropertyDetailSkeleton = () => {
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-        <div className="lg:col-span-3">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-2">
           <Skeleton className="h-[400px] w-full rounded-lg" />
           <div className="grid grid-cols-4 gap-2 mt-4">
             {[1, 2, 3, 4].map(i => (
@@ -601,17 +596,21 @@ const PropertyDetailSkeleton = () => {
           </div>
         </div>
         
-        <div className="lg:col-span-2 space-y-4">
-          <Skeleton className="h-[300px] w-full rounded-lg" />
+        <div className="lg:col-span-1">
+          <Skeleton className="h-[500px] w-full rounded-lg" />
         </div>
       </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-        <Skeleton className="lg:col-span-3 h-[200px] w-full rounded-lg" />
-        <Skeleton className="lg:col-span-2 h-[200px] w-full rounded-lg" />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-2">
+          <Skeleton className="h-[400px] w-full rounded-lg" />
+        </div>
+        <div className="lg:col-span-1">
+          <Skeleton className="h-[400px] w-full rounded-lg" />
+        </div>
       </div>
       
-      <Skeleton className="h-[200px] w-full rounded-lg" />
+      <Skeleton className="h-[150px] w-full rounded-lg" />
       
       <Skeleton className="h-12 w-full rounded-lg" />
       
