@@ -31,6 +31,11 @@ export const formatArea = (area: number, unit: string = 'sq.ft'): string => {
   return `${area.toLocaleString()} ${unit}`;
 };
 
+// Helper function to determine if a property is available
+export const isPropertyAvailable = (status: string): boolean => {
+  return status.toLowerCase() === 'available';
+};
+
 // Helper function to map property data structures
 export const mapPropertyData = (property: any) => {
   // Handle different property structures (from API vs mock data)

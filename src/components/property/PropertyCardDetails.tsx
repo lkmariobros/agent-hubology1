@@ -2,11 +2,15 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { 
-  Edit2
+  Edit2, 
+  Tag,
+  DollarSign,
+  Check
 } from 'lucide-react';
 import { Property } from '@/types';
 import { Badge } from '../ui/badge';
 import { cn } from '@/lib/utils';
+import { formatCurrency } from '@/utils/propertyUtils';
 
 interface PropertyCardDetailsProps {
   property: Property;
@@ -24,6 +28,22 @@ export function PropertyCardDetails({ property, onEdit, className }: PropertyCar
         .map(([key, value]) => `${key}: ${value}`)) : 
     [];
 
+  // Get stock info if available
+  const hasStock = property.stock !== undefined;
+  const stockValue = hasStock ? property.stock : null;
+
+  // Format transaction type badge
+  const getTransactionBadge = () => {
+    const type = property.transactionType?.toLowerCase() || 'sale';
+    if (type === 'rent') {
+      return <Badge variant="outline" className="bg-indigo-600/10 text-indigo-600 border-indigo-600/20">Rental</Badge>;
+    } else if (type === 'primary') {
+      return <Badge variant="outline" className="bg-purple-600/10 text-purple-600 border-purple-600/20">Primary</Badge>;
+    } else {
+      return <Badge variant="outline" className="bg-orange-500/10 text-orange-500 border-orange-500/20">Sale</Badge>;
+    }
+  };
+
   return (
     <div className={cn(
       "px-4 pb-4 pt-2 rounded-xl transition-all duration-300 ease-in-out bg-[#121212]",
@@ -32,13 +52,25 @@ export function PropertyCardDetails({ property, onEdit, className }: PropertyCar
       {/* Property metrics tabs */}
       <div className="grid grid-cols-3 gap-1 mb-3">
         <div className="bg-[#201f22] py-2.5 px-3 rounded-md text-center">
-          <div className="text-xs text-orange-500 font-medium">Sales</div>
+          <div className="text-xs text-orange-500 font-medium">{getTransactionBadge()}</div>
         </div>
         <div className="bg-[#181818] py-2.5 px-3 rounded-md text-center">
-          <div className="text-xs text-neutral-500">Views</div>
+          <div className="text-xs text-neutral-500">
+            {property.status === 'available' ? 
+              <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20">Available</Badge> :
+              property.status === 'pending' ?
+                <Badge variant="outline" className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20">Pending</Badge> :
+                <Badge variant="outline" className="bg-red-500/10 text-red-500 border-red-500/20">Sold</Badge>
+            }
+          </div>
         </div>
         <div className="bg-[#181818] py-2.5 px-3 rounded-md text-center">
-          <div className="text-xs text-neutral-500">Stock</div>
+          <div className="text-xs text-neutral-500">
+            {hasStock ? 
+              <Badge variant="outline" className="bg-blue-500/10 text-blue-500 border-blue-500/20">Stock: {stockValue}</Badge> :
+              <span className="text-neutral-400">No Stock</span>
+            }
+          </div>
         </div>
       </div>
       
@@ -61,6 +93,26 @@ export function PropertyCardDetails({ property, onEdit, className }: PropertyCar
           />
         </svg>
       </div>
+
+      {/* Property price highlight */}
+      <div className="mb-4 pt-1 pb-3 border-b border-dashed border-neutral-700/40">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <DollarSign className="h-4 w-4 mr-1 text-orange-500" />
+            <span className="text-sm text-neutral-300">Price</span>
+          </div>
+          <div className="text-lg font-semibold text-white">
+            {formatCurrency(property.price || 0)}
+          </div>
+        </div>
+        
+        {property.featured && (
+          <div className="mt-2 flex items-center text-yellow-500">
+            <Tag className="h-3.5 w-3.5 mr-1.5" />
+            <span className="text-xs">Featured Property</span>
+          </div>
+        )}
+      </div>
      
       {/* Edit button */}
       <Button 
@@ -70,10 +122,10 @@ export function PropertyCardDetails({ property, onEdit, className }: PropertyCar
         onClick={() => onEdit?.(property.id)}
       >
         <Edit2 className="h-3.5 w-3.5 mr-1.5" />
-        <span>Edit Product</span>
+        <span>Edit Property</span>
       </Button>
       
-      {/* Additional property stats if needed - optional section */}
+      {/* Property features */}
       {featureArray.length > 0 && (
         <div className="pt-4 mt-4 border-t border-dashed border-neutral-700/40">
           <h4 className="text-xs text-neutral-500 mb-2">Features</h4>
@@ -90,6 +142,14 @@ export function PropertyCardDetails({ property, onEdit, className }: PropertyCar
           </div>
         </div>
       )}
+      
+      {/* Add listed by information */}
+      <div className="pt-4 mt-4 border-t border-dashed border-neutral-700/40">
+        <div className="flex items-center text-xs text-neutral-500">
+          <span>Listed by: </span>
+          <span className="ml-1 text-neutral-300">{property.listedBy || property.agent?.name || 'Unknown Agent'}</span>
+        </div>
+      </div>
     </div>
   );
 }
