@@ -35,11 +35,9 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <CommissionBreakdown
-          totalCommission={89500}
-          agencyCommission={31000}
-          agentCommission={58500}
           personalCommission={58500}
           overrideCommission={31000}
+          totalCommission={89500}
         />
         
         <CommissionCalculator

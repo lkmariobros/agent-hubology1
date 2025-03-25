@@ -1,94 +1,26 @@
-import { getPublicImageUrl } from '@/integrations/supabase/storage';
 import { Property } from '@/types';
 
 /**
- * Maps the raw property data from Supabase to the format expected by the UI
+ * Format a price for display
  */
-export const mapPropertyData = (rawProperty: any): Property => {
-  // Process images - if they're objects from Supabase, extract their paths
-  const images = rawProperty.property_images && Array.isArray(rawProperty.property_images)
-    ? rawProperty.property_images
-        .sort((a: any, b: any) => (a.display_order || 0) - (b.display_order || 0))
-        .map((img: any) => img.storage_path || '')
-    : [];
-
-  // Create the property object in the format expected by the UI
-  return {
-    id: rawProperty.id,
-    title: rawProperty.title || 'Untitled Property',
-    description: rawProperty.description || '',
-    type: rawProperty.property_types?.name || rawProperty.property_type || 'Residential',
-    subtype: rawProperty.subtype || '',
-    status: rawProperty.property_statuses?.name || rawProperty.status || 'Available',
-    transactionType: rawProperty.transaction_types?.name || rawProperty.transaction_type || 'For Sale',
-    price: rawProperty.price || 0,
-    rentalRate: rawProperty.rental_rate || 0,
-    address: {
-      street: rawProperty.street || '',
-      city: rawProperty.city || '',
-      state: rawProperty.state || '',
-      zip: rawProperty.zip || '',
-      country: rawProperty.country || 'Malaysia',
-    },
-    features: {
-      bedrooms: rawProperty.bedrooms || 0,
-      bathrooms: rawProperty.bathrooms || 0,
-      squareFeet: rawProperty.built_up_area || rawProperty.floor_area || 0,
-      landSize: rawProperty.land_size || rawProperty.land_area || 0,
-    },
-    agent: {
-      id: rawProperty.agent_id || '',
-      name: rawProperty.agent_name || 'Agent',
-    },
-    images: images,
-    createdAt: rawProperty.created_at || new Date().toISOString(),
-    updatedAt: rawProperty.updated_at || new Date().toISOString(),
-    featured: !!rawProperty.featured,
-    size: rawProperty.built_up_area || rawProperty.floor_area || 0,
-    area: rawProperty.land_size || rawProperty.land_area || 0,
-    bedrooms: rawProperty.bedrooms || 0,
-    bathrooms: rawProperty.bathrooms || 0,
-    // Add stock data if this is a development property
-    stock: rawProperty.stock_total 
-      ? {
-          total: rawProperty.stock_total || 0,
-          available: rawProperty.stock_available || 0,
-        }
-      : undefined,
-  };
-};
-
-/**
- * Formats a currency value with appropriate formatting
- */
-export const formatCurrency = (value: number): string => {
-  return new Intl.NumberFormat('en-MY', {
-    style: 'currency',
-    currency: 'MYR',
-    maximumFractionDigits: 0,
-  }).format(value);
-};
-
-/**
- * Gets the cover image URL for a property
- */
-export const getPropertyCoverImage = (property: Property): string => {
-  if (!property.images || property.images.length === 0) {
-    return '';
+export const formatPrice = (price: number): string => {
+  if (price >= 1000000) {
+    return (price / 1000000).toFixed(2) + 'M';
+  } else {
+    return price.toLocaleString();
   }
-  
-  const coverImage = property.images[0];
-  
-  // Check if the image is a Supabase path
-  if (typeof coverImage === 'string' && coverImage.startsWith('property-images/')) {
-    return getPublicImageUrl(coverImage);
-  }
-  
-  return coverImage;
 };
 
 /**
- * Calculate the percentage of available stock
+ * Format a price in currency format
+ */
+export const formatCurrency = (price: number | null | undefined): string => {
+  if (price === null || price === undefined) return 'RM 0';
+  return `RM ${price.toLocaleString()}`;
+};
+
+/**
+ * Calculate stock availability percentage
  */
 export const calculateStockPercentage = (available: number, total: number): number => {
   if (total === 0) return 0;
@@ -96,64 +28,88 @@ export const calculateStockPercentage = (available: number, total: number): numb
 };
 
 /**
- * Get a label for stock status based on percentage
+ * Get stock status label based on percentage
  */
 export const getStockStatusLabel = (percentage: number): string => {
   if (percentage === 0) return 'Sold Out';
-  if (percentage <= 25) return 'Limited';
+  if (percentage <= 25) return 'Low Stock';
   if (percentage <= 50) return 'Selling Fast';
   if (percentage <= 75) return 'Available';
-  return 'Good Availability';
+  return 'Fully Available';
 };
 
 /**
- * Get property statistics for dashboard
- */
-export const getPropertyStats = (properties: Property[]) => {
-  const stats = {
-    total: properties.length,
-    residential: 0,
-    commercial: 0,
-    industrial: 0,
-    land: 0,
-    available: 0,
-    pending: 0,
-    sold: 0,
-  };
-
-  properties.forEach(property => {
-    // Count by type
-    if (property.type.toLowerCase() === 'residential') stats.residential++;
-    else if (property.type.toLowerCase() === 'commercial') stats.commercial++;
-    else if (property.type.toLowerCase() === 'industrial') stats.industrial++;
-    else if (property.type.toLowerCase() === 'land') stats.land++;
-
-    // Count by status
-    if (property.status.toLowerCase() === 'available') stats.available++;
-    else if (property.status.toLowerCase() === 'pending') stats.pending++;
-    else if (property.status.toLowerCase() === 'sold') stats.sold++;
-  });
-
-  return stats;
-};
-
-/**
- * Format price with appropriate suffixes (K, M)
- */
-export const formatPrice = (price: number): string => {
-  if (price >= 1000000) {
-    return (price / 1000000).toFixed(1) + 'M';
-  } else if (price >= 1000) {
-    return (price / 1000).toFixed(0) + 'K';
-  }
-  return price.toString();
-};
-
-/**
- * Get stock status class
+ * Get CSS class for stock status based on percentage
  */
 export const getStockStatusClass = (percentage: number): string => {
-  if (percentage >= 70) return 'text-green-500';
-  if (percentage >= 30) return 'text-yellow-500';
-  return 'text-red-500';
+  if (percentage === 0) return 'text-red-500 bg-red-500/10 border-red-500/20';
+  if (percentage <= 25) return 'text-orange-500 bg-orange-500/10 border-orange-500/20';
+  if (percentage <= 50) return 'text-yellow-500 bg-yellow-500/10 border-yellow-500/20';
+  if (percentage <= 75) return 'text-blue-500 bg-blue-500/10 border-blue-500/20';
+  return 'text-green-500 bg-green-500/10 border-green-500/20';
+};
+
+/**
+ * Map property data from Supabase to our internal Property type
+ */
+export const mapPropertyData = (propertyData: any): Property => {
+  // Extract image URLs from property_images array
+  const images = propertyData.property_images 
+    ? propertyData.property_images
+        .sort((a: any, b: any) => a.display_order - b.display_order)
+        .map((img: any) => {
+          // Get public URL from storage_path
+          if (img.storage_path) {
+            const baseUrl = 'https://synabhmsxsvsxkyzhfss.supabase.co/storage/v1/object/public/property-images/';
+            return baseUrl + img.storage_path;
+          }
+          return '/placeholder.svg';
+        })
+    : [];
+
+  // Get property type from relation or fallback
+  const propertyType = propertyData.property_types?.name || 'Residential';
+
+  // Get transaction type from relation or fallback 
+  const transactionType = propertyData.transaction_types?.name || 'Sale';
+
+  // Get status from relation or fallback
+  const status = propertyData.property_statuses?.name || 'Available';
+
+  // Combine all data
+  return {
+    id: propertyData.id,
+    title: propertyData.title,
+    description: propertyData.description || '',
+    type: propertyType,
+    status: status,
+    transactionType: transactionType,
+    price: propertyData.price || propertyData.rental_rate || 0,
+    rentalRate: propertyData.rental_rate || 0,
+    address: {
+      street: propertyData.street || '',
+      city: propertyData.city || '',
+      state: propertyData.state || '',
+      zip: propertyData.zip || '',
+      country: propertyData.country || 'Malaysia'
+    },
+    features: {
+      bedrooms: propertyData.bedrooms || 0,
+      bathrooms: propertyData.bathrooms || 0,
+      squareFeet: propertyData.built_up_area || propertyData.floor_area || propertyData.land_area || 0,
+      landSize: propertyData.land_size || 0
+    },
+    agent: {
+      id: propertyData.agent_id || '',
+      name: 'Agent Name', // This would come from agent relation
+    },
+    images: images,
+    createdAt: propertyData.created_at || new Date().toISOString(),
+    updatedAt: propertyData.updated_at || new Date().toISOString(),
+    featured: propertyData.featured || false,
+    // Add these fields for direct access
+    size: propertyData.built_up_area || propertyData.floor_area || propertyData.land_area || 0,
+    bedrooms: propertyData.bedrooms || 0,
+    bathrooms: propertyData.bathrooms || 0
+  };
 };

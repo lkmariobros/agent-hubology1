@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/providers/AuthProvider';
+import { useAuth } from '@/hooks/useAuth';
 import AuthForm from '../AuthForm';
 
 interface ProtectedRouteProps {
@@ -15,13 +15,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   requireAdmin = false,
   redirectTo = '/' 
 }) => {
-  const { user, isAdmin, isAuthenticated } = useAuth();
+  const { user, loading, isAdmin } = useAuth();
   const location = useLocation();
 
-  // Show loading state while checking authentication
-  const loading = false; // This is now handled directly within the AuthProvider
-
   if (loading) {
+    // Show loading state while checking authentication
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -30,7 +28,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   // If user is not authenticated, show auth form
-  if (!isAuthenticated) {
+  if (!user) {
     return (
       <div className="max-w-md mx-auto my-8">
         <h1 className="text-2xl font-semibold mb-6 text-center">Authentication Required</h1>

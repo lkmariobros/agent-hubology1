@@ -1,200 +1,158 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
+import { Button } from "@/components/ui/button";
 import { 
-  BedDouble, 
-  Bath, 
-  SquareFeet, 
-  Heart, 
-  Share2,
-  Home,
-  MapPin,
-  Calendar,
-  User
+  Edit2, 
+  Tag,
+  DollarSign,
+  Check
 } from 'lucide-react';
-import { Property } from '@/types/property';
-import { formatCurrency } from '@/utils/format';
-import { PropertyStock } from '@/types';
+import { Property, PropertyStock } from '@/types';
+import { Badge } from '../ui/badge';
+import { cn } from '@/lib/utils';
+import { formatCurrency } from '@/utils/propertyUtils';
+import { PropertyStockInfo } from './PropertyStockInfo';
 
 interface PropertyCardDetailsProps {
   property: Property;
-  stock?: PropertyStock;
-  showActions?: boolean;
-  isExpanded?: boolean;
+  onEdit?: (id: string) => void;
+  className?: string;
 }
 
-const PropertyCardDetails: React.FC<PropertyCardDetailsProps> = ({ 
-  property, 
-  stock,
-  showActions = true,
-  isExpanded = false
-}) => {
-  // Format price for display
-  const formattedPrice = formatCurrency(property.price);
-  
-  // Format address if available
-  const formatAddress = () => {
-    if (!property.address) return 'Address not available';
-    
-    const { street, city, state, zip, country } = property.address;
-    const addressParts = [street, city, state, zip, country].filter(Boolean);
-    return addressParts.join(', ');
+export function PropertyCardDetails({ property, onEdit, className }: PropertyCardDetailsProps) {
+  // Create a feature array from property.features object
+  const featureArray = property.features ? 
+    (Array.isArray(property.features) ? 
+      property.features : 
+      Object.entries(property.features)
+        .filter(([_, value]) => value !== undefined && value !== null && value !== 0)
+        .map(([key, value]) => `${key}: ${value}`)) : 
+    [];
+
+  // Format transaction type badge
+  const getTransactionBadge = () => {
+    const type = property.transactionType?.toLowerCase() || 'sale';
+    if (type === 'rent') {
+      return <Badge variant="outline" className="bg-indigo-600/10 text-indigo-600 border-indigo-600/20">Rental</Badge>;
+    } else if (type === 'primary') {
+      return <Badge variant="outline" className="bg-purple-600/10 text-purple-600 border-purple-600/20">Primary</Badge>;
+    } else {
+      return <Badge variant="outline" className="bg-orange-500/10 text-orange-500 border-orange-500/20">Sale</Badge>;
+    }
   };
-  
+
   return (
-    <div className="p-4">
-      <div className="flex flex-col space-y-4">
-        {/* Top Section - Property type and price */}
-        <div className="flex justify-between items-start">
-          <div>
-            <Badge 
-              variant="outline" 
-              className="bg-primary/10 text-primary border-primary/20"
-            >
-              {property.type.charAt(0).toUpperCase() + property.type.slice(1)}
-            </Badge>
-            {property.subtype && (
-              <Badge 
-                variant="outline" 
-                className="ml-2 bg-muted/50"
-              >
-                {property.subtype}
-              </Badge>
-            )}
-            {property.status && (
-              <Badge 
-                variant={property.status.toLowerCase() === 'available' ? 'success' : 'outline'}
-                className="ml-2"
-              >
-                {property.status}
-              </Badge>
-            )}
-          </div>
-          <div className="text-xl font-bold">{formattedPrice}</div>
+    <div className={cn(
+      "px-4 pb-4 pt-2 rounded-xl transition-all duration-300 ease-in-out bg-[#121212]",
+      className
+    )}>
+      {/* Property metrics tabs */}
+      <div className="grid grid-cols-3 gap-1 mb-3">
+        <div className="bg-[#201f22] py-2.5 px-3 rounded-md text-center">
+          <div className="text-xs text-orange-500 font-medium">{getTransactionBadge()}</div>
         </div>
-        
-        {/* Property Title */}
-        {!isExpanded && (
-          <h3 className="text-lg font-medium line-clamp-2">{property.title}</h3>
-        )}
-        
-        {/* Property Details */}
-        <div className="flex flex-wrap gap-6">
-          {property.bedrooms !== undefined && (
-            <div className="flex items-center gap-1">
-              <BedDouble className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">{property.bedrooms} Beds</span>
-            </div>
-          )}
-          
-          {property.bathrooms !== undefined && (
-            <div className="flex items-center gap-1">
-              <Bath className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">{property.bathrooms} Baths</span>
-            </div>
-          )}
-          
-          {property.size !== undefined && (
-            <div className="flex items-center gap-1">
-              <SquareFeet className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">{property.size} sqft</span>
-            </div>
+        <div className="bg-[#181818] py-2.5 px-3 rounded-md text-center">
+          <div className="text-xs text-neutral-500">
+            {property.status.toLowerCase() === 'available' ? 
+              <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20">Available</Badge> :
+              property.status.toLowerCase() === 'pending' ?
+                <Badge variant="outline" className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20">Pending</Badge> :
+                <Badge variant="outline" className="bg-red-500/10 text-red-500 border-red-500/20">Sold</Badge>
+            }
+          </div>
+        </div>
+        <div className="bg-[#181818] py-2.5 px-3 rounded-md text-center">
+          {property.stock ? (
+            <PropertyStockInfo stock={property.stock} compact />
+          ) : (
+            <div className="text-xs text-neutral-400">No Stock</div>
           )}
         </div>
-        
-        {/* Address if available */}
-        {property.address && (
-          <div className="flex items-start gap-1 text-sm text-muted-foreground">
-            <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0" />
-            <span>{formatAddress()}</span>
+      </div>
+      
+      {/* Activity graph with dashed border below */}
+      <div className="mb-4 pt-1 pb-3 border-b border-dashed border-neutral-700/40">
+        <svg width="100%" height="80" viewBox="0 0 100 80" preserveAspectRatio="none">
+          <path
+            d="M0,40 C5,20 15,60 25,35 C35,15 45,55 55,40 C65,25 75,55 85,35 C95,15 100,40 100,40"
+            fill="none"
+            stroke="rgba(249, 115, 22, 0.1)"
+            strokeWidth="4"
+            strokeLinecap="round"
+          />
+          <path
+            d="M0,40 C5,20 15,60 25,35 C35,15 45,55 55,40 C65,25 75,55 85,35 C95,15 100,40 100,40"
+            fill="none"
+            stroke="#f97316"
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
+        </svg>
+      </div>
+
+      {/* Property price highlight */}
+      <div className="mb-4 pt-1 pb-3 border-b border-dashed border-neutral-700/40">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <DollarSign className="h-4 w-4 mr-1 text-orange-500" />
+            <span className="text-sm text-neutral-300">Price</span>
           </div>
-        )}
-        
-        {/* Stock Information if provided */}
-        {stock && (
-          <div className="grid grid-cols-4 gap-2 mt-2">
-            <div className="text-center p-2 bg-muted/30 rounded">
-              <div className="text-xs text-muted-foreground">Total</div>
-              <div className="font-medium">{stock.total}</div>
-            </div>
-            <div className="text-center p-2 bg-green-50 rounded">
-              <div className="text-xs text-green-600">Available</div>
-              <div className="font-medium text-green-700">{stock.available}</div>
-            </div>
-            <div className="text-center p-2 bg-amber-50 rounded">
-              <div className="text-xs text-amber-600">Reserved</div>
-              <div className="font-medium text-amber-700">{stock.reserved}</div>
-            </div>
-            <div className="text-center p-2 bg-red-50 rounded">
-              <div className="text-xs text-red-600">Sold</div>
-              <div className="font-medium text-red-700">{stock.sold}</div>
-            </div>
+          <div className="text-lg font-semibold text-white">
+            {formatCurrency(property.price || 0)}
           </div>
-        )}
+        </div>
         
-        {/* Expanded Details - only shown when isExpanded is true */}
-        {isExpanded && (
-          <>
-            <Separator />
-            
-            <div className="space-y-4">
-              <div>
-                <h4 className="text-sm font-medium text-muted-foreground mb-1">Description</h4>
-                <p className="text-sm">{property.description}</p>
-              </div>
-              
-              {property.features && property.features.length > 0 && (
-                <div>
-                  <h4 className="text-sm font-medium text-muted-foreground mb-2">Features</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {property.features.map((feature, index) => (
-                      <Badge key={index} variant="outline" className="bg-muted/30">
-                        {feature}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              <div className="flex flex-wrap gap-4 text-sm">
-                {property.createdAt && (
-                  <div className="flex items-center gap-1">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <span>Listed: {new Date(property.createdAt).toLocaleDateString()}</span>
-                  </div>
-                )}
-                
-                {property.listedBy && (
-                  <div className="flex items-center gap-1">
-                    <User className="h-4 w-4 text-muted-foreground" />
-                    <span>Agent: {typeof property.listedBy === 'string' ? property.listedBy : property.listedBy.name}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </>
-        )}
-        
-        {/* Action Buttons */}
-        {showActions && (
-          <div className="flex space-x-2 pt-2">
-            <Button variant="outline" className="flex-1 flex items-center justify-center">
-              <Home className="mr-2 h-4 w-4" />
-              View Details
-            </Button>
-            <Button variant="ghost" size="icon" className="rounded-full">
-              <Heart className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="icon" className="rounded-full">
-              <Share2 className="h-4 w-4" />
-            </Button>
+        {property.featured && (
+          <div className="mt-2 flex items-center text-yellow-500">
+            <Tag className="h-3.5 w-3.5 mr-1.5" />
+            <span className="text-xs">Featured Property</span>
           </div>
         )}
       </div>
+     
+      {/* Stock information for property developments */}
+      {property.stock && property.stock.total > 1 && (
+        <div className="mb-4 pt-1 pb-3 border-b border-dashed border-neutral-700/40">
+          <PropertyStockInfo stock={property.stock} />
+        </div>
+      )}
+     
+      {/* Edit button */}
+      <Button 
+        variant="default" 
+        size="sm" 
+        className="bg-[#222222] hover:bg-[#2c2c2c] text-white border-0 rounded-md h-10 w-full"
+        onClick={() => onEdit?.(property.id)}
+      >
+        <Edit2 className="h-3.5 w-3.5 mr-1.5" />
+        <span>Edit Property</span>
+      </Button>
+      
+      {/* Property features */}
+      {featureArray.length > 0 && (
+        <div className="pt-4 mt-4 border-t border-dashed border-neutral-700/40">
+          <h4 className="text-xs text-neutral-500 mb-2">Features</h4>
+          <div className="flex flex-wrap gap-1.5">
+            {featureArray.map((feature, index) => (
+              <Badge 
+                key={index}
+                variant="outline" 
+                className="text-xs bg-[#181818] border-[#333333] text-neutral-400"
+              >
+                {feature}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
+      
+      {/* Add listed by information */}
+      <div className="pt-4 mt-4 border-t border-dashed border-neutral-700/40">
+        <div className="flex items-center text-xs text-neutral-500">
+          <span>Listed by: </span>
+          <span className="ml-1 text-neutral-300">{property.listedBy || property.agent?.name || 'Unknown Agent'}</span>
+        </div>
+      </div>
     </div>
   );
-};
-
-export default PropertyCardDetails;
+}

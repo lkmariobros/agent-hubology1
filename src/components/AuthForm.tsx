@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/providers/AuthProvider';
+import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
 const AuthForm = () => {
@@ -14,7 +14,7 @@ const AuthForm = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { signIn, signUp, resetPassword } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,11 +26,11 @@ const AuthForm = () => {
     
     try {
       setLoading(true);
-      await login(email, password);
+      await signIn(email, password);
       navigate('/dashboard');
     } catch (error) {
       console.error('Login error:', error);
-      // Error handling already done in login function
+      // Error handling already done in signIn function
     } finally {
       setLoading(false);
     }
@@ -46,12 +46,11 @@ const AuthForm = () => {
     
     try {
       setLoading(true);
-      // For now, just notify user that sign up is not implemented
-      // since our current AuthProvider doesn't support sign up
-      toast.info('Sign up functionality coming soon');
+      await signUp(email, password);
       setIsLogin(true); // Switch to login view
     } catch (error) {
       console.error('Registration error:', error);
+      // Error handling already done in signUp function
     } finally {
       setLoading(false);
     }
@@ -65,10 +64,10 @@ const AuthForm = () => {
     
     try {
       setLoading(true);
-      // For now, just notify user that reset password is not implemented
-      toast.info('Password reset functionality coming soon');
+      await resetPassword(email);
     } catch (error) {
       console.error('Reset password error:', error);
+      // Error handling already done in resetPassword function
     } finally {
       setLoading(false);
     }

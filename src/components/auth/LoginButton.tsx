@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { useAuth } from '@/providers/AuthProvider';
+import { useAuth } from '@/hooks/useAuth';
 import {
   Dialog,
   DialogContent,
@@ -21,7 +21,7 @@ export function LoginButton() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [isRegister, setIsRegister] = useState(false);
-  const { signIn, signOut, user } = useAuth();
+  const { signIn, signUp, signOut, user } = useAuth();
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,8 +33,7 @@ export function LoginButton() {
     
     try {
       setLoading(true);
-      // Since signUp doesn't exist in our auth context yet, we'll use signIn instead
-      await signIn(email, password);
+      await signUp(email, password);
       
       toast.success('Registration successful! Please check your email for verification.');
       setIsRegister(false); // Switch back to login view

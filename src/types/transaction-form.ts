@@ -1,39 +1,64 @@
 
-import { AgentRank } from '@/types';
-
-// Transaction Type
-export type TransactionType = 'Sale' | 'Rent' | 'Developer';
-
-// Client details interfaces
-export interface ClientDetails {
-  name: string;
-  email: string;
-  phone: string;
+// Transaction form types
+export interface TransactionFormData {
+  id?: string;
+  transactionType: TransactionType;
+  transactionDate: Date;
+  closingDate?: Date;
+  propertyId: string;
+  status: TransactionStatus;
+  property?: PropertyInfo;
+  buyer?: ClientInfo;
+  seller?: ClientInfo;
+  landlord?: ClientInfo;
+  tenant?: ClientInfo;
+  developer?: DeveloperInfo;
+  transactionValue: number;
+  commissionRate: number;
+  commissionAmount: number;
+  agentTier?: AgentRank;
+  coBroking?: CoBrokingInfo;
   notes?: string;
 }
 
-// Co-broking information
+export interface PropertyInfo {
+  id: string;
+  title: string;
+  address?: string;
+  type?: string;
+  price?: number;
+  rentalRate?: number;
+}
+
+export interface ClientInfo {
+  name: string;
+  email?: string;
+  phone?: string;
+  notes?: string;
+}
+
+export interface DeveloperInfo {
+  name: string;
+  company?: string;
+  email?: string;
+  phone?: string;
+  notes?: string;
+}
+
 export interface CoBrokingInfo {
   enabled: boolean;
-  agentName: string;
-  agentCompany: string;
-  agentContact: string;
+  agentName?: string;
+  agentCompany?: string;
+  agentContact?: string;
   commissionSplit: number;
-  credentialsVerified: boolean;
+  credentialsVerified?: boolean;
 }
 
-// Property details interface
-export interface PropertyDetails {
-  title: string;
-  address: string;
-  type: string;
-  price: number;
-}
+export type TransactionType = 'Sale' | 'Rent' | 'Developer';
+export type TransactionStatus = 'Draft' | 'Pending' | 'In Progress' | 'Completed' | 'Cancelled';
+export type AgentRank = 'Advisor' | 'Sales Leader' | 'Team Leader' | 'Group Leader' | 'Supreme Leader';
+export type DocumentType = 'Contract' | 'Agreement' | 'Invoice' | 'Receipt' | 'Other';
 
-// Document type
-export type DocumentType = 'Contract' | 'SPA' | 'Receipt' | 'ID' | 'Other';
-
-// Document interface
 export interface TransactionDocument {
   id?: string;
   name: string;
@@ -42,87 +67,26 @@ export interface TransactionDocument {
   url?: string;
 }
 
-// Transaction form data
-export interface TransactionFormData {
-  id?: string;
-  transactionType: TransactionType;
-  transactionDate: Date;
-  closingDate?: Date;
-  status?: string;
-  transactionValue: number;
-  commissionRate: number;
-  commissionAmount: number;
-  notes: string;
-  propertyId: string;
-  property?: PropertyDetails;
-  coBroking: CoBrokingInfo;
-  // Client information based on transaction type
-  buyer?: ClientDetails;
-  seller?: ClientDetails;
-  landlord?: ClientDetails;
-  tenant?: ClientDetails;
-  developer?: ClientDetails;
+export interface CommissionBreakdown {
+  totalCommission: number;
+  agencyShare: number;
+  agentShare: number;
+  ourAgencyCommission?: number;
+  coAgencyCommission?: number;
   agentTier?: AgentRank;
+  agentCommissionPercentage?: number;
+  // These are used for display purposes in CommissionBreakdownCard
+  transactionValue?: number;
+  commissionRate?: number;
 }
 
-// Transaction form state
 export interface TransactionFormState {
   formData: TransactionFormData;
   documents: TransactionDocument[];
+  errors: Record<string, string>;
+  // Additional state properties
   currentStep: number;
   isSubmitting: boolean;
   isDirty: boolean;
   lastSaved: Date | null;
-  errors: Record<string, string>;
-}
-
-// Commission breakdown interface
-export interface CommissionBreakdown {
-  totalCommission: number;
-  agencyCommission: number;
-  agentCommission: number;
-  agentTier?: AgentRank;
-  agentCommissionPercentage?: number;
-  personalCommission?: number;
-  overrideCommission?: number;
-  agentShare?: number;
-  agencyShare?: number;
-  transactionValue?: number;
-  commissionRate?: number;
-  ourAgencyCommission?: number;
-  coAgencyCommission?: number;
-}
-
-// For form compatibility with React Hook Form
-export interface TransactionFormValues {
-  transactionType?: string;
-  transactionInformation?: {
-    transactionDate?: string | Date;
-    spaDate?: string | Date;
-    price?: number;
-    address?: string;
-    propertyType?: string;
-  };
-  clientInformation?: {
-    name: string;
-    email: string;
-    phone: string;
-    idNumber?: string;
-  };
-  sellerInformation?: {
-    name: string;
-    email: string;
-    phone: string;
-    idNumber?: string;
-  };
-  agentDetails?: {
-    agentId?: string;
-    commissionRate?: number;
-    coAgent?: boolean;
-    coAgentName?: string;
-    coAgentCompany?: string;
-    coAgentCommissionPercentage?: number;
-  };
-  additionalNotes?: string;
-  documents?: { id: string; name: string; path: string; type: string }[];
 }

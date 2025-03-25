@@ -1,8 +1,9 @@
 
 import React, { useEffect } from 'react';
 import { Outlet, Navigate, useLocation } from 'react-router-dom';
+import { BellRing } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useAuth } from '@/providers/AuthProvider';
+import { useAuth } from '@/hooks/useAuth';
 
 import {
   SidebarProvider,
@@ -21,11 +22,10 @@ import {
 import { Button } from '@/components/ui/button';
 import { AdminSidebar } from './AdminSidebar';
 import { ThemeToggle } from '../theme/ThemeToggle';
-import NotificationBell from './NotificationBell';
 
 const AdminLayout = () => {
   const isMobile = useIsMobile();
-  const { user, isAdmin, logout } = useAuth();
+  const { user, loading, signOut, isAdmin } = useAuth();
   const location = useLocation();
   
   // Add data-route attribute to body
@@ -38,8 +38,6 @@ const AdminLayout = () => {
   }, [location.pathname]);
   
   // If still loading, show loading indicator
-  const loading = false; // This is now handled directly within the AuthProvider
-  
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -70,7 +68,9 @@ const AdminLayout = () => {
             <div className="flex items-center space-x-2">
               <ThemeToggle />
               
-              <NotificationBell />
+              <Button variant="ghost" size="icon" className="text-muted-foreground">
+                <BellRing className="h-5 w-5" />
+              </Button>
               
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -83,7 +83,7 @@ const AdminLayout = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>{user?.name || user?.email?.split('@')[0] || 'Admin'}</DropdownMenuLabel>
+                  <DropdownMenuLabel>{user?.email?.split('@')[0] || 'Admin'}</DropdownMenuLabel>
                   <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
                     {user?.email || 'admin@example.com'}
                   </DropdownMenuLabel>
@@ -91,7 +91,7 @@ const AdminLayout = () => {
                   <DropdownMenuItem onClick={() => window.location.href = '/admin/settings'}>Admin Settings</DropdownMenuItem>
                   <DropdownMenuItem onClick={() => window.location.href = '/admin/system'}>System Configuration</DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={logout}>Logout</DropdownMenuItem>
+                  <DropdownMenuItem onClick={signOut}>Logout</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>

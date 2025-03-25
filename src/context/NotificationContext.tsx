@@ -1,114 +1,142 @@
 
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 import { Notification } from '@/types/notification';
-import { useAuth } from '@/providers/AuthProvider';
+import { useNotificationActions } from '@/hooks/useNotificationActions';
+import { useNotificationSubscription } from '@/hooks/useNotificationSubscription';
+import { toast } from 'sonner';
 
 interface NotificationContextType {
   notifications: Notification[];
   unreadCount: number;
-  markAsRead: (id: string) => void;
-  markAllAsRead: () => void;
-  addNotification: (notification: Omit<Notification, 'id' | 'createdAt'>) => void;
-  deleteNotification: (id: string) => void;
-  clearAll: () => void;
-  isLoading: boolean;
+  markAsRead: (id: string) => Promise<void>;
+  markAllAsRead: () => Promise<void>;
+  deleteNotification: (id: string) => Promise<void>;
+  refreshNotifications: () => Promise<void>;
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
+  const userId = user?.id || null;
   
-  // Get unread count
-  const unreadCount = notifications.filter(notification => !notification.read).length;
-  
-  // Load notifications when user changes
+  const { 
+    markAsRead: markNotificationAsRead, 
+    markAllAsRead: markAllNotificationsAsRead,
+    deleteNotification: deleteUserNotification,
+    refreshNotifications: fetchUserNotifications
+  } = useNotificationActions();
+
+  // Function to add a new notification to the state
+  const addNotification = useCallback((notification: Notification) => {
+    setNotifications(prev => {
+      // Check if notification already exists to prevent duplicates
+      const exists = prev.some(n => n.id === notification.id);
+      if (exists) return prev;
+      return [notification, ...prev];
+    });
+    
+    // Show toast for new notifications that aren't already in the list
+    if (!notification.read) {
+      toast(notification.title, {
+        description: notification.message,
+      });
+    }
+  }, []);
+
+  // Use subscription hook for real-time notifications
+  useNotificationSubscription(userId, addNotification);
+
+  // Initialize notifications
   useEffect(() => {
-    const fetchNotifications = async () => {
-      if (!user) {
+    const loadNotifications = async () => {
+      if (!userId) {
         setNotifications([]);
         return;
       }
       
-      setIsLoading(true);
       try {
-        // In a real app, fetch from an API
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // Demo notifications
-        const mockNotifications: Notification[] = [
-          {
-            id: '1',
-            title: 'New transaction',
-            message: 'A new transaction has been submitted for your approval',
-            type: 'transaction',
-            read: false,
-            createdAt: new Date(Date.now() - 3600000).toISOString(),
-          },
-          {
-            id: '2',
-            title: 'Commission approved',
-            message: 'Your commission for Property XYZ has been approved',
-            type: 'commission',
-            read: true,
-            createdAt: new Date(Date.now() - 86400000).toISOString(),
-          },
-        ];
-        
-        setNotifications(mockNotifications);
+        const data = await fetchUserNotifications(userId);
+        setNotifications(data);
       } catch (error) {
-        console.error('Error fetching notifications:', error);
-      } finally {
-        setIsLoading(false);
+        console.error('Error loading notifications:', error);
+        toast.error('Failed to load notifications');
       }
     };
     
-    fetchNotifications();
-  }, [user]);
-  
-  // Mark notification as read
-  const markAsRead = (id: string) => {
-    setNotifications(prev => 
-      prev.map(notification => 
-        notification.id === id 
-          ? { ...notification, read: true } 
-          : notification
-      )
-    );
+    loadNotifications();
+  }, [userId, fetchUserNotifications]);
+
+  // Mark a notification as read
+  const markAsRead = async (id: string) => {
+    try {
+      const success = await markNotificationAsRead(id);
+      
+      if (success) {
+        setNotifications(prev =>
+          prev.map(notification =>
+            notification.id === id ? { ...notification, read: true } : notification
+          )
+        );
+      }
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+      toast.error('Failed to mark notification as read');
+    }
   };
-  
+
   // Mark all notifications as read
-  const markAllAsRead = () => {
-    setNotifications(prev => 
-      prev.map(notification => ({ ...notification, read: true }))
-    );
-  };
-  
-  // Add a new notification
-  const addNotification = (notification: Omit<Notification, 'id' | 'createdAt'>) => {
-    const newNotification: Notification = {
-      ...notification,
-      id: Math.random().toString(36).substring(2, 9),
-      createdAt: new Date().toISOString(),
-    };
+  const markAllAsRead = async () => {
+    if (!userId) return;
     
-    setNotifications(prev => [newNotification, ...prev]);
+    try {
+      const success = await markAllNotificationsAsRead(userId);
+      
+      if (success) {
+        setNotifications(prev =>
+          prev.map(notification => ({ ...notification, read: true }))
+        );
+      }
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error);
+      toast.error('Failed to mark all notifications as read');
+    }
   };
-  
+
   // Delete a notification
-  const deleteNotification = (id: string) => {
-    setNotifications(prev => 
-      prev.filter(notification => notification.id !== id)
-    );
+  const deleteNotification = async (id: string) => {
+    try {
+      const success = await deleteUserNotification(id);
+      
+      if (success) {
+        setNotifications(prev => 
+          prev.filter(notification => notification.id !== id)
+        );
+      }
+    } catch (error) {
+      console.error('Error deleting notification:', error);
+      toast.error('Failed to delete notification');
+    }
   };
-  
-  // Clear all notifications
-  const clearAll = () => {
-    setNotifications([]);
+
+  // Refresh notifications
+  const refreshNotifications = async () => {
+    if (!userId) return;
+    
+    try {
+      const data = await fetchUserNotifications(userId);
+      setNotifications(data);
+    } catch (error) {
+      console.error('Error refreshing notifications:', error);
+      toast.error('Failed to refresh notifications');
+    }
   };
-  
+
+  // Calculate unread count
+  const unreadCount = notifications.filter(notification => !notification.read).length;
+
   return (
     <NotificationContext.Provider
       value={{
@@ -116,10 +144,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         unreadCount,
         markAsRead,
         markAllAsRead,
-        addNotification,
         deleteNotification,
-        clearAll,
-        isLoading,
+        refreshNotifications
       }}
     >
       {children}

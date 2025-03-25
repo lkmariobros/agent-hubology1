@@ -1,85 +1,94 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Bell } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
+
 import { useNotifications } from '@/context/NotificationContext';
-import { formatDistanceToNow } from 'date-fns';
-import { ScrollArea } from '@/components/ui/scroll-area';
 
 const NotificationBell: React.FC = () => {
-  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
-  
-  const hasUnread = unreadCount > 0;
-  
+  const [open, setOpen] = useState(false);
+  const { 
+    notifications, 
+    unreadCount, 
+    markAsRead, 
+    markAllAsRead, 
+    refreshNotifications 
+  } = useNotifications();
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="relative"
+          onClick={() => {
+            refreshNotifications();
+          }}
+        >
           <Bell className="h-5 w-5" />
-          {hasUnread && (
-            <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] text-white">
-              {unreadCount > 9 ? '9+' : unreadCount}
-            </span>
+          {unreadCount > 0 && (
+            <Badge 
+              variant="destructive" 
+              className="absolute -top-1 -right-1 min-w-[18px] h-5 p-0 flex items-center justify-center text-xs"
+            >
+              {unreadCount}
+            </Badge>
           )}
         </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-80">
-        <DropdownMenuLabel className="flex justify-between items-center">
-          <span>Notifications</span>
-          {hasUnread && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="h-7 text-xs hover:bg-secondary" 
-              onClick={() => markAllAsRead()}
-            >
-              Mark all read
+      </PopoverTrigger>
+      <PopoverContent 
+        className="w-[380px] p-0" 
+        align="end" 
+        sideOffset={10}
+      >
+        <div className="flex items-center justify-between p-4 border-b">
+          <h4 className="text-sm font-medium">Notifications</h4>
+          {unreadCount > 0 && (
+            <Button variant="ghost" size="sm" onClick={markAllAsRead}>
+              Mark all as read
             </Button>
           )}
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator />
+        </div>
         
         <ScrollArea className="h-[300px]">
           {notifications.length === 0 ? (
-            <div className="py-6 text-center text-muted-foreground">
-              <p>No notifications</p>
+            <div className="text-center p-4 text-muted-foreground text-sm">
+              No notifications
             </div>
           ) : (
-            <DropdownMenuGroup>
+            <div>
               {notifications.map((notification) => (
-                <DropdownMenuItem
-                  key={notification.id}
-                  className={`flex flex-col items-start p-3 cursor-pointer ${notification.read ? '' : 'bg-accent/10'}`}
+                <div 
+                  key={notification.id} 
+                  className={`px-4 py-3 border-b last:border-0 hover:bg-muted/50 cursor-pointer transition-colors ${notification.read ? '' : 'bg-muted/20'}`}
                   onClick={() => markAsRead(notification.id)}
                 >
-                  <div className="flex justify-between w-full">
-                    <span className="font-medium">{notification.title}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
-                    </span>
+                  <div className="flex items-start">
+                    <div className="flex-1">
+                      <p className={`text-sm font-medium ${notification.read ? 'text-muted-foreground' : ''}`}>
+                        {notification.title}
+                      </p>
+                      <p className="text-xs mt-1 text-muted-foreground">
+                        {notification.message}
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-sm text-muted-foreground mt-1">{notification.message}</p>
-                </DropdownMenuItem>
+                </div>
               ))}
-            </DropdownMenuGroup>
+            </div>
           )}
         </ScrollArea>
-        
-        <DropdownMenuSeparator />
-        <DropdownMenuItem className="justify-center font-medium" asChild>
-          <a href="/settings#notifications">Manage notifications</a>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+      </PopoverContent>
+    </Popover>
   );
 };
 

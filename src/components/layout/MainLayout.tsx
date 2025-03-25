@@ -6,7 +6,6 @@ import { AppSidebar } from './AppSidebar';
 import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
 import { Button } from '@/components/ui/button';
 import NavUtilities from './sidebar/NavUtilities';
-import NotificationBell from './NotificationBell';
 
 interface MainLayoutProps {
   children?: React.ReactNode;

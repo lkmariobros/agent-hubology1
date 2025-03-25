@@ -1,131 +1,132 @@
 
-import React, { useEffect, useState } from 'react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { CheckCircle, Clock, AlertTriangle, FileText } from "lucide-react";
-import { formatDate } from '@/utils/format';
-import { useCommissionApproval } from '@/hooks/useCommissionApproval';
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAuth } from '@/hooks/useAuth';
+import { useCommissionApprovals } from '@/hooks/useCommissionApproval';
+import { Clock, CheckCircle2, XCircle, AlertTriangle, Banknote } from 'lucide-react';
+import { formatCurrency } from '@/utils/propertyUtils';
 
 interface ApprovalStatusProps {
-  transactionId: string;
+  transactionId?: string;
 }
 
-const ApprovalStatusBadge = ({ status }: { status: string }) => {
-  switch (status.toLowerCase()) {
-    case 'pending':
-      return (
-        <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
-          <Clock className="w-3 h-3 mr-1" />
-          Pending
-        </Badge>
-      );
-    case 'approved':
-      return (
-        <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-          <CheckCircle className="w-3 h-3 mr-1" />
-          Approved
-        </Badge>
-      );
-    case 'rejected':
-      return (
-        <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
-          <AlertTriangle className="w-3 h-3 mr-1" />
-          Rejected
-        </Badge>
-      );
-    case 'ready_for_payment':
-      return (
-        <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-          <FileText className="w-3 h-3 mr-1" />
-          Ready for Payment
-        </Badge>
-      );
-    case 'paid':
-      return (
-        <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
-          <CheckCircle className="w-3 h-3 mr-1" />
-          Paid
-        </Badge>
-      );
-    default:
-      return (
-        <Badge variant="outline">
-          {status}
-        </Badge>
-      );
-  }
-};
-
 const ApprovalStatus: React.FC<ApprovalStatusProps> = ({ transactionId }) => {
-  const [approvalData, setApprovalData] = useState<any>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
   
-  const commissionApproval = useCommissionApproval();
+  const { data, isLoading, error } = useCommissionApprovals(
+    undefined, // Get all statuses
+    false, // Not admin
+    user?.id,
+    1,
+    10
+  );
   
-  useEffect(() => {
-    const fetchApprovalData = async () => {
-      setLoading(true);
-      try {
-        // Make API call to get approval data
-        const data = await commissionApproval.getApprovalByTransactionId(
-          transactionId, 
-          { 
-            includeTransaction: true,
-            includeAgent: true,
-            includeHistory: true
-          }
-        );
-        
-        setApprovalData(data);
-        setError(null);
-      } catch (err) {
-        console.error('Error fetching approval data:', err);
-        setError('Failed to load approval data');
-        setApprovalData(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    if (transactionId) {
-      fetchApprovalData();
+  // Filter by transaction ID if provided
+  const approvals = data?.approvals.filter(approval => 
+    !transactionId || approval.transaction_id === transactionId
+  ) || [];
+  
+  // Get status badge style
+  const getStatusBadgeClass = (status: string) => {
+    switch(status) {
+      case 'Pending':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'Under Review':
+        return 'bg-blue-100 text-blue-800';
+      case 'Approved':
+        return 'bg-green-100 text-green-800';
+      case 'Ready for Payment':
+        return 'bg-purple-100 text-purple-800';
+      case 'Paid':
+        return 'bg-gray-100 text-gray-800';
+      case 'Rejected':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
-  }, [transactionId, commissionApproval]);
+  };
   
-  if (loading) {
+  // Get status icon
+  const getStatusIcon = (status: string) => {
+    switch(status) {
+      case 'Pending':
+        return <Clock className="h-4 w-4" />;
+      case 'Under Review':
+        return <AlertTriangle className="h-4 w-4" />;
+      case 'Approved':
+        return <CheckCircle2 className="h-4 w-4" />;
+      case 'Ready for Payment':
+        return <Banknote className="h-4 w-4" />;
+      case 'Paid':
+        return <CheckCircle2 className="h-4 w-4" />;
+      case 'Rejected':
+        return <XCircle className="h-4 w-4" />;
+      default:
+        return <Clock className="h-4 w-4" />;
+    }
+  };
+  
+  // Get status description
+  const getStatusDescription = (status: string) => {
+    switch(status) {
+      case 'Pending':
+        return 'Your commission is pending review by the administrator.';
+      case 'Under Review':
+        return 'Your commission is currently being reviewed by the administrator.';
+      case 'Approved':
+        return 'Your commission has been approved and is awaiting payment processing.';
+      case 'Ready for Payment':
+        return 'Your commission has been processed and is ready for payment.';
+      case 'Paid':
+        return 'Your commission has been paid.';
+      case 'Rejected':
+        return 'Your commission has been rejected. Please contact your administrator for more information.';
+      default:
+        return 'Unknown status';
+    }
+  };
+  
+  // Format date
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+  
+  if (isLoading) {
     return (
       <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center justify-center py-4">
-            <div className="animate-pulse flex space-x-4">
-              <div className="flex-1 space-y-4 py-1">
-                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                <div className="space-y-2">
-                  <div className="h-4 bg-gray-200 rounded"></div>
-                  <div className="h-4 bg-gray-200 rounded w-5/6"></div>
-                </div>
-              </div>
-            </div>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-md">Commission Approval Status</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex justify-center py-6">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>
         </CardContent>
       </Card>
     );
   }
   
-  if (error || !approvalData) {
+  if (error || approvals.length === 0) {
     return (
       <Card>
-        <CardContent className="p-6">
-          <CardDescription className="text-center py-4">
-            {error || 'No approval information available for this transaction.'}
-          </CardDescription>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-md">Commission Approval Status</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-6">
+            <p className="text-muted-foreground">
+              {error ? 
+                'Error loading approval status. Please try again later.' : 
+                transactionId ? 
+                  'No approval information found for this transaction.' :
+                  'You do not have any commission approvals to display.'
+              }
+            </p>
+          </div>
         </CardContent>
       </Card>
     );
@@ -133,80 +134,41 @@ const ApprovalStatus: React.FC<ApprovalStatusProps> = ({ transactionId }) => {
   
   return (
     <Card>
-      <CardHeader className="p-5">
-        <div className="flex justify-between items-center">
-          <CardTitle className="text-lg font-semibold">Commission Approval Status</CardTitle>
-          <ApprovalStatusBadge status={approvalData.status} />
-        </div>
-        <CardDescription>
-          Submitted on {formatDate(approvalData.created_at)}
-        </CardDescription>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-md">Commission Approval Status</CardTitle>
       </CardHeader>
-      
-      <CardContent className="p-5 pt-0 space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <h4 className="text-sm font-semibold text-muted-foreground mb-1">Transaction Value</h4>
-            <p className="font-medium">${approvalData.property_transactions?.transaction_value?.toLocaleString() || 'N/A'}</p>
-          </div>
-          
-          <div>
-            <h4 className="text-sm font-semibold text-muted-foreground mb-1">Commission Amount</h4>
-            <p className="font-medium">${approvalData.property_transactions?.commission_amount?.toLocaleString() || 'N/A'}</p>
-          </div>
-          
-          <div>
-            <h4 className="text-sm font-semibold text-muted-foreground mb-1">Property</h4>
-            <p className="font-medium">{approvalData.property_transactions?.property?.title || 'N/A'}</p>
-          </div>
-          
-          <div>
-            <h4 className="text-sm font-semibold text-muted-foreground mb-1">Agent</h4>
-            <p className="font-medium">{approvalData.agent?.name || 'N/A'}</p>
-          </div>
-        </div>
-        
-        {approvalData.status !== 'Pending' && (
-          <div className="mt-4 border-t pt-4">
-            <h4 className="text-sm font-semibold mb-2">Approval History</h4>
-            <div className="space-y-3">
-              <div className="flex items-start">
-                <div className="bg-gray-100 p-2 rounded-full mr-3 mt-0.5">
-                  <Clock className="h-4 w-4 text-gray-500" />
+      <CardContent>
+        <div className="space-y-4">
+          {approvals.map((approval) => (
+            <div key={approval.id} className="border rounded-md p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeClass(approval.status)}`}>
+                    {getStatusIcon(approval.status)}
+                    <span className="ml-1">{approval.status}</span>
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    Updated: {formatDate(approval.updated_at)}
+                  </span>
                 </div>
-                <div>
-                  <p className="text-sm font-medium">Submitted for Approval</p>
-                  <p className="text-xs text-muted-foreground">{formatDate(approvalData.created_at)}</p>
-                </div>
+                <span className="font-medium">
+                  {formatCurrency(approval.property_transactions.commission_amount)}
+                </span>
               </div>
               
-              {approvalData.status !== 'Pending' && (
-                <div className="flex items-start">
-                  <div className="bg-gray-100 p-2 rounded-full mr-3 mt-0.5">
-                    {approvalData.status === 'Approved' ? (
-                      <CheckCircle className="h-4 w-4 text-green-500" />
-                    ) : (
-                      <AlertTriangle className="h-4 w-4 text-red-500" />
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">
-                      {approvalData.status === 'Approved' ? 'Approved' : 'Rejected'}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {formatDate(approvalData.reviewed_at || new Date())}
-                    </p>
-                    {approvalData.notes && (
-                      <p className="text-xs mt-1 p-2 bg-gray-50 rounded-md">
-                        Note: {approvalData.notes}
-                      </p>
-                    )}
-                  </div>
+              <p className="text-sm text-muted-foreground">
+                {getStatusDescription(approval.status)}
+              </p>
+              
+              {approval.notes && (
+                <div className="mt-3 p-3 bg-muted/50 rounded text-sm">
+                  <p className="font-medium mb-1">Notes:</p>
+                  <p className="text-muted-foreground">{approval.notes}</p>
                 </div>
               )}
             </div>
-          </div>
-        )}
+          ))}
+        </div>
       </CardContent>
     </Card>
   );

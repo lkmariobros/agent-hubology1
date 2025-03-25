@@ -1,247 +1,159 @@
 
-import React, { useState, useRef, ChangeEvent } from 'react';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { 
-  X, 
-  Upload, 
-  FileText, 
-  AlertCircle, 
-  CheckCircle, 
-  Loader2 
-} from "lucide-react";
-
-// Interface for document object
-interface Document {
-  id?: string;
-  name: string;
-  path?: string;
-  file?: File;
-  type: string;
-  uploadStatus?: 'uploading' | 'success' | 'error' | 'completed';
-  progress?: number;
-  errorMessage?: string;
-}
+import React, { useCallback, useState } from 'react';
+import { useDropzone } from 'react-dropzone';
+import { UploadCloud, FileText, X, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { usePropertyForm } from '@/context/PropertyForm/PropertyFormContext';
+import { useStorageUpload } from '@/hooks/useStorageUpload';
+import { toast } from 'sonner';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 
 interface DocumentUploaderProps {
-  documents: Document[];
-  onAddDocument: (document: Document) => void;
-  onRemoveDocument: (index: number) => void;
-  allowedTypes?: string[];
-  maxSize?: number; // in MB
-  maxFiles?: number;
-  disabled?: boolean;
+  maxDocuments?: number;
+  maxSizeMB?: number;
 }
 
 const DocumentUploader: React.FC<DocumentUploaderProps> = ({
-  documents,
-  onAddDocument,
-  onRemoveDocument,
-  allowedTypes = ['.pdf', '.doc', '.docx', '.jpg', '.jpeg', '.png'],
-  maxSize = 10, // 10MB default
-  maxFiles = 10,
-  disabled = false,
+  maxDocuments = 20,
+  maxSizeMB = 10
 }) => {
-  const [dragActive, setDragActive] = useState<boolean>(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  
-  // Simplify allowed types for display
-  const displayAllowedTypes = allowedTypes
-    .map(type => type.replace('.', '').toUpperCase())
-    .join(', ');
-  
-  const handleDrag = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (e.type === 'dragenter' || e.type === 'dragover') {
-      setDragActive(true);
-    } else if (e.type === 'dragleave') {
-      setDragActive(false);
-    }
-  };
-  
-  const validateFile = (file: File): { valid: boolean; error?: string } => {
-    // Check file size
-    if (file.size > maxSize * 1024 * 1024) {
-      return { valid: false, error: `File is too large. Maximum size is ${maxSize}MB.` };
-    }
-    
-    // Check file type
-    const fileExtension = `.${file.name.split('.').pop()?.toLowerCase()}`;
-    if (!allowedTypes.includes(fileExtension) && !allowedTypes.includes('*')) {
-      return { valid: false, error: `File type not allowed. Allowed types: ${displayAllowedTypes}` };
-    }
-    
-    return { valid: true };
-  };
-  
-  const processFiles = (files: FileList | null) => {
-    if (!files) return;
-    
-    // Check max files
-    if (documents.length + files.length > maxFiles) {
-      alert(`You can only upload a maximum of ${maxFiles} files.`);
+  const { state, addDocument, removeDocument } = usePropertyForm();
+  const { uploadFile, isUploading, progress } = useStorageUpload();
+  const [documentType, setDocumentType] = useState<string>('Contract');
+  const [processingFiles, setProcessingFiles] = useState<string[]>([]);
+
+  const onDrop = useCallback(async (acceptedFiles: File[]) => {
+    // Check if we're already at maximum documents
+    if (state.documents.length + acceptedFiles.length > maxDocuments) {
+      toast.error(`You can only upload a maximum of ${maxDocuments} documents`);
       return;
     }
-    
-    Array.from(files).forEach(file => {
-      const validation = validateFile(file);
-      
-      if (validation.valid) {
-        // Create a new document object
-        const newDocument: Document = {
+
+    // Track files being processed
+    const fileNames = acceptedFiles.map(file => file.name);
+    setProcessingFiles(prev => [...prev, ...fileNames]);
+
+    try {
+      for (const file of acceptedFiles) {
+        // Add to form state immediately with required properties
+        addDocument({
+          file,
           name: file.name,
-          file: file,
-          type: file.type,
-          uploadStatus: 'completed', // Set as success since we're not actually uploading in this example
-          progress: 100,
-        };
-        
-        onAddDocument(newDocument);
-      } else {
-        // Handle invalid file
-        alert(validation.error);
+          documentType,
+          url: URL.createObjectURL(file), // Use temporary URL for preview
+          uploadStatus: 'uploading'
+        });
+
+        try {
+          // If connected to Supabase, try uploading
+          if (window.location.hostname !== 'localhost') {
+            await uploadFile(file, {
+              bucket: 'property-documents',
+              path: 'temp',
+              maxSizeMB,
+              acceptedFileTypes: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
+            });
+          }
+        } catch (error) {
+          console.error('Error uploading file:', error);
+          toast.error(`Failed to upload ${file.name}`);
+        }
       }
-    });
-  };
-  
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-    
-    if (disabled) return;
-    
-    processFiles(e.dataTransfer.files);
-  };
-  
-  const handleFileInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    processFiles(e.target.files);
-    // Reset the input value so the same file can be uploaded again if needed
-    if (fileInputRef.current) fileInputRef.current.value = '';
-  };
-  
-  const handleChooseFiles = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
+    } finally {
+      // Remove files from processing state
+      setProcessingFiles(prev => prev.filter(name => !fileNames.includes(name)));
     }
+  }, [state.documents, addDocument, documentType, maxDocuments, maxSizeMB, uploadFile]);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      'application/pdf': ['.pdf'],
+      'application/msword': ['.doc'],
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
+      'image/jpeg': ['.jpg', '.jpeg'],
+      'image/png': ['.png']
+    },
+    maxSize: maxSizeMB * 1024 * 1024, // Convert MB to bytes
+    disabled: isUploading
+  });
+
+  const handleRemoveDocument = (index: number) => {
+    removeDocument(index);
   };
-  
+
   return (
     <div className="space-y-4">
-      <div
-        onDragEnter={handleDrag}
-        onDragLeave={handleDrag}
-        onDragOver={handleDrag}
-        onDrop={handleDrop}
-        className={`
-          border-2 border-dashed rounded-lg p-6 
-          ${dragActive ? 'border-primary bg-primary/5' : 'border-gray-200'} 
-          ${disabled ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}
-          transition-colors duration-200
-          flex flex-col items-center justify-center text-center space-y-2
-        `}
-        onClick={disabled ? undefined : handleChooseFiles}
-      >
-        <Upload className="h-8 w-8 text-muted-foreground mb-2" />
-        <h3 className="font-medium text-lg">Drag & Drop Documents</h3>
-        <p className="text-sm text-muted-foreground">
-          or click to browse your files
-        </p>
-        <p className="text-xs text-muted-foreground mt-1">
-          Supported formats: {displayAllowedTypes}
-        </p>
-        <p className="text-xs text-muted-foreground">
-          Maximum file size: {maxSize}MB
-        </p>
-        
-        <input
-          ref={fileInputRef}
-          type="file"
-          multiple
-          onChange={handleFileInputChange}
-          accept={allowedTypes.join(',')}
-          disabled={disabled}
-          className="hidden"
-        />
+      <div className="mb-4">
+        <Label htmlFor="documentType">Document Type</Label>
+        <Select value={documentType} onValueChange={(value) => setDocumentType(value)}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select document type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Contract">Contract</SelectItem>
+            <SelectItem value="Agreement">Agreement</SelectItem>
+            <SelectItem value="Brochure">Brochure</SelectItem>
+            <SelectItem value="FloorPlan">Floor Plan</SelectItem>
+            <SelectItem value="LegalDocument">Legal Document</SelectItem>
+            <SelectItem value="Other">Other</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
-      
-      {/* File List */}
-      {documents.length > 0 && (
+
+      <div 
+        {...getRootProps()} 
+        className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
+          isDragActive ? 'border-primary bg-primary/5' : 'border-muted-foreground/25 hover:border-primary/50'
+        }`}
+      >
+        <input {...getInputProps()} />
+        <div className="flex flex-col items-center justify-center space-y-2">
+          <UploadCloud className="h-12 w-12 text-muted-foreground" />
+          <h3 className="text-lg font-medium">Drag & drop property documents</h3>
+          <p className="text-sm text-muted-foreground">
+            or click to browse (max {maxSizeMB}MB per document)
+          </p>
+          {isUploading && (
+            <div className="mt-2 flex items-center gap-2">
+              <Loader2 className="h-5 w-5 animate-spin text-primary" />
+              <span>Uploading... {progress}%</span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Documents Preview */}
+      {state.documents.length > 0 && (
         <div className="space-y-2">
-          <Label>Uploaded Documents ({documents.length}/{maxFiles})</Label>
-          <div className="border rounded-md divide-y">
-            {documents.map((doc, index) => (
-              <div key={index} className="flex items-center justify-between p-3">
-                <div className="flex items-center space-x-3">
-                  <FileText className="h-5 w-5 text-blue-500" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{doc.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {doc.type ? doc.type.split('/').pop()?.toUpperCase() : 'Document'}
-                    </p>
+          <h4 className="text-sm font-medium mb-2">Uploaded Documents</h4>
+          <div className="space-y-2">
+            {state.documents.map((doc, index) => (
+              <div 
+                key={index} 
+                className="flex items-center justify-between p-3 bg-muted rounded-md"
+              >
+                <div className="flex items-center">
+                  <FileText className="h-5 w-5 mr-2 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm font-medium">{doc.name}</p>
+                    <p className="text-xs text-muted-foreground">{doc.documentType}</p>
                   </div>
                 </div>
-                
-                {doc.uploadStatus && (
-                  <div className="flex items-center space-x-2">
-                    {doc.uploadStatus === 'uploading' && (
-                      <>
-                        <Progress value={doc.progress} className="w-20 h-2" />
-                        <span className="text-xs text-muted-foreground">{doc.progress}%</span>
-                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                      </>
-                    )}
-                    
-                    {doc.uploadStatus === 'error' && (
-                      <>
-                        <Badge variant="destructive" className="flex items-center space-x-1">
-                          <AlertCircle className="h-3 w-3" />
-                          <span>Error</span>
-                        </Badge>
-                        <Button 
-                          size="sm" 
-                          variant="ghost" 
-                          className="h-6 px-2"
-                          onClick={() => onRemoveDocument(index)}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </>
-                    )}
-                    
-                    {(doc.uploadStatus === 'success' || doc.uploadStatus === 'completed') && (
-                      <>
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                        <Button 
-                          size="sm" 
-                          variant="ghost" 
-                          className="h-6 px-2"
-                          onClick={() => onRemoveDocument(index)}
-                          disabled={disabled}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                )}
-                
-                {!doc.uploadStatus && (
+                <div className="flex items-center">
+                  {doc.uploadStatus === 'uploading' && (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin text-muted-foreground" />
+                  )}
                   <Button 
-                    size="sm" 
                     variant="ghost" 
-                    className="h-6 px-2"
-                    onClick={() => onRemoveDocument(index)}
-                    disabled={disabled}
+                    size="sm"
+                    className="h-8 w-8 p-0"
+                    onClick={() => handleRemoveDocument(index)}
                   >
                     <X className="h-4 w-4" />
                   </Button>
-                )}
+                </div>
               </div>
             ))}
           </div>

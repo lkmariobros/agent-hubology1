@@ -1,151 +1,248 @@
 
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import { User, AuthContextType } from '@/types/auth';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { Session, User } from '@supabase/supabase-js';
 
-// Define UserRole type for export
-export type UserRole = 'admin' | 'agent' | 'manager';
+// Define user types and roles
+export type UserRole = 'agent' | 'admin';
 
-export const AuthContext = createContext<AuthContextType | null>(null);
+export interface UserProfile {
+  id: string;
+  email: string;
+  name?: string;
+  roles: UserRole[];
+  activeRole: UserRole;
+}
 
-// Create and export the useAuth hook directly from this file
-export const useAuth = (): AuthContextType => {
+// Expanded auth context type with role management
+interface AuthContextType {
+  user: UserProfile | null;
+  isAuthenticated: boolean;
+  isAdmin: boolean; // Helper to check if user has admin access
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
+  switchRole: (role: UserRole) => void;
+  session: Session | null;
+}
+
+// Create the context with a default value
+const AuthContext = createContext<AuthContextType>({
+  user: null,
+  isAuthenticated: false,
+  isAdmin: false,
+  login: async () => {},
+  logout: async () => {},
+  switchRole: () => {},
+  session: null,
+});
+
+export const useAuth = () => {
   const context = useContext(AuthContext);
-  
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
-  
   return context;
 };
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ 
-  children 
-}) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+// Mock admin emails for demo purposes - expanded to make testing easier
+// In a real application, this would be determined from database roles
+const ADMIN_EMAILS = [
+  'admin@example.com', 
+  'admin@propertypro.com',
+  'josephkwantum@gmail.com', // User's specific email
+  // For easier testing, consider any email with these patterns as admin
+  'admin', // Any email containing 'admin'
+  'test' // Any email containing 'test'
+];
+
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const location = useLocation();
   
+  // Initialize auth state and set up listener for auth changes
   useEffect(() => {
-    // Check for existing user session
-    // For demo purposes, we'll just simulate a loading delay
-    const checkAuth = async () => {
-      setIsLoading(true);
-      try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000));
+    // First set up listener to react to auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
+      console.log('Auth state changed:', event);
+      
+      setSession(newSession);
+      
+      if (newSession) {
+        // User is logged in
+        const email = newSession.user?.email || '';
         
-        // For demo, create a mock user - in a real app this would come from your auth system
-        const mockUser: User = {
-          id: '123',
-          email: 'demo@example.com',
-          name: 'Demo User',
-          avatar: 'https://ui-avatars.com/api/?name=Demo+User',
-          role: 'agent',
-          agentTier: 'Silver'
+        // Check if user has admin privileges - more flexible check
+        const isAdmin = ADMIN_EMAILS.some(pattern => 
+          email.toLowerCase().includes(pattern.toLowerCase())
+        );
+        
+        // Create user profile with appropriate roles
+        const roles: UserRole[] = ['agent'];
+        if (isAdmin) roles.push('admin');
+        
+        const userProfile: UserProfile = {
+          id: newSession.user.id,
+          email: email,
+          name: email.split('@')[0],
+          roles,
+          activeRole: 'agent', // Default to agent role on login
         };
         
-        setUser(mockUser);
-        setError(null);
-      } catch (err) {
-        setError('Failed to authenticate');
+        setUser(userProfile);
+        
+        // Navigate based on the current location
+        const path = location.pathname;
+        if (path === '/') {
+          navigate('/dashboard');
+        }
+      } else {
+        // User is logged out
         setUser(null);
-      } finally {
-        setIsLoading(false);
+        
+        // Only navigate to login if not already there
+        if (location.pathname !== '/') {
+          navigate('/');
+        }
       }
+    });
+
+    // Then check for existing session
+    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
+      if (initialSession) {
+        const email = initialSession.user?.email || '';
+        
+        // Check if user has admin privileges - more flexible check
+        const isAdmin = ADMIN_EMAILS.some(pattern => 
+          email.toLowerCase().includes(pattern.toLowerCase())
+        );
+        
+        // Create user profile with appropriate roles
+        const roles: UserRole[] = ['agent'];
+        if (isAdmin) roles.push('admin');
+        
+        const userProfile: UserProfile = {
+          id: initialSession.user.id,
+          email: email,
+          name: email.split('@')[0],
+          roles,
+          activeRole: 'agent', // Default to agent role on login
+        };
+        
+        setUser(userProfile);
+        setSession(initialSession);
+        
+        // Navigate based on the current location
+        const path = location.pathname;
+        if (path === '/') {
+          navigate('/dashboard');
+        }
+      } else if (location.pathname !== '/') {
+        // If no session and not on login page, redirect to login
+        navigate('/');
+      }
+      
+      setLoading(false);
+    });
+
+    // Cleanup subscription on unmount
+    return () => {
+      subscription.unsubscribe();
     };
-    
-    checkAuth();
-  }, []);
-  
-  const signIn = async (email: string, password: string): Promise<void> => {
-    setIsLoading(true);
+  }, [navigate, location.pathname]);
+
+  // Login using Supabase Auth
+  const login = async (email: string, password: string) => {
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // For demo, create a mock user - in a real app this would be the response from your auth API
-      const mockUser: User = {
-        id: '123',
+      setLoading(true);
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
-        name: 'Demo User',
-        avatar: 'https://ui-avatars.com/api/?name=Demo+User',
-        role: 'agent',
-        agentTier: 'Silver'
-      };
+        password,
+      });
+
+      if (error) {
+        console.error('Login error:', error.message);
+        throw error;
+      }
       
-      setUser(mockUser);
-      setError(null);
-    } catch (err) {
-      setError('Invalid email or password');
-      throw new Error('Invalid email or password');
+      // Navigation happens automatically via onAuthStateChange
+      toast.success('Logged in successfully');
+    } catch (error: any) {
+      console.error('Login error:', error);
+      toast.error(error.message || 'Login failed. Please try again.');
+      throw error;
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
-  
-  const signUp = async (email: string, password: string): Promise<void> => {
-    setIsLoading(true);
+
+  // Logout using Supabase Auth
+  const logout = async () => {
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      setLoading(true);
+      const { error } = await supabase.auth.signOut();
       
-      // For demo, create a mock user - in a real app this would be the response from your auth API
-      const mockUser: User = {
-        id: '123',
-        email,
-        name: 'Demo User',
-        avatar: 'https://ui-avatars.com/api/?name=Demo+User',
-        role: 'agent',
-        agentTier: 'Silver'
-      };
+      if (error) {
+        console.error('Logout error:', error.message);
+        throw error;
+      }
       
-      setUser(mockUser);
-      setError(null);
-    } catch (err) {
-      setError('Failed to create account');
-      throw new Error('Failed to create account');
+      // Navigation and state reset handled by onAuthStateChange
+      toast.info('Logged out successfully');
+    } catch (error: any) {
+      console.error('Logout error:', error);
+      toast.error(error.message || 'Failed to log out. Please try again.');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
   
-  const signOut = async (): Promise<void> => {
-    setIsLoading(true);
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      setUser(null);
-      setError(null);
-    } catch (err) {
-      setError('Failed to sign out');
-      throw new Error('Failed to sign out');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
+  // Function to switch between roles
   const switchRole = (role: UserRole) => {
-    if (user) {
-      setUser({ ...user, role });
+    if (!user) return;
+    
+    // Check if user has the requested role
+    if (!user.roles.includes(role)) {
+      toast.error('You do not have access to this role');
+      return;
     }
+    
+    // Update user with new active role
+    const updatedUser = { ...user, activeRole: role };
+    setUser(updatedUser);
+    
+    // Navigate to appropriate dashboard based on the new role
+    if (role === 'admin') {
+      navigate('/admin');
+    } else {
+      navigate('/dashboard');
+    }
+    
+    toast.success(`Switched to ${role} portal`);
+  };
+
+  const value = {
+    user,
+    isAuthenticated: !!user,
+    isAdmin: user?.roles.includes('admin') || false,
+    login,
+    logout,
+    switchRole,
+    session,
   };
   
-  return (
-    <AuthContext.Provider 
-      value={{
-        user,
-        isAuthenticated: !!user,
-        isAdmin: user?.role === 'admin',
-        isLoading,
-        error,
-        signIn,
-        signUp,
-        signOut,
-        switchRole
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
+  // Show loading state or render children
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-primary">Loading authentication...</div>
+      </div>
+    );
+  }
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

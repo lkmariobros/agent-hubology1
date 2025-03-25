@@ -1,258 +1,220 @@
 
 import { Property } from '@/types';
 
+// Sample properties data with more realistic images
 export const sampleProperties: Property[] = [
   {
     id: '1',
-    title: 'Luxury Beachfront Villa',
-    description: 'A stunning beachfront villa with panoramic ocean views and private beach access.',
+    title: 'Modern Apartment with City View',
+    description: 'A beautiful modern apartment in the heart of the city',
     type: 'residential',
-    subtype: 'Villa',
-    status: 'available',
-    transactionType: 'sale',
-    price: 2500000,
+    subtype: 'Apartment',
+    price: 850000,
+    bedrooms: 3,
+    bathrooms: 2,
+    area: 1200,
     address: {
-      street: '123 Ocean Drive',
-      city: 'Malibu',
+      street: '123 Main Street',
+      city: 'San Francisco',
       state: 'CA',
-      zip: '90265',
+      zip: '94105',
       country: 'USA'
     },
     features: {
-      bedrooms: 5,
-      bathrooms: 4,
-      squareFeet: 4200,
-      landSize: 0.75
-    },
-    agent: {
-      id: 'agent1',
-      name: 'John Smith'
+      bedrooms: 3,
+      bathrooms: 2,
+      squareFeet: 1200,
+      landSize: 0
     },
     images: [
-      'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2',
-      'https://images.unsplash.com/photo-1576941089067-2de3c901e126',
-      'https://images.unsplash.com/photo-1584622650111-993a426fbf0a'
+      'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8YXBhcnRtZW50fGVufDB8fDB8fHww&auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YXBhcnRtZW50fGVufDB8fDB8fHww&auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTh8fGFwYXJ0bWVudHxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=800&q=80'
     ],
-    createdAt: '2023-05-15T10:30:00Z',
-    updatedAt: '2023-06-01T14:20:00Z',
-    featured: true,
-    size: 4200,
-    area: 4200,
-    bedrooms: 5,
-    bathrooms: 4,
-    listedBy: {
-      id: 'agent1',
-      name: 'John Smith',
-      avatar: 'https://randomuser.me/api/portraits/men/1.jpg'
-    }
+    status: 'available',
+    agent: {
+      id: '1',
+      name: 'Agent Smith'
+    },
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    listedBy: 'Agent Smith',
+    featured: false,
+    transactionType: 'Sale'
   },
   {
     id: '2',
-    title: 'Modern Downtown Condo',
-    description: 'Sleek modern condo in the heart of downtown with city views and upscale amenities.',
-    type: 'residential',
-    subtype: 'Condominium',
-    status: 'available',
-    transactionType: 'sale',
-    price: 850000,
+    title: 'Commercial Office Space',
+    description: 'Prime office space in downtown business district',
+    type: 'commercial',
+    subtype: 'Office',
+    price: 1250000,
+    area: 3000,
     address: {
-      street: '456 High Street, Unit 1201',
-      city: 'San Francisco',
-      state: 'CA',
-      zip: '94103',
+      street: '456 Market Street',
+      city: 'New York',
+      state: 'NY',
+      zip: '10001',
       country: 'USA'
     },
     features: {
-      bedrooms: 2,
-      bathrooms: 2,
-      squareFeet: 1100,
-    },
-    agent: {
-      id: 'agent2',
-      name: 'Sarah Johnson'
+      squareFeet: 3000,
+      landSize: 0
     },
     images: [
-      'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267',
-      'https://images.unsplash.com/photo-1560448204-603b3fc33ddc',
-      'https://images.unsplash.com/photo-1560185007-cde436f6a4d0'
+      'https://images.unsplash.com/photo-1497366754035-f200968a6e72?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8b2ZmaWNlJTIwc3BhY2V8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1497366811353-6870744d04b2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8b2ZmaWNlJTIwc3BhY2V8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=800&q=80'
     ],
-    createdAt: '2023-06-10T09:15:00Z',
-    updatedAt: '2023-06-15T11:40:00Z',
+    status: 'available',
+    agent: {
+      id: '2',
+      name: 'Agent Johnson'
+    },
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    listedBy: 'Agent Johnson',
     featured: false,
-    size: 1100,
-    area: 1100,
-    bedrooms: 2,
-    bathrooms: 2,
-    listedBy: {
-      id: 'agent2',
-      name: 'Sarah Johnson',
-      avatar: 'https://randomuser.me/api/portraits/women/1.jpg'
-    }
+    transactionType: 'Sale'
   },
   {
     id: '3',
-    title: 'Riverside Family Home',
-    description: 'Spacious family home on the river with large garden and outdoor entertainment area.',
-    type: 'residential',
-    subtype: 'Single Family Home',
-    status: 'available',
-    transactionType: 'sale',
-    price: 1250000,
+    title: 'Industrial Warehouse',
+    description: 'Large warehouse space with easy highway access',
+    type: 'industrial',
+    subtype: 'Warehouse',
+    price: 950000,
+    area: 8500,
     address: {
-      street: '789 River Road',
-      city: 'Portland',
-      state: 'OR',
-      zip: '97201',
+      street: '789 Industrial Park',
+      city: 'Chicago',
+      state: 'IL',
+      zip: '60607',
+      country: 'USA'
+    },
+    features: {
+      squareFeet: 8500,
+      landSize: 0
+    },
+    images: [
+      'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8d2FyZWhvdXNlfGVufDB8fDB8fHww&auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1638623383685-6ac06569e100?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8d2FyZWhvdXNlfGVufDB8fDB8fHww&auto=format&fit=crop&w=800&q=80'
+    ],
+    status: 'pending',
+    agent: {
+      id: '3',
+      name: 'Agent Williams'
+    },
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    listedBy: 'Agent Williams',
+    featured: false,
+    transactionType: 'Sale'
+  },
+  {
+    id: '4',
+    title: 'Luxury Penthouse',
+    description: 'Stunning penthouse with panoramic ocean views',
+    type: 'residential',
+    subtype: 'Penthouse',
+    price: 3200000,
+    bedrooms: 4,
+    bathrooms: 4.5,
+    area: 3500,
+    address: {
+      street: '1000 Ocean Drive',
+      city: 'Miami',
+      state: 'FL',
+      zip: '33139',
       country: 'USA'
     },
     features: {
       bedrooms: 4,
-      bathrooms: 3,
-      squareFeet: 2800,
-      landSize: 0.5
-    },
-    agent: {
-      id: 'agent3',
-      name: 'Mike Wilson'
+      bathrooms: 4.5,
+      squareFeet: 3500,
+      landSize: 0
     },
     images: [
-      'https://images.unsplash.com/photo-1564013799919-ab600027ffc6',
-      'https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83',
-      'https://images.unsplash.com/photo-1576941089067-2de3c901e126'
+      'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8cGVudGhvdXNlfGVufDB8fDB8fHww&auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1600210492493-0946911123ea?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OHx8cGVudGhvdXNlfGVufDB8fDB8fHww&auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1598928506311-c55ded91a20c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fHBlbnRob3VzZXxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=800&q=80'
     ],
-    createdAt: '2023-05-20T14:45:00Z',
-    updatedAt: '2023-06-02T10:30:00Z',
-    featured: true,
-    size: 2800,
-    area: 2800,
-    bedrooms: 4,
-    bathrooms: 3,
-    listedBy: {
-      id: 'agent3',
-      name: 'Mike Wilson',
-      avatar: 'https://randomuser.me/api/portraits/men/2.jpg'
-    }
-  },
-  {
-    id: '4',
-    title: 'Prime Office Space',
-    description: 'Premium office space in Class A building with modern amenities and central location.',
-    type: 'commercial',
-    subtype: 'Office',
     status: 'available',
-    transactionType: 'lease',
-    price: 35000,
-    rentalRate: 35,
-    address: {
-      street: '100 Commerce Plaza, 15th Floor',
-      city: 'Chicago',
-      state: 'IL',
-      zip: '60611',
-      country: 'USA'
-    },
-    features: {
-      squareFeet: 5000,
-    },
     agent: {
-      id: 'agent4',
-      name: 'Jessica Brown'
+      id: '4',
+      name: 'Agent Garcia'
     },
-    images: [
-      'https://images.unsplash.com/photo-1497366754035-f200968a6e72',
-      'https://images.unsplash.com/photo-1497366811353-6870744d04b2',
-      'https://images.unsplash.com/photo-1524758631624-e2822e304c36'
-    ],
-    createdAt: '2023-05-25T08:20:00Z',
-    updatedAt: '2023-06-05T16:10:00Z',
-    featured: true,
-    size: 5000,
-    area: 5000,
-    listedBy: {
-      id: 'agent4',
-      name: 'Jessica Brown',
-      avatar: 'https://randomuser.me/api/portraits/women/2.jpg'
-    }
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    listedBy: 'Agent Garcia',
+    featured: false,
+    transactionType: 'Sale'
   },
   {
     id: '5',
-    title: 'Retail Space in Shopping District',
-    description: 'High-traffic retail location in popular shopping district with storefront visibility.',
+    title: 'Retail Space in Mall',
+    description: 'High-traffic retail space in premium shopping mall',
     type: 'commercial',
     subtype: 'Retail',
-    status: 'available',
-    transactionType: 'lease',
-    price: 8500,
-    rentalRate: 42,
+    price: 750000,
+    area: 1800,
     address: {
-      street: '222 Retail Row',
+      street: '200 Shopping Center Blvd',
       city: 'Los Angeles',
       state: 'CA',
-      zip: '90048',
+      zip: '90045',
       country: 'USA'
     },
     features: {
-      squareFeet: 2400,
-    },
-    agent: {
-      id: 'agent5',
-      name: 'David Chen'
+      squareFeet: 1800,
+      landSize: 0
     },
     images: [
-      'https://images.unsplash.com/photo-1586023492125-27b2c045efd7',
-      'https://images.unsplash.com/photo-1595361315589-a12e91cdc5e9',
-      'https://images.unsplash.com/photo-1535959005677-e5ee1a8b54da'
+      'https://images.unsplash.com/photo-1604521693763-50c6dd69ea19?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8cmV0YWlsJTIwc3BhY2V8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8cmV0YWlsJTIwc3BhY2V8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=800&q=80'
     ],
-    createdAt: '2023-06-05T11:30:00Z',
-    updatedAt: '2023-06-10T13:45:00Z',
+    status: 'available',
+    agent: {
+      id: '5',
+      name: 'Agent Davis'
+    },
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    listedBy: 'Agent Davis',
     featured: false,
-    size: 2400,
-    area: 2400,
-    listedBy: {
-      id: 'agent5',
-      name: 'David Chen',
-      avatar: 'https://randomuser.me/api/portraits/men/3.jpg'
-    }
+    transactionType: 'Sale'
   },
   {
     id: '6',
-    title: 'Industrial Warehouse',
-    description: 'Modern warehouse facility with loading docks, high ceilings, and office space.',
+    title: 'Manufacturing Facility',
+    description: 'Turnkey manufacturing facility with modern equipment',
     type: 'industrial',
-    subtype: 'Warehouse',
-    status: 'available',
-    transactionType: 'sale',
-    price: 4200000,
+    subtype: 'Manufacturing',
+    price: 2100000,
+    area: 15000,
     address: {
-      street: '555 Industrial Parkway',
-      city: 'Dallas',
-      state: 'TX',
-      zip: '75207',
+      street: '500 Industry Road',
+      city: 'Detroit',
+      state: 'MI',
+      zip: '48201',
       country: 'USA'
     },
     features: {
-      squareFeet: 50000,
-      landSize: 3.5
-    },
-    agent: {
-      id: 'agent1',
-      name: 'John Smith'
+      squareFeet: 15000,
+      landSize: 0
     },
     images: [
-      'https://images.unsplash.com/photo-1594616286526-a773be1b7dc1',
-      'https://images.unsplash.com/photo-1593788144688-ad385e75dd23',
-      'https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3'
+      'https://images.unsplash.com/photo-1613665813446-82a78c468a1d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8ZmFjdG9yeXxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=800&q=80',
+      'https://images.unsplash.com/photo-1518623489648-a173ef7824f3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8ZmFjdG9yeXxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=800&q=80'
     ],
-    createdAt: '2023-05-18T15:50:00Z',
-    updatedAt: '2023-06-08T09:25:00Z',
-    featured: true,
-    size: 50000,
-    area: 50000,
-    listedBy: {
-      id: 'agent1',
-      name: 'John Smith',
-      avatar: 'https://randomuser.me/api/portraits/men/1.jpg'
-    }
+    status: 'sold',
+    agent: {
+      id: '6',
+      name: 'Agent Miller'
+    },
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    listedBy: 'Agent Miller',
+    featured: false,
+    transactionType: 'Sale'
   }
 ];
-
-export default sampleProperties;

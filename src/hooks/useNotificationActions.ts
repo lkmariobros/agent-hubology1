@@ -1,113 +1,76 @@
 
-import { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 import { Notification } from '@/types/notification';
 
 export const useNotificationActions = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  
-  // Mark a notification as read
-  const markAsRead = async (id: string): Promise<boolean> => {
-    setIsLoading(true);
+  const markAsRead = async (id: string) => {
     try {
-      // In a real app, this would be an API call
-      console.log(`Marking notification ${id} as read`);
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 300));
+      const { error } = await supabase.functions.invoke('mark_notification_read', {
+        body: { notification_id: id }
+      });
+
+      if (error) throw error;
       
       return true;
     } catch (error) {
       console.error('Error marking notification as read:', error);
       return false;
-    } finally {
-      setIsLoading(false);
     }
   };
-  
-  // Mark all notifications as read for a user
-  const markAllAsRead = async (userId: string): Promise<boolean> => {
-    setIsLoading(true);
+
+  const markAllAsRead = async (userId: string) => {
     try {
-      // In a real app, this would be an API call
-      console.log(`Marking all notifications as read for user ${userId}`);
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
+      const { error } = await supabase.functions.invoke('mark_all_notifications_read', {
+        body: { user_id: userId }
+      });
+
+      if (error) throw error;
       
       return true;
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
       return false;
-    } finally {
-      setIsLoading(false);
     }
   };
-  
-  // Delete a notification
-  const deleteNotification = async (id: string): Promise<boolean> => {
-    setIsLoading(true);
+
+  const deleteNotification = async (id: string) => {
     try {
-      // In a real app, this would be an API call
-      console.log(`Deleting notification ${id}`);
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 300));
+      const { error } = await supabase.functions.invoke('delete_notification', {
+        body: { notification_id: id }
+      });
+
+      if (error) throw error;
       
       return true;
     } catch (error) {
       console.error('Error deleting notification:', error);
       return false;
-    } finally {
-      setIsLoading(false);
     }
   };
-  
-  // Refresh notifications for a user
-  const refreshNotifications = async (userId: string): Promise<Notification[]> => {
-    setIsLoading(true);
+
+  const refreshNotifications = async (userId: string) => {
+    if (!userId) return [];
+    
     try {
-      // In a real app, this would be an API call
-      console.log(`Refreshing notifications for user ${userId}`);
+      const { data, error } = await supabase.functions.invoke<Notification[]>('get_user_notifications', {
+        body: { user_id: userId }
+      });
+
+      if (error) throw error;
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Return mock notifications
-      const mockNotifications: Notification[] = [
-        {
-          id: '1',
-          title: 'New Transaction',
-          message: 'A new transaction has been added to your dashboard',
-          read: false,
-          createdAt: new Date(),
-          userId: userId,
-          type: 'transaction'
-        },
-        {
-          id: '2',
-          title: 'Commission Approved',
-          message: 'Your commission has been approved and is ready for payment',
-          read: true,
-          createdAt: new Date(Date.now() - 86400000), // 1 day ago
-          userId: userId,
-          type: 'commission'
-        }
-      ];
-      
-      return mockNotifications;
+      return data || [];
     } catch (error) {
-      console.error('Error refreshing notifications:', error);
+      console.error('Error fetching notifications:', error);
       return [];
-    } finally {
-      setIsLoading(false);
     }
   };
-  
+
   return {
     markAsRead,
     markAllAsRead,
     deleteNotification,
-    refreshNotifications,
-    isLoading
+    refreshNotifications
   };
 };
