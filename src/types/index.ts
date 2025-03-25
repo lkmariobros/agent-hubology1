@@ -111,7 +111,7 @@ export interface Transaction {
   status: string;
   date: string;
   type?: 'individual' | 'developer'; // Added transaction type
-  documents?: string[]; // Added for document uploads
+  documents?: Array<string | { id?: string; name: string; url?: string }>; // Updated to handle both string and object formats
   notes?: string; // Added for additional notes
 }
 

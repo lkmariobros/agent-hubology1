@@ -269,21 +269,31 @@ const TransactionDetail = () => {
                 <h3 className="text-lg font-medium mb-4">Transaction Documents</h3>
                 {transaction.documents && transaction.documents.length > 0 ? (
                   <ul className="space-y-4">
-                    {transaction.documents.map((doc, index) => (
-                      <li key={index} className="flex items-center justify-between p-3 bg-muted rounded-md">
-                        <span>{typeof doc === 'string' ? doc : doc.name}</span>
-                        <Button variant="ghost" size="sm">
-                          <FileDown className="h-4 w-4 mr-2" />
-                          Download
-                        </Button>
-                      </li>
-                    ))}
+                    {transaction.documents.map((doc, index) => {
+                      // Handle different document formats - it could be a string or an object
+                      const documentName = typeof doc === 'string' 
+                        ? doc 
+                        : (doc && typeof doc === 'object' && 'name' in doc) 
+                          ? doc.name 
+                          : 'Unknown document';
+                          
+                      return (
+                        <li key={index} className="flex items-center justify-between p-3 bg-muted rounded-md">
+                          <span>{documentName}</span>
+                          <Button variant="ghost" size="sm">
+                            <FileDown className="h-4 w-4 mr-2" />
+                            Download
+                          </Button>
+                        </li>
+                      );
+                    })}
                   </ul>
                 ) : (
                   <p className="text-muted-foreground">No documents attached to this transaction.</p>
                 )}
               </div>
             </TabsContent>
+            
           </Tabs>
         </CardContent>
       </Card>
