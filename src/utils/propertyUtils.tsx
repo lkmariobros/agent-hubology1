@@ -1,18 +1,5 @@
-
 import React from 'react';
-
-// Function to format currency values
-export const formatCurrency = (value: number): string => {
-  return new Intl.NumberFormat('en-MY', {
-    style: 'currency',
-    currency: 'MYR',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  }).format(value);
-};
-
-// For backward compatibility, ensure both functions are available
-export const formatPrice = formatCurrency;
+import { calculateStockPercentage, getStockStatusLabel, getStockStatusClass, formatCurrency, formatPrice } from './propertyUtils';
 
 // Function to truncate text with ellipsis
 export const truncateText = (text: string, maxLength: number): string => {
@@ -36,28 +23,13 @@ export const isPropertyAvailable = (status: string): boolean => {
   return status.toLowerCase() === 'available';
 };
 
-// Helper function to calculate stock availability percentage
-export const calculateStockPercentage = (available: number, total: number): number => {
-  if (total === 0) return 0;
-  return Math.round((available / total) * 100);
-};
-
-// Helper function to get stock status label
-export const getStockStatusLabel = (percentage: number): string => {
-  if (percentage === 0) return 'Sold Out';
-  if (percentage <= 25) return 'Low Stock';
-  if (percentage <= 50) return 'Selling Fast';
-  if (percentage <= 75) return 'Available';
-  return 'Fully Available';
-};
-
-// Helper function to get stock availability class
-export const getStockStatusClass = (percentage: number): string => {
-  if (percentage === 0) return 'text-red-500 bg-red-500/10 border-red-500/20';
-  if (percentage <= 25) return 'text-orange-500 bg-orange-500/10 border-orange-500/20';
-  if (percentage <= 50) return 'text-yellow-500 bg-yellow-500/10 border-yellow-500/20';
-  if (percentage <= 75) return 'text-blue-500 bg-blue-500/10 border-blue-500/20';
-  return 'text-green-500 bg-green-500/10 border-green-500/20';
+// Re-export the functions from propertyUtils.ts for backwards compatibility
+export { 
+  calculateStockPercentage, 
+  getStockStatusLabel, 
+  getStockStatusClass,
+  formatCurrency,
+  formatPrice
 };
 
 // Helper function to map property data structures

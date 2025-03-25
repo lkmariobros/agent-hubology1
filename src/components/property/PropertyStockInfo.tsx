@@ -6,7 +6,7 @@ import {
   calculateStockPercentage,
   getStockStatusLabel,
   getStockStatusClass
-} from '@/utils/propertyUtils.tsx';
+} from '@/utils/propertyUtils';
 import { cn } from '@/lib/utils';
 
 interface PropertyStock {
