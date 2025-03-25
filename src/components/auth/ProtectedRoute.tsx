@@ -3,13 +3,16 @@ import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import AuthForm from '../AuthForm';
+import { ProtectedRouteProps } from '@/types/auth';
 
-interface ProtectedRouteProps {
-  children: React.ReactNode;
-  requireAdmin?: boolean;
-  redirectTo?: string;
-}
-
+/**
+ * A route component that protects content based on authentication status and role
+ * 
+ * @param {ProtectedRouteProps} props - Component properties
+ * @param {React.ReactNode} props.children - Content to render when authenticated
+ * @param {boolean} props.requireAdmin - Whether admin role is required (default: false)
+ * @param {string} props.redirectTo - Where to redirect if access is denied (default: '/')
+ */
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
   children, 
   requireAdmin = false,
@@ -18,8 +21,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const { user, loading, isAdmin } = useAuth();
   const location = useLocation();
 
+  // Show loading state while checking authentication
   if (loading) {
-    // Show loading state while checking authentication
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>

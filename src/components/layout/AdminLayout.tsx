@@ -62,7 +62,6 @@ const AdminLayout = () => {
           <header className="h-14 flex-shrink-0 border-b border-border flex items-center justify-between px-4 bg-sidebar-bg">
             <div className="flex items-center gap-2">
               <SidebarTrigger className="mr-2" />
-              {/* Removed Portal Switcher from here */}
             </div>
             
             <div className="flex items-center space-x-2">
@@ -83,7 +82,7 @@ const AdminLayout = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>{user?.email?.split('@')[0] || 'Admin'}</DropdownMenuLabel>
+                  <DropdownMenuLabel>{user?.name || user?.email?.split('@')[0] || 'Admin'}</DropdownMenuLabel>
                   <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
                     {user?.email || 'admin@example.com'}
                   </DropdownMenuLabel>

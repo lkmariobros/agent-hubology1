@@ -9,17 +9,19 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Building, Shield, ChevronsUpDown } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { UserRole } from '@/types/auth';
 
 interface PortalSwitcherProps {
   showLabel?: boolean;
   className?: string;
 }
 
+/**
+ * Component that allows users with multiple roles to switch between portals
+ */
 export function PortalSwitcher({ showLabel = true, className = "" }: PortalSwitcherProps) {
-  const { isAdmin, switchRole } = useAuth();
-  
-  const currentRole = window.location.pathname.startsWith('/admin') ? 'admin' : 'agent';
-  const isAdminActive = currentRole === 'admin';
+  const { isAdmin, activeRole, switchRole } = useAuth();
+  const isAdminActive = activeRole === 'admin';
   
   console.log('PortalSwitcher rendering with isAdmin:', isAdmin);
 
@@ -39,7 +41,7 @@ export function PortalSwitcher({ showLabel = true, className = "" }: PortalSwitc
     );
   }
 
-  // For admin users, show the dropdown
+  // For admin users, show the dropdown with portal switching options
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

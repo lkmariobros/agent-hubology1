@@ -7,6 +7,9 @@ interface SidebarProfileProps {
   collapsed?: boolean;
 }
 
+/**
+ * Displays user profile in the sidebar with role information
+ */
 export function SidebarProfile({ collapsed }: SidebarProfileProps) {
   const { user } = useAuth();
   
@@ -19,6 +22,12 @@ export function SidebarProfile({ collapsed }: SidebarProfileProps) {
     }
     return 'U';
   };
+  
+  // Get display name from email or name field
+  const displayName = user.name || (user.email ? user.email.split('@')[0] : 'User');
+  
+  // Display the active role
+  const roleDisplay = user.activeRole;
   
   return (
     <Link 
@@ -33,8 +42,8 @@ export function SidebarProfile({ collapsed }: SidebarProfileProps) {
       
       {!collapsed && (
         <div className="flex flex-col overflow-hidden">
-          <span className="font-medium">{user.email ? user.email.split('@')[0] : 'User'}</span>
-          <span className="text-xs text-muted-foreground truncate">agent</span>
+          <span className="font-medium">{displayName}</span>
+          <span className="text-xs text-muted-foreground truncate">{roleDisplay}</span>
         </div>
       )}
     </Link>
