@@ -31,10 +31,6 @@ export function AppSidebar() {
   const isCollapsed = state === "collapsed";
   const { user, switchRole, isAdmin } = useAuth();
   
-  // Current role is always 'agent' in the agent portal
-  const currentRole = 'agent';
-  const isAdminActive = false;
-  
   return (
     <>
       <Sidebar 
@@ -44,12 +40,11 @@ export function AppSidebar() {
         variant="sidebar"
       >
         <SidebarHeader>
-          {/* Portal Switcher integrated in the sidebar header */}
           {isAdmin ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="flex items-center gap-2 px-2 py-3 w-full text-left hover:text-primary transition-colors focus:outline-none">
-                  <div className="h-8 w-8 rounded-full bg-accent flex items-center justify-center text-white">
+                  <div className="h-8 w-8 rounded-full bg-purple-600 flex items-center justify-center text-white">
                     <span className="font-bold text-sm">P</span>
                   </div>
                   {!isCollapsed && (
@@ -64,7 +59,7 @@ export function AppSidebar() {
               <DropdownMenuContent align="start" className="w-[180px] bg-popover">
                 <DropdownMenuItem 
                   onClick={() => switchRole('agent')}
-                  className={`flex items-center cursor-pointer ${!isAdminActive ? 'bg-accent/10' : ''}`}
+                  className="flex items-center cursor-pointer bg-accent/10"
                 >
                   <Building className="h-4 w-4 mr-2" />
                   <span>Agent Portal</span>
@@ -74,7 +69,7 @@ export function AppSidebar() {
                 
                 <DropdownMenuItem 
                   onClick={() => switchRole('admin')}
-                  className={`flex items-center cursor-pointer ${isAdminActive ? 'bg-accent/10' : ''}`}
+                  className="flex items-center cursor-pointer"
                 >
                   <Shield className="h-4 w-4 mr-2" />
                   <span>Admin Portal</span>
@@ -84,7 +79,7 @@ export function AppSidebar() {
           ) : (
             <div className="flex items-center px-2 py-3">
               <Link to="/dashboard" className="flex items-center">
-                <div className="flex items-center justify-center h-8 w-8 rounded-full bg-accent text-white">
+                <div className="flex items-center justify-center h-8 w-8 rounded-full bg-purple-600 text-white">
                   <span className="font-bold text-sm">P</span>
                 </div>
                 {!isCollapsed && (

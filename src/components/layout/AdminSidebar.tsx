@@ -25,9 +25,11 @@ import { NavSystem } from './sidebar/NavSystem';
 import { AdminProfile } from './sidebar/AdminProfile';
 
 export function AdminSidebar() {
-  const { user, switchRole } = useAuth();
-  const currentRole = 'admin'; // In admin sidebar, always show admin as active role
-  const isAdminActive = currentRole === 'admin';
+  const { user, switchRole, isAdmin } = useAuth();
+  
+  if (!isAdmin) {
+    return null; // Hide sidebar completely if not admin
+  }
 
   return (
     <Sidebar className="border-none bg-[#1F232D] AdminSidebar">
@@ -36,7 +38,7 @@ export function AdminSidebar() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="flex items-center gap-2 px-2 py-3 w-full text-left hover:text-primary transition-colors focus:outline-none">
-              <div className="h-8 w-8 rounded-full bg-accent flex items-center justify-center text-white">
+              <div className="h-8 w-8 rounded-full bg-purple-600 flex items-center justify-center text-white">
                 <span className="font-bold text-sm">P</span>
               </div>
               <span className="ml-2 text-lg font-semibold">PropertyPro</span>
@@ -47,7 +49,7 @@ export function AdminSidebar() {
           <DropdownMenuContent align="start" className="w-[180px] bg-popover">
             <DropdownMenuItem 
               onClick={() => switchRole('agent')}
-              className={`flex items-center cursor-pointer ${!isAdminActive ? 'bg-accent/10' : ''}`}
+              className="flex items-center cursor-pointer"
             >
               <Building className="h-4 w-4 mr-2" />
               <span>Agent Portal</span>
@@ -57,7 +59,7 @@ export function AdminSidebar() {
             
             <DropdownMenuItem 
               onClick={() => switchRole('admin')}
-              className={`flex items-center cursor-pointer ${isAdminActive ? 'bg-accent/10' : ''}`}
+              className="flex items-center cursor-pointer bg-accent/10"
             >
               <Shield className="h-4 w-4 mr-2" />
               <span>Admin Portal</span>
