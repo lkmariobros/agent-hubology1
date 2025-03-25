@@ -25,7 +25,7 @@ import PropertyIndustrialDetails from './form/PropertyIndustrialDetails';
 import PropertyLandDetails from './form/PropertyLandDetails';
 
 interface PropertyFormStepsProps {
-  onSubmit: (data: PropertyFormData) => Promise<void>;
+  onSubmit?: (data: PropertyFormData) => Promise<void>;
   initialData?: Partial<PropertyFormData>;
   isEdit?: boolean;
 }
