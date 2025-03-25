@@ -22,18 +22,96 @@ import {
   User,
   Building2, 
   Tag, 
-  MessageSquare
+  MessageSquare,
+  Plus,
+  ChevronDown,
+  ChevronUp,
+  X
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 
+// Mock contact information (would be fetched from API in real implementation)
+const mockContacts = [
+  {
+    id: 1,
+    name: "Ahmad Razali",
+    role: "Owner",
+    avatar: null,
+    initials: "AR",
+    phone: "+60123456789",
+    email: "ahmad@example.com"
+  },
+  {
+    id: 2,
+    name: "Sarah Lee",
+    role: "Co-Owner",
+    avatar: null,
+    initials: "SL",
+    phone: "+60123456790",
+    email: "sarah@example.com"
+  }
+];
+
+// Mock team notes data
+const teamNotes = [
+  {
+    id: 1,
+    author: {
+      name: "John Doe",
+      initials: "JD",
+      avatarColor: "bg-blue-500"
+    },
+    date: "Jun 15, 2023",
+    content: "Client is very interested in this property but concerned about the price. Might be open to offers 5% below asking."
+  },
+  {
+    id: 2,
+    author: {
+      name: "Lisa Park",
+      initials: "LP",
+      avatarColor: "bg-green-500"
+    },
+    date: "May 28, 2023",
+    content: "Owner mentioned they can expedite the closing process if needed. Also willing to leave some furniture if buyer is interested."
+  },
+  {
+    id: 3,
+    author: {
+      name: "Michael Chen",
+      initials: "MC",
+      avatarColor: "bg-purple-500"
+    },
+    date: "May 15, 2023",
+    content: "Had a viewing with a potential buyer who likes the location but needs more information about the building maintenance history."
+  },
+  {
+    id: 4,
+    author: {
+      name: "Emma Wilson",
+      initials: "EW",
+      avatarColor: "bg-amber-500"
+    },
+    date: "May 10, 2023",
+    content: "Spoke with building management. They confirmed that the roof was replaced last year and all plumbing was updated. This could be a good selling point."
+  }
+];
+
 const PropertyDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: propertyData, isLoading, error } = useProperty(id || '');
   const [activeImage, setActiveImage] = useState(0);
+  const [contacts, setContacts] = useState(mockContacts);
+  const [showAddContact, setShowAddContact] = useState(false);
+  const [newContact, setNewContact] = useState({
+    name: '',
+    role: '',
+    phone: '',
+    email: ''
+  });
 
   if (error) {
     toast.error("Failed to load property details");
@@ -59,39 +137,39 @@ const PropertyDetail = () => {
     setActiveImage(index);
   };
 
-  // Mock contact information (would be fetched from API in real implementation)
-  const contact = {
-    name: "Ahmad Razali",
-    role: "Owner",
-    avatar: null,
-    initials: "AR",
-    phone: "+60123456789",
-    email: "ahmad@example.com"
+  const handleAddContact = () => {
+    // Basic validation
+    if (!newContact.name) {
+      toast.error("Contact name is required");
+      return;
+    }
+
+    const initials = newContact.name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase();
+
+    const contact = {
+      id: contacts.length + 1,
+      name: newContact.name,
+      role: newContact.role || "Contact",
+      avatar: null,
+      initials,
+      phone: newContact.phone,
+      email: newContact.email
+    };
+
+    setContacts([...contacts, contact]);
+    setNewContact({ name: '', role: '', phone: '', email: '' });
+    setShowAddContact(false);
+    toast.success("Contact added successfully");
   };
 
-  // Mock team notes data
-  const teamNotes = [
-    {
-      id: 1,
-      author: {
-        name: "John Doe",
-        initials: "JD",
-        avatarColor: "bg-blue-500"
-      },
-      date: "Jun 15, 2023",
-      content: "Client is very interested in this property but concerned about the price. Might be open to offers 5% below asking."
-    },
-    {
-      id: 2,
-      author: {
-        name: "Lisa Park",
-        initials: "LP",
-        avatarColor: "bg-green-500"
-      },
-      date: "May 28, 2023",
-      content: "Owner mentioned they can expedite the closing process if needed. Also willing to leave some furniture if buyer is interested."
-    }
-  ];
+  const handleRemoveContact = (id: number) => {
+    setContacts(contacts.filter(contact => contact.id !== id));
+    toast.success("Contact removed");
+  };
 
   return (
     <div className="space-y-4">
@@ -235,33 +313,113 @@ const PropertyDetail = () => {
                     </div>
                   </div>
                   
-                  {/* Contact information */}
+                  {/* Multiple Contacts information */}
                   <div>
-                    <h3 className="text-sm font-medium mb-2">PRIMARY CONTACT</h3>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <Avatar className="h-10 w-10 mr-3">
-                          {contact.avatar ? (
-                            <AvatarImage src={contact.avatar} alt={contact.name} />
-                          ) : (
-                            <AvatarFallback className="bg-primary text-primary-foreground">
-                              {contact.initials}
-                            </AvatarFallback>
-                          )}
-                        </Avatar>
-                        <div>
-                          <p className="text-sm font-medium">{contact.name}</p>
-                          <p className="text-xs text-muted-foreground">{contact.role}</p>
+                    <div className="flex justify-between items-center mb-2">
+                      <h3 className="text-sm font-medium">CONTACTS</h3>
+                      <Button variant="ghost" size="sm" onClick={() => setShowAddContact(!showAddContact)} className="h-7 px-2 text-xs">
+                        {showAddContact ? <ChevronUp className="h-4 w-4 mr-1" /> : <Plus className="h-4 w-4 mr-1" />}
+                        {showAddContact ? 'Cancel' : 'Add Contact'}
+                      </Button>
+                    </div>
+                    
+                    {/* Add contact form */}
+                    {showAddContact && (
+                      <div className="bg-muted/50 p-3 rounded-md mb-3 space-y-2 text-sm">
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="text-xs text-muted-foreground">Name*</label>
+                            <input 
+                              type="text" 
+                              className="w-full px-2 py-1 text-sm bg-background rounded border border-input mt-1" 
+                              value={newContact.name}
+                              onChange={(e) => setNewContact({...newContact, name: e.target.value})}
+                              placeholder="Contact name"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs text-muted-foreground">Role</label>
+                            <input 
+                              type="text" 
+                              className="w-full px-2 py-1 text-sm bg-background rounded border border-input mt-1" 
+                              value={newContact.role}
+                              onChange={(e) => setNewContact({...newContact, role: e.target.value})}
+                              placeholder="e.g. Owner, Agent"
+                            />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="text-xs text-muted-foreground">Phone</label>
+                            <input 
+                              type="tel" 
+                              className="w-full px-2 py-1 text-sm bg-background rounded border border-input mt-1" 
+                              value={newContact.phone}
+                              onChange={(e) => setNewContact({...newContact, phone: e.target.value})}
+                              placeholder="Phone number"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs text-muted-foreground">Email</label>
+                            <input 
+                              type="email" 
+                              className="w-full px-2 py-1 text-sm bg-background rounded border border-input mt-1" 
+                              value={newContact.email}
+                              onChange={(e) => setNewContact({...newContact, email: e.target.value})}
+                              placeholder="Email address"
+                            />
+                          </div>
+                        </div>
+                        <div className="flex justify-end">
+                          <Button size="sm" onClick={handleAddContact} className="h-7 px-3 text-xs">Add Contact</Button>
                         </div>
                       </div>
-                      <div className="flex space-x-1">
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <Phone className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <Mail className="h-4 w-4" />
-                        </Button>
-                      </div>
+                    )}
+                    
+                    {/* Contact list */}
+                    <div className="space-y-3">
+                      {contacts.map((contact) => (
+                        <div key={contact.id} className="flex items-center justify-between bg-muted/20 p-2 rounded-md">
+                          <div className="flex items-center">
+                            <Avatar className="h-10 w-10 mr-3">
+                              {contact.avatar ? (
+                                <AvatarImage src={contact.avatar} alt={contact.name} />
+                              ) : (
+                                <AvatarFallback className="bg-primary text-primary-foreground">
+                                  {contact.initials}
+                                </AvatarFallback>
+                              )}
+                            </Avatar>
+                            <div>
+                              <p className="text-sm font-medium">{contact.name}</p>
+                              <p className="text-xs text-muted-foreground">{contact.role}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            <Button variant="ghost" size="icon" className="h-8 w-8" title="Call">
+                              <Phone className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8" title="Email">
+                              <Mail className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-8 w-8 text-destructive hover:text-destructive/90" 
+                              title="Remove contact"
+                              onClick={() => handleRemoveContact(contact.id)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                      
+                      {contacts.length === 0 && (
+                        <div className="text-center py-3 text-sm text-muted-foreground">
+                          No contacts added yet
+                        </div>
+                      )}
                     </div>
                   </div>
                 </CardContent>
@@ -269,14 +427,17 @@ const PropertyDetail = () => {
             </div>
           </div>
           
-          {/* Second row layout with map on left and tabs section on right */}
+          {/* Second row layout with map */}
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 mt-4">
-            {/* Map section on left */}
+            {/* Map section */}
             <Card className="lg:col-span-3 overflow-hidden border-neutral-800 bg-card/90">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center">
+                  <MapPin className="h-4 w-4 mr-2" />
+                  Location
+                </CardTitle>
+              </CardHeader>
               <CardContent className="p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-semibold">Location</h3>
-                </div>
                 <div className="bg-muted rounded-lg overflow-hidden">
                   <div className="w-full h-full flex flex-col items-center justify-center bg-secondary/30 py-8">
                     <MapPin className="h-12 w-12 text-primary opacity-30 mb-4" />
@@ -285,16 +446,36 @@ const PropertyDetail = () => {
                 </div>
               </CardContent>
             </Card>
+          </div>
+          
+          {/* Third row layout with overview and team notes side by side */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 mt-4">
+            {/* Overview section */}
+            <Card className="lg:col-span-3 overflow-hidden border-neutral-800 bg-card/90">
+              <CardHeader className="pb-2">
+                <CardTitle>Overview</CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                {property.description ? (
+                  <p className="text-muted-foreground whitespace-pre-line">{property.description}</p>
+                ) : (
+                  <div className="text-center py-8">
+                    <FileText className="mx-auto h-12 w-12 text-muted-foreground opacity-30" />
+                    <p className="mt-2 text-sm text-muted-foreground">No description available</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
             
-            {/* Team Notes section on right */}
-            <Card className="lg:col-span-2 overflow-hidden border-neutral-800 bg-card/90 backdrop-blur-sm">
+            {/* Team Notes section */}
+            <Card className="lg:col-span-2 overflow-hidden border-neutral-800 bg-card/90 backdrop-blur-sm h-full flex flex-col">
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center">
                   <MessageSquare className="h-4 w-4 mr-2" />
                   Team Notes
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-6">
+              <CardContent className="p-6 flex-grow overflow-auto">
                 <div className="space-y-4">
                   {teamNotes.map((note) => (
                     <div key={note.id} className="bg-muted/50 p-4 rounded-lg">
@@ -321,16 +502,10 @@ const PropertyDetail = () => {
             </Card>
           </div>
           
-          {/* Third row layout with tabs section */}
+          {/* Fourth row layout with tabs section */}
           <div className="mt-4">
-            <Tabs defaultValue="overview" className="w-full">
+            <Tabs defaultValue="features" className="w-full">
               <TabsList className="w-full border-b rounded-none bg-transparent h-12 p-0">
-                <TabsTrigger 
-                  value="overview" 
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-12 px-4"
-                >
-                  Overview
-                </TabsTrigger>
                 <TabsTrigger 
                   value="features" 
                   className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-12 px-4"
@@ -343,24 +518,13 @@ const PropertyDetail = () => {
                 >
                   Documents
                 </TabsTrigger>
+                <TabsTrigger 
+                  value="history" 
+                  className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-12 px-4"
+                >
+                  History
+                </TabsTrigger>
               </TabsList>
-              
-              <TabsContent value="overview" className="mt-4">
-                {/* Description section */}
-                <Card className="overflow-hidden border-neutral-800 bg-card/90">
-                  <CardContent className="p-6">
-                    <h3 className="text-lg font-semibold mb-4">Description</h3>
-                    {property.description ? (
-                      <p className="text-muted-foreground whitespace-pre-line">{property.description}</p>
-                    ) : (
-                      <div className="text-center py-8">
-                        <FileText className="mx-auto h-12 w-12 text-muted-foreground opacity-30" />
-                        <p className="mt-2 text-sm text-muted-foreground">No description available</p>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
               
               <TabsContent value="features" className="mt-4">
                 <Card className="overflow-hidden border-neutral-800 bg-card/90">
@@ -393,6 +557,17 @@ const PropertyDetail = () => {
                     <div className="text-center py-8">
                       <FileText className="mx-auto h-12 w-12 text-muted-foreground opacity-30" />
                       <p className="mt-2 text-sm text-muted-foreground">No documents available</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              
+              <TabsContent value="history" className="mt-4">
+                <Card className="overflow-hidden border-neutral-800 bg-card/90">
+                  <CardContent className="p-6">
+                    <div className="text-center py-8">
+                      <Calendar className="mx-auto h-12 w-12 text-muted-foreground opacity-30" />
+                      <p className="mt-2 text-sm text-muted-foreground">No history available</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -430,6 +605,10 @@ const PropertyDetailSkeleton = () => {
         <div className="lg:col-span-2 space-y-4">
           <Skeleton className="h-[300px] w-full rounded-lg" />
         </div>
+      </div>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+        <Skeleton className="lg:col-span-3 h-[200px] w-full rounded-lg" />
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
