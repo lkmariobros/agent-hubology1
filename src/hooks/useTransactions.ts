@@ -1,7 +1,8 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Transaction, TransactionFormData, TransactionDocument } from '@/types';
+import { Transaction } from '@/types';
+import { TransactionFormData, TransactionDocument } from '@/types/transaction-form';
 import { toast } from 'sonner';
 
 interface TransactionsQueryParams {

@@ -41,7 +41,7 @@ export const saveFormAsDraft = async (state: TransactionFormState): Promise<void
       seller_email: state.formData.seller?.email || null,
       seller_phone: state.formData.seller?.phone || null,
       notes: state.formData.notes || '',
-      updated_at: new Date()
+      updated_at: new Date().toISOString() // Convert Date to ISO string for Supabase
     };
     
     let transactionId = state.formData.id;
@@ -157,7 +157,7 @@ export const submitTransactionForm = async (state: TransactionFormState): Promis
       seller_email: state.formData.seller?.email || null,
       seller_phone: state.formData.seller?.phone || null,
       notes: state.formData.notes || '',
-      updated_at: new Date()
+      updated_at: new Date().toISOString() // Convert Date to ISO string for Supabase
     };
     
     let transactionId = state.formData.id;

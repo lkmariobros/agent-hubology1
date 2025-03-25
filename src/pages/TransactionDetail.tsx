@@ -172,7 +172,7 @@ const TransactionDetail = () => {
                     </div>
                     <div className="grid grid-cols-2">
                       <span className="text-muted-foreground">Agent:</span>
-                      <span>{transaction.agent?.name}</span>
+                      <span>{transaction.agent?.name || 'N/A'}</span>
                     </div>
                   </div>
                 </div>
@@ -216,12 +216,12 @@ const TransactionDetail = () => {
                     <div className="space-y-3">
                       <div className="grid grid-cols-2">
                         <span className="text-muted-foreground">Property:</span>
-                        <span>{transaction.property?.title}</span>
+                        <span>{transaction.property?.title || 'N/A'}</span>
                       </div>
                       <div className="grid grid-cols-2">
                         <span className="text-muted-foreground">Location:</span>
                         <span>
-                          {transaction.property?.address.city}, {transaction.property?.address.state}
+                          {transaction.property?.address?.city || 'N/A'}, {transaction.property?.address?.state || ''}
                         </span>
                       </div>
                     </div>
@@ -271,7 +271,7 @@ const TransactionDetail = () => {
                   <ul className="space-y-4">
                     {transaction.documents.map((doc, index) => (
                       <li key={index} className="flex items-center justify-between p-3 bg-muted rounded-md">
-                        <span>{doc.name}</span>
+                        <span>{typeof doc === 'string' ? doc : doc.name}</span>
                         <Button variant="ghost" size="sm">
                           <FileDown className="h-4 w-4 mr-2" />
                           Download

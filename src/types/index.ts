@@ -1,5 +1,9 @@
 
 import React from 'react';
+import { TransactionFormData, TransactionDocument } from './transaction-form';
+
+// Re-export types from transaction-form.ts
+export type { TransactionFormData, TransactionDocument };
 
 export interface DashboardMetric {
   label: string;
