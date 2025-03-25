@@ -1,3 +1,4 @@
+
 import React from 'react';
 import MetricCard from '@/components/dashboard/MetricCard';
 import OpportunitiesBoard from '@/components/dashboard/OpportunitiesBoard';
@@ -90,6 +91,7 @@ const Home = () => {
       agent: { id: '1', name: 'Agent 1' },
       createdAt: '2023-01-01',
       updatedAt: '2023-01-01',
+      featured: false,
       transactionType: 'Sale'
     },
     { 
@@ -115,6 +117,7 @@ const Home = () => {
       agent: { id: '2', name: 'Agent 2' },
       createdAt: '2023-01-02',
       updatedAt: '2023-01-02',
+      featured: false,
       transactionType: 'Sale'
     },
     { 
@@ -140,6 +143,7 @@ const Home = () => {
       agent: { id: '1', name: 'Agent 1' },
       createdAt: '2023-01-03',
       updatedAt: '2023-01-03',
+      featured: false,
       transactionType: 'Sale'
     }
   ];

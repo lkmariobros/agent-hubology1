@@ -53,7 +53,12 @@ export const mapPropertyData = (property: any) => {
     area: property.built_up_area || property.floor_area || property.land_area || property.size || 0,
     bedrooms: property.bedrooms || 0,
     bathrooms: property.bathrooms || 0,
-    features: property.features || [],
+    features: {
+      bedrooms: property.bedrooms || 0,
+      bathrooms: property.bathrooms || 0,
+      squareFeet: property.built_up_area || property.size || property.area || 0,
+      landSize: property.land_size || 0
+    },
     images: property.property_images 
       ? property.property_images.map((img: any) => 
           img.storage_path ? getImageUrl(img.storage_path) : ''
@@ -62,7 +67,10 @@ export const mapPropertyData = (property: any) => {
     createdAt: property.created_at || new Date().toISOString(),
     updatedAt: property.updated_at || new Date().toISOString(),
     featured: property.featured || false,
-    listedBy: property.agent_id || 'Unknown'
+    listedBy: property.agent_id || 'Unknown',
+    agent: { id: property.agent_id || '', name: 'Agent' },
+    transactionType: property.transaction_types?.name || property.transactionType || 'Sale',
+    stock: property.stock || undefined
   };
   
   return mappedProperty;

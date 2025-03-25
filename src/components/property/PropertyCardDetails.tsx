@@ -15,7 +15,7 @@ interface PropertyCardDetailsProps {
 }
 
 export function PropertyCardDetails({ property, onEdit, className }: PropertyCardDetailsProps) {
-  // Convert features object to array for rendering if needed
+  // Create a feature array from property.features object
   const featureArray = property.features ? 
     (Array.isArray(property.features) ? 
       property.features : 
