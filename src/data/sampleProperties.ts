@@ -1,3 +1,4 @@
+
 import { Property } from '@/types';
 
 // Sample properties data with more realistic images
@@ -38,6 +39,7 @@ export const sampleProperties: Property[] = [
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     listedBy: 'Agent Smith',
+    featured: false,
     transactionType: 'Sale'
   },
   {
@@ -71,6 +73,7 @@ export const sampleProperties: Property[] = [
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     listedBy: 'Agent Johnson',
+    featured: false,
     transactionType: 'Sale'
   },
   {
@@ -104,6 +107,7 @@ export const sampleProperties: Property[] = [
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     listedBy: 'Agent Williams',
+    featured: false,
     transactionType: 'Sale'
   },
   {
@@ -142,6 +146,7 @@ export const sampleProperties: Property[] = [
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     listedBy: 'Agent Garcia',
+    featured: false,
     transactionType: 'Sale'
   },
   {
@@ -175,6 +180,7 @@ export const sampleProperties: Property[] = [
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     listedBy: 'Agent Davis',
+    featured: false,
     transactionType: 'Sale'
   },
   {
@@ -208,6 +214,7 @@ export const sampleProperties: Property[] = [
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     listedBy: 'Agent Miller',
+    featured: false,
     transactionType: 'Sale'
   }
 ];
