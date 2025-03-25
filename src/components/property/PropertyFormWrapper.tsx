@@ -33,19 +33,13 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
     setIsSubmitting(true);
     
     try {
-      // Augment data with current user ID
-      const augmentedData = {
-        ...data,
-        agentId: user.id
-      };
-      
       if (isEdit && propertyId) {
         // Update existing property
-        await updateProperty.mutateAsync({ id: propertyId, data: augmentedData });
+        await updateProperty.mutateAsync({ id: propertyId, data });
         navigate(`/properties/${propertyId}`);
       } else {
         // Create new property
-        const result = await createProperty.mutateAsync(augmentedData);
+        const result = await createProperty.mutateAsync(data);
         navigate(`/properties/${result.propertyId}`);
       }
     } catch (error) {

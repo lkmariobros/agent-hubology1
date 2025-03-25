@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { PropertyFormData } from '@/types/property-form';
+import { PropertyFormData, PropertyImage, PropertyDocument } from '@/types/property-form';
 
 /**
  * Hook for managing property storage operations
@@ -202,41 +202,41 @@ export function usePropertyManagement() {
         const { data: propertyData, error: propertyError } = await supabase
           .from('enhanced_properties')
           .insert({
-            title: data.basicInfo.title,
-            description: data.basicInfo.description,
-            property_type_id: data.basicInfo.propertyType,
-            transaction_type_id: data.basicInfo.transactionType,
-            price: data.basicInfo.price,
-            rental_rate: data.basicInfo.rentalRate,
-            status_id: data.basicInfo.status,
-            featured: data.basicInfo.featured,
+            title: data.title,
+            description: data.description,
+            property_type_id: data.propertyType,
+            transaction_type_id: data.transactionType,
+            price: data.price,
+            rental_rate: data.rentalRate,
+            status_id: data.status,
+            featured: data.featured,
             // Address fields
             street: data.address.street,
             city: data.address.city,
             state: data.address.state,
-            zip: data.address.zipCode,
+            zip: data.address.zip,
             country: data.address.country,
             // Property details based on type
-            bedrooms: data.details.bedrooms,
-            bathrooms: data.details.bathrooms,
-            built_up_area: data.details.builtUpArea,
-            floor_area: data.details.floorArea,
-            land_size: data.details.landSize,
-            furnishing_status: data.details.furnishingStatus,
+            bedrooms: data.bedrooms,
+            bathrooms: data.bathrooms,
+            built_up_area: data.builtUpArea,
+            floor_area: data.floorArea,
+            land_size: data.landSize,
+            furnishing_status: data.furnishingStatus,
             // Commercial/industrial specific
-            building_class: data.details.buildingClass,
-            ceiling_height: data.details.ceilingHeight,
-            loading_bays: data.details.loadingBays,
-            power_capacity: data.details.powerCapacity,
+            building_class: data.buildingClass,
+            ceiling_height: data.ceilingHeight,
+            loading_bays: data.loadingBays,
+            power_capacity: data.powerCapacity,
             // Land specific
-            zoning: data.details.zoning,
-            zoning_type: data.details.zoningType,
-            topography: data.details.topography,
-            road_frontage: data.details.roadFrontage,
+            zoning: data.zoning,
+            zoning_type: data.zoningType,
+            topography: data.topography,
+            road_frontage: data.roadFrontage,
             // Agent notes
-            agent_notes: data.notes.internalNotes,
+            agent_notes: data.agentNotes,
             // Current user as agent
-            agent_id: data.agentId || null
+            agent_id: (await supabase.auth.getUser()).data.user?.id
           })
           .select('id')
           .single();
@@ -249,20 +249,30 @@ export function usePropertyManagement() {
         const propertyId = propertyData.id;
         
         // Step 2: Upload images if any
-        if (data.media.images && data.media.images.length > 0) {
-          const files = data.media.images.filter(img => img instanceof File) as File[];
-          if (files.length > 0) {
-            await uploadImages(propertyId, files);
+        if (data.images && data.images.length > 0) {
+          const imagesToUpload = data.images
+            .filter(img => img.file)
+            .map(img => img.file as File);
+            
+          if (imagesToUpload.length > 0) {
+            await uploadImages(propertyId, imagesToUpload);
           }
         }
         
         // Step 3: Upload documents if any
-        if (data.media.documents && data.media.documents.length > 0) {
-          const files = data.media.documents.filter(doc => doc instanceof File) as File[];
-          const documentTypes = data.media.documentTypes || {};
+        if (data.documents && data.documents.length > 0) {
+          const docsToUpload = data.documents
+            .filter(doc => doc.file)
+            .map(doc => doc.file as File);
+            
+          const documentTypes = Object.fromEntries(
+            data.documents
+              .filter(doc => doc.file)
+              .map(doc => [doc.file?.name || '', doc.documentType])
+          );
           
-          if (files.length > 0) {
-            await uploadDocuments(propertyId, files, documentTypes);
+          if (docsToUpload.length > 0) {
+            await uploadDocuments(propertyId, docsToUpload, documentTypes);
           }
         }
         
@@ -297,59 +307,43 @@ export function usePropertyManagement() {
         const propertyData: any = {};
         
         // Basic info
-        if (data.basicInfo) {
-          const { basicInfo } = data;
-          Object.assign(propertyData, {
-            title: basicInfo.title,
-            description: basicInfo.description,
-            property_type_id: basicInfo.propertyType,
-            transaction_type_id: basicInfo.transactionType,
-            price: basicInfo.price,
-            rental_rate: basicInfo.rentalRate,
-            status_id: basicInfo.status,
-            featured: basicInfo.featured
-          });
-        }
+        if (data.title !== undefined) propertyData.title = data.title;
+        if (data.description !== undefined) propertyData.description = data.description;
+        if (data.propertyType !== undefined) propertyData.property_type_id = data.propertyType;
+        if (data.transactionType !== undefined) propertyData.transaction_type_id = data.transactionType;
+        if (data.price !== undefined) propertyData.price = data.price;
+        if (data.rentalRate !== undefined) propertyData.rental_rate = data.rentalRate;
+        if (data.status !== undefined) propertyData.status_id = data.status;
+        if (data.featured !== undefined) propertyData.featured = data.featured;
         
         // Address
         if (data.address) {
           const { address } = data;
-          Object.assign(propertyData, {
-            street: address.street,
-            city: address.city,
-            state: address.state,
-            zip: address.zipCode,
-            country: address.country
-          });
+          if (address.street !== undefined) propertyData.street = address.street;
+          if (address.city !== undefined) propertyData.city = address.city;
+          if (address.state !== undefined) propertyData.state = address.state;
+          if (address.zip !== undefined) propertyData.zip = address.zip;
+          if (address.country !== undefined) propertyData.country = address.country;
         }
         
-        // Details
-        if (data.details) {
-          const { details } = data;
-          Object.assign(propertyData, {
-            bedrooms: details.bedrooms,
-            bathrooms: details.bathrooms,
-            built_up_area: details.builtUpArea,
-            floor_area: details.floorArea,
-            land_size: details.landSize,
-            furnishing_status: details.furnishingStatus,
-            building_class: details.buildingClass,
-            ceiling_height: details.ceilingHeight,
-            loading_bays: details.loadingBays,
-            power_capacity: details.powerCapacity,
-            zoning: details.zoning,
-            zoning_type: details.zoningType,
-            topography: details.topography,
-            road_frontage: details.roadFrontage
-          });
-        }
+        // Property specific fields
+        if (data.bedrooms !== undefined) propertyData.bedrooms = data.bedrooms;
+        if (data.bathrooms !== undefined) propertyData.bathrooms = data.bathrooms;
+        if (data.builtUpArea !== undefined) propertyData.built_up_area = data.builtUpArea;
+        if (data.floorArea !== undefined) propertyData.floor_area = data.floorArea;
+        if (data.landSize !== undefined) propertyData.land_size = data.landSize;
+        if (data.furnishingStatus !== undefined) propertyData.furnishing_status = data.furnishingStatus;
+        if (data.buildingClass !== undefined) propertyData.building_class = data.buildingClass;
+        if (data.ceilingHeight !== undefined) propertyData.ceiling_height = data.ceilingHeight;
+        if (data.loadingBays !== undefined) propertyData.loading_bays = data.loadingBays;
+        if (data.powerCapacity !== undefined) propertyData.power_capacity = data.powerCapacity;
+        if (data.zoning !== undefined) propertyData.zoning = data.zoning;
+        if (data.zoningType !== undefined) propertyData.zoning_type = data.zoningType;
+        if (data.topography !== undefined) propertyData.topography = data.topography;
+        if (data.roadFrontage !== undefined) propertyData.road_frontage = data.roadFrontage;
         
         // Notes
-        if (data.notes) {
-          Object.assign(propertyData, {
-            agent_notes: data.notes.internalNotes
-          });
-        }
+        if (data.agentNotes !== undefined) propertyData.agent_notes = data.agentNotes;
         
         // Always update the timestamp
         propertyData.updated_at = new Date().toISOString();
@@ -365,75 +359,77 @@ export function usePropertyManagement() {
           throw updateError;
         }
         
-        // Handle media updates if needed
-        if (data.media) {
-          // Upload new images
-          if (data.media.newImages && data.media.newImages.length > 0) {
-            const files = data.media.newImages.filter(img => img instanceof File) as File[];
-            if (files.length > 0) {
-              await uploadImages(id, files);
-            }
-          }
+        // Handle images/documents updates
+        // New images to upload
+        const imagesToUpload = data.images
+          ?.filter(img => img.file && !img.id)
+          .map(img => img.file as File) || [];
           
-          // Upload new documents
-          if (data.media.newDocuments && data.media.newDocuments.length > 0) {
-            const files = data.media.newDocuments.filter(doc => doc instanceof File) as File[];
-            const documentTypes = data.media.documentTypes || {};
+        if (imagesToUpload.length > 0) {
+          await uploadImages(id, imagesToUpload);
+        }
+        
+        // New documents to upload
+        const documentsToUpload = data.documents
+          ?.filter(doc => doc.file && !doc.id)
+          .map(doc => doc.file as File) || [];
+          
+        if (documentsToUpload.length > 0) {
+          const documentTypes = Object.fromEntries(
+            data.documents
+              ?.filter(doc => doc.file && !doc.id)
+              .map(doc => [doc.file?.name || '', doc.documentType]) || []
+          );
+          
+          await uploadDocuments(id, documentsToUpload, documentTypes);
+        }
+        
+        // Images to delete
+        const imagesToDelete = data.imagesToDelete || [];
+        for (const imageId of imagesToDelete) {
+          // First get the image to find its storage path
+          const { data: imageData } = await supabase
+            .from('property_images')
+            .select('storage_path')
+            .eq('id', imageId)
+            .single();
             
-            if (files.length > 0) {
-              await uploadDocuments(id, files, documentTypes);
-            }
+          if (imageData?.storage_path) {
+            // Delete the file from storage
+            await supabase.storage
+              .from('property-images')
+              .remove([imageData.storage_path]);
           }
           
-          // Delete images if specified
-          if (data.media.imagesToDelete && data.media.imagesToDelete.length > 0) {
-            for (const imageId of data.media.imagesToDelete) {
-              // First get the image to find its storage path
-              const { data: imageData } = await supabase
-                .from('property_images')
-                .select('storage_path')
-                .eq('id', imageId)
-                .single();
-                
-              if (imageData?.storage_path) {
-                // Delete the file from storage
-                await supabase.storage
-                  .from('property-images')
-                  .remove([imageData.storage_path]);
-              }
-              
-              // Delete the record
-              await supabase
-                .from('property_images')
-                .delete()
-                .eq('id', imageId);
-            }
+          // Delete the record
+          await supabase
+            .from('property_images')
+            .delete()
+            .eq('id', imageId);
+        }
+        
+        // Documents to delete
+        const documentsToDelete = data.documentsToDelete || [];
+        for (const docId of documentsToDelete) {
+          // First get the document to find its storage path
+          const { data: docData } = await supabase
+            .from('property_documents')
+            .select('storage_path')
+            .eq('id', docId)
+            .single();
+            
+          if (docData?.storage_path) {
+            // Delete the file from storage
+            await supabase.storage
+              .from('property-documents')
+              .remove([docData.storage_path]);
           }
           
-          // Delete documents if specified
-          if (data.media.documentsToDelete && data.media.documentsToDelete.length > 0) {
-            for (const docId of data.media.documentsToDelete) {
-              // First get the document to find its storage path
-              const { data: docData } = await supabase
-                .from('property_documents')
-                .select('storage_path')
-                .eq('id', docId)
-                .single();
-                
-              if (docData?.storage_path) {
-                // Delete the file from storage
-                await supabase.storage
-                  .from('property-documents')
-                  .remove([docData.storage_path]);
-              }
-              
-              // Delete the record
-              await supabase
-                .from('property_documents')
-                .delete()
-                .eq('id', docId);
-            }
-          }
+          // Delete the record
+          await supabase
+            .from('property_documents')
+            .delete()
+            .eq('id', docId);
         }
         
         return {

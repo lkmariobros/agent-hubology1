@@ -117,6 +117,12 @@ export type PropertyFormData = {
   zoning?: string;
   roadFrontage?: number;
   topography?: string;
+  
+  // Additional properties for update operations
+  images?: PropertyImage[];
+  documents?: PropertyDocument[];
+  imagesToDelete?: string[];
+  documentsToDelete?: string[];
 };
 
 // Property images type
@@ -126,7 +132,7 @@ export interface PropertyImage {
   url: string;
   displayOrder: number;
   isCover: boolean;
-  storagePath?: string; // Added missing property
+  storagePath?: string;
 }
 
 // Property document type
@@ -136,7 +142,7 @@ export interface PropertyDocument {
   name: string;
   documentType: string;
   url?: string;
-  storagePath?: string; // Added missing property
+  storagePath?: string;
 }
 
 // Property form state interface

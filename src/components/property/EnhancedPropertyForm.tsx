@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PropertyFormProvider, usePropertyForm } from '@/context/PropertyForm';
@@ -6,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { Loader2, Save, ArrowLeft, ArrowRight } from 'lucide-react';
+import { PropertyFormData } from '@/types/property-form';
 
 // Form step components
 import PropertyTypeSelector from './form/PropertyTypeSelector';
@@ -24,10 +24,23 @@ import PropertyCommercialDetails from './form/PropertyCommercialDetails';
 import PropertyIndustrialDetails from './form/PropertyIndustrialDetails';
 import PropertyLandDetails from './form/PropertyLandDetails';
 
-const PropertyFormSteps: React.FC = () => {
-  const { state, prevStep, nextStep, saveForm, submitForm } = usePropertyForm();
+interface PropertyFormStepsProps {
+  onSubmit: (data: PropertyFormData) => Promise<void>;
+  initialData?: Partial<PropertyFormData>;
+  isEdit?: boolean;
+}
+
+const PropertyFormSteps: React.FC<PropertyFormStepsProps> = ({ onSubmit, initialData, isEdit = false }) => {
+  const { state, prevStep, nextStep, saveForm, submitForm, updateFormData } = usePropertyForm();
   const { currentStep, isSubmitting, lastSaved, formData } = state;
   const navigate = useNavigate();
+
+  // If initialData is provided, update the form data on component mount
+  useEffect(() => {
+    if (initialData) {
+      updateFormData(initialData);
+    }
+  }, [initialData, updateFormData]);
 
   const PropertyDetailsComponent = () => {
     switch (formData.propertyType) {
@@ -55,9 +68,15 @@ const PropertyFormSteps: React.FC = () => {
 
   const handleSubmit = async () => {
     try {
-      await submitForm();
-      toast.success('Property listing created successfully!');
-      navigate('/properties');
+      // If onSubmit prop is provided, use it
+      if (onSubmit) {
+        await onSubmit(formData);
+      } else {
+        // Otherwise use the context's submitForm
+        await submitForm();
+        toast.success('Property listing created successfully!');
+        navigate('/properties');
+      }
     } catch (error) {
       toast.error('Failed to create property listing');
     }
@@ -252,7 +271,7 @@ const PropertyFormSteps: React.FC = () => {
                       Submitting...
                     </>
                   ) : (
-                    'Submit Property'
+                    isEdit ? 'Update Property' : 'Submit Property'
                   )}
                 </Button>
               )}
@@ -273,10 +292,16 @@ const PropertyFormSteps: React.FC = () => {
   );
 };
 
-const EnhancedPropertyForm: React.FC = () => {
+interface EnhancedPropertyFormProps {
+  onSubmit?: (data: PropertyFormData) => Promise<void>;
+  initialData?: Partial<PropertyFormData>;
+  isEdit?: boolean;
+}
+
+const EnhancedPropertyForm: React.FC<EnhancedPropertyFormProps> = (props) => {
   return (
     <PropertyFormProvider>
-      <PropertyFormSteps />
+      <PropertyFormSteps {...props} />
     </PropertyFormProvider>
   );
 };
