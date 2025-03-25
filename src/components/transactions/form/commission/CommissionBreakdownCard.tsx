@@ -40,7 +40,7 @@ const CommissionBreakdownCard: React.FC<CommissionBreakdownCardProps> = ({
             <span className="text-muted-foreground">
               {isRental ? 'Monthly Rental Value:' : 'Total Transaction Value:'}
             </span>
-            <span className="font-medium">{formatCurrency(commissionBreakdown.transactionValue)}</span>
+            <span className="font-medium">{formatCurrency(commissionBreakdown.transactionValue || 0)}</span>
           </div>
           
           {isRental && (
@@ -54,7 +54,7 @@ const CommissionBreakdownCard: React.FC<CommissionBreakdownCardProps> = ({
             <>
               <div className="flex justify-between items-center border-b pb-2">
                 <span className="text-muted-foreground">Commission Rate:</span>
-                <span className="font-medium">{commissionBreakdown.commissionRate}%</span>
+                <span className="font-medium">{commissionBreakdown.commissionRate || 0}%</span>
               </div>
               
               <div className="flex justify-between items-center border-b pb-2">
@@ -103,15 +103,6 @@ const CommissionBreakdownCard: React.FC<CommissionBreakdownCardProps> = ({
             </div>
           </div>
         </div>
-        
-        {/* Visual representation of the split */}
-        <CommissionVisualizer 
-          agentPercentage={agentPortionPercentage}
-          agencyPercentage={agencyPortionPercentage}
-          coBrokingEnabled={coBroking.enabled}
-          agencySplitPercentage={coBroking.commissionSplit}
-          coAgencySplitPercentage={100 - coBroking.commissionSplit}
-        />
       </CardContent>
     </Card>
   );

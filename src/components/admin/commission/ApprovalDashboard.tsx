@@ -14,8 +14,6 @@ import {
 } from '@/hooks/useCommissionApproval';
 import { formatCurrency } from '@/utils/propertyUtils';
 import { useAuth } from '@/hooks/useAuth';
-import SummaryCards from './SummaryCards';
-import StatusBadge from './StatusBadge';
 import { 
   Table,
   TableBody,
@@ -27,14 +25,14 @@ import {
 import { Button } from '@/components/ui/button';
 import { 
   Calendar,
-  PanelTop,
-  User,
   Clock,
   CheckCircle,
   AlertTriangle,
   ExternalLink,
   Loader2
 } from 'lucide-react';
+import SummaryCards from './SummaryCards';
+import StatusBadge from './StatusBadge';
 import BulkApprovalTools from './BulkApprovalTools';
 
 const ApprovalDashboard: React.FC = () => {
@@ -71,7 +69,7 @@ const ApprovalDashboard: React.FC = () => {
         </p>
       </div>
       
-      <SummaryCards isAdmin={isAdmin} threshold={threshold} />
+      <SummaryCards />
       
       <Tabs defaultValue="pending" className="space-y-6" onValueChange={tab => {
         setActiveTab(tab === 'all' ? 'all' : tab);
@@ -168,7 +166,7 @@ const ApprovalDashboard: React.FC = () => {
 };
 
 interface ApprovalsListProps {
-  approvals?: (any)[];
+  approvals?: any[];
   isLoading: boolean;
   threshold: number;
 }

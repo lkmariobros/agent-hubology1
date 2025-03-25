@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useTransactionForm } from '@/context/TransactionFormContext';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -18,11 +18,13 @@ import ApprovalInfo from './commission/ApprovalInfo';
 const CommissionCalculation: React.FC = () => {
   const { state, updateFormData, calculateCommission } = useTransactionForm();
   const { formData, errors } = state;
+  const [ownerCommissionAmount, setOwnerCommissionAmount] = useState(formData.commissionAmount || 0);
   
   const {
     transactionValue = 0,
     commissionRate = 0,
-    agentTier
+    agentTier = 'Advisor',
+    transactionType
   } = formData;
   
   const handleTransactionValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,6 +45,23 @@ const CommissionCalculation: React.FC = () => {
   const commissionBreakdown = calculateCommission();
   const totalCommission = commissionBreakdown.totalCommission || 0;
   
+  // Determine if it's a rental transaction
+  const isRental = transactionType === 'Rent';
+  
+  // Format currency for display
+  const formatCurrency = (amount: number) => {
+    return amount.toLocaleString('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    });
+  };
+  
+  // Calculate agent and agency percentages
+  const agentPortionPercentage = commissionBreakdown.agentCommissionPercentage || 70;
+  const agencyPortionPercentage = 100 - agentPortionPercentage;
+  
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -53,12 +72,9 @@ const CommissionCalculation: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-6">
               <CommissionInputs 
-                transactionValue={transactionValue}
-                commissionRate={commissionRate}
-                onTransactionValueChange={handleTransactionValueChange}
-                onCommissionRateChange={handleCommissionRateChange}
-                transactionType={formData.transactionType}
-                errors={errors}
+                isRental={isRental}
+                ownerCommissionAmount={ownerCommissionAmount}
+                setOwnerCommissionAmount={setOwnerCommissionAmount}
               />
               
               {errors.transactionValue && (
@@ -72,7 +88,7 @@ const CommissionCalculation: React.FC = () => {
               
               <div className="pt-4 border-t">
                 <AgentTierSelector 
-                  value={agentTier || 'Advisor'} 
+                  value={agentTier} 
                   onChange={handleAgentTierChange} 
                 />
               </div>
@@ -88,16 +104,40 @@ const CommissionCalculation: React.FC = () => {
           
           {formData.coBroking?.enabled && (
             <CoBrokingInfoCard
-              coBroking={formData.coBroking}
-              commissionSplit={formData.coBroking.commissionSplit}
+              enabled={formData.coBroking.enabled}
+              agencySplitPercentage={formData.coBroking.commissionSplit}
+              coAgencySplitPercentage={100 - formData.coBroking.commissionSplit}
             />
           )}
         </div>
         
         <div className="space-y-6">
-          <CommissionBreakdownCard breakdown={commissionBreakdown} />
-          <CommissionVisualizer breakdown={commissionBreakdown} />
-          <AgentTierInfo currentTier={agentTier || 'Advisor'} />
+          <CommissionBreakdownCard 
+            commissionBreakdown={commissionBreakdown}
+            agentTier={agentTier}
+            agentPortionPercentage={agentPortionPercentage}
+            agencyPortionPercentage={agencyPortionPercentage}
+            coBroking={{
+              enabled: formData.coBroking?.enabled || false,
+              commissionSplit: formData.coBroking?.commissionSplit || 50
+            }}
+            formatCurrency={formatCurrency}
+            isRental={isRental}
+          />
+          <CommissionVisualizer 
+            agentPercentage={agentPortionPercentage}
+            agencyPercentage={agencyPortionPercentage}
+            coBrokingEnabled={formData.coBroking?.enabled || false}
+            agencySplitPercentage={formData.coBroking?.commissionSplit || 50}
+            coAgencySplitPercentage={formData.coBroking?.enabled ? 100 - (formData.coBroking?.commissionSplit || 50) : 50}
+          />
+          <AgentTierInfo 
+            agentTier={{
+              name: agentTier,
+              rank: agentTier,
+              agentPercentage: agentPortionPercentage
+            }}
+          />
         </div>
       </div>
     </div>
