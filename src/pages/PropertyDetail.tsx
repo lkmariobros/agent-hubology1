@@ -94,7 +94,7 @@ const PropertyDetail = () => {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header with navigation and actions */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div className="flex items-center space-x-4">
@@ -132,7 +132,7 @@ const PropertyDetail = () => {
       ) : property ? (
         <>
           {/* Property detail - two column layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
             {/* Left column - Image gallery (60-65% width) */}
             <div className="lg:col-span-3">
               <div className="space-y-4">
@@ -182,7 +182,7 @@ const PropertyDetail = () => {
             </div>
             
             {/* Right column - Property details (35-40% width) */}
-            <div className="lg:col-span-2 space-y-6">
+            <div className="lg:col-span-2 space-y-4">
               {/* Property info card */}
               <Card className="overflow-hidden border-neutral-800 bg-card/90 backdrop-blur-sm">
                 <CardContent className="p-6 space-y-4">
@@ -266,134 +266,139 @@ const PropertyDetail = () => {
                   </div>
                 </CardContent>
               </Card>
-              
-              {/* Team Notes section - directly visible instead of in a tab */}
-              <Card className="overflow-hidden border-neutral-800 bg-card/90 backdrop-blur-sm">
-                <CardHeader className="pb-2">
-                  <CardTitle className="flex items-center">
-                    <MessageSquare className="h-4 w-4 mr-2" />
-                    Team Notes
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <div className="space-y-4">
-                    {teamNotes.map((note) => (
-                      <div key={note.id} className="bg-muted/50 p-4 rounded-lg">
-                        <div className="flex items-center mb-2">
-                          <Avatar className="h-6 w-6 mr-2">
-                            <AvatarFallback className={note.author.avatarColor + " text-white"}>
-                              {note.author.initials}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span className="text-sm font-medium">{note.author.name}</span>
-                          <span className="text-xs text-muted-foreground ml-auto">{note.date}</span>
-                        </div>
-                        <p className="text-sm">{note.content}</p>
-                      </div>
-                    ))}
-                    
-                    {/* Add note button */}
-                    <Button variant="outline" size="sm" className="w-full mt-2">
-                      <User className="h-4 w-4 mr-2" />
-                      Add Note
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
             </div>
           </div>
           
-          {/* Map section now moved here - underneath the property details */}
-          <Card className="overflow-hidden border-neutral-800 bg-card/90">
-            <CardContent className="p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold">Location</h3>
-              </div>
-              <div className="h-[200px] bg-muted rounded-lg overflow-hidden">
-                <div className="w-full h-full flex flex-col items-center justify-center bg-secondary/30">
-                  <MapPin className="h-12 w-12 text-primary opacity-30 mb-4" />
-                  <p className="text-muted-foreground">Map integration coming soon</p>
+          {/* Second row layout with map on left and tabs section on right */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 mt-4">
+            {/* Map section on left */}
+            <Card className="lg:col-span-3 overflow-hidden border-neutral-800 bg-card/90">
+              <CardContent className="p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-semibold">Location</h3>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          {/* Tabs section - with Team Notes removed since it's shown above */}
-          <Tabs defaultValue="overview" className="mt-6">
-            <TabsList className="w-full border-b rounded-none bg-transparent h-12 p-0">
-              <TabsTrigger 
-                value="overview" 
-                className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-12 px-4"
-              >
-                Overview
-              </TabsTrigger>
-              <TabsTrigger 
-                value="features" 
-                className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-12 px-4"
-              >
-                Features
-              </TabsTrigger>
-              <TabsTrigger 
-                value="documents" 
-                className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-12 px-4"
-              >
-                Documents
-              </TabsTrigger>
-            </TabsList>
+                <div className="bg-muted rounded-lg overflow-hidden">
+                  <div className="w-full h-full flex flex-col items-center justify-center bg-secondary/30 py-8">
+                    <MapPin className="h-12 w-12 text-primary opacity-30 mb-4" />
+                    <p className="text-muted-foreground">Map integration coming soon</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
             
-            <TabsContent value="overview" className="mt-6">
-              {/* Description section */}
-              <Card className="overflow-hidden border-neutral-800 bg-card/90">
-                <CardContent className="p-6">
-                  <h3 className="text-lg font-semibold mb-4">Description</h3>
-                  {property.description ? (
-                    <p className="text-muted-foreground whitespace-pre-line">{property.description}</p>
-                  ) : (
+            {/* Team Notes section on right */}
+            <Card className="lg:col-span-2 overflow-hidden border-neutral-800 bg-card/90 backdrop-blur-sm">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center">
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  Team Notes
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="space-y-4">
+                  {teamNotes.map((note) => (
+                    <div key={note.id} className="bg-muted/50 p-4 rounded-lg">
+                      <div className="flex items-center mb-2">
+                        <Avatar className="h-6 w-6 mr-2">
+                          <AvatarFallback className={note.author.avatarColor + " text-white"}>
+                            {note.author.initials}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="text-sm font-medium">{note.author.name}</span>
+                        <span className="text-xs text-muted-foreground ml-auto">{note.date}</span>
+                      </div>
+                      <p className="text-sm">{note.content}</p>
+                    </div>
+                  ))}
+                  
+                  {/* Add note button */}
+                  <Button variant="outline" size="sm" className="w-full mt-2">
+                    <User className="h-4 w-4 mr-2" />
+                    Add Note
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          
+          {/* Third row layout with tabs section */}
+          <div className="mt-4">
+            <Tabs defaultValue="overview" className="w-full">
+              <TabsList className="w-full border-b rounded-none bg-transparent h-12 p-0">
+                <TabsTrigger 
+                  value="overview" 
+                  className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-12 px-4"
+                >
+                  Overview
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="features" 
+                  className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-12 px-4"
+                >
+                  Features
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="documents" 
+                  className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none h-12 px-4"
+                >
+                  Documents
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="overview" className="mt-4">
+                {/* Description section */}
+                <Card className="overflow-hidden border-neutral-800 bg-card/90">
+                  <CardContent className="p-6">
+                    <h3 className="text-lg font-semibold mb-4">Description</h3>
+                    {property.description ? (
+                      <p className="text-muted-foreground whitespace-pre-line">{property.description}</p>
+                    ) : (
+                      <div className="text-center py-8">
+                        <FileText className="mx-auto h-12 w-12 text-muted-foreground opacity-30" />
+                        <p className="mt-2 text-sm text-muted-foreground">No description available</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              
+              <TabsContent value="features" className="mt-4">
+                <Card className="overflow-hidden border-neutral-800 bg-card/90">
+                  <CardContent className="p-6">
+                    {property.features && property.features.length > 0 ? (
+                      <div className="space-y-4">
+                        <h3 className="text-lg font-semibold">Features</h3>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-y-4">
+                          {property.features.map((feature, index) => (
+                            <div key={index} className="flex items-center">
+                              <div className="h-2 w-2 rounded-full bg-primary mr-2"></div>
+                              <span className="text-sm">{feature}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <Tag className="mx-auto h-12 w-12 text-muted-foreground opacity-30" />
+                        <p className="mt-2 text-sm text-muted-foreground">No features listed</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              
+              <TabsContent value="documents" className="mt-4">
+                <Card className="overflow-hidden border-neutral-800 bg-card/90">
+                  <CardContent className="p-6">
                     <div className="text-center py-8">
                       <FileText className="mx-auto h-12 w-12 text-muted-foreground opacity-30" />
-                      <p className="mt-2 text-sm text-muted-foreground">No description available</p>
+                      <p className="mt-2 text-sm text-muted-foreground">No documents available</p>
                     </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="features" className="mt-6">
-              <Card className="overflow-hidden border-neutral-800 bg-card/90">
-                <CardContent className="p-6">
-                  {property.features && property.features.length > 0 ? (
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-semibold">Features</h3>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-y-4">
-                        {property.features.map((feature, index) => (
-                          <div key={index} className="flex items-center">
-                            <div className="h-2 w-2 rounded-full bg-primary mr-2"></div>
-                            <span className="text-sm">{feature}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="text-center py-8">
-                      <Tag className="mx-auto h-12 w-12 text-muted-foreground opacity-30" />
-                      <p className="mt-2 text-sm text-muted-foreground">No features listed</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="documents" className="mt-6">
-              <Card className="overflow-hidden border-neutral-800 bg-card/90">
-                <CardContent className="p-6">
-                  <div className="text-center py-8">
-                    <FileText className="mx-auto h-12 w-12 text-muted-foreground opacity-30" />
-                    <p className="mt-2 text-sm text-muted-foreground">No documents available</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          </div>
         </>
       ) : (
         <div className="text-center py-12">
@@ -411,8 +416,8 @@ const PropertyDetail = () => {
 // Loading skeleton for property details
 const PropertyDetailSkeleton = () => {
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+    <div className="space-y-4">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
         <div className="lg:col-span-3">
           <Skeleton className="h-[400px] w-full rounded-lg" />
           <div className="grid grid-cols-4 gap-2 mt-4">
@@ -422,10 +427,14 @@ const PropertyDetailSkeleton = () => {
           </div>
         </div>
         
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-4">
           <Skeleton className="h-[300px] w-full rounded-lg" />
-          <Skeleton className="h-[200px] w-full rounded-lg" />
         </div>
+      </div>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+        <Skeleton className="lg:col-span-3 h-[200px] w-full rounded-lg" />
+        <Skeleton className="lg:col-span-2 h-[200px] w-full rounded-lg" />
       </div>
       
       <Skeleton className="h-12 w-full rounded-lg" />
