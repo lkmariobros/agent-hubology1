@@ -151,6 +151,8 @@ export interface PropertyImage {
   displayOrder: number;
   isCover: boolean;
   storagePath?: string;
+  previewUrl?: string; // Added for preview functionality
+  uploadStatus?: 'uploading' | 'success' | 'error'; // Added for tracking upload status
 }
 
 // Property document type
@@ -161,6 +163,7 @@ export interface PropertyDocument {
   documentType: string;
   url?: string;
   storagePath?: string;
+  uploadStatus?: 'uploading' | 'success' | 'error'; // Added for tracking upload status
 }
 
 // Property form state interface
