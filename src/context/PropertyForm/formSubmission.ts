@@ -195,6 +195,28 @@ export const submitPropertyForm = async (state: PropertyFormState): Promise<void
       if (documentsError) throw documentsError;
     }
     
+    // 8. Insert owner contacts
+    if (state.formData.ownerContacts.length > 0) {
+      // In a real implementation, contacts would be inserted into a property_contacts table
+      console.log('Inserting contacts:', state.formData.ownerContacts);
+      
+      // This is a placeholder for the actual implementation
+      // which would insert into a dedicated contacts table
+      /*
+      const { error: contactsError } = await supabase
+        .from('property_contacts')
+        .insert(state.formData.ownerContacts.map(contact => ({
+          property_id: propertyResult.id,
+          name: contact.name,
+          role: contact.role,
+          phone: contact.phone,
+          email: contact.email
+        })));
+        
+      if (contactsError) throw contactsError;
+      */
+    }
+    
     toast.success('Property listing created successfully!');
     return Promise.resolve();
   } catch (error) {

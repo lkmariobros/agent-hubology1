@@ -25,6 +25,14 @@ export const commonPropertySchema = z.object({
   
   // Agent notes
   agentNotes: z.string().optional(),
+
+  // Owner contact information
+  ownerContacts: z.array(z.object({
+    name: z.string().min(1, 'Contact name is required'),
+    role: z.string().optional(),
+    phone: z.string().optional(),
+    email: z.string().email('Invalid email').optional(),
+  })).default([]),
 });
 
 // Residential property specific fields
@@ -58,6 +66,15 @@ export const landPropertySchema = commonPropertySchema.extend({
   topography: z.string().optional(),
 });
 
+// Owner contact type
+export interface OwnerContact {
+  id?: string;
+  name: string;
+  role?: string;
+  phone?: string;
+  email?: string;
+}
+
 // Union type for all property types
 export type PropertyFormData = {
   title: string;
@@ -76,6 +93,7 @@ export type PropertyFormData = {
   price: number | null;
   rentalRate: number | null;
   agentNotes: string;
+  ownerContacts: OwnerContact[];
   
   // Residential specific fields
   bedrooms?: number;

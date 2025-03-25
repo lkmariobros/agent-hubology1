@@ -1,15 +1,14 @@
 
-import { PropertyFormData, PropertyFormState } from '../../types/property-form';
+import { PropertyFormState } from '../../types/property-form';
 
-// Initial state based on property type
-export const getInitialPropertyData = (propertyType: 'Residential' | 'Commercial' | 'Industrial' | 'Land'): PropertyFormData => {
-  const commonData = {
+export const initialPropertyFormState: PropertyFormState = {
+  formData: {
     title: '',
     description: '',
-    transactionType: 'Sale' as const,
-    propertyType: propertyType,
+    transactionType: 'Sale',
+    propertyType: 'Residential',
     featured: false,
-    status: 'Available' as const,
+    status: 'Available',
     address: {
       street: '',
       city: '',
@@ -20,48 +19,14 @@ export const getInitialPropertyData = (propertyType: 'Residential' | 'Commercial
     price: null,
     rentalRate: null,
     agentNotes: '',
-  };
-
-  switch (propertyType) {
-    case 'Residential':
-      return {
-        ...commonData,
-        bedrooms: 0,
-        bathrooms: 0,
-        builtUpArea: 0,
-        furnishingStatus: 'Unfurnished' as const,
-      };
-    case 'Commercial':
-      return {
-        ...commonData,
-        floorArea: 0,
-        zoningType: '',
-        buildingClass: 'Class A' as const,
-      };
-    case 'Industrial':
-      return {
-        ...commonData,
-        landArea: 0,
-        ceilingHeight: 0,
-        loadingBays: 0,
-        powerCapacity: '',
-      };
-    case 'Land':
-      return {
-        ...commonData,
-        landSize: 0,
-        zoning: '',
-        roadFrontage: 0,
-        topography: '',
-      };
-    default:
-      return commonData as PropertyFormData;
-  }
-};
-
-// Initial state
-export const initialPropertyFormState: PropertyFormState = {
-  formData: getInitialPropertyData('Residential'),
+    ownerContacts: [],
+    
+    // Residential specific fields
+    bedrooms: 0,
+    bathrooms: 0,
+    builtUpArea: 0,
+    furnishingStatus: 'Unfurnished',
+  },
   images: [],
   documents: [],
   currentStep: 0,

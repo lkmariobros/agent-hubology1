@@ -16,6 +16,7 @@ import PropertyImagesUpload from './form/PropertyImagesUpload';
 import PropertyDocumentsUpload from './form/PropertyDocumentsUpload';
 import PropertyAgentNotes from './form/PropertyAgentNotes';
 import PropertyFormStepper from './form/PropertyFormStepper';
+import PropertyOwnerContacts from './form/PropertyOwnerContacts';
 
 // Property type specific components
 import PropertyResidentialDetails from './form/PropertyResidentialDetails';
@@ -71,8 +72,10 @@ const PropertyFormSteps: React.FC = () => {
         return true; // All fields are optional or have defaults
       case 2: // Location
         return !!formData.address.street && !!formData.address.city && !!formData.address.state;
-      case 3: // Images
-      case 4: // Documents
+      case 3: // Owner Contacts
+        return true; // Contacts are optional
+      case 4: // Images
+      case 5: // Documents
         return true; // Images and documents are optional
       default:
         return true;
@@ -108,23 +111,30 @@ const PropertyFormSteps: React.FC = () => {
             </div>
           )}
 
-          {/* Step 3: Images */}
+          {/* Step 3: Owner Contacts */}
           {currentStep === 3 && (
+            <div className="space-y-8">
+              <PropertyOwnerContacts />
+            </div>
+          )}
+
+          {/* Step 4: Images */}
+          {currentStep === 4 && (
             <div className="space-y-8">
               <PropertyImagesUpload />
             </div>
           )}
 
-          {/* Step 4: Documents */}
-          {currentStep === 4 && (
+          {/* Step 5: Documents */}
+          {currentStep === 5 && (
             <div className="space-y-8">
               <PropertyDocumentsUpload />
               <PropertyAgentNotes />
             </div>
           )}
 
-          {/* Step 5: Review & Submit */}
-          {currentStep === 5 && (
+          {/* Step 6: Review & Submit */}
+          {currentStep === 6 && (
             <div className="space-y-8">
               <div className="space-y-4">
                 <h3 className="text-lg font-medium">Review & Submit</h3>
@@ -177,6 +187,10 @@ const PropertyFormSteps: React.FC = () => {
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
+                      <h4 className="text-sm font-medium text-muted-foreground mb-1">Owner Contacts</h4>
+                      <p>{formData.ownerContacts.length} contacts</p>
+                    </div>
+                    <div>
                       <h4 className="text-sm font-medium text-muted-foreground mb-1">Images</h4>
                       <p>{state.images.length} images attached</p>
                     </div>
@@ -217,7 +231,7 @@ const PropertyFormSteps: React.FC = () => {
                 Save Draft
               </Button>
               
-              {currentStep < 5 ? (
+              {currentStep < 6 ? (
                 <Button
                   type="button"
                   onClick={nextStep}
