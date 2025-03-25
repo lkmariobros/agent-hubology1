@@ -3,9 +3,10 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Bed, Bath, Grid2X2, Home, Building, MapPin, Tag } from 'lucide-react';
-import { formatCurrency } from '@/utils/propertyUtils';
+import { Bed, Bath, Grid2X2, Home, Building, MapPin, Tag, Package } from 'lucide-react';
+import { formatCurrency, calculateStockPercentage, getStockStatusLabel } from '@/utils/propertyUtils';
 import { Property } from '@/types';
+import { cn } from '@/lib/utils';
 
 interface PropertyCardProps {
   property: Property;
@@ -22,6 +23,19 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, showFullDe
   const imageUrl = property.images && property.images.length > 0 
     ? property.images[0] 
     : '/placeholder.svg';
+  
+  // Check if this is a development with stock
+  const isDevelopment = property.stock && property.stock.total > 1;
+  
+  // Calculate stock percentage if this is a development
+  const stockPercentage = isDevelopment ? 
+    calculateStockPercentage(property.stock.available, property.stock.total) : 
+    null;
+  
+  // Get stock status label if this is a development
+  const stockLabel = stockPercentage !== null ? 
+    getStockStatusLabel(stockPercentage) : 
+    null;
   
   // Handle click for analytics (to be implemented)
   const handlePropertyClick = () => {
@@ -41,19 +55,37 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, showFullDe
             />
           </div>
           
-          {formattedStatus && (
-            <Badge className="absolute top-2 right-2" variant={
-              formattedStatus.toLowerCase() === 'available' ? 'default' :
-              formattedStatus.toLowerCase() === 'sold' || formattedStatus.toLowerCase() === 'rented' ? 'destructive' :
-              'secondary'
-            }>
-              {formattedStatus}
-            </Badge>
-          )}
+          {/* Status badge - Always shown */}
+          <Badge className="absolute top-2 right-2" variant={
+            formattedStatus.toLowerCase() === 'available' ? 'default' :
+            formattedStatus.toLowerCase() === 'sold' || formattedStatus.toLowerCase() === 'rented' ? 'destructive' :
+            'secondary'
+          }>
+            {formattedStatus}
+          </Badge>
           
+          {/* Featured badge */}
           {property.featured && (
             <Badge variant="outline" className="absolute top-2 left-2 bg-yellow-500/80 text-white border-none">
               Featured
+            </Badge>
+          )}
+          
+          {/* Stock badge - Only shown for developments with stock */}
+          {isDevelopment && stockLabel && (
+            <Badge 
+              variant="outline" 
+              className={cn(
+                "absolute bottom-2 right-2 flex items-center gap-1",
+                stockPercentage === 0 ? "bg-red-500/80 border-none text-white" :
+                stockPercentage <= 25 ? "bg-orange-500/80 border-none text-white" :
+                stockPercentage <= 50 ? "bg-yellow-500/80 border-none text-white" :
+                stockPercentage <= 75 ? "bg-blue-500/80 border-none text-white" :
+                "bg-green-500/80 border-none text-white"
+              )}
+            >
+              <Package className="h-3 w-3" />
+              {stockLabel}
             </Badge>
           )}
         </div>
@@ -79,6 +111,14 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, showFullDe
           {formatCurrency(property.price)}
           {(property.transactionType.toLowerCase() === 'rent' || property.transactionType.toLowerCase() === 'rental') ? '/month' : ''}
         </div>
+        
+        {/* Stock information for developments */}
+        {isDevelopment && (
+          <div className="mt-2 text-sm text-muted-foreground flex items-center">
+            <Package className="h-3.5 w-3.5 mr-1.5" />
+            <span>{property.stock.available} of {property.stock.total} units available</span>
+          </div>
+        )}
         
         {showFullDetails && property.description && (
           <p className="mt-2 text-sm text-muted-foreground line-clamp-2">

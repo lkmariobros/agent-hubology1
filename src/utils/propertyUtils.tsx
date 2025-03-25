@@ -43,14 +43,21 @@ export const calculateStockPercentage = (available: number, total: number): numb
 };
 
 // Helper function to get stock status label
-export const getStockStatusLabel = (available: number, total: number): string => {
-  const percentage = calculateStockPercentage(available, total);
-  
+export const getStockStatusLabel = (percentage: number): string => {
   if (percentage === 0) return 'Sold Out';
   if (percentage <= 25) return 'Low Stock';
   if (percentage <= 50) return 'Selling Fast';
   if (percentage <= 75) return 'Available';
   return 'Fully Available';
+};
+
+// Helper function to get stock availability class
+export const getStockStatusClass = (percentage: number): string => {
+  if (percentage === 0) return 'text-red-500 bg-red-500/10 border-red-500/20';
+  if (percentage <= 25) return 'text-orange-500 bg-orange-500/10 border-orange-500/20';
+  if (percentage <= 50) return 'text-yellow-500 bg-yellow-500/10 border-yellow-500/20';
+  if (percentage <= 75) return 'text-blue-500 bg-blue-500/10 border-blue-500/20';
+  return 'text-green-500 bg-green-500/10 border-green-500/20';
 };
 
 // Helper function to map property data structures
@@ -92,7 +99,12 @@ export const mapPropertyData = (property: any) => {
     listedBy: property.agent_id || 'Unknown',
     agent: { id: property.agent_id || '', name: 'Agent' },
     transactionType: property.transaction_types?.name || property.transactionType || 'Sale',
-    stock: property.stock || undefined
+    stock: {
+      total: property.stock_total || property.stock || 0,
+      available: property.stock_available || property.stock || 0,
+      reserved: property.stock_reserved || 0,
+      sold: property.stock_sold || 0
+    }
   };
   
   return mappedProperty;

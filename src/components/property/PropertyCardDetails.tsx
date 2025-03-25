@@ -11,6 +11,7 @@ import { Property } from '@/types';
 import { Badge } from '../ui/badge';
 import { cn } from '@/lib/utils';
 import { formatCurrency } from '@/utils/propertyUtils';
+import { PropertyStockInfo } from './PropertyStockInfo';
 
 interface PropertyCardDetailsProps {
   property: Property;
@@ -27,10 +28,6 @@ export function PropertyCardDetails({ property, onEdit, className }: PropertyCar
         .filter(([_, value]) => value !== undefined && value !== null && value !== 0)
         .map(([key, value]) => `${key}: ${value}`)) : 
     [];
-
-  // Get stock info if available
-  const hasStock = property.stock !== undefined;
-  const stockValue = hasStock ? property.stock : null;
 
   // Format transaction type badge
   const getTransactionBadge = () => {
@@ -56,21 +53,20 @@ export function PropertyCardDetails({ property, onEdit, className }: PropertyCar
         </div>
         <div className="bg-[#181818] py-2.5 px-3 rounded-md text-center">
           <div className="text-xs text-neutral-500">
-            {property.status === 'available' ? 
+            {property.status.toLowerCase() === 'available' ? 
               <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20">Available</Badge> :
-              property.status === 'pending' ?
+              property.status.toLowerCase() === 'pending' ?
                 <Badge variant="outline" className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20">Pending</Badge> :
                 <Badge variant="outline" className="bg-red-500/10 text-red-500 border-red-500/20">Sold</Badge>
             }
           </div>
         </div>
         <div className="bg-[#181818] py-2.5 px-3 rounded-md text-center">
-          <div className="text-xs text-neutral-500">
-            {hasStock ? 
-              <Badge variant="outline" className="bg-blue-500/10 text-blue-500 border-blue-500/20">Stock: {stockValue}</Badge> :
-              <span className="text-neutral-400">No Stock</span>
-            }
-          </div>
+          {property.stock ? (
+            <PropertyStockInfo stock={property.stock} compact />
+          ) : (
+            <div className="text-xs text-neutral-400">No Stock</div>
+          )}
         </div>
       </div>
       
@@ -113,6 +109,13 @@ export function PropertyCardDetails({ property, onEdit, className }: PropertyCar
           </div>
         )}
       </div>
+     
+      {/* Stock information for property developments */}
+      {property.stock && property.stock.total > 1 && (
+        <div className="mb-4 pt-1 pb-3 border-b border-dashed border-neutral-700/40">
+          <PropertyStockInfo stock={property.stock} />
+        </div>
+      )}
      
       {/* Edit button */}
       <Button 
