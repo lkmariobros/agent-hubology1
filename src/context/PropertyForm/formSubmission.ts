@@ -2,6 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { PropertyFormState, PropertyFormData } from '@/types/property-form';
 import { toast } from 'sonner';
+import { useStorageUpload } from '@/hooks/useStorageUpload';
 
 // Save form as draft
 export const saveFormAsDraft = async (state: PropertyFormState): Promise<void> => {
@@ -23,61 +24,17 @@ export const saveFormAsDraft = async (state: PropertyFormState): Promise<void> =
 // Submit form
 export const submitPropertyForm = async (state: PropertyFormState): Promise<void> => {
   try {
-    // 1. Upload images to Supabase Storage
-    const uploadedImages = await Promise.all(
-      state.images.map(async (image, index) => {
-        if (image.file) {
-          const fileExt = image.file.name.split('.').pop();
-          const fileName = `${Date.now()}-${index}.${fileExt}`;
-          const filePath = `${state.formData.propertyType.toLowerCase()}/${fileName}`;
-          
-          const { data, error } = await supabase.storage
-            .from('property-images')
-            .upload(filePath, image.file);
-            
-          if (error) throw error;
-          
-          // Get public URL for the image
-          const { data: publicUrlData } = supabase.storage
-            .from('property-images')
-            .getPublicUrl(filePath);
-            
-          return {
-            ...image,
-            url: publicUrlData.publicUrl,
-            displayOrder: index,
-            storagePath: filePath
-          };
-        }
-        return image;
-      })
-    );
+    // 1. Make sure we have a user
+    const { data: userData, error: userError } = await supabase.auth.getUser();
     
-    // 2. Upload documents to Supabase Storage
-    const uploadedDocuments = await Promise.all(
-      state.documents.map(async (document, index) => {
-        if (document.file) {
-          const fileExt = document.file.name.split('.').pop();
-          const fileName = `${Date.now()}-${index}.${fileExt}`;
-          const filePath = `${state.formData.propertyType.toLowerCase()}/${fileName}`;
-          
-          const { data, error } = await supabase.storage
-            .from('property-documents')
-            .upload(filePath, document.file);
-            
-          if (error) throw error;
-          
-          return {
-            ...document,
-            url: filePath,
-            storagePath: filePath
-          };
-        }
-        return document;
-      })
-    );
+    if (userError || !userData.user) {
+      toast.error('You must be logged in to submit a property');
+      throw new Error('Authentication required');
+    }
     
-    // 3. Get reference data IDs
+    const agentId = userData.user.id;
+    
+    // 2. Get reference data IDs
     // Get or create property type
     let propertyTypeId;
     const { data: existingPropertyType } = await supabase
@@ -144,7 +101,7 @@ export const submitPropertyForm = async (state: PropertyFormState): Promise<void
       statusId = newStatus.id;
     }
     
-    // 4. Build property data object based on property type
+    // 3. Build property data object based on property type
     // Extract common fields
     const commonPropertyData = {
       title: state.formData.title,
@@ -161,8 +118,7 @@ export const submitPropertyForm = async (state: PropertyFormState): Promise<void
       zip: state.formData.address.zip,
       country: state.formData.address.country,
       agent_notes: state.formData.agentNotes,
-      // Get current agent ID from auth
-      agent_id: (await supabase.auth.getUser()).data.user?.id,
+      agent_id: agentId,
     };
     
     // Add type-specific fields
@@ -208,7 +164,7 @@ export const submitPropertyForm = async (state: PropertyFormState): Promise<void
       ...typeSpecificData,
     };
     
-    // 5. Insert property into database
+    // 4. Insert property into database
     const { data: propertyResult, error: propertyError } = await supabase
       .from('enhanced_properties')
       .insert(propertyData)
@@ -217,57 +173,133 @@ export const submitPropertyForm = async (state: PropertyFormState): Promise<void
       
     if (propertyError) throw propertyError;
     
-    // 6. Insert images
-    if (uploadedImages.length > 0) {
-      const imagesToInsert = uploadedImages.map((image) => ({
-        property_id: propertyResult.id,
-        storage_path: image.storagePath || '',
-        display_order: image.displayOrder,
-        is_cover: image.isCover,
-      }));
+    const propertyId = propertyResult.id;
+    
+    // 5. Upload and save images
+    if (state.images.length > 0) {
+      // Ensure the storage bucket exists
+      try {
+        const { data: buckets } = await supabase.storage.listBuckets();
+        if (!buckets?.find(b => b.name === 'property-images')) {
+          await supabase.storage.createBucket('property-images', {
+            public: true
+          });
+        }
+      } catch (error) {
+        console.log('Note: Could not check/create bucket. Using existing bucket.', error);
+      }
       
-      const { error: imagesError } = await supabase
-        .from('property_images')
-        .insert(imagesToInsert);
-        
-      if (imagesError) throw imagesError;
+      // Upload each image file
+      const imagesToInsert = [];
+      
+      for (const [index, image] of state.images.entries()) {
+        if (image.file) {
+          try {
+            // Generate file path
+            const fileExt = image.file.name.split('.').pop();
+            const fileName = `${propertyId}/${Date.now()}-${index}.${fileExt}`;
+            
+            // Upload the file
+            const { data, error } = await supabase.storage
+              .from('property-images')
+              .upload(fileName, image.file, {
+                cacheControl: '3600',
+                upsert: false
+              });
+              
+            if (error) throw error;
+            
+            // Get the public URL
+            const { data: publicUrlData } = supabase.storage
+              .from('property-images')
+              .getPublicUrl(fileName);
+              
+            // Add to images to insert
+            imagesToInsert.push({
+              property_id: propertyId,
+              storage_path: fileName,
+              display_order: index,
+              is_cover: image.isCover
+            });
+          } catch (uploadError) {
+            console.error('Error uploading image:', uploadError);
+            // Continue with other images
+          }
+        }
+      }
+      
+      // Insert all image records
+      if (imagesToInsert.length > 0) {
+        const { error: imagesError } = await supabase
+          .from('property_images')
+          .insert(imagesToInsert);
+          
+        if (imagesError) {
+          console.error('Error saving image metadata:', imagesError);
+          // Continue with submission even if image metadata fails
+        }
+      }
     }
     
-    // 7. Insert documents
-    if (uploadedDocuments.length > 0) {
-      const documentsToInsert = uploadedDocuments.map((doc) => ({
-        property_id: propertyResult.id,
-        name: doc.name,
-        storage_path: doc.storagePath || '',
-        document_type: doc.documentType,
-      }));
+    // 6. Upload and save documents
+    if (state.documents.length > 0) {
+      // Ensure the storage bucket exists
+      try {
+        const { data: buckets } = await supabase.storage.listBuckets();
+        if (!buckets?.find(b => b.name === 'property-documents')) {
+          await supabase.storage.createBucket('property-documents', {
+            public: false // Documents are private
+          });
+        }
+      } catch (error) {
+        console.log('Note: Could not check/create bucket. Using existing bucket.', error);
+      }
       
-      const { error: documentsError } = await supabase
-        .from('property_documents')
-        .insert(documentsToInsert);
-        
-      if (documentsError) throw documentsError;
-    }
-    
-    // 8. Insert owner contacts
-    if (state.formData.ownerContacts.length > 0) {
-      // In a real implementation, contacts would be inserted into a property_contacts table
-      console.log('Owner contacts to be saved:', state.formData.ownerContacts);
+      // Upload each document file
+      const documentsToInsert = [];
       
-      // This would be implemented when a contacts table is created
-      /*
-      const { error: contactsError } = await supabase
-        .from('property_contacts')
-        .insert(state.formData.ownerContacts.map(contact => ({
-          property_id: propertyResult.id,
-          name: contact.name,
-          role: contact.role,
-          phone: contact.phone,
-          email: contact.email
-        })));
-        
-      if (contactsError) throw contactsError;
-      */
+      for (const document of state.documents) {
+        if (document.file) {
+          try {
+            // Generate file path
+            const fileExt = document.file.name.split('.').pop();
+            const fileName = `${propertyId}/${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+            
+            // Upload the file
+            const { data, error } = await supabase.storage
+              .from('property-documents')
+              .upload(fileName, document.file, {
+                cacheControl: '3600',
+                upsert: false
+              });
+              
+            if (error) throw error;
+            
+            // Add to documents to insert
+            documentsToInsert.push({
+              property_id: propertyId,
+              name: document.name,
+              storage_path: fileName,
+              document_type: document.documentType
+            });
+          } catch (uploadError) {
+            console.error('Error uploading document:', uploadError);
+            // Continue with other documents
+          }
+        }
+      }
+      
+      // Insert all document records
+      if (documentsToInsert.length > 0) {
+        const { error: documentsError } = await supabase
+          .from('property_documents')
+          .insert(documentsToInsert);
+          
+        if (documentsError) {
+          console.error('Error saving document metadata:', documentsError);
+          // Continue with submission even if document metadata fails
+        }
+      }
     }
     
     toast.success('Property listing created successfully!');

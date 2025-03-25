@@ -1,4 +1,6 @@
+
 import React from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { calculateStockPercentage, getStockStatusLabel, getStockStatusClass, formatCurrency, formatPrice } from './propertyUtils';
 
 // Function to truncate text with ellipsis
@@ -87,11 +89,13 @@ export const mapPropertyData = (property: any) => {
 export const getImageUrl = (storage_path: string | null) => {
   if (!storage_path) return '/placeholder.svg';
   
-  // This function would typically use Supabase to get the URL
-  // For now, we'll return a placeholder or the path itself
+  // Get public URL from Supabase
   try {
-    const { publicUrl = '/placeholder.svg' } = { publicUrl: `/api/images/${storage_path}` };
-    return publicUrl;
+    const { data } = supabase.storage
+      .from('property-images')
+      .getPublicUrl(storage_path);
+      
+    return data?.publicUrl || '/placeholder.svg';
   } catch (error) {
     console.error('Error getting image URL:', error);
     return '/placeholder.svg';
