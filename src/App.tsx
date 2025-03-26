@@ -35,6 +35,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import Home from './pages/Home';
 import NotFound from './pages/NotFound';
 import Opportunities from './pages/Opportunities';
+import Reports from './pages/Reports';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 
 const queryClient = new QueryClient({
@@ -79,6 +80,10 @@ function App() {
                   <Route path="settings" element={<Settings />} />
                   <Route path="team" element={<Home />} /> {/* Temporary placeholder */}
                   <Route path="opportunities" element={<Opportunities />} />
+                  <Route path="reports" element={<Reports />} />
+                  <Route path="leaderboard" element={<Home />} /> {/* Temporary placeholder */}
+                  <Route path="leaderboard/points" element={<Home />} /> {/* Temporary placeholder */}
+                  <Route path="leaderboard/sales" element={<Home />} /> {/* Temporary placeholder */}
                 </Route>
 
                 {/* Admin Routes */}
@@ -95,6 +100,19 @@ function App() {
                   <Route path="transactions" element={<AdminTransactions />} />
                   <Route path="properties" element={<AdminProperties />} />
                   <Route path="properties/:id" element={<AdminPropertyDetail />} />
+                  
+                  {/* Reports Routes */}
+                  <Route path="reports/overview" element={<Reports />} />
+                  <Route path="reports/performance" element={<Reports />} />
+                  <Route path="reports/sales" element={<Reports />} />
+                  <Route path="reports/custom" element={<Reports />} />
+                  
+                  {/* System Routes */}
+                  <Route path="settings" element={<Settings />} />
+                  <Route path="roles" element={<Home />} /> {/* Temporary placeholder */}
+                  <Route path="commission-tiers" element={<Home />} /> {/* Temporary placeholder */}
+                  <Route path="system-logs" element={<Home />} /> {/* Temporary placeholder */}
+                  <Route path="database" element={<Home />} /> {/* Temporary placeholder */}
                 </Route>
                 
                 {/* Fallback */}
