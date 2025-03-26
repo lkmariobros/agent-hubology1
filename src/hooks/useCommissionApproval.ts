@@ -121,9 +121,7 @@ export const useCommissionApprovals = (
         query = query.eq('status', status);
       }
         
-      if (!isAdmin && userId) {
-        query = query.eq('submitted_by', userId);
-      }
+      // No need to filter by user if admin, RLS will handle permissions
         
       query = query.range(offset, offset + pageSize - 1);
         
@@ -219,35 +217,47 @@ export const useApprovalStatusCounts = () => {
     queryFn: async (): Promise<ApprovalStatusCounts> => {
       if (!user) throw new Error('User not authenticated');
       
-      // Fix the RPC function call
-      const { data, error } = await supabase
-        .from('commission_approvals')
-        .select('status')
-        .is('status', true);
-      
-      if (error) {
+      try {
+        // Try using the RPC function first
+        const { data, error } = await supabase
+          .rpc('get_approval_status_counts');
+        
+        if (!error && data) {
+          return data as ApprovalStatusCounts;
+        }
+        
+        // Fallback to manual calculation if RPC fails
+        console.warn('Falling back to manual status count calculation');
+        const { data: approvals, error: fallbackError } = await supabase
+          .from('commission_approvals')
+          .select('status');
+        
+        if (fallbackError) {
+          throw fallbackError;
+        }
+        
+        // Calculate counts manually
+        const counts = {
+          pending: 0,
+          under_review: 0,
+          approved: 0,
+          ready_for_payment: 0,
+          paid: 0,
+          rejected: 0
+        };
+        
+        approvals?.forEach(item => {
+          const status = item.status.toLowerCase().replace(' ', '_');
+          if (counts.hasOwnProperty(status)) {
+            counts[status as keyof ApprovalStatusCounts]++;
+          }
+        });
+        
+        return counts;
+      } catch (error) {
         console.error('Error fetching approval status counts:', error);
         throw error;
       }
-      
-      // Calculate counts manually since RPC isn't working
-      const counts = {
-        pending: 0,
-        under_review: 0,
-        approved: 0,
-        ready_for_payment: 0,
-        paid: 0,
-        rejected: 0
-      };
-      
-      data?.forEach(item => {
-        const status = item.status.toLowerCase().replace(' ', '_');
-        if (counts.hasOwnProperty(status)) {
-          counts[status as keyof ApprovalStatusCounts]++;
-        }
-      });
-      
-      return counts;
     },
     enabled: !!user
   });
@@ -262,23 +272,36 @@ export const useApprovedCommissionTotal = () => {
     queryFn: async () => {
       if (!user) throw new Error('User not authenticated');
       
-      // Use regular query instead of RPC
-      const { data, error } = await supabase
-        .from('commission_approvals')
-        .select('property_transactions(commission_amount)')
-        .eq('status', 'Approved');
-      
-      if (error) {
+      try {
+        // Try using the RPC function first
+        const { data, error } = await supabase
+          .rpc('get_approved_commission_total');
+        
+        if (!error && data) {
+          return data.total;
+        }
+        
+        // Fallback to manual calculation if RPC fails
+        console.warn('Falling back to manual approved commission calculation');
+        const { data: approvals, error: fallbackError } = await supabase
+          .from('commission_approvals')
+          .select('property_transactions(commission_amount)')
+          .eq('status', 'Approved');
+        
+        if (fallbackError) {
+          throw fallbackError;
+        }
+        
+        // Calculate the total
+        const total = approvals?.reduce((sum, item) => {
+          return sum + (item.property_transactions?.commission_amount || 0);
+        }, 0) || 0;
+        
+        return total;
+      } catch (error) {
         console.error('Error fetching approved commission total:', error);
         throw error;
       }
-      
-      // Calculate the total
-      const total = data?.reduce((sum, item) => {
-        return sum + (item.property_transactions?.commission_amount || 0);
-      }, 0) || 0;
-      
-      return total;
     },
     enabled: !!user
   });
@@ -293,23 +316,36 @@ export const usePendingCommissionTotal = () => {
     queryFn: async () => {
       if (!user) throw new Error('User not authenticated');
       
-      // Use regular query instead of RPC
-      const { data, error } = await supabase
-        .from('commission_approvals')
-        .select('property_transactions(commission_amount)')
-        .eq('status', 'Pending');
-      
-      if (error) {
+      try {
+        // Try using the RPC function first
+        const { data, error } = await supabase
+          .rpc('get_pending_commission_total');
+        
+        if (!error && data) {
+          return data.total;
+        }
+        
+        // Fallback to manual calculation if RPC fails
+        console.warn('Falling back to manual pending commission calculation');
+        const { data: approvals, error: fallbackError } = await supabase
+          .from('commission_approvals')
+          .select('property_transactions(commission_amount)')
+          .eq('status', 'Pending');
+        
+        if (fallbackError) {
+          throw fallbackError;
+        }
+        
+        // Calculate the total
+        const total = approvals?.reduce((sum, item) => {
+          return sum + (item.property_transactions?.commission_amount || 0);
+        }, 0) || 0;
+        
+        return total;
+      } catch (error) {
         console.error('Error fetching pending commission total:', error);
         throw error;
       }
-      
-      // Calculate the total
-      const total = data?.reduce((sum, item) => {
-        return sum + (item.property_transactions?.commission_amount || 0);
-      }, 0) || 0;
-      
-      return total;
     },
     enabled: !!user
   });
@@ -332,24 +368,28 @@ export const useUpdateApprovalStatus = () => {
     }) => {
       if (!user) throw new Error('User not authenticated');
       
-      const { data, error } = await supabase
-        .from('commission_approvals')
-        .update({
-          status,
-          notes,
-          reviewer_id: user.id,
-          reviewed_at: new Date().toISOString()
-        })
-        .eq('id', approvalId)
-        .select()
-        .single();
-      
-      if (error) {
+      try {
+        // Try using the RPC function first
+        const { data, error } = await supabase
+          .rpc('update_commission_approval_status', {
+            p_approval_id: approvalId,
+            p_new_status: status,
+            p_notes: notes
+          });
+        
+        if (error) {
+          throw error;
+        }
+        
+        if (!data.success) {
+          throw new Error(data.message || 'Failed to update status');
+        }
+        
+        return data;
+      } catch (error) {
         console.error('Error updating approval status:', error);
         throw error;
       }
-      
-      return data;
     },
     onSuccess: (_, variables) => {
       // Invalidate queries to refresh data
@@ -420,7 +460,6 @@ export const useDeleteApprovalComment = () => {
         .from('approval_comments')
         .delete()
         .eq('id', commentId)
-        .eq('created_by', user.id)
         .select();
       
       if (error) {

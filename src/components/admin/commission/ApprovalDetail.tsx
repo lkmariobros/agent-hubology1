@@ -22,6 +22,7 @@ import ApprovalHistory from '@/components/commission/ApprovalHistory';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import CommentsSection from './CommentsSection';
+import { toast } from 'sonner';
 
 interface ApprovalDetailProps {
   id: string;
@@ -83,11 +84,19 @@ const ApprovalDetail: React.FC<ApprovalDetailProps> = ({ id }) => {
         notes: statusNotes.trim() ? statusNotes : undefined
       });
       
+      // Show success toast
+      toast.success(`Status updated to ${newStatus}`, {
+        description: "The commission approval status has been updated successfully."
+      });
+      
       // Reset form after successful update
       setNewStatus('');
       setStatusNotes('');
     } catch (error) {
       console.error('Error updating status:', error);
+      toast.error('Failed to update status', {
+        description: error instanceof Error ? error.message : 'An unknown error occurred'
+      });
     }
   };
   

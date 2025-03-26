@@ -664,6 +664,20 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      is_reviewer: {
+        Args: {
+          user_id: string
+        }
+        Returns: boolean
+      }
+      update_commission_approval_status: {
+        Args: {
+          p_approval_id: string
+          p_new_status: string
+          p_notes?: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never
