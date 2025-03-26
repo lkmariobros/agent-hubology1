@@ -9,6 +9,96 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      agencies: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      agent_profiles: {
+        Row: {
+          agency_id: string
+          avatar_url: string | null
+          commission_percentage: number
+          email: string | null
+          full_name: string | null
+          id: string
+          join_date: string
+          license_number: string | null
+          phone: string | null
+          specializations: string[] | null
+          tier: number
+          tier_name: string
+          total_sales: number | null
+          total_transactions: number | null
+          updated_at: string
+          upline_id: string | null
+        }
+        Insert: {
+          agency_id?: string
+          avatar_url?: string | null
+          commission_percentage?: number
+          email?: string | null
+          full_name?: string | null
+          id: string
+          join_date?: string
+          license_number?: string | null
+          phone?: string | null
+          specializations?: string[] | null
+          tier?: number
+          tier_name?: string
+          total_sales?: number | null
+          total_transactions?: number | null
+          updated_at?: string
+          upline_id?: string | null
+        }
+        Update: {
+          agency_id?: string
+          avatar_url?: string | null
+          commission_percentage?: number
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          join_date?: string
+          license_number?: string | null
+          phone?: string | null
+          specializations?: string[] | null
+          tier?: number
+          tier_name?: string
+          total_sales?: number | null
+          total_transactions?: number | null
+          updated_at?: string
+          upline_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_profiles_upline_id_fkey"
+            columns: ["upline_id"]
+            isOneToOne: false
+            referencedRelation: "agent_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_agency"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       approval_comments: {
         Row: {
           approval_id: string | null
@@ -570,7 +660,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
