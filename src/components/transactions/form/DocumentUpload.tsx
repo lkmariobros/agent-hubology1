@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useTransactionForm } from '@/context/TransactionForm';
 import { Upload, FileText, X, AlertCircle } from 'lucide-react';
@@ -20,7 +19,8 @@ import {
   CardHeader, 
   CardTitle 
 } from '@/components/ui/card';
-import { TransactionDocument, DocumentType } from '@/types/transaction-form';
+import { DocumentType } from '@/types/transaction-form';
+import { TransactionDocument } from '@/types'; // Import from main types
 
 const DocumentUpload: React.FC = () => {
   const { state, addDocument, removeDocument } = useTransactionForm();
@@ -62,7 +62,6 @@ const DocumentUpload: React.FC = () => {
     }
     
     const newDocument: TransactionDocument = {
-      id: `temp-${Date.now()}`, // Add a temporary ID that's guaranteed to be a string
       name: documentName,
       documentType: documentType,
       file: file,

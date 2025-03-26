@@ -31,7 +31,7 @@ const Properties = () => {
   const { data, isLoading, error } = useProperties(page, pageSize, filters);
   const propertiesRaw = data?.properties || [];
   
-  // Map the API data structure to the format expected by components
+  // Map the API data to ensure correct types
   const properties: Property[] = propertiesRaw.map(property => mapPropertyData(property));
 
   // Handle property type change

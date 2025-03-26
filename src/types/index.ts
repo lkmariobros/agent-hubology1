@@ -92,10 +92,10 @@ export interface Transaction {
 }
 
 export interface TransactionDocument {
-  id: string;
+  id?: string; // Make id optional to match transaction-form.ts
   name: string;
   documentType: string;
-  url: string;
+  url?: string;
   file?: File;
 }
 
@@ -351,3 +351,4 @@ export type TransactionFormValues = TransactionFormData;
 export type AgentRank = 'Associate' | 'Senior Associate' | 'Advisor' | 'Sales Leader' | 'Team Leader' | 'Group Leader' | 'Director' | 'Supreme Leader';
 export type TransactionType = 'Sale' | 'Rent' | 'Developer';
 export type ApprovalStatus = 'Pending' | 'Approved' | 'Rejected' | 'Under Review' | 'Ready for Payment' | 'Paid';
+
