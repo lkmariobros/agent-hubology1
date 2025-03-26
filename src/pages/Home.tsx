@@ -1,11 +1,11 @@
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import MetricCard from '@/components/dashboard/MetricCard';
 import OpportunitiesBoard from '@/components/dashboard/OpportunitiesBoard';
 import RecentTransactions from '@/components/dashboard/RecentTransactions';
 import PropertyList from '@/components/dashboard/PropertyList';
 import { DashboardMetric, Transaction, Property } from '@/types';
-import { useNavigate } from 'react-router-dom';
 
 const Home = () => {
   const navigate = useNavigate();
