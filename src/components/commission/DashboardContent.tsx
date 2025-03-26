@@ -5,7 +5,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import CommissionBreakdown from './CommissionBreakdown';
 import CommissionHistory from './CommissionHistory';
 import CommissionTiers from './CommissionTiers';
-import CommissionNotificationFeed from './CommissionNotificationFeed';
 import { useAuth } from '@/hooks/useAuth';
 import { AgentWithHierarchy, CommissionHistory as CommissionHistoryType, CommissionTier } from '@/types';
 
@@ -25,8 +24,6 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div className="lg:col-span-2 space-y-6">
-        <CommissionNotificationFeed userId={user?.id} limit={3} />
-        
         <Card>
           <CardHeader>
             <CardTitle>Commission History</CardTitle>

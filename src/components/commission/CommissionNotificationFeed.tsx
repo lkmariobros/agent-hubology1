@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -47,7 +46,7 @@ const CommissionNotificationFeed: React.FC<CommissionNotificationFeedProps> = ({
         title: item.title,
         message: item.message,
         read: item.read || false,
-        data: item.data,
+        data: item.data || {}, // Provide empty object as fallback
         createdAt: item.created_at
       })) as Notification[];
     },
