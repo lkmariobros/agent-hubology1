@@ -144,6 +144,7 @@ export const useTransactionQuery = (id: string) => {
         agent: { id: 'a1', name: 'John Doe' },
         price: 750000,
         commission: 22500,
+        commissionRate: 3, // Added the missing commissionRate property
         status: 'completed',
         buyer: {
           name: 'Alice Brown',
@@ -156,6 +157,7 @@ export const useTransactionQuery = (id: string) => {
           phone: '+601234567891'
         },
         notes: 'This is a sample transaction.',
+        closingDate: new Date().toISOString(), // Added the missing closingDate property
         documents: [
           { id: 'd1', name: 'Sale Agreement.pdf' },
           { id: 'd2', name: 'Property Inspection.pdf' }
@@ -177,6 +179,7 @@ export const useCreateTransactionMutation = () => {
       return { success: true, id: 'new-transaction-id' };
     },
     isLoading: false,
+    isPending: false, // Added isPending property to match TanStack Query v5
     error: null
   };
 };
