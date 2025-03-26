@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertCircle, CheckCircle, Clock } from 'lucide-react';
-import { useSystemConfiguration } from '@/hooks/useCommissionApproval';
+import { useSystemConfiguration, useCommissionApprovalCheck } from '@/hooks/useCommissionApproval';
 
 interface ApprovalInfoProps {
   commissionAmount: number;
@@ -14,15 +14,12 @@ const ApprovalInfo: React.FC<ApprovalInfoProps> = ({
   commissionAmount,
   status = 'pending'
 }) => {
-  // Get the threshold value from system configuration
+  // Check if commission exceeds threshold
   const {
-    data: thresholdValue,
+    threshold,
+    exceedsThreshold,
     isLoading
-  } = useSystemConfiguration('commission_approval_threshold');
-
-  // Parse the threshold value
-  const threshold = thresholdValue ? parseFloat(thresholdValue) : 10000;
-  const exceedsThreshold = commissionAmount > threshold;
+  } = useCommissionApprovalCheck(commissionAmount);
 
   // Format currency
   const formatCurrency = (value: number) => {

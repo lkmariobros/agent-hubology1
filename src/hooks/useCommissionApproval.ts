@@ -14,7 +14,7 @@ export interface CommissionApproval {
   notes?: string;
   created_at: string;
   updated_at: string;
-  property_transactions: {
+  property_transactions?: {
     transaction_value: number;
     commission_amount: number;
     transaction_date: string;
@@ -108,31 +108,44 @@ export const useCommissionApprovals = (
         throw new Error('Unauthorized');
       }
       
-      const { data, error } = await supabase
-        .functions.invoke('get_commission_approvals', {
-          body: {
-            status,
-            user_id: isAdmin ? undefined : userId,
-            limit: pageSize,
-            offset
-          }
-        });
-      
+      let query = supabase
+        .from('commission_approvals')
+        .select(`
+          *,
+          property_transactions(*),
+          agent:submitted_by(*)
+        `)
+        .order('created_at', { ascending: false });
+        
+      if (status) {
+        query = query.eq('status', status);
+      }
+        
+      if (!isAdmin && userId) {
+        query = query.eq('submitted_by', userId);
+      }
+        
+      query = query.range(offset, offset + pageSize - 1);
+        
+      const { data, error, count } = await query;
+        
       if (error) {
         console.error('Error fetching commission approvals:', error);
         throw error;
       }
-      
-      return { approvals: data || [] };
+        
+      return { 
+        approvals: data || [],
+        totalCount: count || 0
+      };
     },
     enabled: !!user
   });
 };
 
 // Fetch a single commission approval with details
-export const useCommissionApprovalDetail = (approvalId: string, isAdmin: boolean = false) => {
+export const useCommissionApprovalDetail = (approvalId: string) => {
   const { user } = useAuth();
-  const queryClient = useQueryClient();
   
   return useQuery({
     queryKey: ['commissionApproval', approvalId],
@@ -141,9 +154,15 @@ export const useCommissionApprovalDetail = (approvalId: string, isAdmin: boolean
       
       // Fetch approval details
       const { data: approval, error } = await supabase
-        .functions.invoke('get_commission_approval_detail', {
-          body: { approval_id: approvalId }
-        });
+        .from('commission_approvals')
+        .select(`
+          *,
+          property_transactions(*),
+          agent:submitted_by(*),
+          reviewer:reviewed_by(*)
+        `)
+        .eq('id', approvalId)
+        .single();
       
       if (error) {
         console.error('Error fetching commission approval:', error);
@@ -152,9 +171,10 @@ export const useCommissionApprovalDetail = (approvalId: string, isAdmin: boolean
       
       // Fetch approval history
       const { data: history, error: historyError } = await supabase
-        .functions.invoke('get_commission_approval_history', {
-          body: { approval_id: approvalId }
-        });
+        .from('approval_history')
+        .select('*')
+        .eq('approval_id', approvalId)
+        .order('created_at', { ascending: false });
       
       if (historyError) {
         console.error('Error fetching approval history:', historyError);
@@ -162,9 +182,10 @@ export const useCommissionApprovalDetail = (approvalId: string, isAdmin: boolean
       
       // Fetch approval comments
       const { data: comments, error: commentsError } = await supabase
-        .functions.invoke('get_commission_approval_comments', {
-          body: { approval_id: approvalId }
-        });
+        .from('approval_comments')
+        .select('*')
+        .eq('approval_id', approvalId)
+        .order('created_at', { ascending: true });
       
       if (commentsError) {
         console.error('Error fetching approval comments:', commentsError);
@@ -182,18 +203,15 @@ export const useCommissionApprovalDetail = (approvalId: string, isAdmin: boolean
 
 // Fetch status counts for dashboard
 export const useApprovalStatusCounts = () => {
-  const { user, isAdmin } = useAuth();
+  const { user } = useAuth();
   
   return useQuery({
     queryKey: ['approvalStatusCounts'],
     queryFn: async (): Promise<ApprovalStatusCounts> => {
       if (!user) throw new Error('User not authenticated');
-      if (!isAdmin) throw new Error('Unauthorized');
       
       const { data, error } = await supabase
-        .functions.invoke('get_approval_status_counts', {
-          body: {}
-        });
+        .rpc('get_approval_status_counts');
       
       if (error) {
         console.error('Error fetching approval status counts:', error);
@@ -209,24 +227,21 @@ export const useApprovalStatusCounts = () => {
         rejected: 0
       };
     },
-    enabled: !!user && isAdmin
+    enabled: !!user
   });
 };
 
 // Fetch approved commission total
 export const useApprovedCommissionTotal = () => {
-  const { user, isAdmin } = useAuth();
+  const { user } = useAuth();
   
   return useQuery({
     queryKey: ['approvedCommissionTotal'],
     queryFn: async () => {
       if (!user) throw new Error('User not authenticated');
-      if (!isAdmin) throw new Error('Unauthorized');
       
       const { data, error } = await supabase
-        .functions.invoke('get_approved_commission_total', {
-          body: {}
-        });
+        .rpc('get_approved_commission_total');
       
       if (error) {
         console.error('Error fetching approved commission total:', error);
@@ -235,24 +250,21 @@ export const useApprovedCommissionTotal = () => {
       
       return data?.total || 0;
     },
-    enabled: !!user && isAdmin
+    enabled: !!user
   });
 };
 
 // Fetch pending commission total
 export const usePendingCommissionTotal = () => {
-  const { user, isAdmin } = useAuth();
+  const { user } = useAuth();
   
   return useQuery({
     queryKey: ['pendingCommissionTotal'],
     queryFn: async () => {
       if (!user) throw new Error('User not authenticated');
-      if (!isAdmin) throw new Error('Unauthorized');
       
       const { data, error } = await supabase
-        .functions.invoke('get_pending_commission_total', {
-          body: {}
-        });
+        .rpc('get_pending_commission_total');
       
       if (error) {
         console.error('Error fetching pending commission total:', error);
@@ -261,7 +273,7 @@ export const usePendingCommissionTotal = () => {
       
       return data?.total || 0;
     },
-    enabled: !!user && isAdmin
+    enabled: !!user
   });
 };
 
@@ -283,13 +295,16 @@ export const useUpdateApprovalStatus = () => {
       if (!user) throw new Error('User not authenticated');
       
       const { data, error } = await supabase
-        .functions.invoke('update_commission_approval_status', {
-          body: {
-            approval_id: approvalId,
-            new_status: status,
-            notes
-          }
-        });
+        .from('commission_approvals')
+        .update({
+          status,
+          notes,
+          reviewer_id: user.id,
+          reviewed_at: new Date().toISOString()
+        })
+        .eq('id', approvalId)
+        .select()
+        .single();
       
       if (error) {
         console.error('Error updating approval status:', error);
@@ -325,12 +340,14 @@ export const useAddApprovalComment = () => {
       if (!user) throw new Error('User not authenticated');
       
       const { data, error } = await supabase
-        .functions.invoke('add_commission_approval_comment', {
-          body: {
-            approval_id: approvalId,
-            content
-          }
-        });
+        .from('approval_comments')
+        .insert({
+          approval_id: approvalId,
+          comment_text: content,
+          created_by: user.id
+        })
+        .select()
+        .single();
       
       if (error) {
         console.error('Error adding approval comment:', error);
@@ -362,11 +379,11 @@ export const useDeleteApprovalComment = () => {
       if (!user) throw new Error('User not authenticated');
       
       const { data, error } = await supabase
-        .functions.invoke('delete_commission_approval_comment', {
-          body: {
-            comment_id: commentId
-          }
-        });
+        .from('approval_comments')
+        .delete()
+        .eq('id', commentId)
+        .eq('created_by', user.id)
+        .select();
       
       if (error) {
         console.error('Error deleting approval comment:', error);
