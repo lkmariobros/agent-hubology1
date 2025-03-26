@@ -1,5 +1,5 @@
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { CommissionNotificationType } from '@/components/commission/CommissionNotification';
@@ -20,55 +20,8 @@ interface CommissionNotification {
   };
 }
 
-// Queue for batching notifications
-let notificationQueue: Array<{params: any, callback?: () => void}> = [];
-let isProcessingQueue = false;
-
-// Process notification queue
-const processNotificationQueue = async (sendNotification: any) => {
-  if (isProcessingQueue || notificationQueue.length === 0) return;
-  
-  isProcessingQueue = true;
-  console.log(`Processing ${notificationQueue.length} queued notifications`);
-  
-  // Take up to 5 notifications at a time to process
-  const batchSize = Math.min(notificationQueue.length, 5);
-  const batchToProcess = notificationQueue.splice(0, batchSize);
-  
-  try {
-    // Process each notification in the batch
-    for (const item of batchToProcess) {
-      try {
-        await sendNotification(item.params, {
-          onSuccess: () => {
-            if (item.callback) item.callback();
-          }
-        });
-      } catch (error) {
-        console.error('Error processing queued notification:', error);
-      }
-    }
-  } finally {
-    isProcessingQueue = false;
-    
-    // If there are more notifications, process them after a short delay
-    if (notificationQueue.length > 0) {
-      setTimeout(() => processNotificationQueue(sendNotification), 300);
-    }
-  }
-};
-
-// Add notification to queue
-const queueNotification = (params: any, sendNotification: any, callback?: () => void) => {
-  notificationQueue.push({ params, callback });
-  
-  // Start processing queue if not already processing
-  if (!isProcessingQueue) {
-    processNotificationQueue(sendNotification);
-  }
-};
-
 export const useCommissionNotifications = (userId?: string) => {
+  const queryClient = useQueryClient();
   const { mutate: sendNotification } = useSendNotification();
   
   // Fetch commission notifications for the current user
@@ -154,15 +107,10 @@ export const useCommissionNotifications = (userId?: string) => {
       message = `Your commission of $${commissionAmount.toLocaleString()} has been paid.`;
     }
     
-    // Determine priority - approval is important
-    const priority = ['approved', 'rejected', 'paid'].includes(status.toLowerCase()) 
-      ? 'high' 
-      : 'normal';
-    
-    // Prepare notification parameters
-    const params = {
+    // Send the notification
+    sendNotification({
       userId,
-      type: 'approval_status_change' as NotificationType,
+      type: 'approval_status_change',
       title,
       message,
       data: {
@@ -170,14 +118,11 @@ export const useCommissionNotifications = (userId?: string) => {
         commissionAmount,
         transactionId,
         approvalId
-      },
-      priority
-    };
-    
-    // Queue notification instead of sending immediately
-    queueNotification(params, sendNotification, () => {
-      toast(title, { description: message });
+      }
     });
+    
+    // Also show a toast
+    toast(title, { description: message });
   };
   
   // Create a notification for tier progress
@@ -188,21 +133,18 @@ export const useCommissionNotifications = (userId?: string) => {
     const title = 'Tier Progress Update';
     const message = `You're ${progressPercentage}% of the way to the next tier. Keep up the great work!`;
     
-    const params = {
+    sendNotification({
       userId,
-      type: 'tier_update' as NotificationType,
+      type: 'tier_update',
       title,
       message,
       data: {
         notificationType: 'tier_progress',
         progressPercentage
-      },
-      priority: 'low' as const  // This is low priority
-    };
-    
-    queueNotification(params, sendNotification, () => {
-      toast(title, { description: message });
+      }
     });
+    
+    toast(title, { description: message });
   };
   
   // Create a notification for tier achievement
@@ -213,21 +155,18 @@ export const useCommissionNotifications = (userId?: string) => {
     const title = 'New Tier Achieved!';
     const message = `Congratulations! You've reached the ${tierName} tier. Your commission rate has been updated.`;
     
-    const params = {
+    sendNotification({
       userId,
-      type: 'tier_update' as NotificationType,
+      type: 'tier_update',
       title,
       message,
       data: {
         notificationType: 'tier_achieved',
         tierName
-      },
-      priority: 'high' as const  // This is important
-    };
-    
-    queueNotification(params, sendNotification, () => {
-      toast(title, { description: message });
+      }
     });
+    
+    toast(title, { description: message });
   };
   
   // Create a notification for commission milestone
@@ -238,21 +177,18 @@ export const useCommissionNotifications = (userId?: string) => {
     const title = 'Commission Milestone Reached';
     const message = `You've reached $${commissionAmount.toLocaleString()} in commissions! Keep up the excellent work.`;
     
-    const params = {
+    sendNotification({
       userId,
-      type: 'commission_milestone' as NotificationType,
+      type: 'commission_milestone',
       title,
       message,
       data: {
         notificationType: 'commission_milestone',
         commissionAmount
-      },
-      priority: 'normal' as const
-    };
-    
-    queueNotification(params, sendNotification, () => {
-      toast.success(title, { description: message });
+      }
     });
+    
+    toast.success(title, { description: message });
   };
   
   return {

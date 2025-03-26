@@ -69,9 +69,7 @@ const CommissionNotificationFeed: React.FC<CommissionNotificationFeedProps> = ({
             notificationData = item.data;
           }
         } catch (e) {
-          console.error('Error parsing notification data:', e, 'Raw data:', item.data);
-          // If parsing fails, fallback to empty object
-          notificationData = {};
+          console.error('Error parsing notification data:', e);
         }
         
         // If there's a related_id, add it to the data object too
