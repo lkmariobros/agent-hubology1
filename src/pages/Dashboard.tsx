@@ -4,35 +4,40 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import MetricCard from '@/components/dashboard/MetricCard';
 import RecentTransactions from '@/components/dashboard/RecentTransactions';
 import PropertyShowcase from '@/components/dashboard/PropertyShowcase';
-import OpportunitiesWidget from '@/components/dashboard/OpportunitiesWidget';
-import ActivityFeed from '@/components/dashboard/ActivityFeed';
-import DashboardCommission from '@/components/dashboard/DashboardCommission';
+import OpportunitiesBoard from '@/components/dashboard/OpportunitiesBoard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { CalendarRange, Briefcase, ListFilter } from 'lucide-react';
+import { CalendarRange, Briefcase, ListFilter, LineChart, Building, Receipt } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import DashboardCommission from '@/components/dashboard/DashboardCommission';
 
 const Dashboard = () => {
-  // Sample metrics for demonstration
+  const navigate = useNavigate();
+  
+  // Sample metrics for demonstration with required icon property
   const metrics = [
     {
       label: "Transactions",
       value: "12",
       change: 8.2,
       trend: "up",
-      description: "This month's transactions"
+      description: "This month's transactions",
+      icon: <Receipt className="h-5 w-5 text-blue-500" />
     },
     {
       label: "Listings",
       value: "32",
       change: -3.1,
       trend: "down",
-      description: "Active property listings"
+      description: "Active property listings",
+      icon: <Building className="h-5 w-5 text-orange-500" />
     },
     {
       label: "Client Inquiries",
       value: "47",
       change: 12.5,
       trend: "up",
-      description: "New inquiries this month"
+      description: "New inquiries this month",
+      icon: <LineChart className="h-5 w-5 text-green-500" />
     }
   ];
 
@@ -67,7 +72,7 @@ const Dashboard = () => {
                   <RecentTransactions limit={5} />
                 </TabsContent>
                 <TabsContent value="properties">
-                  <PropertyShowcase limit={5} />
+                  <PropertyShowcase />
                 </TabsContent>
               </Tabs>
             </CardContent>
@@ -83,7 +88,7 @@ const Dashboard = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <OpportunitiesWidget limit={3} />
+              <OpportunitiesBoard onViewAll={() => navigate('/opportunities')} />
             </CardContent>
           </Card>
           
@@ -95,7 +100,7 @@ const Dashboard = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ActivityFeed limit={5} />
+              <ActivityFeed />
             </CardContent>
           </Card>
         </div>
