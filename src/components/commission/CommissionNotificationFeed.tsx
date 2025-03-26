@@ -39,7 +39,17 @@ const CommissionNotificationFeed: React.FC<CommissionNotificationFeedProps> = ({
         return [];
       }
       
-      return data as Notification[];
+      // Map the snake_case database columns to camelCase properties expected by the Notification type
+      return (data || []).map(item => ({
+        id: item.id,
+        userId: item.user_id,
+        type: item.type as Notification['type'],
+        title: item.title,
+        message: item.message,
+        read: item.read || false,
+        data: item.data,
+        createdAt: item.created_at
+      })) as Notification[];
     },
     enabled: !!userId,
   });
