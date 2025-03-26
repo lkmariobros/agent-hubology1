@@ -6,7 +6,47 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { formatCurrency } from '@/utils/propertyUtils';
 
-const SummaryCards = () => {
+interface SummaryCardData {
+  label: string;
+  value: string;
+  description: string;
+}
+
+interface SummaryCardsProps {
+  summaryData?: SummaryCardData[];
+}
+
+const SummaryCards: React.FC<SummaryCardsProps> = ({ summaryData }) => {
+  // If summaryData is provided, use it instead of fetching data
+  if (summaryData) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {summaryData.map((item, index) => (
+          <Card key={index}>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground mb-1">{item.label}</p>
+                  <h3 className="text-2xl font-bold">{item.value}</h3>
+                </div>
+                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                  {index % 4 === 0 && <Clock className="h-6 w-6 text-primary" />}
+                  {index % 4 === 1 && <AlertTriangle className="h-6 w-6 text-primary" />}
+                  {index % 4 === 2 && <Banknote className="h-6 w-6 text-primary" />}
+                  {index % 4 === 3 && <CheckCircle2 className="h-6 w-6 text-primary" />}
+                </div>
+              </div>
+              <div className="mt-4 text-sm text-muted-foreground">
+                {item.description}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+  
+  // Original implementation for fetching data if summaryData is not provided
   // Fetch status counts
   const { data: statusCounts, isLoading: isLoadingCounts } = useQuery({
     queryKey: ['approval-status-counts'],
