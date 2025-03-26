@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -6,12 +7,13 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Search, Filter, SortDesc, FileText, DollarSign, AlertCircle, CheckCircle2, Clock, ArrowUpDown, ArrowRight } from 'lucide-react';
 import PropertiesBoard from '@/components/property/PropertiesBoard';
 import OpportunitiesBoard from '@/components/opportunity/OpportunitiesBoard';
-import { Property } from '@/types';
+import { Property, Opportunity } from '@/types';
 
 const Home = () => {
   const navigate = useNavigate();
 
-  const sampleProperties = [
+  // Sample properties with all required fields
+  const sampleProperties: Property[] = [
     { 
       id: 'P-001', 
       title: 'Luxury Villa in Tuscany', 
@@ -21,10 +23,13 @@ const Home = () => {
       images: ['/properties/property-1.jpg'], 
       bedrooms: 5, 
       bathrooms: 4, 
-      squareFeet: 4500, 
+      area: 4500, 
       type: 'residential', 
       status: 'available', 
-      featured: true 
+      featured: true,
+      features: ['Pool', 'Garden', 'Terrace'],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     },
     { 
       id: 'P-002', 
@@ -35,10 +40,13 @@ const Home = () => {
       images: ['/properties/property-2.jpg'], 
       bedrooms: 2, 
       bathrooms: 2, 
-      squareFeet: 1800, 
+      area: 1800, 
       type: 'residential', 
       status: 'available', 
-      featured: true 
+      featured: true,
+      features: ['Doorman', 'Gym', 'Balcony'],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     },
     { 
       id: 'P-003', 
@@ -49,14 +57,17 @@ const Home = () => {
       images: ['/properties/property-3.jpg'], 
       bedrooms: 3, 
       bathrooms: 2, 
-      squareFeet: 2200, 
+      area: 2200, 
       type: 'residential', 
       status: 'available', 
-      featured: true 
+      featured: true,
+      features: ['Garden', 'Fireplace', 'Countryside View'],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     },
   ];
 
-  const opportunities = [
+  const opportunities: Opportunity[] = [
     { 
       id: 'O-001', 
       title: 'Investment Opportunity in Downtown LA', 
@@ -115,12 +126,7 @@ const Home = () => {
               <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
           </div>
-          <PropertiesBoard properties={sampleProperties.map(prop => ({
-            ...prop,
-            features: [],
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-          }))} />
+          <PropertiesBoard properties={sampleProperties} />
         </div>
         
         <div>
@@ -131,7 +137,10 @@ const Home = () => {
               <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
           </div>
-          <OpportunitiesBoard opportunities={opportunities} onViewAll={() => navigate('/opportunities')} />
+          <OpportunitiesBoard 
+            opportunities={opportunities} 
+            onViewAll={() => navigate('/opportunities')} 
+          />
         </div>
       </div>
     </div>

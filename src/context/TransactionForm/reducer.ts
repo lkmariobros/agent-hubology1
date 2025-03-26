@@ -1,5 +1,6 @@
+
 import { TransactionFormState } from './types';
-import { stringToTransactionType } from '@/utils/typeConversions';
+import { stringToTransactionType, stringToAgentRank } from '@/utils/typeConversions';
 
 type TransactionFormAction =
   | { type: 'UPDATE_FORM_DATA'; payload: Partial<TransactionFormState['formData']> }
@@ -67,8 +68,11 @@ export const transactionFormReducer = (
         formData: {
           transactionType: 'Sale',
           transactionDate: new Date().toISOString().split('T')[0],
+          closingDate: '',
           propertyId: '',
+          agentId: '',
           status: 'Draft',
+          notes: '',
           transactionValue: 0,
           commissionRate: 0,
           commissionAmount: 0,

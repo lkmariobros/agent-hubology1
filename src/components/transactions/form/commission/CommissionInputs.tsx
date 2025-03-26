@@ -1,10 +1,12 @@
+
 import React from 'react';
 import { useTransactionForm } from '@/context/TransactionFormContext';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useAgentProfile } from '@/hooks/useAgentProfile';
 import { TransactionType } from '@/types';
+import { stringToTransactionType } from '@/utils/typeConversions';
 
 interface CommissionInputsProps {
   isRental: boolean;
@@ -18,87 +20,64 @@ const CommissionInputs: React.FC<CommissionInputsProps> = ({ isRental, ownerComm
   const { data: agentProfile } = useAgentProfile();
   
   // Add type casting where necessary
-  const isRentalTransaction = formData.transactionType === 'Rent' as TransactionType;
+  const transactionTypeStr = formData.transactionType || 'Sale';
+  const isRentalTransaction = stringToTransactionType(transactionTypeStr as string) === 'Rent';
   
   return (
     <div className="space-y-4">
-      <FormField
-        control={useTransactionForm().form.control}
-        name="transactionValue"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Transaction Value</FormLabel>
-            <FormControl>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2">$</span>
-                <Input
-                  type="number"
-                  placeholder="0.00"
-                  className="pl-7"
-                  value={formData.transactionValue?.toString() || ''}
-                  onChange={(e) => {
-                    const value = parseFloat(e.target.value);
-                    updateFormData({ transactionValue: isNaN(value) ? 0 : value });
-                  }}
-                />
-              </div>
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+      <FormItem>
+        <FormLabel>Transaction Value</FormLabel>
+        <div className="relative">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2">$</span>
+          <Input
+            type="number"
+            placeholder="0.00"
+            className="pl-7"
+            value={formData.transactionValue?.toString() || ''}
+            onChange={(e) => {
+              const value = parseFloat(e.target.value);
+              updateFormData({ transactionValue: isNaN(value) ? 0 : value });
+            }}
+          />
+        </div>
+        <FormMessage />
+      </FormItem>
       
-      <FormField
-        control={useTransactionForm().form.control}
-        name="commissionRate"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Commission Rate (%)</FormLabel>
-            <FormControl>
-              <div className="relative">
-                <Input
-                  type="number"
-                  placeholder="0.00"
-                  className="pr-7"
-                  value={formData.commissionRate?.toString() || ''}
-                  onChange={(e) => {
-                    const value = parseFloat(e.target.value);
-                    updateFormData({ commissionRate: isNaN(value) ? 0 : value });
-                  }}
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2">%</span>
-              </div>
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+      <FormItem>
+        <FormLabel>Commission Rate (%)</FormLabel>
+        <div className="relative">
+          <Input
+            type="number"
+            placeholder="0.00"
+            className="pr-7"
+            value={formData.commissionRate?.toString() || ''}
+            onChange={(e) => {
+              const value = parseFloat(e.target.value);
+              updateFormData({ commissionRate: isNaN(value) ? 0 : value });
+            }}
+          />
+          <span className="absolute right-3 top-1/2 -translate-y-1/2">%</span>
+        </div>
+        <FormMessage />
+      </FormItem>
       
-      <FormField
-        control={useTransactionForm().form.control}
-        name="commissionAmount"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Commission Amount</FormLabel>
-            <FormControl>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2">$</span>
-                <Input
-                  type="number"
-                  placeholder="0.00"
-                  className="pl-7"
-                  value={formData.commissionAmount?.toString() || ''}
-                  onChange={(e) => {
-                    const value = parseFloat(e.target.value);
-                    updateFormData({ commissionAmount: isNaN(value) ? 0 : value });
-                  }}
-                />
-              </div>
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+      <FormItem>
+        <FormLabel>Commission Amount</FormLabel>
+        <div className="relative">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2">$</span>
+          <Input
+            type="number"
+            placeholder="0.00"
+            className="pl-7"
+            value={formData.commissionAmount?.toString() || ''}
+            onChange={(e) => {
+              const value = parseFloat(e.target.value);
+              updateFormData({ commissionAmount: isNaN(value) ? 0 : value });
+            }}
+          />
+        </div>
+        <FormMessage />
+      </FormItem>
     </div>
   );
 };

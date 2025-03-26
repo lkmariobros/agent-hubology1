@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { Transaction, TransactionDocument } from '@/types';
@@ -154,10 +155,10 @@ export function useTransactions() {
           notes: data.notes || '',
           closingDate: data.closing_date,
           property: data.property ? {
-            title: data.property.title,
+            title: data.property.title || '',
             address: {
-              city: data.property.city,
-              state: data.property.state
+              city: data.property.city || '',
+              state: data.property.state || ''
             }
           } : undefined,
           agent: {

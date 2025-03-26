@@ -1,6 +1,7 @@
 
 import { TransactionFormData, CommissionBreakdown } from './types';
 import { getAgentCommissionPercentage } from './agentTiers';
+import { stringToAgentRank } from '@/utils/typeConversions';
 
 export const calculateCommission = (formData: TransactionFormData): CommissionBreakdown => {
   const {
@@ -10,8 +11,11 @@ export const calculateCommission = (formData: TransactionFormData): CommissionBr
     coBroking
   } = formData;
   
+  // Convert string to AgentRank type if needed
+  const agentRankTier = stringToAgentRank(agentTier as string);
+  
   // Get agent tier percentage
-  const agentCommissionPercentage = getAgentCommissionPercentage(agentTier);
+  const agentCommissionPercentage = getAgentCommissionPercentage(agentRankTier);
   
   // Calculate basic commission values
   let totalCommission = (transactionValue * commissionRate) / 100;
@@ -38,7 +42,7 @@ export const calculateCommission = (formData: TransactionFormData): CommissionBr
     agentShare,
     ourAgencyCommission,
     coAgencyCommission,
-    agentTier,
+    agentTier: agentRankTier,
     agentCommissionPercentage,
     transactionValue,
     commissionRate

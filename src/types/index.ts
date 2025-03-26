@@ -34,16 +34,17 @@ export interface Property {
   updatedAt: string;
   size?: number;
   stock?: PropertyStock;
-  transactionType?: string; // Added for PropertyCard
-  featured?: boolean; // Added for PropertyCard
-  listedBy?: string; // Added for PropertyCardDetails
+  transactionType?: string;
+  featured?: boolean;
+  listedBy?: string;
 }
 
+// Consolidated PropertyStock to avoid duplicate declarations
 export interface PropertyStock {
   total: number;
   available: number;
-  reserved?: number;
-  sold?: number;
+  reserved: number;
+  sold: number;
 }
 
 export interface Agent {
@@ -95,6 +96,7 @@ export interface TransactionDocument {
   name: string;
   documentType: string;
   url: string;
+  file?: File;
 }
 
 export interface Opportunity {
@@ -256,8 +258,8 @@ export type TransactionFormData = {
   };
   // Added to fix transaction form related errors
   property?: any;
-  transactionType?: string;
-  agentTier?: string;
+  transactionType?: TransactionType;
+  agentTier?: AgentRank;
   landlord?: {
     name?: string;
     email?: string;

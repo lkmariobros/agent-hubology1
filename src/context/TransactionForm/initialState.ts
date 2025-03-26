@@ -1,3 +1,4 @@
+
 import { TransactionFormState, TransactionFormData, TransactionType } from './types';
 import { AgentRank } from '@/types';
 
@@ -20,8 +21,11 @@ export const getInitialTransactionData = (transactionType: TransactionType): Tra
   return {
     transactionType,
     transactionDate: new Date().toISOString().split('T')[0],
+    closingDate: '',
     propertyId: '',
+    agentId: '',
     status: 'Draft',
+    notes: '',
     transactionValue: 0,
     commissionRate,
     commissionAmount: 0,
@@ -37,8 +41,11 @@ export const initialTransactionFormState: TransactionFormState = {
   formData: {
     transactionType: 'Sale',
     transactionDate: new Date().toISOString().split('T')[0], // Use ISO string format for date
+    closingDate: '',
     propertyId: '',
+    agentId: '',
     status: 'Draft',
+    notes: '',
     transactionValue: 0,
     commissionRate: getDefaultCommissionRate('Sale'),
     commissionAmount: 0,

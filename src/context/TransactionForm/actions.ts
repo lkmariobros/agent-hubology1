@@ -12,7 +12,7 @@ import { initialTransactionFormState, getDefaultCommissionRate } from './initial
 import { saveFormAsDraft, submitTransactionForm } from './formSubmission';
 import { stringToAgentRank } from '@/utils/typeConversions';
 
-// Agent tier commission percentages
+// Agent tier commission percentages should match the ones in agentTiers.ts
 const AGENT_TIER_PERCENTAGES: Record<AgentRank, number> = {
   'Associate': 70,
   'Senior Associate': 75,
@@ -202,7 +202,8 @@ export const useTransactionFormActions = () => {
 
   // Helper function to get agent's commission percentage based on their tier
   const getAgentCommissionPercentage = (tier: string | AgentRank): number => {
-    return AGENT_TIER_PERCENTAGES[tier as AgentRank] || 70; // Default to 70% if tier not found
+    const agentRank = stringToAgentRank(tier as string);
+    return AGENT_TIER_PERCENTAGES[agentRank] || 70; // Default to 70% if tier not found
   };
 
   // Calculate commission breakdown - updated to match business rules
@@ -212,8 +213,11 @@ export const useTransactionFormActions = () => {
     // Calculate basic values
     const totalCommission = (transactionValue * commissionRate) / 100;
     
+    // Convert string to AgentRank if needed
+    const agentRankTier = stringToAgentRank(agentTier as string);
+    
     // Get agent's tier-based percentage
-    const agentTierPercentage = getAgentCommissionPercentage(agentTier);
+    const agentTierPercentage = getAgentCommissionPercentage(agentRankTier);
     
     // Calculate split percentages for co-broking scenario
     const agencySplitPercentage = coBroking?.enabled ? (coBroking.commissionSplit || 50) : 100;
@@ -237,7 +241,7 @@ export const useTransactionFormActions = () => {
       agentShare,
       ourAgencyCommission,
       coAgencyCommission,
-      agentTier,
+      agentTier: agentRankTier,
       agentCommissionPercentage: agentTierPercentage,
       // Add these for display purposes in CommissionBreakdownCard
       transactionValue: transactionValue || 0,
