@@ -1,28 +1,47 @@
 
 import { 
-  TransactionFormState,
   TransactionFormData,
   TransactionDocument, 
-  CommissionBreakdown,
-  TransactionType,
-  AgentRank
-} from '../../types/transaction-form';
+  AgentRank,
+  ApprovalStatus
+} from '../../types';
 
 // Re-export types from the main types file
 export type {
-  TransactionFormState,
   TransactionFormData,
   TransactionDocument,
-  CommissionBreakdown,
-  TransactionType,
   AgentRank
 };
+
+export interface CommissionBreakdown {
+  totalCommission: number;
+  agencyShare: number;
+  agentShare: number;
+  ourAgencyCommission?: number;
+  coAgencyCommission?: number;
+  agentTier?: AgentRank;
+  agentCommissionPercentage?: number;
+  // These are used for display purposes in CommissionBreakdownCard
+  transactionValue?: number;
+  commissionRate?: number;
+}
+
+export interface TransactionFormState {
+  formData: TransactionFormData;
+  documents: TransactionDocument[];
+  errors: Record<string, string>;
+  // Additional state properties
+  currentStep: number;
+  isSubmitting: boolean;
+  isDirty: boolean;
+  lastSaved: Date | null;
+}
 
 // Define the context type
 export interface TransactionFormContextType {
   state: TransactionFormState;
   updateFormData: (data: Partial<TransactionFormData>) => void;
-  updateTransactionType: (type: TransactionType) => void;
+  updateTransactionType: (type: string) => void;
   addDocument: (document: TransactionDocument) => void;
   removeDocument: (index: number) => void;
   nextStep: () => void;
@@ -36,9 +55,6 @@ export interface TransactionFormContextType {
   initiateApprovalProcess?: () => Promise<void>;
   checkApprovalStatus?: () => Promise<ApprovalStatus>;
 }
-
-// Define approval status type
-export type ApprovalStatus = 'Pending' | 'Under Review' | 'Approved' | 'Ready for Payment' | 'Paid' | 'Rejected';
 
 // Define commission tier interface
 export interface CommissionTier {
