@@ -10,6 +10,8 @@ const PropertyGallery: React.FC<PropertyGalleryProps> = ({ images, title }) => {
   // Using placeholder for now, in a real app these would be actual image URLs
   const hasImages = images && images.length > 0;
   
+  console.log('PropertyGallery received images:', images);
+  
   return (
     <div className="space-y-2">
       <div className="aspect-video bg-muted rounded-md overflow-hidden">
@@ -18,6 +20,10 @@ const PropertyGallery: React.FC<PropertyGalleryProps> = ({ images, title }) => {
             src={images[0]} 
             alt={`${title} main view`} 
             className="w-full h-full object-cover"
+            onError={(e) => {
+              console.error('Failed to load image:', images[0]);
+              e.currentTarget.src = '/placeholder.svg';
+            }}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
@@ -33,7 +39,11 @@ const PropertyGallery: React.FC<PropertyGalleryProps> = ({ images, title }) => {
               <img 
                 src={image} 
                 alt={`${title} view ${index + 2}`}
-                className="w-full h-full object-cover" 
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  console.error('Failed to load thumbnail:', image);
+                  e.currentTarget.src = '/placeholder.svg';
+                }}
               />
             </div>
           ))

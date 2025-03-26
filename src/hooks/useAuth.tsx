@@ -22,7 +22,9 @@ export const useAuth = () => {
    */
   const switchRole = (role: UserRole) => {
     // Update role in auth context
-    auth.switchRole(role);
+    if (auth && typeof auth.switchRole === 'function') {
+      auth.switchRole(role);
+    }
     
     // Navigate based on the role
     if (role === 'admin') {
@@ -33,8 +35,11 @@ export const useAuth = () => {
   };
   
   return {
-    ...auth,
+    // Safely spread auth properties if auth exists
+    ...(auth || {}),
     activeRole: isAdminRoute ? 'admin' : 'agent',
-    switchRole
+    switchRole,
+    // Add a default isAdmin property if auth doesn't provide one
+    isAdmin: auth?.isAdmin || isAdminRoute
   };
 };

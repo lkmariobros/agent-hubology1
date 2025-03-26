@@ -59,6 +59,7 @@ const PropertyDetail = () => {
     // };
     // 
     // fetchNotes();
+    console.log('Property detail loaded for ID:', id);
   }, [id]);
   
   const handleAddNote = (note: Omit<TeamNote, 'id' | 'date'>) => {
@@ -90,10 +91,12 @@ const PropertyDetail = () => {
   }
   
   if (error || !propertyResponse?.data) {
+    console.error('Error loading property:', error?.message || 'Property not found', propertyResponse);
     return <div className="p-6">Error loading property: {error?.message || 'Property not found'}</div>;
   }
   
   const property = propertyResponse.data;
+  console.log('Property data:', property);
   
   // Extract property type from property_types relation
   const propertyType = property.property_types?.name || 'Property';
