@@ -218,15 +218,17 @@ export const useApprovalStatusCounts = () => {
       if (!user) throw new Error('User not authenticated');
       
       try {
-        // Try using the RPC function first
-        const { data, error } = await supabase
-          .rpc('get_approval_status_counts');
+        // Use the Edge Function to get status counts
+        const { data, error } = await supabase.functions.invoke('get_approval_status_counts');
         
-        if (!error && data) {
-          return data as ApprovalStatusCounts;
-        }
+        if (error) throw error;
         
-        // Fallback to manual calculation if RPC fails
+        // Cast the response data to our expected type
+        return data as ApprovalStatusCounts;
+      } catch (error) {
+        console.error('Error fetching approval status counts:', error);
+        
+        // Fallback to manual calculation if function call fails
         console.warn('Falling back to manual status count calculation');
         const { data: approvals, error: fallbackError } = await supabase
           .from('commission_approvals')
@@ -237,7 +239,7 @@ export const useApprovalStatusCounts = () => {
         }
         
         // Calculate counts manually
-        const counts = {
+        const counts: ApprovalStatusCounts = {
           pending: 0,
           under_review: 0,
           approved: 0,
@@ -248,15 +250,12 @@ export const useApprovalStatusCounts = () => {
         
         approvals?.forEach(item => {
           const status = item.status.toLowerCase().replace(' ', '_');
-          if (counts.hasOwnProperty(status)) {
+          if (status in counts) {
             counts[status as keyof ApprovalStatusCounts]++;
           }
         });
         
         return counts;
-      } catch (error) {
-        console.error('Error fetching approval status counts:', error);
-        throw error;
       }
     },
     enabled: !!user
@@ -273,15 +272,17 @@ export const useApprovedCommissionTotal = () => {
       if (!user) throw new Error('User not authenticated');
       
       try {
-        // Try using the RPC function first
-        const { data, error } = await supabase
-          .rpc('get_approved_commission_total');
+        // Use the Edge Function to get approved commission total
+        const { data, error } = await supabase.functions.invoke('get_approved_commission_total');
         
-        if (!error && data) {
-          return data.total;
-        }
+        if (error) throw error;
         
-        // Fallback to manual calculation if RPC fails
+        // The edge function returns an object with a total property
+        return (data as { total: number }).total;
+      } catch (error) {
+        console.error('Error fetching approved commission total:', error);
+        
+        // Fallback to manual calculation if function call fails
         console.warn('Falling back to manual approved commission calculation');
         const { data: approvals, error: fallbackError } = await supabase
           .from('commission_approvals')
@@ -298,9 +299,6 @@ export const useApprovedCommissionTotal = () => {
         }, 0) || 0;
         
         return total;
-      } catch (error) {
-        console.error('Error fetching approved commission total:', error);
-        throw error;
       }
     },
     enabled: !!user
@@ -317,15 +315,17 @@ export const usePendingCommissionTotal = () => {
       if (!user) throw new Error('User not authenticated');
       
       try {
-        // Try using the RPC function first
-        const { data, error } = await supabase
-          .rpc('get_pending_commission_total');
+        // Use the Edge Function to get pending commission total
+        const { data, error } = await supabase.functions.invoke('get_pending_commission_total');
         
-        if (!error && data) {
-          return data.total;
-        }
+        if (error) throw error;
         
-        // Fallback to manual calculation if RPC fails
+        // The edge function returns an object with a total property
+        return (data as { total: number }).total;
+      } catch (error) {
+        console.error('Error fetching pending commission total:', error);
+        
+        // Fallback to manual calculation if function call fails
         console.warn('Falling back to manual pending commission calculation');
         const { data: approvals, error: fallbackError } = await supabase
           .from('commission_approvals')
@@ -342,9 +342,6 @@ export const usePendingCommissionTotal = () => {
         }, 0) || 0;
         
         return total;
-      } catch (error) {
-        console.error('Error fetching pending commission total:', error);
-        throw error;
       }
     },
     enabled: !!user
@@ -369,23 +366,27 @@ export const useUpdateApprovalStatus = () => {
       if (!user) throw new Error('User not authenticated');
       
       try {
-        // Try using the RPC function first
-        const { data, error } = await supabase
-          .rpc('update_commission_approval_status', {
+        // Use Edge Function instead of direct RPC
+        const { data, error } = await supabase.functions.invoke('update_commission_approval_status', {
+          body: {
             p_approval_id: approvalId,
             p_new_status: status,
             p_notes: notes
-          });
+          }
+        });
         
         if (error) {
           throw error;
         }
         
-        if (!data.success) {
-          throw new Error(data.message || 'Failed to update status');
+        // Cast the response to get proper type checking
+        const response = data as { success: boolean; message: string };
+        
+        if (!response.success) {
+          throw new Error(response.message || 'Failed to update status');
         }
         
-        return data;
+        return response;
       } catch (error) {
         console.error('Error updating approval status:', error);
         throw error;

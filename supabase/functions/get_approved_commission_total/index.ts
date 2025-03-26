@@ -15,13 +15,23 @@ serve(async (req) => {
   try {
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
     
-    // Use the RPC function
-    const { data, error } = await supabase.rpc('get_approved_commission_total')
+    // Get all approved approvals with their commission amounts
+    const { data, error } = await supabase
+      .from('commission_approvals')
+      .select(`
+        property_transactions(commission_amount)
+      `)
+      .eq('status', 'Approved')
     
     if (error) throw error
     
+    // Calculate the total
+    const total = data.reduce((sum, item) => {
+      return sum + (item.property_transactions?.commission_amount || 0)
+    }, 0)
+    
     return new Response(
-      JSON.stringify({ data }),
+      JSON.stringify({ total }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   } catch (error) {

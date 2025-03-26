@@ -15,13 +15,53 @@ serve(async (req) => {
   try {
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
     
-    // Use the RPC function
-    const { data, error } = await supabase.rpc('get_approval_status_counts')
+    // Get count for each status
+    const { data: pendingCount, error: pendingError } = await supabase
+      .from('commission_approvals')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'Pending')
     
-    if (error) throw error
+    const { data: underReviewCount, error: underReviewError } = await supabase
+      .from('commission_approvals')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'Under Review')
+    
+    const { data: approvedCount, error: approvedError } = await supabase
+      .from('commission_approvals')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'Approved')
+    
+    const { data: readyForPaymentCount, error: readyForPaymentError } = await supabase
+      .from('commission_approvals')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'Ready for Payment')
+    
+    const { data: paidCount, error: paidError } = await supabase
+      .from('commission_approvals')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'Paid')
+    
+    const { data: rejectedCount, error: rejectedError } = await supabase
+      .from('commission_approvals')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'Rejected')
+    
+    if (pendingError || underReviewError || approvedError || 
+        readyForPaymentError || paidError || rejectedError) {
+      throw new Error('Error fetching status counts')
+    }
+    
+    const result = {
+      pending: pendingCount?.length || 0,
+      under_review: underReviewCount?.length || 0,
+      approved: approvedCount?.length || 0,
+      ready_for_payment: readyForPaymentCount?.length || 0,
+      paid: paidCount?.length || 0,
+      rejected: rejectedCount?.length || 0
+    }
     
     return new Response(
-      JSON.stringify({ data }),
+      JSON.stringify(result),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   } catch (error) {
