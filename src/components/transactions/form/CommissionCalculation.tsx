@@ -1,9 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { useTransactionForm } from '@/context/TransactionFormContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle, Award } from 'lucide-react';
-import AgentTierSelector from './commission/AgentTierSelector';
 import CommissionInputs from './commission/CommissionInputs';
 import CommissionBreakdownCard from './commission/CommissionBreakdownCard';
 import CoBrokingInfoCard from './commission/CoBrokingInfoCard';
@@ -11,6 +11,7 @@ import CommissionVisualizer from './commission/CommissionVisualizer';
 import { useAgentProfile } from '@/hooks/useAgentProfile';
 import { AgentRank } from '@/types';
 import { stringToAgentRank } from '@/utils/typeConversions';
+
 const CommissionCalculation: React.FC = () => {
   const {
     state,
@@ -32,19 +33,14 @@ const CommissionCalculation: React.FC = () => {
     transactionType
   } = formData;
 
-  // Sync agent tier with profile when it loads
+  // Sync agent tier with profile when it loads - this is now the ONLY way to set the tier
   useEffect(() => {
-    if (agentProfile && agentProfile.tier_name && agentTier !== agentProfile.tier_name) {
+    if (agentProfile && agentProfile.tier_name) {
       updateFormData({
         agentTier: stringToAgentRank(agentProfile.tier_name)
       });
     }
-  }, [agentProfile, agentTier, updateFormData]);
-  const handleAgentTierChange = (tier: string) => {
-    updateFormData({
-      agentTier: stringToAgentRank(tier)
-    });
-  };
+  }, [agentProfile, updateFormData]);
 
   // Calculate commission
   const commissionBreakdown = calculateCommission();
@@ -66,6 +62,7 @@ const CommissionCalculation: React.FC = () => {
   // Calculate agent and agency percentages
   const agentPortionPercentage = commissionBreakdown.agentCommissionPercentage || 70;
   const agencyPortionPercentage = 100 - agentPortionPercentage;
+  
   return <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
@@ -120,7 +117,7 @@ const CommissionCalculation: React.FC = () => {
                   {agentTier} Commission Split
                 </h3>
                 <p className="text-xs text-gray-400 mb-2">
-                  Your current commission split rate is {agentPortionPercentage}/{agencyPortionPercentage} based on your tier.
+                  Your commission split rate is {agentPortionPercentage}/{agencyPortionPercentage} based on your tier.
                 </p>
                 <div className="flex items-center justify-between">
                   <span className="text-sm">You: {agentPortionPercentage}%</span>

@@ -1,3 +1,4 @@
+
 import { useCallback } from 'react';
 import { useReducer } from 'react';
 import { 
@@ -6,7 +7,7 @@ import {
   CommissionBreakdown,
   TransactionType,
   AgentRank
-} from './types';
+} from '@/types/transaction-form';
 import { transactionFormReducer } from './reducer';
 import { initialTransactionFormState, getDefaultCommissionRate } from './initialState';
 import { saveFormAsDraft, submitTransactionForm } from './formSubmission';
@@ -213,10 +214,10 @@ export const useTransactionFormActions = () => {
     // Calculate basic values
     const totalCommission = (transactionValue * commissionRate) / 100;
     
-    // Convert string to AgentRank if needed
+    // Convert string to AgentRank type if needed
     const agentRankTier = stringToAgentRank(agentTier as string);
     
-    // Get agent's tier-based percentage
+    // Get agent tier percentage
     const agentTierPercentage = getAgentCommissionPercentage(agentRankTier);
     
     // Calculate split percentages for co-broking scenario

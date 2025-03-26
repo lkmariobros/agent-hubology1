@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { commissionApi } from '@/lib/api';
 import { AgentRank, AgentWithHierarchy, CommissionTier, OverrideCommission } from '@/types';
@@ -85,8 +86,8 @@ export function calculateOverrideCommissions(
   // Apply override percentages based on rank
   while (currentUpline) {
     // Only apply override if upline's rank is higher than the agent's rank
-    const currentRank = stringToAgentRank(currentAgent.rank);
-    const uplineRank = stringToAgentRank(currentUpline.rank);
+    const currentRank = stringToAgentRank(currentAgent.rank as string);
+    const uplineRank = stringToAgentRank(currentUpline.rank as string);
     
     if (getRankLevel(uplineRank) > getRankLevel(currentRank)) {
       const overridePercentage = getOverridePercentage(uplineRank);
@@ -101,7 +102,7 @@ export function calculateOverrideCommissions(
         amount: overrideAmount,
         status: 'Pending',
         agentName: currentUpline.name,
-        rank: currentUpline.rank
+        rank: uplineRank
       });
     }
     
