@@ -43,13 +43,26 @@ const CommissionNotificationFeed: React.FC<CommissionNotificationFeedProps> = ({
       
       // Map the snake_case database columns to camelCase properties expected by the Notification type
       return (data || []).map(item => {
-        // Create a notification data object based on available properties
-        const notificationData: Record<string, any> = {
-          // If there's stored data JSON, use it
-          ...(item.data || {}),
-          // If there's a related_id, use it as a reference point too
-          ...(item.related_id ? { relatedId: item.related_id } : {}),
-        };
+        // Parse the data JSON field if it exists, otherwise create an empty object
+        let notificationData: Record<string, any> = {};
+        
+        try {
+          // Check if the data field exists as a string and try to parse it
+          if (typeof item.data === 'string' && item.data) {
+            notificationData = JSON.parse(item.data);
+          } 
+          // If it's already an object, use it directly
+          else if (typeof item.data === 'object' && item.data !== null) {
+            notificationData = item.data;
+          }
+        } catch (e) {
+          console.error('Error parsing notification data:', e);
+        }
+        
+        // If there's a related_id, add it to the data object too
+        if (item.related_id) {
+          notificationData.relatedId = item.related_id;
+        }
         
         return {
           id: item.id,
