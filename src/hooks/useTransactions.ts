@@ -2,6 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { Transaction, Property } from '@/types';
 
+// Basic transaction fetch function
 const fetchTransactions = async (page: number = 1, pageSize: number = 10) => {
   const response = await fetch(`/api/transactions?page=${page}&pageSize=${pageSize}`);
   if (!response.ok) {
@@ -10,13 +11,15 @@ const fetchTransactions = async (page: number = 1, pageSize: number = 10) => {
   return response.json();
 };
 
-export const useTransactions = (page: number = 1, pageSize: number = 10) => {
+// Basic transaction fetching hook (renamed to avoid duplication)
+export const useBasicTransactions = (page: number = 1, pageSize: number = 10) => {
   return useQuery({
     queryKey: ['transactions', page, pageSize],
     queryFn: () => fetchTransactions(page, pageSize)
   });
 };
 
+// Property fetching function
 const fetchProperties = async () => {
   const response = await fetch('/api/properties');
   if (!response.ok) {
@@ -25,6 +28,7 @@ const fetchProperties = async () => {
   return response.json();
 };
 
+// Property fetching hook for transaction forms
 export const usePropertiesForTransactions = () => {
   return useQuery({
     queryKey: ['propertiesForTransactions'],
@@ -32,6 +36,7 @@ export const usePropertiesForTransactions = () => {
   });
 };
 
+// Hook to get property options for transaction forms
 export const useTransactionOptions = () => {
   const { data: propertiesData, isLoading, error } = usePropertiesForTransactions();
 
@@ -49,7 +54,7 @@ export const useTransactionOptions = () => {
   };
 };
 
-// Extended hook with query params support
+// Advanced transactions query with filtering
 export const useTransactionsQuery = ({ 
   page = 0, 
   limit = 10, 
@@ -122,9 +127,65 @@ export const useTransactionsQuery = ({
   });
 };
 
-// For use in components
+// Fetch a single transaction by ID
+export const useTransactionQuery = (id: string) => {
+  return useQuery({
+    queryKey: ['transaction', id],
+    queryFn: async () => {
+      // Mock implementation - in a real app, this would be a real API call
+      const mockTransaction = {
+        id,
+        date: new Date().toISOString(),
+        propertyId: '101',
+        property: {
+          title: 'Luxury Condominium',
+          address: { city: 'Kuala Lumpur', state: 'Malaysia' }
+        },
+        agent: { id: 'a1', name: 'John Doe' },
+        price: 750000,
+        commission: 22500,
+        status: 'completed',
+        buyer: {
+          name: 'Alice Brown',
+          email: 'alice@example.com',
+          phone: '+601234567890'
+        },
+        seller: {
+          name: 'Bob Green',
+          email: 'bob@example.com',
+          phone: '+601234567891'
+        },
+        notes: 'This is a sample transaction.',
+        documents: [
+          { id: 'd1', name: 'Sale Agreement.pdf' },
+          { id: 'd2', name: 'Property Inspection.pdf' }
+        ]
+      };
+      
+      return mockTransaction;
+    },
+    staleTime: 60000 // 1 minute
+  });
+};
+
+// Create transaction mutation
+export const useCreateTransactionMutation = () => {
+  return {
+    mutateAsync: async (data: any) => {
+      // Mock implementation - would be a real API call in production
+      console.log('Creating transaction with data:', data);
+      return { success: true, id: 'new-transaction-id' };
+    },
+    isLoading: false,
+    error: null
+  };
+};
+
+// Main hook that exports all transaction-related hooks
 export const useTransactions = () => {
   return {
-    useTransactionsQuery
+    useTransactionsQuery,
+    useTransactionQuery,
+    useCreateTransactionMutation
   };
 };
