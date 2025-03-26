@@ -2,6 +2,7 @@
 import { useToast } from "@/hooks/use-toast";
 import { useSendNotification } from "@/hooks/useSendNotification";
 import { formatCurrency } from "@/utils/propertyUtils";
+import { NotificationType } from "@/types/notification";
 
 export function useCommissionNotifications() {
   const { toast } = useToast();
@@ -54,7 +55,7 @@ export function useCommissionNotifications() {
       
       await sendNotification({
         userId,
-        type: 'approval_status',
+        type: 'approval_status_change' as NotificationType,
         title,
         message,
         data: {
@@ -91,7 +92,7 @@ export function useCommissionNotifications() {
     try {
       await sendNotification({
         userId,
-        type: 'tier_progress',
+        type: 'tier_update' as NotificationType,
         title: 'Tier Progress Update',
         message: `You are ${progress}% towards your next commission tier.`,
         data: {
@@ -123,7 +124,7 @@ export function useCommissionNotifications() {
     try {
       await sendNotification({
         userId,
-        type: 'tier_achieved',
+        type: 'tier_update' as NotificationType,
         title: 'New Tier Achieved!',
         message: `Congratulations! You've reached the ${tier} tier.`,
         data: {
@@ -155,7 +156,7 @@ export function useCommissionNotifications() {
     try {
       await sendNotification({
         userId,
-        type: 'commission_milestone',
+        type: 'commission_milestone' as NotificationType,
         title: 'Commission Milestone Reached!',
         message: `You've reached ${formatCurrency(milestone)} in commissions this year!`,
         data: {
@@ -218,7 +219,7 @@ export function useCommissionNotifications() {
       
       await sendNotification({
         userId,
-        type: 'transaction_status',
+        type: 'approval_status_change' as NotificationType,
         title,
         message,
         data: {
