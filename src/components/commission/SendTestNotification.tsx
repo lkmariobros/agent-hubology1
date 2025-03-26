@@ -67,7 +67,7 @@ const SendTestNotification: React.FC = () => {
       <Alert className="bg-blue-50 border-blue-200">
         <InfoIcon className="h-4 w-4 text-blue-600" />
         <AlertDescription className="text-blue-700">
-          Use these tools to test notification functionality. If you encounter errors, use the debugger to help identify the issue.
+          Use these tools to test notification functionality. For more detailed debugging, use the advanced debugger below.
         </AlertDescription>
       </Alert>
       
@@ -89,7 +89,7 @@ const SendTestNotification: React.FC = () => {
           size="sm" 
           onClick={() => setShowDebugger(!showDebugger)}
         >
-          {showDebugger ? "Hide Debugger" : "Show Debugger"}
+          {showDebugger ? "Hide Debugger" : "Show Advanced Debugger"}
         </Button>
       </div>
       
