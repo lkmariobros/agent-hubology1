@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useProperty } from '@/hooks/useProperties';
@@ -15,48 +14,51 @@ import { CheckCircle2, Edit, Trash2, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 // Mock data for team notes
-const mockNotes: TeamNote[] = [
-  {
-    id: 1,
-    author: {
-      name: "John Smith",
-      initials: "JS",
-      avatarColor: "bg-blue-500"
-    },
-    date: "2 hours ago",
-    content: "Just showed this property to the Johnsons. They're very interested and might make an offer soon."
+const mockNotes: TeamNote[] = [{
+  id: 1,
+  author: {
+    name: "John Smith",
+    initials: "JS",
+    avatarColor: "bg-blue-500"
   },
-  {
-    id: 2,
-    author: {
-      name: "Sarah Lee",
-      initials: "SL",
-      avatarColor: "bg-green-500"
-    },
-    date: "Yesterday",
-    content: "Owner mentioned they might be willing to negotiate on the price. Starting point is firm though."
-  }
-];
-
+  date: "2 hours ago",
+  content: "Just showed this property to the Johnsons. They're very interested and might make an offer soon."
+}, {
+  id: 2,
+  author: {
+    name: "Sarah Lee",
+    initials: "SL",
+    avatarColor: "bg-green-500"
+  },
+  date: "Yesterday",
+  content: "Owner mentioned they might be willing to negotiate on the price. Starting point is firm though."
+}];
 const PropertyDetail = () => {
-  const { id } = useParams<{ id: string }>();
-  const { isAdmin } = useAuth();
+  const {
+    id
+  } = useParams<{
+    id: string;
+  }>();
+  const {
+    isAdmin
+  } = useAuth();
   const navigate = useNavigate();
-  
+
   // Mocked data for development
   const useMockData = process.env.NODE_ENV === 'development' && (id === '1' || id === '2' || id === '3');
-  
-  const { data: propertyResponse, isLoading, error } = useProperty(id || '', {
+  const {
+    data: propertyResponse,
+    isLoading,
+    error
+  } = useProperty(id || '', {
     enabled: !useMockData // Only enable the query if we're not using mock data
   });
-  
   const [notes, setNotes] = useState<TeamNote[]>(mockNotes);
   const [property, setProperty] = useState<any>(null);
-  
   useEffect(() => {
     // In a real app, you would fetch notes from Supabase here
     console.log('Property detail loaded for ID:', id);
-    
+
     // If using mock data for development (when UUID validation fails)
     if (useMockData) {
       console.log('Using mock data for property ID:', id);
@@ -78,23 +80,38 @@ const PropertyDetail = () => {
         featured: true,
         agent_notes: 'Owner is highly motivated to sell.',
         created_at: new Date().toISOString(),
-        property_types: { name: 'Residential' },
-        transaction_types: { name: 'For Sale' },
-        property_statuses: { name: 'Active' },
-        property_images: [
-          { id: 1, storage_path: 'https://picsum.photos/id/1067/800/600', is_cover: true },
-          { id: 2, storage_path: 'https://picsum.photos/id/1068/800/600' },
-          { id: 3, storage_path: 'https://picsum.photos/id/1069/800/600' },
-          { id: 4, storage_path: 'https://picsum.photos/id/1070/800/600' },
-          { id: 5, storage_path: 'https://picsum.photos/id/1071/800/600' }
-        ]
+        property_types: {
+          name: 'Residential'
+        },
+        transaction_types: {
+          name: 'For Sale'
+        },
+        property_statuses: {
+          name: 'Active'
+        },
+        property_images: [{
+          id: 1,
+          storage_path: 'https://picsum.photos/id/1067/800/600',
+          is_cover: true
+        }, {
+          id: 2,
+          storage_path: 'https://picsum.photos/id/1068/800/600'
+        }, {
+          id: 3,
+          storage_path: 'https://picsum.photos/id/1069/800/600'
+        }, {
+          id: 4,
+          storage_path: 'https://picsum.photos/id/1070/800/600'
+        }, {
+          id: 5,
+          storage_path: 'https://picsum.photos/id/1071/800/600'
+        }]
       };
       setProperty(mockProperty);
     } else if (propertyResponse?.data) {
       setProperty(propertyResponse.data);
     }
   }, [id, propertyResponse, useMockData]);
-  
   const handleAddNote = (note: Omit<TeamNote, 'id' | 'date'>) => {
     // In a real app, you would add the note to Supabase here
     const newNote: TeamNote = {
@@ -103,68 +120,53 @@ const PropertyDetail = () => {
       content: note.content,
       date: 'Just now'
     };
-    
     setNotes([newNote, ...notes]);
     toast.success('Note added successfully');
   };
-  
   const handleEditProperty = () => {
     navigate(`/properties/edit/${id}`);
   };
-  
   const handleDeleteProperty = () => {
     // Implement delete functionality
     toast.error('Delete functionality not implemented yet');
   };
-  
   if (isLoading && !useMockData) {
-    return (
-      <div className="p-6 flex items-center justify-center min-h-[50vh]">
+    return <div className="p-6 flex items-center justify-center min-h-[50vh]">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent mb-4"></div>
           <p>Loading property details...</p>
         </div>
-      </div>
-    );
+      </div>;
   }
-  
   if ((error || !propertyResponse?.data) && !useMockData) {
     console.error('Error loading property:', error?.message || 'Property not found', propertyResponse);
-    return (
-      <div className="p-6 text-center">
+    return <div className="p-6 text-center">
         <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
         <h2 className="text-xl font-bold mb-2">Error Loading Property</h2>
         <p className="text-muted-foreground mb-6">{error?.message || 'Property not found'}</p>
         <Button onClick={() => navigate('/properties')}>
           Return to Properties
         </Button>
-      </div>
-    );
+      </div>;
   }
-  
   if (!property) {
-    return (
-      <div className="p-6 text-center">
+    return <div className="p-6 text-center">
         <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
         <h2 className="text-xl font-bold mb-2">Property Not Found</h2>
         <p className="text-muted-foreground mb-6">The requested property could not be found.</p>
         <Button onClick={() => navigate('/properties')}>
           Return to Properties
         </Button>
-      </div>
-    );
+      </div>;
   }
-  
   console.log('Property data:', property);
-  
+
   // Extract property type from property_types relation
   const propertyType = property.property_types?.name || 'Property';
-  
+
   // Create an array of image URLs from property_images
-  const propertyImages = property.property_images 
-    ? property.property_images.map((img: any) => img.storage_path).filter(Boolean)
-    : [];
-  
+  const propertyImages = property.property_images ? property.property_images.map((img: any) => img.storage_path).filter(Boolean) : [];
+
   // Mock owner data - in a real app this would come from the API
   const owner = {
     name: "Michael Roberts",
@@ -172,9 +174,7 @@ const PropertyDetail = () => {
     phone: "+1 (555) 123-4567",
     company: "Roberts Real Estate Holdings"
   };
-  
-  return (
-    <div className="p-6">
+  return <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">{property.title}</h1>
         <div className="flex gap-2">
@@ -182,22 +182,17 @@ const PropertyDetail = () => {
             <Edit className="h-4 w-4" />
             Edit
           </Button>
-          {isAdmin && (
-            <Button variant="destructive" className="flex items-center gap-1" onClick={handleDeleteProperty}>
+          {isAdmin && <Button variant="destructive" className="flex items-center gap-1" onClick={handleDeleteProperty}>
               <Trash2 className="h-4 w-4" />
               Delete
-            </Button>
-          )}
+            </Button>}
         </div>
       </div>
       
       <Card className="mb-6">
         <CardContent className="pt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <PropertyGallery 
-              images={propertyImages} 
-              title={property.title} 
-            />
+            <PropertyGallery images={propertyImages} title={property.title} />
             
             <div>
               <div className="flex items-center gap-2 mb-4">
@@ -205,9 +200,7 @@ const PropertyDetail = () => {
                 <Badge variant="outline">
                   {property.transaction_types?.name || 'For Sale'}
                 </Badge>
-                {property.featured && (
-                  <Badge variant="secondary">Featured</Badge>
-                )}
+                {property.featured && <Badge variant="secondary">Featured</Badge>}
               </div>
               
               <p className="text-3xl font-bold mb-6">${property.price?.toLocaleString()}</p>
@@ -233,18 +226,14 @@ const PropertyDetail = () => {
                   <span className="text-muted-foreground">Size:</span>
                   <span>{property.land_area || property.floor_area || property.built_up_area} sqft</span>
                 </div>
-                {property.bedrooms && (
-                  <div className="grid grid-cols-2">
+                {property.bedrooms && <div className="grid grid-cols-2">
                     <span className="text-muted-foreground">Bedrooms:</span>
                     <span>{property.bedrooms}</span>
-                  </div>
-                )}
-                {property.bathrooms && (
-                  <div className="grid grid-cols-2">
+                  </div>}
+                {property.bathrooms && <div className="grid grid-cols-2">
                     <span className="text-muted-foreground">Bathrooms:</span>
                     <span>{property.bathrooms}</span>
-                  </div>
-                )}
+                  </div>}
                 <div className="grid grid-cols-2">
                   <span className="text-muted-foreground">Status:</span>
                   <span className="font-medium text-green-600">
@@ -278,13 +267,10 @@ const PropertyDetail = () => {
                   </CardHeader>
                   <CardContent>
                     <ul className="space-y-2">
-                      {["Central Air Conditioning", "In-unit Laundry", "Hardwood Floors", 
-                        "Stainless Steel Appliances", "Granite Countertops", "Walk-in Closets"].map((feature, idx) => (
-                        <li key={idx} className="flex items-center">
+                      {["Central Air Conditioning", "In-unit Laundry", "Hardwood Floors", "Stainless Steel Appliances", "Granite Countertops", "Walk-in Closets"].map((feature, idx) => <li key={idx} className="flex items-center">
                           <CheckCircle2 className="w-4 h-4 text-green-500 mr-2" />
                           {feature}
-                        </li>
-                      ))}
+                        </li>)}
                     </ul>
                   </CardContent>
                 </Card>
@@ -295,13 +281,10 @@ const PropertyDetail = () => {
                   </CardHeader>
                   <CardContent>
                     <ul className="space-y-2">
-                      {["24-hour Concierge", "Fitness Center", "Rooftop Terrace", 
-                        "Package Room", "Bicycle Storage", "Pet Friendly"].map((amenity, idx) => (
-                        <li key={idx} className="flex items-center">
+                      {["24-hour Concierge", "Fitness Center", "Rooftop Terrace", "Package Room", "Bicycle Storage", "Pet Friendly"].map((amenity, idx) => <li key={idx} className="flex items-center">
                           <CheckCircle2 className="w-4 h-4 text-green-500 mr-2" />
                           {amenity}
-                        </li>
-                      ))}
+                        </li>)}
                     </ul>
                   </CardContent>
                 </Card>
@@ -316,8 +299,7 @@ const PropertyDetail = () => {
                     {property.description || 'No description available for this property.'}
                   </p>
                   
-                  {property.agent_notes && (
-                    <>
+                  {property.agent_notes && <>
                       <Separator className="my-6" />
                       <div>
                         <h3 className="font-semibold mb-2">Agent Notes</h3>
@@ -325,8 +307,7 @@ const PropertyDetail = () => {
                           {property.agent_notes}
                         </p>
                       </div>
-                    </>
-                  )}
+                    </>}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -397,7 +378,7 @@ const PropertyDetail = () => {
         <div className="md:col-span-1 h-full">
           <Card className="h-full">
             <CardHeader>
-              <CardTitle>Team Notes</CardTitle>
+              
             </CardHeader>
             <CardContent>
               <TeamNotes notes={notes} onAddNote={handleAddNote} className="h-full" />
@@ -405,8 +386,6 @@ const PropertyDetail = () => {
           </Card>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default PropertyDetail;
