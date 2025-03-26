@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface CoBrokingInfoCardProps {
   enabled: boolean;
@@ -7,24 +8,39 @@ interface CoBrokingInfoCardProps {
   coAgencySplitPercentage: number;
 }
 
-const CoBrokingInfoCard: React.FC<CoBrokingInfoCardProps> = ({ 
-  enabled, 
-  agencySplitPercentage, 
-  coAgencySplitPercentage 
+const CoBrokingInfoCard: React.FC<CoBrokingInfoCardProps> = ({
+  enabled,
+  agencySplitPercentage,
+  coAgencySplitPercentage
 }) => {
   if (!enabled) return null;
   
   return (
-    <div className="bg-muted/50 p-4 rounded-md">
-      <h3 className="text-sm font-semibold mb-2">Co-Broking Split</h3>
-      <p className="text-xs text-muted-foreground mb-2">
-        This property is co-brokered. The commission will be split between agencies before internal splits are calculated.
-      </p>
-      <div className="flex items-center justify-between">
-        <span className="text-sm">Our Agency: {agencySplitPercentage}%</span>
-        <span className="text-sm">Co-Broker: {coAgencySplitPercentage}%</span>
-      </div>
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Co-Broking Split</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="h-5 w-full flex rounded-full overflow-hidden">
+          <div 
+            className="bg-blue-500 h-full" 
+            style={{ width: `${agencySplitPercentage}%` }}
+          ></div>
+          <div 
+            className="bg-orange-500 h-full" 
+            style={{ width: `${coAgencySplitPercentage}%` }}
+          ></div>
+        </div>
+        <div className="flex justify-between text-xs">
+          <span>Our Agency ({agencySplitPercentage}%)</span>
+          <span>Co-Broker ({coAgencySplitPercentage}%)</span>
+        </div>
+        
+        <p className="text-sm text-muted-foreground mt-2">
+          This transaction includes a co-broker. The commission will be split as shown above.
+        </p>
+      </CardContent>
+    </Card>
   );
 };
 

@@ -1,83 +1,110 @@
 
-import React from 'react';
-import { useTransactionForm } from '@/context/TransactionFormContext';
+import React, { useEffect } from 'react';
+import { useTransactionForm } from '@/context/TransactionForm';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { useAgentProfile } from '@/hooks/useAgentProfile';
-import { TransactionType } from '@/types';
-import { stringToTransactionType } from '@/utils/typeConversions';
 
 interface CommissionInputsProps {
   isRental: boolean;
   ownerCommissionAmount: number;
-  setOwnerCommissionAmount: React.Dispatch<React.SetStateAction<number>>;
+  setOwnerCommissionAmount: (amount: number) => void;
 }
 
-const CommissionInputs: React.FC<CommissionInputsProps> = ({ isRental, ownerCommissionAmount, setOwnerCommissionAmount }) => {
+const CommissionInputs: React.FC<CommissionInputsProps> = ({ 
+  isRental, 
+  ownerCommissionAmount, 
+  setOwnerCommissionAmount 
+}) => {
   const { state, updateFormData } = useTransactionForm();
   const { formData } = state;
-  const { data: agentProfile } = useAgentProfile();
   
-  // Add type casting where necessary
-  const transactionTypeStr = formData.transactionType || 'Sale';
-  const isRentalTransaction = stringToTransactionType(transactionTypeStr as string) === 'Rent';
+  // Get transaction value and commission rate from form data
+  const transactionValue = formData.transactionValue || 0;
+  const commissionRate = formData.commissionRate || 0;
+  
+  // Calculate commission amount when transaction value or rate changes
+  useEffect(() => {
+    const calculatedAmount = (transactionValue * commissionRate) / 100;
+    updateFormData({ commissionAmount: calculatedAmount });
+    setOwnerCommissionAmount(calculatedAmount);
+  }, [transactionValue, commissionRate, updateFormData, setOwnerCommissionAmount]);
+  
+  // Handle transaction value change
+  const handleTransactionValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value) || 0;
+    updateFormData({ transactionValue: value });
+  };
+  
+  // Handle commission rate change
+  const handleCommissionRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rate = parseFloat(e.target.value) || 0;
+    updateFormData({ commissionRate: rate });
+  };
+  
+  // Handle manual commission amount change (overrides the calculated amount)
+  const handleCommissionAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const amount = parseFloat(e.target.value) || 0;
+    setOwnerCommissionAmount(amount);
+    updateFormData({ commissionAmount: amount });
+  };
   
   return (
     <div className="space-y-4">
-      <FormItem>
-        <FormLabel>Transaction Value</FormLabel>
-        <div className="relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2">$</span>
+      <div>
+        <Label htmlFor="transactionValue">
+          {isRental ? 'Rental Value' : 'Transaction Value'}
+        </Label>
+        <div className="mt-1 relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <span className="text-gray-500 sm:text-sm">$</span>
+          </div>
           <Input
             type="number"
+            name="transactionValue"
+            id="transactionValue"
             placeholder="0.00"
+            value={transactionValue || ''}
+            onChange={handleTransactionValueChange}
             className="pl-7"
-            value={formData.transactionValue?.toString() || ''}
-            onChange={(e) => {
-              const value = parseFloat(e.target.value);
-              updateFormData({ transactionValue: isNaN(value) ? 0 : value });
-            }}
           />
         </div>
-        <FormMessage />
-      </FormItem>
+      </div>
       
-      <FormItem>
-        <FormLabel>Commission Rate (%)</FormLabel>
-        <div className="relative">
+      <div>
+        <Label htmlFor="commissionRate">Commission Rate (%)</Label>
+        <div className="mt-1 relative">
           <Input
             type="number"
+            name="commissionRate"
+            id="commissionRate"
             placeholder="0.00"
-            className="pr-7"
-            value={formData.commissionRate?.toString() || ''}
-            onChange={(e) => {
-              const value = parseFloat(e.target.value);
-              updateFormData({ commissionRate: isNaN(value) ? 0 : value });
-            }}
+            value={commissionRate || ''}
+            onChange={handleCommissionRateChange}
+            step="0.1"
           />
-          <span className="absolute right-3 top-1/2 -translate-y-1/2">%</span>
+          <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+            <span className="text-gray-500 sm:text-sm">%</span>
+          </div>
         </div>
-        <FormMessage />
-      </FormItem>
+      </div>
       
-      <FormItem>
-        <FormLabel>Commission Amount</FormLabel>
-        <div className="relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2">$</span>
+      <div>
+        <Label htmlFor="commissionAmount">Commission Amount</Label>
+        <div className="mt-1 relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <span className="text-gray-500 sm:text-sm">$</span>
+          </div>
           <Input
             type="number"
+            name="commissionAmount"
+            id="commissionAmount"
             placeholder="0.00"
+            value={ownerCommissionAmount || ''}
+            onChange={handleCommissionAmountChange}
             className="pl-7"
-            value={formData.commissionAmount?.toString() || ''}
-            onChange={(e) => {
-              const value = parseFloat(e.target.value);
-              updateFormData({ commissionAmount: isNaN(value) ? 0 : value });
-            }}
           />
         </div>
-        <FormMessage />
-      </FormItem>
+      </div>
     </div>
   );
 };

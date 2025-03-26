@@ -1,64 +1,77 @@
 
 import React from 'react';
+import { CommissionBreakdown } from '@/types/transaction-form';
 
 interface CommissionVisualizerProps {
-  agentPercentage: number;
-  agencyPercentage: number;
-  coBrokingEnabled?: boolean;
-  agencySplitPercentage?: number;
-  coAgencySplitPercentage?: number;
+  commissionBreakdown: CommissionBreakdown;
 }
 
-const CommissionVisualizer: React.FC<CommissionVisualizerProps> = ({
-  agentPercentage,
-  agencyPercentage,
-  coBrokingEnabled = false,
-  agencySplitPercentage = 50,
-  coAgencySplitPercentage = 50
-}) => {
+const CommissionVisualizer: React.FC<CommissionVisualizerProps> = ({ commissionBreakdown }) => {
+  const { 
+    agentCommissionPercentage = 70,
+    ourAgencyCommission = 0,
+    coAgencyCommission = 0,
+    totalCommission
+  } = commissionBreakdown;
+  
+  // Agency percentage is the opposite of agent percentage
+  const agencyCommissionPercentage = 100 - agentCommissionPercentage;
+  
+  // Format currency
+  const formatCurrency = (amount: number): string => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(amount);
+  };
+  
   return (
-    <div className="mt-4 space-y-3">
-      <div>
-        <h4 className="text-sm font-medium mb-2">Your Commission Split</h4>
-        <div className="h-4 w-full flex rounded-full overflow-hidden">
-          <div 
-            className="bg-green-500 h-full" 
-            style={{ width: `${agentPercentage}%` }} 
-            title={`Your Share: ${agentPercentage}%`}
-          ></div>
-          <div 
-            className="bg-primary h-full" 
-            style={{ width: `${agencyPercentage}%` }} 
-            title={`Agency: ${agencyPercentage}%`}
-          ></div>
-        </div>
-        <div className="flex justify-between text-xs mt-1 text-muted-foreground">
-          <span>Your Share ({agentPercentage}%)</span>
-          <span>Agency ({agencyPercentage}%)</span>
+    <div className="space-y-4">
+      <h3 className="text-lg font-medium">Commission Split Visualization</h3>
+      
+      <div className="space-y-2">
+        <p className="text-sm">Total Commission: {formatCurrency(totalCommission)}</p>
+        
+        {/* Visualize the split between our agency and co-broker */}
+        {coAgencyCommission !== undefined && coAgencyCommission > 0 && (
+          <div className="space-y-1">
+            <p className="text-xs text-muted-foreground">Agency Split</p>
+            <div className="h-4 w-full flex rounded-sm overflow-hidden">
+              <div 
+                className="bg-blue-500 h-full" 
+                style={{ width: `${(ourAgencyCommission / totalCommission) * 100}%` }}
+              ></div>
+              <div 
+                className="bg-orange-500 h-full" 
+                style={{ width: `${(coAgencyCommission / totalCommission) * 100}%` }}
+              ></div>
+            </div>
+            <div className="flex justify-between text-xs">
+              <span>Our Agency: {formatCurrency(ourAgencyCommission)}</span>
+              <span>Co-Broker: {formatCurrency(coAgencyCommission)}</span>
+            </div>
+          </div>
+        )}
+        
+        {/* Visualize the split between agent and our agency */}
+        <div className="space-y-1 mt-4">
+          <p className="text-xs text-muted-foreground">Your Agency Split</p>
+          <div className="h-4 w-full flex rounded-sm overflow-hidden">
+            <div 
+              className="bg-green-500 h-full" 
+              style={{ width: `${agentCommissionPercentage}%` }}
+            ></div>
+            <div 
+              className="bg-gray-300 h-full" 
+              style={{ width: `${agencyCommissionPercentage}%` }}
+            ></div>
+          </div>
+          <div className="flex justify-between text-xs">
+            <span>Agent: {agentCommissionPercentage}%</span>
+            <span>Agency: {agencyCommissionPercentage}%</span>
+          </div>
         </div>
       </div>
-      
-      {coBrokingEnabled && (
-        <div className="mt-2">
-          <h4 className="text-sm font-medium mb-2">Inter-Agency Split</h4>
-          <div className="h-4 w-full flex rounded-full overflow-hidden">
-            <div 
-              className="bg-blue-500 h-full" 
-              style={{ width: `${agencySplitPercentage}%` }} 
-              title={`Our Agency: ${agencySplitPercentage}%`}
-            ></div>
-            <div 
-              className="bg-orange-500 h-full" 
-              style={{ width: `${coAgencySplitPercentage}%` }} 
-              title={`Co-Broker: ${coAgencySplitPercentage}%`}
-            ></div>
-          </div>
-          <div className="flex justify-between text-xs mt-1 text-muted-foreground">
-            <span>Our Agency ({agencySplitPercentage}%)</span>
-            <span>Co-Broker ({coAgencySplitPercentage}%)</span>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

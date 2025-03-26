@@ -1,71 +1,34 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { AgentRank } from '@/types/transaction-form';
-import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
 
-interface AgentProfile {
-  id: string;
-  tier: number;
-  tier_name: AgentRank;
-  commission_percentage: number;
-  full_name?: string;
-  email?: string;
-  avatar_url?: string;
-  agency_id: string;
-  upline_id?: string | null;
-  specializations?: string[];
-  total_sales?: number;
-  total_transactions?: number;
-}
+// Mock agent profile data
+const mockAgentProfile = {
+  id: 'agent-1',
+  tier: 2,
+  tier_name: 'Advisor',
+  commission_percentage: 70,
+  total_sales: 2500000,
+  join_date: new Date(2022, 0, 15).toISOString(),
+  specializations: ['Residential', 'Commercial'],
+  avatar_url: '/avatars/agent-1.jpg',
+  full_name: 'John Doe',
+  email: 'john.doe@example.com',
+  phone: '+1234567890',
+  agency_id: 'agency-1',
+  upline_id: null,
+  total_transactions: 12
+};
 
+// Fetch the agent profile
 export const useAgentProfile = () => {
-  const { user } = useAuth();
-  
   return useQuery({
-    queryKey: ['agentProfile', user?.id],
-    queryFn: async (): Promise<AgentProfile> => {
-      if (!user) throw new Error('User not authenticated');
-      
-      // Fetch the agent profile from the new table
-      const { data, error } = await supabase
-        .from('agent_profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-      
-      if (error) {
-        console.error('Error fetching agent profile:', error);
-        throw error;
-      }
-      
-      if (!data) {
-        console.warn('No agent profile found, using defaults');
-        // Provide a fallback profile with default values
-        return {
-          id: user.id,
-          tier: 3,
-          tier_name: 'Team Leader' as AgentRank,
-          commission_percentage: 83,
-          agency_id: '11111111-1111-1111-1111-111111111111'
-        };
-      }
-      
-      return {
-        id: data.id,
-        tier: data.tier,
-        tier_name: data.tier_name as AgentRank,
-        commission_percentage: data.commission_percentage,
-        full_name: data.full_name,
-        email: data.email,
-        avatar_url: data.avatar_url,
-        agency_id: data.agency_id,
-        upline_id: data.upline_id,
-        specializations: data.specializations,
-        total_sales: data.total_sales,
-        total_transactions: data.total_transactions
-      };
+    queryKey: ['agentProfile'],
+    queryFn: async () => {
+      // In a real app, this would be an API call
+      // For now, return mock data
+      await new Promise(resolve => setTimeout(resolve, 500));
+      return mockAgentProfile;
     },
-    enabled: !!user,
+    staleTime: 5 * 60 * 1000 // 5 minutes
   });
 };

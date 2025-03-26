@@ -1,7 +1,9 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TransactionFormProvider } from '@/context/TransactionForm';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { useTransactions } from '@/hooks/useTransactions';
 
@@ -14,6 +16,9 @@ import CommissionCalculation from './form/CommissionCalculation';
 import DocumentUpload from './form/DocumentUpload';
 import TransactionReview from './form/TransactionReview';
 import TransactionFormStepper from './form/TransactionFormStepper';
+
+// Import the hook
+import { useTransactionForm } from '@/context/TransactionForm';
 
 // Types
 import { TransactionFormData } from '@/types/transaction-form';

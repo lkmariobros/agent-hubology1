@@ -1,5 +1,5 @@
 
-import { TransactionFormData, CommissionBreakdown } from './types';
+import { TransactionFormData, CommissionBreakdown, AgentRank } from '@/types/transaction-form';
 import { getAgentCommissionPercentage } from './agentTiers';
 import { stringToAgentRank } from '@/utils/typeConversions';
 

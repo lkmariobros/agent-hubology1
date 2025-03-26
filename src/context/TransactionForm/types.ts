@@ -32,3 +32,11 @@ export interface TransactionFormState {
   isDirty: boolean;
   lastSaved: Date | null;
 }
+
+export type { 
+  TransactionFormData, 
+  TransactionDocument, 
+  CommissionBreakdown, 
+  TransactionType, 
+  AgentRank 
+};

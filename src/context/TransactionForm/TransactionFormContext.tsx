@@ -1,10 +1,10 @@
 
 import React, { createContext, useContext, ReactNode } from 'react';
 import { useTransactionFormActions } from './actions';
-import { TransactionFormContextType } from '@/types/transaction-form';
+import { TransactionFormContextType } from './types';
 
 // Create the context
-const TransactionFormContext = createContext<TransactionFormContextType | undefined>(undefined);
+export const TransactionFormContext = createContext<TransactionFormContextType | undefined>(undefined);
 
 // Provider component
 export const TransactionFormProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
