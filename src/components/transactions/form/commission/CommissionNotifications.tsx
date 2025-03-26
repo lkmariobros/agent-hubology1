@@ -1,15 +1,12 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle, AlertTriangle, HelpCircle } from 'lucide-react';
-
 interface CommissionNotificationsProps {
   commissionAmount: number;
   isSubmitting: boolean;
 }
-
-const CommissionNotifications: React.FC<CommissionNotificationsProps> = ({ 
-  commissionAmount, 
+const CommissionNotifications: React.FC<CommissionNotificationsProps> = ({
+  commissionAmount,
   isSubmitting
 }) => {
   // For demonstration purposes only
@@ -35,35 +32,7 @@ const CommissionNotifications: React.FC<CommissionNotificationsProps> = ({
       };
     }
   };
-  
   const notification = getNotificationContent();
-  
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Commission Notes</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="flex items-start space-x-3">
-          <div className="mt-0.5">
-            {notification.icon}
-          </div>
-          <div>
-            <h4 className="font-medium mb-1">{notification.title}</h4>
-            <p className="text-sm text-muted-foreground">
-              {notification.message}
-            </p>
-            
-            {isSubmitting && (
-              <p className="mt-2 text-sm italic">
-                Your transaction is being submitted. Notifications will be sent when the commission is approved.
-              </p>
-            )}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
+  return;
 };
-
 export default CommissionNotifications;
