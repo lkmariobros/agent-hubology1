@@ -13,6 +13,19 @@ interface CommissionNotificationFeedProps {
   limit?: number;
 }
 
+// Define the type for the data returned from the database
+interface NotificationRow {
+  id: string;
+  user_id: string;
+  type: string;
+  title: string;
+  message: string;
+  read: boolean;
+  related_id?: string;
+  created_at: string;
+  data?: string | Record<string, any>;
+}
+
 const CommissionNotificationFeed: React.FC<CommissionNotificationFeedProps> = ({ 
   userId,
   limit = 3
@@ -42,7 +55,7 @@ const CommissionNotificationFeed: React.FC<CommissionNotificationFeedProps> = ({
       console.log('Raw notification data:', data);
       
       // Map the snake_case database columns to camelCase properties expected by the Notification type
-      return (data || []).map(item => {
+      return (data || []).map((item: NotificationRow) => {
         // Parse the data JSON field if it exists, otherwise create an empty object
         let notificationData: Record<string, any> = {};
         
