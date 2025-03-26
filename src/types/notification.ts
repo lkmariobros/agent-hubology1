@@ -4,9 +4,13 @@ export type NotificationType =
   | 'payment' 
   | 'system' 
   | 'message' 
+  | 'approval_status' 
   | 'approval_status_change'
+  | 'tier_progress' 
+  | 'tier_achieved'
   | 'tier_update'
-  | 'commission_milestone';
+  | 'commission_milestone'
+  | 'transaction_status';
 
 export interface Notification {
   id: string;
