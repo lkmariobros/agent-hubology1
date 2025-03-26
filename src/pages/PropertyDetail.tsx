@@ -257,131 +257,145 @@ const PropertyDetail = () => {
         </CardContent>
       </Card>
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        <div className="lg:col-span-2">
-          <Tabs defaultValue="details" className="w-full">
-            <TabsList className="mb-6">
-              <TabsTrigger value="details">Details</TabsTrigger>
-              <TabsTrigger value="transactions">Transactions</TabsTrigger>
-              <TabsTrigger value="documents">Documents</TabsTrigger>
-              <TabsTrigger value="history">History</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="details">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Property Features</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-2">
-                      {["Central Air Conditioning", "In-unit Laundry", "Hardwood Floors", 
-                        "Stainless Steel Appliances", "Granite Countertops", "Walk-in Closets"].map((feature, idx) => (
-                        <li key={idx} className="flex items-center">
-                          <CheckCircle2 className="w-4 h-4 text-green-500 mr-2" />
-                          {feature}
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Building Amenities</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-2">
-                      {["24-hour Concierge", "Fitness Center", "Rooftop Terrace", 
-                        "Package Room", "Bicycle Storage", "Pet Friendly"].map((amenity, idx) => (
-                        <li key={idx} className="flex items-center">
-                          <CheckCircle2 className="w-4 h-4 text-green-500 mr-2" />
-                          {amenity}
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                </Card>
-              </div>
-              
-              <Card className="mt-6">
-                <CardHeader>
-                  <CardTitle>Description</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">
-                    {property.description || 'No description available for this property.'}
-                  </p>
-                  
-                  {property.agent_notes && (
-                    <>
-                      <Separator className="my-6" />
-                      <div>
-                        <h3 className="font-semibold mb-2">Agent Notes</h3>
-                        <p className="text-muted-foreground">
-                          {property.agent_notes}
-                        </p>
-                      </div>
-                    </>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="transactions">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Transaction History</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center text-muted-foreground py-4">
-                    No transaction history available for this property
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="documents">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Property Documents</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center text-muted-foreground py-4">
-                    No documents available for this property
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="history">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Activity History</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-start gap-4">
-                      <div className="w-2 h-2 mt-2 rounded-full bg-green-500"></div>
-                      <div>
-                        <p className="font-medium">Property created</p>
-                        <p className="text-sm text-muted-foreground">
-                          {new Date(property.created_at).toLocaleDateString()} by {property.agent_id || 'System'}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        </div>
+      <Tabs defaultValue="details" className="w-full">
+        <TabsList className="mb-6">
+          <TabsTrigger value="details">Details</TabsTrigger>
+          <TabsTrigger value="owner">Owner</TabsTrigger>
+          <TabsTrigger value="transactions">Transactions</TabsTrigger>
+          <TabsTrigger value="documents">Documents</TabsTrigger>
+          <TabsTrigger value="history">History</TabsTrigger>
+        </TabsList>
         
-        <div className="space-y-6">
-          <PropertyOwnerInfo owner={owner} />
-          <TeamNotes notes={notes} onAddNote={handleAddNote} />
-        </div>
-      </div>
+        <TabsContent value="details">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Property Features</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2">
+                  {["Central Air Conditioning", "In-unit Laundry", "Hardwood Floors", 
+                    "Stainless Steel Appliances", "Granite Countertops", "Walk-in Closets"].map((feature, idx) => (
+                    <li key={idx} className="flex items-center">
+                      <CheckCircle2 className="w-4 h-4 text-green-500 mr-2" />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Building Amenities</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2">
+                  {["24-hour Concierge", "Fitness Center", "Rooftop Terrace", 
+                    "Package Room", "Bicycle Storage", "Pet Friendly"].map((amenity, idx) => (
+                    <li key={idx} className="flex items-center">
+                      <CheckCircle2 className="w-4 h-4 text-green-500 mr-2" />
+                      {amenity}
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
+          
+          <Card className="mt-6">
+            <CardHeader>
+              <CardTitle>Description</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                {property.description || 'No description available for this property.'}
+              </p>
+              
+              {property.agent_notes && (
+                <>
+                  <Separator className="my-6" />
+                  <div>
+                    <h3 className="font-semibold mb-2">Agent Notes</h3>
+                    <p className="text-muted-foreground">
+                      {property.agent_notes}
+                    </p>
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+          
+          <Card className="mt-6">
+            <CardHeader>
+              <CardTitle>Team Notes</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <TeamNotes notes={notes} onAddNote={handleAddNote} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="owner">
+          <Card>
+            <CardHeader>
+              <CardTitle>Owner Information</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="max-w-md mx-auto md:mx-0">
+                <PropertyOwnerInfo owner={owner} />
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="transactions">
+          <Card>
+            <CardHeader>
+              <CardTitle>Transaction History</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center text-muted-foreground py-4">
+                No transaction history available for this property
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="documents">
+          <Card>
+            <CardHeader>
+              <CardTitle>Property Documents</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center text-muted-foreground py-4">
+                No documents available for this property
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="history">
+          <Card>
+            <CardHeader>
+              <CardTitle>Activity History</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-start gap-4">
+                  <div className="w-2 h-2 mt-2 rounded-full bg-green-500"></div>
+                  <div>
+                    <p className="font-medium">Property created</p>
+                    <p className="text-sm text-muted-foreground">
+                      {new Date(property.created_at).toLocaleDateString()} by {property.agent_id || 'System'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
