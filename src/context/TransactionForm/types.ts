@@ -1,16 +1,19 @@
 
 import { 
-  TransactionFormData,
   TransactionDocument, 
   AgentRank,
-  ApprovalStatus
+  ApprovalStatus,
+  TransactionFormData,
+  TransactionType
 } from '../../types';
 
 // Re-export types from the main types file
 export type {
   TransactionFormData,
   TransactionDocument,
-  AgentRank
+  AgentRank,
+  TransactionType,
+  ApprovalStatus
 };
 
 export interface CommissionBreakdown {

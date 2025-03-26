@@ -1,10 +1,11 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Container } from '@/components/ui/container';
 import MetricsContainer from '@/components/dashboard/MetricsContainer';
 import RecentTransactions from '@/components/dashboard/RecentTransactions';
-import PropertyGrid from '@/components/property/PropertyGrid';
+import { PropertyGrid } from '@/components/property/PropertyGrid';
 import OpportunitiesBoard from '@/components/dashboard/OpportunitiesBoard';
 import { DashboardMetric, Transaction } from '@/types';
 
@@ -21,6 +22,7 @@ const Home: React.FC = () => {
       status: 'positive',
       period: 'Last Quarter',
       icon: 'lucide-dollar-sign',
+      trend: 'up'
     },
     {
       id: 'new-customers',
@@ -30,6 +32,7 @@ const Home: React.FC = () => {
       status: 'negative',
       period: 'Last Month',
       icon: 'lucide-user-plus',
+      trend: 'down'
     },
     {
       id: 'average-order-value',
@@ -39,6 +42,7 @@ const Home: React.FC = () => {
       status: 'positive',
       period: 'Last Week',
       icon: 'lucide-shopping-cart',
+      trend: 'up'
     },
   ];
 
@@ -58,7 +62,7 @@ const Home: React.FC = () => {
         }
       },
       price: 450000,
-      notes: '',
+      notes: 'Transaction completed successfully',
       closingDate: '2023-07-01',
       buyer: {
         name: 'John Doe'
@@ -82,7 +86,7 @@ const Home: React.FC = () => {
         }
       },
       price: 720000,
-      notes: '',
+      notes: 'Waiting for bank approval',
       closingDate: '2023-06-15',
       buyer: {
         name: 'Alice Johnson'
@@ -106,7 +110,7 @@ const Home: React.FC = () => {
         }
       },
       price: 950000,
-      notes: '',
+      notes: 'Paperwork in progress',
       closingDate: '2023-06-01',
       buyer: {
         name: 'Emily Brown'
@@ -211,7 +215,7 @@ const Home: React.FC = () => {
           <PropertyGrid properties={sampleProperties} />
         </div>
 
-        <OpportunitiesBoard />
+        <OpportunitiesBoard onViewAll={() => navigate('/opportunities')} />
       </div>
     </Container>
   );

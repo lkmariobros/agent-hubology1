@@ -1,3 +1,4 @@
+
 import { Property } from '@/types';
 
 const sampleProperties: Property[] = [
@@ -20,7 +21,9 @@ const sampleProperties: Property[] = [
     type: 'Residential',
     status: 'Available',
     isFeatured: true,
-    transactionType: 'Sale'
+    featured: true,
+    transactionType: 'Sale',
+    subtype: 'Villa'
   },
   {
     id: '2',
@@ -41,7 +44,9 @@ const sampleProperties: Property[] = [
     type: 'Residential',
     status: 'Under Offer',
     isFeatured: false,
-    transactionType: 'Sale'
+    featured: false,
+    transactionType: 'Sale',
+    subtype: 'Apartment'
   },
   {
     id: '3',
@@ -62,7 +67,9 @@ const sampleProperties: Property[] = [
     type: 'Residential',
     status: 'Available',
     isFeatured: true,
-    transactionType: 'Sale'
+    featured: true,
+    transactionType: 'Sale',
+    subtype: 'House'
   },
   {
     id: '4',
@@ -83,7 +90,9 @@ const sampleProperties: Property[] = [
     type: 'Residential',
     status: 'Pending',
     isFeatured: false,
-    transactionType: 'Sale'
+    featured: false,
+    transactionType: 'Sale',
+    subtype: 'Cottage'
   },
   {
     id: '5',
@@ -104,7 +113,9 @@ const sampleProperties: Property[] = [
     type: 'Residential',
     status: 'Sold',
     isFeatured: true,
-    transactionType: 'Sale'
+    featured: true,
+    transactionType: 'Sale',
+    subtype: 'Penthouse'
   },
   {
     id: '6',
@@ -125,7 +136,9 @@ const sampleProperties: Property[] = [
     type: 'Residential',
     status: 'Rented',
     isFeatured: false,
-    transactionType: 'Rent'
+    featured: false,
+    transactionType: 'Rent',
+    subtype: 'Cabin'
   }
 ];
 

@@ -45,6 +45,7 @@ export interface PropertyFormValues {
   title: string;
   description: string;
   type: string;
+  subtype?: string; // Added this field
   transactionType: string;
   price: number;
   area?: number;
@@ -74,6 +75,7 @@ export interface Agent {
   properties?: Property[];
   createdAt?: string;
   updatedAt?: string;
+  name?: string; // Added this field for backward compatibility
 }
 
 export interface Transaction {
@@ -190,6 +192,7 @@ export interface CommissionHistory {
   amount: number;
   type: 'personal' | 'override';
   source?: string;
+  transactionId?: string; // Added this field
 }
 
 export interface OverrideCommission {
@@ -220,6 +223,7 @@ export interface DashboardMetric {
   period?: string;
   status?: 'positive' | 'negative' | 'neutral';
   icon?: string;
+  trend?: 'up' | 'down' | 'neutral'; // Added this field
 }
 
 export interface Opportunity {
@@ -249,6 +253,9 @@ export interface User {
   role: string;
   tier?: string;
   joinDate?: string;
+  phone?: string; // Added this field
+  properties?: number; // Added this field
+  transactions?: number; // Added this field
 }
 
 // API response types
@@ -265,3 +272,61 @@ export interface PaginatedResponse<T> {
   limit: number;
   totalPages: number;
 }
+
+// Add TransactionFormData type
+export interface TransactionFormData {
+  id?: string;
+  transactionType: TransactionType;
+  transactionDate: Date;
+  closingDate?: Date;
+  propertyId: string;
+  status: TransactionStatus;
+  property?: PropertyInfo;
+  buyer?: ClientInfo;
+  seller?: ClientInfo;
+  landlord?: ClientInfo;
+  tenant?: ClientInfo;
+  developer?: DeveloperInfo;
+  transactionValue: number;
+  commissionRate: number;
+  commissionAmount: number;
+  agentTier?: AgentRank;
+  coBroking?: CoBrokingInfo;
+  notes?: string;
+}
+
+export interface PropertyInfo {
+  id: string;
+  title: string;
+  address?: string;
+  type?: string;
+  price?: number;
+  rentalRate?: number;
+}
+
+export interface ClientInfo {
+  name: string;
+  email?: string;
+  phone?: string;
+  notes?: string;
+}
+
+export interface DeveloperInfo {
+  name: string;
+  company?: string;
+  email?: string;
+  phone?: string;
+  notes?: string;
+}
+
+export interface CoBrokingInfo {
+  enabled: boolean;
+  agentName?: string;
+  agentCompany?: string;
+  agentContact?: string;
+  commissionSplit: number;
+  credentialsVerified?: boolean;
+}
+
+export type TransactionType = 'Sale' | 'Rent' | 'Developer';
+export type TransactionStatus = 'Draft' | 'Pending' | 'In Progress' | 'Completed' | 'Cancelled';

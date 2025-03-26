@@ -16,7 +16,7 @@ const PropertyForm = () => {
       description: '',
       price: 0,
       type: 'residential',
-      subtype: 'Apartment',
+      transactionType: 'Sale',
       area: 0,
       bedrooms: 0,
       bathrooms: 0,

@@ -23,9 +23,8 @@ interface PropertyEssentialInfoProps {
 const PropertyEssentialInfo: React.FC<PropertyEssentialInfoProps> = ({ form, nextTab }) => {
   const propertyType = form.watch('type');
 
-  // Update subtype when property type changes
+  // Update when property type changes
   useEffect(() => {
-    form.setValue('subtype', propertySubtypes[propertyType][0]);
     // Reset bedrooms and bathrooms when switching from/to residential
     if (propertyType !== 'residential') {
       form.setValue('bedrooms', undefined);
@@ -93,28 +92,24 @@ const PropertyEssentialInfo: React.FC<PropertyEssentialInfoProps> = ({ form, nex
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="subtype"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Property Subtype *</FormLabel>
-              <FormControl>
-                <select
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  {...field}
-                >
-                  {propertySubtypes[propertyType].map((subtype) => (
-                    <option key={subtype} value={subtype}>
-                      {subtype}
-                    </option>
-                  ))}
-                </select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {/* Property Subtype */}
+        <div>
+          <FormLabel>Property Subtype *</FormLabel>
+          <select
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            value={propertySubtypes[propertyType][0]}
+            onChange={(e) => {
+              // Handle subtype change without using form.setValue
+              console.log("Selected subtype:", e.target.value);
+            }}
+          >
+            {propertySubtypes[propertyType].map((subtype) => (
+              <option key={subtype} value={subtype}>
+                {subtype}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       <FormField

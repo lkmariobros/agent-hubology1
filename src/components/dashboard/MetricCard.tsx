@@ -11,6 +11,9 @@ interface MetricCardProps {
 }
 
 const MetricCard = ({ metric, className }: MetricCardProps) => {
+  // Determine trend based on change if trend is not provided
+  const trend = metric.trend || (metric.change ? (metric.change > 0 ? 'up' : 'down') : 'neutral');
+  
   return (
     <Card className={cn("glass-card overflow-hidden", className)}>
       <CardContent className="p-5 space-y-4">
@@ -32,17 +35,17 @@ const MetricCard = ({ metric, className }: MetricCardProps) => {
         
         {metric.change !== undefined && (
           <div className="flex items-center">
-            {metric.trend === 'up' ? (
+            {trend === 'up' ? (
               <TrendingUp className="mr-2 h-4 w-4 text-green-400" />
-            ) : metric.trend === 'down' ? (
+            ) : trend === 'down' ? (
               <TrendingDown className="mr-2 h-4 w-4 text-red-400" />
             ) : null}
             <span
               className={cn(
                 "text-sm",
-                metric.trend === 'up'
+                trend === 'up'
                   ? 'text-green-400'
-                  : metric.trend === 'down'
+                  : trend === 'down'
                   ? 'text-red-400'
                   : 'text-muted-foreground'
               )}
