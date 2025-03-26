@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -9,8 +10,42 @@ import { PropertyTable } from '@/components/property/PropertyTable';
 import { PropertyGrid } from '@/components/property/PropertyGrid';
 import { useProperties } from '@/hooks/useProperties';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { mapPropertyData } from '@/utils/propertyUtils';
 import { Property } from '@/types';
+
+// Utility function to map API data to the format expected by components
+const mapPropertyData = (property: any): Property => {
+  return {
+    id: property.id,
+    title: property.title,
+    description: property.description,
+    price: Number(property.price) || 0,
+    address: {
+      street: property.street,
+      city: property.city,
+      state: property.state,
+      zip: property.zip,
+      country: property.country
+    },
+    type: property.property_types?.name?.toLowerCase() || 'residential',
+    subtype: property.subtype || '',
+    features: [],
+    bedrooms: property.bedrooms || 0,
+    bathrooms: property.bathrooms || 0,
+    area: property.built_up_area || 0,
+    images: property.property_images?.map((img: any) => img.storage_path) || [],
+    status: property.property_statuses?.name?.toLowerCase() || 'available',
+    agent: {
+      id: property.agent_id || '',
+      name: 'Agent Name', // This would come from a join in a real app
+      firstName: 'Unknown',
+      lastName: 'Agent',
+      email: 'agent@example.com',
+      phone: '123-456-7890'
+    },
+    createdAt: property.created_at || new Date().toISOString(),
+    updatedAt: property.updated_at || new Date().toISOString()
+  };
+};
 
 const AdminProperties = () => {
   const [page, setPage] = useState(1);

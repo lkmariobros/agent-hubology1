@@ -12,26 +12,31 @@ import SendTestNotification from '@/components/commission/SendTestNotification';
 
 // Sample commission tiers for fallback when API fails
 const fallbackTiers: CommissionTier[] = [{
+  id: 'bronze',
   tier: 'Bronze',
   rate: 20,
   minTransactions: 0,
   color: 'orange'
 }, {
+  id: 'silver',
   tier: 'Silver',
   rate: 25,
   minTransactions: 10,
   color: 'blue'
 }, {
+  id: 'gold',
   tier: 'Gold',
   rate: 30,
   minTransactions: 25,
   color: 'orange'
 }, {
+  id: 'platinum',
   tier: 'Platinum',
   rate: 35,
   minTransactions: 50,
   color: 'purple'
 }, {
+  id: 'diamond',
   tier: 'Diamond',
   rate: 40,
   minTransactions: 100,
@@ -73,6 +78,7 @@ const fallbackAgentHierarchy: AgentWithHierarchy = {
 const recentCommissions: CommissionHistory[] = [{
   id: '1',
   transactionId: 'tx1',
+  transactionReference: 'tx1', // Adding this to match the type
   property: {
     title: 'Suburban Family Home',
     location: 'Palo Alto, CA'
@@ -83,6 +89,7 @@ const recentCommissions: CommissionHistory[] = [{
 }, {
   id: '2',
   transactionId: 'tx2',
+  transactionReference: 'tx2', // Adding this to match the type
   property: {
     title: 'Downtown Loft',
     location: 'San Francisco, CA'
@@ -93,6 +100,7 @@ const recentCommissions: CommissionHistory[] = [{
 }, {
   id: '3',
   transactionId: 'tx3',
+  transactionReference: 'tx3', // Adding this to match the type
   property: {
     title: 'Luxury Beach Condo',
     location: 'Santa Monica, CA'
@@ -104,6 +112,7 @@ const recentCommissions: CommissionHistory[] = [{
 }, {
   id: '4',
   transactionId: 'tx4',
+  transactionReference: 'tx4', // Adding this to match the type
   property: {
     title: 'Modern Townhouse',
     location: 'Berkeley, CA'

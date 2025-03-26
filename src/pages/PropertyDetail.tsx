@@ -1,265 +1,305 @@
-import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+
+import React, { useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { 
+  Card, 
+  CardContent, 
+  CardHeader, 
+  CardTitle, 
+  CardDescription 
+} from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { 
-  MapPin, 
-  Bed, 
-  Bath, 
-  Grid2X2, 
-  Car, 
-  Heart, 
-  Edit, 
-  Trash2, 
-  ChevronLeft, 
-  ImagePlus,
-  Building
-} from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
-import { toast } from 'sonner';
+  Tabs, 
+  TabsContent, 
+  TabsList, 
+  TabsTrigger 
+} from '@/components/ui/tabs';
 import { useProperties } from '@/hooks/useProperties';
-import { formatCurrency } from '@/utils/propertyUtils';
+import { 
+  Building, 
+  MapPin, 
+  User, 
+  Calendar, 
+  Edit, 
+  Trash, 
+  Share, 
+  Heart, 
+  ChevronLeft, 
+  Loader2 
+} from 'lucide-react';
+import { mapPropertyData } from '@/utils/propertyUtils';
 
 const PropertyDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const { useProperty } = useProperties();
-  const { data: property, isLoading, error } = useProperty(id || '');
+  const [activeTab, setActiveTab] = useState('details');
+  
+  // Use the same hook but extract the first property
+  const { data, isLoading, error } = useProperties(1, 1, { id });
+  const propertyRaw = data?.properties?.[0]; 
+  
+  // Map to the expected format if we have data
+  const property = propertyRaw ? mapPropertyData(propertyRaw) : null;
 
-  if (error) {
-    toast.error("Failed to load property details");
+  if (isLoading) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center space-x-4">
-          <Button variant="ghost" onClick={() => navigate('/properties')}>
-            <ChevronLeft className="mr-2 h-4 w-4" />
-            Back to Properties
-          </Button>
-        </div>
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">Error loading property details. Please try again later.</p>
-        </div>
+      <div className="flex justify-center items-center min-h-screen">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
       </div>
     );
   }
 
-  // Helper to safely access features 
-  const getFeatureValue = (key: string, defaultValue: number = 0): number => {
-    if (!property?.features) return defaultValue;
-    
-    if (Array.isArray(property.features)) {
-      return defaultValue;
-    }
-    
-    return (property.features as any)[key] || defaultValue;
+  if (error || !property) {
+    return (
+      <div className="p-6">
+        <Link to="/properties">
+          <Button variant="outline" className="mb-6">
+            <ChevronLeft className="mr-2 h-4 w-4" /> Back to Properties
+          </Button>
+        </Link>
+        <Card>
+          <CardContent className="py-10 text-center">
+            <p className="text-muted-foreground mb-4">
+              {error ? 'Error loading property. Please try again.' : 'Property not found.'}
+            </p>
+            <Link to="/properties">
+              <Button>Return to Properties</Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Format price
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      maximumFractionDigits: 0
+    }).format(price);
   };
 
-  // Helper function to get the first image or fallback to a placeholder
-  const getImageUrl = () => {
-    return property?.images && property.images.length > 0 ? property.images[0] : '/placeholder.svg';
-  };
-
-  // Fix status badge conditionals
+  // Get status badge variant
   const getStatusBadge = (status: string) => {
-    const statusLower = status.toLowerCase();
-    
-    if (statusLower === 'available') {
-      return <Badge>Available</Badge>;
-    } else if (statusLower === 'pending') {
-      return <Badge variant="outline" className="bg-orange-500/10 text-orange-500 hover:bg-orange-500/20">Pending</Badge>;
-    } else if (statusLower === 'sold' || statusLower === 'under offer') {
-      return <Badge variant="secondary">Sold</Badge>;
+    switch (status.toLowerCase()) {
+      case 'available':
+        return <Badge>Available</Badge>;
+      case 'pending':
+        return <Badge variant="outline" className="bg-orange-500/10 text-orange-500 hover:bg-orange-500/20">Pending</Badge>;
+      case 'sold':
+        return <Badge variant="destructive">Sold</Badge>;
+      default:
+        return <Badge>{status}</Badge>;
     }
-    
-    return <Badge>{status}</Badge>;
   };
 
   return (
-    <div className="space-y-4">
-      {/* Header with navigation and actions */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div className="flex items-center space-x-4">
-          <Button variant="ghost" onClick={() => navigate('/properties')}>
-            <ChevronLeft className="mr-2 h-4 w-4" />
-            Back to Properties
+    <div className="p-6">
+      <div className="flex justify-between items-center mb-6">
+        <Link to="/properties">
+          <Button variant="outline">
+            <ChevronLeft className="mr-2 h-4 w-4" /> Back to Properties
+          </Button>
+        </Link>
+        <div className="flex gap-2">
+          <Button variant="outline" size="icon">
+            <Heart className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="icon">
+            <Share className="h-4 w-4" />
+          </Button>
+          <Button variant="outline">
+            <Edit className="mr-2 h-4 w-4" /> Edit
+          </Button>
+          <Button variant="destructive">
+            <Trash className="mr-2 h-4 w-4" /> Delete
           </Button>
         </div>
-        
-        {!isLoading && property && 
-          <div className="flex space-x-2">
-            <Button variant="outline" onClick={() => navigate(`/properties/${id}/edit`)}>
-              <Edit className="mr-2 h-4 w-4" />
-              Edit
-            </Button>
-            <Button 
-              variant="destructive" 
-              onClick={() => {
-                if (confirm('Are you sure you want to delete this property?')) {
-                  // Property deletion logic would go here
-                  toast.success("Property deleted successfully");
-                  navigate('/properties');
-                }
-              }}
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete
-            </Button>
-          </div>
-        }
       </div>
-
-      {isLoading ? (
-        <PropertyDetailSkeleton />
-      ) : property ? (
-        <>
-          {/* Property Details */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {/* Left Column: Image and Basic Info */}
-            <div className="lg:col-span-1">
-              <Card className="overflow-hidden border-neutral-800 bg-card/90 backdrop-blur-sm h-full">
-                <div className="relative">
-                  <img 
-                    src={getImageUrl()}
-                    alt={property.title} 
-                    className="w-full h-64 object-cover" 
-                  />
-                  <Badge className="absolute top-2 right-2">{getStatusBadge(property.status || 'Available')}</Badge>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          <Card className="overflow-hidden">
+            <div className="relative aspect-video">
+              {property.images && property.images.length > 0 ? (
+                <img 
+                  src={property.images[0]} 
+                  alt={property.title} 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-muted flex items-center justify-center">
+                  <Building className="h-16 w-16 text-muted-foreground" />
+                  <p className="text-muted-foreground">No image available</p>
                 </div>
-                <CardHeader className="pb-2">
-                  <CardTitle>{property.title}</CardTitle>
-                </CardHeader>
-                <CardContent className="p-6 space-y-4">
-                  <div className="space-y-2">
-                    <h1 className="text-2xl font-bold tracking-tight">
-                      {formatCurrency(property.price)}
-                    </h1>
-                    <div className="flex items-center text-muted-foreground">
-                      <MapPin className="h-4 w-4 mr-1 flex-shrink-0" />
-                      <p className="text-sm">
-                        {[property.address?.city, property.address?.state].filter(Boolean).join(', ')}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-3 pt-2">
-                    <div className="flex flex-col items-start p-2 rounded-md bg-secondary/50">
-                      <Bed className="h-5 w-5 mb-1" />
-                      <span className="text-xs text-muted-foreground">Bedrooms</span>
-                      <span className="text-sm font-medium">{getFeatureValue('bedrooms')}</span>
-                    </div>
-                    
-                    <div className="flex flex-col items-start p-2 rounded-md bg-secondary/50">
-                      <Bath className="h-5 w-5 mb-1" />
-                      <span className="text-xs text-muted-foreground">Bathrooms</span>
-                      <span className="text-sm font-medium">{getFeatureValue('bathrooms')}</span>
-                    </div>
-                    
-                    <div className="flex flex-col items-start p-2 rounded-md bg-secondary/50">
-                      <Grid2X2 className="h-5 w-5 mb-1" />
-                      <span className="text-xs text-muted-foreground">Sq. Ft.</span>
-                      <span className="text-sm font-medium">{getFeatureValue('squareFeet')}</span>
-                    </div>
-                    
-                    <div className="flex flex-col items-start p-2 rounded-md bg-secondary/50">
-                      <Car className="h-5 w-5 mb-1" />
-                      <span className="text-xs text-muted-foreground">Parking</span>
-                      <span className="text-sm font-medium">{getFeatureValue('parking')}</span>
-                    </div>
-                  </div>
-                  
-                  <p className="text-sm text-muted-foreground">
-                    {property.description}
-                  </p>
-                </CardContent>
-              </Card>
+              )}
+              {getStatusBadge(property.status)}
             </div>
             
-            {/* Right Column: Details and Amenities */}
-            <div className="lg:col-span-1 space-y-4">
-              {/* Amenities Section */}
-              <Card className="overflow-hidden border-neutral-800 bg-card/90">
-                <CardHeader className="pb-2">
-                  <CardTitle>Amenities</CardTitle>
-                </CardHeader>
-                <CardContent className="p-4">
-                  {property.amenities && property.amenities.length > 0 ? (
-                    <ul className="list-disc list-inside text-sm text-muted-foreground">
-                      {property.amenities.map((amenity, index) => (
-                        <li key={index}>{amenity}</li>
+            <CardHeader className="pb-2">
+              <div className="flex justify-between items-start">
+                <div>
+                  <CardTitle className="text-2xl">{property.title}</CardTitle>
+                  <CardDescription className="mt-2 flex items-center">
+                    <MapPin className="h-4 w-4 mr-1" />
+                    {property.address.street}, {property.address.city}, {property.address.state} {property.address.zip}
+                  </CardDescription>
+                </div>
+                <div className="text-2xl font-bold text-primary">
+                  {formatPrice(property.price)}
+                </div>
+              </div>
+            </CardHeader>
+            
+            <CardContent>
+              <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <TabsList className="mb-4">
+                  <TabsTrigger value="details">Details</TabsTrigger>
+                  <TabsTrigger value="features">Features</TabsTrigger>
+                  <TabsTrigger value="documents">Documents</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="details" className="space-y-4">
+                  <p className="text-muted-foreground">{property.description}</p>
+                  
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 py-4">
+                    <div className="text-center p-3 bg-muted/30 rounded-md">
+                      <p className="text-sm text-muted-foreground">Type</p>
+                      <p className="font-medium capitalize">{property.type}</p>
+                    </div>
+                    {property.bedrooms !== undefined && (
+                      <div className="text-center p-3 bg-muted/30 rounded-md">
+                        <p className="text-sm text-muted-foreground">Bedrooms</p>
+                        <p className="font-medium">{property.bedrooms}</p>
+                      </div>
+                    )}
+                    {property.bathrooms !== undefined && (
+                      <div className="text-center p-3 bg-muted/30 rounded-md">
+                        <p className="text-sm text-muted-foreground">Bathrooms</p>
+                        <p className="font-medium">{property.bathrooms}</p>
+                      </div>
+                    )}
+                    {property.area !== undefined && (
+                      <div className="text-center p-3 bg-muted/30 rounded-md">
+                        <p className="text-sm text-muted-foreground">Area</p>
+                        <p className="font-medium">{property.area} sq ft</p>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="border-t pt-4">
+                    <h3 className="font-medium mb-2">Listed By</h3>
+                    <div className="flex items-center">
+                      <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center mr-3">
+                        <User className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <p className="font-medium">{property.agent?.name || "Unknown Agent"}</p>
+                        <p className="text-sm text-muted-foreground">
+                          Listed on {new Date(property.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="features">
+                  {property.features && property.features.length > 0 ? (
+                    <ul className="grid grid-cols-2 gap-2">
+                      {property.features.map((feature, index) => (
+                        <li key={index} className="flex items-center">
+                          <div className="h-2 w-2 rounded-full bg-primary mr-2"></div>
+                          <span className="capitalize">{feature}</span>
+                        </li>
                       ))}
                     </ul>
                   ) : (
-                    <div className="text-center py-2">
-                      <Heart className="mx-auto h-12 w-12 text-muted-foreground opacity-30" />
-                      <p className="mt-2 text-sm text-muted-foreground">No amenities listed</p>
-                    </div>
+                    <p className="text-muted-foreground">No features listed for this property.</p>
                   )}
-                </CardContent>
-              </Card>
-              
-              {/* Additional Details Section */}
-              <Card className="overflow-hidden border-neutral-800 bg-card/90">
-                <CardHeader className="pb-2">
-                  <CardTitle>Additional Details</CardTitle>
-                </CardHeader>
-                <CardContent className="p-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
-                    <div>
-                      <span className="font-medium">Type:</span> {property.type}
-                    </div>
-                    <div>
-                      <span className="font-medium">Year Built:</span> {property.yearBuilt || 'N/A'}
-                    </div>
-                    <div>
-                      <span className="font-medium">Lot Size:</span> {property.lotSize || 'N/A'}
-                    </div>
-                    <div>
-                      <span className="font-medium">Stories:</span> {property.stories || 'N/A'}
-                    </div>
-                    <div>
-                      <span className="font-medium">Parking Spaces:</span> {property.parkingSpaces || 'N/A'}
-                    </div>
-                    <div>
-                      <span className="font-medium">HOA:</span> {property.hoa || 'N/A'}
-                    </div>
+                </TabsContent>
+                
+                <TabsContent value="documents">
+                  <p className="text-muted-foreground">No documents available for this property.</p>
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+        </div>
+        
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Property Details</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Property ID</span>
+                <span className="font-medium">{property.id}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Type</span>
+                <span className="font-medium capitalize">{property.type}</span>
+              </div>
+              {property.subtype && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Subtype</span>
+                  <span className="font-medium capitalize">{property.subtype}</span>
+                </div>
+              )}
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Status</span>
+                <span>{getStatusBadge(property.status)}</span>
+              </div>
+              <div className="border-t pt-4">
+                <h3 className="font-medium mb-3">Location</h3>
+                <div className="space-y-2">
+                  <p className="text-sm">
+                    <span className="text-muted-foreground">Street:</span> {property.address.street}
+                  </p>
+                  <p className="text-sm">
+                    <span className="text-muted-foreground">City:</span> {property.address.city}
+                  </p>
+                  <p className="text-sm">
+                    <span className="text-muted-foreground">State:</span> {property.address.state}
+                  </p>
+                  <p className="text-sm">
+                    <span className="text-muted-foreground">Zip Code:</span> {property.address.zip}
+                  </p>
+                  {property.address.country && (
+                    <p className="text-sm">
+                      <span className="text-muted-foreground">Country:</span> {property.address.country}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <div className="border-t pt-4">
+                <h3 className="font-medium mb-3">Listing Information</h3>
+                <div className="space-y-2">
+                  <div className="flex items-center text-sm">
+                    <Calendar className="h-4 w-4 mr-2 text-muted-foreground" /> 
+                    <span>Listed on {new Date(property.createdAt).toLocaleDateString()}</span>
                   </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </>
-      ) : (
-        <div className="text-center py-12">
-          <ImagePlus className="mx-auto h-12 w-12 text-muted-foreground opacity-30" />
-          <p className="mt-2 text-sm text-muted-foreground">Property not found</p>
-          <Button variant="outline" size="sm" className="mt-4" onClick={() => navigate('/properties')}>
-            Back to Properties
-          </Button>
-        </div>
-      )}
-    </div>
-  );
-};
-
-// Loading skeleton for property details
-const PropertyDetailSkeleton = () => {
-  return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="lg:col-span-1">
-          <Skeleton className="h-[500px] w-full rounded-lg" />
-        </div>
-        <div className="lg:col-span-1">
-          <Skeleton className="h-[400px] w-full rounded-lg" />
+                  <div className="flex items-center text-sm">
+                    <User className="h-4 w-4 mr-2 text-muted-foreground" /> 
+                    <span>Listed by {property.agent?.name || "Unknown Agent"}</span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle>Contact Agent</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Button className="w-full">Request Information</Button>
+            </CardContent>
+          </Card>
         </div>
       </div>
-      
-      <Skeleton className="h-[150px] w-full rounded-lg" />
-      
-      <Skeleton className="h-12 w-full rounded-lg" />
-      
-      <Skeleton className="h-[150px] w-full rounded-lg" />
     </div>
   );
 };

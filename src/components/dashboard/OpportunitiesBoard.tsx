@@ -113,7 +113,7 @@ const OpportunitiesBoard: React.FC<OpportunitiesBoardProps> = ({ onViewAll }) =>
                   </div>
                   <div className="flex items-center text-muted-foreground">
                     <Clock className="h-3.5 w-3.5 mr-1" />
-                    <span>{formatRelativeTime(opportunity.postedAt)}</span>
+                    <span>{formatRelativeTime(opportunity.postedDate)}</span>
                   </div>
                 </div>
               </CardContent>

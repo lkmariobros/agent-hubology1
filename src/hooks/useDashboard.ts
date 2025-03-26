@@ -164,7 +164,7 @@ const DEFAULT_OPPORTUNITIES = {
       location: 'Kuala Lumpur (KLCC, Bangsar)',
       status: 'Urgent',
       postedBy: 'Sarah Johnson',
-      postedAt: '2024-06-01T09:30:00Z'
+      postedDate: '2024-06-01T09:30:00Z'  // Changed from postedAt to postedDate
     },
     {
       id: '2',
@@ -175,7 +175,7 @@ const DEFAULT_OPPORTUNITIES = {
       location: 'Bukit Bintang, Pavilion area',
       status: 'New',
       postedBy: 'Michael Brown',
-      postedAt: '2024-06-05T14:15:00Z'
+      postedDate: '2024-06-05T14:15:00Z'  // Changed from postedAt to postedDate
     },
     {
       id: '3',
@@ -186,7 +186,7 @@ const DEFAULT_OPPORTUNITIES = {
       location: 'Selangor (Rawang, Semenyih)',
       status: 'Featured',
       postedBy: 'John Smith',
-      postedAt: '2024-06-03T11:45:00Z'
+      postedDate: '2024-06-03T11:45:00Z'  // Changed from postedAt to postedDate
     }
   ],
   message: 'Opportunities retrieved successfully',
