@@ -25,8 +25,8 @@ import { AgentRank, RankRequirement } from '@/types';
 
 // Define form schema for rank configuration
 const rankSchema = z.object({
-  minTransactions: z.coerce.number().min(0, 'Must be at least 0'),
-  minSalesVolume: z.coerce.number().min(0, 'Must be at least 0'),
+  transactions: z.coerce.number().min(0, 'Must be at least 0'),
+  salesVolume: z.coerce.number().min(0, 'Must be at least 0'),
   personalSales: z.boolean(),
   recruitedAgents: z.coerce.number().min(0, 'Must be at least 0').optional(),
   overridePercentage: z.coerce.number().min(0, 'Must be at least 0').max(100, 'Cannot exceed 100%'),
@@ -36,39 +36,39 @@ const rankSchema = z.object({
 const initialRankRequirements: Record<AgentRank, RankRequirement> = {
   'Advisor': {
     rank: 'Advisor',
-    minTransactions: 0,
-    minSalesVolume: 0,
+    transactions: 0,
+    salesVolume: 0,
     personalSales: true,
     color: 'blue'
   },
   'Sales Leader': {
     rank: 'Sales Leader',
-    minTransactions: 10,
-    minSalesVolume: 5000000,
+    transactions: 10,
+    salesVolume: 5000000,
     personalSales: true,
     recruitedAgents: 2,
     color: 'purple'
   },
   'Team Leader': {
     rank: 'Team Leader',
-    minTransactions: 25,
-    minSalesVolume: 15000000,
+    transactions: 25,
+    salesVolume: 15000000,
     personalSales: true,
     recruitedAgents: 5,
     color: 'pink'
   },
   'Group Leader': {
     rank: 'Group Leader',
-    minTransactions: 50,
-    minSalesVolume: 50000000,
+    transactions: 50,
+    salesVolume: 50000000,
     personalSales: true,
     recruitedAgents: 10,
     color: 'orange'
   },
   'Supreme Leader': {
     rank: 'Supreme Leader',
-    minTransactions: 100,
-    minSalesVolume: 100000000,
+    transactions: 100,
+    salesVolume: 100000000,
     personalSales: true,
     recruitedAgents: 20,
     color: 'green'
@@ -93,8 +93,8 @@ const AdminCommission = () => {
   const form = useForm<z.infer<typeof rankSchema>>({
     resolver: zodResolver(rankSchema),
     defaultValues: {
-      minTransactions: rankRequirements[selectedRank].minTransactions,
-      minSalesVolume: rankRequirements[selectedRank].minSalesVolume,
+      transactions: rankRequirements[selectedRank].transactions,
+      salesVolume: rankRequirements[selectedRank].salesVolume,
       personalSales: rankRequirements[selectedRank].personalSales,
       recruitedAgents: rankRequirements[selectedRank].recruitedAgents,
       overridePercentage: overridePercentages[selectedRank]
@@ -104,8 +104,8 @@ const AdminCommission = () => {
   // Update form values when selected rank changes
   React.useEffect(() => {
     form.reset({
-      minTransactions: rankRequirements[selectedRank].minTransactions,
-      minSalesVolume: rankRequirements[selectedRank].minSalesVolume,
+      transactions: rankRequirements[selectedRank].transactions,
+      salesVolume: rankRequirements[selectedRank].salesVolume,
       personalSales: rankRequirements[selectedRank].personalSales,
       recruitedAgents: rankRequirements[selectedRank].recruitedAgents,
       overridePercentage: overridePercentages[selectedRank]
@@ -118,8 +118,8 @@ const AdminCommission = () => {
       ...prev,
       [selectedRank]: {
         ...prev[selectedRank],
-        minTransactions: values.minTransactions,
-        minSalesVolume: values.minSalesVolume,
+        transactions: values.transactions,
+        salesVolume: values.salesVolume,
         personalSales: values.personalSales,
         recruitedAgents: values.recruitedAgents
       }
@@ -189,7 +189,7 @@ const AdminCommission = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <FormField
                         control={form.control}
-                        name="minTransactions"
+                        name="transactions"
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Minimum Transactions</FormLabel>
@@ -211,7 +211,7 @@ const AdminCommission = () => {
 
                       <FormField
                         control={form.control}
-                        name="minSalesVolume"
+                        name="salesVolume"
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Minimum Sales Volume</FormLabel>
@@ -225,7 +225,7 @@ const AdminCommission = () => {
                               />
                             </FormControl>
                             <FormDescription>
-                              Minimum sales volume required ({formatCurrency(form.watch("minSalesVolume"))})
+                              Minimum sales volume required ({formatCurrency(form.watch("salesVolume"))})
                             </FormDescription>
                             <FormMessage />
                           </FormItem>
@@ -339,8 +339,8 @@ const AdminCommission = () => {
                       {Object.entries(rankRequirements).map(([rank, requirements]) => (
                         <tr key={rank} className="border-t hover:bg-muted/50">
                           <td className="p-3 font-medium">{rank}</td>
-                          <td className="p-3">{requirements.minTransactions}</td>
-                          <td className="p-3">{formatCurrency(requirements.minSalesVolume)}</td>
+                          <td className="p-3">{requirements.transactions}</td>
+                          <td className="p-3">{formatCurrency(requirements.salesVolume)}</td>
                           <td className="p-3">{requirements.recruitedAgents || 'N/A'}</td>
                           <td className="p-3">{overridePercentages[rank as AgentRank]}%</td>
                         </tr>
