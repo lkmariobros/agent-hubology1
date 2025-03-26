@@ -1,16 +1,21 @@
 
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuthContext } from '@/context/AuthContext';
-import { UserRole } from '@/types/auth';
+import { useContext } from 'react';
+import { AuthContext } from '@/providers/AuthProvider';
+import { UserRole } from '@/providers/AuthProvider';
 
 /**
  * Enhanced authentication hook that extends the base auth context
  * with additional routing and role-related functionality.
  */
 export const useAuth = () => {
-  const auth = useAuthContext();
+  const auth = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
+  
+  if (!auth) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
   
   // Determine if the current route is in the admin section
   const isAdminRoute = location.pathname.startsWith('/admin');
