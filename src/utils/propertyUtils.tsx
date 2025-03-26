@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { Building2, Home, MapPin, Store, Factory, Map } from 'lucide-react';
 
 // Function to truncate text with ellipsis
 export const truncateText = (text: string, maxLength: number): string => {
@@ -10,8 +11,20 @@ export const truncateText = (text: string, maxLength: number): string => {
 
 // Function to get property type icon
 export const getPropertyTypeIcon = (type: string): JSX.Element => {
-  // You can import and use your icons here
-  return <></>;
+  const typeLower = type.toLowerCase();
+  
+  switch(typeLower) {
+    case 'residential':
+      return <Home className="h-4 w-4" />;
+    case 'commercial':
+      return <Store className="h-4 w-4" />;
+    case 'industrial':
+      return <Factory className="h-4 w-4" />;
+    case 'land':
+      return <Map className="h-4 w-4" />;
+    default:
+      return <Building2 className="h-4 w-4" />;
+  }
 };
 
 // Convert area to standard format
