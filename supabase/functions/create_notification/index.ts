@@ -58,8 +58,8 @@ serve(async (req) => {
 
     console.log("Creating notification:", { userId, type, title });
 
-    // Prepare data as a JSON string if it's an object
-    const dataToInsert = typeof data === 'object' ? JSON.stringify(data) : data;
+    // Always stringify data if it exists to ensure proper database storage
+    const dataToStore = data ? JSON.stringify(data) : null;
 
     // Insert the notification
     const { data: notificationData, error } = await supabaseClient
@@ -69,7 +69,7 @@ serve(async (req) => {
         type,
         title,
         message,
-        data: dataToInsert,
+        data: dataToStore,
         read: false
       })
       .select()
