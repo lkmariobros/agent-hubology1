@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -39,16 +40,24 @@ const CommissionNotificationFeed: React.FC<CommissionNotificationFeedProps> = ({
       }
       
       // Map the snake_case database columns to camelCase properties expected by the Notification type
-      return (data || []).map(item => ({
-        id: item.id,
-        userId: item.user_id,
-        type: item.type as Notification['type'],
-        title: item.title,
-        message: item.message,
-        read: item.read || false,
-        data: item.data || {}, // Provide empty object as fallback
-        createdAt: item.created_at
-      })) as Notification[];
+      return (data || []).map(item => {
+        // Extract related_id as data if data is not present
+        const notificationData = {
+          // If there's a related_id, use it as a reference point
+          ...(item.related_id ? { relatedId: item.related_id } : {}),
+        };
+        
+        return {
+          id: item.id,
+          userId: item.user_id,
+          type: item.type as Notification['type'],
+          title: item.title,
+          message: item.message,
+          read: item.read || false,
+          data: notificationData, // Use the constructed data object
+          createdAt: item.created_at
+        } as Notification;
+      });
     },
     enabled: !!userId,
   });
