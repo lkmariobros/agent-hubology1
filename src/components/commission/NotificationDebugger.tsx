@@ -9,13 +9,30 @@ import { NotificationType } from '@/types/notification';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle, CheckCircle, RefreshCw } from 'lucide-react';
+import { AlertCircle, CheckCircle, RefreshCw, BarChart } from 'lucide-react';
 
 const NotificationDebugger: React.FC = () => {
   const { user } = useAuth();
   const { mutate: sendNotification } = useSendNotification();
   const [logs, setLogs] = useState<{message: string; type: 'info' | 'error' | 'success'}[]>([]);
   const [isLoadingLogs, setIsLoadingLogs] = useState(false);
+  const [usageStats, setUsageStats] = useState<{
+    total: number;
+    edge: number;
+    local: number;
+  }>({ total: 0, edge: 0, local: 0 });
+  
+  useEffect(() => {
+    // Load usage stats from localStorage
+    const edgeCount = parseInt(localStorage.getItem('edge_function_usage_count') || '0', 10);
+    const totalCount = parseInt(localStorage.getItem('notification_total_count') || '0', 10);
+    
+    setUsageStats({
+      total: totalCount,
+      edge: edgeCount,
+      local: totalCount - edgeCount
+    });
+  }, []);
   
   const addLog = (message: string, type: 'info' | 'error' | 'success' = 'info') => {
     setLogs(prev => [{ message: `[${new Date().toISOString()}] ${message}`, type }, ...prev]);
@@ -23,6 +40,14 @@ const NotificationDebugger: React.FC = () => {
   
   const clearLogs = () => {
     setLogs([]);
+  };
+  
+  // Reset usage counters
+  const resetUsageCounters = () => {
+    localStorage.setItem('edge_function_usage_count', '0');
+    localStorage.setItem('notification_total_count', '0');
+    setUsageStats({ total: 0, edge: 0, local: 0 });
+    addLog('Usage counters have been reset', 'success');
   };
   
   const fetchEdgeFunctionLogs = async () => {
@@ -53,6 +78,10 @@ const NotificationDebugger: React.FC = () => {
         addLog(`Using simulated logs for development`, 'info');
         addLog(`[Edge] Notification function received request`, 'info');
         addLog(`[Edge] Processing notification data`, 'info');
+        
+        // Add warning about usage limits
+        addLog(`[Edge] Warning: You have exceeded your Free Plan edge function invocation quota (754%)`, 'error');
+        addLog(`[Edge] Consider upgrading your plan or implementing local fallbacks`, 'info');
       }
     } catch (error: any) {
       addLog(`❌ Error fetching logs: ${error.message}`, 'error');
@@ -61,14 +90,14 @@ const NotificationDebugger: React.FC = () => {
     }
   };
   
-  const sendTestNotification = async (type: NotificationType, title: string, data: any) => {
+  const sendTestNotification = async (type: NotificationType, title: string, data: any, priority: 'high' | 'normal' | 'low' = 'normal') => {
     if (!user?.id) {
       addLog("❌ Error: No user ID found", 'error');
       return;
     }
     
     try {
-      addLog(`📤 Sending notification of type: ${type}`, 'info');
+      addLog(`📤 Sending notification of type: ${type} (priority: ${priority})`, 'info');
       addLog(`📦 Data: ${JSON.stringify(data)}`, 'info');
       
       sendNotification({
@@ -76,10 +105,22 @@ const NotificationDebugger: React.FC = () => {
         type,
         title,
         message: `Test message for ${type}`,
-        data
+        data,
+        priority
       }, {
         onSuccess: (response) => {
           addLog(`✅ Success: ${JSON.stringify(response)}`, 'success');
+          
+          // Update usage stats
+          const edgeCount = parseInt(localStorage.getItem('edge_function_usage_count') || '0', 10);
+          const totalCount = parseInt(localStorage.getItem('notification_total_count') || '0', 10) + 1;
+          localStorage.setItem('notification_total_count', totalCount.toString());
+          
+          setUsageStats({
+            total: totalCount,
+            edge: edgeCount,
+            local: totalCount - edgeCount
+          });
         },
         onError: (error) => {
           addLog(`❌ Error: ${error.message}`, 'error');
@@ -127,65 +168,82 @@ const NotificationDebugger: React.FC = () => {
       <CardContent>
         <Tabs defaultValue="send" className="w-full">
           <TabsList className="mb-4 w-full">
-            <TabsTrigger value="send">Send Test Notifications</TabsTrigger>
+            <TabsTrigger value="send">Test Notifications</TabsTrigger>
+            <TabsTrigger value="stats">Usage Statistics</TabsTrigger>
             <TabsTrigger value="logs">Debug Logs</TabsTrigger>
           </TabsList>
           
           <TabsContent value="send" className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <Button variant="outline" onClick={() => 
-                sendTestNotification(
-                  'approval_status_change', 
-                  'Approval Test',
-                  {
-                    notificationType: 'approval_approved',
-                    commissionAmount: 10000,
-                    transactionId: `tx-${Date.now()}`,
-                    approvalId: `ap-${Date.now()}`
-                  }
-                )
-              }>
-                Test Approval Notification
-              </Button>
+            <div className="bg-amber-50 border border-amber-200 rounded-md p-3 mb-4">
+              <h3 className="text-sm font-medium text-amber-800 mb-1">Edge Function Usage Warning</h3>
+              <p className="text-xs text-amber-700">
+                Your Supabase project has exceeded the Free Plan quota for edge function invocations (754%).
+                Test notifications below will use priority-based routing to reduce edge function calls.
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+              <div className="border rounded-md p-3">
+                <h3 className="text-sm font-medium mb-2">High Priority (Edge Function)</h3>
+                <Button variant="outline" className="w-full mb-2" onClick={() => 
+                  sendTestNotification(
+                    'approval_status_change', 
+                    'Approval Test',
+                    {
+                      notificationType: 'approval_approved',
+                      commissionAmount: 10000,
+                      transactionId: `tx-${Date.now()}`,
+                      approvalId: `ap-${Date.now()}`
+                    },
+                    'high'
+                  )
+                }>
+                  Test Approval (High)
+                </Button>
+                <p className="text-xs text-muted-foreground">
+                  Always uses edge function regardless of quota.
+                </p>
+              </div>
               
-              <Button variant="outline" onClick={() => 
-                sendTestNotification(
-                  'tier_update', 
-                  'Tier Progress', 
-                  {
-                    notificationType: 'tier_progress',
-                    progressPercentage: 75
-                  }
-                )
-              }>
-                Test Tier Progress
-              </Button>
+              <div className="border rounded-md p-3">
+                <h3 className="text-sm font-medium mb-2">Normal Priority (Mixed)</h3>
+                <Button variant="outline" className="w-full mb-2" onClick={() => 
+                  sendTestNotification(
+                    'commission_milestone', 
+                    'Milestone Reached',
+                    {
+                      notificationType: 'commission_milestone',
+                      commissionAmount: 500000
+                    },
+                    'normal'
+                  )
+                }>
+                  Test Milestone (Normal)
+                </Button>
+                <p className="text-xs text-muted-foreground">
+                  Uses edge function until session limit is reached.
+                </p>
+              </div>
               
-              <Button variant="outline" onClick={() => 
-                sendTestNotification(
-                  'tier_update', 
-                  'Tier Achieved',
-                  {
-                    notificationType: 'tier_achieved',
-                    tierName: 'Gold'
-                  }
-                )
-              }>
-                Test Tier Achievement
-              </Button>
-              
-              <Button variant="outline" onClick={() => 
-                sendTestNotification(
-                  'commission_milestone', 
-                  'Milestone Reached',
-                  {
-                    notificationType: 'commission_milestone',
-                    commissionAmount: 500000
-                  }
-                )
-              }>
-                Test Commission Milestone
-              </Button>
+              <div className="border rounded-md p-3">
+                <h3 className="text-sm font-medium mb-2">Low Priority (Local Only)</h3>
+                <Button variant="outline" className="w-full mb-2" onClick={() => 
+                  sendTestNotification(
+                    'tier_update', 
+                    'Tier Progress', 
+                    {
+                      notificationType: 'tier_progress',
+                      progressPercentage: 75
+                    },
+                    'low'
+                  )
+                }>
+                  Test Progress (Low)
+                </Button>
+                <p className="text-xs text-muted-foreground">
+                  Always uses local fallback to save quota.
+                </p>
+              </div>
             </div>
             
             <div className="mt-4">
@@ -206,6 +264,45 @@ const NotificationDebugger: React.FC = () => {
                   ))
                 )}
               </div>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="stats" className="space-y-4">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-sm font-medium">Edge Function Usage</h3>
+              <Button variant="outline" size="sm" onClick={resetUsageCounters}>
+                Reset Counters
+              </Button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="border rounded-md p-4 flex flex-col items-center">
+                <BarChart className="h-8 w-8 text-blue-500 mb-2" />
+                <span className="text-2xl font-bold">{usageStats.total}</span>
+                <span className="text-sm text-muted-foreground">Total Notifications</span>
+              </div>
+              
+              <div className="border rounded-md p-4 flex flex-col items-center">
+                <Badge variant="destructive" className="mb-2 px-3 py-1">Edge</Badge>
+                <span className="text-2xl font-bold">{usageStats.edge}</span>
+                <span className="text-sm text-muted-foreground">Edge Functions Used</span>
+              </div>
+              
+              <div className="border rounded-md p-4 flex flex-col items-center">
+                <Badge variant="secondary" className="mb-2 px-3 py-1">Local</Badge>
+                <span className="text-2xl font-bold">{usageStats.local}</span>
+                <span className="text-sm text-muted-foreground">Local Fallbacks</span>
+              </div>
+            </div>
+            
+            <div className="bg-blue-50 border border-blue-200 rounded-md p-4 mt-4">
+              <h4 className="text-sm font-medium text-blue-700 mb-2">Quota Saving Strategy</h4>
+              <ul className="list-disc list-inside text-sm text-blue-600 space-y-1">
+                <li>High priority notifications always use edge functions</li>
+                <li>Normal priority uses edge functions until session limit is reached</li>
+                <li>Low priority notifications always use local database insert</li>
+                <li>Batching is used to group multiple notifications</li>
+              </ul>
             </div>
           </TabsContent>
           

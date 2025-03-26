@@ -5,17 +5,26 @@ import { useAuth } from "@/hooks/useAuth";
 import { useCommissionNotifications } from '@/hooks/useCommissionNotifications';
 import NotificationDebugger from './NotificationDebugger';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { InfoIcon } from 'lucide-react';
+import { InfoIcon, AlertTriangle } from 'lucide-react';
 
 const SendTestNotification: React.FC = () => {
   const { user } = useAuth();
   const [showDebugger, setShowDebugger] = useState(false);
+  const [usageWarning, setUsageWarning] = useState<boolean>(false);
   const {
     createApprovalStatusNotification,
     createTierProgressNotification,
     createTierAchievedNotification,
     createCommissionMilestoneNotification
   } = useCommissionNotifications();
+  
+  // Check localStorage for edge function usage
+  React.useEffect(() => {
+    const usageCount = localStorage.getItem('edge_function_usage_count');
+    if (usageCount && parseInt(usageCount, 10) > 350) {
+      setUsageWarning(true);
+    }
+  }, []);
   
   const sendApprovalNotification = () => {
     if (!user?.id) {
@@ -64,10 +73,19 @@ const SendTestNotification: React.FC = () => {
   
   return (
     <div className="space-y-4 mt-4">
+      {usageWarning && (
+        <Alert className="bg-amber-50 border-amber-200">
+          <AlertTriangle className="h-4 w-4 text-amber-600" />
+          <AlertDescription className="text-amber-700">
+            Edge function usage is high. Low-priority notifications will use local fallback to reduce edge function invocations.
+          </AlertDescription>
+        </Alert>
+      )}
+      
       <Alert className="bg-blue-50 border-blue-200">
         <InfoIcon className="h-4 w-4 text-blue-600" />
         <AlertDescription className="text-blue-700">
-          Use these tools to test notification functionality. For more detailed debugging, use the advanced debugger below.
+          Use these tools to test notification functionality. For detailed debugging, use the advanced debugger below.
         </AlertDescription>
       </Alert>
       
