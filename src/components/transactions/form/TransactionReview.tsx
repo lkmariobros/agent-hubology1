@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useTransactionForm } from '@/context/TransactionForm'; // Updated import path
 import { Button } from '@/components/ui/button';
@@ -67,13 +66,18 @@ const TransactionReview: React.FC = () => {
   };
   
   // Format date for display
-  const formatDate = (date?: Date) => {
-    if (!date) return 'Not specified';
-    return new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    }).format(date);
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return 'Not specified';
+    try {
+      const date = new Date(dateStr);
+      return new Intl.DateTimeFormat('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      }).format(date);
+    } catch (e) {
+      return dateStr || 'Not specified';
+    }
   };
   
   // Format currency for display

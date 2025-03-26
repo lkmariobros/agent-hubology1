@@ -1,474 +1,250 @@
-
-import React, { useState } from 'react';
-import MainLayout from '@/components/layout/MainLayout';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { 
-  Form, 
-  FormControl, 
-  FormDescription, 
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormMessage 
-} from '@/components/ui/form';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Slider } from '@/components/ui/slider';
-import { Switch } from '@/components/ui/switch';
+import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useToast } from '@/hooks/use-toast';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Search, Filter, SortDesc, FileText, DollarSign, AlertCircle, CheckCircle2, Clock, ArrowUpDown } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Card, CardContent } from '@/components/ui/card';
 import { AgentRank, RankRequirement } from '@/types';
 
-// Define form schema for rank configuration
-const rankSchema = z.object({
-  transactions: z.coerce.number().min(0, 'Must be at least 0'),
-  salesVolume: z.coerce.number().min(0, 'Must be at least 0'),
-  personalSales: z.boolean(),
-  recruitedAgents: z.coerce.number().min(0, 'Must be at least 0').optional(),
-  overridePercentage: z.coerce.number().min(0, 'Must be at least 0').max(100, 'Cannot exceed 100%'),
-});
+const AdminTransactions = () => {
+  const transactions = [
+    { 
+      id: 'TRX-001', 
+      property: '123 Main St, San Francisco, CA', 
+      agent: 'John Doe',
+      client: 'Sarah Smith',
+      date: '2023-03-15', 
+      amount: '$750,000', 
+      commission: '$22,500',
+      status: 'completed',
+      type: 'sale' 
+    },
+    { 
+      id: 'TRX-002', 
+      property: '456 Oak Ave, Los Angeles, CA', 
+      agent: 'Jane Smith',
+      client: 'Michael Johnson',
+      date: '2023-03-10', 
+      amount: '$3,500', 
+      commission: '$1,750',
+      status: 'pending',
+      type: 'rental' 
+    },
+    { 
+      id: 'TRX-003', 
+      property: '789 Pine St, San Diego, CA', 
+      agent: 'Robert Johnson',
+      client: 'Emily Williams',
+      date: '2023-03-05', 
+      amount: '$1,200,000', 
+      commission: '$36,000',
+      status: 'in-progress',
+      type: 'sale' 
+    },
+    { 
+      id: 'TRX-004', 
+      property: '101 Cedar Blvd, San Jose, CA', 
+      agent: 'Emily Davis',
+      client: 'David Brown',
+      date: '2023-03-01', 
+      amount: '$620,000', 
+      commission: '$18,600',
+      status: 'completed',
+      type: 'sale' 
+    },
+    { 
+      id: 'TRX-005', 
+      property: '202 Maple Rd, Oakland, CA', 
+      agent: 'Michael Brown',
+      client: 'Lisa Taylor',
+      date: '2023-02-28', 
+      amount: '$4,200', 
+      commission: '$2,100',
+      status: 'cancelled',
+      type: 'rental' 
+    },
+  ];
 
-// Sample rank requirements data (in production, this would come from an API)
-const initialRankRequirements: Record<AgentRank, RankRequirement> = {
-  'Advisor': {
-    rank: 'Advisor',
-    transactions: 0,
-    salesVolume: 0,
-    personalSales: true,
-    color: 'blue'
-  },
-  'Sales Leader': {
-    rank: 'Sales Leader',
-    transactions: 10,
-    salesVolume: 5000000,
-    personalSales: true,
-    recruitedAgents: 2,
-    color: 'purple'
-  },
-  'Team Leader': {
-    rank: 'Team Leader',
-    transactions: 25,
-    salesVolume: 15000000,
-    personalSales: true,
-    recruitedAgents: 5,
-    color: 'pink'
-  },
-  'Group Leader': {
-    rank: 'Group Leader',
-    transactions: 50,
-    salesVolume: 50000000,
-    personalSales: true,
-    recruitedAgents: 10,
-    color: 'orange'
-  },
-  'Supreme Leader': {
-    rank: 'Supreme Leader',
-    transactions: 100,
-    salesVolume: 100000000,
-    personalSales: true,
-    recruitedAgents: 20,
-    color: 'green'
-  }
-};
-
-// Sample override percentage data (in production, this would come from an API)
-const initialOverridePercentages: Record<AgentRank, number> = {
-  'Advisor': 0,
-  'Sales Leader': 7,
-  'Team Leader': 5,
-  'Group Leader': 8,
-  'Supreme Leader': 6
-};
-
-const AdminCommission = () => {
-  const [selectedRank, setSelectedRank] = useState<AgentRank>('Advisor');
-  const [rankRequirements, setRankRequirements] = useState<Record<AgentRank, RankRequirement>>(initialRankRequirements);
-  const [overridePercentages, setOverridePercentages] = useState<Record<AgentRank, number>>(initialOverridePercentages);
-  const { toast } = useToast();
-
-  const form = useForm<z.infer<typeof rankSchema>>({
-    resolver: zodResolver(rankSchema),
-    defaultValues: {
-      transactions: rankRequirements[selectedRank].transactions,
-      salesVolume: rankRequirements[selectedRank].salesVolume,
-      personalSales: rankRequirements[selectedRank].personalSales,
-      recruitedAgents: rankRequirements[selectedRank].recruitedAgents,
-      overridePercentage: overridePercentages[selectedRank]
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return <Badge className="bg-green-500 hover:bg-green-600">Completed</Badge>;
+      case 'pending':
+        return <Badge className="bg-amber-500 hover:bg-amber-600">Pending</Badge>;
+      case 'in-progress':
+        return <Badge className="bg-blue-500 hover:bg-blue-600">In Progress</Badge>;
+      case 'cancelled':
+        return <Badge className="bg-red-500 hover:bg-red-600">Cancelled</Badge>;
+      default:
+        return <Badge>Unknown</Badge>;
     }
-  });
-
-  // Update form values when selected rank changes
-  React.useEffect(() => {
-    form.reset({
-      transactions: rankRequirements[selectedRank].transactions,
-      salesVolume: rankRequirements[selectedRank].salesVolume,
-      personalSales: rankRequirements[selectedRank].personalSales,
-      recruitedAgents: rankRequirements[selectedRank].recruitedAgents,
-      overridePercentage: overridePercentages[selectedRank]
-    });
-  }, [selectedRank, rankRequirements, overridePercentages, form]);
-
-  const onSubmit = (values: z.infer<typeof rankSchema>) => {
-    // Update rank requirements
-    setRankRequirements(prev => ({
-      ...prev,
-      [selectedRank]: {
-        ...prev[selectedRank],
-        transactions: values.transactions,
-        salesVolume: values.salesVolume,
-        personalSales: values.personalSales,
-        recruitedAgents: values.recruitedAgents
-      }
-    }));
-
-    // Update override percentages
-    setOverridePercentages(prev => ({
-      ...prev,
-      [selectedRank]: values.overridePercentage
-    }));
-
-    toast({
-      title: "Settings saved",
-      description: `${selectedRank} commission settings have been updated.`,
-    });
   };
 
-  // Format number as currency
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(value);
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return <CheckCircle2 className="h-4 w-4 text-green-500" />;
+      case 'pending':
+        return <Clock className="h-4 w-4 text-amber-500" />;
+      case 'in-progress':
+        return <FileText className="h-4 w-4 text-blue-500" />;
+      case 'cancelled':
+        return <AlertCircle className="h-4 w-4 text-red-500" />;
+      default:
+        return null;
+    }
   };
 
   return (
-    <MainLayout>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Commission Configuration</h1>
-          <p className="text-muted-foreground">
-            Configure commission rates, tiers, and requirements for agent ranks.
-          </p>
-        </div>
-
-        <Tabs defaultValue="ranks">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="ranks">Rank Requirements</TabsTrigger>
-            <TabsTrigger value="commission">Commission Distribution</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="ranks" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Rank Requirements</CardTitle>
-                <CardDescription>
-                  Configure the requirements for each agent rank in the hierarchy.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2 mb-6">
-                  {Object.keys(rankRequirements).map((rank) => (
-                    <Button
-                      key={rank}
-                      variant={selectedRank === rank ? "default" : "outline"}
-                      onClick={() => setSelectedRank(rank as AgentRank)}
-                    >
-                      {rank}
-                    </Button>
-                  ))}
-                </div>
-
-                <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <FormField
-                        control={form.control}
-                        name="transactions"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Minimum Transactions</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="number"
-                                min={0}
-                                {...field}
-                                onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                              />
-                            </FormControl>
-                            <FormDescription>
-                              Minimum number of completed transactions required for this rank.
-                            </FormDescription>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={form.control}
-                        name="salesVolume"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Minimum Sales Volume</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="number"
-                                min={0}
-                                step={100000}
-                                {...field}
-                                onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                              />
-                            </FormControl>
-                            <FormDescription>
-                              Minimum sales volume required ({formatCurrency(form.watch("salesVolume"))})
-                            </FormDescription>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <FormField
-                        control={form.control}
-                        name="personalSales"
-                        render={({ field }) => (
-                          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                            <div className="space-y-0.5">
-                              <FormLabel className="text-base">Personal Sales Required</FormLabel>
-                              <FormDescription>
-                                Agent must make personal sales to qualify for this rank.
-                              </FormDescription>
-                            </div>
-                            <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      {selectedRank !== 'Advisor' && (
-                        <FormField
-                          control={form.control}
-                          name="recruitedAgents"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Minimum Recruited Agents</FormLabel>
-                              <FormControl>
-                                <Input
-                                  type="number"
-                                  min={0}
-                                  {...field}
-                                  onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                                />
-                              </FormControl>
-                              <FormDescription>
-                                Minimum number of agents that must be recruited.
-                              </FormDescription>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      )}
-                    </div>
-
-                    <FormField
-                      control={form.control}
-                      name="overridePercentage"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Override Commission Percentage: {field.value}%</FormLabel>
-                          <FormControl>
-                            <Slider
-                              min={0}
-                              max={20}
-                              step={0.5}
-                              value={[field.value]}
-                              onValueChange={(value) => field.onChange(value[0])}
-                              className="py-4"
-                            />
-                          </FormControl>
-                          <FormDescription>
-                            The percentage of commission this rank earns from downline agents.
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <div className="flex justify-end space-x-2">
-                      <Button type="button" variant="outline" onClick={() => form.reset()}>
-                        Reset
-                      </Button>
-                      <Button type="submit">Save Changes</Button>
-                    </div>
-                  </form>
-                </Form>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Rank Summary</CardTitle>
-                <CardDescription>
-                  Overview of all rank requirements and commission rates
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="rounded-md border overflow-hidden">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="bg-muted/50">
-                        <th className="p-3 text-left font-medium text-muted-foreground">Rank</th>
-                        <th className="p-3 text-left font-medium text-muted-foreground">Min. Transactions</th>
-                        <th className="p-3 text-left font-medium text-muted-foreground">Min. Sales Volume</th>
-                        <th className="p-3 text-left font-medium text-muted-foreground">Min. Recruits</th>
-                        <th className="p-3 text-left font-medium text-muted-foreground">Override %</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {Object.entries(rankRequirements).map(([rank, requirements]) => (
-                        <tr key={rank} className="border-t hover:bg-muted/50">
-                          <td className="p-3 font-medium">{rank}</td>
-                          <td className="p-3">{requirements.transactions}</td>
-                          <td className="p-3">{formatCurrency(requirements.salesVolume)}</td>
-                          <td className="p-3">{requirements.recruitedAgents || 'N/A'}</td>
-                          <td className="p-3">{overridePercentages[rank as AgentRank]}%</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="commission" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Commission Flow Visualization</CardTitle>
-                <CardDescription>
-                  This diagram shows how commission flows through the agent hierarchy.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="border rounded-lg p-6 flex flex-col items-center space-y-6">
-                  <div className="flex flex-col items-center space-y-2 p-4 rounded-lg bg-muted max-w-sm w-full text-center">
-                    <p className="font-semibold">Transaction</p>
-                    <p className="text-2xl font-bold">${(1000000).toLocaleString()}</p>
-                    <p className="text-sm text-muted-foreground">Base Commission: 3%</p>
-                    <p className="text-lg font-bold">${(30000).toLocaleString()}</p>
-                  </div>
-                  
-                  <div className="w-px h-8 bg-border"></div>
-                  
-                  <div className="flex flex-col items-center space-y-2 p-4 rounded-lg border border-property-blue/50 bg-property-blue/10 max-w-sm w-full text-center">
-                    <p className="font-semibold">Advisor</p>
-                    <p className="text-sm text-muted-foreground">100% of base commission</p>
-                    <p className="text-lg font-bold">${(30000).toLocaleString()}</p>
-                  </div>
-                  
-                  <div className="w-px h-8 bg-border"></div>
-                  
-                  <div className="flex flex-col items-center space-y-2 p-4 rounded-lg border border-property-purple/50 bg-property-purple/10 max-w-sm w-full text-center">
-                    <p className="font-semibold">Sales Leader</p>
-                    <p className="text-sm text-muted-foreground">{overridePercentages['Sales Leader']}% override</p>
-                    <p className="text-lg font-bold">${(30000 * overridePercentages['Sales Leader'] / 100).toLocaleString()}</p>
-                  </div>
-                  
-                  <div className="w-px h-8 bg-border"></div>
-                  
-                  <div className="flex flex-col items-center space-y-2 p-4 rounded-lg border border-property-pink/50 bg-property-pink/10 max-w-sm w-full text-center">
-                    <p className="font-semibold">Team Leader</p>
-                    <p className="text-sm text-muted-foreground">{overridePercentages['Team Leader']}% override</p>
-                    <p className="text-lg font-bold">${(30000 * overridePercentages['Team Leader'] / 100).toLocaleString()}</p>
-                  </div>
-                  
-                  <div className="w-px h-8 bg-border"></div>
-                  
-                  <div className="flex flex-col items-center space-y-2 p-4 rounded-lg border border-property-orange/50 bg-property-orange/10 max-w-sm w-full text-center">
-                    <p className="font-semibold">Group Leader</p>
-                    <p className="text-sm text-muted-foreground">{overridePercentages['Group Leader']}% override</p>
-                    <p className="text-lg font-bold">${(30000 * overridePercentages['Group Leader'] / 100).toLocaleString()}</p>
-                  </div>
-                  
-                  <div className="w-px h-8 bg-border"></div>
-                  
-                  <div className="flex flex-col items-center space-y-2 p-4 rounded-lg border border-property-green/50 bg-property-green/10 max-w-sm w-full text-center">
-                    <p className="font-semibold">Supreme Leader</p>
-                    <p className="text-sm text-muted-foreground">{overridePercentages['Supreme Leader']}% override</p>
-                    <p className="text-lg font-bold">${(30000 * overridePercentages['Supreme Leader'] / 100).toLocaleString()}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Commission Rules</CardTitle>
-                <CardDescription>
-                  Customize the rules for how commission is distributed through the hierarchy.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between space-x-2">
-                    <Label htmlFor="override-limit" className="flex-grow">
-                      Maximum Override Generations
-                      <p className="text-sm text-muted-foreground mt-1">
-                        How many levels up the hierarchy can override commissions flow.
-                      </p>
-                    </Label>
-                    <Input
-                      id="override-limit"
-                      type="number"
-                      className="w-20"
-                      defaultValue={5}
-                      min={1}
-                      max={10}
-                    />
-                  </div>
-                  
-                  <div className="flex items-start space-x-2">
-                    <Switch id="rank-requirement" />
-                    <Label htmlFor="rank-requirement" className="flex-grow">
-                      Enforce Rank Superiority Rule
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Upline agents can only earn override from downline agents of lower rank.
-                      </p>
-                    </Label>
-                  </div>
-                  
-                  <div className="flex items-start space-x-2">
-                    <Switch id="decrease-override" defaultChecked />
-                    <Label htmlFor="decrease-override" className="flex-grow">
-                      Decrease Override for Distant Generations
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Override percentage decreases the further away the agent is in the hierarchy.
-                      </p>
-                    </Label>
-                  </div>
-                  
-                  <div className="flex justify-end">
-                    <Button>Save Rules</Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+    <div className="p-6">
+      <h1 className="text-3xl font-bold mb-6">Transactions</h1>
+      
+      <Card className="mb-6">
+        <CardContent className="pt-6">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input placeholder="Search transactions..." className="pl-9" />
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline">
+                <Filter className="h-4 w-4 mr-2" />
+                Filter
+              </Button>
+              <Button variant="outline">
+                <SortDesc className="h-4 w-4 mr-2" />
+                Sort
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="text-sm text-muted-foreground">Total Transactions</p>
+                <p className="text-2xl font-bold">125</p>
+              </div>
+              <FileText className="h-8 w-8 text-muted-foreground" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="text-sm text-muted-foreground">Sales Volume</p>
+                <p className="text-2xl font-bold">$52.3M</p>
+              </div>
+              <DollarSign className="h-8 w-8 text-muted-foreground" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="text-sm text-muted-foreground">Pending Approval</p>
+                <p className="text-2xl font-bold">12</p>
+              </div>
+              <Clock className="h-8 w-8 text-amber-500" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="text-sm text-muted-foreground">Commission Total</p>
+                <p className="text-2xl font-bold">$1.57M</p>
+              </div>
+              <DollarSign className="h-8 w-8 text-green-500" />
+            </div>
+          </CardContent>
+        </Card>
       </div>
-    </MainLayout>
+      
+      <div className="bg-card rounded-md border shadow">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b">
+                <th className="text-left p-4 font-medium">
+                  <div className="flex items-center gap-1">
+                    Transaction ID
+                    <ArrowUpDown className="h-3 w-3" />
+                  </div>
+                </th>
+                <th className="text-left p-4 font-medium">Property</th>
+                <th className="text-left p-4 font-medium">Agent</th>
+                <th className="text-left p-4 font-medium">
+                  <div className="flex items-center gap-1">
+                    Date
+                    <ArrowUpDown className="h-3 w-3" />
+                  </div>
+                </th>
+                <th className="text-left p-4 font-medium">
+                  <div className="flex items-center gap-1">
+                    Amount
+                    <ArrowUpDown className="h-3 w-3" />
+                  </div>
+                </th>
+                <th className="text-left p-4 font-medium">Commission</th>
+                <th className="text-left p-4 font-medium">Status</th>
+                <th className="text-left p-4 font-medium">Type</th>
+                <th className="text-left p-4 font-medium"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {transactions.map((transaction) => (
+                <tr key={transaction.id} className="border-b hover:bg-muted/50">
+                  <td className="p-4">
+                    <div className="flex items-center gap-2">
+                      {getStatusIcon(transaction.status)}
+                      {transaction.id}
+                    </div>
+                  </td>
+                  <td className="p-4">{transaction.property}</td>
+                  <td className="p-4">{transaction.agent}</td>
+                  <td className="p-4">{transaction.date}</td>
+                  <td className="p-4">{transaction.amount}</td>
+                  <td className="p-4">{transaction.commission}</td>
+                  <td className="p-4">{getStatusBadge(transaction.status)}</td>
+                  <td className="p-4">
+                    <Badge variant="outline">
+                      {transaction.type === 'sale' ? 'Sale' : 'Rental'}
+                    </Badge>
+                  </td>
+                  <td className="p-4">
+                    <Link to={`/transactions/${transaction.id}`}>
+                      <Button variant="ghost" size="sm">View</Button>
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        
+        <div className="p-4 border-t flex items-center justify-between">
+          <div className="text-sm text-muted-foreground">
+            Showing <span className="font-medium">1</span> to <span className="font-medium">5</span> of <span className="font-medium">125</span> transactions
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" disabled>Previous</Button>
+            <Button variant="outline" size="sm">Next</Button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
-export default AdminCommission;
+export default AdminTransactions;

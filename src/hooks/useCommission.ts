@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { commissionApi } from '@/lib/api';
 import { AgentRank, AgentWithHierarchy, CommissionTier, OverrideCommission } from '@/types';
+import { stringToAgentRank } from '@/utils/typeConversions';
 
 // Get commission summary (current month, previous month, year to date)
 export function useCommissionSummary() {
@@ -75,6 +76,7 @@ export function calculateOverrideCommissions(
 ): OverrideCommission[] {
   const overrides: OverrideCommission[] = [];
   
+  // Check if upline exists
   if (!agent.upline) return overrides;
   
   let currentAgent = agent;
@@ -83,16 +85,23 @@ export function calculateOverrideCommissions(
   // Apply override percentages based on rank
   while (currentUpline) {
     // Only apply override if upline's rank is higher than the agent's rank
-    if (getRankLevel(currentUpline.rank) > getRankLevel(currentAgent.rank)) {
-      const overridePercentage = getOverridePercentage(currentUpline.rank);
+    const currentRank = stringToAgentRank(currentAgent.rank);
+    const uplineRank = stringToAgentRank(currentUpline.rank);
+    
+    if (getRankLevel(uplineRank) > getRankLevel(currentRank)) {
+      const overridePercentage = getOverridePercentage(uplineRank);
       const overrideAmount = baseCommission * (overridePercentage / 100);
       
       overrides.push({
+        id: `override-${currentUpline.id}`,
         agentId: currentUpline.id,
-        agentName: currentUpline.name,
-        rank: currentUpline.rank,
+        baseAgentId: currentAgent.id,
+        transactionId: '',
         percentage: overridePercentage,
-        amount: overrideAmount
+        amount: overrideAmount,
+        status: 'Pending',
+        agentName: currentUpline.name,
+        rank: currentUpline.rank
       });
     }
     

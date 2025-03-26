@@ -1,4 +1,3 @@
-
 import { useCallback } from 'react';
 import { useReducer } from 'react';
 import { 
@@ -11,13 +10,17 @@ import {
 import { transactionFormReducer } from './reducer';
 import { initialTransactionFormState, getDefaultCommissionRate } from './initialState';
 import { saveFormAsDraft, submitTransactionForm } from './formSubmission';
+import { stringToAgentRank } from '@/utils/typeConversions';
 
 // Agent tier commission percentages
 const AGENT_TIER_PERCENTAGES: Record<AgentRank, number> = {
+  'Associate': 70,
+  'Senior Associate': 75,
   'Advisor': 70,
   'Sales Leader': 80,
   'Team Leader': 83,
   'Group Leader': 85,
+  'Director': 87,
   'Supreme Leader': 85
 };
 
@@ -198,8 +201,8 @@ export const useTransactionFormActions = () => {
   }, [state, resetForm, validateCurrentStep]);
 
   // Helper function to get agent's commission percentage based on their tier
-  const getAgentCommissionPercentage = (tier: AgentRank): number => {
-    return AGENT_TIER_PERCENTAGES[tier] || 70; // Default to 70% if tier not found
+  const getAgentCommissionPercentage = (tier: string | AgentRank): number => {
+    return AGENT_TIER_PERCENTAGES[tier as AgentRank] || 70; // Default to 70% if tier not found
   };
 
   // Calculate commission breakdown - updated to match business rules

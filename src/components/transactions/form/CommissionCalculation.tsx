@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useTransactionForm } from '@/context/TransactionFormContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,6 +9,7 @@ import CommissionBreakdownCard from './commission/CommissionBreakdownCard';
 import CoBrokingInfoCard from './commission/CoBrokingInfoCard';
 import CommissionVisualizer from './commission/CommissionVisualizer';
 import { useAgentProfile } from '@/hooks/useAgentProfile';
+import { AgentRank } from '@/types';
 
 const CommissionCalculation: React.FC = () => {
   const { state, updateFormData, calculateCommission } = useTransactionForm();
@@ -20,19 +20,19 @@ const CommissionCalculation: React.FC = () => {
   const {
     transactionValue = 0,
     commissionRate = 0,
-    agentTier = 'Advisor',
+    agentTier = 'Advisor' as AgentRank,
     transactionType
   } = formData;
   
   // Sync agent tier with profile when it loads
   useEffect(() => {
     if (agentProfile && agentProfile.tier_name && agentTier !== agentProfile.tier_name) {
-      updateFormData({ agentTier: agentProfile.tier_name });
+      updateFormData({ agentTier: agentProfile.tier_name as AgentRank });
     }
   }, [agentProfile, agentTier, updateFormData]);
   
   const handleAgentTierChange = (tier: string) => {
-    updateFormData({ agentTier: tier as any });
+    updateFormData({ agentTier: tier as AgentRank });
   };
   
   // Calculate commission

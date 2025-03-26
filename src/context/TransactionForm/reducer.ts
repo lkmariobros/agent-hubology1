@@ -1,17 +1,10 @@
+import { TransactionFormState } from './types';
+import { stringToTransactionType } from '@/utils/typeConversions';
 
-import { 
-  TransactionFormState, 
-  TransactionFormData, 
-  TransactionDocument, 
-  TransactionType 
-} from './types';
-import { getInitialTransactionData } from './initialState';
-
-// Action types
-export type TransactionFormAction =
-  | { type: 'UPDATE_FORM_DATA'; payload: Partial<TransactionFormData> }
-  | { type: 'UPDATE_TRANSACTION_TYPE'; payload: TransactionType }
-  | { type: 'ADD_DOCUMENT'; payload: TransactionDocument }
+type TransactionFormAction =
+  | { type: 'UPDATE_FORM_DATA'; payload: Partial<TransactionFormState['formData']> }
+  | { type: 'UPDATE_TRANSACTION_TYPE'; payload: string }
+  | { type: 'ADD_DOCUMENT'; payload: any }
   | { type: 'REMOVE_DOCUMENT'; payload: number }
   | { type: 'NEXT_STEP' }
   | { type: 'PREV_STEP' }
@@ -21,143 +14,89 @@ export type TransactionFormAction =
   | { type: 'SUBMITTING'; payload: boolean }
   | { type: 'SET_ERRORS'; payload: Record<string, string> };
 
-// Reducer function
 export const transactionFormReducer = (
-  state: TransactionFormState, 
+  state: TransactionFormState,
   action: TransactionFormAction
 ): TransactionFormState => {
-  // Safely log action type and payload if it exists
-  console.log('Reducer action:', action.type, 
-    'payload' in action ? action.payload : '(no payload)');
-  
   switch (action.type) {
     case 'UPDATE_FORM_DATA':
-      // Special handling for coBroking object
-      if (action.payload.coBroking !== undefined) {
-        // Make sure the coBroking object is properly initialized
-        const currentCoBroking = state.formData.coBroking || {
-          enabled: false,
-          agentName: '',
-          agentCompany: '',
-          agentContact: '',
-          commissionSplit: 50,
-          credentialsVerified: false
-        };
-        
-        console.log('Current coBroking before update:', currentCoBroking);
-        console.log('New coBroking data:', action.payload.coBroking);
-        
-        // Create a new state object with the updated coBroking data
-        const newState = {
-          ...state,
-          formData: { 
-            ...state.formData, 
-            ...action.payload,
-            coBroking: {
-              ...currentCoBroking,
-              ...action.payload.coBroking
-            }
-          },
-          isDirty: true,
-        };
-        
-        console.log('New state after coBroking update:', newState.formData.coBroking);
-        return newState;
-      }
-      
-      // Handle other fields
       return {
         ...state,
         formData: { ...state.formData, ...action.payload },
-        isDirty: true,
+        isDirty: true
       };
-      
-    case 'UPDATE_TRANSACTION_TYPE': {
-      console.log('Updating transaction type to:', action.payload);
-      
-      // Keep current property data when changing transaction type
-      const currentProperty = state.formData.property;
-      const currentPropertyId = state.formData.propertyId;
-      
-      // Get fresh form data for the new transaction type
-      const newFormData = getInitialTransactionData(action.payload);
-      
-      // Merge the new form data with existing property data
+    case 'UPDATE_TRANSACTION_TYPE':
       return {
         ...state,
-        formData: { 
-          ...newFormData, 
-          property: currentProperty,
-          propertyId: currentPropertyId 
+        formData: {
+          ...state.formData,
+          transactionType: stringToTransactionType(action.payload),
         },
-        isDirty: true,
+        isDirty: true
       };
-    }
-    
     case 'ADD_DOCUMENT':
       return {
         ...state,
         documents: [...state.documents, action.payload],
-        isDirty: true,
+        isDirty: true
       };
-      
     case 'REMOVE_DOCUMENT':
       return {
         ...state,
         documents: state.documents.filter((_, index) => index !== action.payload),
-        isDirty: true,
+        isDirty: true
       };
-      
     case 'NEXT_STEP':
-      console.log('Moving to next step, current step:', state.currentStep);
       return {
         ...state,
-        currentStep: state.currentStep + 1,
+        currentStep: Math.min(state.currentStep + 1, 6)
       };
-      
     case 'PREV_STEP':
       return {
         ...state,
-        currentStep: Math.max(0, state.currentStep - 1),
+        currentStep: Math.max(state.currentStep - 1, 0)
       };
-      
     case 'GO_TO_STEP':
       return {
         ...state,
-        currentStep: action.payload,
+        currentStep: action.payload
       };
-      
     case 'RESET_FORM':
       return {
         ...state,
-        formData: getInitialTransactionData(state.formData.transactionType),
+        formData: {
+          transactionType: 'Sale',
+          transactionDate: new Date().toISOString().split('T')[0],
+          propertyId: '',
+          status: 'Draft',
+          transactionValue: 0,
+          commissionRate: 0,
+          commissionAmount: 0,
+          agentTier: 'Advisor'
+        },
         documents: [],
+        errors: {},
         currentStep: 0,
         isSubmitting: false,
         isDirty: false,
-        lastSaved: null,
-        errors: {},
+        lastSaved: null
       };
-      
     case 'FORM_SAVED':
       return {
         ...state,
         lastSaved: action.payload,
-        isDirty: false,
+        isDirty: false
       };
-      
     case 'SUBMITTING':
       return {
         ...state,
-        isSubmitting: action.payload,
+        isSubmitting: action.payload
       };
-      
     case 'SET_ERRORS':
       return {
         ...state,
-        errors: action.payload,
+        errors: action.payload
       };
-      
     default:
       return state;
   }

@@ -1,5 +1,5 @@
-
 import { TransactionFormState, TransactionFormData, TransactionType } from './types';
+import { AgentRank } from '@/types';
 
 // Default commission rates by transaction type
 const DEFAULT_COMMISSION_RATES = {
@@ -19,7 +19,7 @@ export const getInitialTransactionData = (transactionType: TransactionType): Tra
   
   return {
     transactionType,
-    transactionDate: new Date(),
+    transactionDate: new Date().toISOString().split('T')[0],
     propertyId: '',
     status: 'Draft',
     transactionValue: 0,
@@ -34,9 +34,19 @@ export const getInitialTransactionData = (transactionType: TransactionType): Tra
 
 // Initial state for the transaction form
 export const initialTransactionFormState: TransactionFormState = {
-  formData: getInitialTransactionData('Sale'),
+  formData: {
+    transactionType: 'Sale',
+    transactionDate: new Date().toISOString().split('T')[0], // Use ISO string format for date
+    propertyId: '',
+    status: 'Draft',
+    transactionValue: 0,
+    commissionRate: getDefaultCommissionRate('Sale'),
+    commissionAmount: 0,
+    agentTier: 'Advisor' as AgentRank,
+  },
   documents: [],
   errors: {},
+  // Additional state properties
   currentStep: 0,
   isSubmitting: false,
   isDirty: false,

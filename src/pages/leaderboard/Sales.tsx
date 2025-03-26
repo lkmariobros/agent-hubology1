@@ -1,190 +1,141 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { User } from '@/types';
-import { cn } from '@/lib/utils';
-import { Badge } from '@/components/ui/badge';
-import MainLayout from '@/components/layout/MainLayout';
 
-// Sample users data
-const users: User[] = [{
-  id: '1',
-  name: 'John Smith',
-  email: 'john@example.com',
-  role: 'agent',
-  tier: 'senior',
-  avatar: 'https://randomuser.me/api/portraits/men/1.jpg'
-}, {
-  id: '2',
-  name: 'Sarah Johnson',
-  email: 'sarah@example.com',
-  role: 'agent',
-  tier: 'principal',
-  avatar: 'https://randomuser.me/api/portraits/women/2.jpg'
-}, {
-  id: '3',
-  name: 'Michael Brown',
-  email: 'michael@example.com',
-  role: 'agent',
-  tier: 'associate',
-  avatar: 'https://randomuser.me/api/portraits/men/3.jpg'
-}, {
-  id: '4',
-  name: 'Emily Davis',
-  email: 'emily@example.com',
-  role: 'manager',
-  tier: 'director',
-  avatar: 'https://randomuser.me/api/portraits/women/4.jpg'
-}, {
-  id: '5',
-  name: 'Robert Wilson',
-  email: 'robert@example.com',
-  role: 'agent',
-  tier: 'junior',
-  avatar: 'https://randomuser.me/api/portraits/men/5.jpg'
-}, {
-  id: '6',
-  name: 'Lisa Anderson',
-  email: 'lisa@example.com',
-  role: 'agent',
-  tier: 'associate',
-  avatar: 'https://randomuser.me/api/portraits/women/6.jpg'
-}, {
-  id: '7',
-  name: 'David Martinez',
-  email: 'david@example.com',
-  role: 'agent',
-  tier: 'senior',
-  avatar: 'https://randomuser.me/api/portraits/men/7.jpg'
-}, {
-  id: '8',
-  name: 'Jennifer Taylor',
-  email: 'jennifer@example.com',
-  role: 'agent',
-  tier: 'principal',
-  avatar: 'https://randomuser.me/api/portraits/women/8.jpg'
-}, {
-  id: '9',
-  name: 'James Johnson',
-  email: 'james@example.com',
-  role: 'agent',
-  tier: 'associate',
-  avatar: 'https://randomuser.me/api/portraits/men/9.jpg'
-}, {
-  id: '10',
-  name: 'Amanda White',
-  email: 'amanda@example.com',
-  role: 'agent',
-  tier: 'senior',
-  avatar: 'https://randomuser.me/api/portraits/women/10.jpg'
-}];
-type TimeFrame = 'week' | 'month' | 'year' | 'all-time';
-const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: 0
-  }).format(value);
-};
-const SalesLeaderboard = () => {
-  const [timeFrame, setTimeFrame] = React.useState<TimeFrame>('month');
+const users: User[] = [
+  {
+    id: '1',
+    name: 'Alex Johnson',
+    email: 'alex@example.com',
+    role: 'Agent',
+    tier: 'Gold',
+    avatar: '/avatars/avatar-1.png',
+    sales: 7850000,
+    joinDate: '2021-04-15'
+  },
+  {
+    id: '2',
+    name: 'Megan Davis',
+    email: 'megan@example.com',
+    role: 'Agent',
+    tier: 'Silver',
+    avatar: '/avatars/avatar-2.png',
+    sales: 6200000,
+    joinDate: '2022-02-28'
+  },
+  {
+    id: '3',
+    name: 'Ryan Chen',
+    email: 'ryan@example.com',
+    role: 'Agent',
+    tier: 'Bronze',
+    avatar: '/avatars/avatar-3.png',
+    sales: 5100000,
+    joinDate: '2022-11-01'
+  },
+  {
+    id: '4',
+    name: 'Emily White',
+    email: 'emily@example.com',
+    role: 'Agent',
+    tier: 'Gold',
+    avatar: '/avatars/avatar-4.png',
+    sales: 4950000,
+    joinDate: '2023-01-10'
+  },
+  {
+    id: '5',
+    name: 'Kevin Brown',
+    email: 'kevin@example.com',
+    role: 'Agent',
+    tier: 'Silver',
+    avatar: '/avatars/avatar-5.png',
+    sales: 3800000,
+    joinDate: '2023-03-22'
+  },
+  {
+    id: '6',
+    name: 'Laura Wilson',
+    email: 'laura@example.com',
+    role: 'Agent',
+    tier: 'Bronze',
+    avatar: '/avatars/avatar-6.png',
+    sales: 2700000,
+    joinDate: '2023-05-05'
+  },
+  {
+    id: '7',
+    name: 'David Garcia',
+    email: 'david@example.com',
+    role: 'Agent',
+    tier: 'Gold',
+    avatar: '/avatars/avatar-7.png',
+    sales: 1950000,
+    joinDate: '2023-07-18'
+  },
+  {
+    id: '8',
+    name: 'Sophia Rodriguez',
+    email: 'sophia@example.com',
+    role: 'Agent',
+    tier: 'Silver',
+    avatar: '/avatars/avatar-8.png',
+    sales: 1500000,
+    joinDate: '2023-09-01'
+  },
+  {
+    id: '9',
+    name: 'Daniel Martinez',
+    email: 'daniel@example.com',
+    role: 'Agent',
+    tier: 'Bronze',
+    avatar: '/avatars/avatar-9.png',
+    sales: 900000,
+    joinDate: '2023-10-12'
+  },
+  {
+    id: '10',
+    name: 'Olivia Anderson',
+    email: 'olivia@example.com',
+    role: 'Agent',
+    tier: 'Gold',
+    avatar: '/avatars/avatar-10.png',
+    sales: 550000,
+    joinDate: '2023-12-24'
+  },
+];
 
-  // Sort users by random sales (in a real app, this would be actual data)
-  const sortedUsers = React.useMemo(() => {
-    return [...users].map(user => ({
-      ...user,
-      sales: Math.floor(Math.random() * 20000000) + 1000000
-    })).sort((a, b) => b.sales - a.sales);
-  }, [timeFrame]); // Recalculate when timeFrame changes
-
+const Sales = () => {
   return (
-    <div className="space-y-6 px-[42px] py-[19px] my-0 mx-[50px]">
-      {/* Page Title */}
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Sales Leaderboard</h1>
-        <p className="text-muted-foreground">
-          Track agent performance based on sales volume.
-        </p>
-      </div>
-
-      {/* Time Frame Selector */}
-      <div className="flex space-x-2">
-        <Badge variant={timeFrame === 'week' ? 'default' : 'outline'} className="cursor-pointer" onClick={() => setTimeFrame('week')}>
-          This Week
-        </Badge>
-        <Badge variant={timeFrame === 'month' ? 'default' : 'outline'} className="cursor-pointer" onClick={() => setTimeFrame('month')}>
-          This Month
-        </Badge>
-        <Badge variant={timeFrame === 'year' ? 'default' : 'outline'} className="cursor-pointer" onClick={() => setTimeFrame('year')}>
-          This Year
-        </Badge>
-        <Badge variant={timeFrame === 'all-time' ? 'default' : 'outline'} className="cursor-pointer" onClick={() => setTimeFrame('all-time')}>
-          All Time
-        </Badge>
-      </div>
-
-      {/* Leaderboard Card */}
-      <Card className="glass-card overflow-hidden">
-        <CardHeader className="px-6 py-4">
-          <CardTitle className="text-lg font-semibold">Sales Ranking</CardTitle>
-        </CardHeader>
-        
-        <CardContent className="px-6 py-0 pb-6">
-          <div className="space-y-4">
-            {sortedUsers.map((user, index) => (
-              <div key={user.id} className="flex items-center space-x-4 p-3 rounded-lg hover:bg-white/5 transition-colors">
-                <div className="w-8 text-center">
-                  <div className={cn(
-                    "w-6 h-6 mx-auto rounded-full flex items-center justify-center text-xs font-medium",
-                    index === 0
-                      ? "bg-property-orange text-white"
-                      : index === 1
-                      ? "bg-property-purple text-white"
-                      : index === 2
-                      ? "bg-property-pink text-white"
-                      : "bg-sidebar-accent text-sidebar-accent-foreground"
-                  )}>
-                    {index + 1}
-                  </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Sales Leaderboard</CardTitle>
+      </CardHeader>
+      <CardContent className="pl-2 pr-2">
+        <ScrollArea className="h-[500px] w-full rounded-md border">
+          <div className="p-3">
+            {users.map((user) => (
+              <div key={user.id} className="mb-4 flex items-center space-x-4">
+                <Avatar>
+                  <AvatarImage src={user.avatar} alt={user.name} />
+                  <AvatarFallback>{user.name.slice(0, 2)}</AvatarFallback>
+                </Avatar>
+                <div className="flex-1">
+                  <h3 className="text-sm font-semibold">{user.name}</h3>
+                  <p className="text-xs text-muted-foreground">{user.role} ({user.tier} Tier)</p>
                 </div>
-                
-                <div className="flex-shrink-0">
-                  {user.avatar ? (
-                    <img
-                      src={user.avatar}
-                      alt={user.name}
-                      className="h-10 w-10 rounded-full object-cover border border-white/10"
-                    />
-                  ) : (
-                    <div className="h-10 w-10 rounded-full bg-accent/10 flex items-center justify-center">
-                      <span className="text-sm font-medium text-accent">
-                        {user.name.charAt(0)}
-                      </span>
-                    </div>
-                  )}
-                </div>
-                
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">
-                    {user.name}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {user.role === 'agent' ? user.tier : user.role}
-                  </p>
-                </div>
-                
-                <div className="text-right">
-                  <p className="text-sm font-semibold">
-                    {formatCurrency(user.sales)}
-                  </p>
-                  <p className="text-xs text-muted-foreground">in sales</p>
+                <div>
+                  <p className="text-sm font-medium">${user.sales?.toLocaleString()}</p>
                 </div>
               </div>
             ))}
           </div>
-        </CardContent>
-      </Card>
-    </div>
+        </ScrollArea>
+      </CardContent>
+    </Card>
   );
 };
 
-export default SalesLeaderboard;
+export default Sales;

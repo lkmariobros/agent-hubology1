@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { Transaction, TransactionDocument } from '@/types';
@@ -143,7 +142,7 @@ export function useTransactions() {
           throw error;
         }
 
-        // Map to our Transaction interface
+        // Fix property access on transaction data
         const transaction: Transaction = {
           id: data.id,
           propertyId: data.property_id,

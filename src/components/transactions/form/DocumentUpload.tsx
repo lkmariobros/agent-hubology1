@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useTransactionForm } from '@/context/TransactionForm';
 import { Upload, FileText, X, AlertCircle } from 'lucide-react';
@@ -62,6 +61,7 @@ const DocumentUpload: React.FC = () => {
     }
     
     const newDocument: TransactionDocument = {
+      id: `temp-${Date.now()}`, // Add a temporary ID to satisfy the type requirement
       name: documentName,
       documentType: documentType as DocumentType,
       file: file

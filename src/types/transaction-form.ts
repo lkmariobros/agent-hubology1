@@ -16,9 +16,10 @@ export interface TransactionFormData {
   transactionValue: number;
   commissionRate: number;
   commissionAmount: number;
-  agentTier?: string; // Changed from AgentRank to string for compatibility
+  agentTier?: AgentRank; // Updated to AgentRank type
   coBroking?: CoBrokingInfo;
   notes?: string;
+  agentId?: string;
 }
 
 export interface PropertyInfo {
@@ -56,7 +57,7 @@ export interface CoBrokingInfo {
 
 export type TransactionType = 'Sale' | 'Rent' | 'Developer';
 export type TransactionStatus = 'Draft' | 'Pending' | 'In Progress' | 'Completed' | 'Cancelled';
-export type AgentRank = 'Advisor' | 'Sales Leader' | 'Team Leader' | 'Group Leader' | 'Supreme Leader';
+export type AgentRank = 'Associate' | 'Senior Associate' | 'Advisor' | 'Sales Leader' | 'Team Leader' | 'Group Leader' | 'Director' | 'Supreme Leader';
 export type DocumentType = 'Contract' | 'Agreement' | 'Invoice' | 'Receipt' | 'Other';
 
 export interface TransactionDocument {

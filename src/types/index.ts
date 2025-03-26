@@ -186,6 +186,18 @@ export interface OverrideCommission {
   amount: number;
   percentage: number;
   status: string;
+  agentName?: string; // Add missing property
+  rank?: string; // Add missing property
+}
+
+export interface OverrideCommission {
+  id: string;
+  agentId: string;
+  baseAgentId: string;
+  transactionId: string;
+  amount: number;
+  percentage: number;
+  status: string;
 }
 
 export interface AgentWithHierarchy {
@@ -323,10 +335,17 @@ export interface RankRequirement {
   minSalesVolume: number;
   minTransactions: number;
   overrideRate: number;
+  rank?: string;
+  color?: string;
+  personalSales?: number;
+  recruitedAgents?: number;
+  transactions?: number; // Alias for minTransactions
+  salesVolume?: number; // Alias for minSalesVolume
 }
 
 export type TransactionFormValues = TransactionFormData;
 
+// Update AgentRank to include all used values
+export type AgentRank = 'Associate' | 'Senior Associate' | 'Advisor' | 'Sales Leader' | 'Team Leader' | 'Group Leader' | 'Director' | 'Supreme Leader';
 export type TransactionType = 'Sale' | 'Rent' | 'Developer';
-export type AgentRank = 'Associate' | 'Senior Associate' | 'Team Leader' | 'Sales Leader' | 'Director' | 'Advisor' | 'Group Leader' | 'Supreme Leader';
 export type ApprovalStatus = 'Pending' | 'Approved' | 'Rejected' | 'Under Review' | 'Ready for Payment' | 'Paid';
