@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
@@ -13,34 +14,49 @@ import SendTestNotification from '@/components/commission/SendTestNotification';
 // Sample commission tiers for fallback when API fails
 const fallbackTiers: CommissionTier[] = [{
   id: 'bronze',
+  name: 'Bronze',
   tier: 'Bronze',
   rate: 20,
   minTransactions: 0,
-  color: 'orange'
+  color: 'orange',
+  rank: 'Associate',
+  agentPercentage: 70
 }, {
   id: 'silver',
+  name: 'Silver',
   tier: 'Silver',
   rate: 25,
   minTransactions: 10,
-  color: 'blue'
+  color: 'blue',
+  rank: 'Senior Associate',
+  agentPercentage: 75
 }, {
   id: 'gold',
+  name: 'Gold',
   tier: 'Gold',
   rate: 30,
   minTransactions: 25,
-  color: 'orange'
+  color: 'orange',
+  rank: 'Team Leader',
+  agentPercentage: 80
 }, {
   id: 'platinum',
+  name: 'Platinum',
   tier: 'Platinum',
   rate: 35,
   minTransactions: 50,
-  color: 'purple'
+  color: 'purple',
+  rank: 'Sales Leader',
+  agentPercentage: 85
 }, {
   id: 'diamond',
+  name: 'Diamond',
   tier: 'Diamond',
   rate: 40,
   minTransactions: 100,
-  color: 'pink'
+  color: 'pink',
+  rank: 'Director',
+  agentPercentage: 90
 }];
 
 // Sample agent hierarchy for fallback when API fails
@@ -78,7 +94,7 @@ const fallbackAgentHierarchy: AgentWithHierarchy = {
 const recentCommissions: CommissionHistory[] = [{
   id: '1',
   transactionId: 'tx1',
-  transactionReference: 'tx1', // Adding this to match the type
+  transactionReference: 'tx1',
   property: {
     title: 'Suburban Family Home',
     location: 'Palo Alto, CA'
@@ -89,7 +105,7 @@ const recentCommissions: CommissionHistory[] = [{
 }, {
   id: '2',
   transactionId: 'tx2',
-  transactionReference: 'tx2', // Adding this to match the type
+  transactionReference: 'tx2',
   property: {
     title: 'Downtown Loft',
     location: 'San Francisco, CA'
@@ -100,7 +116,7 @@ const recentCommissions: CommissionHistory[] = [{
 }, {
   id: '3',
   transactionId: 'tx3',
-  transactionReference: 'tx3', // Adding this to match the type
+  transactionReference: 'tx3',
   property: {
     title: 'Luxury Beach Condo',
     location: 'Santa Monica, CA'
@@ -112,7 +128,7 @@ const recentCommissions: CommissionHistory[] = [{
 }, {
   id: '4',
   transactionId: 'tx4',
-  transactionReference: 'tx4', // Adding this to match the type
+  transactionReference: 'tx4',
   property: {
     title: 'Modern Townhouse',
     location: 'Berkeley, CA'

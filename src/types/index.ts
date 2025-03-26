@@ -1,3 +1,4 @@
+
 export interface DashboardMetric {
   id: string;
   label: string;
@@ -5,6 +6,7 @@ export interface DashboardMetric {
   change?: number;
   trend?: 'up' | 'down' | 'neutral';
   icon?: React.ReactNode;
+  status?: string; // Added to fix DashboardMetric errors
 }
 
 export interface Property {
@@ -31,6 +33,10 @@ export interface Property {
   createdAt: string;
   updatedAt: string;
   size?: number;
+  stock?: number; // Added for PropertyCard
+  transactionType?: string; // Added for PropertyCard
+  featured?: boolean; // Added for PropertyCard
+  listedBy?: string; // Added for PropertyCardDetails
 }
 
 export interface Agent {
@@ -102,6 +108,14 @@ export interface ApiResponse<T> {
   data: T;
 }
 
+export interface PaginatedResponse<T> extends ApiResponse<T> {
+  pagination: {
+    total: number;
+    page: number;
+    limit: number;
+  };
+}
+
 export interface CommissionTier {
   id: string;
   name: string;
@@ -111,6 +125,10 @@ export interface CommissionTier {
   minSalesVolume?: number;
   isDefault?: boolean;
   thresholdAmount?: number;
+  // Properties needed by CommissionTiers component
+  tier?: string;
+  rate?: number;
+  color?: string;
 }
 
 export interface AgentCommissionProfile {
@@ -153,6 +171,16 @@ export interface CommissionOverride {
   status: 'Pending' | 'Approved' | 'Paid';
 }
 
+export interface OverrideCommission {
+  id: string;
+  agentId: string;
+  baseAgentId: string;
+  transactionId: string;
+  amount: number;
+  percentage: number;
+  status: string;
+}
+
 export interface AgentWithHierarchy {
   id: string;
   name: string;
@@ -167,11 +195,12 @@ export interface AgentWithHierarchy {
   overrideCommission: number;
   totalCommission: number;
   downline: AgentWithHierarchy[];
+  upline?: AgentWithHierarchy; // Added to fix useCommission errors
 }
 
 export interface CommissionHistory {
   id: string;
-  transactionId: string;
+  transactionId?: string; // Made optional to match usage
   property: {
     title: string;
     location: string;
@@ -184,6 +213,7 @@ export interface CommissionHistory {
 }
 
 export type TransactionFormData = {
+  id?: string;
   transactionValue: number;
   commissionRate: number;
   commissionAmount: number;
@@ -197,14 +227,96 @@ export type TransactionFormData = {
     name?: string;
     email?: string;
     phone?: string;
+    notes?: string; // Added to fix ClientInformation errors
   };
   seller?: {
     name?: string;
     email?: string;
     phone?: string;
+    notes?: string; // Added to fix ClientInformation errors
+  };
+  // Added to fix transaction form related errors
+  property?: any;
+  transactionType?: string;
+  agentTier?: string;
+  landlord?: {
+    name?: string;
+    email?: string;
+    phone?: string;
+    notes?: string;
+  };
+  tenant?: {
+    name?: string;
+    email?: string;
+    phone?: string;
+    notes?: string;
+  };
+  developer?: {
+    name?: string;
+    email?: string;
+    phone?: string;
+    notes?: string;
+  };
+  coBroking?: {
+    enabled: boolean;
+    agentName?: string;
+    agentCompany?: string;
+    agentContact?: string;
+    commissionSplit: number;
+    credentialsVerified?: boolean;
   };
 };
 
-export type TransactionType = 'Sale' | 'Rental';
-export type AgentRank = 'Associate' | 'Senior Associate' | 'Team Leader' | 'Sales Leader' | 'Director';
-export type ApprovalStatus = 'Pending' | 'Approved' | 'Rejected';
+export interface PropertyStock {
+  total: number;
+  available: number;
+  reserved: number;
+  sold: number;
+}
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  avatar: string;
+  role: string;
+  joinDate: string;
+  rank?: string;
+  phone?: string; // Added to fix Team component errors
+  properties?: number; // Added to fix Team component errors
+  transactions?: number; // Added to fix Team component errors
+}
+
+export interface PropertyFormValues {
+  title: string;
+  description: string;
+  type: string;
+  subtype?: string; // Added for PropertyForm
+  address: {
+    street: string;
+    city: string;
+    state: string;
+    zip: string;
+    country: string;
+  };
+  price: number;
+  area?: number;
+  bedrooms?: number;
+  bathrooms?: number;
+  features: string[];
+  images: File[];
+  status: string;
+  transactionType?: string;
+}
+
+export interface RankRequirement {
+  minSalesVolume: number;
+  minTransactions: number;
+  overrideRate: number;
+}
+
+export type TransactionFormValues = TransactionFormData;
+
+export type TransactionType = 'Sale' | 'Rent' | 'Developer';
+export type AgentRank = 'Associate' | 'Senior Associate' | 'Team Leader' | 'Sales Leader' | 'Director' | 'Advisor' | 'Group Leader' | 'Supreme Leader';
+export type ApprovalStatus = 'Pending' | 'Approved' | 'Rejected' | 'Under Review' | 'Ready for Payment' | 'Paid';
