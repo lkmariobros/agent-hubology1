@@ -20,7 +20,7 @@ const Dashboard = () => {
       label: "Transactions",
       value: "12",
       change: 8.2,
-      trend: "up",
+      trend: "up" as const,
       description: "This month's transactions",
       icon: <Receipt className="h-5 w-5 text-blue-500" />
     },
@@ -28,7 +28,7 @@ const Dashboard = () => {
       label: "Listings",
       value: "32",
       change: -3.1,
-      trend: "down",
+      trend: "down" as const,
       description: "Active property listings",
       icon: <Building className="h-5 w-5 text-orange-500" />
     },
@@ -36,7 +36,7 @@ const Dashboard = () => {
       label: "Client Inquiries",
       value: "47",
       change: 12.5,
-      trend: "up",
+      trend: "up" as const,
       description: "New inquiries this month",
       icon: <LineChart className="h-5 w-5 text-green-500" />
     }

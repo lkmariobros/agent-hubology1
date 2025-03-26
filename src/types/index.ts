@@ -1,3 +1,4 @@
+
 export interface Address {
   street: string;
   city: string;
@@ -36,6 +37,14 @@ export interface Property {
   updatedAt: string;
   featured: boolean;
   transactionType: string;
+  stock?: PropertyStock;
+}
+
+export interface PropertyStock {
+  total: number;
+  available: number;
+  reserved: number;
+  sold: number;
 }
 
 export interface Transaction {
@@ -55,6 +64,18 @@ export interface Transaction {
     };
   };
   price?: number;
+  type?: string;
+  notes?: string;
+  documents?: DocumentRecord[];
+}
+
+export interface DocumentRecord {
+  id: string;
+  name: string;
+  url: string;
+  type: string;
+  uploadedAt: string;
+  size: number;
 }
 
 export interface Opportunity {
@@ -82,4 +103,109 @@ export interface ApiResponse<T> {
   data: T;
   message: string;
   success: boolean;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+  avatar?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AgentWithHierarchy {
+  id: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  avatar?: string;
+  rank: AgentRank;
+  joinDate: string;
+  transactions: number;
+  salesVolume: number;
+  personalCommission: number;
+  overrideCommission: number;
+  totalCommission: number;
+  upline?: AgentWithHierarchy;
+  downline: AgentWithHierarchy[];
+}
+
+export type AgentRank = 'Advisor' | 'Sales Leader' | 'Team Leader' | 'Group Leader' | 'Supreme Leader';
+
+export interface RankRequirement {
+  rank: AgentRank;
+  salesVolume: number;
+  transactions: number;
+  description: string;
+}
+
+export interface CommissionTier {
+  tier: string;
+  rate: number;
+  minTransactions: number;
+  color: string;
+}
+
+export interface OverrideCommission {
+  agentId: string;
+  agentName: string;
+  rank: AgentRank;
+  percentage: number;
+  amount: number;
+}
+
+export interface CommissionHistory {
+  id: string;
+  transactionId: string;
+  property: {
+    title: string;
+    location: string;
+  };
+  date: string;
+  amount: number;
+  type: 'personal' | 'override';
+  source?: string;
+}
+
+export interface PropertyFormValues {
+  title: string;
+  description: string;
+  type: string;
+  subtype: string;
+  price: number;
+  area: number;
+  bedrooms: number;
+  bathrooms: number;
+  features: Record<string, boolean>;
+  address: Address;
+  images: File[];
+  status: string;
+  transactionType: string;
+}
+
+export interface TransactionFormValues {
+  transactionType: string;
+  propertyId: string;
+  clientId: string;
+  clientType: string;
+  price: number;
+  date: string;
+  commissionRate: number;
+  commissionAmount: number;
+  notes: string;
+  documents: File[];
+  status: string;
+  coBroking: boolean;
+  coBrokerId?: string;
+  coBrokerCommissionSplit?: number;
 }
