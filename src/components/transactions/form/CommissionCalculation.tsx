@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useTransactionForm } from '@/context/TransactionFormContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,38 +11,48 @@ import CommissionVisualizer from './commission/CommissionVisualizer';
 import { useAgentProfile } from '@/hooks/useAgentProfile';
 import { AgentRank } from '@/types';
 import { stringToAgentRank } from '@/utils/typeConversions';
-
 const CommissionCalculation: React.FC = () => {
-  const { state, updateFormData, calculateCommission } = useTransactionForm();
-  const { formData, errors } = state;
+  const {
+    state,
+    updateFormData,
+    calculateCommission
+  } = useTransactionForm();
+  const {
+    formData,
+    errors
+  } = state;
   const [ownerCommissionAmount, setOwnerCommissionAmount] = useState(formData.commissionAmount || 0);
-  const { data: agentProfile } = useAgentProfile();
-  
+  const {
+    data: agentProfile
+  } = useAgentProfile();
   const {
     transactionValue = 0,
     commissionRate = 0,
     agentTier = 'Advisor',
     transactionType
   } = formData;
-  
+
   // Sync agent tier with profile when it loads
   useEffect(() => {
     if (agentProfile && agentProfile.tier_name && agentTier !== agentProfile.tier_name) {
-      updateFormData({ agentTier: stringToAgentRank(agentProfile.tier_name) });
+      updateFormData({
+        agentTier: stringToAgentRank(agentProfile.tier_name)
+      });
     }
   }, [agentProfile, agentTier, updateFormData]);
-  
   const handleAgentTierChange = (tier: string) => {
-    updateFormData({ agentTier: stringToAgentRank(tier) });
+    updateFormData({
+      agentTier: stringToAgentRank(tier)
+    });
   };
-  
+
   // Calculate commission
   const commissionBreakdown = calculateCommission();
   const totalCommission = commissionBreakdown.totalCommission || 0;
-  
+
   // Determine if it's a rental transaction
   const isRental = transactionType === 'Rent';
-  
+
   // Format currency for display
   const formatCurrency = (amount: number) => {
     return amount.toLocaleString('en-US', {
@@ -53,13 +62,11 @@ const CommissionCalculation: React.FC = () => {
       maximumFractionDigits: 0
     });
   };
-  
+
   // Calculate agent and agency percentages
   const agentPortionPercentage = commissionBreakdown.agentCommissionPercentage || 70;
   const agencyPortionPercentage = 100 - agentPortionPercentage;
-  
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <Card>
@@ -67,39 +74,22 @@ const CommissionCalculation: React.FC = () => {
               <CardTitle>Commission Calculation</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              <CommissionInputs 
-                isRental={isRental}
-                ownerCommissionAmount={ownerCommissionAmount}
-                setOwnerCommissionAmount={setOwnerCommissionAmount}
-              />
+              <CommissionInputs isRental={isRental} ownerCommissionAmount={ownerCommissionAmount} setOwnerCommissionAmount={setOwnerCommissionAmount} />
               
-              {errors.transactionValue && (
-                <Alert variant="destructive">
+              {errors.transactionValue && <Alert variant="destructive">
                   <AlertCircle className="h-4 w-4" />
                   <AlertDescription>
                     {errors.transactionValue}
                   </AlertDescription>
-                </Alert>
-              )}
+                </Alert>}
               
-              <div className="pt-4 border-t">
-                <AgentTierSelector 
-                  value={agentTier} 
-                  onChange={handleAgentTierChange} 
-                />
-              </div>
+              
             </CardContent>
           </Card>
           
-          {formData.coBroking?.enabled && (
-            <div className="mt-6">
-              <CoBrokingInfoCard
-                enabled={formData.coBroking.enabled}
-                agencySplitPercentage={formData.coBroking.commissionSplit}
-                coAgencySplitPercentage={100 - formData.coBroking.commissionSplit}
-              />
-            </div>
-          )}
+          {formData.coBroking?.enabled && <div className="mt-6">
+              <CoBrokingInfoCard enabled={formData.coBroking.enabled} agencySplitPercentage={formData.coBroking.commissionSplit} coAgencySplitPercentage={100 - formData.coBroking.commissionSplit} />
+            </div>}
         </div>
         
         <div>
@@ -111,14 +101,12 @@ const CommissionCalculation: React.FC = () => {
               <div>
                 <h4 className="text-sm font-medium mb-2">Your Commission Split</h4>
                 <div className="h-5 w-full flex rounded-full overflow-hidden">
-                  <div 
-                    className="bg-green-500 h-full" 
-                    style={{ width: `${agentPortionPercentage}%` }}
-                  ></div>
-                  <div 
-                    className="bg-white h-full" 
-                    style={{ width: `${agencyPortionPercentage}%` }}
-                  ></div>
+                  <div className="bg-green-500 h-full" style={{
+                  width: `${agentPortionPercentage}%`
+                }}></div>
+                  <div className="bg-white h-full" style={{
+                  width: `${agencyPortionPercentage}%`
+                }}></div>
                 </div>
                 <div className="flex justify-between text-xs mt-1">
                   <span>Your Share ({agentPortionPercentage}%)</span>
@@ -140,25 +128,21 @@ const CommissionCalculation: React.FC = () => {
                 </div>
               </div>
               
-              {formData.coBroking?.enabled && (
-                <div className="mt-2">
+              {formData.coBroking?.enabled && <div className="mt-2">
                   <h4 className="text-sm font-medium mb-2">Inter-Agency Split</h4>
                   <div className="h-5 w-full flex rounded-full overflow-hidden">
-                    <div 
-                      className="bg-blue-500 h-full" 
-                      style={{ width: `${formData.coBroking.commissionSplit}%` }}
-                    ></div>
-                    <div 
-                      className="bg-orange-500 h-full" 
-                      style={{ width: `${100 - formData.coBroking.commissionSplit}%` }}
-                    ></div>
+                    <div className="bg-blue-500 h-full" style={{
+                  width: `${formData.coBroking.commissionSplit}%`
+                }}></div>
+                    <div className="bg-orange-500 h-full" style={{
+                  width: `${100 - formData.coBroking.commissionSplit}%`
+                }}></div>
                   </div>
                   <div className="flex justify-between text-xs mt-1">
                     <span>Our Agency ({formData.coBroking.commissionSplit}%)</span>
                     <span>Co-Broker ({100 - formData.coBroking.commissionSplit}%)</span>
                   </div>
-                </div>
-              )}
+                </div>}
               
               <div className="mt-3">
                 <div className="flex justify-between items-center mb-1">
@@ -178,8 +162,6 @@ const CommissionCalculation: React.FC = () => {
           </Card>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default CommissionCalculation;
