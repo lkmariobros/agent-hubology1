@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Clock, AlertTriangle, CheckCircle2, Banknote, Ban, HelpCircle } from 'lucide-react';
+import { ApprovalStatus } from '@/types';
 
 interface StatusBadgeProps {
   status: string;

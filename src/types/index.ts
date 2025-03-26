@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { TransactionFormData, TransactionDocument } from './transaction-form';
 
@@ -57,8 +58,8 @@ export interface Property {
   subtype?: string;
   size?: number; // Added to match usage in PropertyDetail
   area?: number;
-  bedrooms?: number; // Added for direct access
-  bathrooms?: number; // Added for direct access
+  bedrooms?: number; // Already added for direct access
+  bathrooms?: number; // Already added for direct access
   stock?: PropertyStock; // Changed to use PropertyStock interface
   listedBy?: string; // Added to match usage in data files
 }
@@ -68,7 +69,7 @@ export interface User {
   name: string;
   email: string;
   role: string;
-  tier: string;
+  tier?: string;
   avatar?: string;
   phone?: string;
   properties?: number;
@@ -217,8 +218,8 @@ export interface OverrideCommission {
 
 export interface RankRequirement {
   rank: AgentRank;
-  minTransactions: number;
-  minSalesVolume: number;
+  transactions: number; // Changed from minTransactions to match usage
+  salesVolume: number; // Changed from minSalesVolume to match usage
   personalSales: boolean;
   recruitedAgents?: number;
   color: string;
