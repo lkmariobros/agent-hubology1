@@ -10,6 +10,17 @@ export const formatCurrency = (value: number): string => {
   }).format(value);
 };
 
+// Format price for display (shorter format)
+export const formatPrice = (value: number): string => {
+  if (value >= 1000000) {
+    return (value / 1000000).toFixed(1) + 'M';
+  } else if (value >= 1000) {
+    return (value / 1000).toFixed(0) + 'K';
+  } else {
+    return value.toString();
+  }
+};
+
 // Calculate percentage of available stock
 export const calculateStockPercentage = (available: number, total: number): number => {
   if (total === 0) return 0;
@@ -22,6 +33,15 @@ export const getStockStatusLabel = (percentage: number): string => {
   if (percentage <= 30) return 'Limited';
   if (percentage >= 80) return 'High Availability';
   return 'Available';
+};
+
+// Get stock status class for styling based on percentage
+export const getStockStatusClass = (percentage: number): string => {
+  if (percentage === 0) return 'text-red-500';
+  if (percentage <= 25) return 'text-orange-500';
+  if (percentage <= 50) return 'text-yellow-500';
+  if (percentage <= 75) return 'text-blue-500';
+  return 'text-green-500';
 };
 
 // Map API property data to component-ready Property type
@@ -40,7 +60,7 @@ export const mapPropertyData = (property: any): Property => {
     },
     type: (property.property_types?.name?.toLowerCase() || 'residential') as 'residential' | 'commercial' | 'industrial' | 'land',
     subtype: property.subtype || '',
-    features: property.features ? property.features : [], // Ensure features is an array
+    features: Array.isArray(property.features) ? property.features : [], // Ensure features is an array
     bedrooms: property.bedrooms || 0,
     bathrooms: property.bathrooms || 0,
     area: property.built_up_area || 0,

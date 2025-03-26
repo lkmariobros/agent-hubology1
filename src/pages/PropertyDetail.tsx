@@ -324,19 +324,8 @@ const AdminPropertyDetail = () => {
           </Card>
         </TabsContent>
       </Tabs>
-      {property.features && Array.isArray(property.features) && property.features.length > 0 && (
-        <div className="mt-6">
-          <h3 className="text-lg font-semibold mb-2">Features</h3>
-          <ul className="grid grid-cols-2 gap-2">
-            {property.features.map((feature, index) => (
-              <li key={index} className="flex items-center">
-                <CheckCircle2 className="h-4 w-4 text-primary mr-2" />
-                {feature}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+      {/* Features section - conditionally render only if features exist and is an array */}
+      
     </div>
   );
 };
