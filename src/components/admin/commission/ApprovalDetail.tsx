@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -243,7 +242,7 @@ const ApprovalDetail: React.FC<ApprovalDetailProps> = ({ id }) => {
                   </div>
                   <div>
                     <h3 className="text-sm font-medium text-muted-foreground mb-1">Submitted By</h3>
-                    <p className="text-lg">{approval.agent?.name || approval.submitted_by}</p>
+                    <p className="text-lg">{approval.agent?.name || (typeof approval.submitted_by === 'object' ? 'Unknown' : approval.submitted_by)}</p>
                   </div>
                   <div>
                     <h3 className="text-sm font-medium text-muted-foreground mb-1">Submitted On</h3>

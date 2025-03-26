@@ -4,78 +4,109 @@ import { User } from '@/types';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 
-// Sample users data
+// Sample users data with properly typed fields
 const users: User[] = [{
   id: '1',
   name: 'John Smith',
   email: 'john@example.com',
   role: 'agent',
   tier: 'senior',
-  avatar: 'https://randomuser.me/api/portraits/men/1.jpg'
+  avatar: 'https://randomuser.me/api/portraits/men/1.jpg',
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+  phone: '123-456-7890'
 }, {
   id: '2',
   name: 'Sarah Johnson',
   email: 'sarah@example.com',
   role: 'agent',
   tier: 'principal',
-  avatar: 'https://randomuser.me/api/portraits/women/2.jpg'
+  avatar: 'https://randomuser.me/api/portraits/women/2.jpg',
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+  phone: '123-456-7890'
 }, {
   id: '3',
   name: 'Michael Brown',
   email: 'michael@example.com',
   role: 'agent',
   tier: 'associate',
-  avatar: 'https://randomuser.me/api/portraits/men/3.jpg'
+  avatar: 'https://randomuser.me/api/portraits/men/3.jpg',
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+  phone: '123-456-7890'
 }, {
   id: '4',
   name: 'Emily Davis',
   email: 'emily@example.com',
   role: 'manager',
   tier: 'director',
-  avatar: 'https://randomuser.me/api/portraits/women/4.jpg'
+  avatar: 'https://randomuser.me/api/portraits/women/4.jpg',
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+  phone: '123-456-7890'
 }, {
   id: '5',
   name: 'Robert Wilson',
   email: 'robert@example.com',
   role: 'agent',
   tier: 'junior',
-  avatar: 'https://randomuser.me/api/portraits/men/5.jpg'
+  avatar: 'https://randomuser.me/api/portraits/men/5.jpg',
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+  phone: '123-456-7890'
 }, {
   id: '6',
   name: 'Lisa Anderson',
   email: 'lisa@example.com',
   role: 'agent',
   tier: 'associate',
-  avatar: 'https://randomuser.me/api/portraits/women/6.jpg'
+  avatar: 'https://randomuser.me/api/portraits/women/6.jpg',
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+  phone: '123-456-7890'
 }, {
   id: '7',
   name: 'David Martinez',
   email: 'david@example.com',
   role: 'agent',
   tier: 'senior',
-  avatar: 'https://randomuser.me/api/portraits/men/7.jpg'
+  avatar: 'https://randomuser.me/api/portraits/men/7.jpg',
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+  phone: '123-456-7890'
 }, {
   id: '8',
   name: 'Jennifer Taylor',
   email: 'jennifer@example.com',
   role: 'agent',
   tier: 'principal',
-  avatar: 'https://randomuser.me/api/portraits/women/8.jpg'
+  avatar: 'https://randomuser.me/api/portraits/women/8.jpg',
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+  phone: '123-456-7890'
 }, {
   id: '9',
   name: 'James Johnson',
   email: 'james@example.com',
   role: 'agent',
   tier: 'associate',
-  avatar: 'https://randomuser.me/api/portraits/men/9.jpg'
+  avatar: 'https://randomuser.me/api/portraits/men/9.jpg',
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+  phone: '123-456-7890'
 }, {
   id: '10',
   name: 'Amanda White',
   email: 'amanda@example.com',
   role: 'agent',
   tier: 'senior',
-  avatar: 'https://randomuser.me/api/portraits/women/10.jpg'
+  avatar: 'https://randomuser.me/api/portraits/women/10.jpg',
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+  phone: '123-456-7890'
 }];
+
 type TimeFrame = 'week' | 'month' | 'year' | 'all-time';
 
 const PointsLeaderboard = () => {
@@ -123,7 +154,8 @@ const PointsLeaderboard = () => {
         
         <CardContent className="px-6 py-0 pb-6">
           <div className="space-y-4">
-            {sortedUsers.map((user, index) => <div key={user.id} className="flex items-center space-x-4 p-3 rounded-lg hover:bg-white/5 transition-colors">
+            {sortedUsers.map((user, index) => (
+              <div key={user.id} className="flex items-center space-x-4 p-3 rounded-lg hover:bg-white/5 transition-colors">
                 <div className="w-8 text-center">
                   <div className={cn("w-6 h-6 mx-auto rounded-full flex items-center justify-center text-xs font-medium", index === 0 ? "bg-property-orange text-white" : index === 1 ? "bg-property-purple text-white" : index === 2 ? "bg-property-pink text-white" : "bg-sidebar-accent text-sidebar-accent-foreground")}>
                     {index + 1}
@@ -143,7 +175,7 @@ const PointsLeaderboard = () => {
                     {user.name}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {user.role === 'agent' ? user.tier : user.role}
+                    {user.role === 'agent' ? user.tier || 'Agent' : user.role}
                   </p>
                 </div>
                 
@@ -153,7 +185,8 @@ const PointsLeaderboard = () => {
                   </p>
                   <p className="text-xs text-muted-foreground">points</p>
                 </div>
-              </div>)}
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>

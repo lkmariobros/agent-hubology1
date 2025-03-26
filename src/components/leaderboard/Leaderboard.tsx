@@ -77,7 +77,7 @@ const Leaderboard = ({ users, period = 'month' }: LeaderboardProps) => {
                       {user.name}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {user.role === 'agent' ? user.tier : user.role}
+                      {user.role === 'agent' ? user.tier || 'Agent' : user.role}
                     </p>
                   </div>
                   

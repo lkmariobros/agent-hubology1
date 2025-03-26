@@ -1,4 +1,3 @@
-
 export interface Address {
   street: string;
   city: string;
@@ -67,6 +66,17 @@ export interface Transaction {
   type?: string;
   notes?: string;
   documents?: DocumentRecord[];
+  agent?: Agent;
+  buyer?: {
+    name: string;
+    email?: string;
+    phone?: string;
+  };
+  seller?: {
+    name: string;
+    email?: string;
+    phone?: string;
+  };
 }
 
 export interface DocumentRecord {
@@ -121,6 +131,10 @@ export interface User {
   avatar?: string;
   createdAt: string;
   updatedAt: string;
+  tier?: string;
+  phone?: string;
+  properties?: number;
+  transactions?: number;
 }
 
 export interface AgentWithHierarchy {
@@ -147,6 +161,10 @@ export interface RankRequirement {
   salesVolume: number;
   transactions: number;
   description: string;
+  minTransactions?: number;
+  minSalesVolume?: number;
+  personalSales?: number;
+  recruitedAgents?: number;
 }
 
 export interface CommissionTier {
