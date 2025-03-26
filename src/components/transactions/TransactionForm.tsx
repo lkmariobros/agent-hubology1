@@ -27,7 +27,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { TransactionFormValues } from '@/types';
+import { TransactionFormData } from '@/types/transaction-form';
 
 // Validation schema
 const transactionSchema = z.object({

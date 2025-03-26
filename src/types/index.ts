@@ -1,4 +1,3 @@
-
 export interface DashboardMetric {
   id: string;
   label: string;
@@ -284,3 +283,53 @@ export type DocumentType = 'Contract' | 'Agreement' | 'Invoice' | 'Receipt' | 'O
 export type AgentRank = 'Associate' | 'Senior Associate' | 'Advisor' | 'Sales Leader' | 'Team Leader' | 'Group Leader' | 'Director' | 'Supreme Leader';
 export type TransactionType = 'Sale' | 'Rent' | 'Developer';
 export type ApprovalStatus = 'Pending' | 'Approved' | 'Rejected' | 'Under Review' | 'Ready for Payment' | 'Paid';
+
+// Adding missing User type
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  avatar?: string;
+  role?: string;
+  tier?: string;
+  rank?: AgentRank;
+  status?: 'active' | 'inactive';
+  joinDate?: string;
+  salesVolume?: number;
+  transactions?: number;
+  commission?: number;
+}
+
+// Adding missing RankRequirement type
+export interface RankRequirement {
+  id: string;
+  rank: AgentRank;
+  minSalesVolume: number;
+  minTransactions: number;
+  commissionPercentage: number;
+  color: string;
+}
+
+// Fix for PropertyFormValues - ensure it's not using TransactionFormData fields
+export type PropertyFormValues = {
+  title: string;
+  description: string;
+  price: number;
+  type: 'residential' | 'commercial' | 'industrial' | 'land';
+  subtype?: string;
+  features: string[];
+  bedrooms?: number;
+  bathrooms?: number;
+  area?: number;
+  images: string[];
+  status: string;
+  address: {
+    street: string;
+    city: string;
+    state: string;
+    zip: string;
+    country: string;
+  };
+  transactionType?: string;
+};

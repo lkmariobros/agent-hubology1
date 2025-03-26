@@ -120,7 +120,7 @@ const PropertyDetailsInfo: React.FC<PropertyDetailsInfoProps> = ({ form, nextTab
                         >
                           <FormControl>
                             <Checkbox
-                              checked={field.value?.includes(feature.id)}
+                              checked={field.value.includes(feature.id)}
                               onCheckedChange={(checked) => {
                                 const currentValues = [...field.value];
                                 if (checked) {
