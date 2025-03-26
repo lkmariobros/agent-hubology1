@@ -24,7 +24,16 @@ serve(async (req) => {
     
     if (!supabaseUrl || !supabaseKey) {
       console.error("Missing environment variables: SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
-      throw new Error("Server configuration error");
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: "Server configuration error" 
+        }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        }
+      );
     }
 
     const supabaseClient = createClient(supabaseUrl, supabaseKey);
@@ -36,7 +45,10 @@ serve(async (req) => {
     if (!userId || !type || !title || !message) {
       console.error("Missing required fields:", { userId, type, title, message });
       return new Response(
-        JSON.stringify({ success: false, error: "userId, type, title, and message are required" }),
+        JSON.stringify({ 
+          success: false, 
+          error: "userId, type, title, and message are required" 
+        }),
         { 
           status: 400, 
           headers: { ...corsHeaders, "Content-Type": "application/json" } 
@@ -46,6 +58,9 @@ serve(async (req) => {
 
     console.log("Creating notification:", { userId, type, title });
 
+    // Prepare data as a JSON string if it's an object
+    const dataToInsert = typeof data === 'object' ? JSON.stringify(data) : data;
+
     // Insert the notification
     const { data: notificationData, error } = await supabaseClient
       .from("notifications")
@@ -54,7 +69,7 @@ serve(async (req) => {
         type,
         title,
         message,
-        data,
+        data: dataToInsert,
         read: false
       })
       .select()
@@ -62,7 +77,16 @@ serve(async (req) => {
 
     if (error) {
       console.error("Database error:", error);
-      throw error;
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: error.message 
+        }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        }
+      );
     }
 
     console.log("Notification created successfully:", notificationData);
@@ -82,7 +106,10 @@ serve(async (req) => {
   } catch (error) {
     console.error("Error in create_notification function:", error.message);
     return new Response(
-      JSON.stringify({ success: false, error: error.message }),
+      JSON.stringify({ 
+        success: false, 
+        error: error.message 
+      }),
       { 
         status: 500, 
         headers: { ...corsHeaders, "Content-Type": "application/json" } 

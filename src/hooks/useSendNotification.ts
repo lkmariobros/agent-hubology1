@@ -12,15 +12,22 @@ interface SendNotificationParams {
   data?: Record<string, any>;
 }
 
+interface NotificationResponse {
+  success: boolean;
+  message?: string;
+  error?: string;
+  data?: any;
+}
+
 export const useSendNotification = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async (params: SendNotificationParams) => {
+    mutationFn: async (params: SendNotificationParams): Promise<NotificationResponse> => {
       try {
         console.log('Sending notification:', params);
         
-        const { data, error } = await supabase.functions.invoke<{ success: boolean; data: any }>(
+        const { data: response, error } = await supabase.functions.invoke<NotificationResponse>(
           'create_notification',
           {
             body: params
@@ -28,21 +35,23 @@ export const useSendNotification = () => {
         );
         
         if (error) {
-          console.error('Error sending notification:', error);
-          throw error;
+          console.error('Edge function error:', error);
+          throw new Error(`Edge function error: ${error.message}`);
         }
         
-        if (!data?.success) {
-          console.error('Failed to send notification:', data);
-          throw new Error('Failed to send notification');
+        if (!response) {
+          console.error('No response from edge function');
+          throw new Error('No response from edge function');
         }
         
-        console.log('Notification sent successfully:', data);
+        if (!response.success) {
+          console.error('Failed to send notification:', response.error || 'Unknown error');
+          throw new Error(response.error || 'Failed to send notification');
+        }
         
-        // Invalidate notifications query to refresh the list
-        queryClient.invalidateQueries({ queryKey: ['notifications'] });
+        console.log('Notification sent successfully:', response);
         
-        return data;
+        return response;
       } catch (error: any) {
         console.error('Error sending notification:', error);
         throw error;
@@ -52,7 +61,7 @@ export const useSendNotification = () => {
       // Invalidate specific queries after a successful notification
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       console.error('Mutation error:', error);
       toast.error(`Failed to send notification: ${error.message}`);
     }
