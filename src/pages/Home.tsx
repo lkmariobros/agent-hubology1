@@ -5,8 +5,11 @@ import OpportunitiesBoard from '@/components/dashboard/OpportunitiesBoard';
 import RecentTransactions from '@/components/dashboard/RecentTransactions';
 import PropertyList from '@/components/dashboard/PropertyList';
 import { DashboardMetric, Transaction, Property } from '@/types';
+import { useNavigate } from 'react-router-dom';
 
 const Home = () => {
+  const navigate = useNavigate();
+  
   // Sample metrics for demonstration
   const metrics: DashboardMetric[] = [
     {
@@ -150,7 +153,13 @@ const Home = () => {
 
   const handleViewAll = (section: string) => {
     console.log(`View all ${section}`);
-    // Navigation logic would go here
+    if (section === 'transactions') {
+      navigate('/transactions');
+    } else if (section === 'properties') {
+      navigate('/properties');
+    } else if (section === 'opportunities') {
+      navigate('/opportunities');
+    }
   };
 
   return (
@@ -166,17 +175,15 @@ const Home = () => {
         ))}
       </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-card rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-4">Recent Transactions</h2>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <div>
           <RecentTransactions 
             transactions={transactions}
             onViewAll={() => handleViewAll('transactions')}
           />
         </div>
         
-        <div className="bg-card rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold mb-4">Featured Properties</h2>
+        <div>
           <PropertyList 
             properties={properties}
             onViewAll={() => handleViewAll('properties')}
@@ -184,7 +191,7 @@ const Home = () => {
         </div>
       </div>
       
-      <div className="mt-8">
+      <div>
         <h2 className="text-xl font-semibold mb-4">Opportunities</h2>
         <OpportunitiesBoard 
           onViewAll={() => handleViewAll('opportunities')}
