@@ -1,4 +1,3 @@
-
 export interface DashboardMetric {
   id: string;
   label: string;
@@ -7,6 +6,7 @@ export interface DashboardMetric {
   trend?: 'up' | 'down' | 'neutral';
   icon?: React.ReactNode;
   status?: string; // Added to fix DashboardMetric errors
+  period?: string;
 }
 
 export interface Property {
@@ -33,10 +33,17 @@ export interface Property {
   createdAt: string;
   updatedAt: string;
   size?: number;
-  stock?: number; // Added for PropertyCard
+  stock?: PropertyStock;
   transactionType?: string; // Added for PropertyCard
   featured?: boolean; // Added for PropertyCard
   listedBy?: string; // Added for PropertyCardDetails
+}
+
+export interface PropertyStock {
+  total: number;
+  available: number;
+  reserved?: number;
+  sold?: number;
 }
 
 export interface Agent {
@@ -282,9 +289,12 @@ export interface User {
   role: string;
   joinDate: string;
   rank?: string;
+  tier?: string;
   phone?: string; // Added to fix Team component errors
   properties?: number; // Added to fix Team component errors
   transactions?: number; // Added to fix Team component errors
+  points?: number;
+  sales?: number;
 }
 
 export interface PropertyFormValues {

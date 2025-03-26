@@ -1,223 +1,202 @@
-
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
-import { Container } from '@/components/ui/container';
+import { DashboardMetric } from '@/types';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import Container from '@/components/ui/container';
 import MetricsContainer from '@/components/dashboard/MetricsContainer';
-import RecentTransactions from '@/components/dashboard/RecentTransactions';
+import { RightToLeft } from 'lucide-react';
 import { PropertyGrid } from '@/components/property/PropertyGrid';
+import RecentTransactions from '@/components/dashboard/RecentTransactions';
 import OpportunitiesBoard from '@/components/dashboard/OpportunitiesBoard';
-import { DashboardMetric, Transaction } from '@/types';
+import PropertyShowcase from '@/components/dashboard/PropertyShowcase';
+import Leaderboard from '@/components/leaderboard/Leaderboard';
+import { useAuth } from '@/hooks/useAuth';
 
-const Home: React.FC = () => {
-  const navigate = useNavigate();
-  const { user, isAdmin } = useAuth();
+const Home = () => {
+  const { user } = useAuth();
 
+  // Update the metrics to use string values instead of numbers
   const metrics: DashboardMetric[] = [
     {
-      id: 'total-revenue',
-      label: 'Total Revenue',
-      value: '$2.34M',
-      change: 12.5,
-      status: 'positive',
-      period: 'Last Quarter',
-      icon: 'lucide-dollar-sign',
-      trend: 'up'
+      id: "total-properties",
+      label: "Total Properties",
+      value: "156", // Changed from number to string
+      change: 12,
+      trend: "up",
+      status: "active",
+      period: "monthly"
     },
     {
-      id: 'new-customers',
-      label: 'New Customers',
-      value: 456,
-      change: -5.2,
-      status: 'negative',
-      period: 'Last Month',
-      icon: 'lucide-user-plus',
-      trend: 'down'
+      id: "total-agents",
+      label: "Total Agents",
+      value: "48", // Changed from number to string
+      change: 4,
+      trend: "up",
+      status: "active",
+      period: "monthly"
     },
     {
-      id: 'average-order-value',
-      label: 'Average Order Value',
-      value: '$567',
-      change: 2.3,
-      status: 'positive',
-      period: 'Last Week',
-      icon: 'lucide-shopping-cart',
-      trend: 'up'
-    },
-  ];
-
-  const mockTransactions: Transaction[] = [
-    {
-      id: '1',
-      propertyId: 'prop-1',
-      agentId: 'agent-1',
-      commission: 12500,
-      status: 'completed',
-      date: '2023-06-15',
-      property: {
-        title: 'Modern Apartment in Downtown',
-        address: {
-          city: 'New York',
-          state: 'NY'
-        }
-      },
-      price: 450000,
-      notes: 'Transaction completed successfully',
-      closingDate: '2023-07-01',
-      buyer: {
-        name: 'John Doe'
-      },
-      seller: {
-        name: 'Jane Smith'
-      }
+      id: "new-opportunities",
+      label: "New Opportunities",
+      value: "16", // Changed from number to string
+      change: -2,
+      trend: "down",
+      status: "active",
+      period: "monthly"
     },
     {
-      id: '2',
-      propertyId: 'prop-2',
-      agentId: 'agent-2',
-      commission: 9800,
-      status: 'pending',
-      date: '2023-06-01',
-      property: {
-        title: 'Spacious House with Garden',
-        address: {
-          city: 'Los Angeles',
-          state: 'CA'
-        }
-      },
-      price: 720000,
-      notes: 'Waiting for bank approval',
-      closingDate: '2023-06-15',
-      buyer: {
-        name: 'Alice Johnson'
-      },
-      seller: {
-        name: 'Bob Williams'
-      }
-    },
-    {
-      id: '3',
-      propertyId: 'prop-3',
-      agentId: 'agent-1',
-      commission: 15200,
-      status: 'in progress',
-      date: '2023-05-18',
-      property: {
-        title: 'Luxury Condo with City View',
-        address: {
-          city: 'Chicago',
-          state: 'IL'
-        }
-      },
-      price: 950000,
-      notes: 'Paperwork in progress',
-      closingDate: '2023-06-01',
-      buyer: {
-        name: 'Emily Brown'
-      },
-      seller: {
-        name: 'David Wilson'
-      }
+      id: "average-commission",
+      label: "Average Commission",
+      value: "$2,350", // Changed from number to string
+      change: 8,
+      trend: "up",
+      status: "active",
+      period: "monthly"
     }
   ];
 
   const sampleProperties = [
     {
-      id: '1',
-      title: 'Luxury Oceanfront Villa',
-      description: 'A stunning oceanfront property with panoramic views and direct beach access.',
-      price: 4500000,
+      id: "1",
+      title: "Luxury Villa with Pool",
+      description: "Stunning villa with private pool and ocean views.",
+      price: 2500000,
       address: {
-        street: '123 Beachside Drive',
-        city: 'Malibu',
-        state: 'CA',
-        zip: '90265',
-        country: 'USA'
+        street: "123 Ocean View Dr",
+        city: "Malibu",
+        state: "CA",
+        zip: "90265",
+        country: "USA",
       },
-      images: ['/images/property1.jpg', '/images/property2.jpg'],
+      images: [
+        "/property-images/luxury-villa-1.webp",
+        "/property-images/luxury-villa-2.webp",
+      ],
       bedrooms: 5,
-      bathrooms: 4,
-      squareFeet: 5200,
-      type: 'Residential',
-      status: 'Available',
+      bathrooms: 6,
+      squareFeet: 5000,
+      type: "Residential",
+      status: "available",
       featured: true,
     },
     {
-      id: '2',
-      title: 'Modern Downtown Apartment',
-      description: 'A stylish apartment in the heart of the city, close to all amenities.',
-      price: 1200000,
-      address: {
-        street: '456 City Center Plaza',
-        city: 'New York',
-        state: 'NY',
-        zip: '10001',
-        country: 'USA'
-      },
-      images: ['/images/property3.jpg', '/images/property4.jpg'],
-      bedrooms: 2,
-      bathrooms: 2,
-      squareFeet: 1800,
-      type: 'Residential',
-      status: 'Under Offer',
-      featured: false,
-    },
-    {
-      id: '3',
-      title: 'Secluded Mountain Retreat',
-      description: 'A cozy cabin nestled in the mountains, perfect for a peaceful getaway.',
+      id: "2",
+      title: "Modern Apartment in Downtown",
+      description: "Stylish apartment in the heart of downtown.",
       price: 850000,
       address: {
-        street: '789 Mountain Road',
-        city: 'Aspen',
-        state: 'CO',
-        zip: '81611',
-        country: 'USA'
+        street: "456 Main St",
+        city: "New York",
+        state: "NY",
+        zip: "10001",
+        country: "USA",
       },
-      images: ['/images/property5.jpg', '/images/property6.jpg'],
+      images: [
+        "/property-images/modern-apartment-1.webp",
+        "/property-images/modern-apartment-2.webp",
+      ],
+      bedrooms: 2,
+      bathrooms: 2,
+      squareFeet: 1200,
+      type: "Apartment",
+      status: "available",
+      featured: true,
+    },
+    {
+      id: "3",
+      title: "Charming House in the Suburbs",
+      description: "Cozy house with a large backyard, perfect for families.",
+      price: 620000,
+      address: {
+        street: "789 Suburban Ln",
+        city: "Chicago",
+        state: "IL",
+        zip: "60601",
+        country: "USA",
+      },
+      images: [
+        "/property-images/charming-house-1.webp",
+        "/property-images/charming-house-2.webp",
+      ],
       bedrooms: 3,
       bathrooms: 2,
-      squareFeet: 2500,
-      type: 'Residential',
-      status: 'Available',
+      squareFeet: 1800,
+      type: "House",
+      status: "available",
       featured: false,
     },
   ];
 
+  const sampleUsers = [
+    {
+      id: "1",
+      name: "John Smith",
+      email: "john@example.com",
+      avatar: "https://randomuser.me/api/portraits/men/1.jpg",
+      role: "agent",
+      joinDate: "2023-01-15",
+    },
+    {
+      id: "2",
+      name: "Sarah Johnson",
+      email: "sarah@example.com",
+      avatar: "https://randomuser.me/api/portraits/women/2.jpg",
+      role: "agent",
+      joinDate: "2023-02-20",
+    },
+    {
+      id: "3",
+      name: "Michael Brown",
+      email: "michael@example.com",
+      avatar: "https://randomuser.me/api/portraits/men/3.jpg",
+      role: "agent",
+      joinDate: "2023-03-10",
+    },
+    {
+      id: "4",
+      name: "Emily Davis",
+      email: "emily@example.com",
+      avatar: "https://randomuser.me/api/portraits/women/4.jpg",
+      role: "manager",
+      joinDate: "2023-04-05",
+    },
+  ];
+
   return (
-    <Container>
-      <div className="space-y-8">
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold tracking-tight">
-            {isAdmin ? 'Admin Dashboard' : 'Agent Dashboard'}
-          </h1>
-          <p className="text-muted-foreground">
-            Welcome, {user?.name || 'Agent'}!
-          </p>
+    <div className="space-y-6">
+      <Container>
+        <div className="flex items-center justify-between">
+          <Card>
+            <CardHeader>
+              <CardTitle>
+                Welcome, {user ? user.name || user.email : "Guest"}!
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              Here's a snapshot of your dashboard.
+            </CardContent>
+          </Card>
+          <RightToLeft className="mr-2 h-4 w-4" />
         </div>
 
         <MetricsContainer metrics={metrics} />
 
-        <RecentTransactions transactions={mockTransactions} />
-
-        <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold tracking-tight">
-              Featured Properties
-            </h2>
-            <button
-              className="text-sm text-primary hover:underline"
-              onClick={() => navigate('/properties')}
-            >
-              View All Properties
-            </button>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="space-y-6">
+            <PropertyGrid
+              title="Featured Properties"
+              properties={sampleProperties}
+            />
+            <RecentTransactions />
           </div>
-          <PropertyGrid properties={sampleProperties} />
-        </div>
 
-        <OpportunitiesBoard onViewAll={() => navigate('/opportunities')} />
-      </div>
-    </Container>
+          <div className="space-y-6">
+            <OpportunitiesBoard />
+            <PropertyShowcase />
+            <Leaderboard users={sampleUsers} />
+          </div>
+        </div>
+      </Container>
+    </div>
   );
 };
 

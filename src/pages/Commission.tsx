@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
@@ -93,7 +92,6 @@ const fallbackAgentHierarchy: AgentWithHierarchy = {
 // Sample recent commission history (would come from API in production)
 const recentCommissions: CommissionHistory[] = [{
   id: '1',
-  transactionId: 'tx1',
   transactionReference: 'tx1',
   property: {
     title: 'Suburban Family Home',
@@ -104,7 +102,6 @@ const recentCommissions: CommissionHistory[] = [{
   type: 'personal'
 }, {
   id: '2',
-  transactionId: 'tx2',
   transactionReference: 'tx2',
   property: {
     title: 'Downtown Loft',
@@ -115,7 +112,6 @@ const recentCommissions: CommissionHistory[] = [{
   type: 'personal'
 }, {
   id: '3',
-  transactionId: 'tx3',
   transactionReference: 'tx3',
   property: {
     title: 'Luxury Beach Condo',
@@ -127,7 +123,6 @@ const recentCommissions: CommissionHistory[] = [{
   source: 'Robert Wilson'
 }, {
   id: '4',
-  transactionId: 'tx4',
   transactionReference: 'tx4',
   property: {
     title: 'Modern Townhouse',

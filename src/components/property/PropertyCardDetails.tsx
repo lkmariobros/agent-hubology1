@@ -1,193 +1,103 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Bed, Bath, Grid2X2, Home, Building, MapPin, Tag, Package, Calendar } from 'lucide-react';
-import { formatCurrency, calculateStockPercentage, getStockStatusLabel } from '@/utils/propertyUtils';
 import { Property, PropertyStock } from '@/types';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Bed, Bath, Square, MapPin, Calendar, Tag, Building, User } from 'lucide-react';
+import { formatPrice } from '@/utils/propertyUtils';
+import { format } from 'date-fns';
 
-interface PropertyCardDetailsProps {
+export interface PropertyCardDetailsProps {
   property: Property;
+  onEdit?: (id: string) => void;
 }
 
-export const PropertyCardDetails: React.FC<PropertyCardDetailsProps> = ({ property }) => {
-  // Format status for display
-  const formattedStatus = property.status ?
-    property.status.charAt(0).toUpperCase() + property.status.slice(1) :
-    'Available';
-
-  // Get image URL or fallback
-  const imageUrl = property.images && property.images.length > 0
-    ? property.images[0]
-    : '/placeholder.svg';
-
-  // Check if this is a development with stock
-  const isDevelopment = property.stock && property.stock > 1;
-
-  // Calculate stock percentage if this is a development
-  const stockPercentage = isDevelopment && property.stock ?
-    calculateStockPercentage(property.stock, property.stock) :
-    null;
-
-  // Get stock status label if this is a development
-  const stockLabel = stockPercentage !== null ?
-    getStockStatusLabel(stockPercentage) :
-    null;
-
-  // Helper to safely access features
-  const getFeatureValue = (key: string, defaultValue: number = 0): number => {
-    if (!property.features) return defaultValue;
-
-    if (Array.isArray(property.features)) {
-      return defaultValue;
-    }
-
-    return (property.features as any)[key] || defaultValue;
-  };
-
+const PropertyCardDetails: React.FC<PropertyCardDetailsProps> = ({ property }) => {
   return (
-    <Card className="overflow-hidden transition-shadow hover:shadow-md">
-      <Link to={`/properties/${property.id}`}>
-        <div className="relative">
-          <div className="h-64 overflow-hidden">
-            <img
-              src={imageUrl}
-              alt={property.title}
-              className="w-full h-full object-cover transition-transform hover:scale-105"
-            />
-          </div>
-
-          {/* Status badge - Always shown */}
-          <Badge className="absolute top-2 right-2" variant={
-            formattedStatus.toLowerCase() === 'available' ? 'default' :
-              formattedStatus.toLowerCase() === 'sold' || formattedStatus.toLowerCase() === 'rented' ? 'destructive' :
-                'secondary'
-          }>
-            {formattedStatus}
-          </Badge>
-
-          {/* Featured badge */}
-          {property.featured && (
-            <Badge variant="outline" className="absolute top-2 left-2 bg-yellow-500/80 text-white border-none">
-              Featured
-            </Badge>
-          )}
-
-          {/* Stock badge - Only shown for developments with stock */}
-          {isDevelopment && stockLabel && property.stock && (
-            <Badge
-              variant="outline"
-              className="absolute bottom-2 right-2 flex items-center gap-1"
-            >
-              <Package className="h-3 w-3" />
-              {stockLabel}
-            </Badge>
-          )}
-        </div>
-      </Link>
-
-      <CardContent className="p-4">
-        <div className="mb-2 flex justify-between items-start">
-          <div>
-            <h3 className="font-semibold text-lg line-clamp-1">{property.title}</h3>
-            <div className="flex items-center text-muted-foreground text-sm mt-1">
-              <MapPin className="h-3.5 w-3.5 mr-1" />
-              <span className="line-clamp-1">
-                {[property.address?.city, property.address?.state].filter(Boolean).join(', ')}
-              </span>
+    <div className="p-4 space-y-4">
+      {/* Property Details */}
+      <div className="space-y-2">
+        <h4 className="font-medium text-sm text-neutral-400">Property Details</h4>
+        <div className="grid grid-cols-2 gap-3">
+          {property.bedrooms && (
+            <div className="flex items-center gap-2">
+              <Bed className="h-4 w-4 text-neutral-400" />
+              <span className="text-sm">{property.bedrooms} Bedrooms</span>
             </div>
+          )}
+          
+          {property.bathrooms && (
+            <div className="flex items-center gap-2">
+              <Bath className="h-4 w-4 text-neutral-400" />
+              <span className="text-sm">{property.bathrooms} Bathrooms</span>
+            </div>
+          )}
+          
+          {property.area && (
+            <div className="flex items-center gap-2">
+              <Square className="h-4 w-4 text-neutral-400" />
+              <span className="text-sm">{property.area} sq ft</span>
+            </div>
+          )}
+          
+          <div className="flex items-center gap-2">
+            <MapPin className="h-4 w-4 text-neutral-400" />
+            <span className="text-sm truncate">{property.address.city}, {property.address.state}</span>
           </div>
-          <Badge variant="outline" className="ml-2 whitespace-nowrap capitalize">
-            {property.transactionType || 'Sale'}
-          </Badge>
+          
+          <div className="flex items-center gap-2">
+            <Tag className="h-4 w-4 text-neutral-400" />
+            <span className="text-sm">${formatPrice(property.price)}</span>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <Building className="h-4 w-4 text-neutral-400" />
+            <span className="text-sm capitalize">{property.type}</span>
+          </div>
+          
+          {property.createdAt && (
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-neutral-400" />
+              <span className="text-sm">{format(new Date(property.createdAt), 'MMM d, yyyy')}</span>
+            </div>
+          )}
+          
+          {property.listedBy && (
+            <div className="flex items-center gap-2">
+              <User className="h-4 w-4 text-neutral-400" />
+              <span className="text-sm">{property.listedBy}</span>
+            </div>
+          )}
         </div>
-
-        <div className="mt-3 text-lg font-bold">
-          {formatCurrency(property.price)}
-          {(property.transactionType?.toLowerCase() === 'rent' || property.transactionType?.toLowerCase() === 'rental') ? '/month' : ''}
+      </div>
+      
+      {/* Features */}
+      {property.features && property.features.length > 0 && (
+        <div className="space-y-2">
+          <h4 className="font-medium text-sm text-neutral-400">Features</h4>
+          <div className="flex flex-wrap gap-2">
+            {property.features.map((feature, index) => (
+              <Badge key={index} variant="outline" className="bg-neutral-800/50 text-neutral-200 border-neutral-700">
+                {feature}
+              </Badge>
+            ))}
+          </div>
         </div>
-
-        {/* Stock information for developments */}
-        {isDevelopment && property.stock && (
-          <div className="mt-2 text-sm text-muted-foreground flex items-center">
-            <Package className="h-3.5 w-3.5 mr-1.5" />
-            <span>{property.stock} units available</span>
-          </div>
+      )}
+      
+      {/* Description */}
+      <div className="space-y-2">
+        <h4 className="font-medium text-sm text-neutral-400">Description</h4>
+        <p className="text-sm text-neutral-300 line-clamp-3">{property.description}</p>
+      </div>
+      
+      {/* Actions */}
+      <div className="pt-2 flex justify-end gap-2">
+        <Button variant="outline" size="sm">View Details</Button>
+        {property.status === 'available' && (
+          <Button size="sm">Contact Agent</Button>
         )}
-
-        {property.description && (
-          <p className="mt-2 text-sm text-muted-foreground line-clamp-3">
-            {property.description}
-          </p>
-        )}
-
-        {property.listedBy && (
-          <div className="mt-2 text-sm text-muted-foreground flex items-center">
-            <Calendar className="h-3.5 w-3.5 mr-1.5" />
-            <span>Listed by: {property.listedBy}</span>
-          </div>
-        )}
-      </CardContent>
-
-      {/* Property Details Section */}
-      <CardHeader className="p-4">
-        <CardTitle>Property Details</CardTitle>
-        <CardDescription>
-          Explore the unique features of this property.
-        </CardDescription>
-      </CardHeader>
-
-      <CardContent className="p-4 pt-0 flex flex-wrap gap-2 text-sm">
-        {/* Show details based on property type */}
-        {property.type.toLowerCase() === 'residential' && (
-          <>
-            {getFeatureValue('bedrooms') > 0 && (
-              <div className="flex items-center mr-3">
-                <Bed className="h-4 w-4 mr-1" />
-                <span>{getFeatureValue('bedrooms')} {getFeatureValue('bedrooms') === 1 ? 'Bed' : 'Beds'}</span>
-              </div>
-            )}
-
-            {getFeatureValue('bathrooms') > 0 && (
-              <div className="flex items-center mr-3">
-                <Bath className="h-4 w-4 mr-1" />
-                <span>{getFeatureValue('bathrooms')} {getFeatureValue('bathrooms') === 1 ? 'Bath' : 'Baths'}</span>
-              </div>
-            )}
-
-            {getFeatureValue('squareFeet') > 0 && (
-              <div className="flex items-center">
-                <Grid2X2 className="h-4 w-4 mr-1" />
-                <span>{getFeatureValue('squareFeet')} sq.ft</span>
-              </div>
-            )}
-          </>
-        )}
-
-        {(property.type.toLowerCase() === 'commercial' || property.type.toLowerCase() === 'industrial') && (
-          <>
-            {getFeatureValue('squareFeet') > 0 && (
-              <div className="flex items-center mr-3">
-                <Building className="h-4 w-4 mr-1" />
-                <span>{getFeatureValue('squareFeet')} sq.ft</span>
-              </div>
-            )}
-          </>
-        )}
-
-        {property.type.toLowerCase() === 'land' && getFeatureValue('landSize') > 0 && (
-          <div className="flex items-center">
-            <Grid2X2 className="h-4 w-4 mr-1" />
-            <span>{getFeatureValue('landSize')} sq.ft</span>
-          </div>
-        )}
-
-        <div className="flex items-center ml-auto">
-          <Tag className="h-4 w-4 mr-1" />
-          <span className="capitalize">{property.type}</span>
-        </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 

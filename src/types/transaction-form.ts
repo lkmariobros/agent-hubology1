@@ -3,8 +3,8 @@
 export interface TransactionFormData {
   id?: string;
   transactionType: TransactionType;
-  transactionDate: Date;
-  closingDate?: Date;
+  transactionDate: string; // Changed from Date to string
+  closingDate?: string; // Changed from Date to string
   propertyId: string;
   status: TransactionStatus;
   property?: PropertyInfo;
@@ -16,7 +16,7 @@ export interface TransactionFormData {
   transactionValue: number;
   commissionRate: number;
   commissionAmount: number;
-  agentTier?: AgentRank;
+  agentTier?: string; // Changed from AgentRank to string for compatibility
   coBroking?: CoBrokingInfo;
   notes?: string;
 }

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -32,38 +31,53 @@ import { TransactionFormValues } from '@/types';
 
 // Validation schema
 const transactionSchema = z.object({
-  type: z.enum(['individual', 'developer']),
+  transactionType: z.enum(['individual', 'developer']),
   transactionDate: z.date(),
   status: z.string(),
   propertyId: z.string().min(1, 'Property is required'),
   agentId: z.string().min(1, 'Agent is required'),
-  buyerId: z.string().optional(),
-  sellerId: z.string().optional(),
-  price: z.coerce.number().min(1, 'Price must be greater than 0'),
-  commission: z.coerce.number().min(0, 'Commission cannot be negative'),
+  buyer: z.object({
+    name: z.string().optional(),
+    email: z.string().optional(),
+    phone: z.string().optional(),
+    notes: z.string().optional()
+  }).optional(),
+  seller: z.object({
+    name: z.string().optional(),
+    email: z.string().optional(),
+    phone: z.string().optional(),
+    notes: z.string().optional()
+  }).optional(),
+  transactionValue: z.coerce.number().min(1, 'Value must be greater than 0'),
+  commissionRate: z.coerce.number().min(0, 'Commission rate cannot be negative'),
+  commissionAmount: z.coerce.number().min(0, 'Commission amount cannot be negative'),
   notes: z.string().optional(),
 });
+
+// Define the form values type based on the schema
+type FormValues = z.infer<typeof transactionSchema>;
 
 const TransactionForm = () => {
   const navigate = useNavigate();
   const [documentFiles, setDocumentFiles] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const form = useForm<TransactionFormValues>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(transactionSchema),
     defaultValues: {
-      type: 'individual',
+      transactionType: 'individual',
       transactionDate: new Date(),
       status: 'pending',
       propertyId: '',
       agentId: '',
-      price: 0,
-      commission: 0,
+      transactionValue: 0,
+      commissionRate: 5,
+      commissionAmount: 0,
       notes: '',
     },
   });
 
-  const transactionType = form.watch('type');
+  const transactionType = form.watch('transactionType');
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -78,7 +92,7 @@ const TransactionForm = () => {
     toast.info('Document removed');
   };
 
-  const onSubmit = async (data: TransactionFormValues) => {
+  const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true);
     
     try {
@@ -115,7 +129,7 @@ const TransactionForm = () => {
             {/* Transaction Type Selection */}
             <FormField
               control={form.control}
-              name="type"
+              name="transactionType"
               render={({ field }) => (
                 <FormItem className="space-y-3">
                   <FormLabel>Transaction Type</FormLabel>
@@ -143,6 +157,7 @@ const TransactionForm = () => {
               )}
             />
 
+            {/* Date and Status */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Date Picker */}
               <FormField
@@ -162,7 +177,7 @@ const TransactionForm = () => {
                             )}
                           >
                             {field.value ? (
-                              format(new Date(field.value), "PPP")
+                              format(field.value, "PPP")
                             ) : (
                               <span>Pick a date</span>
                             )}
@@ -173,7 +188,7 @@ const TransactionForm = () => {
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
                           mode="single"
-                          selected={field.value instanceof Date ? field.value : new Date(field.value as string)}
+                          selected={field.value}
                           onSelect={field.onChange}
                           initialFocus
                         />
@@ -225,7 +240,7 @@ const TransactionForm = () => {
               />
             </div>
 
-            {/* Property Selection (Would normally be a dropdown connected to your properties database) */}
+            {/* Property Selection */}
             <FormField
               control={form.control}
               name="propertyId"
@@ -243,30 +258,32 @@ const TransactionForm = () => {
               )}
             />
 
-            {/* Display different fields based on transaction type */}
+            {/* Client Information based on transaction type */}
             {transactionType === 'individual' ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Buyer Information */}
                 <FormField
                   control={form.control}
-                  name="buyerId"
+                  name="buyer.name"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Buyer</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter buyer information..." {...field} />
+                        <Input placeholder="Enter buyer name..." {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+                {/* Seller Information */}
                 <FormField
                   control={form.control}
-                  name="sellerId"
+                  name="seller.name"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Seller</FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter seller information..." {...field} />
+                        <Input placeholder="Enter seller name..." {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -289,10 +306,11 @@ const TransactionForm = () => {
               />
             )}
 
+            {/* Transaction Value and Commission */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField
                 control={form.control}
-                name="price"
+                name="transactionValue"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Transaction Value</FormLabel>
@@ -309,7 +327,7 @@ const TransactionForm = () => {
                             field.onChange(e);
                             // Auto-calculate commission (5% of transaction value)
                             if (!isNaN(value)) {
-                              form.setValue('commission', Math.round(value * 0.05));
+                              form.setValue('commissionAmount', Math.round(value * 0.05));
                             }
                           }}
                         />
@@ -322,7 +340,7 @@ const TransactionForm = () => {
 
               <FormField
                 control={form.control}
-                name="commission"
+                name="commissionAmount"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Commission</FormLabel>
