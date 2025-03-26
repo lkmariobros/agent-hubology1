@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -18,13 +19,14 @@ import {
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
-import { useTransaction } from '@/hooks/useTransactions';
+import { useTransactions } from '@/hooks/useTransactions';
 import { formatCurrency } from '@/utils/propertyUtils';
 
 const TransactionDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { data: transactionData, isLoading, error } = useTransaction(id || '');
+  const { useTransaction } = useTransactions();
+  const { data: transaction, isLoading, error } = useTransaction(id || '');
 
   if (error) {
     toast.error("Failed to load transaction details");
@@ -42,8 +44,6 @@ const TransactionDetail = () => {
       </div>
     );
   }
-
-  const transaction = transactionData?.data;
 
   return (
     <div className="space-y-4">

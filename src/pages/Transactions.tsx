@@ -136,7 +136,7 @@ const Transactions = () => {
                       <div>
                         <div className="font-medium">{transaction.property?.title}</div>
                         <div className="text-xs text-muted-foreground">
-                          {transaction.property?.address.city}, {transaction.property?.address.state}
+                          {transaction.property?.address?.city}, {transaction.property?.address?.state}
                         </div>
                       </div>
                     </td>

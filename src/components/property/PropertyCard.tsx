@@ -43,6 +43,17 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, showFullDe
     // Track click analytics here
   };
 
+  // Helper to safely access features 
+  const getFeatureValue = (key: string, defaultValue: number = 0): number => {
+    if (!property.features) return defaultValue;
+    
+    if (Array.isArray(property.features)) {
+      return defaultValue;
+    }
+    
+    return (property.features as any)[key] || defaultValue;
+  };
+
   return (
     <Card className="overflow-hidden transition-shadow hover:shadow-md">
       <Link to={`/properties/${property.id}`} onClick={handlePropertyClick}>
@@ -109,7 +120,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, showFullDe
         
         <div className="mt-3 text-lg font-bold">
           {formatCurrency(property.price)}
-          {(property.transactionType.toLowerCase() === 'rent' || property.transactionType.toLowerCase() === 'rental') ? '/month' : ''}
+          {(property.transactionType?.toLowerCase() === 'rent' || property.transactionType?.toLowerCase() === 'rental') ? '/month' : ''}
         </div>
         
         {/* Stock information for developments */}
@@ -131,24 +142,24 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, showFullDe
         {/* Show details based on property type */}
         {property.type.toLowerCase() === 'residential' && (
           <>
-            {property.features?.bedrooms > 0 && (
+            {getFeatureValue('bedrooms') > 0 && (
               <div className="flex items-center mr-3">
                 <Bed className="h-4 w-4 mr-1" />
-                <span>{property.features.bedrooms} {property.features.bedrooms === 1 ? 'Bed' : 'Beds'}</span>
+                <span>{getFeatureValue('bedrooms')} {getFeatureValue('bedrooms') === 1 ? 'Bed' : 'Beds'}</span>
               </div>
             )}
             
-            {property.features?.bathrooms > 0 && (
+            {getFeatureValue('bathrooms') > 0 && (
               <div className="flex items-center mr-3">
                 <Bath className="h-4 w-4 mr-1" />
-                <span>{property.features.bathrooms} {property.features.bathrooms === 1 ? 'Bath' : 'Baths'}</span>
+                <span>{getFeatureValue('bathrooms')} {getFeatureValue('bathrooms') === 1 ? 'Bath' : 'Baths'}</span>
               </div>
             )}
             
-            {property.features?.squareFeet > 0 && (
+            {getFeatureValue('squareFeet') > 0 && (
               <div className="flex items-center">
                 <Grid2X2 className="h-4 w-4 mr-1" />
-                <span>{property.features.squareFeet} sq.ft</span>
+                <span>{getFeatureValue('squareFeet')} sq.ft</span>
               </div>
             )}
           </>
@@ -156,19 +167,19 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, showFullDe
         
         {(property.type.toLowerCase() === 'commercial' || property.type.toLowerCase() === 'industrial') && (
           <>
-            {property.features?.squareFeet > 0 && (
+            {getFeatureValue('squareFeet') > 0 && (
               <div className="flex items-center mr-3">
                 <Building className="h-4 w-4 mr-1" />
-                <span>{property.features.squareFeet} sq.ft</span>
+                <span>{getFeatureValue('squareFeet')} sq.ft</span>
               </div>
             )}
           </>
         )}
         
-        {property.type.toLowerCase() === 'land' && property.features?.landSize > 0 && (
+        {property.type.toLowerCase() === 'land' && getFeatureValue('landSize') > 0 && (
           <div className="flex items-center">
             <Grid2X2 className="h-4 w-4 mr-1" />
-            <span>{property.features.landSize} sq.ft</span>
+            <span>{getFeatureValue('landSize')} sq.ft</span>
           </div>
         )}
         
