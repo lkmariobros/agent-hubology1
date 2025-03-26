@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import CommissionBreakdown from './CommissionBreakdown';
 import CommissionHistory from './CommissionHistory';
 import CommissionTiers from './CommissionTiers';
@@ -29,26 +28,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
             <CardTitle>Commission History</CardTitle>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="all" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="personal">Personal</TabsTrigger>
-                <TabsTrigger value="override">Override</TabsTrigger>
-              </TabsList>
-              <TabsContent value="all" className="pt-4">
-                <CommissionHistory commissions={commissions} />
-              </TabsContent>
-              <TabsContent value="personal" className="pt-4">
-                <CommissionHistory 
-                  commissions={commissions.filter(c => c.type === 'personal')} 
-                />
-              </TabsContent>
-              <TabsContent value="override" className="pt-4">
-                <CommissionHistory 
-                  commissions={commissions.filter(c => c.type === 'override')} 
-                />
-              </TabsContent>
-            </Tabs>
+            <CommissionHistory commissions={commissions} />
           </CardContent>
         </Card>
       </div>
