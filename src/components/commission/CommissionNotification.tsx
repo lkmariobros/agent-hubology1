@@ -1,17 +1,36 @@
 
 import React from 'react';
-import { AlertCircle, CheckCircle, Info } from 'lucide-react';
+import { AlertCircle, CheckCircle, Info, Award, TrendingUp, DollarSign } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
+export type CommissionNotificationType = 
+  | 'approval_pending'
+  | 'approval_review'
+  | 'approval_approved'
+  | 'approval_ready'
+  | 'approval_paid'
+  | 'approval_rejected'
+  | 'tier_progress'
+  | 'tier_achieved'
+  | 'commission_milestone';
+
 interface CommissionNotificationProps {
-  status: string;
-  commissionAmount: number;
+  type: CommissionNotificationType;
+  title?: string;
+  message?: string;
+  commissionAmount?: number;
+  tierName?: string;
+  progressPercentage?: number;
   date?: string;
 }
 
 const CommissionNotification: React.FC<CommissionNotificationProps> = ({ 
-  status, 
-  commissionAmount,
+  type,
+  title,
+  message,
+  commissionAmount = 0,
+  tierName,
+  progressPercentage,
   date 
 }) => {
   // Format currency
@@ -35,68 +54,100 @@ const CommissionNotification: React.FC<CommissionNotificationProps> = ({
   };
   
   const getNotificationContent = () => {
-    switch(status) {
-      case 'Pending':
-        return {
-          icon: <Info className="h-4 w-4" />,
-          variant: 'default',
-          title: 'Commission Pending Approval',
-          description: `Your commission of ${formatCurrency(commissionAmount)} has been submitted for approval.${date ? ` Submitted on ${formatDate(date)}.` : ''}`
-        };
-      case 'Under Review':
-        return {
-          icon: <AlertCircle className="h-4 w-4" />,
-          variant: 'default',
-          title: 'Commission Under Review',
-          description: `Your commission of ${formatCurrency(commissionAmount)} is currently under review.${date ? ` Last updated on ${formatDate(date)}.` : ''}`
-        };
-      case 'Approved':
-        return {
-          icon: <CheckCircle className="h-4 w-4" />,
-          variant: 'success',
-          title: 'Commission Approved',
-          description: `Your commission of ${formatCurrency(commissionAmount)} has been approved.${date ? ` Approved on ${formatDate(date)}.` : ''}`
-        };
-      case 'Ready for Payment':
-        return {
-          icon: <CheckCircle className="h-4 w-4" />,
-          variant: 'success',
-          title: 'Commission Ready for Payment',
-          description: `Your commission of ${formatCurrency(commissionAmount)} is ready for payment.${date ? ` Payment processing started on ${formatDate(date)}.` : ''}`
-        };
-      case 'Paid':
-        return {
-          icon: <CheckCircle className="h-4 w-4" />,
-          variant: 'success',
-          title: 'Commission Paid',
-          description: `Your commission of ${formatCurrency(commissionAmount)} has been paid.${date ? ` Paid on ${formatDate(date)}.` : ''}`
-        };
-      case 'Rejected':
-        return {
-          icon: <AlertCircle className="h-4 w-4" />,
-          variant: 'destructive',
-          title: 'Commission Rejected',
-          description: `Your commission of ${formatCurrency(commissionAmount)} has been rejected.${date ? ` Rejected on ${formatDate(date)}.` : ''} Please contact your administrator for more information.`
-        };
+    // Default values which may be overridden if custom title/message provided
+    let defaultTitle = '';
+    let defaultMessage = '';
+    let icon = <Info className="h-4 w-4" />;
+    let variant: 'default' | 'destructive' | 'success' = 'default';
+
+    switch(type) {
+      case 'approval_pending':
+        icon = <Info className="h-4 w-4" />;
+        variant = 'default';
+        defaultTitle = 'Commission Pending Approval';
+        defaultMessage = `Your commission of ${formatCurrency(commissionAmount)} has been submitted for approval.${date ? ` Submitted on ${formatDate(date)}.` : ''}`;
+        break;
+        
+      case 'approval_review':
+        icon = <AlertCircle className="h-4 w-4" />;
+        variant = 'default';
+        defaultTitle = 'Commission Under Review';
+        defaultMessage = `Your commission of ${formatCurrency(commissionAmount)} is currently under review.${date ? ` Last updated on ${formatDate(date)}.` : ''}`;
+        break;
+        
+      case 'approval_approved':
+        icon = <CheckCircle className="h-4 w-4" />;
+        variant = 'success';
+        defaultTitle = 'Commission Approved';
+        defaultMessage = `Your commission of ${formatCurrency(commissionAmount)} has been approved.${date ? ` Approved on ${formatDate(date)}.` : ''}`;
+        break;
+        
+      case 'approval_ready':
+        icon = <DollarSign className="h-4 w-4" />;
+        variant = 'success';
+        defaultTitle = 'Commission Ready for Payment';
+        defaultMessage = `Your commission of ${formatCurrency(commissionAmount)} is ready for payment.${date ? ` Payment processing started on ${formatDate(date)}.` : ''}`;
+        break;
+        
+      case 'approval_paid':
+        icon = <CheckCircle className="h-4 w-4" />;
+        variant = 'success';
+        defaultTitle = 'Commission Paid';
+        defaultMessage = `Your commission of ${formatCurrency(commissionAmount)} has been paid.${date ? ` Paid on ${formatDate(date)}.` : ''}`;
+        break;
+        
+      case 'approval_rejected':
+        icon = <AlertCircle className="h-4 w-4" />;
+        variant = 'destructive';
+        defaultTitle = 'Commission Rejected';
+        defaultMessage = `Your commission of ${formatCurrency(commissionAmount)} has been rejected.${date ? ` Rejected on ${formatDate(date)}.` : ''} Please contact your administrator for more information.`;
+        break;
+        
+      case 'tier_progress':
+        icon = <TrendingUp className="h-4 w-4" />;
+        variant = 'default';
+        defaultTitle = 'Tier Progress Update';
+        defaultMessage = `You're ${progressPercentage}% of the way to the next tier. Keep up the great work!`;
+        break;
+        
+      case 'tier_achieved':
+        icon = <Award className="h-4 w-4" />;
+        variant = 'success';
+        defaultTitle = 'New Tier Achieved!';
+        defaultMessage = `Congratulations! You've reached the ${tierName} tier. Your commission rate has been updated.`;
+        break;
+        
+      case 'commission_milestone':
+        icon = <Award className="h-4 w-4" />;
+        variant = 'success';
+        defaultTitle = 'Commission Milestone Reached';
+        defaultMessage = `You've reached ${formatCurrency(commissionAmount)} in commissions! Keep up the excellent work.`;
+        break;
+        
       default:
-        return {
-          icon: <Info className="h-4 w-4" />,
-          variant: 'default',
-          title: 'Commission Status',
-          description: `Your commission of ${formatCurrency(commissionAmount)} is being processed.`
-        };
+        icon = <Info className="h-4 w-4" />;
+        variant = 'default';
+        defaultTitle = 'Commission Update';
+        defaultMessage = `You have a new update regarding your commission.`;
     }
+
+    return {
+      icon,
+      variant,
+      title: title || defaultTitle,
+      message: message || defaultMessage
+    };
   };
   
   const content = getNotificationContent();
   
   return (
-    <Alert variant={content.variant as any}>
+    <Alert variant={content.variant as any} className="border-l-4">
       <div className="flex items-center">
         {content.icon}
         <AlertTitle className="ml-2">{content.title}</AlertTitle>
       </div>
-      <AlertDescription>{content.description}</AlertDescription>
+      <AlertDescription>{content.message}</AlertDescription>
     </Alert>
   );
 };
