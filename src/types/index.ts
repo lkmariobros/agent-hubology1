@@ -1,3 +1,4 @@
+
 export interface DashboardMetric {
   id: string;
   label: string;
@@ -276,15 +277,13 @@ export type TransactionFormData = {
   };
 };
 
-export type PropertyFormValues = TransactionFormData;
-
 export type DocumentType = 'Contract' | 'Agreement' | 'Invoice' | 'Receipt' | 'Other';
 
 export type AgentRank = 'Associate' | 'Senior Associate' | 'Advisor' | 'Sales Leader' | 'Team Leader' | 'Group Leader' | 'Director' | 'Supreme Leader';
 export type TransactionType = 'Sale' | 'Rent' | 'Developer';
 export type ApprovalStatus = 'Pending' | 'Approved' | 'Rejected' | 'Under Review' | 'Ready for Payment' | 'Paid';
 
-// Adding missing User type
+// Enhanced User interface with necessary properties for leaderboards
 export interface User {
   id: string;
   name: string;
@@ -299,9 +298,13 @@ export interface User {
   salesVolume?: number;
   transactions?: number;
   commission?: number;
+  // Adding properties needed for the leaderboard components
+  points?: number;
+  sales?: number;
+  properties?: number; // Number of properties managed by user
 }
 
-// Adding missing RankRequirement type
+// RankRequirement interface
 export interface RankRequirement {
   id: string;
   rank: AgentRank;
@@ -311,19 +314,17 @@ export interface RankRequirement {
   color: string;
 }
 
-// Fix for PropertyFormValues - ensure it's not using TransactionFormData fields
-export type PropertyFormValues = {
+// Proper PropertyFormValues interface for property forms
+export interface PropertyFormValues {
   title: string;
   description: string;
   price: number;
   type: 'residential' | 'commercial' | 'industrial' | 'land';
-  subtype?: string;
-  features: string[];
+  status: string;
+  area?: number;
   bedrooms?: number;
   bathrooms?: number;
-  area?: number;
-  images: string[];
-  status: string;
+  features: string[];
   address: {
     street: string;
     city: string;
@@ -331,5 +332,5 @@ export type PropertyFormValues = {
     zip: string;
     country: string;
   };
-  transactionType?: string;
-};
+  images: string[];
+}
