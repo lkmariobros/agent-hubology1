@@ -12,6 +12,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 
 import { useNotifications } from '@/context/NotificationContext';
+import CommissionNotification from '../commission/CommissionNotification';
 
 const NotificationBell: React.FC = () => {
   const [open, setOpen] = useState(false);
@@ -22,6 +23,32 @@ const NotificationBell: React.FC = () => {
     markAllAsRead, 
     refreshNotifications 
   } = useNotifications();
+
+  // Helper function to determine commission notification type
+  const getCommissionNotificationType = (notification: any) => {
+    const { type, data } = notification;
+    
+    if (data?.notificationType) {
+      return data.notificationType;
+    }
+    
+    // Fallback mapping based on notification type
+    switch (type) {
+      case 'approval_status_change':
+        return 'approval_approved';
+      case 'tier_update':
+        return 'tier_progress'; 
+      case 'commission_milestone':
+        return 'commission_milestone';
+      default:
+        return null; // Not a commission notification
+    }
+  };
+
+  // Check if notification is a commission notification
+  const isCommissionNotification = (notification: any) => {
+    return ['approval_status_change', 'tier_update', 'commission_milestone'].includes(notification.type);
+  };
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -69,19 +96,34 @@ const NotificationBell: React.FC = () => {
               {notifications.map((notification) => (
                 <div 
                   key={notification.id} 
-                  className={`px-4 py-3 border-b last:border-0 hover:bg-muted/50 cursor-pointer transition-colors ${notification.read ? '' : 'bg-muted/20'}`}
+                  className={`border-b last:border-0 hover:bg-muted/50 cursor-pointer transition-colors ${notification.read ? '' : 'bg-muted/20'}`}
                   onClick={() => markAsRead(notification.id)}
                 >
-                  <div className="flex items-start">
-                    <div className="flex-1">
-                      <p className={`text-sm font-medium ${notification.read ? 'text-muted-foreground' : ''}`}>
-                        {notification.title}
-                      </p>
-                      <p className="text-xs mt-1 text-muted-foreground">
-                        {notification.message}
-                      </p>
+                  {isCommissionNotification(notification) ? (
+                    <CommissionNotification
+                      type={getCommissionNotificationType(notification)}
+                      title={notification.title}
+                      message={notification.message}
+                      commissionAmount={notification.data?.commissionAmount}
+                      tierName={notification.data?.tierName}
+                      progressPercentage={notification.data?.progressPercentage}
+                      date={notification.data?.date || notification.createdAt}
+                      compact={true}
+                    />
+                  ) : (
+                    <div className="px-4 py-3">
+                      <div className="flex items-start">
+                        <div className="flex-1">
+                          <p className={`text-sm font-medium ${notification.read ? 'text-muted-foreground' : ''}`}>
+                            {notification.title}
+                          </p>
+                          <p className="text-xs mt-1 text-muted-foreground">
+                            {notification.message}
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               ))}
             </div>

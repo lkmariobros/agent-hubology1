@@ -8,6 +8,7 @@ import DashboardContent from '@/components/commission/DashboardContent';
 import TeamContent from '@/components/commission/TeamContent';
 import { useCommissionTiers, useAgentHierarchy } from '@/hooks/useCommission';
 import { AgentWithHierarchy, CommissionHistory, CommissionTier } from '@/types';
+import SendTestNotification from '@/components/commission/SendTestNotification';
 
 // Sample commission tiers for fallback when API fails
 const fallbackTiers: CommissionTier[] = [{
@@ -135,6 +136,7 @@ const metricsData = {
 const Commission = () => {
   const [currentTab, setCurrentTab] = useState('dashboard');
   const [selectedAgent, setSelectedAgent] = useState<AgentWithHierarchy | null>(null);
+  const [showTestTools, setShowTestTools] = useState(process.env.NODE_ENV === 'development');
 
   // Fetch commission data - in production, these would use real API calls
   const {
@@ -172,6 +174,8 @@ const Commission = () => {
             commissions={recentCommissions} 
             agentHierarchy={agentHierarchy} 
           />
+          
+          {showTestTools && <SendTestNotification />}
         </TabsContent>
         
         <TabsContent value="team" className="space-y-6">

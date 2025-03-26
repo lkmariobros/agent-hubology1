@@ -22,6 +22,7 @@ interface CommissionNotificationProps {
   tierName?: string;
   progressPercentage?: number;
   date?: string;
+  compact?: boolean;
 }
 
 const CommissionNotification: React.FC<CommissionNotificationProps> = ({ 
@@ -31,7 +32,8 @@ const CommissionNotification: React.FC<CommissionNotificationProps> = ({
   commissionAmount = 0,
   tierName,
   progressPercentage,
-  date 
+  date,
+  compact = false
 }) => {
   // Format currency
   const formatCurrency = (amount: number) => {
@@ -140,6 +142,18 @@ const CommissionNotification: React.FC<CommissionNotificationProps> = ({
   };
   
   const content = getNotificationContent();
+
+  if (compact) {
+    return (
+      <div className="flex items-start p-2">
+        <div className="mr-2 mt-0.5">{content.icon}</div>
+        <div>
+          <p className="text-sm font-medium">{content.title}</p>
+          <p className="text-xs text-muted-foreground">{content.message}</p>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <Alert variant={content.variant as any} className="border-l-4">

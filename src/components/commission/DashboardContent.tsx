@@ -5,7 +5,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import CommissionBreakdown from './CommissionBreakdown';
 import CommissionHistory from './CommissionHistory';
 import CommissionTiers from './CommissionTiers';
-import CommissionNotification from './CommissionNotification';
+import CommissionNotificationFeed from './CommissionNotificationFeed';
+import { useAuth } from '@/hooks/useAuth';
 import { AgentWithHierarchy, CommissionHistory as CommissionHistoryType, CommissionTier } from '@/types';
 
 interface DashboardContentProps {
@@ -19,27 +20,12 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
   commissions,
   agentHierarchy
 }) => {
+  const { user } = useAuth();
+  
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <div className="lg:col-span-2 space-y-6">
-        <div className="space-y-4">
-          <CommissionNotification 
-            type="approval_approved" 
-            commissionAmount={15000} 
-            date="2024-02-28"
-          />
-          
-          <CommissionNotification 
-            type="tier_progress" 
-            progressPercentage={78}
-          />
-          
-          <CommissionNotification 
-            type="approval_ready" 
-            commissionAmount={22500} 
-            date="2024-03-15"
-          />
-        </div>
+        <CommissionNotificationFeed userId={user?.id} limit={3} />
         
         <Card>
           <CardHeader>
