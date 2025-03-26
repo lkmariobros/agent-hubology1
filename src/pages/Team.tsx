@@ -1,133 +1,181 @@
+
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { UserCircle } from "lucide-react";
 import { User } from '@/types';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Search, Plus, Mail, Phone, MoreVertical } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 // Sample users data
-const teamMembers: User[] = [
-  {
-    id: '1',
-    name: 'John Smith',
-    email: 'john@example.com',
-    role: 'agent',
-    avatar: 'https://randomuser.me/api/portraits/men/1.jpg',
-    createdAt: '2023-01-01',
-    updatedAt: '2023-01-01',
-    phone: '555-123-4567',
-    tier: 'Senior Agent',
-    properties: 24,
-    transactions: 45
-  },
-  {
-    id: '2',
-    name: 'Emily Johnson',
-    email: 'emily@example.com',
-    role: 'agent',
-    avatar: 'https://randomuser.me/api/portraits/women/2.jpg',
-    createdAt: '2023-02-15',
-    updatedAt: '2023-02-15',
-    phone: '555-234-5678',
-    tier: 'Principal Agent',
-    properties: 32,
-    transactions: 67
-  },
-  {
-    id: '3',
-    name: 'Michael Brown',
-    email: 'michael@example.com',
-    role: 'agent',
-    avatar: 'https://randomuser.me/api/portraits/men/3.jpg',
-    createdAt: '2023-03-01',
-    updatedAt: '2023-03-01',
-    phone: '555-345-6789',
-    tier: 'Associate Agent',
-    properties: 18,
-    transactions: 29
-  },
-  {
-    id: '4',
-    name: 'Jessica Davis',
-    email: 'jessica@example.com',
-    role: 'agent',
-    avatar: 'https://randomuser.me/api/portraits/women/4.jpg',
-    createdAt: '2023-04-10',
-    updatedAt: '2023-04-10',
-    phone: '555-456-7890',
-    tier: 'Senior Agent',
-    properties: 28,
-    transactions: 52
-  },
-  {
-    id: '5',
-    name: 'David Wilson',
-    email: 'david@example.com',
-    role: 'agent',
-    avatar: 'https://randomuser.me/api/portraits/men/5.jpg',
-    createdAt: '2023-05-01',
-    updatedAt: '2023-05-01',
-    phone: '555-567-8901',
-    tier: 'Junior Agent',
-    properties: 12,
-    transactions: 18
+const users: User[] = [{
+  id: '1',
+  name: 'John Smith',
+  email: 'john@example.com',
+  phone: '+1 (555) 123-4567',
+  role: 'agent',
+  tier: 'senior',
+  avatar: 'https://randomuser.me/api/portraits/men/1.jpg',
+  properties: 42,
+  transactions: 18
+}, {
+  id: '2',
+  name: 'Sarah Johnson',
+  email: 'sarah@example.com',
+  phone: '+1 (555) 234-5678',
+  role: 'agent',
+  tier: 'principal',
+  avatar: 'https://randomuser.me/api/portraits/women/2.jpg',
+  properties: 78,
+  transactions: 36
+}, {
+  id: '3',
+  name: 'Michael Brown',
+  email: 'michael@example.com',
+  phone: '+1 (555) 345-6789',
+  role: 'agent',
+  tier: 'associate',
+  avatar: 'https://randomuser.me/api/portraits/men/3.jpg',
+  properties: 29,
+  transactions: 11
+}, {
+  id: '4',
+  name: 'Emily Davis',
+  email: 'emily@example.com',
+  phone: '+1 (555) 456-7890',
+  role: 'manager',
+  tier: 'director',
+  avatar: 'https://randomuser.me/api/portraits/women/4.jpg',
+  properties: 56,
+  transactions: 22
+}, {
+  id: '5',
+  name: 'Robert Wilson',
+  email: 'robert@example.com',
+  phone: '+1 (555) 567-8901',
+  role: 'agent',
+  tier: 'junior',
+  avatar: 'https://randomuser.me/api/portraits/men/5.jpg',
+  properties: 17,
+  transactions: 4
+}];
+const getRoleBadge = (role: string) => {
+  switch (role) {
+    case 'agent':
+      return <Badge variant="outline">Agent</Badge>;
+    case 'manager':
+      return <Badge variant="secondary">Manager</Badge>;
+    case 'admin':
+      return <Badge>Admin</Badge>;
+    default:
+      return <Badge variant="outline">{role}</Badge>;
   }
-];
-
+};
+const getTierBadge = (tier: string) => {
+  switch (tier) {
+    case 'junior':
+      return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">Junior</Badge>;
+    case 'associate':
+      return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Associate</Badge>;
+    case 'senior':
+      return <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">Senior</Badge>;
+    case 'principal':
+      return <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">Principal</Badge>;
+    case 'director':
+      return <Badge variant="outline" className="bg-pink-50 text-pink-700 border-pink-200">Director</Badge>;
+    default:
+      return <Badge variant="outline">{tier}</Badge>;
+  }
+};
 const Team = () => {
   return (
-    <div className="container mx-auto py-10">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">Our Team</h1>
-        <p className="text-muted-foreground">Meet our dedicated team of real estate professionals.</p>
+    <div className="space-y-6 px-[31px] py-[3px]">
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold tracking-tight">Team</h1>
+        <Button className="gap-2">
+          <Plus size={16} />
+          Add Team Member
+        </Button>
       </div>
       
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle>Search Team</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-4">
+            <div className="flex-1 min-w-[200px]">
+              <Input placeholder="Search by name, email..." className="w-full" />
+            </div>
+            <Button>Search</Button>
+          </div>
+        </CardContent>
+      </Card>
+      
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {teamMembers.map((agent) => (
-          <AgentCard key={agent.id} agent={agent} />
-        ))}
+        {users.map(user => <Card key={user.id} className="overflow-hidden">
+            <CardContent className="p-0">
+              <div className="p-6">
+                <div className="flex items-center gap-4">
+                  <Avatar className="h-16 w-16">
+                    <AvatarImage src={user.avatar} alt={user.name} />
+                    <AvatarFallback>{user.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-semibold text-lg truncate">{user.name}</h3>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem>View Profile</DropdownMenuItem>
+                          <DropdownMenuItem>Edit</DropdownMenuItem>
+                          <DropdownMenuItem className="text-destructive">Deactivate</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                    <div className="flex items-center gap-2 mt-1">
+                      {getRoleBadge(user.role)}
+                      {getTierBadge(user.tier)}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="mt-4 grid grid-cols-2 gap-4">
+                  <div className="flex items-center gap-2 text-sm">
+                    <div className="rounded-full bg-muted p-1">
+                      <Mail className="h-3 w-3" />
+                    </div>
+                    <span className="truncate">{user.email}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <div className="rounded-full bg-muted p-1">
+                      <Phone className="h-3 w-3" />
+                    </div>
+                    <span className="truncate">{user.phone}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 border-t border-border">
+                <div className="p-4 text-center border-r border-border">
+                  <div className="text-2xl font-bold">{user.properties}</div>
+                  <div className="text-xs text-muted-foreground">Properties</div>
+                </div>
+                <div className="p-4 text-center">
+                  <div className="text-2xl font-bold">{user.transactions}</div>
+                  <div className="text-xs text-muted-foreground">Transactions</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>)}
       </div>
     </div>
   );
 };
-
-const AgentCard = ({ agent }: { agent: User }) => {
-  return (
-    <Card className="h-full">
-      <CardContent className="p-6">
-        <div className="flex flex-col items-center space-y-3">
-          {agent.avatar ? (
-            <Avatar className="h-20 w-20 mb-2">
-              <AvatarImage src={agent.avatar} alt={agent.name} />
-              <AvatarFallback>{agent.name.charAt(0)}</AvatarFallback>
-            </Avatar>
-          ) : (
-            <div className="h-20 w-20 rounded-full bg-muted flex items-center justify-center mb-2">
-              <UserCircle className="h-10 w-10 text-muted-foreground" />
-            </div>
-          )}
-          
-          <h3 className="text-lg font-medium">{agent.name}</h3>
-          <p className="text-sm text-muted-foreground">{agent.tier || agent.role}</p>
-          
-          <div className="w-full border-t my-2 pt-2">
-            <div className="flex justify-between text-sm">
-              <span>Phone:</span>
-              <span className="font-medium">{agent.phone || 'N/A'}</span>
-            </div>
-            <div className="flex justify-between text-sm mt-1">
-              <span>Properties:</span>
-              <span className="font-medium">{agent.properties || 0}</span>
-            </div>
-            <div className="flex justify-between text-sm mt-1">
-              <span>Transactions:</span>
-              <span className="font-medium">{agent.transactions || 0}</span>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
-
 export default Team;

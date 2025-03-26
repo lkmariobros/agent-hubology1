@@ -32,19 +32,16 @@ import { TransactionFormValues } from '@/types';
 
 // Validation schema
 const transactionSchema = z.object({
-  transactionType: z.enum(['individual', 'developer']),
+  type: z.enum(['individual', 'developer']),
   date: z.date(),
   status: z.string(),
   propertyId: z.string().min(1, 'Property is required'),
-  clientId: z.string().optional(),
-  clientType: z.string().optional(),
+  agentId: z.string().min(1, 'Agent is required'),
+  buyerId: z.string().optional(),
+  sellerId: z.string().optional(),
   price: z.coerce.number().min(1, 'Price must be greater than 0'),
-  commissionRate: z.coerce.number().min(0, 'Commission cannot be negative'),
-  commissionAmount: z.coerce.number().min(0, 'Commission cannot be negative'),
+  commission: z.coerce.number().min(0, 'Commission cannot be negative'),
   notes: z.string().optional(),
-  coBroking: z.boolean().default(false),
-  coBrokerId: z.string().optional(),
-  coBrokerCommissionSplit: z.coerce.number().optional(),
 });
 
 const TransactionForm = () => {
@@ -55,21 +52,18 @@ const TransactionForm = () => {
   const form = useForm<TransactionFormValues>({
     resolver: zodResolver(transactionSchema),
     defaultValues: {
-      transactionType: 'individual',
-      date: new Date().toISOString().split('T')[0], // Format as YYYY-MM-DD string
+      type: 'individual',
+      date: new Date(),
       status: 'pending',
       propertyId: '',
-      clientId: '',
-      clientType: '',
+      agentId: '',
       price: 0,
-      commissionRate: 0,
-      commissionAmount: 0,
+      commission: 0,
       notes: '',
-      coBroking: false,
     },
   });
 
-  const transactionType = form.watch('transactionType');
+  const transactionType = form.watch('type');
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -121,7 +115,7 @@ const TransactionForm = () => {
             {/* Transaction Type Selection */}
             <FormField
               control={form.control}
-              name="transactionType"
+              name="type"
               render={({ field }) => (
                 <FormItem className="space-y-3">
                   <FormLabel>Transaction Type</FormLabel>
@@ -168,7 +162,7 @@ const TransactionForm = () => {
                             )}
                           >
                             {field.value ? (
-                              format(new Date(field.value), "PPP")
+                              format(field.value, "PPP")
                             ) : (
                               <span>Pick a date</span>
                             )}
@@ -179,8 +173,8 @@ const TransactionForm = () => {
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
                           mode="single"
-                          selected={new Date(field.value)}
-                          onSelect={(date) => field.onChange(date?.toISOString().split('T')[0] || '')}
+                          selected={field.value as Date}
+                          onSelect={field.onChange}
                           initialFocus
                         />
                       </PopoverContent>
@@ -254,7 +248,7 @@ const TransactionForm = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField
                   control={form.control}
-                  name="clientId"
+                  name="buyerId"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Buyer</FormLabel>
@@ -267,7 +261,7 @@ const TransactionForm = () => {
                 />
                 <FormField
                   control={form.control}
-                  name="clientType"
+                  name="sellerId"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Seller</FormLabel>
@@ -282,7 +276,7 @@ const TransactionForm = () => {
             ) : (
               <FormField
                 control={form.control}
-                name="clientId"
+                name="agentId"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Developer</FormLabel>
@@ -315,8 +309,7 @@ const TransactionForm = () => {
                             field.onChange(e);
                             // Auto-calculate commission (5% of transaction value)
                             if (!isNaN(value)) {
-                              form.setValue('commissionRate', 5);
-                              form.setValue('commissionAmount', Math.round(value * 0.05));
+                              form.setValue('commission', Math.round(value * 0.05));
                             }
                           }}
                         />
@@ -329,7 +322,7 @@ const TransactionForm = () => {
 
               <FormField
                 control={form.control}
-                name="commissionAmount"
+                name="commission"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Commission</FormLabel>
