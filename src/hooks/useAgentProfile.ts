@@ -1,6 +1,5 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { AgentRank } from '@/types/transaction-form';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -19,32 +18,19 @@ export const useAgentProfile = () => {
     queryFn: async (): Promise<AgentProfile> => {
       if (!user) throw new Error('User not authenticated');
       
-      // In a real implementation, this would fetch from the profiles table
+      // In a real implementation, this would fetch from the database
       // For now, we'll simulate a fixed tier for the agent
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id, tier, tier_name, commission_percentage')
-        .eq('id', user.id)
-        .single();
+      // This would be replaced with an actual API call to Supabase in production
       
-      if (error) {
-        console.error('Error fetching agent profile:', error);
-        
-        // Fallback to a default tier if profile not found
-        return {
-          id: user.id,
-          tier: 3,
-          tier_name: 'Team Leader' as AgentRank,
-          commission_percentage: 83
-        };
-      }
-      
-      return data || {
+      // Simulated profile data
+      const mockProfile: AgentProfile = {
         id: user.id,
         tier: 3,
         tier_name: 'Team Leader' as AgentRank,
         commission_percentage: 83
       };
+      
+      return mockProfile;
     },
     enabled: !!user,
   });

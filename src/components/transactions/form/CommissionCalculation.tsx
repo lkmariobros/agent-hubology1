@@ -121,13 +121,22 @@ const CommissionCalculation: React.FC = () => {
             formatCurrency={formatCurrency}
             isRental={isRental}
           />
-          <CommissionVisualizer 
-            agentPercentage={agentPortionPercentage}
-            agencyPercentage={agencyPortionPercentage}
-            coBrokingEnabled={formData.coBroking?.enabled || false}
-            agencySplitPercentage={formData.coBroking?.commissionSplit || 50}
-            coAgencySplitPercentage={formData.coBroking?.enabled ? 100 - (formData.coBroking?.commissionSplit || 50) : 50}
-          />
+          
+          <Card className="bg-muted/40">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Commission Split Visualization</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CommissionVisualizer 
+                agentPercentage={agentPortionPercentage}
+                agencyPercentage={agencyPortionPercentage}
+                coBrokingEnabled={formData.coBroking?.enabled || false}
+                agencySplitPercentage={formData.coBroking?.commissionSplit || 50}
+                coAgencySplitPercentage={formData.coBroking?.enabled ? 100 - (formData.coBroking?.commissionSplit || 50) : 50}
+              />
+            </CardContent>
+          </Card>
+          
           <AgentTierInfo 
             agentTier={{
               name: agentTier,
@@ -137,6 +146,8 @@ const CommissionCalculation: React.FC = () => {
           />
         </div>
       </div>
+      
+      {/* Remove duplicate commission visualizer that was causing layout issues */}
     </div>
   );
 };
