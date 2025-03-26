@@ -1,76 +1,43 @@
 
 import React from 'react';
 import { useTransactionForm } from '@/context/TransactionForm';
-import { 
-  Check, 
-  Building2, 
-  Users, 
-  Handshake, 
-  Calculator, 
-  FileText, 
-  ClipboardCheck 
-} from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const TransactionFormStepper: React.FC = () => {
-  const { state, goToStep } = useTransactionForm();
+  const { state, prevStep, nextStep, goToStep } = useTransactionForm();
   const { currentStep } = state;
-
-  console.log('TransactionFormStepper rendered with currentStep:', currentStep);
-
+  
   const steps = [
-    { id: 0, label: 'Transaction Type', icon: <Check className="h-4 w-4" /> },
-    { id: 1, label: 'Property', icon: <Building2 className="h-4 w-4" /> },
-    { id: 2, label: 'Clients', icon: <Users className="h-4 w-4" /> },
-    { id: 3, label: 'Co-Broking', icon: <Handshake className="h-4 w-4" /> },
-    { id: 4, label: 'Commission', icon: <Calculator className="h-4 w-4" /> },
-    { id: 5, label: 'Documents', icon: <FileText className="h-4 w-4" /> },
-    { id: 6, label: 'Review', icon: <ClipboardCheck className="h-4 w-4" /> },
+    'Transaction Type',
+    'Property',
+    'Client Info',
+    'Co-Broking',
+    'Commission',
+    'Documents',
+    'Review'
   ];
-
+  
   return (
-    <div className="mb-8">
-      <div className="relative">
-        {/* This is the continuous background line that runs through all steps */}
-        <div className="absolute top-6 left-0 right-0 transform translate-y-(-50%) h-[2px] bg-muted"></div>
-        
-        {/* This is the progress line overlay that grows based on current step */}
-        <div 
-          className="absolute top-6 left-0 h-[2px] bg-primary transition-all duration-300 ease-in-out"
-          style={{ 
-            width: `${(currentStep / (steps.length - 1)) * 100}%`,
-          }}
-        ></div>
-        
-        {/* Step circles positioned above the line */}
-        <div className="flex justify-between items-center relative">
-          {steps.map((step) => (
-            <div 
-              key={step.id}
-              className="flex flex-col items-center z-20 cursor-pointer"
-              onClick={() => goToStep(step.id)}
+    <div className="mb-6">
+      <div className="flex items-center justify-between">
+        {steps.map((step, index) => (
+          <React.Fragment key={index}>
+            <Button
+              variant={currentStep === index ? "default" : "ghost"}
+              size="sm"
+              className={`rounded-full ${currentStep === index ? "" : "text-muted-foreground"}`}
+              onClick={() => goToStep(index)}
+              disabled={index > currentStep}
             >
-              <div 
-                className={`w-12 h-12 rounded-full border-2 flex items-center justify-center mb-2 transition-colors
-                ${step.id < currentStep 
-                  ? 'bg-primary border-primary text-primary-foreground' 
-                  : step.id === currentStep 
-                    ? 'bg-primary border-primary text-primary-foreground'
-                    : 'bg-muted border-muted-foreground/30 text-muted-foreground'}`}
-              >
-                {step.id < currentStep ? <Check className="h-5 w-5" /> : step.icon}
-              </div>
-              <span 
-                className={`text-xs font-medium ${
-                  step.id <= currentStep 
-                    ? 'text-primary' 
-                    : 'text-muted-foreground'
-                }`}
-              >
-                {step.label}
-              </span>
-            </div>
-          ))}
-        </div>
+              <span className="mr-2">{index + 1}</span>
+              <span className="hidden sm:inline">{step}</span>
+            </Button>
+            
+            {index < steps.length - 1 && (
+              <div className="h-px w-full bg-muted" />
+            )}
+          </React.Fragment>
+        ))}
       </div>
     </div>
   );

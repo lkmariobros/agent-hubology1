@@ -1,181 +1,158 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TransactionFormProvider, useTransactionForm } from '@/context/TransactionForm'; 
-import { Button } from '@/components/ui/button';
+import { TransactionFormProvider } from '@/context/TransactionForm';
 import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { Loader2, Save, ArrowLeft, ArrowRight } from 'lucide-react';
 import { useTransactions } from '@/hooks/useTransactions';
 
-// Step components
-import TransactionFormStepper from './form/TransactionFormStepper';
+// Form step components
 import TransactionTypeSelector from './form/TransactionTypeSelector';
-import PropertyDetails from './form/PropertyDetails';
+import PropertySelection from './form/PropertySelection';
 import ClientInformation from './form/ClientInformation';
 import CoBrokingSetup from './form/CoBrokingSetup';
 import CommissionCalculation from './form/CommissionCalculation';
 import DocumentUpload from './form/DocumentUpload';
 import TransactionReview from './form/TransactionReview';
+import TransactionFormStepper from './form/TransactionFormStepper';
 
-const TransactionFormSteps: React.FC = () => {
-  const { state, prevStep, nextStep, saveForm, submitForm, validateCurrentStep } = useTransactionForm();
-  const { currentStep, isSubmitting, lastSaved, errors, formData, documents } = state;
+// Types
+import { TransactionFormData } from '@/types/transaction-form';
+
+interface TransactionFormStepsProps {
+  onSubmit?: (data: TransactionFormData) => Promise<void>;
+}
+
+const TransactionFormSteps: React.FC<TransactionFormStepsProps> = ({ onSubmit }) => {
   const navigate = useNavigate();
   const { useCreateTransactionMutation } = useTransactions();
-  const createMutation = useCreateTransactionMutation();
+  const createTransaction = useCreateTransactionMutation();
+  const [submitting, setSubmitting] = useState(false);
 
-  console.log('TransactionFormSteps rendered with currentStep:', currentStep);
-
-  const handleSaveDraft = async () => {
-    console.log('Save draft clicked');
+  // Handle submit transaction
+  const handleSubmitTransaction = async (formData: TransactionFormData) => {
     try {
-      await saveForm();
-      toast.success('Transaction saved as draft');
-    } catch (error) {
-      console.error('Save error:', error);
-      toast.error('Failed to save transaction');
-    }
-  };
-
-  const handleSubmit = async () => {
-    console.log('Submit clicked');
-    try {
-      if (!validateCurrentStep()) {
-        toast.error('Please fix the validation errors before submitting');
-        return;
+      setSubmitting(true);
+      if (onSubmit) {
+        await onSubmit(formData);
+      } else {
+        // Use the provided mutation
+        const result = await createTransaction.mutateAsync(formData);
+        toast.success('Transaction created successfully!');
+        navigate(`/transactions/${result.id}`);
       }
-      
-      // Use the mutation function to create the transaction
-      await createMutation.mutateAsync({
-        formData,
-        documents
-      });
-      
-      toast.success('Transaction created successfully!');
-      navigate('/transactions');
     } catch (error) {
-      console.error('Submit error:', error);
+      console.error('Error submitting transaction:', error);
       toast.error('Failed to create transaction');
-    }
-  };
-  
-  const handleNextStep = () => {
-    console.log('Next button clicked, proceeding to validation');
-    // Validate the current step before proceeding
-    if (validateCurrentStep()) {
-      console.log('Validation passed, moving to next step');
-      nextStep();
-    } else {
-      console.log('Validation failed, errors:', errors);
-      toast.error('Please fix the validation errors before proceeding');
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  // Render the current step component
-  const renderStepContent = () => {
-    console.log('Rendering step content for step:', currentStep);
-    switch (currentStep) {
-      case 0:
-        return <TransactionTypeSelector />;
-      case 1:
-        return <PropertyDetails />;
-      case 2:
-        return <ClientInformation />;
-      case 3:
-        return <CoBrokingSetup />;
-      case 4:
-        return <CommissionCalculation />;
-      case 5:
-        return <DocumentUpload />;
-      case 6:
-        return <TransactionReview />;
-      default:
-        console.warn('Unknown step:', currentStep);
-        return <TransactionTypeSelector />;
-    }
-  };
-
+  // This component is intended to be used within the TransactionFormProvider
+  // which supplies the form state and functions via context
   return (
     <div className="space-y-6">
       <TransactionFormStepper />
       
       <Card>
         <CardContent className="pt-6">
-          {renderStepContent()}
-          
-          {/* Navigation buttons */}
-          <div className="flex justify-between mt-8">
-            <div>
-              {currentStep > 0 && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={prevStep}
-                  disabled={isSubmitting}
-                >
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Back
-                </Button>
-              )}
-            </div>
-            
-            <div className="flex gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleSaveDraft}
-                disabled={isSubmitting || createMutation.isPending}
-              >
-                <Save className="h-4 w-4 mr-2" />
-                Save Draft
-              </Button>
-              
-              {currentStep < 6 ? (
-                <Button
-                  type="button"
-                  onClick={handleNextStep}
-                  disabled={isSubmitting || createMutation.isPending}
-                >
-                  Next
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
-              ) : (
-                <Button
-                  type="button"
-                  onClick={handleSubmit}
-                  disabled={isSubmitting || createMutation.isPending}
-                >
-                  {isSubmitting || createMutation.isPending ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Submitting...
-                    </>
-                  ) : (
-                    'Submit Transaction'
-                  )}
-                </Button>
-              )}
-            </div>
-          </div>
-          
-          {/* Auto-save indicator */}
-          {lastSaved && (
-            <div className="mt-4 text-right">
-              <p className="text-xs text-muted-foreground">
-                Last saved: {lastSaved.toLocaleTimeString()}
-              </p>
-            </div>
-          )}
+          <TransactionStepContent
+            submitting={submitting}
+            onSubmit={handleSubmitTransaction}
+            createTransactionIsPending={createTransaction.isPending || false}
+          />
         </CardContent>
       </Card>
     </div>
   );
 };
 
-// The key change here is ensuring TransactionFormProvider properly wraps TransactionFormSteps
+// This component renders the appropriate form step based on the current step in the form context
+const TransactionStepContent: React.FC<{
+  submitting: boolean;
+  onSubmit: (formData: TransactionFormData) => Promise<void>;
+  createTransactionIsPending: boolean;
+}> = ({ submitting, onSubmit, createTransactionIsPending }) => {
+  // This component will get the currentStep from the TransactionForm context
+  const { state, nextStep, prevStep, submitForm } = useTransactionForm();
+  const { currentStep, formData } = state;
+
+  const handleSubmit = async () => {
+    try {
+      await submitForm();
+      await onSubmit(formData);
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      toast.error('Please fix the errors before submitting');
+    }
+  };
+
+  return (
+    <div className="transaction-form-steps">
+      {/* Step 0: Transaction Type */}
+      {currentStep === 0 && (
+        <TransactionTypeSelector />
+      )}
+
+      {/* Step 1: Property Selection */}
+      {currentStep === 1 && (
+        <PropertySelection />
+      )}
+
+      {/* Step 2: Client Information */}
+      {currentStep === 2 && (
+        <ClientInformation />
+      )}
+
+      {/* Step 3: Co-Broking Setup */}
+      {currentStep === 3 && (
+        <CoBrokingSetup />
+      )}
+
+      {/* Step 4: Commission Calculation */}
+      {currentStep === 4 && (
+        <CommissionCalculation />
+      )}
+
+      {/* Step 5: Document Upload */}
+      {currentStep === 5 && (
+        <DocumentUpload />
+      )}
+
+      {/* Step 6: Review & Submit */}
+      {currentStep === 6 && (
+        <TransactionReview 
+          onSubmit={handleSubmit}
+          isSubmitting={submitting || createTransactionIsPending}
+        />
+      )}
+
+      {/* Navigation buttons - only show if not on first or last step */}
+      {currentStep > 0 && currentStep < 6 && (
+        <div className="flex justify-between mt-6">
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={prevStep}
+            disabled={submitting}
+          >
+            Back
+          </Button>
+          <Button 
+            type="button" 
+            onClick={nextStep}
+            disabled={submitting}
+          >
+            Continue
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Main exported component that wraps everything in the required provider
 const EnhancedTransactionForm: React.FC = () => {
-  console.log('EnhancedTransactionForm rendered');
   return (
     <TransactionFormProvider>
       <TransactionFormSteps />

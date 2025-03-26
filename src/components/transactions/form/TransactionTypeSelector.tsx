@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useTransactionForm } from '@/context/TransactionFormContext';
+import { useTransactionForm } from '@/context/TransactionForm';
 import { Home, Building, Key } from 'lucide-react';
 import { 
   Card, 
@@ -44,8 +44,12 @@ const transactionTypes: {
 ];
 
 const TransactionTypeSelector: React.FC = () => {
-  const { state, updateTransactionType } = useTransactionForm();
+  const { state, updateTransactionType, nextStep } = useTransactionForm();
   const { formData } = state;
+  
+  const handleContinue = () => {
+    nextStep();
+  };
   
   return (
     <div className="space-y-6">
@@ -95,6 +99,12 @@ const TransactionTypeSelector: React.FC = () => {
             </CardFooter>
           </Card>
         ))}
+      </div>
+      
+      <div className="flex justify-end mt-6">
+        <Button onClick={handleContinue}>
+          Continue
+        </Button>
       </div>
     </div>
   );
