@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CalendarRange, Briefcase, ListFilter, LineChart, Building, Receipt } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import DashboardCommission from '@/components/dashboard/DashboardCommission';
+import ActivityFeed from '@/components/dashboard/ActivityFeed';
 
 const Dashboard = () => {
   const navigate = useNavigate();
