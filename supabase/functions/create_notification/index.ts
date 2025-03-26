@@ -77,21 +77,20 @@ serve(async (req) => {
 
     console.log("Creating notification:", { userId, type, title });
 
-    // Ensure data is valid and serializable before stringifying
-    let dataJson = null;
+    // Process data field - ensure it's a clean object
+    let processedData = null;
     
     if (data) {
       try {
-        // Test if the data is serializable
-        const testStr = JSON.stringify(data);
-        dataJson = testStr;
-        console.log("Data is valid JSON, serialized to:", dataJson);
+        // Convert data to a string then back to make sure it's serializable
+        processedData = JSON.parse(JSON.stringify(data));
+        console.log("Processed data:", processedData);
       } catch (e) {
-        console.error("Error serializing data:", e);
+        console.error("Error processing data field:", e);
         return new Response(
           JSON.stringify({ 
             success: false, 
-            error: "Data field is not serializable" 
+            error: "Data field contains non-serializable values" 
           }),
           { 
             status: 400, 
@@ -103,6 +102,7 @@ serve(async (req) => {
 
     // Insert the notification
     try {
+      console.log("Inserting notification into database");
       const { data: notificationData, error: insertError } = await supabaseClient
         .from("notifications")
         .insert({
@@ -110,7 +110,7 @@ serve(async (req) => {
           type,
           title,
           message,
-          data: dataJson,
+          data: processedData,
           read: false
         })
         .select()

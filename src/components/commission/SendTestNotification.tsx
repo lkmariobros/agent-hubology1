@@ -1,12 +1,15 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useCommissionNotifications } from '@/hooks/useCommissionNotifications';
 import NotificationDebugger from './NotificationDebugger';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { InfoIcon } from 'lucide-react';
 
 const SendTestNotification: React.FC = () => {
   const { user } = useAuth();
+  const [showDebugger, setShowDebugger] = useState(false);
   const {
     createApprovalStatusNotification,
     createTierProgressNotification,
@@ -61,6 +64,13 @@ const SendTestNotification: React.FC = () => {
   
   return (
     <div className="space-y-4 mt-4">
+      <Alert className="bg-blue-50 border-blue-200">
+        <InfoIcon className="h-4 w-4 text-blue-600" />
+        <AlertDescription className="text-blue-700">
+          Use these tools to test notification functionality. If you encounter errors, use the debugger to help identify the issue.
+        </AlertDescription>
+      </Alert>
+      
       <div className="flex flex-wrap gap-2">
         <Button variant="outline" size="sm" onClick={sendApprovalNotification}>
           Test Approval Notification
@@ -74,9 +84,16 @@ const SendTestNotification: React.FC = () => {
         <Button variant="outline" size="sm" onClick={sendMilestoneNotification}>
           Test Milestone
         </Button>
+        <Button 
+          variant={showDebugger ? "default" : "secondary"} 
+          size="sm" 
+          onClick={() => setShowDebugger(!showDebugger)}
+        >
+          {showDebugger ? "Hide Debugger" : "Show Debugger"}
+        </Button>
       </div>
       
-      <NotificationDebugger />
+      {showDebugger && <NotificationDebugger />}
     </div>
   );
 };
