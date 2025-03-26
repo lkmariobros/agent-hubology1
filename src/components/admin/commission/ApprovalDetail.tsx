@@ -29,7 +29,7 @@ interface ApprovalDetailProps {
 
 const ApprovalDetail: React.FC<ApprovalDetailProps> = ({ id }) => {
   const navigate = useNavigate();
-  const { data, isLoading, error } = useCommissionApprovalDetail(id, true);
+  const { data, isLoading, error } = useCommissionApprovalDetail(id);
   const updateStatusMutation = useUpdateApprovalStatus();
   const [statusNotes, setStatusNotes] = React.useState('');
   const [newStatus, setNewStatus] = React.useState<string>('');

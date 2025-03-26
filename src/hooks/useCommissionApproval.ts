@@ -181,7 +181,7 @@ export const useCommissionApprovalDetail = (approvalId: string) => {
       }
       
       // Fetch approval comments
-      const { data: comments, error: commentsError } = await supabase
+      const { data: commentsRaw, error: commentsError } = await supabase
         .from('approval_comments')
         .select('*')
         .eq('approval_id', approvalId)
@@ -191,10 +191,19 @@ export const useCommissionApprovalDetail = (approvalId: string) => {
         console.error('Error fetching approval comments:', commentsError);
       }
       
+      // Map the comments to match our interface
+      const comments: CommissionApprovalComment[] = commentsRaw ? commentsRaw.map(comment => ({
+        id: comment.id,
+        approval_id: comment.approval_id,
+        content: comment.comment_text, // Map comment_text to content
+        created_by: comment.created_by,
+        created_at: comment.created_at
+      })) : [];
+      
       return {
         approval,
         history: history || [],
-        comments: comments || []
+        comments
       };
     },
     enabled: !!user && !!approvalId
@@ -210,15 +219,19 @@ export const useApprovalStatusCounts = () => {
     queryFn: async (): Promise<ApprovalStatusCounts> => {
       if (!user) throw new Error('User not authenticated');
       
+      // Fix the RPC function call
       const { data, error } = await supabase
-        .rpc('get_approval_status_counts');
+        .from('commission_approvals')
+        .select('status')
+        .is('status', true);
       
       if (error) {
         console.error('Error fetching approval status counts:', error);
         throw error;
       }
       
-      return data || {
+      // Calculate counts manually since RPC isn't working
+      const counts = {
         pending: 0,
         under_review: 0,
         approved: 0,
@@ -226,6 +239,15 @@ export const useApprovalStatusCounts = () => {
         paid: 0,
         rejected: 0
       };
+      
+      data?.forEach(item => {
+        const status = item.status.toLowerCase().replace(' ', '_');
+        if (counts.hasOwnProperty(status)) {
+          counts[status as keyof ApprovalStatusCounts]++;
+        }
+      });
+      
+      return counts;
     },
     enabled: !!user
   });
@@ -240,15 +262,23 @@ export const useApprovedCommissionTotal = () => {
     queryFn: async () => {
       if (!user) throw new Error('User not authenticated');
       
+      // Use regular query instead of RPC
       const { data, error } = await supabase
-        .rpc('get_approved_commission_total');
+        .from('commission_approvals')
+        .select('property_transactions(commission_amount)')
+        .eq('status', 'Approved');
       
       if (error) {
         console.error('Error fetching approved commission total:', error);
         throw error;
       }
       
-      return data?.total || 0;
+      // Calculate the total
+      const total = data?.reduce((sum, item) => {
+        return sum + (item.property_transactions?.commission_amount || 0);
+      }, 0) || 0;
+      
+      return total;
     },
     enabled: !!user
   });
@@ -263,15 +293,23 @@ export const usePendingCommissionTotal = () => {
     queryFn: async () => {
       if (!user) throw new Error('User not authenticated');
       
+      // Use regular query instead of RPC
       const { data, error } = await supabase
-        .rpc('get_pending_commission_total');
+        .from('commission_approvals')
+        .select('property_transactions(commission_amount)')
+        .eq('status', 'Pending');
       
       if (error) {
         console.error('Error fetching pending commission total:', error);
         throw error;
       }
       
-      return data?.total || 0;
+      // Calculate the total
+      const total = data?.reduce((sum, item) => {
+        return sum + (item.property_transactions?.commission_amount || 0);
+      }, 0) || 0;
+      
+      return total;
     },
     enabled: !!user
   });
