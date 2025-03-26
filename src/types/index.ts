@@ -94,7 +94,7 @@ export interface Transaction {
 export interface TransactionDocument {
   id?: string; // Make id optional to match transaction-form.ts
   name: string;
-  documentType: string;
+  documentType: DocumentType; // Updated from string to DocumentType
   url?: string;
   file?: File;
 }
@@ -171,6 +171,16 @@ export interface CommissionApprovalComment {
 }
 
 export interface CommissionOverride {
+  transactionId: string;
+  overrideAgentId: string;
+  baseAgentId: string;
+  amount: number;
+  percentage: number;
+  rank: AgentRank;
+  status: 'Pending' | 'Approved' | 'Paid';
+}
+
+export interface OverrideCommission {
   transactionId: string;
   overrideAgentId: string;
   baseAgentId: string;
@@ -347,8 +357,10 @@ export interface RankRequirement {
 
 export type TransactionFormValues = TransactionFormData;
 
+// Include DocumentType type if it doesn't exist
+export type DocumentType = 'Contract' | 'Agreement' | 'Invoice' | 'Receipt' | 'Other';
+
 // Update AgentRank to include all used values
 export type AgentRank = 'Associate' | 'Senior Associate' | 'Advisor' | 'Sales Leader' | 'Team Leader' | 'Group Leader' | 'Director' | 'Supreme Leader';
 export type TransactionType = 'Sale' | 'Rent' | 'Developer';
 export type ApprovalStatus = 'Pending' | 'Approved' | 'Rejected' | 'Under Review' | 'Ready for Payment' | 'Paid';
-

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useTransactionForm } from '@/context/TransactionForm';
 import { Upload, FileText, X, AlertCircle } from 'lucide-react';
@@ -19,8 +20,7 @@ import {
   CardHeader, 
   CardTitle 
 } from '@/components/ui/card';
-import { DocumentType } from '@/types/transaction-form';
-import { TransactionDocument } from '@/types'; // Import from main types
+import { DocumentType, TransactionDocument } from '@/types/transaction-form';
 
 const DocumentUpload: React.FC = () => {
   const { state, addDocument, removeDocument } = useTransactionForm();
