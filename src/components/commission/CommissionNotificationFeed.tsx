@@ -39,11 +39,15 @@ const CommissionNotificationFeed: React.FC<CommissionNotificationFeedProps> = ({
         return [];
       }
       
+      console.log('Raw notification data:', data);
+      
       // Map the snake_case database columns to camelCase properties expected by the Notification type
       return (data || []).map(item => {
-        // Extract related_id as data if data is not present
-        const notificationData = {
-          // If there's a related_id, use it as a reference point
+        // Create a notification data object based on available properties
+        const notificationData: Record<string, any> = {
+          // If there's stored data JSON, use it
+          ...(item.data || {}),
+          // If there's a related_id, use it as a reference point too
           ...(item.related_id ? { relatedId: item.related_id } : {}),
         };
         
@@ -54,7 +58,7 @@ const CommissionNotificationFeed: React.FC<CommissionNotificationFeedProps> = ({
           title: item.title,
           message: item.message,
           read: item.read || false,
-          data: notificationData, // Use the constructed data object
+          data: notificationData,
           createdAt: item.created_at
         } as Notification;
       });

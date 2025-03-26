@@ -18,24 +18,33 @@ serve(async (req) => {
   }
 
   try {
-    const supabaseClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-    );
+    // Initialize Supabase client with environment variables
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    
+    if (!supabaseUrl || !supabaseKey) {
+      console.error("Missing environment variables: SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
+      throw new Error("Server configuration error");
+    }
+
+    const supabaseClient = createClient(supabaseUrl, supabaseKey);
 
     // Parse request body
     const body: RequestBody = await req.json();
     const { userId, type, title, message, data } = body;
 
     if (!userId || !type || !title || !message) {
+      console.error("Missing required fields:", { userId, type, title, message });
       return new Response(
-        JSON.stringify({ error: "userId, type, title, and message are required" }),
+        JSON.stringify({ success: false, error: "userId, type, title, and message are required" }),
         { 
           status: 400, 
           headers: { ...corsHeaders, "Content-Type": "application/json" } 
         }
       );
     }
+
+    console.log("Creating notification:", { userId, type, title });
 
     // Insert the notification
     const { data: notificationData, error } = await supabaseClient
@@ -52,8 +61,11 @@ serve(async (req) => {
       .single();
 
     if (error) {
+      console.error("Database error:", error);
       throw error;
     }
+
+    console.log("Notification created successfully:", notificationData);
 
     // Return success response
     return new Response(
@@ -68,7 +80,7 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error("Error:", error.message);
+    console.error("Error in create_notification function:", error.message);
     return new Response(
       JSON.stringify({ success: false, error: error.message }),
       { 

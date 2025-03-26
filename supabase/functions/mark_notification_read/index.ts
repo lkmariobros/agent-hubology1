@@ -14,10 +14,16 @@ serve(async (req) => {
   }
 
   try {
-    const supabaseClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-    );
+    // Initialize Supabase client with environment variables
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    
+    if (!supabaseUrl || !supabaseKey) {
+      console.error("Missing environment variables: SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY");
+      throw new Error("Server configuration error");
+    }
+
+    const supabaseClient = createClient(supabaseUrl, supabaseKey);
 
     // Parse request body
     const body: RequestBody = await req.json();
@@ -25,7 +31,7 @@ serve(async (req) => {
 
     if (!notification_id) {
       return new Response(
-        JSON.stringify({ error: "notification_id is required" }),
+        JSON.stringify({ success: false, error: "notification_id is required" }),
         { 
           status: 400, 
           headers: { ...corsHeaders, "Content-Type": "application/json" } 
@@ -33,21 +39,29 @@ serve(async (req) => {
       );
     }
 
-    // Update the notification
-    const { error } = await supabaseClient
+    console.log("Marking notification as read:", notification_id);
+
+    // Update the notification status
+    const { data, error } = await supabaseClient
       .from("notifications")
       .update({ read: true })
-      .eq("id", notification_id);
+      .eq("id", notification_id)
+      .select()
+      .single();
 
     if (error) {
+      console.error("Database error:", error);
       throw error;
     }
+
+    console.log("Notification marked as read:", data);
 
     // Return success response
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: "Notification marked as read" 
+        message: "Notification marked as read",
+        data
       }),
       { 
         status: 200, 
@@ -55,7 +69,7 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error("Error:", error.message);
+    console.error("Error in mark_notification_read function:", error.message);
     return new Response(
       JSON.stringify({ success: false, error: error.message }),
       { 

@@ -18,15 +18,29 @@ export const useSendNotification = () => {
   return useMutation({
     mutationFn: async (params: SendNotificationParams) => {
       try {
-        const { data, error } = await supabase.functions.invoke<{ success: boolean }>(
+        console.log('Sending notification:', params);
+        
+        const { data, error } = await supabase.functions.invoke<{ success: boolean; data: any }>(
           'create_notification',
           {
             body: params
           }
         );
         
-        if (error) throw error;
-        if (!data?.success) throw new Error('Failed to send notification');
+        if (error) {
+          console.error('Error sending notification:', error);
+          throw error;
+        }
+        
+        if (!data?.success) {
+          console.error('Failed to send notification:', data);
+          throw new Error('Failed to send notification');
+        }
+        
+        console.log('Notification sent successfully:', data);
+        
+        // Invalidate notifications query to refresh the list
+        queryClient.invalidateQueries({ queryKey: ['notifications'] });
         
         return data;
       } catch (error: any) {
@@ -34,7 +48,12 @@ export const useSendNotification = () => {
         throw error;
       }
     },
+    onSuccess: () => {
+      // Invalidate specific queries after a successful notification
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    },
     onError: (error) => {
+      console.error('Mutation error:', error);
       toast.error(`Failed to send notification: ${error.message}`);
     }
   });
