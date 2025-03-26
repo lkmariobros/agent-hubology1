@@ -1,12 +1,11 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useCommissionNotifications } from '@/hooks/useCommissionNotifications';
+import NotificationDebugger from './NotificationDebugger';
 
 const SendTestNotification: React.FC = () => {
-  const { toast } = useToast();
   const { user } = useAuth();
   const {
     createApprovalStatusNotification,
@@ -17,11 +16,6 @@ const SendTestNotification: React.FC = () => {
   
   const sendApprovalNotification = () => {
     if (!user?.id) {
-      toast({
-        title: "Error",
-        description: "User not logged in",
-        variant: "destructive"
-      });
       return;
     }
     
@@ -34,11 +28,6 @@ const SendTestNotification: React.FC = () => {
   
   const sendTierProgressNotification = () => {
     if (!user?.id) {
-      toast({
-        title: "Error",
-        description: "User not logged in",
-        variant: "destructive"
-      });
       return;
     }
     
@@ -48,11 +37,6 @@ const SendTestNotification: React.FC = () => {
   
   const sendTierAchievedNotification = () => {
     if (!user?.id) {
-      toast({
-        title: "Error",
-        description: "User not logged in",
-        variant: "destructive"
-      });
       return;
     }
     
@@ -64,11 +48,6 @@ const SendTestNotification: React.FC = () => {
   
   const sendMilestoneNotification = () => {
     if (!user?.id) {
-      toast({
-        title: "Error",
-        description: "User not logged in",
-        variant: "destructive"
-      });
       return;
     }
     
@@ -81,19 +60,23 @@ const SendTestNotification: React.FC = () => {
   if (!user) return null;
   
   return (
-    <div className="flex flex-wrap gap-2 mt-4">
-      <Button variant="outline" size="sm" onClick={sendApprovalNotification}>
-        Test Approval Notification
-      </Button>
-      <Button variant="outline" size="sm" onClick={sendTierProgressNotification}>
-        Test Tier Progress
-      </Button>
-      <Button variant="outline" size="sm" onClick={sendTierAchievedNotification}>
-        Test Tier Achievement
-      </Button>
-      <Button variant="outline" size="sm" onClick={sendMilestoneNotification}>
-        Test Milestone
-      </Button>
+    <div className="space-y-4 mt-4">
+      <div className="flex flex-wrap gap-2">
+        <Button variant="outline" size="sm" onClick={sendApprovalNotification}>
+          Test Approval Notification
+        </Button>
+        <Button variant="outline" size="sm" onClick={sendTierProgressNotification}>
+          Test Tier Progress
+        </Button>
+        <Button variant="outline" size="sm" onClick={sendTierAchievedNotification}>
+          Test Tier Achievement
+        </Button>
+        <Button variant="outline" size="sm" onClick={sendMilestoneNotification}>
+          Test Milestone
+        </Button>
+      </div>
+      
+      <NotificationDebugger />
     </div>
   );
 };

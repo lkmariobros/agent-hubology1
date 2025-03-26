@@ -77,30 +77,79 @@ serve(async (req) => {
 
     console.log("Creating notification:", { userId, type, title });
 
-    // Always stringify data if it exists to ensure proper database storage
-    const dataJson = data ? JSON.stringify(data) : null;
-    console.log("Data to store:", dataJson);
+    // Ensure data is valid and serializable before stringifying
+    let dataJson = null;
+    
+    if (data) {
+      try {
+        // Test if the data is serializable
+        const testStr = JSON.stringify(data);
+        dataJson = testStr;
+        console.log("Data is valid JSON, serialized to:", dataJson);
+      } catch (e) {
+        console.error("Error serializing data:", e);
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            error: "Data field is not serializable" 
+          }),
+          { 
+            status: 400, 
+            headers: { ...corsHeaders, "Content-Type": "application/json" } 
+          }
+        );
+      }
+    }
 
     // Insert the notification
-    const { data: notificationData, error: insertError } = await supabaseClient
-      .from("notifications")
-      .insert({
-        user_id: userId,
-        type,
-        title,
-        message,
-        data: dataJson,
-        read: false
-      })
-      .select()
-      .single();
+    try {
+      const { data: notificationData, error: insertError } = await supabaseClient
+        .from("notifications")
+        .insert({
+          user_id: userId,
+          type,
+          title,
+          message,
+          data: dataJson,
+          read: false
+        })
+        .select()
+        .single();
 
-    if (insertError) {
-      console.error("Database error:", insertError);
+      if (insertError) {
+        console.error("Database error:", insertError);
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            error: insertError.message 
+          }),
+          { 
+            status: 500, 
+            headers: { ...corsHeaders, "Content-Type": "application/json" } 
+          }
+        );
+      }
+
+      console.log("Notification created successfully:", notificationData);
+
+      // Return success response
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          message: "Notification created successfully",
+          data: notificationData
+        }),
+        { 
+          status: 200, 
+          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        }
+      );
+    } catch (dbError) {
+      console.error("Unexpected database error:", dbError);
       return new Response(
         JSON.stringify({ 
           success: false, 
-          error: insertError.message 
+          error: `Database error: ${dbError.message}` 
         }),
         { 
           status: 500, 
@@ -108,21 +157,6 @@ serve(async (req) => {
         }
       );
     }
-
-    console.log("Notification created successfully:", notificationData);
-
-    // Return success response
-    return new Response(
-      JSON.stringify({ 
-        success: true, 
-        message: "Notification created successfully",
-        data: notificationData
-      }),
-      { 
-        status: 200, 
-        headers: { ...corsHeaders, "Content-Type": "application/json" } 
-      }
-    );
   } catch (error) {
     console.error("Error in create_notification function:", error.message);
     return new Response(

@@ -27,11 +27,19 @@ export const useSendNotification = () => {
       try {
         console.log('Sending notification with params:', params);
         
-        // Ensure data is a serializable object
-        const cleanParams = {
-          ...params,
-          data: params.data ? JSON.parse(JSON.stringify(params.data)) : undefined
-        };
+        // Ensure data is a clean, serializable object by removing any circular references
+        let cleanParams;
+        try {
+          cleanParams = {
+            ...params,
+            data: params.data ? JSON.parse(JSON.stringify(params.data)) : undefined
+          };
+        } catch (error) {
+          console.error('Error serializing notification data:', error);
+          throw new Error('Notification data contains circular references or non-serializable values');
+        }
+        
+        console.log('Cleaned params for notification:', cleanParams);
         
         const { data: response, error } = await supabase.functions.invoke<NotificationResponse>(
           'create_notification',
