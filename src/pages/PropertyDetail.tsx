@@ -95,6 +95,14 @@ const PropertyDetail = () => {
   
   const property = propertyResponse.data;
   
+  // Extract property type from property_types relation
+  const propertyType = property.property_types?.name || 'Property';
+  
+  // Create an array of image URLs from property_images
+  const propertyImages = property.property_images 
+    ? property.property_images.map((img: any) => img.storage_path).filter(Boolean)
+    : [];
+  
   // Mock owner data - in a real app this would come from the API
   const owner = {
     name: "Michael Roberts",
@@ -125,13 +133,13 @@ const PropertyDetail = () => {
         <CardContent className="pt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <PropertyGallery 
-              images={property.images || []} 
+              images={propertyImages} 
               title={property.title} 
             />
             
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <Badge>{property.type}</Badge>
+                <Badge>{propertyType}</Badge>
                 <Badge variant="outline">
                   {property.transaction_types?.name || 'For Sale'}
                 </Badge>

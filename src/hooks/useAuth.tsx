@@ -1,8 +1,8 @@
 
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useContext } from 'react';
-import { AuthContext } from '@/providers/AuthProvider';
-import { UserRole } from '@/providers/AuthProvider';
+// Import from context instead of providers
+import { AuthContext, UserRole } from '@/context/AuthContext';
 
 /**
  * Enhanced authentication hook that extends the base auth context
