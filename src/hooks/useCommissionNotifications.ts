@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { CommissionNotificationType } from '@/components/commission/CommissionNotification';
 import { useSendNotification } from '@/hooks/useSendNotification';
+import { NotificationType } from '@/types/notification';
 
 interface CommissionNotification {
   type: CommissionNotificationType;
@@ -39,7 +40,7 @@ export const useCommissionNotifications = (userId?: string) => {
             'approval_status_change', 
             'tier_update', 
             'commission_milestone'
-          ])
+          ] as NotificationType[])
           .order('created_at', { ascending: false })
           .limit(20);
         

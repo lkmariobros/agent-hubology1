@@ -1,5 +1,12 @@
 
-export type NotificationType = 'approval' | 'payment' | 'system' | 'message';
+export type NotificationType = 
+  | 'approval' 
+  | 'payment' 
+  | 'system' 
+  | 'message' 
+  | 'approval_status_change'
+  | 'tier_update'
+  | 'commission_milestone';
 
 export interface Notification {
   id: string;

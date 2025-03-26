@@ -8,13 +8,15 @@ import { CommissionTier } from '@/types';
 interface CommissionTiersProps {
   tiers: CommissionTier[];
   currentTier: string;
-  transactionsCompleted: number;
+  transactionsCompleted?: number;
+  salesVolume?: number;
 }
 
 const CommissionTiers = ({
   tiers,
   currentTier,
-  transactionsCompleted
+  transactionsCompleted = 0,
+  salesVolume = 0
 }: CommissionTiersProps) => {
   // Check if tiers array is empty or undefined
   if (!tiers || tiers.length === 0) {
@@ -30,10 +32,13 @@ const CommissionTiers = ({
     );
   }
 
+  // Use either transactionsCompleted or simulate from salesVolume
+  const effectiveTransactions = transactionsCompleted || Math.floor(salesVolume / 100000);
+  
   const currentTierObj = tiers.find(t => t.tier === currentTier) || tiers[0];
-  const nextTierObj = tiers.find(t => t.minTransactions > transactionsCompleted);
-  const transactionsToNextTier = nextTierObj ? nextTierObj.minTransactions - transactionsCompleted : 0;
-  const progress = nextTierObj ? (transactionsCompleted / nextTierObj.minTransactions) * 100 : 100;
+  const nextTierObj = tiers.find(t => t.minTransactions > effectiveTransactions);
+  const transactionsToNextTier = nextTierObj ? nextTierObj.minTransactions - effectiveTransactions : 0;
+  const progress = nextTierObj ? (effectiveTransactions / nextTierObj.minTransactions) * 100 : 100;
 
   return (
     <Card className="glass-card">

@@ -2,8 +2,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-
-export type NotificationType = 'approval' | 'payment' | 'system' | 'message';
+import { NotificationType } from '@/types/notification';
 
 interface SendNotificationParams {
   userId: string;

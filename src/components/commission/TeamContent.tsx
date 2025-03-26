@@ -4,7 +4,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { AgentWithHierarchy } from '@/types';
 import AgentHierarchyChart from './AgentHierarchyChart';
 import AgentDetails from './AgentDetails';
-import CommissionCalculator from './CommissionCalculator';
 
 interface TeamContentProps {
   agentHierarchy: AgentWithHierarchy;
@@ -37,11 +36,6 @@ const TeamContent: React.FC<TeamContentProps> = ({
           {selectedAgent && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <AgentDetails agent={selectedAgent} />
-              
-              <CommissionCalculator
-                agent={selectedAgent}
-                commissionRate={25}
-              />
             </div>
           )}
         </>
