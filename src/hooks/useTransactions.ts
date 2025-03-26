@@ -88,8 +88,8 @@ export function useTransactions() {
         }
       } : undefined,
       agent: item.agent ? {
-        id: item.agent.id,
-        name: item.agent.name
+        id: item.agent.id || '',
+        name: item.agent.name || ''
       } : undefined,
       buyer: {
         name: item.buyer_name,
@@ -120,7 +120,7 @@ export function useTransactions() {
   };
 
   // Get a single transaction by ID
-  const getTransaction = async (id) => {
+  const getTransaction = async (id: string) => {
     const { data, error } = await supabase
       .from('property_transactions')
       .select(`
@@ -163,8 +163,8 @@ export function useTransactions() {
         }
       } : undefined,
       agent: data.agent ? {
-        id: data.agent.id,
-        name: data.agent.name
+        id: data.agent.id || '',
+        name: data.agent.name || ''
       } : undefined,
       buyer: {
         name: data.buyer_name,
@@ -175,7 +175,8 @@ export function useTransactions() {
         name: data.seller_name,
         email: data.seller_email,
         phone: data.seller_phone
-      }
+      },
+      documents: [] // Add empty documents array to match the type
     };
   };
 
@@ -184,7 +185,7 @@ export function useTransactions() {
     const queryClient = useQueryClient();
     
     return useMutation({
-      mutationFn: async (transaction) => {
+      mutationFn: async (transaction: { formData: any, documents: any[] }) => {
         const { formData, documents } = transaction;
         
         // Insert transaction data
@@ -238,7 +239,7 @@ export function useTransactions() {
     const queryClient = useQueryClient();
     
     return useMutation({
-      mutationFn: async ({ id, data }) => {
+      mutationFn: async ({ id, data }: { id: string, data: any }) => {
         const { error } = await supabase
           .from('property_transactions')
           .update({
@@ -271,7 +272,7 @@ export function useTransactions() {
       },
       onSuccess: (_, variables) => {
         queryClient.invalidateQueries({ queryKey: ['transactions'] });
-        queryClient.invalidateQueries({ queryKey: ['transactions', variables.id] });
+        queryClient.invalidateQueries({ queryKey: ['transaction', variables.id] });
         toast.success('Transaction updated successfully');
       },
       onError: (error) => {
@@ -285,7 +286,7 @@ export function useTransactions() {
     const queryClient = useQueryClient();
 
     return useMutation({
-      mutationFn: async (id) => {
+      mutationFn: async (id: string) => {
         const { error } = await supabase
           .from('property_transactions')
           .delete()
@@ -309,7 +310,7 @@ export function useTransactions() {
   };
 
   return {
-    useTransaction: (id) => useQuery({
+    useTransaction: (id: string) => useQuery({
       queryKey: ['transaction', id],
       queryFn: () => getTransaction(id),
       enabled: !!id,

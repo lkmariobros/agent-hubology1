@@ -48,8 +48,8 @@ const TransactionFormSteps: React.FC = () => {
       
       // Use the mutation function to create the transaction
       await createMutation.mutateAsync({
-        formData: formData,
-        documents: documents
+        formData,
+        documents
       });
       
       toast.success('Transaction created successfully!');

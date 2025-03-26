@@ -1,370 +1,287 @@
-
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { PropertyFilterBar } from '@/components/property/PropertyFilterBar';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Plus, Loader2 } from 'lucide-react';
-import { PropertyTable } from '@/components/property/PropertyTable';
-import { PropertyGrid } from '@/components/property/PropertyGrid';
-import { PropertyMap } from '@/components/property/PropertyMap';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ViewMode } from '@/components/property/PropertyFilterBar';
-import { useProperties, PropertyFilters } from '@/hooks/useProperties';
-import { mapPropertyData } from '@/utils/propertyUtils';
-import { Property } from '@/types';
-import { toast } from 'sonner';
-
-type TimeFilter = '7days' | '30days' | '90days' | 'all';
-type SortOption = 'newest' | 'oldest' | 'price-asc' | 'price-desc';
+import { PropertyCard } from '@/components/property/PropertyCard';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Search, Filter, Download, Plus, ArrowUpDown } from 'lucide-react';
+import { useProperties } from '@/hooks/useProperties';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { Slider } from '@/components/ui/slider';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 const Properties = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const queryParams = new URLSearchParams(location.search);
-  
-  // State for view mode and filters
-  const [viewMode, setViewMode] = useState<ViewMode>('grid');
-  const [timeFilter, setTimeFilter] = useState<TimeFilter>(queryParams.get('time') as TimeFilter || 'all');
-  const [sortOption, setSortOption] = useState<SortOption>(queryParams.get('sort') as SortOption || 'newest');
-  const [page, setPage] = useState(Number(queryParams.get('page')) || 1);
-  const [pageSize] = useState(12);
-  const [filters, setFilters] = useState<PropertyFilters>({});
-  
-  // Initialize filters from URL on component mount
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
+  const [currentPage, setCurrentPage] = useState(0);
+  const [minPrice, setMinPrice] = useState<number | undefined>(undefined);
+  const [maxPrice, setMaxPrice] = useState<number | undefined>(undefined);
+  const [propertyType, setPropertyType] = useState<string | undefined>(undefined);
+  const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
+  const [isFeatured, setIsFeatured] = useState(false);
+  const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false);
+
+  const { usePropertiesQuery } = useProperties();
+  const { data, isLoading, isError } = usePropertiesQuery({
+    search: searchQuery,
+    limit: 12,
+    page: currentPage,
+    minPrice: minPrice,
+    maxPrice: maxPrice,
+    type: propertyType,
+    status: statusFilter,
+    featured: isFeatured
+  });
+
+  const properties = data?.properties || [];
+  const totalProperties = data?.total || 0;
+  const totalPages = Math.ceil(totalProperties / 12);
+
   useEffect(() => {
-    const initialFilters: PropertyFilters = {};
-    
-    // Search term
-    if (queryParams.get('search')) {
-      initialFilters.title = queryParams.get('search') || undefined;
-    }
-    
-    // Property type
-    if (queryParams.get('type') && queryParams.get('type') !== 'all') {
-      initialFilters.propertyType = queryParams.get('type') || undefined;
-    }
-    
-    // Transaction type
-    if (queryParams.get('transaction') && queryParams.get('transaction') !== 'all') {
-      initialFilters.transactionType = queryParams.get('transaction') || undefined;
-    }
-    
-    // Price range
-    if (queryParams.get('minPrice')) {
-      initialFilters.minPrice = Number(queryParams.get('minPrice'));
-    }
-    
-    if (queryParams.get('maxPrice')) {
-      initialFilters.maxPrice = Number(queryParams.get('maxPrice'));
-    }
-    
-    // Room filters
-    if (queryParams.get('bedrooms')) {
-      initialFilters.bedrooms = Number(queryParams.get('bedrooms'));
-    }
-    
-    if (queryParams.get('bathrooms')) {
-      initialFilters.bathrooms = Number(queryParams.get('bathrooms'));
-    }
-    
-    // Featured properties
-    if (queryParams.get('featured') === 'true') {
-      initialFilters.featured = true;
-    }
-    
-    setFilters(initialFilters);
-  }, []);
-  
-  // Fetch properties with filters
-  const { data, isLoading, error } = useProperties(page, pageSize, filters);
-  const propertiesRaw = data?.properties || [];
-  
-  // Map the API data structure to the format expected by components
-  const properties: Property[] = propertiesRaw.map(property => mapPropertyData(property));
-  
-  // Handle view mode change
-  const handleViewChange = (newView: ViewMode) => {
-    setViewMode(newView);
-    
-    // Update URL
-    const params = new URLSearchParams(location.search);
-    params.set('view', newView);
-    
-    navigate({
-      pathname: location.pathname,
-      search: params.toString()
-    }, { replace: true });
+    const params = new URLSearchParams();
+    if (searchQuery) params.set('search', searchQuery);
+    setSearchParams(params);
+  }, [searchQuery, setSearchParams]);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    setCurrentPage(0);
   };
-  
-  // Handle search filters
-  const handleFilter = (newFilters: PropertyFilters) => {
-    console.log('Applying filters:', newFilters);
-    setFilters(newFilters);
-    setPage(1); // Reset to first page when changing filters
-    
-    // Update page param in URL
-    const params = new URLSearchParams(location.search);
-    params.set('page', '1');
-    
-    navigate({
-      pathname: location.pathname,
-      search: params.toString()
-    }, { replace: true });
+
+  const handleFiltersApply = () => {
+    setCurrentPage(0);
+    setIsFilterDialogOpen(false);
   };
-  
-  // Handle sort options
-  const handleSortChange = (value: string) => {
-    setSortOption(value as SortOption);
-    
-    // Update URL
-    const params = new URLSearchParams(location.search);
-    params.set('sort', value);
-    
-    navigate({
-      pathname: location.pathname,
-      search: params.toString()
-    }, { replace: true });
-    
-    // In a real implementation, this would update the API query order
-    toast.info(`Sorting by ${value}`);
-    
-    // Apply sort filter
-    const newFilters = { ...filters };
-    switch (value) {
-      case 'newest':
-        newFilters.sortBy = 'created_at';
-        newFilters.sortDirection = 'desc';
-        break;
-      case 'oldest':
-        newFilters.sortBy = 'created_at';
-        newFilters.sortDirection = 'asc';
-        break;
-      case 'price-asc':
-        newFilters.sortBy = 'price';
-        newFilters.sortDirection = 'asc';
-        break;
-      case 'price-desc':
-        newFilters.sortBy = 'price';
-        newFilters.sortDirection = 'desc';
-        break;
+
+  const handleFiltersReset = () => {
+    setMinPrice(undefined);
+    setMaxPrice(undefined);
+    setPropertyType(undefined);
+    setStatusFilter(undefined);
+    setIsFeatured(false);
+    setCurrentPage(0);
+  };
+
+  // Function to determine which badge variant to use
+  const getStatusBadge = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'available':
+        return <Badge>Available</Badge>;
+      case 'pending':
+        return <Badge variant="outline" className="bg-orange-500/10 text-orange-500 hover:bg-orange-500/20">Pending</Badge>;
+      case 'sold':
+        return <Badge variant="secondary">Sold</Badge>;
+      default:
+        return <Badge>{status}</Badge>;
     }
-    
-    setFilters(newFilters);
   };
-  
-  // Handle time filter change
-  const handleTimeFilterChange = (value: string) => {
-    setTimeFilter(value as TimeFilter);
-    
-    // Update URL
-    const params = new URLSearchParams(location.search);
-    params.set('time', value);
-    
-    navigate({
-      pathname: location.pathname,
-      search: params.toString()
-    }, { replace: true });
-    
-    // Apply time filter to API query
-    const newFilters = { ...filters };
-    const now = new Date();
-    
-    switch (value) {
-      case '7days':
-        const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-        newFilters.createdAfter = sevenDaysAgo.toISOString();
-        break;
-      case '30days':
-        const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-        newFilters.createdAfter = thirtyDaysAgo.toISOString();
-        break;
-      case '90days':
-        const ninetyDaysAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
-        newFilters.createdAfter = ninetyDaysAgo.toISOString();
-        break;
-      case 'all':
-        delete newFilters.createdAfter;
-        break;
+
+  // Function to determine the badge color based on the status
+  const getStatusBadgeColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'available':
+        return 'default';
+      case 'pending':
+        return 'outline';
+      case 'sold':
+        return 'secondary';
+      default:
+        return 'default';
     }
-    
-    setFilters(newFilters);
   };
-  
-  // Handle page change
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage);
-    
-    // Update URL
-    const params = new URLSearchParams(location.search);
-    params.set('page', newPage.toString());
-    
-    navigate({
-      pathname: location.pathname,
-      search: params.toString()
-    }, { replace: true });
-    
-    // Scroll to top
-    window.scrollTo(0, 0);
+
+  // Function to get the status filter condition
+  const getStatusFilterCondition = (status: string) => {
+    if (status.toLowerCase() === 'available') {
+      return { status: 'available' };
+    } else if (status.toLowerCase() === 'pending') {
+      return { status: 'pending' };
+    } else if (status.toLowerCase() === 'sold') {
+      return { status: 'sold' };
+    }
+    return {};
   };
-  
-  // Calculate summary statistics from real data
-  const summaryStats = React.useMemo(() => {
-    const total = properties.length;
-    const active = properties.filter(p => p.status === 'available' || p.status === 'Available').length;
-    const pending = properties.filter(p => 
-      p.status === 'pending' || p.status === 'Pending' || 
-      p.status.toLowerCase() === 'under offer').length;
-    const value = properties.reduce((sum, p) => sum + p.price, 0);
-    
-    // Simulated weekly changes
-    return {
-      total,
-      active,
-      pending,
-      value,
-      change: {
-        total: Math.floor(Math.random() * 10) + 1,
-        active: Math.round(Math.random() * 6 - 3)
-      }
-    };
-  }, [properties]);
-  
+
   return (
-    <div className="page-container">
-      {/* Header section with consistent alignment */}
-      <div className="page-header">
-        <h1 className="page-title">Properties</h1>
-        <Button 
-          size="sm" 
-          className="gap-2 rounded-full px-6 bg-orange-500 hover:bg-orange-600" 
-          onClick={() => navigate('/properties/new')}
-        >
-          <Plus size={16} />
-          Add Property
-        </Button>
-      </div>
-      
-      {/* Summary Stats */}
-      <div className="grid grid-cols-4 gap-4 bg-neutral-900/60 backdrop-blur-sm rounded-lg p-5">
-        <div className="flex flex-col">
-          <span className="text-sm text-neutral-400">Total Properties</span>
-          <div className="flex items-baseline mt-1">
-            <span className="text-3xl font-medium">{summaryStats.total}</span>
-            <span className="ml-2 text-xs text-emerald-500">+{summaryStats.change.total} this week</span>
-          </div>
-        </div>
-        
-        <div className="flex flex-col">
-          <span className="text-sm text-neutral-400">Active Listings</span>
-          <div className="flex items-baseline mt-1">
-            <span className="text-3xl font-medium">{summaryStats.active}</span>
-            <span className={`ml-2 text-xs ${summaryStats.change.active >= 0 ? 'text-emerald-500' : 'text-red-500'}`}>
-              {summaryStats.change.active >= 0 ? '+' : ''}{summaryStats.change.active}% of total
-            </span>
-          </div>
-        </div>
-        
-        <div className="flex flex-col">
-          <span className="text-sm text-neutral-400">Pending Approvals</span>
-          <div className="flex items-baseline mt-1">
-            <span className="text-3xl font-medium">{summaryStats.pending}</span>
-            <span className="ml-2 text-xs text-neutral-400">properties</span>
-          </div>
-        </div>
-        
-        <div className="flex flex-col">
-          <span className="text-sm text-neutral-400">Total Value</span>
-          <div className="flex items-baseline mt-1">
-            <span className="text-3xl font-medium">${(summaryStats.value / 1000000).toFixed(2)}M</span>
-          </div>
+    <div className="p-6 space-y-6 max-w-[1200px] mx-auto">
+      <div className="flex justify-between items-center">
+        <h1 className="text-xl font-normal tracking-tight">Properties</h1>
+        <div className="flex space-x-2">
+          <Button variant="outline" size="sm" className="gap-2">
+            <Download size={16} />
+            Export
+          </Button>
+          <Button
+            size="sm"
+            className="gap-2"
+            onClick={() => navigate('/properties/new')}
+          >
+            <Plus size={16} />
+            Add Property
+          </Button>
         </div>
       </div>
-      
-      {/* Filter row with consistent alignment */}
-      <div className="flex justify-between bg-neutral-900 rounded-lg p-4">
-        <div className="flex-1">
-          <PropertyFilterBar 
-            onFilter={handleFilter} 
-            onViewChange={handleViewChange} 
-            currentView={viewMode}
-            filters={filters}
-          />
-        </div>
-        
-        <div className="flex items-center gap-3">
-          <Select value={timeFilter} onValueChange={handleTimeFilterChange}>
-            <SelectTrigger className="w-[130px] h-10 rounded-lg bg-neutral-800 border-neutral-700">
-              <SelectValue placeholder="All time" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="7days">Last 7 days</SelectItem>
-              <SelectItem value="30days">Last 30 days</SelectItem>
-              <SelectItem value="90days">Last 90 days</SelectItem>
-              <SelectItem value="all">All time</SelectItem>
-            </SelectContent>
-          </Select>
-          
-          <Select value={sortOption} onValueChange={handleSortChange}>
-            <SelectTrigger className="w-[130px] h-10 rounded-lg bg-neutral-800 border-neutral-700">
-              <SelectValue placeholder="Newest" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="newest">Newest</SelectItem>
-              <SelectItem value="oldest">Oldest</SelectItem>
-              <SelectItem value="price-asc">Price: Low to High</SelectItem>
-              <SelectItem value="price-desc">Price: High to Low</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-      
-      {/* Property content */}
-      <div className="min-h-[60vh] relative">
+
+      <Card className="p-4">
+        <form onSubmit={handleSearch} className="flex flex-wrap gap-4">
+          <div className="flex-1 min-w-[200px]">
+            <Input
+              placeholder="Search by title, city, address..."
+              className="w-full h-9"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <Dialog open={isFilterDialogOpen} onOpenChange={setIsFilterDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-2">
+                <Filter size={16} />
+                Filters
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Filter Properties</DialogTitle>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="min-price" className="text-right">
+                    Min Price
+                  </Label>
+                  <Input
+                    type="number"
+                    id="min-price"
+                    value={minPrice !== undefined ? minPrice.toString() : ''}
+                    onChange={(e) => setMinPrice(e.target.value ? parseInt(e.target.value) : undefined)}
+                    className="col-span-3"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="max-price" className="text-right">
+                    Max Price
+                  </Label>
+                  <Input
+                    type="number"
+                    id="max-price"
+                    value={maxPrice !== undefined ? maxPrice.toString() : ''}
+                    onChange={(e) => setMaxPrice(e.target.value ? parseInt(e.target.value) : undefined)}
+                    className="col-span-3"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="property-type" className="text-right">
+                    Property Type
+                  </Label>
+                  <Select onValueChange={setPropertyType} defaultValue={propertyType || ''}>
+                    <SelectTrigger className="col-span-3">
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">All</SelectItem>
+                      <SelectItem value="residential">Residential</SelectItem>
+                      <SelectItem value="commercial">Commercial</SelectItem>
+                      <SelectItem value="land">Land</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="status" className="text-right">
+                    Status
+                  </Label>
+                  <Select onValueChange={setStatusFilter} defaultValue={statusFilter || ''}>
+                    <SelectTrigger className="col-span-3">
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">All</SelectItem>
+                      <SelectItem value="available">Available</SelectItem>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="sold">Sold</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="featured"
+                    checked={isFeatured}
+                    onCheckedChange={setIsFeatured}
+                  />
+                  <Label htmlFor="featured">Featured</Label>
+                </div>
+              </div>
+              <div className="flex justify-end space-x-2">
+                <Button type="button" variant="secondary" onClick={handleFiltersReset}>
+                  Reset
+                </Button>
+                <Button type="button" onClick={handleFiltersApply}>
+                  Apply Filters
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+          <Button size="sm" type="submit">Search</Button>
+        </form>
+      </Card>
+
+      <Card className="overflow-hidden">
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center h-[50vh]">
-            <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-            <p className="text-lg text-muted-foreground">Loading properties...</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-6">
+            {Array(12).fill(0).map((_, index) => (
+              <div key={index} className="space-y-2">
+                <Skeleton className="h-40 w-full rounded-md" />
+                <div className="space-y-1.5">
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
+                </div>
+              </div>
+            ))}
           </div>
-        ) : error ? (
-          <div className="flex flex-col items-center justify-center h-[50vh]">
-            <p className="text-lg text-destructive mb-2">Error loading properties</p>
-            <p className="text-sm text-muted-foreground">Please try refreshing the page</p>
+        ) : isError ? (
+          <div className="p-6 text-center">
+            <p className="text-red-500">Error loading properties. Please try again.</p>
           </div>
         ) : properties.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-[50vh]">
-            <p className="text-lg mb-4">No properties found</p>
-            <Button 
+          <div className="p-6 text-center">
+            <p className="text-muted-foreground">No properties found.</p>
+            <Button
+              className="mt-4"
               onClick={() => navigate('/properties/new')}
-              variant="outline"
             >
-              <Plus className="h-4 w-4 mr-2" />
-              Add New Property
+              Create your first property
             </Button>
           </div>
         ) : (
           <>
-            {viewMode === 'grid' && <PropertyGrid properties={properties} />}
-            {viewMode === 'table' && <PropertyTable properties={properties} />}
-            {viewMode === 'map' && <PropertyMap properties={properties} />}
-            
-            {/* Pagination */}
-            {data && data.totalCount > pageSize && (
-              <div className="flex justify-center mt-6">
-                <div className="flex space-x-2">
-                  <Button 
-                    variant="outline" 
-                    onClick={() => handlePageChange(page - 1)}
-                    disabled={page === 1}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-6">
+              {properties.map((property) => (
+                <PropertyCard key={property.id} property={property} />
+              ))}
+            </div>
+
+            {totalPages > 1 && (
+              <div className="p-4 border-t flex items-center justify-between">
+                <div className="text-sm text-muted-foreground">
+                  Showing {currentPage * 12 + 1} to {Math.min((currentPage + 1) * 12, totalProperties)} of {totalProperties} properties
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={currentPage === 0}
+                    onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
                   >
                     Previous
                   </Button>
-                  <span className="py-2 px-4 bg-neutral-800 rounded">
-                    Page {page} of {Math.ceil(data.totalCount / pageSize)}
-                  </span>
-                  <Button 
-                    variant="outline" 
-                    onClick={() => handlePageChange(page + 1)}
-                    disabled={page >= Math.ceil(data.totalCount / pageSize)}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={currentPage >= totalPages - 1}
+                    onClick={() => setCurrentPage(prev => Math.min(totalPages - 1, prev + 1))}
                   >
                     Next
                   </Button>
@@ -373,7 +290,7 @@ const Properties = () => {
             )}
           </>
         )}
-      </div>
+      </Card>
     </div>
   );
 };

@@ -31,6 +31,22 @@ const Transactions = () => {
     setCurrentPage(0);
   };
 
+  // Function to determine which badge variant to use
+  const getStatusBadge = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'completed':
+        return <Badge>Completed</Badge>;
+      case 'pending':
+        return <Badge variant="outline" className="bg-orange-500/10 text-orange-500 hover:bg-orange-500/20">Pending</Badge>;
+      case 'in progress':
+        return <Badge variant="outline" className="bg-blue-500/10 text-blue-500 hover:bg-blue-500/20">In Progress</Badge>;
+      case 'cancelled':
+        return <Badge variant="destructive">Cancelled</Badge>;
+      default:
+        return <Badge>{status}</Badge>;
+    }
+  };
+
   return (
     <div className="p-6 space-y-6 max-w-[1200px] mx-auto">
       <div className="flex justify-between items-center">
@@ -150,12 +166,7 @@ const Transactions = () => {
                       ${transaction.commission.toLocaleString()}
                     </td>
                     <td>
-                      <Badge
-                        variant={transaction.status === 'completed' ? 'default' : 'outline'}
-                        className={transaction.status === 'pending' ? 'bg-orange-500/10 text-orange-500 hover:bg-orange-500/20' : ''}
-                      >
-                        {transaction.status}
-                      </Badge>
+                      {getStatusBadge(transaction.status)}
                     </td>
                     <td>
                       <Button 

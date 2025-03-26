@@ -33,7 +33,7 @@ import { TransactionFormValues } from '@/types';
 // Validation schema
 const transactionSchema = z.object({
   type: z.enum(['individual', 'developer']),
-  date: z.date(),
+  transactionDate: z.date(),
   status: z.string(),
   propertyId: z.string().min(1, 'Property is required'),
   agentId: z.string().min(1, 'Agent is required'),
@@ -53,7 +53,7 @@ const TransactionForm = () => {
     resolver: zodResolver(transactionSchema),
     defaultValues: {
       type: 'individual',
-      date: new Date(),
+      transactionDate: new Date(),
       status: 'pending',
       propertyId: '',
       agentId: '',
@@ -147,7 +147,7 @@ const TransactionForm = () => {
               {/* Date Picker */}
               <FormField
                 control={form.control}
-                name="date"
+                name="transactionDate"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel>Transaction Date</FormLabel>
@@ -162,7 +162,7 @@ const TransactionForm = () => {
                             )}
                           >
                             {field.value ? (
-                              format(field.value, "PPP")
+                              format(new Date(field.value), "PPP")
                             ) : (
                               <span>Pick a date</span>
                             )}
@@ -173,7 +173,7 @@ const TransactionForm = () => {
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
                           mode="single"
-                          selected={field.value as Date}
+                          selected={field.value instanceof Date ? field.value : new Date(field.value as string)}
                           onSelect={field.onChange}
                           initialFocus
                         />
