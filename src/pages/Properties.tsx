@@ -210,10 +210,10 @@ const Properties = () => {
   // Calculate summary statistics from real data
   const summaryStats = React.useMemo(() => {
     const total = properties.length;
-    const active = properties.filter(p => p.status === 'Available' || p.status.toLowerCase() === 'available').length;
+    const active = properties.filter(p => p.status === 'available' || p.status === 'Available').length;
     const pending = properties.filter(p => 
-      p.status === 'Under Offer' || p.status === 'Pending' || 
-      p.status.toLowerCase() === 'pending').length;
+      p.status === 'pending' || p.status === 'Pending' || 
+      p.status.toLowerCase() === 'under offer').length;
     const value = properties.reduce((sum, p) => sum + p.price, 0);
     
     // Simulated weekly changes

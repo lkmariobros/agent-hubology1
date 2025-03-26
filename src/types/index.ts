@@ -21,6 +21,9 @@ export interface User {
   role: string;
   avatar?: string;
   tier?: string;
+  phone?: string;
+  properties?: number;
+  transactions?: number;
 }
 
 export interface AgentWithHierarchy {
@@ -83,6 +86,10 @@ export interface PropertyFeatures {
   bathrooms?: number;
   squareFeet?: number;
   landSize?: number;
+  furnishingStatus?: string;
+  buildingClass?: string;
+  ceilingHeight?: number;
+  powerCapacity?: string;
   [key: string]: any;
 }
 
@@ -105,6 +112,7 @@ export interface Property {
   bedrooms?: number;
   bathrooms?: number;
   area?: number;
+  size?: number;
   images?: string[];
   status: 'available' | 'pending' | 'sold';
   listedBy?: string;
@@ -146,6 +154,8 @@ export interface Transaction {
   commission: number;
   status: string;
   date: string;
+  notes?: string;
+  documents?: any[];
   property?: {
     title: string;
     address?: {
@@ -183,6 +193,12 @@ export interface TransactionFormValues {
   commissionSplit: boolean;
   coAgentId?: string;
   coAgentCommissionPercentage?: number;
+  type?: string;
+  commission?: number;
+  buyerId?: string;
+  sellerId?: string;
+  agentId?: string;
+  price?: number;
 }
 
 // Dashboard Types
