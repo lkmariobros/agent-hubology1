@@ -1,31 +1,22 @@
 
-import { TransactionFormData, CommissionBreakdown, AgentRank } from './types';
+import { TransactionFormData, CommissionBreakdown } from './types';
+import { getAgentCommissionPercentage } from './agentTiers';
 
-// Agent tier commission percentages
-const AGENT_TIER_PERCENTAGES: Record<AgentRank, number> = {
-  'Advisor': 70,
-  'Sales Leader': 80,
-  'Team Leader': 83,
-  'Group Leader': 85,
-  'Supreme Leader': 85
-};
-
-// Calculate commission breakdown for a transaction
 export const calculateCommission = (formData: TransactionFormData): CommissionBreakdown => {
-  const { 
-    transactionValue = 0, 
-    commissionRate = 0, 
-    coBroking, 
-    agentTier = 'Advisor' 
+  const {
+    transactionValue = 0,
+    commissionRate = 0,
+    agentTier = 'Advisor',
+    coBroking
   } = formData;
   
-  // Calculate total commission
-  const totalCommission = (transactionValue * commissionRate) / 100;
+  // Get agent tier percentage
+  const agentCommissionPercentage = getAgentCommissionPercentage(agentTier);
   
-  // Get agent's tier-based percentage
-  const agentTierPercentage = AGENT_TIER_PERCENTAGES[agentTier] || 70;
+  // Calculate basic commission values
+  let totalCommission = (transactionValue * commissionRate) / 100;
   
-  // Calculate split percentages for co-broking scenario
+  // Handle co-broking split
   const agencySplitPercentage = coBroking?.enabled ? (coBroking.commissionSplit || 50) : 100;
   const coAgencySplitPercentage = coBroking?.enabled ? (100 - agencySplitPercentage) : 0;
   
@@ -38,8 +29,8 @@ export const calculateCommission = (formData: TransactionFormData): CommissionBr
     : undefined;
   
   // From our agency's portion, calculate agent and agency shares
-  const agentShare = ourAgencyCommission * (agentTierPercentage / 100);
-  const agencyShare = ourAgencyCommission * ((100 - agentTierPercentage) / 100);
+  const agentShare = ourAgencyCommission * (agentCommissionPercentage / 100);
+  const agencyShare = ourAgencyCommission * ((100 - agentCommissionPercentage) / 100);
   
   return {
     totalCommission,
@@ -48,8 +39,7 @@ export const calculateCommission = (formData: TransactionFormData): CommissionBr
     ourAgencyCommission,
     coAgencyCommission,
     agentTier,
-    agentCommissionPercentage: agentTierPercentage,
-    // Add these for display purposes
+    agentCommissionPercentage,
     transactionValue,
     commissionRate
   };

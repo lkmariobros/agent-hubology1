@@ -1,8 +1,6 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTransactionForm } from '@/context/TransactionFormContext';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
@@ -14,11 +12,13 @@ import CoBrokingInfoCard from './commission/CoBrokingInfoCard';
 import CommissionVisualizer from './commission/CommissionVisualizer';
 import CommissionNotifications from './commission/CommissionNotifications';
 import ApprovalInfo from './commission/ApprovalInfo';
+import { useAgentProfile } from '@/hooks/useAgentProfile';
 
 const CommissionCalculation: React.FC = () => {
   const { state, updateFormData, calculateCommission } = useTransactionForm();
   const { formData, errors } = state;
   const [ownerCommissionAmount, setOwnerCommissionAmount] = useState(formData.commissionAmount || 0);
+  const { data: agentProfile } = useAgentProfile();
   
   const {
     transactionValue = 0,
@@ -27,15 +27,12 @@ const CommissionCalculation: React.FC = () => {
     transactionType
   } = formData;
   
-  const handleTransactionValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(e.target.value) || 0;
-    updateFormData({ transactionValue: value });
-  };
-  
-  const handleCommissionRateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(e.target.value) || 0;
-    updateFormData({ commissionRate: value });
-  };
+  // Sync agent tier with profile when it loads
+  useEffect(() => {
+    if (agentProfile && agentProfile.tier_name && agentTier !== agentProfile.tier_name) {
+      updateFormData({ agentTier: agentProfile.tier_name });
+    }
+  }, [agentProfile, agentTier, updateFormData]);
   
   const handleAgentTierChange = (tier: string) => {
     updateFormData({ agentTier: tier as any });
