@@ -12,7 +12,8 @@ const SendTestNotification: React.FC = () => {
     createApprovalStatusNotification,
     createTierProgressNotification,
     createTierAchievedNotification,
-    createCommissionMilestoneNotification
+    createCommissionMilestoneNotification,
+    createTransactionStatusNotification
   } = useCommissionNotifications();
   
   const sendApprovalNotification = () => {
@@ -78,6 +79,25 @@ const SendTestNotification: React.FC = () => {
     createCommissionMilestoneNotification(user.id, milestone);
   };
   
+  const sendTransactionStatusNotification = () => {
+    if (!user?.id) {
+      toast({
+        title: "Error",
+        description: "User not logged in",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    const statuses = ["pending", "in progress", "completed", "cancelled"];
+    const status = statuses[Math.floor(Math.random() * statuses.length)];
+    const properties = ["Luxury Condo at Skyline Towers", "Beach House in Paradise Cove", "Commercial Space in Business District", "Suburban House in Green Valley"];
+    const property = properties[Math.floor(Math.random() * properties.length)];
+    const amount = Math.floor(Math.random() * 50000) + 5000;
+    
+    createTransactionStatusNotification(user.id, status, property, amount, `tx-${Date.now()}`);
+  };
+  
   if (!user) return null;
   
   return (
@@ -93,6 +113,9 @@ const SendTestNotification: React.FC = () => {
       </Button>
       <Button variant="outline" size="sm" onClick={sendMilestoneNotification}>
         Test Milestone
+      </Button>
+      <Button variant="outline" size="sm" onClick={sendTransactionStatusNotification}>
+        Test Transaction Status
       </Button>
     </div>
   );
