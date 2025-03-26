@@ -38,6 +38,13 @@ import Opportunities from './pages/Opportunities';
 import Reports from './pages/Reports';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 
+// Admin System Pages
+import AdminSettings from './pages/admin/Settings';
+import Roles from './pages/admin/Roles';
+import CommissionTiers from './pages/admin/CommissionTiers';
+import SystemLogs from './pages/admin/SystemLogs';
+import Database from './pages/admin/Database';
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -108,11 +115,11 @@ function App() {
                   <Route path="reports/custom" element={<Reports />} />
                   
                   {/* System Routes */}
-                  <Route path="settings" element={<Settings />} />
-                  <Route path="roles" element={<Home />} /> {/* Temporary placeholder */}
-                  <Route path="commission-tiers" element={<Home />} /> {/* Temporary placeholder */}
-                  <Route path="system-logs" element={<Home />} /> {/* Temporary placeholder */}
-                  <Route path="database" element={<Home />} /> {/* Temporary placeholder */}
+                  <Route path="settings" element={<AdminSettings />} />
+                  <Route path="roles" element={<Roles />} />
+                  <Route path="commission-tiers" element={<CommissionTiers />} />
+                  <Route path="system-logs" element={<SystemLogs />} />
+                  <Route path="database" element={<Database />} />
                 </Route>
                 
                 {/* Fallback */}
