@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { Property, PropertyStock } from '@/types';
+import { Property } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Bed, Bath, Square, MapPin, Calendar, Tag, Building, User } from 'lucide-react';
@@ -11,7 +12,7 @@ export interface PropertyCardDetailsProps {
   onEdit?: (id: string) => void;
 }
 
-const PropertyCardDetails: React.FC<PropertyCardDetailsProps> = ({ property }) => {
+export const PropertyCardDetails: React.FC<PropertyCardDetailsProps> = ({ property, onEdit }) => {
   return (
     <div className="p-4 space-y-4">
       {/* Property Details */}
@@ -61,10 +62,10 @@ const PropertyCardDetails: React.FC<PropertyCardDetailsProps> = ({ property }) =
             </div>
           )}
           
-          {property.listedBy && (
+          {property.agent && (
             <div className="flex items-center gap-2">
               <User className="h-4 w-4 text-neutral-400" />
-              <span className="text-sm">{property.listedBy}</span>
+              <span className="text-sm">{property.agent.firstName} {property.agent.lastName}</span>
             </div>
           )}
         </div>
@@ -95,6 +96,11 @@ const PropertyCardDetails: React.FC<PropertyCardDetailsProps> = ({ property }) =
         <Button variant="outline" size="sm">View Details</Button>
         {property.status === 'available' && (
           <Button size="sm">Contact Agent</Button>
+        )}
+        {onEdit && (
+          <Button variant="outline" size="sm" onClick={() => onEdit(property.id)}>
+            Edit Property
+          </Button>
         )}
       </div>
     </div>

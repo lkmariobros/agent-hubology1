@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
 import { PropertyCardHeader } from './PropertyCardHeader';
 import { PropertyCardBasicInfo } from './PropertyCardBasicInfo';
-import { PropertyCardDetails } from './PropertyCardDetails';
+import PropertyCardDetails from './PropertyCardDetails';
 
 interface ExpandablePropertyCardProps {
   property: Property;
