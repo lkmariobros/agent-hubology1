@@ -27,10 +27,16 @@ export const useSendNotification = () => {
       try {
         console.log('Sending notification with params:', params);
         
+        // Ensure data is a serializable object
+        const cleanParams = {
+          ...params,
+          data: params.data ? JSON.parse(JSON.stringify(params.data)) : undefined
+        };
+        
         const { data: response, error } = await supabase.functions.invoke<NotificationResponse>(
           'create_notification',
           {
-            body: params
+            body: cleanParams
           }
         );
         

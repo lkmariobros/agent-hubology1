@@ -18,6 +18,8 @@ serve(async (req) => {
   }
 
   try {
+    console.log("Notification function called");
+    
     // Initialize Supabase client with environment variables
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
@@ -39,7 +41,24 @@ serve(async (req) => {
     const supabaseClient = createClient(supabaseUrl, supabaseKey);
 
     // Parse request body
-    const body: RequestBody = await req.json();
+    let body: RequestBody;
+    try {
+      body = await req.json();
+      console.log("Request body:", JSON.stringify(body));
+    } catch (e) {
+      console.error("Failed to parse request body:", e);
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: "Invalid request body" 
+        }),
+        { 
+          status: 400, 
+          headers: { ...corsHeaders, "Content-Type": "application/json" } 
+        }
+      );
+    }
+
     const { userId, type, title, message, data } = body;
 
     if (!userId || !type || !title || !message) {
@@ -59,28 +78,29 @@ serve(async (req) => {
     console.log("Creating notification:", { userId, type, title });
 
     // Always stringify data if it exists to ensure proper database storage
-    const dataToStore = data ? JSON.stringify(data) : null;
+    const dataJson = data ? JSON.stringify(data) : null;
+    console.log("Data to store:", dataJson);
 
     // Insert the notification
-    const { data: notificationData, error } = await supabaseClient
+    const { data: notificationData, error: insertError } = await supabaseClient
       .from("notifications")
       .insert({
         user_id: userId,
         type,
         title,
         message,
-        data: dataToStore,
+        data: dataJson,
         read: false
       })
       .select()
       .single();
 
-    if (error) {
-      console.error("Database error:", error);
+    if (insertError) {
+      console.error("Database error:", insertError);
       return new Response(
         JSON.stringify({ 
           success: false, 
-          error: error.message 
+          error: insertError.message 
         }),
         { 
           status: 500, 
