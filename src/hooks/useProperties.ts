@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -218,7 +217,7 @@ export function useProperties(page = 1, pageSize = 10, filters: PropertyFilters 
 }
 
 // Get a single property by ID
-export function useProperty(id: string) {
+export function useProperty(id: string, options = {}) {
   return useQuery({
     queryKey: ['property', id],
     queryFn: async () => {
@@ -226,30 +225,62 @@ export function useProperty(id: string) {
       
       console.log('Fetching property with ID:', id);
       
-      const { data, error } = await supabase
-        .from('enhanced_properties')
-        .select(`
-          *,
-          property_types(name),
-          transaction_types(name),
-          property_statuses(name),
-          property_images(id, storage_path, is_cover, display_order)
-        `)
-        .eq('id', id)
-        .single();
+      // Check if the ID is a valid UUID
+      const isValidUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+      
+      if (!isValidUuid) {
+        console.log('Non-UUID property ID provided:', id);
         
-      if (error) {
-        console.error('Error fetching property:', error);
-        return { success: false, message: error.message, data: null };
+        // In development, we might want to allow non-UUID IDs for testing
+        if (process.env.NODE_ENV === 'development') {
+          return { 
+            success: false, 
+            message: 'Invalid UUID format', 
+            data: null
+          };
+        }
+        
+        return { 
+          success: false, 
+          message: 'Invalid property ID format', 
+          data: null 
+        };
       }
       
-      return { 
-        success: true, 
-        message: 'Property retrieved successfully', 
-        data
-      };
+      try {
+        const { data, error } = await supabase
+          .from('enhanced_properties')
+          .select(`
+            *,
+            property_types(name),
+            transaction_types(name),
+            property_statuses(name),
+            property_images(id, storage_path, is_cover, display_order)
+          `)
+          .eq('id', id)
+          .single();
+          
+        if (error) {
+          console.error('Error fetching property:', error);
+          return { success: false, message: error.message, data: null };
+        }
+        
+        return { 
+          success: true, 
+          message: 'Property retrieved successfully', 
+          data
+        };
+      } catch (err: any) {
+        console.error('Exception fetching property:', err.message);
+        return { 
+          success: false, 
+          message: err.message, 
+          data: null
+        };
+      }
     },
     enabled: !!id,
+    ...options,
   });
 }
 

@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useProperty } from '@/hooks/useProperties';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,7 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import { TeamNotes, TeamNote } from '@/components/property/TeamNotes';
 import PropertyOwnerInfo from '@/components/property/PropertyOwnerInfo';
 import PropertyGallery from '@/components/property/PropertyGallery';
-import { CheckCircle2, Edit, Trash2 } from 'lucide-react';
+import { CheckCircle2, Edit, Trash2, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 // Mock data for team notes
@@ -41,40 +41,62 @@ const mockNotes: TeamNote[] = [
 const PropertyDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { isAdmin } = useAuth();
-  const { data: propertyResponse, isLoading, error } = useProperty(id || '');
+  const navigate = useNavigate();
+  
+  // Mocked data for development
+  const useMockData = process.env.NODE_ENV === 'development' && (id === '1' || id === '2' || id === '3');
+  
+  const { data: propertyResponse, isLoading, error } = useProperty(id || '', {
+    enabled: !useMockData // Only enable the query if we're not using mock data
+  });
+  
   const [notes, setNotes] = useState<TeamNote[]>(mockNotes);
+  const [property, setProperty] = useState<any>(null);
   
   useEffect(() => {
     // In a real app, you would fetch notes from Supabase here
-    // Example:
-    // const fetchNotes = async () => {
-    //   const { data, error } = await supabase
-    //     .from('property_notes')
-    //     .select('*')
-    //     .eq('property_id', id);
-    //   
-    //   if (data) {
-    //     setNotes(data);
-    //   }
-    // };
-    // 
-    // fetchNotes();
     console.log('Property detail loaded for ID:', id);
-  }, [id]);
+    
+    // If using mock data for development (when UUID validation fails)
+    if (useMockData) {
+      console.log('Using mock data for property ID:', id);
+      // Load mock data based on the ID
+      const mockProperty = {
+        id: id,
+        title: `Sample Property ${id}`,
+        description: 'This is a sample property description used for development.',
+        price: 750000,
+        street: '123 Main Street',
+        city: 'San Francisco',
+        state: 'CA',
+        country: 'USA',
+        zip: '94102',
+        bedrooms: 3,
+        bathrooms: 2,
+        built_up_area: 1500,
+        land_area: 2000,
+        featured: true,
+        agent_notes: 'Owner is highly motivated to sell.',
+        created_at: new Date().toISOString(),
+        property_types: { name: 'Residential' },
+        transaction_types: { name: 'For Sale' },
+        property_statuses: { name: 'Active' },
+        property_images: [
+          { id: 1, storage_path: 'https://picsum.photos/id/1067/800/600', is_cover: true },
+          { id: 2, storage_path: 'https://picsum.photos/id/1068/800/600' },
+          { id: 3, storage_path: 'https://picsum.photos/id/1069/800/600' },
+          { id: 4, storage_path: 'https://picsum.photos/id/1070/800/600' },
+          { id: 5, storage_path: 'https://picsum.photos/id/1071/800/600' }
+        ]
+      };
+      setProperty(mockProperty);
+    } else if (propertyResponse?.data) {
+      setProperty(propertyResponse.data);
+    }
+  }, [id, propertyResponse, useMockData]);
   
   const handleAddNote = (note: Omit<TeamNote, 'id' | 'date'>) => {
     // In a real app, you would add the note to Supabase here
-    // Example:
-    // const addNote = async () => {
-    //   const { data, error } = await supabase
-    //     .from('property_notes')
-    //     .insert({
-    //       property_id: id,
-    //       author_id: auth.user.id,
-    //       content: note.content
-    //     });
-    // };
-    
     const newNote: TeamNote = {
       id: notes.length + 1,
       author: note.author,
@@ -86,16 +108,53 @@ const PropertyDetail = () => {
     toast.success('Note added successfully');
   };
   
-  if (isLoading) {
-    return <div className="p-6">Loading property details...</div>;
+  const handleEditProperty = () => {
+    navigate(`/properties/edit/${id}`);
+  };
+  
+  const handleDeleteProperty = () => {
+    // Implement delete functionality
+    toast.error('Delete functionality not implemented yet');
+  };
+  
+  if (isLoading && !useMockData) {
+    return (
+      <div className="p-6 flex items-center justify-center min-h-[50vh]">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent mb-4"></div>
+          <p>Loading property details...</p>
+        </div>
+      </div>
+    );
   }
   
-  if (error || !propertyResponse?.data) {
+  if ((error || !propertyResponse?.data) && !useMockData) {
     console.error('Error loading property:', error?.message || 'Property not found', propertyResponse);
-    return <div className="p-6">Error loading property: {error?.message || 'Property not found'}</div>;
+    return (
+      <div className="p-6 text-center">
+        <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
+        <h2 className="text-xl font-bold mb-2">Error Loading Property</h2>
+        <p className="text-muted-foreground mb-6">{error?.message || 'Property not found'}</p>
+        <Button onClick={() => navigate('/properties')}>
+          Return to Properties
+        </Button>
+      </div>
+    );
   }
   
-  const property = propertyResponse.data;
+  if (!property) {
+    return (
+      <div className="p-6 text-center">
+        <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
+        <h2 className="text-xl font-bold mb-2">Property Not Found</h2>
+        <p className="text-muted-foreground mb-6">The requested property could not be found.</p>
+        <Button onClick={() => navigate('/properties')}>
+          Return to Properties
+        </Button>
+      </div>
+    );
+  }
+  
   console.log('Property data:', property);
   
   // Extract property type from property_types relation
@@ -119,12 +178,12 @@ const PropertyDetail = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">{property.title}</h1>
         <div className="flex gap-2">
-          <Button variant="outline" className="flex items-center gap-1">
+          <Button variant="outline" className="flex items-center gap-1" onClick={handleEditProperty}>
             <Edit className="h-4 w-4" />
             Edit
           </Button>
           {isAdmin && (
-            <Button variant="destructive" className="flex items-center gap-1">
+            <Button variant="destructive" className="flex items-center gap-1" onClick={handleDeleteProperty}>
               <Trash2 className="h-4 w-4" />
               Delete
             </Button>
