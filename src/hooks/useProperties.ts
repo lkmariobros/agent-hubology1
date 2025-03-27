@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -231,11 +232,11 @@ export function useProperty(id: string, options = {}) {
       if (!isValidUuid) {
         console.log('Non-UUID property ID provided:', id);
         
-        // In development, we might want to allow non-UUID IDs for testing
+        // In development, we'll handle this gracefully
         if (process.env.NODE_ENV === 'development') {
           return { 
             success: false, 
-            message: 'Invalid UUID format', 
+            message: 'Invalid UUID format - using mock data in development', 
             data: null
           };
         }

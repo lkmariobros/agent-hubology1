@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useProperty } from '@/hooks/useProperties';
@@ -33,33 +34,25 @@ const mockNotes: TeamNote[] = [{
   date: "Yesterday",
   content: "Owner mentioned they might be willing to negotiate on the price. Starting point is firm though."
 }];
+
 const PropertyDetail = () => {
-  const {
-    id
-  } = useParams<{
-    id: string;
-  }>();
-  const {
-    isAdmin
-  } = useAuth();
+  const { id } = useParams<{ id: string }>();
+  const { isAdmin } = useAuth();
   const navigate = useNavigate();
 
-  // Mocked data for development
-  const useMockData = process.env.NODE_ENV === 'development' && (id === '1' || id === '2' || id === '3');
-  const {
-    data: propertyResponse,
-    isLoading,
-    error
-  } = useProperty(id || '', {
+  // Mocked data for development - support any ID in development mode
+  const useMockData = process.env.NODE_ENV === 'development';
+  const { data: propertyResponse, isLoading, error } = useProperty(id || '', {
     enabled: !useMockData // Only enable the query if we're not using mock data
   });
+  
   const [notes, setNotes] = useState<TeamNote[]>(mockNotes);
   const [property, setProperty] = useState<any>(null);
+  
   useEffect(() => {
-    // In a real app, you would fetch notes from Supabase here
     console.log('Property detail loaded for ID:', id);
 
-    // If using mock data for development (when UUID validation fails)
+    // In development mode, always use mock data
     if (useMockData) {
       console.log('Using mock data for property ID:', id);
       // Load mock data based on the ID
@@ -112,6 +105,7 @@ const PropertyDetail = () => {
       setProperty(propertyResponse.data);
     }
   }, [id, propertyResponse, useMockData]);
+
   const handleAddNote = (note: Omit<TeamNote, 'id' | 'date'>) => {
     // In a real app, you would add the note to Supabase here
     const newNote: TeamNote = {
@@ -123,42 +117,48 @@ const PropertyDetail = () => {
     setNotes([newNote, ...notes]);
     toast.success('Note added successfully');
   };
+
   const handleEditProperty = () => {
     navigate(`/properties/edit/${id}`);
   };
+
   const handleDeleteProperty = () => {
     // Implement delete functionality
     toast.error('Delete functionality not implemented yet');
   };
+
   if (isLoading && !useMockData) {
     return <div className="p-6 flex items-center justify-center min-h-[50vh]">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent mb-4"></div>
-          <p>Loading property details...</p>
-        </div>
-      </div>;
+      <div className="text-center">
+        <div className="inline-block animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent mb-4"></div>
+        <p>Loading property details...</p>
+      </div>
+    </div>;
   }
+
   if ((error || !propertyResponse?.data) && !useMockData) {
     console.error('Error loading property:', error?.message || 'Property not found', propertyResponse);
     return <div className="p-6 text-center">
-        <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
-        <h2 className="text-xl font-bold mb-2">Error Loading Property</h2>
-        <p className="text-muted-foreground mb-6">{error?.message || 'Property not found'}</p>
-        <Button onClick={() => navigate('/properties')}>
-          Return to Properties
-        </Button>
-      </div>;
+      <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
+      <h2 className="text-xl font-bold mb-2">Error Loading Property</h2>
+      <p className="text-muted-foreground mb-6">{error?.message || 'Property not found'}</p>
+      <Button onClick={() => navigate('/properties')}>
+        Return to Properties
+      </Button>
+    </div>;
   }
+
   if (!property) {
     return <div className="p-6 text-center">
-        <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
-        <h2 className="text-xl font-bold mb-2">Property Not Found</h2>
-        <p className="text-muted-foreground mb-6">The requested property could not be found.</p>
-        <Button onClick={() => navigate('/properties')}>
-          Return to Properties
-        </Button>
-      </div>;
+      <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
+      <h2 className="text-xl font-bold mb-2">Property Not Found</h2>
+      <p className="text-muted-foreground mb-6">The requested property could not be found.</p>
+      <Button onClick={() => navigate('/properties')}>
+        Return to Properties
+      </Button>
+    </div>;
   }
+
   console.log('Property data:', property);
 
   // Extract property type from property_types relation
@@ -174,7 +174,9 @@ const PropertyDetail = () => {
     phone: "+1 (555) 123-4567",
     company: "Roberts Real Estate Holdings"
   };
-  return <div className="p-6">
+
+  return (
+    <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">{property.title}</h1>
         <div className="flex gap-2">
@@ -183,9 +185,9 @@ const PropertyDetail = () => {
             Edit
           </Button>
           {isAdmin && <Button variant="destructive" className="flex items-center gap-1" onClick={handleDeleteProperty}>
-              <Trash2 className="h-4 w-4" />
-              Delete
-            </Button>}
+            <Trash2 className="h-4 w-4" />
+            Delete
+          </Button>}
         </div>
       </div>
       
@@ -227,13 +229,13 @@ const PropertyDetail = () => {
                   <span>{property.land_area || property.floor_area || property.built_up_area} sqft</span>
                 </div>
                 {property.bedrooms && <div className="grid grid-cols-2">
-                    <span className="text-muted-foreground">Bedrooms:</span>
-                    <span>{property.bedrooms}</span>
-                  </div>}
+                  <span className="text-muted-foreground">Bedrooms:</span>
+                  <span>{property.bedrooms}</span>
+                </div>}
                 {property.bathrooms && <div className="grid grid-cols-2">
-                    <span className="text-muted-foreground">Bathrooms:</span>
-                    <span>{property.bathrooms}</span>
-                  </div>}
+                  <span className="text-muted-foreground">Bathrooms:</span>
+                  <span>{property.bathrooms}</span>
+                </div>}
                 <div className="grid grid-cols-2">
                   <span className="text-muted-foreground">Status:</span>
                   <span className="font-medium text-green-600">
@@ -246,10 +248,10 @@ const PropertyDetail = () => {
         </CardContent>
       </Card>
       
-      {/* Split layout with tabs on the left and team notes on the right */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Tabs section - takes 2/3 of the space */}
-        <div className="md:col-span-2">
+      {/* Modified layout to have tabs next to team notes */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        {/* Tabs section - takes 3/4 of the space */}
+        <div className="md:col-span-3">
           <Tabs defaultValue="details" className="w-full">
             <TabsList className="mb-6">
               <TabsTrigger value="details">Details</TabsTrigger>
@@ -267,10 +269,12 @@ const PropertyDetail = () => {
                   </CardHeader>
                   <CardContent>
                     <ul className="space-y-2">
-                      {["Central Air Conditioning", "In-unit Laundry", "Hardwood Floors", "Stainless Steel Appliances", "Granite Countertops", "Walk-in Closets"].map((feature, idx) => <li key={idx} className="flex items-center">
+                      {["Central Air Conditioning", "In-unit Laundry", "Hardwood Floors", "Stainless Steel Appliances", "Granite Countertops", "Walk-in Closets"].map((feature, idx) => (
+                        <li key={idx} className="flex items-center">
                           <CheckCircle2 className="w-4 h-4 text-green-500 mr-2" />
                           {feature}
-                        </li>)}
+                        </li>
+                      ))}
                     </ul>
                   </CardContent>
                 </Card>
@@ -281,10 +285,12 @@ const PropertyDetail = () => {
                   </CardHeader>
                   <CardContent>
                     <ul className="space-y-2">
-                      {["24-hour Concierge", "Fitness Center", "Rooftop Terrace", "Package Room", "Bicycle Storage", "Pet Friendly"].map((amenity, idx) => <li key={idx} className="flex items-center">
+                      {["24-hour Concierge", "Fitness Center", "Rooftop Terrace", "Package Room", "Bicycle Storage", "Pet Friendly"].map((amenity, idx) => (
+                        <li key={idx} className="flex items-center">
                           <CheckCircle2 className="w-4 h-4 text-green-500 mr-2" />
                           {amenity}
-                        </li>)}
+                        </li>
+                      ))}
                     </ul>
                   </CardContent>
                 </Card>
@@ -299,7 +305,8 @@ const PropertyDetail = () => {
                     {property.description || 'No description available for this property.'}
                   </p>
                   
-                  {property.agent_notes && <>
+                  {property.agent_notes && (
+                    <>
                       <Separator className="my-6" />
                       <div>
                         <h3 className="font-semibold mb-2">Agent Notes</h3>
@@ -307,7 +314,8 @@ const PropertyDetail = () => {
                           {property.agent_notes}
                         </p>
                       </div>
-                    </>}
+                    </>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -374,11 +382,11 @@ const PropertyDetail = () => {
           </Tabs>
         </div>
         
-        {/* Team Notes section - takes 1/3 of the space */}
-        <div className="md:col-span-1 h-full">
+        {/* Team Notes section - now positioned to the right of the tabs */}
+        <div className="md:col-span-1">
           <Card className="h-full">
             <CardHeader>
-              
+              <CardTitle>Team Notes</CardTitle>
             </CardHeader>
             <CardContent>
               <TeamNotes notes={notes} onAddNote={handleAddNote} className="h-full" />
@@ -386,6 +394,8 @@ const PropertyDetail = () => {
           </Card>
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default PropertyDetail;
