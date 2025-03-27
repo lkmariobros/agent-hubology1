@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
@@ -67,7 +66,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, showFullDe
           </div>
           
           {/* Status badge - Always shown */}
-          <Badge className="absolute top-2 right-2" variant={
+          <Badge className="absolute top-2 left-2" variant={
             formattedStatus.toLowerCase() === 'available' ? 'default' :
             formattedStatus.toLowerCase() === 'sold' || formattedStatus.toLowerCase() === 'rented' ? 'destructive' :
             'secondary'
@@ -77,7 +76,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, showFullDe
           
           {/* Featured badge */}
           {property.featured && (
-            <Badge variant="outline" className="absolute top-2 left-2 bg-yellow-500/80 text-white border-none">
+            <Badge variant="outline" className="absolute top-2 right-2 bg-yellow-500/80 text-white border-none">
               Featured
             </Badge>
           )}

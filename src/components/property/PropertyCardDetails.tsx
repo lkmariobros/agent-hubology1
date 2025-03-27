@@ -98,12 +98,11 @@ export const PropertyCardDetails: React.FC<PropertyCardDetailsProps> = ({ proper
         <p className="text-sm text-neutral-300 line-clamp-3">{property.description}</p>
       </div>
       
-      {/* Actions */}
+      {/* Actions - Updated to match the first screenshot layout */}
       <div className="pt-2 flex justify-end gap-2">
-        <Button variant="outline" size="sm" onClick={handleViewDetails}>View Details</Button>
-        {property.status === 'available' && (
-          <Button size="sm">Contact Agent</Button>
-        )}
+        <Button variant="outline" size="sm" onClick={handleViewDetails}>
+          View Details
+        </Button>
         {onEdit && (
           <Button variant="outline" size="sm" onClick={() => onEdit(property.id)}>
             Edit Property
