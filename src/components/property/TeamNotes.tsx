@@ -35,12 +35,14 @@ interface TeamNotesProps {
   notes: TeamNote[];
   onAddNote?: (note: Omit<TeamNote, 'id' | 'date'>) => void;
   className?: string;
+  hideTitle?: boolean; // Add a new prop to hide the title
 }
 
 export const TeamNotes: React.FC<TeamNotesProps> = ({ 
   notes, 
   onAddNote,
-  className = '' 
+  className = '',
+  hideTitle = false // Default to showing the title
 }) => {
   const [newNote, setNewNote] = useState('');
   const [isAddingNote, setIsAddingNote] = useState(false);
@@ -71,12 +73,14 @@ export const TeamNotes: React.FC<TeamNotesProps> = ({
 
   return (
     <Card className={`overflow-hidden border-neutral-800 bg-card/90 backdrop-blur-sm h-full flex flex-col ${className}`}>
-      <CardHeader className="pb-2">
-        <CardTitle className="flex items-center">
-          <MessageSquare className="h-4 w-4 mr-2" />
-          Team Notes
-        </CardTitle>
-      </CardHeader>
+      {!hideTitle && (
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center">
+            <MessageSquare className="h-4 w-4 mr-2" />
+            Team Notes
+          </CardTitle>
+        </CardHeader>
+      )}
       <CardContent className="p-4 flex-grow overflow-auto">
         {notes.length > 0 ? (
           <Timeline>

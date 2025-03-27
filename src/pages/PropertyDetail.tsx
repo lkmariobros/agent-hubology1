@@ -248,7 +248,7 @@ const PropertyDetail = () => {
         </CardContent>
       </Card>
       
-      {/* Modified layout to have tabs next to team notes */}
+      {/* Modified layout to have tabs next to team notes with adjusted widths */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {/* Tabs section - takes 3/4 of the space */}
         <div className="md:col-span-3">
@@ -382,14 +382,14 @@ const PropertyDetail = () => {
           </Tabs>
         </div>
         
-        {/* Team Notes section - now positioned to the right of the tabs */}
+        {/* Team Notes section - now with more width (1/4 of the space) */}
         <div className="md:col-span-1">
           <Card className="h-full">
             <CardHeader>
               <CardTitle>Team Notes</CardTitle>
             </CardHeader>
             <CardContent>
-              <TeamNotes notes={notes} onAddNote={handleAddNote} className="h-full" />
+              <TeamNotes notes={notes} onAddNote={handleAddNote} className="h-full" hideTitle={true} />
             </CardContent>
           </Card>
         </div>
