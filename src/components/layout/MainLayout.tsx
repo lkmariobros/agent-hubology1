@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
@@ -7,59 +6,45 @@ import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
 import { Button } from '@/components/ui/button';
 import NavUtilities from './sidebar/NavUtilities';
 import PageBreadcrumb from './PageBreadcrumb';
-
 interface MainLayoutProps {
   children?: React.ReactNode;
 }
 
 // Create a header component that has access to the sidebar context
 const Header = () => {
-  const { open, toggleSidebar } = useSidebar();
-  
-  return (
-    <div className="border-b border-border">
+  const {
+    open,
+    toggleSidebar
+  } = useSidebar();
+  return <div className="border-b border-border">
       {/* Breadcrumb section */}
       <div className="flex items-center px-6 py-2 border-b border-border">
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={toggleSidebar} 
-          className="h-8 w-8 mr-2 z-20"
-          aria-label={open ? "Collapse sidebar" : "Expand sidebar"}
-        >
+        <Button variant="ghost" size="icon" onClick={toggleSidebar} className="h-8 w-8 mr-2 z-20" aria-label={open ? "Collapse sidebar" : "Expand sidebar"}>
           {open ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeftOpen className="h-4 w-4" />}
         </Button>
         <PageBreadcrumb />
       </div>
       
       {/* Page title section */}
-      <div className="px-6 py-4">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          {/* Dynamic page title based on the last breadcrumb */}
-          {document.title || "Dashboard"}
-        </h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Manage your property portfolio with ease.
-        </p>
-      </div>
+      
       
       {/* Utilities section */}
       <div className="absolute top-3 right-6">
         <NavUtilities />
       </div>
-    </div>
-  );
+    </div>;
 };
-
-const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
+const MainLayout: React.FC<MainLayoutProps> = ({
+  children
+}) => {
   // Load saved sidebar state from localStorage if available
   const savedState = localStorage.getItem("sidebar:state") === "false" ? false : true;
   const location = useLocation();
-  
+
   // Add data-route attribute to body
   useEffect(() => {
     document.body.setAttribute('data-route', location.pathname);
-    
+
     // Set document title based on location
     const pathSegments = location.pathname.split('/').filter(segment => segment);
     if (pathSegments.length > 0) {
@@ -69,27 +54,23 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     } else {
       document.title = "Dashboard";
     }
-    
     return () => {
       document.body.removeAttribute('data-route');
     };
   }, [location.pathname]);
-  
+
   // Set up effect to save sidebar state changes
   React.useEffect(() => {
-    const handleStorageChange = (e) => {
+    const handleStorageChange = e => {
       if (e.key === "sidebar:state") {
         // This ensures our UI stays in sync with other tabs
         console.log("Sidebar state changed:", e.newValue);
       }
     };
-    
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
-  
-  return (
-    <SidebarProvider defaultOpen={savedState}>
+  return <SidebarProvider defaultOpen={savedState}>
       <div className="flex min-h-screen w-full bg-background app-container">
         <AppSidebar />
         <div className="flex-1 overflow-auto main-content content-area dashboard-container">
@@ -99,8 +80,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           </div>
         </div>
       </div>
-    </SidebarProvider>
-  );
+    </SidebarProvider>;
 };
-
 export default MainLayout;
