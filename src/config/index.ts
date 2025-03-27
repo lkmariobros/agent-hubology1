@@ -6,13 +6,13 @@
 
 // Controls whether to use real Supabase data or mock data
 // Can be overridden regardless of environment
-export const USE_REAL_DATA = process.env.VITE_USE_REAL_DATA === 'true' || process.env.NODE_ENV === 'production';
+export const USE_REAL_DATA = import.meta.env.VITE_USE_REAL_DATA === 'true' || import.meta.env.MODE === 'production';
 
 // Enable detailed console logging for debugging database operations
-export const ENABLE_DB_LOGGING = process.env.VITE_ENABLE_DB_LOGGING === 'true' || process.env.NODE_ENV === 'development';
+export const ENABLE_DB_LOGGING = import.meta.env.VITE_ENABLE_DB_LOGGING === 'true' || import.meta.env.MODE === 'development';
 
 // Toggle for development features
-export const SHOW_DEV_TOOLS = process.env.VITE_SHOW_DEV_TOOLS === 'true' || process.env.NODE_ENV === 'development';
+export const SHOW_DEV_TOOLS = import.meta.env.VITE_SHOW_DEV_TOOLS === 'true' || import.meta.env.MODE === 'development';
 
 // Local storage keys
 export const STORAGE_KEYS = {
@@ -23,7 +23,7 @@ export const STORAGE_KEYS = {
 
 // Temporarily access mock data mode from localStorage during development
 export const getMockDataMode = (): boolean => {
-  if (process.env.NODE_ENV !== 'development') return false;
+  if (import.meta.env.MODE !== 'development') return false;
   
   try {
     const storedValue = localStorage.getItem(STORAGE_KEYS.DATA_MODE);
@@ -36,7 +36,7 @@ export const getMockDataMode = (): boolean => {
 
 // Set mock data mode in localStorage (development only)
 export const setMockDataMode = (useMock: boolean): void => {
-  if (process.env.NODE_ENV !== 'development') return;
+  if (import.meta.env.MODE !== 'development') return;
   
   try {
     localStorage.setItem(STORAGE_KEYS.DATA_MODE, useMock ? 'mock' : 'real');
