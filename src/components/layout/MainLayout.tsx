@@ -17,8 +17,9 @@ const Header = () => {
   const { open, toggleSidebar } = useSidebar();
   
   return (
-    <div className="flex items-center justify-between px-6 py-3 border-b border-border">
-      <div className="flex items-center gap-2">
+    <div className="border-b border-border">
+      {/* Breadcrumb section */}
+      <div className="flex items-center px-6 py-2 border-b border-border/50">
         <Button 
           variant="ghost" 
           size="icon" 
@@ -30,7 +31,22 @@ const Header = () => {
         </Button>
         <PageBreadcrumb />
       </div>
-      <NavUtilities />
+      
+      {/* Page title section */}
+      <div className="px-6 py-4">
+        <h1 className="text-2xl font-semibold tracking-tight">
+          {/* Dynamic page title based on the last breadcrumb */}
+          {document.title || "Dashboard"}
+        </h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          Manage your property portfolio with ease.
+        </p>
+      </div>
+      
+      {/* Utilities section */}
+      <div className="absolute top-3 right-6">
+        <NavUtilities />
+      </div>
     </div>
   );
 };
@@ -43,6 +59,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   // Add data-route attribute to body
   useEffect(() => {
     document.body.setAttribute('data-route', location.pathname);
+    
+    // Set document title based on location
+    const pathSegments = location.pathname.split('/').filter(segment => segment);
+    if (pathSegments.length > 0) {
+      const lastSegment = pathSegments[pathSegments.length - 1];
+      const title = lastSegment.charAt(0).toUpperCase() + lastSegment.slice(1);
+      document.title = isNaN(Number(title)) ? title : `${pathSegments[pathSegments.length - 2]} Details`;
+    } else {
+      document.title = "Dashboard";
+    }
     
     return () => {
       document.body.removeAttribute('data-route');

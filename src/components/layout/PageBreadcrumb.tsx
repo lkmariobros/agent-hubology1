@@ -80,8 +80,8 @@ const PageBreadcrumb = () => {
   });
 
   return (
-    <Breadcrumb className="mb-4">
-      <BreadcrumbList>
+    <Breadcrumb>
+      <BreadcrumbList className="text-sm text-muted-foreground">
         {breadcrumbItems.map((item, index) => (
           <React.Fragment key={item.path}>
             <BreadcrumbItem>

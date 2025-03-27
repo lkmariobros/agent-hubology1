@@ -21,7 +21,12 @@ const PropertyHeader: React.FC<PropertyHeaderProps> = ({
   return (
     <div className="mb-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">{title}</h1>
+        <div>
+          <h2 className="text-2xl font-bold">{title}</h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Manage all details for this {propertyType.toLowerCase()}.
+          </p>
+        </div>
         <div className="flex gap-2">
           <Button variant="outline" className="flex items-center gap-1" onClick={onEdit}>
             <Edit className="h-4 w-4" />
