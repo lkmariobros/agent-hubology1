@@ -177,7 +177,7 @@ const PropertyDetail = () => {
     return <PropertyErrorState 
       title="Error Loading Property" 
       message={error?.message || 'The property data could not be loaded. Please try again.'}
-      errorCode={error?.code || 404}
+      errorCode={error && 'code' in error ? (error as any).code : 404}
       onRetry={handleRetry}
     />;
   }
