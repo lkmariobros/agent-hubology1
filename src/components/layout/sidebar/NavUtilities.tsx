@@ -1,13 +1,13 @@
 
 import React from 'react';
-import { Settings, Bell } from 'lucide-react';
+import { Settings } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import NotificationBell from '../NotificationBell';
 
 const NavUtilities: React.FC = () => {
   return (
-    <div className="flex items-center space-x-3 pb-1">
+    <div className="flex items-center space-x-3 pt-1 pb-2">
       <NotificationBell />
       
       <Link to="/settings">

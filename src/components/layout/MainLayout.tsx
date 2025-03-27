@@ -16,9 +16,9 @@ const Header = () => {
     open,
     toggleSidebar
   } = useSidebar();
-  return <div className="border-b border-border">
+  return <div className="border-b border-border/40">
       {/* Breadcrumb section */}
-      <div className="flex items-center px-6 py-2 border-b border-border">
+      <div className="flex items-center px-6 py-2 border-b border-border/10">
         <Button variant="ghost" size="icon" onClick={toggleSidebar} className="h-8 w-8 mr-2 z-20" aria-label={open ? "Collapse sidebar" : "Expand sidebar"}>
           {open ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeftOpen className="h-4 w-4" />}
         </Button>
@@ -29,7 +29,7 @@ const Header = () => {
       
       
       {/* Utilities section */}
-      <div className="absolute top-3 right-6">
+      <div className="absolute top-2 right-6">
         <NavUtilities />
       </div>
     </div>;
@@ -70,6 +70,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
+  
   return <SidebarProvider defaultOpen={savedState}>
       <div className="flex min-h-screen w-full bg-background app-container">
         <AppSidebar />

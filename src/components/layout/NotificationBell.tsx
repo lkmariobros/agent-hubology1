@@ -61,7 +61,7 @@ const NotificationBell: React.FC = () => {
             refreshNotifications();
           }}
         >
-          <Bell className="h-5 w-5" />
+          <Bell className="h-5 w-5 text-muted-foreground" />
           {unreadCount > 0 && (
             <Badge 
               variant="destructive" 
@@ -73,11 +73,11 @@ const NotificationBell: React.FC = () => {
         </Button>
       </PopoverTrigger>
       <PopoverContent 
-        className="w-[380px] p-0" 
+        className="w-[380px] p-0 bg-popover"
         align="end" 
         sideOffset={10}
       >
-        <div className="flex items-center justify-between p-4 border-b">
+        <div className="flex items-center justify-between p-4 border-b border-border/10">
           <h4 className="text-sm font-medium">Notifications</h4>
           {unreadCount > 0 && (
             <Button variant="ghost" size="sm" onClick={markAllAsRead}>
