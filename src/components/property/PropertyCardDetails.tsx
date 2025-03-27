@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Bed, Bath, Square, MapPin, Calendar, Tag, Building, User } from 'lucide-react';
 import { formatPrice } from '@/utils/propertyUtils';
 import { format } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
 
 export interface PropertyCardDetailsProps {
   property: Property;
@@ -13,6 +14,12 @@ export interface PropertyCardDetailsProps {
 }
 
 export const PropertyCardDetails: React.FC<PropertyCardDetailsProps> = ({ property, onEdit }) => {
+  const navigate = useNavigate();
+
+  const handleViewDetails = () => {
+    navigate(`/properties/${property.id}`);
+  };
+
   return (
     <div className="p-4 space-y-4">
       {/* Property Details */}
@@ -93,7 +100,7 @@ export const PropertyCardDetails: React.FC<PropertyCardDetailsProps> = ({ proper
       
       {/* Actions */}
       <div className="pt-2 flex justify-end gap-2">
-        <Button variant="outline" size="sm">View Details</Button>
+        <Button variant="outline" size="sm" onClick={handleViewDetails}>View Details</Button>
         {property.status === 'available' && (
           <Button size="sm">Contact Agent</Button>
         )}
