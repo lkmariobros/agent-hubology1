@@ -218,6 +218,7 @@ const PropertyDetail = () => {
       <PropertyHeader 
         title={property.title}
         isAdmin={isAdmin}
+        propertyType={propertyType}
         onEdit={handleEditProperty}
         onDelete={handleDeleteProperty}
       />
