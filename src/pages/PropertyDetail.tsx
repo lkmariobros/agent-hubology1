@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useProperty } from '@/hooks/useProperties';
@@ -11,6 +10,7 @@ import PropertyHeader from '@/components/property/PropertyHeader';
 import PropertySummaryCard from '@/components/property/PropertySummaryCard';
 import PropertyTabsSection from '@/components/property/PropertyTabsSection';
 import PropertyErrorState from '@/components/property/PropertyErrorState';
+import PropertyLoadingSkeleton from '@/components/property/PropertyLoadingSkeleton';
 import { TeamNote } from '@/components/property/TeamNotes';
 
 // Mock data for team notes
@@ -45,12 +45,14 @@ const PropertyDetail = () => {
   
   // Only enable the query if we're not using mock data and we have a valid UUID
   const isValidPropertyId = normalizedId ? isValidUuid(normalizedId) : false;
-  const { data: propertyResponse, isLoading, error } = useProperty(normalizedId || '', {
+  
+  const { data: propertyResponse, isLoading, error, refetch } = useProperty(normalizedId || '', {
     enabled: !useMockData && isValidPropertyId && !!normalizedId
   });
   
   const [notes, setNotes] = useState<TeamNote[]>(mockNotes);
   const [property, setProperty] = useState<any>(null);
+  const [isLocalLoading, setIsLocalLoading] = useState(true);
   
   useEffect(() => {
     dbLogger.log(`Property detail loaded for ID: ${normalizedId}`, { id: normalizedId, useMockData }, {
@@ -115,6 +117,13 @@ const PropertyDetail = () => {
       dbLogger.success('Property data loaded from Supabase', propertyResponse.data, 'enhanced_properties', 'select', false);
       setProperty(propertyResponse.data);
     }
+
+    // Set local loading state to give the app time to process mock data
+    const timer = setTimeout(() => {
+      setIsLocalLoading(false);
+    }, 800);
+
+    return () => clearTimeout(timer);
   }, [normalizedId, propertyResponse, useMockData, id, isValidPropertyId]);
 
   const handleAddNote = (note: Omit<TeamNote, 'id' | 'date'>) => {
@@ -138,31 +147,48 @@ const PropertyDetail = () => {
     toast.error('Delete functionality not implemented yet');
   };
 
-  if (isLoading && !useMockData) {
-    return (
-      <div className="p-6 flex items-center justify-center min-h-[50vh]">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent mb-4"></div>
-          <p>Loading property details...</p>
-        </div>
-      </div>
-    );
+  const handleRetry = () => {
+    setIsLocalLoading(true);
+    
+    if (useMockData) {
+      // Re-trigger the mock data effect by forcing a state update
+      setProperty(null);
+      setTimeout(() => setIsLocalLoading(false), 800);
+    } else {
+      // Real data - use the refetch function
+      refetch().finally(() => {
+        setTimeout(() => setIsLocalLoading(false), 300);
+      });
+    }
+    
+    toast.info('Retrying...');
+  };
+
+  // Show skeleton during loading
+  if (isLoading || isLocalLoading) {
+    return <PropertyLoadingSkeleton />;
   }
 
+  // Handle error states more gracefully
   if ((error || !propertyResponse?.data) && !useMockData && !import.meta.env.DEV) {
     dbLogger.error('Error loading property', error?.message || 'Property not found', 'enhanced_properties', 'select');
     console.error('Error loading property:', error?.message || 'Property not found', propertyResponse);
     
     return <PropertyErrorState 
       title="Error Loading Property" 
-      message={error?.message || 'Property not found'}
+      message={error?.message || 'The property data could not be loaded. Please try again.'}
+      errorCode={error?.code || 404}
+      onRetry={handleRetry}
     />;
   }
 
+  // Handle missing property data
   if (!property) {
     return <PropertyErrorState 
       title="Property Not Found" 
-      message="The requested property could not be found."
+      message="The requested property could not be found or may have been removed."
+      errorCode={404}
+      onRetry={handleRetry}
     />;
   }
 
