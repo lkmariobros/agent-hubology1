@@ -6,6 +6,7 @@ import { AppSidebar } from './AppSidebar';
 import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
 import { Button } from '@/components/ui/button';
 import NavUtilities from './sidebar/NavUtilities';
+import PageBreadcrumb from './PageBreadcrumb';
 
 interface MainLayoutProps {
   children?: React.ReactNode;
@@ -27,7 +28,7 @@ const Header = () => {
         >
           {open ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeftOpen className="h-4 w-4" />}
         </Button>
-        <h1 className="text-2xl font-semibold text-primary">Dashboard</h1>
+        <PageBreadcrumb />
       </div>
       <NavUtilities />
     </div>
