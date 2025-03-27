@@ -49,7 +49,7 @@ const MockDataToggle: React.FC<MockDataToggleProps> = ({ className = '' }) => {
         <Switch
           checked={useMockData}
           onCheckedChange={toggleMockData}
-          size="sm"
+          className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-input h-5 w-9"
         />
       </div>
     </div>

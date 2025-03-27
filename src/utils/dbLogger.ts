@@ -7,11 +7,12 @@
 import { ENABLE_DB_LOGGING } from '../config';
 
 type LogLevel = 'info' | 'warning' | 'error' | 'success';
+type DbOperation = 'select' | 'insert' | 'update' | 'delete' | 'other';
 
 interface LogOptions {
   level?: LogLevel;
   table?: string;
-  operation?: 'select' | 'insert' | 'update' | 'delete' | 'other';
+  operation?: DbOperation;
   showData?: boolean;
 }
 
@@ -57,7 +58,7 @@ export const dbLogger = {
   /**
    * Log an error during a database operation
    */
-  error: (message: string, error: any, table = '', operation = 'other') => {
+  error: (message: string, error: any, table = '', operation: DbOperation = 'other') => {
     if (!ENABLE_DB_LOGGING) return;
     
     dbLogger.log(message, error, { 
@@ -76,7 +77,7 @@ export const dbLogger = {
   /**
    * Log a successful database operation
    */
-  success: (message: string, data?: any, table = '', operation = 'other', showData = false) => {
+  success: (message: string, data?: any, table = '', operation: DbOperation = 'other', showData = false) => {
     if (!ENABLE_DB_LOGGING) return;
     
     dbLogger.log(message, data, { 
