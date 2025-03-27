@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
@@ -16,24 +17,25 @@ const Header = () => {
     open,
     toggleSidebar
   } = useSidebar();
-  return <div className="border-b border-border/40">
-      {/* Breadcrumb section */}
-      <div className="flex items-center px-6 py-2 border-b border-border/10">
-        <Button variant="ghost" size="icon" onClick={toggleSidebar} className="h-8 w-8 mr-2 z-20" aria-label={open ? "Collapse sidebar" : "Expand sidebar"}>
-          {open ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeftOpen className="h-4 w-4" />}
-        </Button>
-        <PageBreadcrumb />
-      </div>
-      
-      {/* Page title section */}
-      
-      
-      {/* Utilities section */}
-      <div className="absolute top-2 right-6">
+  return <div>
+      {/* Breadcrumb and Navigation Section */}
+      <div className="flex items-center justify-between px-6 py-2">
+        <div className="flex items-center">
+          <Button variant="ghost" size="icon" onClick={toggleSidebar} className="h-8 w-8 mr-2 z-20" aria-label={open ? "Collapse sidebar" : "Expand sidebar"}>
+            {open ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeftOpen className="h-4 w-4" />}
+          </Button>
+          <PageBreadcrumb />
+        </div>
+        
+        {/* Utilities section */}
         <NavUtilities />
       </div>
+      
+      {/* Divider */}
+      <div className="border-b border-border"></div>
     </div>;
 };
+
 const MainLayout: React.FC<MainLayoutProps> = ({
   children
 }) => {

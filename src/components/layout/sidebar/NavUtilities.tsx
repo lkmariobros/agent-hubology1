@@ -7,7 +7,7 @@ import NotificationBell from '../NotificationBell';
 
 const NavUtilities: React.FC = () => {
   return (
-    <div className="flex items-center space-x-3 pt-1 pb-2">
+    <div className="flex items-center space-x-3">
       <NotificationBell />
       
       <Link to="/settings">
