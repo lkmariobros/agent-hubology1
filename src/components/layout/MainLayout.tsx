@@ -19,7 +19,7 @@ const Header = () => {
   return (
     <div className="border-b border-border">
       {/* Breadcrumb section */}
-      <div className="flex items-center px-6 py-2 border-b border-border/50">
+      <div className="flex items-center px-6 py-2 border-b border-border">
         <Button 
           variant="ghost" 
           size="icon" 
