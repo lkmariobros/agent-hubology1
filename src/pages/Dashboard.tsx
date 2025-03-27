@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Building2, BarChart4, Users, DollarSign, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -10,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useMetrics, useRecentProperties, useRecentTransactions } from '@/hooks/useDashboard';
 import { DashboardMetric } from '@/types';
+
 const Dashboard = () => {
   const navigate = useNavigate();
 
@@ -65,6 +67,7 @@ const Dashboard = () => {
   const handleViewAllOpportunities = () => {
     navigate('/opportunities');
   };
+
   return <div className="space-y-6">
       {/* Page Title */}
       <div className="flex justify-between items-center">
@@ -108,4 +111,5 @@ const Dashboard = () => {
       </div>
     </div>;
 };
+
 export default Dashboard;
