@@ -85,7 +85,7 @@ export const TeamNotes: React.FC<TeamNotesProps> = ({
         {notes.length > 0 ? (
           <Timeline>
             {notes.map((note, index) => (
-              <TimelineItem key={note.id} className="pb-0 last:pb-0">
+              <TimelineItem key={note.id} className="pb-4 last:pb-0">
                 <TimelineIndicator>
                   <Avatar className="h-7 w-7">
                     {note.author.avatar ? (
@@ -111,9 +111,9 @@ export const TeamNotes: React.FC<TeamNotesProps> = ({
                 </TimelineHeader>
                 
                 <TimelineContent>
-                  <div className="rounded-lg border border-neutral-800 bg-black/20 px-4 py-3 text-sm">
+                  <div className="rounded-lg border border-neutral-800 bg-black/20 px-5 py-4 text-sm">
                     {note.content}
-                    <TimelineDate>{note.date}</TimelineDate>
+                    <TimelineDate className="mt-2">{note.date}</TimelineDate>
                   </div>
                 </TimelineContent>
               </TimelineItem>
@@ -126,10 +126,10 @@ export const TeamNotes: React.FC<TeamNotesProps> = ({
         )}
         
         {isAddingNote ? (
-          <div className="mt-4 space-y-3">
+          <div className="mt-6 space-y-3">
             <Textarea
               placeholder="Type your note here..."
-              className="min-h-[100px] bg-black/20 border-neutral-800"
+              className="min-h-[120px] bg-black/20 border-neutral-800"
               value={newNote}
               onChange={(e) => setNewNote(e.target.value)}
             />

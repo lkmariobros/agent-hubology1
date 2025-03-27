@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useProperty } from '@/hooks/useProperties';
@@ -248,10 +247,10 @@ const PropertyDetail = () => {
         </CardContent>
       </Card>
       
-      {/* Modified layout to have tabs next to team notes with adjusted widths */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {/* Tabs section - takes 3/4 of the space */}
-        <div className="md:col-span-3">
+      {/* Modified layout with improved proportions for tabs and team notes */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Tabs section - takes 2/3 of the space */}
+        <div className="md:col-span-2">
           <Tabs defaultValue="details" className="w-full">
             <TabsList className="mb-6">
               <TabsTrigger value="details">Details</TabsTrigger>
@@ -382,13 +381,13 @@ const PropertyDetail = () => {
           </Tabs>
         </div>
         
-        {/* Team Notes section - now with more width (1/4 of the space) */}
+        {/* Team Notes section - now with more width (1/3 of the space) */}
         <div className="md:col-span-1">
           <Card className="h-full">
             <CardHeader>
               <CardTitle>Team Notes</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-5">
               <TeamNotes notes={notes} onAddNote={handleAddNote} className="h-full" hideTitle={true} />
             </CardContent>
           </Card>
