@@ -30,7 +30,7 @@ export const dbLogger = {
     const { 
       level = 'info', 
       table = '', 
-      operation = 'other',
+      operation = 'other' as DbOperation,
       showData = true 
     } = options;
     

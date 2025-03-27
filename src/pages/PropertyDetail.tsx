@@ -13,7 +13,7 @@ import PropertyGallery from '@/components/property/PropertyGallery';
 import { CheckCircle2, Edit, Trash2, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { getMockDataMode } from '@/config';
-import { normalizeUuid, isValidUuid } from '@/utils/uuidUtils';
+import { normalizeUuid, isValidUuid, createMockUuid } from '@/utils/uuidUtils';
 import { dbLogger } from '@/utils/dbLogger';
 
 // Mock data for team notes
@@ -41,15 +41,15 @@ const PropertyDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { isAdmin } = useAuth();
   const navigate = useNavigate();
-  const normalizedId = normalizeUuid(id);
+  const normalizedId = id ? normalizeUuid(id) : null;
 
   // Check whether to use mock data based on config and localStorage
   const useMockData = getMockDataMode();
   
   // Only enable the query if we're not using mock data and we have a valid UUID
-  const isValidPropertyId = isValidUuid(normalizedId);
+  const isValidPropertyId = normalizedId ? isValidUuid(normalizedId) : false;
   const { data: propertyResponse, isLoading, error } = useProperty(normalizedId || '', {
-    enabled: !useMockData && isValidPropertyId
+    enabled: !useMockData && isValidPropertyId && !!normalizedId
   });
   
   const [notes, setNotes] = useState<TeamNote[]>(mockNotes);
@@ -62,13 +62,16 @@ const PropertyDetail = () => {
     });
 
     // In development mock data mode, use mock data
-    if (useMockData) {
-      dbLogger.log(`Using mock data for property ID: ${normalizedId}`);
+    if (useMockData || (import.meta.env.MODE === 'development' && (!isValidPropertyId || !normalizedId))) {
+      dbLogger.log(`Using mock data for property ID: ${normalizedId || 'unknown'}`);
+      
+      // Generate a consistent mock ID based on the provided ID or create a new one
+      const mockId = normalizedId || createMockUuid(normalizedId);
       
       // Load mock data based on the ID
       const mockProperty = {
-        id: normalizedId,
-        title: `Sample Property ${normalizedId}`,
+        id: mockId,
+        title: `Sample Property ${id || ''}`,
         description: 'This is a sample property description used for development.',
         price: 750000,
         street: '123 Main Street',
@@ -115,7 +118,7 @@ const PropertyDetail = () => {
       dbLogger.success('Property data loaded from Supabase', propertyResponse.data, 'enhanced_properties', 'select', false);
       setProperty(propertyResponse.data);
     }
-  }, [normalizedId, propertyResponse, useMockData]);
+  }, [normalizedId, propertyResponse, useMockData, id, isValidPropertyId]);
 
   const handleAddNote = (note: Omit<TeamNote, 'id' | 'date'>) => {
     // In a real app, you would add the note to Supabase here
@@ -147,7 +150,7 @@ const PropertyDetail = () => {
     </div>;
   }
 
-  if ((error || !propertyResponse?.data) && !useMockData) {
+  if ((error || !propertyResponse?.data) && !useMockData && !import.meta.env.DEV) {
     dbLogger.error('Error loading property', error?.message || 'Property not found', 'enhanced_properties', 'select');
     console.error('Error loading property:', error?.message || 'Property not found', propertyResponse);
     
@@ -266,7 +269,6 @@ const PropertyDetail = () => {
         </CardContent>
       </Card>
       
-      {/* Modified layout with improved proportions for tabs and team notes */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Tabs section - takes 2/3 of the space */}
         <div className="md:col-span-2">
