@@ -1,8 +1,9 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { PropertyFormData } from '@/types/property-form';
+import { normalizeUuid, isValidUuid } from '@/utils/uuidUtils';
+import { dbLogger } from '@/utils/dbLogger';
 
 // Define the filters interface 
 export interface PropertyFilters {
@@ -27,7 +28,10 @@ export function useProperties(page = 1, pageSize = 10, filters: PropertyFilters 
   return useQuery({
     queryKey: ['properties', page, pageSize, filters],
     queryFn: async () => {
-      console.log('Fetching properties with filters:', filters);
+      dbLogger.log('Fetching properties with filters', filters, {
+        table: 'enhanced_properties',
+        operation: 'select'
+      });
       
       // Start with the base query
       let query = supabase
@@ -136,7 +140,7 @@ export function useProperties(page = 1, pageSize = 10, filters: PropertyFilters 
       const { data, error } = await query;
       
       if (error) {
-        console.error('Error fetching properties:', error);
+        dbLogger.error('Error fetching properties', error, 'enhanced_properties', 'select');
         throw error;
       }
       
@@ -206,8 +210,10 @@ export function useProperties(page = 1, pageSize = 10, filters: PropertyFilters 
       const { count: totalCount, error: countError } = await countQuery;
         
       if (countError) {
-        console.error('Error fetching property count:', countError);
+        dbLogger.error('Error fetching property count', countError, 'enhanced_properties', 'select');
       }
+      
+      dbLogger.success(`Retrieved ${data?.length || 0} properties (total: ${totalCount || 0})`, null, 'enhanced_properties', 'select');
       
       return { 
         properties: data || [], 
@@ -224,15 +230,21 @@ export function useProperty(id: string, options = {}) {
     queryFn: async () => {
       if (!id) return { success: false, message: 'No property ID provided', data: null };
       
-      console.log('Fetching property with ID:', id);
+      // Normalize the UUID format
+      const normalizedId = normalizeUuid(id);
+      
+      dbLogger.log(`Fetching property with ID: ${normalizedId}`, { id: normalizedId }, {
+        table: 'enhanced_properties',
+        operation: 'select'
+      });
       
       // Check if the ID is a valid UUID
-      const isValidUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+      const propertyIdIsValid = isValidUuid(normalizedId);
       
-      if (!isValidUuid) {
-        console.log('Non-UUID property ID provided:', id);
+      if (!propertyIdIsValid) {
+        dbLogger.error('Invalid UUID format provided', { id: normalizedId }, 'enhanced_properties', 'select');
         
-        // In development, we'll handle this gracefully
+        // In development, handle this gracefully
         if (process.env.NODE_ENV === 'development') {
           return { 
             success: false, 
@@ -258,13 +270,15 @@ export function useProperty(id: string, options = {}) {
             property_statuses(name),
             property_images(id, storage_path, is_cover, display_order)
           `)
-          .eq('id', id)
+          .eq('id', normalizedId)
           .single();
           
         if (error) {
-          console.error('Error fetching property:', error);
+          dbLogger.error('Error fetching property', error, 'enhanced_properties', 'select');
           return { success: false, message: error.message, data: null };
         }
+        
+        dbLogger.success('Property retrieved successfully', { id: normalizedId }, 'enhanced_properties', 'select');
         
         return { 
           success: true, 
@@ -272,7 +286,7 @@ export function useProperty(id: string, options = {}) {
           data
         };
       } catch (err: any) {
-        console.error('Exception fetching property:', err.message);
+        dbLogger.error('Exception fetching property', err.message, 'enhanced_properties', 'select');
         return { 
           success: false, 
           message: err.message, 
