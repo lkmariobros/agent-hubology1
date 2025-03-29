@@ -2,11 +2,11 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthForm from '../components/AuthForm';
-import useAuth from '@/hooks/useAuth';  // Updated import
+import { useAuthContext } from '@/context/auth';  // Updated import
 import LoadingIndicator from '@/components/ui/loading-indicator';
 
 const Index = () => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading } = useAuthContext();
   const navigate = useNavigate();
   const [isRedirecting, setIsRedirecting] = useState(false);
 

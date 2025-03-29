@@ -1,7 +1,7 @@
 
 import { useEffect } from 'react';
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabase';
 import { Notification } from '@/types/notification';
 import { logger } from '@/services/logging';
 
