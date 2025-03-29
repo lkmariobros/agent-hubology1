@@ -39,7 +39,7 @@ if (import.meta.env.DEV && (!SUPABASE_URL || !SUPABASE_ANON_KEY)) {
   console.warn('Missing Supabase environment variables. Using fallback values.');
 }
 
-// Set up a listener for auth state changes (outside the client initialization)
+// Create separate auth state listener instead of in the config
 supabase.auth.onAuthStateChange((event, session) => {
   console.log('[Supabase Client] Auth state change:', event, !!session);
 });
@@ -56,6 +56,18 @@ export const handleSupabaseError = (error: any, operation: string) => {
   };
 };
 
+// Simplified database types to avoid deep instantiation issues
+interface AgentProfile {
+  id?: string;
+  full_name?: string;
+  email?: string;
+  avatar_url?: string;
+  tier?: number;
+  tier_name?: string;
+  role?: string;
+  [key: string]: any;
+}
+
 // Type-safe utility functions for Supabase operations
 export const supabaseUtils = {
   // Get user roles from the database
@@ -70,18 +82,18 @@ export const supabaseUtils = {
     }
   },
 
-  // Utility function for fetching a user profile by ID using type assertions safely
-  getUserProfile: async (userId: string) => {
+  // Utility function for fetching a user profile by ID using simplified typing
+  getUserProfile: async (userId: string): Promise<AgentProfile | null> => {
     try {
       const { data, error } = await supabase
         .from('agent_profiles')
         .select('*')
-        // Use type assertion to handle the deep typing issue
-        .eq('id' as any, userId as any)
+        // Use type assertion to handle typing issues
+        .eq('id' as any, userId)
         .single();
         
       if (error) throw error;
-      return data;
+      return data as AgentProfile;
     } catch (error) {
       console.error('Error fetching user profile:', error);
       return null;
