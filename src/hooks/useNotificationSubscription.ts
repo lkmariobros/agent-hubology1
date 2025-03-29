@@ -1,7 +1,7 @@
 
 import { useEffect } from 'react';
 import { toast } from 'sonner';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 import { Notification } from '@/types/notification';
 import { logger } from '@/services/logging';
 
@@ -12,7 +12,6 @@ export const useNotificationSubscription = (
   useEffect(() => {
     if (!userId) return;
 
-    // Create the channel
     let channel;
     try {
       channel = supabase
@@ -62,16 +61,13 @@ export const useNotificationSubscription = (
           }
         )
         .subscribe((status) => {
-          // Fix: Cast or handle status as string instead of treating it as Record<string, any>
-          const statusStr = status.toString();
-          
-          if (statusStr === 'SUBSCRIBED') {
+          // Handle subscription status
+          if (status === 'SUBSCRIBED') {
             logger.info('Successfully subscribed to notifications');
-          } else if (statusStr === 'CHANNEL_ERROR') {
-            // Fix: Pass the status as an object property instead of a second parameter
-            logger.error('Failed to subscribe to notifications', { status: statusStr });
+          } else if (status === 'CHANNEL_ERROR') {
+            logger.error('Failed to subscribe to notifications', { status });
             toast.error('Failed to connect to notification service');
-          } else if (statusStr === 'CLOSED') {
+          } else if (status === 'CLOSED') {
             logger.error('Notification channel closed');
             // Attempt to reconnect after a delay
             setTimeout(() => {
@@ -101,5 +97,6 @@ export const useNotificationSubscription = (
         }
       }
     };
+  // Use userId and onNewNotification as dependencies
   }, [userId, onNewNotification]);
 };

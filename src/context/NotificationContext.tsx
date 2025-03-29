@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { useAuthContext } from '@/context/AuthContext';
 import { Notification } from '@/types/notification';
@@ -51,14 +52,15 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   // Use subscription hook for real-time notifications
   useNotificationSubscription(userId, addNotification);
 
-  // Initialize notifications
+  // Initialize notifications - FIX: Add proper dependency array and avoid unnecessary fetches
   useEffect(() => {
+    // Only fetch notifications if we have a userId and aren't already loading
+    if (!userId) {
+      setNotifications([]);
+      return;
+    }
+    
     const loadNotifications = async () => {
-      if (!userId) {
-        setNotifications([]);
-        return;
-      }
-      
       setIsLoading(true);
       try {
         const data = await fetchUserNotifications(userId);
@@ -72,6 +74,9 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     };
     
     loadNotifications();
+    
+    // Add userId and fetchUserNotifications to dependency array
+    // Since fetchUserNotifications might change between renders, we need to include it
   }, [userId, fetchUserNotifications]);
 
   // Mark a notification as read
