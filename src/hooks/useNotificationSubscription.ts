@@ -62,6 +62,7 @@ export const useNotificationSubscription = (
           }
         )
         .subscribe((status) => {
+          // Fix: Properly handle the status as a string
           if (status === 'SUBSCRIBED') {
             logger.info('Successfully subscribed to notifications');
           } else if (status === 'CHANNEL_ERROR') {
