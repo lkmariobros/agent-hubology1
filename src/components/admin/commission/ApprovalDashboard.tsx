@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -9,7 +8,8 @@ import {
   useApprovalStatusCounts,
   usePendingCommissionTotal,
   useApprovedCommissionTotal,
-  useCommissionApprovals
+  useCommissionApprovals,
+  ApprovalStatus
 } from '@/hooks/useCommissionApproval';
 import { formatCurrency } from '@/utils/propertyUtils';
 import { Link } from 'react-router-dom';
@@ -25,7 +25,7 @@ const ApprovalDashboard = () => {
   const { data: statusCounts, isLoading: isLoadingCounts } = useApprovalStatusCounts();
   const { data: pendingTotal, isLoading: isLoadingPending } = usePendingCommissionTotal();
   const { data: approvedTotal, isLoading: isLoadingApproved } = useApprovedCommissionTotal();
-  const [activeTab, setActiveTab] = React.useState('pending');
+  const [activeTab, setActiveTab] = React.useState<ApprovalStatus | 'All'>('Pending');
   const [page, setPage] = React.useState(1);
   const pageSize = 5;
   

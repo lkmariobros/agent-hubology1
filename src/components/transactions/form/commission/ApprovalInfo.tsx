@@ -16,10 +16,13 @@ const ApprovalInfo: React.FC<ApprovalInfoProps> = ({
 }) => {
   // Check if commission exceeds threshold
   const {
-    threshold,
-    exceedsThreshold,
+    data,
     isLoading
   } = useCommissionApprovalCheck(commissionAmount);
+  
+  // Extract threshold and exceedsThreshold from data
+  const threshold = data?.threshold || 0;
+  const exceedsThreshold = data?.exceedsThreshold || false;
 
   // Format currency
   const formatCurrency = (value: number) => {
