@@ -18,6 +18,7 @@ interface AuthContextState {
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
+  signUp: (email: string, password: string) => Promise<void>;
 }
 
 // Create the context with a default undefined value
@@ -124,6 +125,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // Sign up function
+  const signUp = async (email: string, password: string) => {
+    try {
+      setLoading(true);
+      const { error } = await supabase.auth.signUp({ email, password });
+      if (error) throw error;
+      toast.success('Registration successful! Please check your email for confirmation.');
+    } catch (err) {
+      logger.error('Sign up error', { email, error: err });
+      setError(err instanceof Error ? err : new Error('Failed to sign up'));
+      toast.error('Registration failed: ' + (err instanceof Error ? err.message : 'Unknown error'));
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Sign out function
   const signOut = async () => {
     try {
@@ -185,6 +203,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     signIn,
     signOut,
     resetPassword,
+    signUp,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
