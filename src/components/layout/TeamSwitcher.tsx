@@ -49,16 +49,16 @@ export function TeamSwitcher() {
     // First switch the role
     switchRole(role);
     
-    // Then navigate with a small delay to ensure state updates first
-    setTimeout(() => {
-      if (role === 'admin') {
-        console.log('TeamSwitcher: Navigating to /admin after role switch');
-        window.location.href = '/admin';
-      } else {
-        console.log('TeamSwitcher: Navigating to /dashboard after role switch');
-        window.location.href = '/dashboard';
-      }
-    }, 100);
+    // Force browser navigation (full page reload) to ensure proper context
+    if (role === 'admin') {
+      console.log('TeamSwitcher: Navigating to /admin after role switch');
+      // Use replace to avoid adding to browser history
+      window.location.replace('/admin');
+    } else {
+      console.log('TeamSwitcher: Navigating to /dashboard after role switch');
+      // Use replace to avoid adding to browser history
+      window.location.replace('/dashboard');
+    }
   };
 
   return (

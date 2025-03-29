@@ -54,18 +54,20 @@ export function PortalSwitcher({ showLabel = true, className = "" }: PortalSwitc
     // First switch the role
     switchRole(role);
     
-    // Then navigate with a small delay to ensure state updates first
-    setTimeout(() => {
-      if (role === 'admin') {
-        console.log('Navigating to /admin after role switch');
-        window.location.href = '/admin';
-        toast.success('Switched to Admin Portal');
-      } else {
-        console.log('Navigating to /dashboard after role switch');
-        window.location.href = '/dashboard';
-        toast.success('Switched to Agent Portal');
-      }
-    }, 100);
+    // Force browser navigation (full page reload) to ensure proper context switch
+    if (role === 'admin') {
+      console.log('PortalSwitcher: Navigating to /admin after role switch');
+      // Show toast before navigation
+      toast.success('Switching to Admin Portal...');
+      // Use replace to avoid adding to browser history
+      window.location.replace('/admin');
+    } else {
+      console.log('PortalSwitcher: Navigating to /dashboard after role switch');
+      // Show toast before navigation
+      toast.success('Switching to Agent Portal...');
+      // Use replace to avoid adding to browser history
+      window.location.replace('/dashboard');
+    }
   };
 
   return (
