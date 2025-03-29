@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
+import useAuth from "@/hooks/useAuth";
 import { useCommissionNotifications } from '@/hooks/useCommissionNotifications';
 
 const SendTestNotification: React.FC = () => {

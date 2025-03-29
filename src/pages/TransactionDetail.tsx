@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTransactionQuery } from '@/hooks/useTransactions';
-import { useAuth } from '@/hooks/useAuth';
+import useAuth from '@/hooks/useAuth';
 import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import LoadingIndicator from '@/components/ui/loading-indicator';

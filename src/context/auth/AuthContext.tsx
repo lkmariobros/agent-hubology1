@@ -17,5 +17,3 @@ export const useAuthContext = (): AuthContextType => {
   
   return context;
 };
-
-export { AuthContext };
