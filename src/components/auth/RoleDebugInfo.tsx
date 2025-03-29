@@ -21,7 +21,7 @@ const RoleDebugInfo: React.FC = () => {
   }
 
   return (
-    <div className="relative mb-4">
+    <div className="relative inline-block">
       <div 
         className="inline-flex items-center px-3 py-1 text-xs bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-300 dark:border-yellow-800 rounded-lg cursor-pointer"
         onClick={() => setIsExpanded(!isExpanded)}
@@ -35,7 +35,7 @@ const RoleDebugInfo: React.FC = () => {
       </div>
       
       {isExpanded && (
-        <div className="absolute top-full left-0 z-10 mt-1 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg shadow-md w-72">
+        <div className="absolute bottom-full right-0 z-10 mb-1 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg shadow-md w-72">
           <h3 className="font-medium text-yellow-800 dark:text-yellow-300 mb-2">Debug Information (Dev Only)</h3>
           <div className="space-y-1 text-sm">
             <p><strong>Email:</strong> {user.email}</p>

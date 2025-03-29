@@ -54,15 +54,11 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="space-y-6 p-10">
-      <div className="flex justify-between items-center">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-bold">Welcome, {user?.name || 'Agent'}</h1>
-          <p className="text-muted-foreground">
-            Here's what's happening with your properties and transactions.
-          </p>
-        </div>
-        {/* Debug information positioned to the right */}
-        <RoleDebugInfo />
+      <div className="flex flex-col space-y-2">
+        <h1 className="text-2xl font-bold">Welcome, {user?.name || 'Agent'}</h1>
+        <p className="text-muted-foreground">
+          Here's what's happening with your properties and transactions.
+        </p>
       </div>
 
       {/* Dashboard Metrics */}
@@ -84,6 +80,11 @@ const Dashboard: React.FC = () => {
 
       {/* Property Showcase */}
       <PropertyShowcase />
+      
+      {/* Debug information at the bottom of the page */}
+      <div className="flex justify-end mt-8">
+        <RoleDebugInfo />
+      </div>
     </div>
   );
 };
