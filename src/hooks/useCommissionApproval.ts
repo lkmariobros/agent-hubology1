@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
@@ -277,9 +276,7 @@ export const useApprovedCommissionTotal = () => {
   });
 };
 
-/**
- * Hook to get commission approvals
- */
+// The fix for the count method in the useCommissionApprovals function
 export const useCommissionApprovals = (
   status?: string,
   isAdmin?: boolean,
@@ -319,7 +316,7 @@ export const useCommissionApprovals = (
       const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
       
-      // Get total count for pagination - fixed version using proper count() method
+      // Get total count for pagination - fixed version using count() as a method
       const countQuery = supabase
         .from('commission_approvals')
         .select('*', { count: 'exact', head: true });
@@ -333,6 +330,7 @@ export const useCommissionApprovals = (
         countQuery.eq('submitted_by' as any, agentId as any);
       }
       
+      // Use the count() method properly
       const { count, error: countError } = await countQuery;
       
       if (countError) {
