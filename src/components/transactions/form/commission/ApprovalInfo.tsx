@@ -30,7 +30,7 @@ const ApprovalInfo: React.FC<ApprovalInfoProps> = ({ commissionAmount }) => {
             </AlertDescription>
           </Alert>
         ) : (
-          <Alert variant="default">
+          <Alert>
             <AlertTitle>No Approval Required</AlertTitle>
             <AlertDescription>
               This commission amount (${commissionAmount.toLocaleString()}) is below the threshold of ${threshold.toLocaleString()} and does not require additional approval.
