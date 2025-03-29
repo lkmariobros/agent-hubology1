@@ -3,7 +3,7 @@
 import { useAuthContext } from '@/context/auth';
 import type { AuthContextType } from '@/types/auth';
 
-// Export the hook as the default export
+// Simple re-export of the auth context hook
 const useAuth = useAuthContext;
 
 // Export the type for use in components
