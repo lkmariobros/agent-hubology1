@@ -76,7 +76,7 @@ export const supabaseUtils = {
       const { data, error } = await supabase
         .from('agent_profiles')
         .select('*')
-        .eq('id', userId as any)
+        .eq('id' as any, userId as any)
         .single();
         
       if (error) throw error;

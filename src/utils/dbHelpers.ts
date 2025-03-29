@@ -1,5 +1,5 @@
 
-import { PostgrestFilterBuilder, PostgrestSingleResponse } from '@supabase/supabase-js';
+import { PostgrestSingleResponse } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 
 /**
@@ -20,6 +20,7 @@ export const dbHelpers = {
       let query = supabase.from(tableName).select(columns);
       
       if (filterColumn && filterValue !== undefined) {
+        // Use type assertion to resolve type issues
         query = query.eq(filterColumn as any, filterValue as any);
       }
       

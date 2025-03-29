@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
@@ -366,12 +367,3 @@ export const addApprovalComment = async (
   if (error) throw error;
   return data;
 };
-
-// Keep other hooks and functions from the original file
-export const useApprovalStatusCounts = useQuery;
-export const usePendingCommissionTotal = useQuery;
-export const useApprovedCommissionTotal = useQuery;
-export const useCommissionApprovals = useQuery;
-export const useCommissionApprovalDetail = useQuery;
-export const useApprovalHistory = useQuery;
-export const useApprovalComments = useQuery;
