@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
 import { Notification } from '@/types/notification';
+import { LoadingIndicator } from '@/components/ui/loading-indicator';
 
 export const useNotificationSubscription = (
   userId: string | null,
@@ -13,7 +14,7 @@ export const useNotificationSubscription = (
 
     // Create the channel
     const channel = supabase
-      .channel('notifications')
+      .channel(`user-notifications-${userId}`)
       .on(
         'postgres_changes',
         {
@@ -39,9 +40,10 @@ export const useNotificationSubscription = (
             // Update application state
             onNewNotification(newNotification);
             
-            // Show toast notification
+            // Show toast notification with improved UI
             toast(newNotification.title, {
               description: newNotification.message,
+              duration: 5000,
               action: {
                 label: 'View',
                 onClick: () => {
@@ -58,8 +60,11 @@ export const useNotificationSubscription = (
         }
       )
       .subscribe((status) => {
-        if (status !== 'SUBSCRIBED') {
+        if (status === 'SUBSCRIBED') {
+          console.log('Successfully subscribed to notifications');
+        } else if (status === 'CHANNEL_ERROR') {
           console.error('Failed to subscribe to notifications:', status);
+          toast.error('Failed to connect to notification service');
         }
       });
 
