@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -40,6 +41,11 @@ const ApprovalDashboard = () => {
   const approvals = approvalsData?.approvals || [];
   const totalCount = approvalsData?.totalCount || 0;
   const totalPages = Math.ceil(totalCount / pageSize);
+  
+  // Handle tab change with proper type conversion
+  const handleTabChange = (value: string) => {
+    setActiveTab(value as ApprovalStatus | 'All');
+  };
   
   const summaryCardsData: DashboardSummary[] = [
     {
@@ -107,47 +113,47 @@ const ApprovalDashboard = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="pending" className="space-y-4" onValueChange={setActiveTab}>
+          <Tabs defaultValue="Pending" className="space-y-4" onValueChange={handleTabChange}>
             <TabsList>
-              <TabsTrigger value="pending">Pending</TabsTrigger>
-              <TabsTrigger value="under_review">Under Review</TabsTrigger>
-              <TabsTrigger value="approved">Approved</TabsTrigger>
-              <TabsTrigger value="ready_for_payment">Ready for Payment</TabsTrigger>
-              <TabsTrigger value="paid">Paid</TabsTrigger>
-              <TabsTrigger value="rejected">Rejected</TabsTrigger>
+              <TabsTrigger value="Pending">Pending</TabsTrigger>
+              <TabsTrigger value="Under Review">Under Review</TabsTrigger>
+              <TabsTrigger value="Approved">Approved</TabsTrigger>
+              <TabsTrigger value="Ready for Payment">Ready for Payment</TabsTrigger>
+              <TabsTrigger value="Paid">Paid</TabsTrigger>
+              <TabsTrigger value="Rejected">Rejected</TabsTrigger>
             </TabsList>
             
-            <TabsContent value="pending">
+            <TabsContent value="Pending">
               <ApprovalList 
                 approvals={approvals} 
                 isLoading={isLoadingApprovals}
               />
             </TabsContent>
-            <TabsContent value="under_review">
+            <TabsContent value="Under Review">
               <ApprovalList 
                 approvals={approvals} 
                 isLoading={isLoadingApprovals}
               />
             </TabsContent>
-            <TabsContent value="approved">
+            <TabsContent value="Approved">
               <ApprovalList 
                 approvals={approvals} 
                 isLoading={isLoadingApprovals}
               />
             </TabsContent>
-            <TabsContent value="ready_for_payment">
+            <TabsContent value="Ready for Payment">
               <ApprovalList 
                 approvals={approvals} 
                 isLoading={isLoadingApprovals}
               />
             </TabsContent>
-            <TabsContent value="paid">
+            <TabsContent value="Paid">
               <ApprovalList 
                 approvals={approvals} 
                 isLoading={isLoadingApprovals}
               />
             </TabsContent>
-            <TabsContent value="rejected">
+            <TabsContent value="Rejected">
               <ApprovalList 
                 approvals={approvals} 
                 isLoading={isLoadingApprovals}
