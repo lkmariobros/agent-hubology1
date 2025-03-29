@@ -50,7 +50,9 @@ export interface ApprovalCountResult {
   rejected: number;
 }
 
-// Hook for commission approval functionality
+/**
+ * Custom hook for commission approval system functionality
+ */
 const useCommissionApproval = {
   /**
    * Hook to get system configuration values
@@ -59,8 +61,7 @@ const useCommissionApproval = {
     return useQuery({
       queryKey: ['system-config', configKey],
       queryFn: async () => {
-        // In a real implementation, this would fetch from the database
-        // For now, we're using default values
+        // Default values for testing/development
         const defaultConfigs = {
           commission_approval_threshold: { value: '10000' },
           commission_auto_approve_below: { value: '5000' },
@@ -92,6 +93,7 @@ const useCommissionApproval = {
         
         if (error) throw error;
         
+        // Map snake_case from API to camelCase for our interface
         return {
           pending: data?.pending || 0,
           underReview: data?.under_review || 0, // Map snake_case to camelCase
@@ -175,6 +177,7 @@ const useCommissionApproval = {
   useCommissionApprovalDetail: (approvalId: string) => {
     return useQuery({
       queryKey: ['commission-approval-detail', approvalId],
+      enabled: !!approvalId,
       queryFn: async () => {
         const [detailResponse, historyResponse] = await Promise.all([
           supabase.functions.invoke<{ approval: CommissionApproval }>('get_commission_approval_detail', {
@@ -202,6 +205,7 @@ const useCommissionApproval = {
    */
   useUpdateApprovalStatusMutation: () => {
     const queryClient = useQueryClient();
+    const sendNotification = useSendNotification();
     
     return useMutation({
       mutationFn: async ({ approvalId, newStatus, notes }: { 
@@ -223,13 +227,18 @@ const useCommissionApproval = {
         
         return data;
       },
-      onSuccess: (_, variables) => {
+      onSuccess: (data, variables) => {
         // Invalidate relevant queries
         queryClient.invalidateQueries({ queryKey: ['commission-approval-detail', variables.approvalId] });
         queryClient.invalidateQueries({ queryKey: ['commission-approvals'] });
         queryClient.invalidateQueries({ queryKey: ['approval-status-counts'] });
         queryClient.invalidateQueries({ queryKey: ['pending-commission-total'] });
         queryClient.invalidateQueries({ queryKey: ['approved-commission-total'] });
+        
+        // Show success message
+        toast.success(`Status updated to ${variables.newStatus}`, {
+          description: variables.notes ? `Note: ${variables.notes}` : undefined
+        });
       },
       onError: (error: Error) => {
         toast.error('Failed to update status', {
@@ -245,6 +254,7 @@ const useCommissionApproval = {
   useApprovalComments: (approvalId: string) => {
     return useQuery({
       queryKey: ['approval-comments', approvalId],
+      enabled: !!approvalId,
       queryFn: async () => {
         const { data, error } = await supabase.functions.invoke<ApprovalComment[]>('get_commission_approval_comments', {
           body: { p_approval_id: approvalId }
@@ -279,6 +289,7 @@ const useCommissionApproval = {
       },
       onSuccess: (_, variables) => {
         queryClient.invalidateQueries({ queryKey: ['approval-comments', variables.approvalId] });
+        toast.success('Comment added');
       },
       onError: (error: Error) => {
         toast.error('Failed to add comment', {
@@ -308,6 +319,7 @@ const useCommissionApproval = {
       },
       onSuccess: (_, variables) => {
         queryClient.invalidateQueries({ queryKey: ['approval-comments', variables.approvalId] });
+        toast.success('Comment deleted');
       },
       onError: (error: Error) => {
         toast.error('Failed to delete comment', {
@@ -317,5 +329,8 @@ const useCommissionApproval = {
     });
   }
 };
+
+// Import for sendNotification functionality
+import { useSendNotification } from './useSendNotification';
 
 export default useCommissionApproval;

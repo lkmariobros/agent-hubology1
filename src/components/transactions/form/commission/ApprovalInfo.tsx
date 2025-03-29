@@ -11,11 +11,23 @@ interface ApprovalInfoProps {
 
 const ApprovalInfo: React.FC<ApprovalInfoProps> = ({ commissionAmount }) => {
   const { useSystemConfiguration, useCommissionApprovalCheck } = useCommissionApproval;
-  const { data: thresholdConfig } = useSystemConfiguration('commission_approval_threshold');
+  const { data: thresholdConfig, isLoading } = useSystemConfiguration('commission_approval_threshold');
   const { requiresApproval } = useCommissionApprovalCheck(commissionAmount);
   
   // Get threshold from config or use default
   const threshold = thresholdConfig?.value ? parseInt(thresholdConfig.value, 10) : 10000;
+  
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="p-4">
+          <div className="h-16 flex items-center justify-center">
+            <span className="text-sm text-muted-foreground">Loading approval requirements...</span>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
   
   return (
     <Card>

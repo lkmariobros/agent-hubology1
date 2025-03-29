@@ -9,7 +9,7 @@ import { useAuthState } from './useAuthState';
 import { roleUtils } from './roleUtils';
 import { toast } from 'sonner';
 
-// AuthProvider Props from types
+// AuthProvider Props
 import { AuthProviderProps } from './types';
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
@@ -26,10 +26,71 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     console.log('[AuthProvider] Setting up auth listener');
     
-    let authTimeout: number;
+    let authTimeout: number | undefined;
     let isInitialized = false;
     
-    // First, get the current session to avoid race conditions
+    // Set up auth state change listener first to avoid missing events
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('[AuthProvider] Auth state changed:', event, !!session);
+        
+        // Handle the auth state change synchronously first
+        if (event === 'SIGNED_OUT') {
+          console.log('[AuthProvider] User signed out');
+          resetState();
+          isInitialized = true;
+          if (authTimeout) {
+            clearTimeout(authTimeout);
+            authTimeout = undefined;
+          }
+          setLoading(false);
+          return;
+        }
+        
+        // For other events that require async processing, use setTimeout to avoid deadlocks
+        if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session) {
+          // First update with just the session to show the user is logged in
+          setLoading(true);
+          
+          // Use setTimeout to avoid potential deadlocks with Supabase client
+          setTimeout(async () => {
+            try {
+              console.log('[AuthProvider] Processing sign-in event');
+              
+              const { profile, userProfile, roles, activeRole } = 
+                await fetchProfileAndRoles(session.user.id, session.user.email);
+              
+              updateSessionState(
+                session,
+                userProfile,
+                profile,
+                roles,
+                activeRole
+              );
+              
+              console.log('[AuthProvider] Auth state updated after sign-in');
+              isInitialized = true;
+              if (authTimeout) {
+                clearTimeout(authTimeout);
+                authTimeout = undefined;
+              }
+              setLoading(false);
+            } catch (error) {
+              console.error('[AuthProvider] Error processing auth state change:', error);
+              setError(error instanceof Error ? error : new Error('Unknown error occurred'));
+              setLoading(false);
+              isInitialized = true;
+              if (authTimeout) {
+                clearTimeout(authTimeout);
+                authTimeout = undefined;
+              }
+            }
+          }, 0);
+        }
+      }
+    );
+    
+    // Then get the current session to initialize the auth state
     const initializeAuth = async () => {
       try {
         console.log('[AuthProvider] Checking for existing session');
@@ -54,6 +115,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             
             console.log('[AuthProvider] Session initialized with roles', roles);
             isInitialized = true;
+            setLoading(false);
           } catch (profileError) {
             console.error('[AuthProvider] Error fetching profile:', profileError);
             setError(profileError instanceof Error ? profileError : new Error('Failed to load profile'));
@@ -74,52 +136,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     };
     
-    // Then set up auth state change listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('[AuthProvider] Auth state changed:', event, !!session);
-        
-        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-          try {
-            if (session) {
-              console.log('[AuthProvider] Processing sign-in event');
-              
-              const { profile, userProfile, roles, activeRole } = 
-                await fetchProfileAndRoles(session.user.id, session.user.email);
-              
-              updateSessionState(
-                session,
-                userProfile,
-                profile,
-                roles,
-                activeRole
-              );
-              
-              console.log('[AuthProvider] Auth state updated after sign-in');
-              isInitialized = true;
-              clearTimeout(authTimeout);
-            }
-          } catch (error) {
-            console.error('[AuthProvider] Error processing auth state change:', error);
-            setError(error instanceof Error ? error : new Error('Unknown error occurred'));
-            setLoading(false);
-            isInitialized = true;
-            clearTimeout(authTimeout);
-          }
-        } else if (event === 'SIGNED_OUT') {
-          console.log('[AuthProvider] User signed out');
-          resetState();
-          isInitialized = true;
-          clearTimeout(authTimeout);
-          setLoading(false);
-        }
-      }
-    );
-    
-    // Initialize auth
     initializeAuth();
     
-    // Set a timeout to avoid infinite loading - increased from 20s to 30s
+    // Set a timeout to avoid infinite loading - increased to 30s
     authTimeout = window.setTimeout(() => {
       if (!isInitialized) {
         console.warn('[AuthProvider] Auth initialization timed out after 30 seconds');
@@ -127,13 +146,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setLoading(false);
         toast.error('Authentication verification timed out. Please refresh the page.');
       }
-    }, 30000); // 30 second timeout (increased from 20s)
+    }, 30000); 
     
     // Cleanup subscription and timeout on unmount
     return () => {
       console.log('[AuthProvider] Cleaning up auth subscription');
       subscription.unsubscribe();
-      clearTimeout(authTimeout);
+      if (authTimeout) {
+        clearTimeout(authTimeout);
+      }
     };
   }, []);
   
