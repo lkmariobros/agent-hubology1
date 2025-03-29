@@ -98,7 +98,7 @@ export const PropertyCardDetails: React.FC<PropertyCardDetailsProps> = ({ proper
         <p className="text-sm text-neutral-300 line-clamp-3">{property.description}</p>
       </div>
       
-      {/* Actions - Updated to match the first screenshot layout */}
+      {/* Actions - Using consistent layout from first screenshot */}
       <div className="pt-2 flex justify-end gap-2">
         <Button variant="outline" size="sm" onClick={handleViewDetails}>
           View Details

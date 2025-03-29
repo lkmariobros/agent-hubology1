@@ -45,11 +45,13 @@ import CommissionTiers from './pages/admin/CommissionTiers';
 import SystemLogs from './pages/admin/SystemLogs';
 import Database from './pages/admin/Database';
 
+// Configure the QueryClient
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 60 * 1000, // 1 minute
-      refetchOnWindowFocus: false,
+      refetchOnWindowFocus: import.meta.env.PROD, // Only refetch on window focus in production
+      retry: 1, // Limit retries on failure
     },
   },
 });
@@ -125,7 +127,7 @@ function App() {
                 {/* Fallback */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
-              <Toaster position="top-right" />
+              <Toaster position="top-right" richColors />
             </NotificationProvider>
           </AuthProvider>
         </Router>
