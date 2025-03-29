@@ -2,11 +2,14 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { roleUtils } from '@/context/auth/roleUtils';
-import { ChevronDown, ChevronUp, Shield } from 'lucide-react';
+import { ChevronDown, ChevronUp, Shield, RefreshCw } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+import { toast } from 'sonner';
 
 const RoleDebugInfo: React.FC = () => {
   const { user, roles, profile, isAdmin, activeRole } = useAuth();
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Ensure this component only renders in development mode
   if (import.meta.env.PROD) {
@@ -24,6 +27,21 @@ const RoleDebugInfo: React.FC = () => {
   const badgeColorClasses = isAdmin 
     ? "bg-green-100 dark:bg-green-900/30 border-green-300 dark:border-green-800 text-green-800 dark:text-green-300"
     : "bg-yellow-100 dark:bg-yellow-900/30 border-yellow-300 dark:border-yellow-800 text-yellow-800 dark:text-yellow-300";
+
+  const handleRefreshSession = async () => {
+    setIsRefreshing(true);
+    try {
+      // Force refresh session
+      const { error } = await supabase.auth.refreshSession();
+      if (error) throw error;
+      toast.success("Session refreshed. Roles updated.");
+    } catch (error) {
+      console.error('Error refreshing session:', error);
+      toast.error("Failed to refresh session");
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   return (
     <div className="relative inline-block">
@@ -53,6 +71,14 @@ const RoleDebugInfo: React.FC = () => {
           <div className="mt-2 text-xs text-gray-600 dark:text-gray-400">
             <p>Note: Admin access requires tier level 5 or higher</p>
           </div>
+          <button 
+            onClick={handleRefreshSession} 
+            disabled={isRefreshing}
+            className="mt-2 flex items-center justify-center w-full text-xs bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 text-blue-800 dark:text-blue-300 py-1 rounded"
+          >
+            <RefreshCw className={`h-3 w-3 mr-1 ${isRefreshing ? 'animate-spin' : ''}`} />
+            {isRefreshing ? 'Refreshing...' : 'Refresh Session'}
+          </button>
         </div>
       )}
     </div>

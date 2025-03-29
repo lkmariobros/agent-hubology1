@@ -59,16 +59,25 @@ export const fetchProfileAndRoles = async (userId: string, userEmail: string | u
   try {
     console.log('Fetching profile for user:', userId);
     
-    // Fetch profile
+    // Use direct SQL query to avoid RLS recursion issue
     const { data: profileData, error: profileError } = await supabase
-      .from('agent_profiles')
-      .select('*')
-      .eq('id', castParam(userId))
+      .rpc('get_agent_profile_by_id', { user_id: userId })
       .single();
       
     if (profileError) {
       console.error('Profile fetch error:', profileError);
-      // Continue anyway - profile is optional
+      // Try using the simple select query as fallback
+      const { data: fallbackData, error: fallbackError } = await supabase
+        .from('agent_profiles')
+        .select('*')
+        .eq('id', userId)
+        .maybeSingle();
+        
+      if (fallbackError) {
+        console.error('Fallback profile fetch error:', fallbackError);
+      } else if (fallbackData) {
+        profileData = fallbackData;
+      }
     }
     
     // Determine roles based on tier
@@ -76,6 +85,7 @@ export const fetchProfileAndRoles = async (userId: string, userEmail: string | u
     
     if (profileData) {
       const tier = safelyExtractProperty(profileData, 'tier', 1);
+      console.log('User tier level:', tier);
       
       // Map tiers to roles
       if (tier >= 5) roles.push('admin');
