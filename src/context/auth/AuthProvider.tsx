@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { AuthContext } from './AuthContext';
 import { UserRole, UserProfile } from '@/types/auth';
 import { toast } from 'sonner';
+import { fetchProfileAndRoles } from './authUtils';
 
 // AuthProvider Props from types
 import { AuthProviderProps, AuthState } from './types';
@@ -24,116 +25,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Effect to initialize auth session and subscribe to auth changes
   useEffect(() => {
-    console.log('AuthProvider: Setting up auth listener');
+    console.log('[AuthProvider] Setting up auth listener');
     
-    // Function to get and set the initial session
-    const initializeAuth = async () => {
-      try {
-        // Get the current session
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        // If there's a session, get the user's profile and roles
-        if (session) {
-          // Fetch user profile from the agent_profiles table
-          const { data: profile } = await supabase
-            .from('agent_profiles')
-            .select('*')
-            .eq('id', session.user.id)
-            .maybeSingle();
-          
-          // Determine roles based on tier (temporary mapping)
-          let roles: UserRole[] = ['agent', 'viewer']; // Everyone has basic roles
-          
-          if (profile) {
-            const tier = profile.tier || 1;
-            
-            // Map tiers to roles
-            if (tier >= 5) roles.push('admin');
-            if (tier >= 4) roles.push('team_leader');
-            if (tier >= 3) roles.push('manager');
-            if (tier >= 2) roles.push('finance');
-          }
-          
-          // Set the default active role (prefer admin if available)
-          const activeRole = roles.includes('admin') ? 'admin' : roles[0] || 'agent';
-          
-          const userProfile: UserProfile = {
-            id: session.user.id,
-            email: session.user.email || '',
-            name: profile?.full_name || session.user.email?.split('@')[0] || 'User',
-            roles: roles,
-            activeRole: activeRole,
-          };
-          
-          setState({
-            user: userProfile,
-            profile,
-            session,
-            loading: false,
-            error: null,
-            roles,
-            activeRole,
-          });
-          
-          console.log('AuthProvider: Auth session initialized with roles', roles);
-        } else {
-          // No session, reset state
-          setState({
-            ...initialState,
-            loading: false,
-          });
-          console.log('AuthProvider: No auth session found');
-        }
-      } catch (error) {
-        console.error('AuthProvider: Error initializing auth', error);
-        setState({
-          ...initialState,
-          error: error instanceof Error ? error : new Error('Unknown error occurred'),
-          loading: false,
-        });
-      }
-    };
-    
-    // Initialize auth immediately
-    initializeAuth();
-    
-    // Subscribe to auth changes
+    // First, set up auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('AuthProvider: Auth state changed', event);
+        console.log('[AuthProvider] Auth state changed:', event);
         
         if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
           try {
             if (session) {
-              // Fetch user profile from the agent_profiles table
-              const { data: profile } = await supabase
-                .from('agent_profiles')
-                .select('*')
-                .eq('id', session.user.id)
-                .maybeSingle();
+              console.log('[AuthProvider] Processing sign-in event');
               
-              // Determine roles based on tier
-              let roles: UserRole[] = ['agent', 'viewer']; // Everyone has basic roles
-              
-              if (profile) {
-                const tier = profile.tier || 1;
-                
-                // Map tiers to roles
-                if (tier >= 5) roles.push('admin');
-                if (tier >= 4) roles.push('team_leader');
-                if (tier >= 3) roles.push('manager');
-                if (tier >= 2) roles.push('finance');
-              }
-              
-              const activeRole = roles.includes('admin') ? 'admin' : roles[0] || 'agent';
-              
-              const userProfile: UserProfile = {
-                id: session.user.id,
-                email: session.user.email || '',
-                name: profile?.full_name || session.user.email?.split('@')[0] || 'User',
-                roles: roles,
-                activeRole: activeRole,
-              };
+              const { profile, userProfile, roles, activeRole } = 
+                await fetchProfileAndRoles(session.user.id, session.user.email);
               
               setState({
                 user: userProfile,
@@ -144,12 +49,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 roles,
                 activeRole,
               });
+              
+              console.log('[AuthProvider] Auth state updated after sign-in');
             }
           } catch (error) {
-            console.error('AuthProvider: Error updating auth state', error);
-            toast.error('Error updating authentication state');
+            console.error('[AuthProvider] Error processing auth state change:', error);
+            setState(prev => ({
+              ...prev,
+              loading: false,
+              error: error instanceof Error ? error : new Error('Unknown error occurred'),
+            }));
           }
         } else if (event === 'SIGNED_OUT') {
+          console.log('[AuthProvider] User signed out');
           setState({
             ...initialState,
             loading: false,
@@ -158,20 +70,88 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     );
     
+    // Then check for existing session
+    const initializeAuth = async () => {
+      try {
+        console.log('[AuthProvider] Checking for existing session');
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session) {
+          console.log('[AuthProvider] Existing session found', session.user.id);
+          
+          try {
+            const { profile, userProfile, roles, activeRole } = 
+              await fetchProfileAndRoles(session.user.id, session.user.email);
+            
+            setState({
+              user: userProfile,
+              profile,
+              session,
+              loading: false,
+              error: null,
+              roles,
+              activeRole,
+            });
+            
+            console.log('[AuthProvider] Session initialized with roles', roles);
+          } catch (profileError) {
+            console.error('[AuthProvider] Error fetching profile:', profileError);
+            setState({
+              ...initialState,
+              loading: false,
+              error: profileError instanceof Error ? profileError : new Error('Failed to load profile'),
+            });
+          }
+        } else {
+          console.log('[AuthProvider] No existing session found');
+          setState({
+            ...initialState,
+            loading: false,
+          });
+        }
+      } catch (error) {
+        console.error('[AuthProvider] Error during auth initialization:', error);
+        setState({
+          ...initialState,
+          loading: false,
+          error: error instanceof Error ? error : new Error('Failed to initialize auth'),
+        });
+      }
+    };
+    
+    // Initialize auth
+    initializeAuth();
+    
     // Cleanup subscription on unmount
     return () => {
+      console.log('[AuthProvider] Cleaning up auth subscription');
       subscription.unsubscribe();
     };
   }, []);
   
   // Authentication methods
   const signIn = async (email: string, password: string) => {
-    setState(prev => ({ ...prev, loading: true }));
+    console.log(`[AuthProvider] Attempting to sign in user: ${email}`);
+    setState(prev => ({ ...prev, loading: true, error: null }));
+    
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      
+      if (error) {
+        console.error('[AuthProvider] Sign in error:', error.message);
+        toast.error(`Sign in failed: ${error.message}`);
+        setState(prev => ({
+          ...prev,
+          error,
+          loading: false,
+        }));
+        throw error;
+      }
+      
+      console.log('[AuthProvider] Sign in successful, auth state change listener will update state');
+      // The auth state change listener will update the state
     } catch (error) {
-      console.error('AuthProvider: Sign in error', error);
+      console.error('[AuthProvider] Sign in execution error:', error);
       setState(prev => ({
         ...prev,
         error: error instanceof Error ? error : new Error('Sign in failed'),
@@ -182,13 +162,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
   
   const signUp = async (email: string, password: string) => {
-    setState(prev => ({ ...prev, loading: true }));
+    setState(prev => ({ ...prev, loading: true, error: null }));
     try {
-      const { error } = await supabase.auth.signUp({ email, password });
-      if (error) throw error;
+      const { data, error } = await supabase.auth.signUp({ email, password });
+      
+      if (error) {
+        console.error('[AuthProvider] Sign up error:', error.message);
+        toast.error(`Sign up failed: ${error.message}`);
+        setState(prev => ({
+          ...prev,
+          error,
+          loading: false,
+        }));
+        throw error;
+      }
+      
       toast.success('Sign up successful! Please verify your email.');
+      setState(prev => ({ ...prev, loading: false }));
     } catch (error) {
-      console.error('AuthProvider: Sign up error', error);
+      console.error('[AuthProvider] Sign up execution error:', error);
       setState(prev => ({
         ...prev,
         error: error instanceof Error ? error : new Error('Sign up failed'),
@@ -199,12 +191,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
   
   const signOut = async () => {
-    setState(prev => ({ ...prev, loading: true }));
+    setState(prev => ({ ...prev, loading: true, error: null }));
     try {
       const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      
+      if (error) {
+        console.error('[AuthProvider] Sign out error:', error.message);
+        toast.error(`Sign out failed: ${error.message}`);
+        setState(prev => ({
+          ...prev,
+          error,
+          loading: false,
+        }));
+        throw error;
+      }
+      
+      console.log('[AuthProvider] Sign out successful');
+      // The auth state change listener will reset the state
     } catch (error) {
-      console.error('AuthProvider: Sign out error', error);
+      console.error('[AuthProvider] Sign out execution error:', error);
       setState(prev => ({
         ...prev,
         error: error instanceof Error ? error : new Error('Sign out failed'),
@@ -215,14 +220,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
   
   const resetPassword = async (email: string) => {
-    setState(prev => ({ ...prev, loading: true }));
+    setState(prev => ({ ...prev, loading: true, error: null }));
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email);
-      if (error) throw error;
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/reset-password',
+      });
+      
+      if (error) {
+        console.error('[AuthProvider] Reset password error:', error.message);
+        toast.error(`Password reset failed: ${error.message}`);
+        setState(prev => ({
+          ...prev,
+          error,
+          loading: false,
+        }));
+        throw error;
+      }
+      
       toast.success('Password reset instructions sent to your email');
       setState(prev => ({ ...prev, loading: false }));
     } catch (error) {
-      console.error('AuthProvider: Reset password error', error);
+      console.error('[AuthProvider] Reset password execution error:', error);
       setState(prev => ({
         ...prev,
         error: error instanceof Error ? error : new Error('Password reset failed'),

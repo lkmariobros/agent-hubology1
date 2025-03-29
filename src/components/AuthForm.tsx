@@ -1,11 +1,10 @@
 
-import React, { useState, useEffect } from 'react';
-import useAuth from '@/hooks/useAuth';  // Updated import
+import React, { useState } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from "@/components/ui/separator";
-import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 
@@ -14,15 +13,7 @@ const AuthForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
-  const { signIn, signUp, resetPassword, isAuthenticated } = useAuth();
-
-  // Redirect if already authenticated
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/dashboard');
-    }
-  }, [isAuthenticated, navigate]);
+  const { signIn, signUp, resetPassword } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,13 +25,15 @@ const AuthForm = () => {
     
     try {
       setLoading(true);
-      console.log('Attempting sign in with:', email);
+      console.log('[AuthForm] Attempting sign in with:', email);
       await signIn(email, password);
-      // The navigation will be handled by the auth state change in the useEffect above
-      console.log('Sign in request completed');
-    } catch (error) {
-      console.error('Login error:', error);
-      setLoading(false); // Make sure to set loading to false on error
+      console.log('[AuthForm] Sign in request completed');
+      // The navigation will be handled by the auth state change and Index page
+    } catch (error: any) {
+      console.error('[AuthForm] Login error:', error);
+      toast.error(`Sign in failed: ${error.message || 'Unknown error'}`);
+    } finally {
+      setLoading(false);
     }
   };
   
@@ -55,10 +48,12 @@ const AuthForm = () => {
     try {
       setLoading(true);
       await signUp(email, password);
+      toast.success('Account created! Check your email for verification.');
       setIsLogin(true); // Switch to login view
-      setLoading(false);
-    } catch (error) {
-      console.error('Registration error:', error);
+    } catch (error: any) {
+      console.error('[AuthForm] Registration error:', error);
+      toast.error(`Sign up failed: ${error.message || 'Unknown error'}`);
+    } finally {
       setLoading(false);
     }
   };
@@ -72,9 +67,24 @@ const AuthForm = () => {
     try {
       setLoading(true);
       await resetPassword(email);
+      toast.success('Password reset instructions sent to your email');
+    } catch (error: any) {
+      console.error('[AuthForm] Reset password error:', error);
+      toast.error(`Reset failed: ${error.message || 'Unknown error'}`);
+    } finally {
       setLoading(false);
+    }
+  };
+
+  // Create a test user option for quick access
+  const handleDemoLogin = async () => {
+    try {
+      setLoading(true);
+      console.log('[AuthForm] Attempting demo login');
+      await signIn('josephkwantum@gmail.com', 'password123');
     } catch (error) {
-      console.error('Reset password error:', error);
+      console.error('[AuthForm] Demo login error:', error);
+    } finally {
       setLoading(false);
     }
   };
@@ -163,6 +173,17 @@ const AuthForm = () => {
         disabled={loading}
       >
         {isLogin ? 'Create an account' : 'Sign in'}
+      </Button>
+      
+      {/* Demo login button for testing */}
+      <Button
+        type="button"
+        variant="ghost"
+        className="w-full mt-4 text-gray-400 hover:text-white text-sm"
+        onClick={handleDemoLogin}
+        disabled={loading}
+      >
+        Demo Login (josephkwantum@gmail.com)
       </Button>
     </div>
   );

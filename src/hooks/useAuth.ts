@@ -1,5 +1,5 @@
 
-import { useAuthContext } from '@/context/auth/AuthContext';
+import { useAuthContext } from '@/context/auth';
 import type { AuthContextType } from '@/types/auth';
 
 /**

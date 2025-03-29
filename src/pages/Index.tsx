@@ -6,22 +6,33 @@ import { useAuth } from '@/hooks/useAuth';
 import LoadingIndicator from '@/components/ui/loading-indicator';
 
 const Index = () => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, session } = useAuth();
   const navigate = useNavigate();
   const [isRedirecting, setIsRedirecting] = useState(false);
+  const [initialCheckDone, setInitialCheckDone] = useState(false);
 
   // If user is already authenticated, redirect to dashboard
   useEffect(() => {
-    if (isAuthenticated) {
-      console.log('User already authenticated, redirecting to dashboard');
+    console.log('[IndexPage] Auth state:', { 
+      isAuthenticated, 
+      loading, 
+      sessionExists: !!session,
+      initialCheckDone
+    });
+    
+    // Only redirect after the initial auth check is complete
+    if (!loading && isAuthenticated && !isRedirecting) {
+      console.log('[IndexPage] User authenticated, redirecting to dashboard');
       setIsRedirecting(true);
-      const redirectTimeout = setTimeout(() => {
-        navigate('/dashboard');
-      }, 500); // Small delay to show redirect message
-      
-      return () => clearTimeout(redirectTimeout);
+      navigate('/dashboard');
     }
-  }, [isAuthenticated, navigate]);
+    
+    // Mark initial check as done when loading is false
+    if (!loading && !initialCheckDone) {
+      console.log('[IndexPage] Initial auth check completed');
+      setInitialCheckDone(true);
+    }
+  }, [isAuthenticated, loading, navigate, initialCheckDone, session]);
 
   // Show loading indicator while checking authentication or redirecting
   if (loading || isRedirecting) {
