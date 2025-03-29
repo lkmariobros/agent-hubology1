@@ -88,15 +88,15 @@ const useCommissionApproval = {
     return useQuery({
       queryKey: ['approval-status-counts'],
       queryFn: async () => {
-        const { data, error } = await supabase.functions.invoke<ApprovalCountResult>('get_approval_status_counts');
+        const { data, error } = await supabase.functions.invoke<any>('get_approval_status_counts');
         
         if (error) throw error;
         
         return {
           pending: data?.pending || 0,
-          underReview: data?.under_review || 0,
+          underReview: data?.under_review || 0, // Map snake_case to camelCase
           approved: data?.approved || 0,
-          readyForPayment: data?.ready_for_payment || 0,
+          readyForPayment: data?.ready_for_payment || 0, // Map snake_case to camelCase
           paid: data?.paid || 0,
           rejected: data?.rejected || 0
         };
