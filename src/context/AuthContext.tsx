@@ -12,12 +12,19 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
  * Creates a user profile from Supabase user data and roles
  */
 const createUserProfile = async (user: User): Promise<UserProfile> => {
-  // Get roles from the user_roles table
+  // Get roles from agent_profiles tier-based fallback method
   const roles: UserRole[] = await supabaseUtils.getRoles();
   
   // Default to agent role if no roles returned
   if (!roles || !roles.length) {
-    roles.push('agent');
+    const defaultRoles: UserRole[] = ['agent'];
+    return {
+      id: user.id,
+      email: user.email || '',
+      name: user.email?.split('@')[0] || '',
+      roles: defaultRoles,
+      activeRole: defaultRoles[0],
+    };
   }
   
   // Set active role (prefer admin if available, otherwise first role)

@@ -53,9 +53,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (profileError) throw profileError;
       setProfile(profileData);
       
-      // Fetch roles
+      // Fetch roles based on tier in profile (temporary fallback)
       const fetchedRoles = await supabaseUtils.getRoles();
-      if (fetchedRoles && fetchedRoles.length > 0) {
+      
+      // Update roles state if we got valid data
+      if (fetchedRoles && Array.isArray(fetchedRoles) && fetchedRoles.length > 0) {
         setRoles(fetchedRoles);
         
         // Set active role based on URL or saved preference

@@ -80,23 +80,33 @@ export const supabaseUtils = {
     if (!user) return ['agent']; // Default fallback role
     
     try {
-      // Use a query on the user_roles table instead of rpc
+      // For now, determine roles from agent_profiles based on tier
+      // This is a fallback/temporary solution until user_roles table is properly created in schema
       const { data, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id);
+        .from('agent_profiles')
+        .select('tier, tier_name')
+        .eq('id', user.id)
+        .single();
       
       if (error) {
-        console.error('Error getting user roles:', error);
+        console.error('Error getting user tier data:', error);
         return ['agent']; // Default fallback role
       }
       
-      if (data && Array.isArray(data) && data.length > 0) {
-        // Extract the role values from the returned objects
-        return data.map(item => item.role) as UserRole[];
-      } else {
-        return ['agent']; // Default fallback role
+      // Define roles based on tier (temporary mapping)
+      const roles: UserRole[] = ['agent']; // Everyone has agent role
+      
+      if (data) {
+        const tier = data.tier || 1;
+        
+        // Map tiers to roles
+        if (tier >= 5) roles.push('admin');
+        if (tier >= 4) roles.push('team_leader');
+        if (tier >= 3) roles.push('manager');
+        if (tier >= 2) roles.push('finance');
       }
+      
+      return roles;
     } catch (error) {
       console.error('Error in getRoles function:', error);
       return ['agent']; // Default fallback role
@@ -108,19 +118,31 @@ export const supabaseUtils = {
     if (!user) return false;
     
     try {
-      // Check directly in the user_roles table instead of using rpc
-      const { data, error, count } = await supabase
-        .from('user_roles')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id)
-        .eq('role', roleName);
+      // For now, determine roles from agent_profiles based on tier
+      const { data, error } = await supabase
+        .from('agent_profiles')
+        .select('tier')
+        .eq('id', user.id)
+        .single();
       
       if (error) {
         console.error('Error checking role:', error);
         return false;
       }
       
-      return count !== null && count > 0;
+      // Map roles to minimum tiers required
+      const roleTierMap: Record<UserRole, number> = {
+        'agent': 1,
+        'finance': 2,
+        'manager': 3,
+        'team_leader': 4,
+        'admin': 5
+      };
+      
+      const tier = data?.tier || 1;
+      const requiredTier = roleTierMap[roleName] || 999;
+      
+      return tier >= requiredTier;
     } catch (error) {
       console.error('Error in hasRole function:', error);
       return false;
