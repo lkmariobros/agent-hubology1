@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useProperty } from '@/hooks/useProperties';
-import { useAuth } from '@/context/AuthContext';  // Updated to use correct path
+import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
 import { getMockDataMode } from '@/config';
 import { normalizeUuid, isValidUuid, createMockUuid } from '@/utils/uuidUtils';
@@ -37,7 +37,7 @@ const mockNotes: TeamNote[] = [{
 
 const PropertyDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const { isAdmin } = useAuth();  // This now correctly uses the context from AuthContext
+  const { isAdmin } = useAuth();
   const navigate = useNavigate();
   const normalizedId = id ? normalizeUuid(id) : null;
 

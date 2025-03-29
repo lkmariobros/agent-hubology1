@@ -443,6 +443,6 @@ export const useAuthContext = (): AuthContextType => {
 };
 
 /**
- * Alias for useAuthContext for backward compatibility
+ * Primary hook for accessing auth functionality
  */
 export const useAuth = useAuthContext;
