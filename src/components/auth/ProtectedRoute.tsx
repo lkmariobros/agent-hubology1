@@ -1,7 +1,7 @@
 
 import React, { ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/context/AuthContext';
 import LoadingIndicator from '../ui/loading-indicator';
 import { UserRole } from '@/types/auth';
 

@@ -33,6 +33,7 @@ export interface UserProfile {
 export interface AuthContextType {
   // Session State
   user: UserProfile | null;
+  profile: any | null; // Agent profile data from database
   session: Session | null;
   loading: boolean;
   error: Error | null;
