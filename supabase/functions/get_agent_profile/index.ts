@@ -26,6 +26,26 @@ serve(async (req) => {
       .select('*')
       .eq('id', user.id)
       .single();
+    
+    // Special handling for admin
+    if (user.email === 'josephkwantum@gmail.com') {
+      console.log('Admin user detected:', user.email);
+      // If profile exists, update it with admin tier
+      if (data) {
+        data.tier = 5;
+        data.tier_name = 'Administrator';
+      }
+      // If no profile, create one with admin tier
+      else {
+        data = {
+          id: user.id,
+          email: user.email,
+          full_name: user.user_metadata?.full_name || user.email.split('@')[0],
+          tier: 5,
+          tier_name: 'Administrator'
+        };
+      }
+    }
 
     if (error) throw error;
 

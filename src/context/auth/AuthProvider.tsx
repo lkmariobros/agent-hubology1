@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { AuthContext } from './AuthContext';
@@ -44,6 +43,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             authTimeout = undefined;
           }
           setLoading(false);
+          
+          // Clear email cookie on signout
+          document.cookie = "userEmail=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
           return;
         }
         
@@ -51,6 +53,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session) {
           // First update with just the session to show the user is logged in
           setLoading(true);
+          
+          // Set email in cookie for roleUtils to use
+          if (session.user?.email) {
+            document.cookie = `userEmail=${encodeURIComponent(session.user.email)}; path=/;`;
+          }
           
           // Use setTimeout to avoid potential deadlocks with Supabase client
           setTimeout(async () => {
@@ -60,12 +67,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               const { profile, userProfile, roles, activeRole } = 
                 await fetchProfileAndRoles(session.user.id, session.user.email);
               
+              // Special handling for josephkwantum@gmail.com
+              let finalRoles = [...roles];
+              let finalActiveRole = activeRole;
+              
+              if (session.user.email === 'josephkwantum@gmail.com') {
+                console.log('[AuthProvider] Admin email detected, forcing admin role');
+                if (!finalRoles.includes('admin')) {
+                  finalRoles.push('admin');
+                }
+                finalActiveRole = 'admin';
+              }
+              
               updateSessionState(
                 session,
-                userProfile,
+                {
+                  ...userProfile,
+                  roles: finalRoles,
+                  activeRole: finalActiveRole
+                },
                 profile,
-                roles,
-                activeRole
+                finalRoles,
+                finalActiveRole
               );
               
               console.log('[AuthProvider] Auth state updated after sign-in');
@@ -101,19 +124,40 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (session) {
           console.log('[AuthProvider] Existing session found', session.user.id);
           
+          // Set email in cookie for roleUtils to use
+          if (session.user?.email) {
+            document.cookie = `userEmail=${encodeURIComponent(session.user.email)}; path=/;`;
+          }
+          
           try {
             const { profile, userProfile, roles, activeRole } = 
               await fetchProfileAndRoles(session.user.id, session.user.email);
             
+            // Special handling for josephkwantum@gmail.com
+            let finalRoles = [...roles];
+            let finalActiveRole = activeRole;
+            
+            if (session.user.email === 'josephkwantum@gmail.com') {
+              console.log('[AuthProvider] Admin email detected, forcing admin role');
+              if (!finalRoles.includes('admin')) {
+                finalRoles.push('admin');
+              }
+              finalActiveRole = 'admin';
+            }
+            
             updateSessionState(
               session,
-              userProfile,
+              {
+                ...userProfile,
+                roles: finalRoles,
+                activeRole: finalActiveRole
+              },
               profile,
-              roles,
-              activeRole
+              finalRoles,
+              finalActiveRole
             );
             
-            console.log('[AuthProvider] Session initialized with roles', roles);
+            console.log('[AuthProvider] Session initialized with roles', finalRoles);
             isInitialized = true;
             setLoading(false);
           } catch (profileError) {
@@ -127,6 +171,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           resetState();
           isInitialized = true;
           setLoading(false);
+          
+          // Clear email cookie when no session
+          document.cookie = "userEmail=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
         }
       } catch (error) {
         console.error('[AuthProvider] Error during auth initialization:', error);
@@ -236,6 +283,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
   
   const hasRole = (role: UserRole) => {
+    // Special case for admin email
+    if (role === 'admin' && state.user?.email === 'josephkwantum@gmail.com') {
+      return true;
+    }
     return roleUtils.hasRole(state.roles, role);
   };
 

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { roleUtils } from '@/context/auth/roleUtils';
 import { ChevronDown, ChevronUp, Shield, RefreshCw } from 'lucide-react';
@@ -10,6 +10,14 @@ const RoleDebugInfo: React.FC = () => {
   const { user, roles, profile, isAdmin, activeRole } = useAuth();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [forceAdminEnabled, setForceAdminEnabled] = useState(false);
+
+  // Check for admin override on mount and when user changes
+  useEffect(() => {
+    if (user && user.email === 'josephkwantum@gmail.com') {
+      setForceAdminEnabled(true);
+    }
+  }, [user]);
 
   // Ensure this component only renders in development mode
   if (import.meta.env.PROD) {
@@ -43,6 +51,8 @@ const RoleDebugInfo: React.FC = () => {
     }
   };
 
+  const showAdminOverrideMessage = user.email === 'josephkwantum@gmail.com' && !isAdmin;
+
   return (
     <div className="relative inline-block">
       <div 
@@ -67,9 +77,15 @@ const RoleDebugInfo: React.FC = () => {
             <p><strong>Active Role:</strong> {activeRole}</p>
             <p><strong>Is Admin:</strong> <span className={isAdmin ? "text-green-600 dark:text-green-400 font-semibold" : ""}>{isAdmin ? 'Yes ✓' : 'No'}</span></p>
             <p><strong>Profile Tier:</strong> {profile?.tier || 'Not set'} {profile?.tier_name ? `(${profile.tier_name})` : ''}</p>
+            {showAdminOverrideMessage && (
+              <p className="text-amber-600 dark:text-amber-400 font-semibold">
+                Admin override should be active. Try refreshing session.
+              </p>
+            )}
           </div>
           <div className="mt-2 text-xs text-gray-600 dark:text-gray-400">
             <p>Note: Admin access requires tier level 5 or higher</p>
+            {forceAdminEnabled && <p className="text-green-600 dark:text-green-400">Special admin override active for this email</p>}
           </div>
           <button 
             onClick={handleRefreshSession} 
