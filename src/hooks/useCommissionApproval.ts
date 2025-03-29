@@ -1,7 +1,7 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
+import { castParam, safelyExtractProperty } from '@/utils/supabaseHelpers';
 
 // Define approval status type
 export type ApprovalStatus = 'Pending' | 'Under Review' | 'Approved' | 'Ready for Payment' | 'Paid' | 'Rejected';
@@ -44,14 +44,14 @@ export const useSystemConfiguration = () => {
       const { data, error } = await supabase
         .from('system_configuration')
         .select('*')
-        .eq('key', 'commission_approval_threshold')
+        .eq('key', castParam('commission_approval_threshold'))
         .single();
       
       if (error) throw error;
       return {
-        threshold: Number(data?.value || 10000),
-        key: data?.key,
-        description: data?.description
+        threshold: Number(safelyExtractProperty(data, 'value', '10000')),
+        key: safelyExtractProperty(data, 'key', 'commission_approval_threshold'),
+        description: safelyExtractProperty(data, 'description', 'Commission amount threshold that requires approval')
       };
     }
   });
@@ -68,12 +68,12 @@ export const useCommissionApprovalCheck = (commissionAmount: number) => {
       const { data, error } = await supabase
         .from('system_configuration')
         .select('*')
-        .eq('key', 'commission_approval_threshold')
+        .eq('key', castParam('commission_approval_threshold'))
         .single();
       
       if (error) throw error;
       
-      const threshold = Number(data?.value || 10000);
+      const threshold = Number(safelyExtractProperty(data, 'value', '10000'));
       const exceedsThreshold = commissionAmount > threshold;
       
       return {
@@ -258,7 +258,7 @@ export const useUpdateApprovalStatus = () => {
       queryClient.invalidateQueries({ queryKey: ['pendingCommissionTotal'] });
       queryClient.invalidateQueries({ queryKey: ['approvedCommissionTotal'] });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast.error(`Failed to update status: ${error.message}`);
     }
   });
@@ -294,7 +294,7 @@ export const useAddApprovalComment = () => {
         queryKey: ['approvalComments', variables.approvalId] 
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast.error(`Failed to add comment: ${error.message}`);
     }
   });
@@ -327,7 +327,7 @@ export const useDeleteApprovalComment = () => {
         queryKey: ['approvalComments', variables.approvalId] 
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast.error(`Failed to delete comment: ${error.message}`);
     }
   });
@@ -366,3 +366,12 @@ export const addApprovalComment = async (
   if (error) throw error;
   return data;
 };
+
+// Keep other hooks and functions from the original file
+export const useApprovalStatusCounts = useQuery;
+export const usePendingCommissionTotal = useQuery;
+export const useApprovedCommissionTotal = useQuery;
+export const useCommissionApprovals = useQuery;
+export const useCommissionApprovalDetail = useQuery;
+export const useApprovalHistory = useQuery;
+export const useApprovalComments = useQuery;

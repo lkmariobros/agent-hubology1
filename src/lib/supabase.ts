@@ -17,9 +17,6 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, 
     storage: localStorage,
     flowType: 'implicit',
     debug: import.meta.env.DEV, // Enable debug logging in development
-    onAuthStateChange: (event, session) => {
-      console.log('[Supabase Client] Auth state change:', event, !!session);
-    }
   },
   global: {
     headers: {
@@ -41,6 +38,11 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, 
 if (import.meta.env.DEV && (!SUPABASE_URL || !SUPABASE_ANON_KEY)) {
   console.warn('Missing Supabase environment variables. Using fallback values.');
 }
+
+// Add a listener for auth state changes
+supabase.auth.onAuthStateChange((event, session) => {
+  console.log('[Supabase Client] Auth state change:', event, !!session);
+});
 
 // Error handling utilities for Supabase operations
 export const handleSupabaseError = (error: any, operation: string) => {
@@ -74,7 +76,7 @@ export const supabaseUtils = {
       const { data, error } = await supabase
         .from('agent_profiles')
         .select('*')
-        .eq('id', userId)
+        .eq('id', userId as any)
         .single();
         
       if (error) throw error;

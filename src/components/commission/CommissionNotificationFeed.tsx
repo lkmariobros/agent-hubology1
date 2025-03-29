@@ -38,12 +38,12 @@ const CommissionNotificationFeed: React.FC<CommissionNotificationFeedProps> = ({
       const { data, error } = await supabase
         .from('notifications')
         .select('*')
-        .eq('user_id', userId)
+        .eq('user_id', userId as any)
         .in('type', [
           'approval_status_change',
           'tier_update',
           'commission_milestone'
-        ])
+        ] as any[])
         .order('created_at', { ascending: false })
         .limit(limit);
       
@@ -54,8 +54,8 @@ const CommissionNotificationFeed: React.FC<CommissionNotificationFeedProps> = ({
       
       console.log('Raw notification data:', data);
       
-      // Map the snake_case database columns to camelCase properties expected by the Notification type
-      return (data || []).map((item: NotificationRow) => {
+      // Map the database rows to our Notification type with safe type assertions
+      return (data || []).map((item: any) => {
         // Parse the data JSON field if it exists, otherwise create an empty object
         let notificationData: Record<string, any> = {};
         

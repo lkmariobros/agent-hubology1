@@ -2,6 +2,7 @@
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { UserProfile, UserRole } from '@/types/auth';
+import { castParam, safelyExtractProperty } from '@/utils/supabaseHelpers';
 
 /**
  * Creates a user profile from Supabase user data and roles
@@ -11,14 +12,14 @@ export const createUserProfile = async (user: User): Promise<UserProfile> => {
   const { data: profileData } = await supabase
     .from('agent_profiles')
     .select('*')
-    .eq('id', user.id)
+    .eq('id', castParam(user.id))
     .maybeSingle();
     
   // Determine roles based on tier
   let roles: UserRole[] = ['agent', 'viewer']; // Everyone has basic roles
   
   if (profileData) {
-    const tier = profileData.tier || 1;
+    const tier = safelyExtractProperty(profileData, 'tier', 1);
     
     // Map tiers to roles
     if (tier >= 5) roles.push('admin');
@@ -62,7 +63,7 @@ export const fetchProfileAndRoles = async (userId: string, userEmail: string | u
     const { data: profileData, error: profileError } = await supabase
       .from('agent_profiles')
       .select('*')
-      .eq('id', userId)
+      .eq('id', castParam(userId))
       .single();
       
     if (profileError) {
@@ -74,7 +75,7 @@ export const fetchProfileAndRoles = async (userId: string, userEmail: string | u
     let roles: UserRole[] = ['agent', 'viewer']; // Everyone has basic roles
     
     if (profileData) {
-      const tier = profileData.tier || 1;
+      const tier = safelyExtractProperty(profileData, 'tier', 1);
       
       // Map tiers to roles
       if (tier >= 5) roles.push('admin');
@@ -88,7 +89,7 @@ export const fetchProfileAndRoles = async (userId: string, userEmail: string | u
     const userProfile = {
       id: userId,
       email: userEmail || '',
-      name: profileData?.full_name || userEmail?.split('@')[0] || '',
+      name: safelyExtractProperty(profileData, 'full_name', userEmail?.split('@')[0] || ''),
       roles: roles,
       activeRole: activeRole,
     };

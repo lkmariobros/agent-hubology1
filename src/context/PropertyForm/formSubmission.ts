@@ -2,6 +2,8 @@
 import { supabase } from '@/lib/supabase';
 import { PropertyFormState, PropertyFormData } from '@/types/property-form';
 import { toast } from 'sonner';
+import { propertyFormHelpers } from '@/utils/dbHelpers';
+import { castParam } from '@/utils/supabaseHelpers';
 
 // Save form as draft
 export const saveFormAsDraft = async (state: PropertyFormState): Promise<void> => {
@@ -33,72 +35,15 @@ export const submitPropertyForm = async (state: PropertyFormState): Promise<void
     
     const agentId = userData.user.id;
     
-    // 2. Get reference data IDs
-    // Get or create property type
-    let propertyTypeId;
-    const { data: existingPropertyType } = await supabase
-      .from('property_types')
-      .select('id')
-      .eq('name', state.formData.propertyType)
-      .maybeSingle();
-      
-    if (existingPropertyType) {
-      propertyTypeId = existingPropertyType.id;
-    } else {
-      // Create new property type
-      const { data: newPropertyType, error } = await supabase
-        .from('property_types')
-        .insert({ name: state.formData.propertyType })
-        .select()
-        .single();
-        
-      if (error) throw error;
-      propertyTypeId = newPropertyType.id;
-    }
-      
-    // Get or create transaction type
-    let transactionTypeId;
-    const { data: existingTransactionType } = await supabase
-      .from('transaction_types')
-      .select('id')
-      .eq('name', state.formData.transactionType)
-      .maybeSingle();
-      
-    if (existingTransactionType) {
-      transactionTypeId = existingTransactionType.id;
-    } else {
-      // Create new transaction type
-      const { data: newTransactionType, error } = await supabase
-        .from('transaction_types')
-        .insert({ name: state.formData.transactionType })
-        .select()
-        .single();
-        
-      if (error) throw error;
-      transactionTypeId = newTransactionType.id;
-    }
-      
-    // Get or create status
-    let statusId;
-    const { data: existingStatus } = await supabase
-      .from('property_statuses')
-      .select('id')
-      .eq('name', state.formData.status)
-      .maybeSingle();
-      
-    if (existingStatus) {
-      statusId = existingStatus.id;
-    } else {
-      // Create new status
-      const { data: newStatus, error } = await supabase
-        .from('property_statuses')
-        .insert({ name: state.formData.status })
-        .select()
-        .single();
-        
-      if (error) throw error;
-      statusId = newStatus.id;
-    }
+    // 2. Get reference data IDs using the helpers
+    const propertyTypeId = await propertyFormHelpers.getOrCreatePropertyType(state.formData.propertyType);
+    if (!propertyTypeId) throw new Error('Failed to process property type');
+    
+    const transactionTypeId = await propertyFormHelpers.getOrCreateTransactionType(state.formData.transactionType);
+    if (!transactionTypeId) throw new Error('Failed to process transaction type');
+    
+    const statusId = await propertyFormHelpers.getOrCreatePropertyStatus(state.formData.status);
+    if (!statusId) throw new Error('Failed to process status');
     
     // 3. Build property data object based on property type
     // Extract common fields
@@ -164,15 +109,8 @@ export const submitPropertyForm = async (state: PropertyFormState): Promise<void
     };
     
     // 4. Insert property into database
-    const { data: propertyResult, error: propertyError } = await supabase
-      .from('enhanced_properties')
-      .insert(propertyData)
-      .select()
-      .single();
-      
-    if (propertyError) throw propertyError;
-    
-    const propertyId = propertyResult.id;
+    const propertyId = await propertyFormHelpers.createProperty(propertyData);
+    if (!propertyId) throw new Error('Failed to create property');
     
     // 5. Upload and save images
     if (state.images.length > 0) {
@@ -219,7 +157,7 @@ export const submitPropertyForm = async (state: PropertyFormState): Promise<void
       if (imagesToInsert.length > 0) {
         const { error: imagesError } = await supabase
           .from('property_images')
-          .insert(imagesToInsert);
+          .insert(imagesToInsert as any);
           
         if (imagesError) {
           console.error('Error saving image metadata:', imagesError);
@@ -268,7 +206,7 @@ export const submitPropertyForm = async (state: PropertyFormState): Promise<void
       if (documentsToInsert.length > 0) {
         const { error: documentsError } = await supabase
           .from('property_documents')
-          .insert(documentsToInsert);
+          .insert(documentsToInsert as any);
           
         if (documentsError) {
           console.error('Error saving document metadata:', documentsError);
