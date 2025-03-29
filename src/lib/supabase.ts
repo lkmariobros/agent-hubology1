@@ -65,7 +65,7 @@ export const supabaseUtils = {
       .from('agent_profiles')
       .select('*')
       .eq('id', user.id)
-      .single();
+      .maybeSingle();
       
     if (error) {
       handleSupabaseError(error, 'getProfile');
@@ -77,7 +77,7 @@ export const supabaseUtils = {
   
   getRoles: async (): Promise<UserRole[]> => {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return ['agent', 'viewer']; // Default fallback roles
+    if (!user) return ['viewer']; // Default fallback roles
     
     try {
       // For now, determine roles from agent_profiles based on tier
@@ -86,7 +86,7 @@ export const supabaseUtils = {
         .from('agent_profiles')
         .select('tier, tier_name')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
       
       if (error) {
         console.error('Error getting user tier data:', error);
@@ -125,7 +125,7 @@ export const supabaseUtils = {
         .from('agent_profiles')
         .select('tier')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
       
       if (error) {
         console.error('Error checking role:', error);

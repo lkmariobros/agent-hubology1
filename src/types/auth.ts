@@ -1,8 +1,10 @@
 
 import { Session, User } from '@supabase/supabase-js';
 
-export type UserRole = 'admin' | 'agent' | 'team_leader' | 'finance' | 'viewer' | 'manager';
+// User roles in the system
+export type UserRole = 'admin' | 'team_leader' | 'manager' | 'finance' | 'agent' | 'viewer';
 
+// User profile information
 export interface UserProfile {
   id: string;
   email: string;
@@ -11,6 +13,7 @@ export interface UserProfile {
   activeRole: UserRole;
 }
 
+// Auth context data and methods
 export interface AuthContextType {
   user: UserProfile | null;
   profile: any | null;
@@ -21,10 +24,14 @@ export interface AuthContextType {
   isAdmin: boolean;
   roles: UserRole[];
   activeRole: UserRole;
+  
+  // Auth methods
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
+  
+  // Role management
   switchRole: (role: UserRole) => void;
   hasRole: (role: UserRole) => boolean;
 }
