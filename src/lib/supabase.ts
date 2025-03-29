@@ -1,6 +1,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
+import { UserRole } from '@/types/auth';
 
 // Get environment variables 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://synabhmsxsvsxkyzhfss.supabase.co";
@@ -74,38 +75,52 @@ export const supabaseUtils = {
     return data;
   },
   
-  getRoles: async () => {
+  getRoles: async (): Promise<UserRole[]> => {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return [];
+    if (!user) return ['agent']; // Default fallback role
     
-    // Use our new function to get user roles
-    const { data, error } = await supabase.rpc('get_user_roles', {
-      user_id: user.id
-    });
-    
-    if (error) {
-      handleSupabaseError(error, 'getRoles');
+    try {
+      // Use our database function to get user roles
+      const { data, error } = await supabase.rpc('get_user_roles', {
+        user_id: user.id
+      });
+      
+      if (error) {
+        console.error('Error getting user roles:', error);
+        return ['agent']; // Default fallback role
+      }
+      
+      if (data && Array.isArray(data)) {
+        return data as UserRole[];
+      } else {
+        return ['agent']; // Default fallback role
+      }
+    } catch (error) {
+      console.error('Error in getRoles function:', error);
       return ['agent']; // Default fallback role
     }
-    
-    return data || ['agent'];
   },
   
-  hasRole: async (roleName: string) => {
+  hasRole: async (roleName: UserRole): Promise<boolean> => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return false;
     
-    const { data, error } = await supabase.rpc('has_role', {
-      user_id: user.id,
-      role_name: roleName
-    });
-    
-    if (error) {
-      handleSupabaseError(error, 'hasRole');
+    try {
+      const { data, error } = await supabase.rpc('has_role', {
+        user_id: user.id,
+        role_name: roleName
+      });
+      
+      if (error) {
+        console.error('Error checking role:', error);
+        return false;
+      }
+      
+      return !!data;
+    } catch (error) {
+      console.error('Error in hasRole function:', error);
       return false;
     }
-    
-    return data || false;
   },
   
   refreshSession: async () => {

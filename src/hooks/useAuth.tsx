@@ -56,7 +56,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Fetch roles
       const fetchedRoles = await supabaseUtils.getRoles();
       if (fetchedRoles && fetchedRoles.length > 0) {
-        setRoles(fetchedRoles as UserRole[]);
+        setRoles(fetchedRoles);
         
         // Set active role based on URL or saved preference
         if (location.pathname.startsWith('/admin')) {
@@ -68,7 +68,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           if (savedRole && fetchedRoles.includes(savedRole)) {
             setActiveRole(savedRole);
           } else {
-            setActiveRole(fetchedRoles[0] as UserRole);
+            setActiveRole(fetchedRoles[0]);
           }
         }
       }

@@ -13,10 +13,10 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
  */
 const createUserProfile = async (user: User): Promise<UserProfile> => {
   // Get roles from the user_roles table
-  const roles = await supabaseUtils.getRoles();
+  const roles: UserRole[] = await supabaseUtils.getRoles();
   
   // Default to agent role if no roles returned
-  if (!roles.length) {
+  if (!roles || !roles.length) {
     roles.push('agent');
   }
   
