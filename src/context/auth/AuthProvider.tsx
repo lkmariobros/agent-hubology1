@@ -1,10 +1,9 @@
 
-import React, { useEffect, useMemo, useReducer, useState } from 'react';
-import { supabase, supabaseUtils } from '@/lib/supabase';
+import React, { useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { AuthContext } from './AuthContext';
 import { UserRole, UserProfile } from '@/types/auth';
 import { toast } from 'sonner';
-import { Session } from '@supabase/supabase-js';
 
 // AuthProvider Props from types
 import { AuthProviderProps, AuthState } from './types';
@@ -35,8 +34,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         
         // If there's a session, get the user's profile and roles
         if (session) {
-          const profile = await supabaseUtils.getProfile();
-          const roles = await supabaseUtils.getRoles();
+          // Fetch user profile from the agent_profiles table
+          const { data: profile } = await supabase
+            .from('agent_profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .maybeSingle();
+          
+          // Determine roles based on tier (temporary mapping)
+          let roles: UserRole[] = ['agent', 'viewer']; // Everyone has basic roles
+          
+          if (profile) {
+            const tier = profile.tier || 1;
+            
+            // Map tiers to roles
+            if (tier >= 5) roles.push('admin');
+            if (tier >= 4) roles.push('team_leader');
+            if (tier >= 3) roles.push('manager');
+            if (tier >= 2) roles.push('finance');
+          }
           
           // Set the default active role (prefer admin if available)
           const activeRole = roles.includes('admin') ? 'admin' : roles[0] || 'agent';
@@ -89,8 +105,26 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
           try {
             if (session) {
-              const profile = await supabaseUtils.getProfile();
-              const roles = await supabaseUtils.getRoles();
+              // Fetch user profile from the agent_profiles table
+              const { data: profile } = await supabase
+                .from('agent_profiles')
+                .select('*')
+                .eq('id', session.user.id)
+                .maybeSingle();
+              
+              // Determine roles based on tier
+              let roles: UserRole[] = ['agent', 'viewer']; // Everyone has basic roles
+              
+              if (profile) {
+                const tier = profile.tier || 1;
+                
+                // Map tiers to roles
+                if (tier >= 5) roles.push('admin');
+                if (tier >= 4) roles.push('team_leader');
+                if (tier >= 3) roles.push('manager');
+                if (tier >= 2) roles.push('finance');
+              }
+              
               const activeRole = roles.includes('admin') ? 'admin' : roles[0] || 'agent';
               
               const userProfile: UserProfile = {
