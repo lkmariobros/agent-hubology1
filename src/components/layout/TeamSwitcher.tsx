@@ -46,14 +46,19 @@ export function TeamSwitcher() {
   if (!currentRoleInfo) return null;
 
   const handleSwitchRole = (role: UserRole) => {
+    // First switch the role
     switchRole(role);
     
-    // Navigate to the appropriate route based on the role
-    if (role === 'admin') {
-      navigate('/admin');
-    } else {
-      navigate('/dashboard');
-    }
+    // Then navigate with a small delay to ensure state updates first
+    setTimeout(() => {
+      if (role === 'admin') {
+        console.log('TeamSwitcher: Navigating to /admin after role switch');
+        window.location.href = '/admin';
+      } else {
+        console.log('TeamSwitcher: Navigating to /dashboard after role switch');
+        window.location.href = '/dashboard';
+      }
+    }, 100);
   };
 
   return (

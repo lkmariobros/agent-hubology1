@@ -51,16 +51,21 @@ export function PortalSwitcher({ showLabel = true, className = "" }: PortalSwitc
 
   // For admin users, show the dropdown with portal switching options
   const handleSwitchRole = (role: UserRole) => {
+    // First switch the role
     switchRole(role);
     
-    // Add navigation based on role
-    if (role === 'admin') {
-      navigate('/admin');
-      toast.success('Switched to Admin Portal');
-    } else {
-      navigate('/dashboard');
-      toast.success('Switched to Agent Portal');
-    }
+    // Then navigate with a small delay to ensure state updates first
+    setTimeout(() => {
+      if (role === 'admin') {
+        console.log('Navigating to /admin after role switch');
+        window.location.href = '/admin';
+        toast.success('Switched to Admin Portal');
+      } else {
+        console.log('Navigating to /dashboard after role switch');
+        window.location.href = '/dashboard';
+        toast.success('Switched to Agent Portal');
+      }
+    }, 100);
   };
 
   return (
