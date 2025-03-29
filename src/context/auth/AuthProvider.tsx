@@ -29,7 +29,52 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     let authTimeout: number;
     let isInitialized = false;
     
-    // First, set up auth state change listener
+    // First, get the current session to avoid race conditions
+    const initializeAuth = async () => {
+      try {
+        console.log('[AuthProvider] Checking for existing session');
+        setLoading(true);
+        
+        const { data: { session } } = await authService.getSession();
+        
+        if (session) {
+          console.log('[AuthProvider] Existing session found', session.user.id);
+          
+          try {
+            const { profile, userProfile, roles, activeRole } = 
+              await fetchProfileAndRoles(session.user.id, session.user.email);
+            
+            updateSessionState(
+              session,
+              userProfile,
+              profile,
+              roles,
+              activeRole
+            );
+            
+            console.log('[AuthProvider] Session initialized with roles', roles);
+            isInitialized = true;
+          } catch (profileError) {
+            console.error('[AuthProvider] Error fetching profile:', profileError);
+            setError(profileError instanceof Error ? profileError : new Error('Failed to load profile'));
+            setLoading(false);
+            isInitialized = true;
+          }
+        } else {
+          console.log('[AuthProvider] No existing session found');
+          resetState();
+          isInitialized = true;
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error('[AuthProvider] Error during auth initialization:', error);
+        setError(error instanceof Error ? error : new Error('Failed to initialize auth'));
+        setLoading(false);
+        isInitialized = true;
+      }
+    };
+    
+    // Then set up auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('[AuthProvider] Auth state changed:', event, !!session);
@@ -66,64 +111,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           resetState();
           isInitialized = true;
           clearTimeout(authTimeout);
+          setLoading(false);
         }
       }
     );
     
-    // Then check for existing session
-    const initializeAuth = async () => {
-      try {
-        console.log('[AuthProvider] Checking for existing session');
-        const { data: { session } } = await authService.getSession();
-        
-        if (session) {
-          console.log('[AuthProvider] Existing session found', session.user.id);
-          
-          try {
-            const { profile, userProfile, roles, activeRole } = 
-              await fetchProfileAndRoles(session.user.id, session.user.email);
-            
-            updateSessionState(
-              session,
-              userProfile,
-              profile,
-              roles,
-              activeRole
-            );
-            
-            console.log('[AuthProvider] Session initialized with roles', roles);
-            isInitialized = true;
-          } catch (profileError) {
-            console.error('[AuthProvider] Error fetching profile:', profileError);
-            setError(profileError instanceof Error ? profileError : new Error('Failed to load profile'));
-            setLoading(false);
-            isInitialized = true;
-          }
-        } else {
-          console.log('[AuthProvider] No existing session found');
-          resetState();
-          isInitialized = true;
-        }
-      } catch (error) {
-        console.error('[AuthProvider] Error during auth initialization:', error);
-        setError(error instanceof Error ? error : new Error('Failed to initialize auth'));
-        setLoading(false);
-        isInitialized = true;
-      }
-    };
-    
     // Initialize auth
     initializeAuth();
     
-    // Set a timeout to avoid infinite loading
+    // Set a timeout to avoid infinite loading - increased from 10s to 20s
     authTimeout = window.setTimeout(() => {
       if (!isInitialized) {
-        console.warn('[AuthProvider] Auth initialization timed out after 10 seconds');
+        console.warn('[AuthProvider] Auth initialization timed out after 20 seconds');
         setError(new Error('Authentication verification timed out'));
         setLoading(false);
         toast.error('Authentication verification timed out. Please refresh the page.');
       }
-    }, 10000); // 10 second timeout
+    }, 20000); // 20 second timeout (increased from 10s)
     
     // Cleanup subscription and timeout on unmount
     return () => {
@@ -234,7 +238,45 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
   
   return (
-    <AuthContext.Provider value={authContextValue}>
+    <AuthContext.Provider value={state.loading ? {
+      ...state,
+      signIn: async () => {
+        toast.error('Authentication system is still initializing. Please try again.');
+        throw new Error('Auth system initializing');
+      },
+      signUp: async () => {
+        toast.error('Authentication system is still initializing. Please try again.');
+        throw new Error('Auth system initializing');
+      },
+      signOut: async () => {
+        toast.error('Authentication system is still initializing. Please try again.');
+        throw new Error('Auth system initializing');
+      },
+      resetPassword: async () => {
+        toast.error('Authentication system is still initializing. Please try again.');
+        throw new Error('Auth system initializing');
+      },
+      switchRole: () => {
+        toast.error('Authentication system is still initializing. Please try again.');
+      },
+      hasRole: () => false,
+    } : {
+      user: state.user,
+      profile: state.profile,
+      session: state.session,
+      loading: state.loading,
+      error: state.error,
+      isAuthenticated: !!state.session,
+      isAdmin: state.roles.includes('admin'),
+      roles: state.roles,
+      activeRole: state.activeRole,
+      signIn,
+      signUp,
+      signOut,
+      resetPassword,
+      switchRole,
+      hasRole,
+    }}>
       {children}
     </AuthContext.Provider>
   );

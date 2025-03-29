@@ -5,12 +5,16 @@ import AuthForm from '../components/AuthForm';
 import { useAuth } from '@/hooks/useAuth';
 import LoadingIndicator from '@/components/ui/loading-indicator';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { AlertCircle } from 'lucide-react';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 const Index = () => {
   const { isAuthenticated, loading, session, error } = useAuth();
   const navigate = useNavigate();
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [initialCheckDone, setInitialCheckDone] = useState(false);
+  const [timeoutCount, setTimeoutCount] = useState(0);
   
   // Track mount state to prevent state updates after unmount
   const isMounted = useRef(true);
@@ -42,9 +46,10 @@ const Index = () => {
         if (isMounted.current && loading) {
           console.warn('[IndexPage] Auth check timed out, forcing initialCheckDone');
           setInitialCheckDone(true);
+          setTimeoutCount(prev => prev + 1);
           toast.error('Authentication check timed out. Please try refreshing.');
         }
-      }, 8000); // 8 seconds timeout
+      }, 15000); // 15 seconds timeout (increased from 8s)
     }
     
     // Clear timeout when loading completes
@@ -67,8 +72,12 @@ const Index = () => {
     }
   }, [isAuthenticated, loading, navigate, initialCheckDone, session, error]);
 
-  // Show error if authentication check fails
-  if (error && initialCheckDone) {
+  const handleRetry = () => {
+    window.location.reload();
+  };
+
+  // Show error with retry button if authentication check fails multiple times
+  if ((error || timeoutCount > 1) && initialCheckDone) {
     return (
       <div 
         className="min-h-screen flex flex-col items-center justify-center bg-black"
@@ -77,14 +86,30 @@ const Index = () => {
         }}
       >
         <div className="bg-gray-800 p-6 rounded-lg shadow-lg max-w-md w-full">
-          <h2 className="text-xl text-red-400 font-bold mb-4">Authentication Error</h2>
-          <p className="text-white mb-4">{error.message}</p>
-          <button 
-            onClick={() => window.location.reload()} 
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded"
-          >
-            Refresh Page
-          </button>
+          <Alert variant="destructive" className="mb-4 bg-red-900/20 border-red-800">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle className="text-red-300">Authentication Error</AlertTitle>
+            <AlertDescription className="text-red-300">
+              {error?.message || "Authentication verification timed out repeatedly."}
+            </AlertDescription>
+          </Alert>
+          <p className="text-white mb-4">
+            This could be due to network issues, server problems, or browser settings. Try these options:
+          </p>
+          <ul className="list-disc list-inside text-gray-300 mb-4 space-y-2">
+            <li>Check your internet connection</li>
+            <li>Clear your browser cache and cookies</li>
+            <li>Try using a different browser</li>
+            <li>Disable any VPN or proxy services</li>
+          </ul>
+          <div className="flex space-x-3">
+            <Button 
+              onClick={handleRetry} 
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              Retry Login
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -104,6 +129,15 @@ const Index = () => {
           size="lg"
           className="text-white"
         />
+        {loading && timeoutCount > 0 && (
+          <Button
+            variant="link"
+            onClick={handleRetry}
+            className="mt-4 text-blue-400 hover:text-blue-300"
+          >
+            Taking too long? Click to retry
+          </Button>
+        )}
       </div>
     );
   }

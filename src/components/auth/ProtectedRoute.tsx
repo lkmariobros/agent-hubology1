@@ -37,7 +37,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
           setTimeoutOccurred(true);
           toast.error('Authentication verification timed out.');
         }
-      }, 10000); // 10 seconds timeout
+      }, 20000); // 20 seconds timeout (increased from 10s)
     }
     
     // Clear timeout when loading completes
