@@ -40,7 +40,7 @@ const Index = () => {
       error: error?.message
     });
     
-    // Set a timeout to avoid infinite loading state
+    // Set a timeout to avoid infinite loading state - increased to 25 seconds
     if (loading && !timeoutRef.current) {
       timeoutRef.current = window.setTimeout(() => {
         if (isMounted.current && loading) {
@@ -49,7 +49,7 @@ const Index = () => {
           setTimeoutCount(prev => prev + 1);
           toast.error('Authentication check timed out. Please try refreshing.');
         }
-      }, 15000); // 15 seconds timeout (increased from 8s)
+      }, 25000); // 25 seconds timeout (increased from 15s)
     }
     
     // Clear timeout when loading completes

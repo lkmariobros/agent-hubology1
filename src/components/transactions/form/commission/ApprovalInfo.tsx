@@ -3,19 +3,14 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import useCommissionApproval from '@/hooks/useCommissionApproval';
 
 interface ApprovalInfoProps {
   commissionAmount: number;
 }
 
 const ApprovalInfo: React.FC<ApprovalInfoProps> = ({ commissionAmount }) => {
-  // Get the system configuration hooks
-  const { useSystemConfiguration, useCommissionApprovalCheck } = useCommissionApproval;
-  
-  // Use the hooks to determine if the commission needs approval
-  const { data: thresholdConfig } = useSystemConfiguration('commission_approval_threshold');
-  const threshold = thresholdConfig ? Number(thresholdConfig.value) : 10000;
+  // Set a default threshold for display purposes
+  const threshold = 10000;
   const needsApproval = commissionAmount >= threshold;
   
   return (
@@ -30,7 +25,7 @@ const ApprovalInfo: React.FC<ApprovalInfoProps> = ({ commissionAmount }) => {
             </AlertDescription>
           </Alert>
         ) : (
-          <Alert variant="default">
+          <Alert>
             <CheckCircle2 className="h-4 w-4 text-green-500" />
             <AlertTitle>No Approval Required</AlertTitle>
             <AlertDescription>

@@ -119,15 +119,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Initialize auth
     initializeAuth();
     
-    // Set a timeout to avoid infinite loading - increased from 10s to 20s
+    // Set a timeout to avoid infinite loading - increased from 20s to 30s
     authTimeout = window.setTimeout(() => {
       if (!isInitialized) {
-        console.warn('[AuthProvider] Auth initialization timed out after 20 seconds');
+        console.warn('[AuthProvider] Auth initialization timed out after 30 seconds');
         setError(new Error('Authentication verification timed out'));
         setLoading(false);
         toast.error('Authentication verification timed out. Please refresh the page.');
       }
-    }, 20000); // 20 second timeout (increased from 10s)
+    }, 30000); // 30 second timeout (increased from 20s)
     
     // Cleanup subscription and timeout on unmount
     return () => {
@@ -217,50 +217,44 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const hasRole = (role: UserRole) => {
     return roleUtils.hasRole(state.roles, role);
   };
-  
-  // Prepare the auth context value
-  const authContextValue = {
-    user: state.user,
-    profile: state.profile,
-    session: state.session,
-    loading: state.loading,
-    error: state.error,
-    isAuthenticated: !!state.session,
-    isAdmin: state.roles.includes('admin'),
-    roles: state.roles,
-    activeRole: state.activeRole,
-    signIn,
-    signUp,
-    signOut,
-    resetPassword,
-    switchRole,
-    hasRole,
-  };
-  
-  return (
-    <AuthContext.Provider value={state.loading ? {
-      ...state,
-      signIn: async () => {
-        toast.error('Authentication system is still initializing. Please try again.');
-        throw new Error('Auth system initializing');
-      },
-      signUp: async () => {
-        toast.error('Authentication system is still initializing. Please try again.');
-        throw new Error('Auth system initializing');
-      },
-      signOut: async () => {
-        toast.error('Authentication system is still initializing. Please try again.');
-        throw new Error('Auth system initializing');
-      },
-      resetPassword: async () => {
-        toast.error('Authentication system is still initializing. Please try again.');
-        throw new Error('Auth system initializing');
-      },
-      switchRole: () => {
-        toast.error('Authentication system is still initializing. Please try again.');
-      },
-      hasRole: () => false,
-    } : {
+
+  // Create a proper context value
+  const createContextValue = () => {
+    if (state.loading) {
+      return {
+        user: null,
+        profile: null,
+        session: null,
+        loading: true,
+        error: state.error,
+        isAuthenticated: false,
+        isAdmin: false,
+        roles: [],
+        activeRole: 'agent' as UserRole,
+        signIn: async () => {
+          toast.error('Authentication system is still initializing. Please try again.');
+          throw new Error('Auth system initializing');
+        },
+        signUp: async () => {
+          toast.error('Authentication system is still initializing. Please try again.');
+          throw new Error('Auth system initializing');
+        },
+        signOut: async () => {
+          toast.error('Authentication system is still initializing. Please try again.');
+          throw new Error('Auth system initializing');
+        },
+        resetPassword: async () => {
+          toast.error('Authentication system is still initializing. Please try again.');
+          throw new Error('Auth system initializing');
+        },
+        switchRole: () => {
+          toast.error('Authentication system is still initializing. Please try again.');
+        },
+        hasRole: () => false,
+      };
+    }
+    
+    return {
       user: state.user,
       profile: state.profile,
       session: state.session,
@@ -276,7 +270,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       resetPassword,
       switchRole,
       hasRole,
-    }}>
+    };
+  };
+  
+  return (
+    <AuthContext.Provider value={createContextValue()}>
       {children}
     </AuthContext.Provider>
   );
