@@ -62,13 +62,15 @@ export const useNotificationSubscription = (
           }
         )
         .subscribe((status) => {
-          // Fix: Properly handle the status as a string
-          if (status === 'SUBSCRIBED') {
+          // Fix: Cast or handle status as string instead of treating it as Record<string, any>
+          const statusStr = status.toString();
+          
+          if (statusStr === 'SUBSCRIBED') {
             logger.info('Successfully subscribed to notifications');
-          } else if (status === 'CHANNEL_ERROR') {
-            logger.error('Failed to subscribe to notifications:', status);
+          } else if (statusStr === 'CHANNEL_ERROR') {
+            logger.error('Failed to subscribe to notifications:', statusStr);
             toast.error('Failed to connect to notification service');
-          } else if (status === 'CLOSED') {
+          } else if (statusStr === 'CLOSED') {
             logger.error('Notification channel closed');
             // Attempt to reconnect after a delay
             setTimeout(() => {
