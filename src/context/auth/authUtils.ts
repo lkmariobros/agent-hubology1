@@ -18,7 +18,11 @@ export const createUserProfile = async (user: User): Promise<UserProfile> => {
   // Determine roles based on tier
   let roles: UserRole[] = ['agent', 'viewer']; // Everyone has basic roles
   
-  if (profileData) {
+  // Hard-coded admin for specific email
+  if (user.email === 'josephkwantum@gmail.com') {
+    console.log('Granting admin access to:', user.email);
+    roles.push('admin');
+  } else if (profileData) {
     const tier = safelyExtractProperty(profileData, 'tier', 1);
     
     // Map tiers to roles
@@ -89,7 +93,11 @@ export const fetchProfileAndRoles = async (userId: string, userEmail: string | u
     // Determine roles based on tier
     let roles: UserRole[] = ['agent', 'viewer']; // Everyone has basic roles
     
-    if (finalProfileData) {
+    // Hard-coded admin for specific email
+    if (userEmail === 'josephkwantum@gmail.com') {
+      console.log('Granting admin access to:', userEmail);
+      roles.push('admin');
+    } else if (finalProfileData) {
       const tier = safelyExtractProperty(finalProfileData, 'tier', 1);
       console.log('User tier level:', tier);
       
@@ -122,6 +130,13 @@ export const fetchProfileAndRoles = async (userId: string, userEmail: string | u
     console.error('Error fetching user profile or roles', { userId, error: err });
     // Still return a basic profile even if there's an error
     const defaultRoles: UserRole[] = ['agent'];
+    
+    // Hard-coded admin for specific email even in error case
+    if (userEmail === 'josephkwantum@gmail.com') {
+      console.log('Granting admin access to:', userEmail, '(in error handler)');
+      defaultRoles.push('admin');
+    }
+    
     return {
       profile: null,
       userProfile: {
@@ -129,10 +144,10 @@ export const fetchProfileAndRoles = async (userId: string, userEmail: string | u
         email: userEmail || '',
         name: userEmail?.split('@')[0] || '',
         roles: defaultRoles,
-        activeRole: defaultRoles[0],
+        activeRole: defaultRoles.includes('admin') ? 'admin' : defaultRoles[0],
       },
       roles: defaultRoles,
-      activeRole: defaultRoles[0]
+      activeRole: defaultRoles.includes('admin') ? 'admin' : defaultRoles[0]
     };
   }
 };
