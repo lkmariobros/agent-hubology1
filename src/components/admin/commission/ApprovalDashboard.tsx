@@ -5,12 +5,9 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import SummaryCards from '@/components/admin/commission/SummaryCards';
 import StatusBadge from '@/components/admin/commission/StatusBadge';
 import { Button } from '@/components/ui/button';
-import { 
-  useApprovalStatusCounts,
-  usePendingCommissionTotal,
-  useApprovedCommissionTotal,
-  useCommissionApprovals,
-  ApprovalStatus
+import useCommissionApproval, { 
+  ApprovalCountResult,
+  CommissionApproval
 } from '@/hooks/useCommissionApproval';
 import { formatCurrency } from '@/utils/propertyUtils';
 import { Link } from 'react-router-dom';
@@ -23,16 +20,17 @@ interface DashboardSummary {
 }
 
 const ApprovalDashboard = () => {
+  const { useApprovalStatusCounts, usePendingCommissionTotal, useApprovedCommissionTotal, useCommissionApprovals } = useCommissionApproval;
   const { data: statusCounts, isLoading: isLoadingCounts } = useApprovalStatusCounts();
   const { data: pendingTotal, isLoading: isLoadingPending } = usePendingCommissionTotal();
   const { data: approvedTotal, isLoading: isLoadingApproved } = useApprovedCommissionTotal();
-  const [activeTab, setActiveTab] = React.useState<ApprovalStatus | 'All'>('Pending');
+  const [activeTab, setActiveTab] = React.useState<string>('Pending');
   const [page, setPage] = React.useState(1);
   const pageSize = 5;
   
   const { data: approvalsData, isLoading: isLoadingApprovals } = useCommissionApprovals(
-    activeTab,
-    true, // isAdmin
+    activeTab !== 'All' ? activeTab : undefined,
+    true,
     undefined,
     page,
     pageSize
@@ -42,9 +40,10 @@ const ApprovalDashboard = () => {
   const totalCount = approvalsData?.totalCount || 0;
   const totalPages = Math.ceil(totalCount / pageSize);
   
-  // Handle tab change with proper type conversion
+  // Handle tab change
   const handleTabChange = (value: string) => {
-    setActiveTab(value as ApprovalStatus | 'All');
+    setActiveTab(value);
+    setPage(1);
   };
   
   const summaryCardsData: DashboardSummary[] = [
@@ -55,7 +54,7 @@ const ApprovalDashboard = () => {
     },
     {
       label: 'Under Review',
-      value: isLoadingCounts ? 'Loading...' : statusCounts?.under_review.toString() || '0',
+      value: isLoadingCounts ? 'Loading...' : statusCounts?.underReview.toString() || '0',
       description: 'Commission approvals currently under review'
     },
     {
@@ -65,7 +64,7 @@ const ApprovalDashboard = () => {
     },
     {
       label: 'Ready for Payment',
-      value: isLoadingCounts ? 'Loading...' : statusCounts?.ready_for_payment.toString() || '0',
+      value: isLoadingCounts ? 'Loading...' : statusCounts?.readyForPayment.toString() || '0',
       description: 'Commission approvals ready for payment processing'
     },
     {
@@ -185,7 +184,7 @@ const ApprovalDashboard = () => {
 };
 
 interface ApprovalListProps {
-  approvals: any[];
+  approvals: CommissionApproval[];
   isLoading: boolean;
 }
 
@@ -207,7 +206,7 @@ const ApprovalList: React.FC<ApprovalListProps> = ({ approvals, isLoading }) => 
               Transaction #{approval.transaction_id?.slice(0, 8)}
             </Link>
             <p className="text-sm text-muted-foreground">
-              Submitted by {approval.agent?.name || 'Unknown'} on {new Date(approval.created_at).toLocaleDateString()}
+              Submitted by {approval.submitted_by || 'Unknown'} on {new Date(approval.created_at).toLocaleDateString()}
             </p>
           </div>
           <StatusBadge status={approval.status} />

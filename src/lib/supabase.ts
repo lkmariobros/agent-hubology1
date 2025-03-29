@@ -15,8 +15,6 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, 
     detectSessionInUrl: true,
     storageKey: 'property-agency-auth-token',
     storage: localStorage,
-    flowType: 'implicit',
-    debug: import.meta.env.DEV, // Enable debug logging in development
   },
   global: {
     headers: {
@@ -39,7 +37,7 @@ if (import.meta.env.DEV && (!SUPABASE_URL || !SUPABASE_ANON_KEY)) {
   console.warn('Missing Supabase environment variables. Using fallback values.');
 }
 
-// Create separate auth state listener instead of in the config
+// Create separate auth state listener
 supabase.auth.onAuthStateChange((event, session) => {
   console.log('[Supabase Client] Auth state change:', event, !!session);
 });

@@ -1,73 +1,39 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertCircle, CheckCircle, Clock } from 'lucide-react';
-import { useSystemConfiguration, useCommissionApprovalCheck } from '@/hooks/useCommissionApproval';
+import { Card, CardContent } from '@/components/ui/card';
+import { AlertCircle } from 'lucide-react';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import useCommissionApproval from '@/hooks/useCommissionApproval';
 
 interface ApprovalInfoProps {
   commissionAmount: number;
-  status?: string;
 }
 
-const ApprovalInfo: React.FC<ApprovalInfoProps> = ({
-  commissionAmount,
-  status = 'pending'
-}) => {
-  // Check if commission exceeds threshold
-  const {
-    data,
-    isLoading
-  } = useCommissionApprovalCheck(commissionAmount);
+const ApprovalInfo: React.FC<ApprovalInfoProps> = ({ commissionAmount }) => {
+  // Get the system configuration hooks
+  const { useSystemConfiguration, useCommissionApprovalCheck } = useCommissionApproval;
   
-  // Format currency
-  const formatCurrency = (value: number) => {
-    return value.toLocaleString('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    });
-  };
-
-  // If still loading the threshold value
-  if (isLoading) {
-    return <Card>
-        <CardHeader>
-          <CardTitle>Commission Approval</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center space-x-2">
-            <Clock className="h-5 w-5 text-muted-foreground" />
-            <p>Loading approval information...</p>
-          </div>
-        </CardContent>
-      </Card>;
-  }
-
-  const threshold = data?.threshold || 0;
-  const exceedsThreshold = data?.exceedsThreshold || false;
-
+  // Use the hooks to determine if the commission needs approval
+  const { data: thresholdConfig } = useSystemConfiguration('commission_approval_threshold');
+  const threshold = thresholdConfig ? Number(thresholdConfig.value) : 10000;
+  const needsApproval = commissionAmount >= threshold;
+  
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Commission Approval</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {exceedsThreshold ? (
-          <Alert variant="destructive" className="mb-2">
+      <CardContent className="p-4">
+        {needsApproval ? (
+          <Alert variant="warning">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Approval Required</AlertTitle>
             <AlertDescription>
-              This commission amount ({formatCurrency(commissionAmount)}) exceeds the threshold of {formatCurrency(threshold)} and will require approval.
+              This commission amount (${commissionAmount.toLocaleString()}) exceeds the threshold of ${threshold.toLocaleString()} and will require approval before processing.
             </AlertDescription>
           </Alert>
         ) : (
-          <Alert variant="default" className="mb-2 border-green-200 bg-green-50 text-green-800">
-            <CheckCircle className="h-4 w-4 text-green-600" />
+          <Alert variant="default">
             <AlertTitle>No Approval Required</AlertTitle>
             <AlertDescription>
-              This commission amount ({formatCurrency(commissionAmount)}) is below the threshold and does not require additional approval.
+              This commission amount (${commissionAmount.toLocaleString()}) is below the threshold of ${threshold.toLocaleString()} and does not require additional approval.
             </AlertDescription>
           </Alert>
         )}

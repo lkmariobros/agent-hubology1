@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import useAuth from './useAuth';
 
-// IMPORTANT: Types for approval data
+// Types for approval data
 export interface ApprovalStatus {
   status: string;
   count: number;
@@ -247,7 +247,7 @@ export const usePendingCommissionTotal = () => {
         return 0;
       }
       
-      return data.total || 0;
+      return (data as any)?.total || 0;
     },
     enabled: !!user
   });
@@ -271,7 +271,7 @@ export const useApprovedCommissionTotal = () => {
         return 0;
       }
       
-      return data.total || 0;
+      return (data as any)?.total || 0;
     },
     enabled: !!user
   });
@@ -280,11 +280,17 @@ export const useApprovedCommissionTotal = () => {
 /**
  * Hook to get commission approvals
  */
-export const useCommissionApprovals = (filters: { status?: string; agent_id?: string; } = {}) => {
+export const useCommissionApprovals = (
+  status?: string,
+  isAdmin?: boolean,
+  agentId?: string,
+  page: number = 1,
+  pageSize: number = 10
+) => {
   const { user } = useAuth();
   
   return useQuery({
-    queryKey: ['commission-approvals', filters],
+    queryKey: ['commission-approvals', status, isAdmin, agentId, page, pageSize],
     queryFn: async () => {
       let query = supabase
         .from('commission_approvals')
@@ -301,29 +307,47 @@ export const useCommissionApprovals = (filters: { status?: string; agent_id?: st
           )
         `);
       
-      if (filters.status) {
-        query = query.eq('status' as any, filters.status as any);
+      if (status && status !== 'All') {
+        query = query.eq('status' as any, status as any);
       }
       
-      if (filters.agent_id) {
-        query = query.eq('submitted_by' as any, filters.agent_id as any);
+      if (agentId) {
+        query = query.eq('submitted_by' as any, agentId as any);
       }
       
-      const { data, error } = await query.order('created_at', { ascending: false });
+      // Calculate pagination
+      const from = (page - 1) * pageSize;
+      const to = from + pageSize - 1;
+      
+      // Get total count for pagination
+      const { count: totalCount, error: countError } = await query.count();
+      
+      if (countError) {
+        console.error('Error counting approvals:', countError);
+        return { approvals: [], totalCount: 0 };
+      }
+      
+      // Get paginated data
+      const { data, error } = await query
+        .order('created_at', { ascending: false })
+        .range(from, to);
       
       if (error) {
         console.error('Error fetching commission approvals:', error);
-        return [];
+        return { approvals: [], totalCount: 0 };
       }
       
-      return mapApprovalData(data || []);
+      return { 
+        approvals: mapApprovalData(data || []),
+        totalCount: totalCount || 0
+      };
     },
     enabled: !!user
   });
 };
 
 /**
- * Hook to get a single commission approval
+ * Hook to get a single commission approval with its history
  */
 export const useCommissionApprovalDetail = (id?: string) => {
   const { user } = useAuth();
@@ -331,7 +355,8 @@ export const useCommissionApprovalDetail = (id?: string) => {
   return useQuery({
     queryKey: ['commission-approval', id],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // Get approval details
+      const { data: approvalData, error: approvalError } = await supabase
         .from('commission_approvals')
         .select(`
           *,
@@ -348,12 +373,40 @@ export const useCommissionApprovalDetail = (id?: string) => {
         .eq('id' as any, id as any)
         .single();
       
-      if (error) {
-        console.error('Error fetching approval detail:', error);
-        return null;
+      if (approvalError) {
+        console.error('Error fetching approval detail:', approvalError);
+        return { approval: null, history: [] };
       }
       
-      return mapApprovalData([data])[0];
+      // Get approval history
+      const { data: historyData, error: historyError } = await supabase
+        .from('approval_history')
+        .select(`
+          *,
+          users:changed_by (
+            full_name
+          )
+        `)
+        .eq('approval_id' as any, id as any)
+        .order('created_at', { ascending: false });
+      
+      if (historyError) {
+        console.error('Error fetching approval history:', historyError);
+      }
+      
+      return {
+        approval: mapApprovalData([approvalData])[0],
+        history: (historyData || []).map(item => ({
+          id: item.id,
+          approval_id: item.approval_id,
+          previous_status: item.previous_status,
+          new_status: item.new_status,
+          changed_by: item.changed_by,
+          changed_by_name: item.users?.full_name,
+          notes: item.notes,
+          created_at: item.created_at
+        }))
+      };
     },
     enabled: !!user && !!id
   });
@@ -529,6 +582,47 @@ export const useAddApprovalCommentMutation = () => {
 };
 
 /**
+ * Hook to delete a comment
+ */
+export const useDeleteApprovalCommentMutation = () => {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+  
+  return useMutation({
+    mutationFn: async ({
+      commentId,
+      approvalId
+    }: {
+      commentId: string;
+      approvalId: string;
+    }) => {
+      if (!user?.id) throw new Error('User not authenticated');
+      
+      const { error } = await supabase
+        .from('approval_comments')
+        .delete()
+        .eq('id' as any, commentId as any)
+        .eq('user_id' as any, user.id as any);
+      
+      if (error) {
+        console.error('Error deleting comment:', error);
+        throw new Error(error.message);
+      }
+      
+      return true;
+    },
+    onSuccess: (_, variables) => {
+      // Invalidate comments query
+      queryClient.invalidateQueries({ queryKey: ['approval-comments', variables.approvalId] });
+      toast.success('Comment deleted');
+    },
+    onError: (error) => {
+      toast.error(`Failed to delete comment: ${error.message}`);
+    }
+  });
+};
+
+/**
  * Hook to update approval settings
  */
 export const useUpdateApprovalSettingMutation = () => {
@@ -615,22 +709,60 @@ export const useUpdateApprovalSettingMutation = () => {
   });
 };
 
-// Export all hooks together
-export const useCommissionApproval = () => {
+/**
+ * Hook for system configuration settings
+ */
+export const useSystemConfiguration = (key: string) => {
+  return useQuery({
+    queryKey: ['system-config', key],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('system_configuration')
+        .select('*')
+        .eq('key' as any, key as any)
+        .single();
+      
+      if (error) {
+        console.error(`Error fetching configuration for ${key}:`, error);
+        return null;
+      }
+      
+      return data;
+    }
+  });
+};
+
+/**
+ * Hook for checking if a commission needs approval
+ */
+export const useCommissionApprovalCheck = (commissionAmount: number) => {
+  const { data: thresholdSetting } = useSystemConfiguration('commission_approval_threshold');
+  
+  const threshold = thresholdSetting ? Number(thresholdSetting.value) : 10000;
+  
   return {
-    useApprovalStatusCounts,
-    usePendingCommissionTotal,
-    useApprovedCommissionTotal,
-    useCommissionApprovals,
-    useCommissionApprovalDetail,
-    useApprovalHistory,
-    useApprovalComments,
-    useApprovalThreshold,
-    useAutoApprovalDays,
-    useUpdateApprovalStatusMutation,
-    useAddApprovalCommentMutation,
-    useUpdateApprovalSettingMutation,
+    needsApproval: commissionAmount >= threshold,
+    threshold
   };
+};
+
+// Export all hooks together
+const useCommissionApproval = {
+  useApprovalThreshold,
+  useAutoApprovalDays,
+  useApprovalStatusCounts,
+  usePendingCommissionTotal,
+  useApprovedCommissionTotal,
+  useCommissionApprovals,
+  useCommissionApprovalDetail,
+  useApprovalHistory,
+  useApprovalComments,
+  useUpdateApprovalStatusMutation,
+  useAddApprovalCommentMutation,
+  useDeleteApprovalCommentMutation,
+  useUpdateApprovalSettingMutation,
+  useSystemConfiguration,
+  useCommissionApprovalCheck
 };
 
 export default useCommissionApproval;

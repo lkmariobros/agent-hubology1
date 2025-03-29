@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -7,16 +8,14 @@ import {
   CardTitle, 
   CardDescription 
 } from '@/components/ui/card';
-import { 
-  useCommissionApprovalDetail, 
-  useUpdateApprovalStatus,
-  ApprovalStatus
+import useCommissionApproval, { 
+  CommissionApproval
 } from '@/hooks/useCommissionApproval';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import StatusBadge from './StatusBadge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, CheckCircle, XCircle, AlertTriangle, Loader2 } from 'lucide-react';
+import { ArrowLeft, CheckCircle, AlertTriangle, Loader2 } from 'lucide-react';
 import { formatCurrency } from '@/utils/propertyUtils';
 import ApprovalHistory from '@/components/commission/ApprovalHistory';
 import { Separator } from '@/components/ui/separator';
@@ -30,10 +29,11 @@ interface ApprovalDetailProps {
 
 const ApprovalDetail: React.FC<ApprovalDetailProps> = ({ id }) => {
   const navigate = useNavigate();
+  const { useCommissionApprovalDetail, useUpdateApprovalStatusMutation } = useCommissionApproval;
   const { data, isLoading, error } = useCommissionApprovalDetail(id);
-  const updateStatusMutation = useUpdateApprovalStatus();
+  const updateStatusMutation = useUpdateApprovalStatusMutation();
   const [statusNotes, setStatusNotes] = React.useState('');
-  const [newStatus, setNewStatus] = React.useState<ApprovalStatus | ''>('');
+  const [newStatus, setNewStatus] = React.useState<string>('');
   
   if (isLoading) {
     return (
@@ -64,7 +64,8 @@ const ApprovalDetail: React.FC<ApprovalDetailProps> = ({ id }) => {
     );
   }
   
-  const { approval, history } = data;
+  const approval = data.approval || {} as CommissionApproval;
+  const history = data.history || [];
   
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -80,7 +81,7 @@ const ApprovalDetail: React.FC<ApprovalDetailProps> = ({ id }) => {
     try {
       await updateStatusMutation.mutateAsync({
         approvalId: id,
-        status: newStatus as ApprovalStatus,
+        newStatus: newStatus,
         notes: statusNotes.trim() ? statusNotes : undefined
       });
       
@@ -159,27 +160,19 @@ const ApprovalDetail: React.FC<ApprovalDetailProps> = ({ id }) => {
               <CardContent>
                 <div className="space-y-6">
                   <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <h3 className="text-sm font-medium text-muted-foreground mb-1">Transaction Value</h3>
-                      <p className="text-lg font-semibold">
-                        {formatCurrency(approval.property_transactions.transaction_value)}
-                      </p>
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-medium text-muted-foreground mb-1">Commission Amount</h3>
-                      <p className="text-lg font-semibold">
-                        {formatCurrency(approval.property_transactions.commission_amount)}
-                      </p>
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-medium text-muted-foreground mb-1">Transaction Date</h3>
-                      <p>{formatDate(approval.property_transactions.transaction_date)}</p>
-                    </div>
-                    {approval.property_transactions.commission_rate && (
-                      <div>
-                        <h3 className="text-sm font-medium text-muted-foreground mb-1">Commission Rate</h3>
-                        <p>{approval.property_transactions.commission_rate}%</p>
-                      </div>
+                    {approval.transaction && (
+                      <>
+                        <div>
+                          <h3 className="text-sm font-medium text-muted-foreground mb-1">Commission Amount</h3>
+                          <p className="text-lg font-semibold">
+                            {formatCurrency(approval.transaction.commission_amount)}
+                          </p>
+                        </div>
+                        <div>
+                          <h3 className="text-sm font-medium text-muted-foreground mb-1">Transaction Date</h3>
+                          <p>{formatDate(approval.transaction.transaction_date)}</p>
+                        </div>
+                      </>
                     )}
                   </div>
                   
@@ -219,7 +212,7 @@ const ApprovalDetail: React.FC<ApprovalDetailProps> = ({ id }) => {
                       </label>
                       <Select 
                         value={newStatus} 
-                        onValueChange={(value) => setNewStatus(value as ApprovalStatus)}
+                        onValueChange={(value) => setNewStatus(value)}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select new status" />

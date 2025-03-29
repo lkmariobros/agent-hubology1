@@ -1,267 +1,112 @@
 
-import { PostgrestSingleResponse } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 
 /**
- * Safe database operations that handle type compatibility issues
+ * Helper functions for database operations with proper typing
  */
 
-export const dbHelpers = {
-  /**
-   * Safely perform a query with a filter by value
-   */
-  safeSelect: async <T>(
-    tableName: string,
-    columns: string,
-    filterColumn?: string,
-    filterValue?: any
-  ): Promise<T[] | null> => {
-    try {
-      let query = supabase.from(tableName).select(columns);
-      
-      if (filterColumn && filterValue !== undefined) {
-        // Use type assertion to resolve type issues
-        query = query.eq(filterColumn as any, filterValue as any);
-      }
-      
-      const { data, error } = await query;
-      
-      if (error) {
-        console.error(`Error in safeSelect for ${tableName}:`, error);
-        return null;
-      }
-      
-      return data as T[];
-    } catch (err) {
-      console.error(`Exception in safeSelect for ${tableName}:`, err);
-      return null;
-    }
-  },
-  
-  /**
-   * Safely insert a record into a table
-   */
-  safeInsert: async <T>(
-    tableName: string,
-    values: Record<string, any>
-  ): Promise<T | null> => {
-    try {
-      const { data, error } = await supabase
-        .from(tableName)
-        .insert(values as any)
-        .select()
-        .single();
-      
-      if (error) {
-        console.error(`Error in safeInsert for ${tableName}:`, error);
-        return null;
-      }
-      
-      return data as T;
-    } catch (err) {
-      console.error(`Exception in safeInsert for ${tableName}:`, err);
-      return null;
-    }
-  },
-  
-  /**
-   * Safely update a record in a table
-   */
-  safeUpdate: async <T>(
-    tableName: string,
-    values: Record<string, any>,
-    filterColumn: string,
-    filterValue: any
-  ): Promise<T | null> => {
-    try {
-      const { data, error } = await supabase
-        .from(tableName)
-        .update(values as any)
-        .eq(filterColumn as any, filterValue as any)
-        .select()
-        .single();
-      
-      if (error) {
-        console.error(`Error in safeUpdate for ${tableName}:`, error);
-        return null;
-      }
-      
-      return data as T;
-    } catch (err) {
-      console.error(`Exception in safeUpdate for ${tableName}:`, err);
-      return null;
-    }
-  },
-  
-  /**
-   * Safely delete a record from a table
-   */
-  safeDelete: async (
-    tableName: string,
-    filterColumn: string,
-    filterValue: any
-  ): Promise<boolean> => {
-    try {
-      const { error } = await supabase
-        .from(tableName)
-        .delete()
-        .eq(filterColumn as any, filterValue as any);
-      
-      if (error) {
-        console.error(`Error in safeDelete for ${tableName}:`, error);
-        return false;
-      }
-      
-      return true;
-    } catch (err) {
-      console.error(`Exception in safeDelete for ${tableName}:`, err);
-      return false;
-    }
-  },
-  
-  /**
-   * Process query result safely with a fallback
-   */
-  processQueryResult: <T>(
-    response: PostgrestSingleResponse<T>,
-    defaultValue: T | null = null
-  ): T | null => {
-    if (response.error) {
-      console.error('Query error:', response.error);
-      return defaultValue;
+/**
+ * Safe query execution with error handling
+ * @param queryFn Function that executes the query
+ * @returns Result with data and error
+ */
+export async function safeQueryExecution<T>(
+  queryFn: () => Promise<{ data: T | null; error: any }>
+): Promise<{ data: T | null; error: string | null }> {
+  try {
+    const { data, error } = await queryFn();
+    
+    if (error) {
+      console.error('Database query error:', error);
+      return { data: null, error: error.message || 'An error occurred during the database operation' };
     }
     
-    return response.data || defaultValue;
+    return { data, error: null };
+  } catch (err: any) {
+    console.error('Unexpected error during database query:', err);
+    return { data: null, error: err.message || 'An unexpected error occurred' };
   }
-};
+}
 
-// Wrapper for working with property-related database operations
-export const propertyFormHelpers = {
-  /**
-   * Get or create a property type
-   */
-  getOrCreatePropertyType: async (propertyType: string): Promise<string | null> => {
-    try {
-      // First try to find existing property type
-      const { data: existingType } = await supabase
-        .from('property_types')
-        .select('id')
-        .eq('name' as any, propertyType as any)
-        .maybeSingle();
-      
-      if (existingType && 'id' in existingType) {
-        return existingType.id;
-      }
-      
-      // Create new property type
-      const { data: newType, error } = await supabase
-        .from('property_types')
-        .insert({ name: propertyType } as any)
-        .select()
-        .single();
-      
-      if (error) {
-        console.error('Error creating property type:', error);
-        return null;
-      }
-      
-      return newType.id;
-    } catch (err) {
-      console.error('Exception in getOrCreatePropertyType:', err);
-      return null;
-    }
-  },
-  
-  /**
-   * Get or create a transaction type
-   */
-  getOrCreateTransactionType: async (transactionType: string): Promise<string | null> => {
-    try {
-      // First try to find existing transaction type
-      const { data: existingType } = await supabase
-        .from('transaction_types')
-        .select('id')
-        .eq('name' as any, transactionType as any)
-        .maybeSingle();
-      
-      if (existingType && 'id' in existingType) {
-        return existingType.id;
-      }
-      
-      // Create new transaction type
-      const { data: newType, error } = await supabase
-        .from('transaction_types')
-        .insert({ name: transactionType } as any)
-        .select()
-        .single();
-      
-      if (error) {
-        console.error('Error creating transaction type:', error);
-        return null;
-      }
-      
-      return newType.id;
-    } catch (err) {
-      console.error('Exception in getOrCreateTransactionType:', err);
-      return null;
-    }
-  },
-  
-  /**
-   * Get or create a property status
-   */
-  getOrCreatePropertyStatus: async (status: string): Promise<string | null> => {
-    try {
-      // First try to find existing status
-      const { data: existingStatus } = await supabase
-        .from('property_statuses')
-        .select('id')
-        .eq('name' as any, status as any)
-        .maybeSingle();
-      
-      if (existingStatus && 'id' in existingStatus) {
-        return existingStatus.id;
-      }
-      
-      // Create new status
-      const { data: newStatus, error } = await supabase
-        .from('property_statuses')
-        .insert({ name: status } as any)
-        .select()
-        .single();
-      
-      if (error) {
-        console.error('Error creating property status:', error);
-        return null;
-      }
-      
-      return newStatus.id;
-    } catch (err) {
-      console.error('Exception in getOrCreatePropertyStatus:', err);
-      return null;
-    }
-  },
-  
-  /**
-   * Create a property
-   */
-  createProperty: async (propertyData: Record<string, any>): Promise<string | null> => {
-    try {
-      const { data: property, error } = await supabase
-        .from('enhanced_properties')
-        .insert(propertyData as any)
-        .select()
-        .single();
-      
-      if (error) {
-        console.error('Error creating property:', error);
-        return null;
-      }
-      
-      return property.id;
-    } catch (err) {
-      console.error('Exception in createProperty:', err);
-      return null;
-    }
-  }
+/**
+ * Type-safe select query for Supabase
+ */
+export async function safeSelect<T>(
+  table: string,
+  columns: string = '*',
+  conditions: Record<string, any> = {}
+): Promise<{ data: T[] | null; error: string | null }> {
+  return safeQueryExecution<T[]>(async () => {
+    let query = supabase.from(table).select(columns);
+    
+    // Apply any conditions if provided
+    Object.entries(conditions).forEach(([key, value]) => {
+      query = query.eq(key as any, value as any);
+    });
+    
+    return await query;
+  });
+}
+
+/**
+ * Type-safe insert for Supabase
+ */
+export async function safeInsert<T>(
+  table: string,
+  data: Record<string, any>
+): Promise<{ data: T | null; error: string | null }> {
+  return safeQueryExecution<T>(async () => {
+    return await supabase
+      .from(table)
+      .insert(data as any)
+      .select()
+      .single();
+  });
+}
+
+/**
+ * Type-safe update for Supabase
+ */
+export async function safeUpdate<T>(
+  table: string,
+  data: Record<string, any>,
+  conditions: Record<string, any>
+): Promise<{ data: T | null; error: string | null }> {
+  return safeQueryExecution<T>(async () => {
+    let query = supabase.from(table).update(data as any);
+    
+    // Apply any conditions
+    Object.entries(conditions).forEach(([key, value]) => {
+      query = query.eq(key as any, value as any);
+    });
+    
+    return await query.select().single();
+  });
+}
+
+/**
+ * Type-safe delete for Supabase
+ */
+export async function safeDelete(
+  table: string,
+  conditions: Record<string, any>
+): Promise<{ error: string | null }> {
+  return safeQueryExecution(async () => {
+    let query = supabase.from(table).delete();
+    
+    // Apply any conditions
+    Object.entries(conditions).forEach(([key, value]) => {
+      query = query.eq(key as any, value as any);
+    });
+    
+    return await query;
+  });
+}
+
+export default {
+  safeSelect,
+  safeInsert,
+  safeUpdate,
+  safeDelete,
+  safeQueryExecution
 };
