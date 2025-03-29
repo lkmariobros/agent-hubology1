@@ -7,6 +7,7 @@ import { fetchProfileAndRoles } from './authUtils';
 import { authService } from './authService';
 import { useAuthState } from './useAuthState';
 import { roleUtils } from './roleUtils';
+import { toast } from 'sonner';
 
 // AuthProvider Props from types
 import { AuthProviderProps } from './types';
@@ -25,10 +26,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     console.log('[AuthProvider] Setting up auth listener');
     
+    let authTimeout: number;
+    let isInitialized = false;
+    
     // First, set up auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('[AuthProvider] Auth state changed:', event);
+        console.log('[AuthProvider] Auth state changed:', event, !!session);
         
         if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
           try {
@@ -47,15 +51,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               );
               
               console.log('[AuthProvider] Auth state updated after sign-in');
+              isInitialized = true;
+              clearTimeout(authTimeout);
             }
           } catch (error) {
             console.error('[AuthProvider] Error processing auth state change:', error);
             setError(error instanceof Error ? error : new Error('Unknown error occurred'));
             setLoading(false);
+            isInitialized = true;
+            clearTimeout(authTimeout);
           }
         } else if (event === 'SIGNED_OUT') {
           console.log('[AuthProvider] User signed out');
           resetState();
+          isInitialized = true;
+          clearTimeout(authTimeout);
         }
       }
     );
@@ -82,29 +92,44 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             );
             
             console.log('[AuthProvider] Session initialized with roles', roles);
+            isInitialized = true;
           } catch (profileError) {
             console.error('[AuthProvider] Error fetching profile:', profileError);
             setError(profileError instanceof Error ? profileError : new Error('Failed to load profile'));
             setLoading(false);
+            isInitialized = true;
           }
         } else {
           console.log('[AuthProvider] No existing session found');
           resetState();
+          isInitialized = true;
         }
       } catch (error) {
         console.error('[AuthProvider] Error during auth initialization:', error);
         setError(error instanceof Error ? error : new Error('Failed to initialize auth'));
         setLoading(false);
+        isInitialized = true;
       }
     };
     
     // Initialize auth
     initializeAuth();
     
-    // Cleanup subscription on unmount
+    // Set a timeout to avoid infinite loading
+    authTimeout = window.setTimeout(() => {
+      if (!isInitialized) {
+        console.warn('[AuthProvider] Auth initialization timed out after 10 seconds');
+        setError(new Error('Authentication verification timed out'));
+        setLoading(false);
+        toast.error('Authentication verification timed out. Please refresh the page.');
+      }
+    }, 10000); // 10 second timeout
+    
+    // Cleanup subscription and timeout on unmount
     return () => {
       console.log('[AuthProvider] Cleaning up auth subscription');
       subscription.unsubscribe();
+      clearTimeout(authTimeout);
     };
   }, []);
   

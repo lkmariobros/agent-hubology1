@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Session } from '@supabase/supabase-js';
 import { UserProfile, UserRole } from '@/types/auth';
 import { AuthState } from './types';
@@ -21,51 +21,56 @@ const initialState: AuthState = {
 export function useAuthState() {
   const [state, setState] = useState<AuthState>(initialState);
   
-  const updateState = (newState: Partial<AuthState>) => {
+  const updateState = useCallback((newState: Partial<AuthState>) => {
     setState(prev => ({ ...prev, ...newState }));
-  };
+  }, []);
   
-  const setLoading = (isLoading: boolean) => {
+  const setLoading = useCallback((isLoading: boolean) => {
     updateState({ loading: isLoading });
-  };
+  }, [updateState]);
   
-  const setError = (error: Error | null) => {
+  const setError = useCallback((error: Error | null) => {
     updateState({ error });
-  };
+    
+    // Automatically set loading to false when an error occurs
+    if (error) {
+      updateState({ loading: false });
+    }
+  }, [updateState]);
   
-  const setSession = (session: Session | null) => {
+  const setSession = useCallback((session: Session | null) => {
     updateState({ session });
-  };
+  }, [updateState]);
   
-  const setUser = (user: UserProfile | null) => {
+  const setUser = useCallback((user: UserProfile | null) => {
     updateState({ user });
-  };
+  }, [updateState]);
   
-  const setProfile = (profile: any | null) => {
+  const setProfile = useCallback((profile: any | null) => {
     updateState({ profile });
-  };
+  }, [updateState]);
   
-  const setRoles = (roles: UserRole[]) => {
+  const setRoles = useCallback((roles: UserRole[]) => {
     updateState({ roles });
-  };
+  }, [updateState]);
   
-  const setActiveRole = (activeRole: UserRole) => {
+  const setActiveRole = useCallback((activeRole: UserRole) => {
     updateState({ activeRole });
     
     // Also update the user's active role
     if (state.user) {
       setUser({ ...state.user, activeRole });
     }
-  };
+  }, [state.user, updateState, setUser]);
   
-  const resetState = () => {
+  const resetState = useCallback(() => {
     setState({
       ...initialState,
       loading: false,
     });
-  };
+  }, []);
   
-  const updateSessionState = (
+  const updateSessionState = useCallback((
     session: Session | null, 
     user: UserProfile | null, 
     profile: any | null, 
@@ -81,7 +86,7 @@ export function useAuthState() {
       roles,
       activeRole,
     });
-  };
+  }, []);
   
   return {
     state,
