@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Card, 
@@ -24,7 +23,7 @@ import { formatCurrency } from '@/utils/propertyUtils';
 import { Loader2, CheckCircle2, AlertTriangle } from 'lucide-react';
 import StatusBadge from './StatusBadge';
 import { toast } from 'sonner';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/context/AuthContext';
 
 interface BulkApprovalToolsProps {
   onComplete?: () => void;

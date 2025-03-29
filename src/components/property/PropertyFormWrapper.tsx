@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { usePropertyManagement } from '@/hooks/usePropertyManagement';
 import EnhancedPropertyForm from '@/components/property/EnhancedPropertyForm';
 import { PropertyFormData } from '@/types/property-form';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
