@@ -1,6 +1,6 @@
 
 import { createClient } from '@supabase/supabase-js';
-import type { Database } from '@/integrations/supabase/types';
+import type { Database } from '@/types/supabase';
 import { UserRole } from '@/types/auth';
 
 // Get environment variables or fallback to hardcoded values for development
@@ -47,6 +47,23 @@ export const handleSupabaseError = (error: any, operation: string) => {
     error: error.message || `An error occurred during ${operation}`,
     details: import.meta.env.DEV ? error : undefined
   };
+};
+
+// Utility functions for Supabase operations
+export const supabaseUtils = {
+  // Get user roles from the database
+  getRoles: async (): Promise<UserRole[]> => {
+    try {
+      // In a real implementation, this would query role information
+      // For now, return default roles
+      return ['agent', 'viewer'];
+    } catch (error) {
+      console.error('Error fetching user roles:', error);
+      return ['agent'];
+    }
+  },
+
+  // Additional utility functions can be added here
 };
 
 // Export default supabase instance

@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Clock, CheckCircle2, AlertTriangle, Banknote } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabase';
 import { formatCurrency } from '@/utils/propertyUtils';
 
 interface SummaryCardData {

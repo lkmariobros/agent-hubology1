@@ -1,5 +1,5 @@
 
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabase';
 import { PropertyFormState, PropertyFormData } from '@/types/property-form';
 import { toast } from 'sonner';
 import { useStorageUpload } from '@/hooks/useStorageUpload';
