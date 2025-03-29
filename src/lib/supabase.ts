@@ -78,19 +78,34 @@ export const supabaseUtils = {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return [];
     
-    // Since the user_roles table doesn't exist yet in our schema types,
-    // let's temporarily use a simple role determination approach
-    // In a production app, this would be replaced with actual DB roles
-    const email = user.email || '';
+    // Use our new function to get user roles
+    const { data, error } = await supabase.rpc('get_user_roles', {
+      user_id: user.id
+    });
     
-    // Define admin patterns (for development purposes)
-    const adminPatterns = ['admin', 'manager', 'director'];
-    const isAdmin = adminPatterns.some(pattern => 
-      email.toLowerCase().includes(pattern)
-    );
+    if (error) {
+      handleSupabaseError(error, 'getRoles');
+      return ['agent']; // Default fallback role
+    }
     
-    // Return simulated roles based on email patterns
-    return isAdmin ? ['admin', 'agent'] : ['agent'];
+    return data || ['agent'];
+  },
+  
+  hasRole: async (roleName: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return false;
+    
+    const { data, error } = await supabase.rpc('has_role', {
+      user_id: user.id,
+      role_name: roleName
+    });
+    
+    if (error) {
+      handleSupabaseError(error, 'hasRole');
+      return false;
+    }
+    
+    return data || false;
   },
   
   refreshSession: async () => {

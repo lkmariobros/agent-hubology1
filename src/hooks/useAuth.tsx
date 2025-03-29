@@ -2,7 +2,7 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useContext, createContext, useState, useEffect, ReactNode } from 'react';
 import { toast } from 'sonner';
-import { supabase } from '@/lib/supabase';
+import { supabase, supabaseUtils } from '@/lib/supabase';
 import { UserRole } from '@/types/auth';
 import { logger } from '@/services/logging';
 
@@ -14,7 +14,9 @@ interface AuthContextState {
   error: Error | null;
   isAdmin: boolean;
   activeRole: UserRole;
+  roles: UserRole[];
   switchRole: (role: UserRole) => void;
+  hasRole: (role: UserRole) => boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
@@ -31,37 +33,48 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [activeRole, setActiveRole] = useState<UserRole>('agent');
+  const [roles, setRoles] = useState<UserRole[]>(['agent']);
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Determine if user is admin
-  const isAdmin = profile?.tier >= 5;
+  // Determine if user is admin based on roles
+  const isAdmin = roles.includes('admin');
 
-  // Fetch user profile data
-  const fetchProfile = async (userId: string) => {
+  // Fetch user profile and roles
+  const fetchProfileAndRoles = async (userId: string) => {
     try {
-      const { data, error } = await supabase
+      // Fetch profile
+      const { data: profileData, error: profileError } = await supabase
         .from('agent_profiles')
         .select('*')
         .eq('id', userId)
         .single();
         
-      if (error) throw error;
+      if (profileError) throw profileError;
+      setProfile(profileData);
       
-      setProfile(data);
-      // Store tier level for RLS policies
-      localStorage.setItem('user-tier', data.tier.toString());
-      
-      // Set active role based on URL or saved preference
-      if (location.pathname.startsWith('/admin')) {
-        setActiveRole('admin');
-      } else {
-        const savedRole = localStorage.getItem('user-role') as UserRole;
-        setActiveRole(savedRole || 'agent');
+      // Fetch roles
+      const fetchedRoles = await supabaseUtils.getRoles();
+      if (fetchedRoles && fetchedRoles.length > 0) {
+        setRoles(fetchedRoles as UserRole[]);
+        
+        // Set active role based on URL or saved preference
+        if (location.pathname.startsWith('/admin')) {
+          if (fetchedRoles.includes('admin')) {
+            setActiveRole('admin');
+          }
+        } else {
+          const savedRole = localStorage.getItem('user-role') as UserRole;
+          if (savedRole && fetchedRoles.includes(savedRole)) {
+            setActiveRole(savedRole);
+          } else {
+            setActiveRole(fetchedRoles[0] as UserRole);
+          }
+        }
       }
     } catch (err) {
-      logger.error('Error fetching user profile', { userId, error: err });
-      setError(err instanceof Error ? err : new Error('Failed to fetch profile'));
+      logger.error('Error fetching user profile or roles', { userId, error: err });
+      setError(err instanceof Error ? err : new Error('Failed to fetch profile or roles'));
     }
   };
 
@@ -73,7 +86,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         setUser(session.user);
-        fetchProfile(session.user.id);
+        fetchProfileAndRoles(session.user.id);
       }
       setLoading(false);
     });
@@ -83,10 +96,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       async (event, session) => {
         if (session?.user) {
           setUser(session.user);
-          await fetchProfile(session.user.id);
+          await fetchProfileAndRoles(session.user.id);
         } else {
           setUser(null);
           setProfile(null);
+          setRoles(['agent']);
+          setActiveRole('agent');
         }
         
         setLoading(false);
@@ -149,7 +164,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       localStorage.removeItem('user-role');
-      localStorage.removeItem('user-tier');
     } catch (err) {
       logger.error('Sign out error', { error: err });
       setError(err instanceof Error ? err : new Error('Failed to sign out'));
@@ -180,6 +194,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // Switch role function
   const switchRole = (role: UserRole) => {
+    if (!roles.includes(role)) {
+      toast.error(`You don't have permission to access the ${role} role`);
+      return;
+    }
+    
     setActiveRole(role);
     localStorage.setItem('user-role', role);
     
@@ -190,6 +209,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       navigate('/dashboard');
     }
   };
+  
+  // Check if user has a specific role
+  const hasRole = (role: UserRole): boolean => {
+    return roles.includes(role);
+  };
 
   // Context value
   const value = {
@@ -199,7 +223,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     error,
     isAdmin,
     activeRole,
+    roles,
     switchRole,
+    hasRole,
     signIn,
     signOut,
     resetPassword,

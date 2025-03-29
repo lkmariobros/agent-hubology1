@@ -1,46 +1,32 @@
 
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { Session, User } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, supabaseUtils } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { UserProfile, UserRole, AuthContextType } from '@/types/auth';
 
 // Create context with default values
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Admin email patterns for development/testing
-// In production, this would be replaced with proper role management from the database
-const ADMIN_EMAIL_PATTERNS = ['admin', 'test', 'josephkwantum@gmail.com'];
-
 /**
- * Determines if a user has admin privileges based on email patterns
- * This is a temporary solution for development - in production, roles would come from the database
+ * Creates a user profile from Supabase user data and roles
  */
-const determineIsAdmin = (email: string): boolean => {
-  return ADMIN_EMAIL_PATTERNS.some(pattern => 
-    email.toLowerCase().includes(pattern.toLowerCase()) || 
-    email.toLowerCase() === pattern.toLowerCase()
-  );
-};
-
-/**
- * Creates a user profile from Supabase user data
- */
-const createUserProfile = (user: User): UserProfile => {
-  const email = user.email || '';
-  const isAdmin = determineIsAdmin(email);
+const createUserProfile = async (user: User): Promise<UserProfile> => {
+  // Get roles from the user_roles table
+  const roles = await supabaseUtils.getRoles();
   
-  // Build the roles array based on permissions
-  const roles: UserRole[] = ['agent'];
-  if (isAdmin) roles.push('admin');
+  // Default to agent role if no roles returned
+  if (!roles.length) {
+    roles.push('agent');
+  }
   
-  // Default to agent role for initial display
-  const activeRole: UserRole = 'agent';
+  // Set active role (prefer admin if available, otherwise first role)
+  const activeRole = roles.includes('admin') ? 'admin' : roles[0];
   
   return {
     id: user.id,
-    email,
-    name: email.split('@')[0],
+    email: user.email || '',
+    name: user.email?.split('@')[0] || '',
     roles,
     activeRole,
   };
@@ -67,9 +53,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setSession(newSession);
         
         if (newSession?.user) {
-          // Create user profile from session user
-          const userProfile = createUserProfile(newSession.user);
-          setUser(userProfile);
+          try {
+            // Create user profile from session user with roles
+            const userProfile = await createUserProfile(newSession.user);
+            setUser(userProfile);
+          } catch (err) {
+            console.error('Error creating user profile:', err);
+            // Still set basic user info even if role fetch fails
+            setUser({
+              id: newSession.user.id,
+              email: newSession.user.email || '',
+              name: newSession.user.email?.split('@')[0] || '',
+              roles: ['agent'],
+              activeRole: 'agent',
+            });
+          }
         } else {
           // Clear user when session is null
           setUser(null);
@@ -80,13 +78,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     );
 
     // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
+    supabase.auth.getSession().then(async ({ data: { session: initialSession } }) => {
       setSession(initialSession);
       
       if (initialSession?.user) {
-        // Create user profile from session user
-        const userProfile = createUserProfile(initialSession.user);
-        setUser(userProfile);
+        try {
+          // Create user profile from session user with roles
+          const userProfile = await createUserProfile(initialSession.user);
+          setUser(userProfile);
+        } catch (err) {
+          console.error('Error creating user profile:', err);
+          // Still set basic user info even if role fetch fails
+          setUser({
+            id: initialSession.user.id,
+            email: initialSession.user.email || '',
+            name: initialSession.user.email?.split('@')[0] || '',
+            roles: ['agent'],
+            activeRole: 'agent',
+          });
+        }
       }
       
       setLoading(false);

@@ -5,8 +5,11 @@ import { Session, User as SupabaseUser } from '@supabase/supabase-js';
  * Defines the available user roles in the application
  * - agent: Standard property agent role
  * - admin: Administrator with elevated permissions
+ * - manager: Manager role with team oversight
+ * - team_leader: Team leader role 
+ * - finance: Finance department role
  */
-export type UserRole = 'agent' | 'admin';
+export type UserRole = 'agent' | 'admin' | 'manager' | 'team_leader' | 'finance';
 
 /**
  * Extended user profile with application-specific fields
