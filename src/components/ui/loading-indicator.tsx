@@ -8,6 +8,7 @@ interface LoadingIndicatorProps {
   className?: string;
   text?: string;
   fullScreen?: boolean;
+  variant?: 'default' | 'inline' | 'overlay';
 }
 
 export const LoadingIndicator: React.FC<LoadingIndicatorProps> = ({
@@ -15,6 +16,7 @@ export const LoadingIndicator: React.FC<LoadingIndicatorProps> = ({
   className,
   text = 'Loading...',
   fullScreen = false,
+  variant = 'default',
 }) => {
   const sizeClasses = {
     sm: 'h-4 w-4',
@@ -30,17 +32,38 @@ export const LoadingIndicator: React.FC<LoadingIndicatorProps> = ({
         </div>
       );
     }
+    
+    if (variant === 'overlay') {
+      return (
+        <div className="absolute inset-0 flex items-center justify-center bg-background/60 backdrop-blur-[2px] rounded-md z-10">
+          {children}
+        </div>
+      );
+    }
+    
+    if (variant === 'inline') {
+      return (
+        <span className="inline-flex items-center">
+          {children}
+        </span>
+      );
+    }
+    
     return <>{children}</>;
   };
 
   return (
     <Container>
       <div className={cn(
-        "flex flex-col items-center justify-center space-y-2",
+        "flex items-center justify-center space-y-0",
+        variant === 'inline' ? "flex-row space-x-2" : "flex-col space-y-2",
         className
       )}>
         <Loader2 className={cn("animate-spin text-primary", sizeClasses[size])} />
-        {text && <p className="text-sm text-muted-foreground">{text}</p>}
+        {text && <p className={cn(
+          "text-muted-foreground",
+          size === 'sm' ? "text-xs" : "text-sm"
+        )}>{text}</p>}
       </div>
     </Container>
   );

@@ -3,17 +3,39 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Bed, Bath, Grid2X2, Home, Building, MapPin, Tag, Package } from 'lucide-react';
+import { Bed, Bath, Grid2X2, Square, MapPin, Tag, Package, Home, Building } from 'lucide-react';
 import { formatCurrency, calculateStockPercentage, getStockStatusLabel } from '@/utils/propertyUtils';
 import { Property } from '@/types';
 import { cn } from '@/lib/utils';
+import { LoadingIndicator } from '@/components/ui/loading-indicator';
 
 interface PropertyCardProps {
   property: Property;
   showFullDetails?: boolean;
+  isLoading?: boolean;
+  onClick?: () => void;
+  className?: string;
 }
 
-export const PropertyCard: React.FC<PropertyCardProps> = ({ property, showFullDetails = false }) => {
+export const PropertyCard: React.FC<PropertyCardProps> = ({ 
+  property, 
+  showFullDetails = false,
+  isLoading = false,
+  onClick,
+  className = ''
+}) => {
+  // Handle loading state
+  if (isLoading) {
+    return (
+      <Card className={cn("overflow-hidden transition-shadow hover:shadow-md", className)}>
+        <div className="h-48 bg-neutral-100 dark:bg-neutral-800 animate-pulse" />
+        <CardContent className="p-4">
+          <LoadingIndicator size="sm" text="Loading property..." />
+        </CardContent>
+      </Card>
+    );
+  }
+  
   // Format status for display
   const formattedStatus = property.status ? 
     property.status.charAt(0).toUpperCase() + property.status.slice(1) : 
@@ -37,10 +59,10 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, showFullDe
     getStockStatusLabel(stockPercentage) : 
     null;
   
-  // Handle click for analytics (to be implemented)
+  // Handle click for analytics
   const handlePropertyClick = () => {
     console.log('Property clicked:', property.id);
-    // Track click analytics here
+    if (onClick) onClick();
   };
 
   // Helper to safely access features 
@@ -55,7 +77,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, showFullDe
   };
 
   return (
-    <Card className="overflow-hidden transition-shadow hover:shadow-md">
+    <Card className={cn("overflow-hidden transition-shadow hover:shadow-md", className)}>
       <Link to={`/properties/${property.id}`} onClick={handlePropertyClick}>
         <div className="relative">
           <div className="h-48 overflow-hidden">
@@ -63,6 +85,10 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, showFullDe
               src={imageUrl} 
               alt={property.title} 
               className="w-full h-full object-cover transition-transform hover:scale-105"
+              loading="lazy"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = '/placeholder.svg';
+              }}
             />
           </div>
           
@@ -140,7 +166,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, showFullDe
       
       <CardFooter className="p-4 pt-0 flex flex-wrap gap-2 text-sm">
         {/* Show details based on property type */}
-        {property.type.toLowerCase() === 'residential' && (
+        {(!property.type || property.type.toLowerCase() === 'residential') && (
           <>
             {getFeatureValue('bedrooms') > 0 && (
               <div className="flex items-center mr-3">
@@ -158,14 +184,14 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, showFullDe
             
             {getFeatureValue('squareFeet') > 0 && (
               <div className="flex items-center">
-                <Grid2X2 className="h-4 w-4 mr-1" />
+                <Square className="h-4 w-4 mr-1" />
                 <span>{getFeatureValue('squareFeet')} sq.ft</span>
               </div>
             )}
           </>
         )}
         
-        {(property.type.toLowerCase() === 'commercial' || property.type.toLowerCase() === 'industrial') && (
+        {property.type && (property.type.toLowerCase() === 'commercial' || property.type.toLowerCase() === 'industrial') && (
           <>
             {getFeatureValue('squareFeet') > 0 && (
               <div className="flex items-center mr-3">
@@ -176,7 +202,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, showFullDe
           </>
         )}
         
-        {property.type.toLowerCase() === 'land' && getFeatureValue('landSize') > 0 && (
+        {property.type && property.type.toLowerCase() === 'land' && getFeatureValue('landSize') > 0 && (
           <div className="flex items-center">
             <Grid2X2 className="h-4 w-4 mr-1" />
             <span>{getFeatureValue('landSize')} sq.ft</span>
@@ -185,7 +211,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({ property, showFullDe
         
         <div className="flex items-center ml-auto">
           <Tag className="h-4 w-4 mr-1" />
-          <span className="capitalize">{property.type}</span>
+          <span className="capitalize">{property.type || 'Residential'}</span>
         </div>
       </CardFooter>
     </Card>

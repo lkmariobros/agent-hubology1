@@ -44,13 +44,19 @@ import CommissionTiers from './pages/admin/CommissionTiers';
 import SystemLogs from './pages/admin/SystemLogs';
 import Database from './pages/admin/Database';
 
-// Configure the QueryClient
+// Configure the QueryClient with optimized settings
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 60 * 1000, // 1 minute
+      staleTime: import.meta.env.PROD ? 60 * 1000 : 0, // 1 minute in production, 0 in development
+      gcTime: import.meta.env.PROD ? 5 * 60 * 1000 : 60 * 1000, // 5 minutes in prod, 1 minute in dev
       refetchOnWindowFocus: import.meta.env.PROD, // Only refetch on window focus in production
-      retry: 1, // Limit retries on failure
+      retry: import.meta.env.PROD ? 2 : 1, // More retries in production
+      retryDelay: attempt => Math.min(1000 * 2 ** attempt, 30000), // Exponential backoff with max 30s
+    },
+    mutations: {
+      retry: import.meta.env.PROD ? 1 : 0, // Retry mutations in production
+      networkMode: 'always',
     },
   },
 });

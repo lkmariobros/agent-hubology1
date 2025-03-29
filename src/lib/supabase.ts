@@ -14,6 +14,20 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, 
     detectSessionInUrl: true,
     storageKey: 'property-agency-auth-token',
     storage: window.localStorage
+  },
+  global: {
+    headers: {
+      'x-application-name': 'property-agency-system',
+    }
+  },
+  db: {
+    schema: 'public'
+  },
+  realtime: {
+    timeout: 30000, // 30s timeout for realtime channels (default is 10s)
+    params: {
+      eventsPerSecond: 10
+    }
   }
 });
 
@@ -58,5 +72,31 @@ export const supabaseUtils = {
     }
     
     return data;
+  },
+  
+  getRoles: async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return [];
+    
+    const { data, error } = await supabase.rpc('get_user_roles', { user_id: user.id });
+    
+    if (error) {
+      handleSupabaseError(error, 'getRoles');
+      return [];
+    }
+    
+    return data || [];
+  },
+  
+  refreshSession: async () => {
+    const { data, error } = await supabase.auth.refreshSession();
+    if (error) {
+      handleSupabaseError(error, 'refreshSession');
+      return null;
+    }
+    return data;
   }
 };
+
+// Export a singleton instance for the entire application
+export default supabase;
