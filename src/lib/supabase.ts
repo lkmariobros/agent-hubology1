@@ -104,6 +104,8 @@ export const supabaseUtils = {
         if (tier >= 4) roles.push('team_leader');
         if (tier >= 3) roles.push('manager');
         if (tier >= 2) roles.push('finance');
+        // Adding viewer role for completeness
+        roles.push('viewer'); // Everyone can be a viewer
       }
       
       return roles;
@@ -136,7 +138,8 @@ export const supabaseUtils = {
         'finance': 2,
         'manager': 3,
         'team_leader': 4,
-        'admin': 5
+        'admin': 5,
+        'viewer': 1  // Adding viewer role with the lowest tier requirement
       };
       
       const tier = data?.tier || 1;
