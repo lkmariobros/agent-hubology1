@@ -60,10 +60,13 @@ export const fetchProfileAndRoles = async (userId: string, userEmail: string | u
     console.log('Fetching profile for user:', userId);
     
     // Use direct SQL query to avoid RLS recursion issue
-    const { data: profileData, error: profileError } = await supabase
+    const { data: primaryProfileData, error: profileError } = await supabase
       .rpc('get_agent_profile_by_id', { user_id: userId })
       .single();
       
+    // Determine which profile data to use (primary or fallback)
+    let finalProfileData = primaryProfileData;
+    
     if (profileError) {
       console.error('Profile fetch error:', profileError);
       // Try using the simple select query as fallback
@@ -75,74 +78,61 @@ export const fetchProfileAndRoles = async (userId: string, userEmail: string | u
         
       if (fallbackError) {
         console.error('Fallback profile fetch error:', fallbackError);
-        return createFallbackProfile(userId, userEmail);
-      } else if (fallbackData) {
-        return createProfileFromData(fallbackData, userId, userEmail);
+        // No profile data available, will use defaults
+        finalProfileData = null;
+      } else {
+        // Use fallback data instead
+        finalProfileData = fallbackData;
       }
     }
     
-    // If we have profile data from the RPC call, use it
-    if (profileData) {
-      return createProfileFromData(profileData, userId, userEmail);
+    // Determine roles based on tier
+    let roles: UserRole[] = ['agent', 'viewer']; // Everyone has basic roles
+    
+    if (finalProfileData) {
+      const tier = safelyExtractProperty(finalProfileData, 'tier', 1);
+      console.log('User tier level:', tier);
+      
+      // Map tiers to roles
+      if (tier >= 5) roles.push('admin');
+      if (tier >= 4) roles.push('team_leader');
+      if (tier >= 3) roles.push('manager');
+      if (tier >= 2) roles.push('finance');
     }
     
-    // If we reach here, we couldn't get profile data
-    return createFallbackProfile(userId, userEmail);
+    const activeRole = roles.includes('admin') ? 'admin' : roles[0];
     
-  } catch (err) {
-    console.error('Error fetching user profile or roles', { userId, error: err });
-    return createFallbackProfile(userId, userEmail);
-  }
-};
-
-// Helper function to create a profile from data
-const createProfileFromData = (profileData: any, userId: string, userEmail: string | undefined) => {
-  // Determine roles based on tier
-  let roles: UserRole[] = ['agent', 'viewer']; // Everyone has basic roles
-  
-  const tier = safelyExtractProperty(profileData, 'tier', 1);
-  console.log('User tier level:', tier);
-  
-  // Map tiers to roles
-  if (tier >= 5) roles.push('admin');
-  if (tier >= 4) roles.push('team_leader');
-  if (tier >= 3) roles.push('manager');
-  if (tier >= 2) roles.push('finance');
-  
-  const activeRole = roles.includes('admin') ? 'admin' : roles[0];
-  
-  const userProfile = {
-    id: userId,
-    email: userEmail || '',
-    name: safelyExtractProperty(profileData, 'full_name', userEmail?.split('@')[0] || ''),
-    roles: roles,
-    activeRole: activeRole,
-  };
-  
-  console.log('User profile created:', userProfile);
-  
-  return {
-    profile: profileData,
-    userProfile,
-    roles,
-    activeRole
-  };
-};
-
-// Helper function to create a fallback profile
-const createFallbackProfile = (userId: string, userEmail: string | undefined) => {
-  // Still return a basic profile even if there's an error
-  const defaultRoles: UserRole[] = ['agent'];
-  return {
-    profile: null,
-    userProfile: {
+    const userProfile = {
       id: userId,
       email: userEmail || '',
-      name: userEmail?.split('@')[0] || '',
+      name: safelyExtractProperty(finalProfileData, 'full_name', userEmail?.split('@')[0] || ''),
+      roles: roles,
+      activeRole: activeRole,
+    };
+    
+    console.log('User profile created:', userProfile);
+    
+    return {
+      profile: finalProfileData,
+      userProfile,
+      roles: userProfile.roles,
+      activeRole: userProfile.activeRole
+    };
+  } catch (err) {
+    console.error('Error fetching user profile or roles', { userId, error: err });
+    // Still return a basic profile even if there's an error
+    const defaultRoles: UserRole[] = ['agent'];
+    return {
+      profile: null,
+      userProfile: {
+        id: userId,
+        email: userEmail || '',
+        name: userEmail?.split('@')[0] || '',
+        roles: defaultRoles,
+        activeRole: defaultRoles[0],
+      },
       roles: defaultRoles,
-      activeRole: defaultRoles[0],
-    },
-    roles: defaultRoles,
-    activeRole: defaultRoles[0]
-  };
+      activeRole: defaultRoles[0]
+    };
+  }
 };
