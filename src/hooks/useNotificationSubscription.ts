@@ -68,7 +68,8 @@ export const useNotificationSubscription = (
           if (statusStr === 'SUBSCRIBED') {
             logger.info('Successfully subscribed to notifications');
           } else if (statusStr === 'CHANNEL_ERROR') {
-            logger.error('Failed to subscribe to notifications:', statusStr);
+            // Fix: Pass the status as an object property instead of a second parameter
+            logger.error('Failed to subscribe to notifications', { status: statusStr });
             toast.error('Failed to connect to notification service');
           } else if (statusStr === 'CLOSED') {
             logger.error('Notification channel closed');
