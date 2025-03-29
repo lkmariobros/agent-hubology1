@@ -81,8 +81,8 @@ const Dashboard: React.FC = () => {
       {/* Property Showcase */}
       <PropertyShowcase />
       
-      {/* Debug information at the bottom of the page */}
-      <div className="flex justify-end mt-8">
+      {/* Debug information at the bottom right corner of the page */}
+      <div className="fixed bottom-4 right-4 z-10">
         <RoleDebugInfo />
       </div>
     </div>

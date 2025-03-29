@@ -23,7 +23,7 @@ const RoleDebugInfo: React.FC = () => {
   return (
     <div className="relative inline-block">
       <div 
-        className="inline-flex items-center px-3 py-1 text-xs bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-300 dark:border-yellow-800 rounded-lg cursor-pointer"
+        className="inline-flex items-center px-3 py-1 text-xs bg-yellow-100 dark:bg-yellow-900/30 border border-yellow-300 dark:border-yellow-800 rounded-lg cursor-pointer hover:bg-yellow-200 dark:hover:bg-yellow-900/50 shadow-sm"
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <span className="text-yellow-800 dark:text-yellow-300 font-medium">Debug Info</span>
