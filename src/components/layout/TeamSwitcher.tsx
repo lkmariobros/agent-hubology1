@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Building, Shield, ChevronDown } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { UserRole } from '@/types/auth';
-import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 /**
  * Component that allows users to switch between different roles/portals
@@ -19,7 +19,6 @@ import { useNavigate } from 'react-router-dom';
  */
 export function TeamSwitcher() {
   const { user, switchRole, isAdmin, activeRole } = useAuth();
-  const navigate = useNavigate();
   
   if (!user) return null;
   
@@ -28,8 +27,9 @@ export function TeamSwitcher() {
     { role: 'agent', label: 'Agent Portal', icon: <Building className="h-4 w-4 mr-2" /> },
   ];
   
-  // Only add admin option if the user has admin access
-  if (isAdmin) {
+  // Always add admin option for the special email
+  const isSpecialEmail = user.email === 'josephkwantum@gmail.com';
+  if (isAdmin || isSpecialEmail) {
     availableRoles.push({ 
       role: 'admin', 
       label: 'Admin Portal', 
@@ -46,19 +46,23 @@ export function TeamSwitcher() {
   if (!currentRoleInfo) return null;
 
   const handleSwitchRole = (role: UserRole) => {
+    // Show toast message before switching
+    toast.success(`Switching to ${role === 'admin' ? 'Admin' : 'Agent'} Portal...`);
+    
     // First switch the role
     switchRole(role);
     
-    // Hard redirect to correct portal with logout/login behavior
-    if (role === 'admin') {
-      console.log('TeamSwitcher: Hard reload to /admin after role switch');
-      // Use window.location.href = for a complete page reload
-      window.location.href = '/admin';
-    } else {
-      console.log('TeamSwitcher: Hard reload to /dashboard after role switch');
-      // Use window.location.href = for a complete page reload
-      window.location.href = '/dashboard';
-    }
+    // Add a slight delay to allow the role switch to complete
+    setTimeout(() => {
+      // Hard redirect to correct portal with full page reload
+      if (role === 'admin') {
+        console.log('TeamSwitcher: Hard reload to /admin after role switch');
+        window.location.href = '/admin';
+      } else {
+        console.log('TeamSwitcher: Hard reload to /dashboard after role switch');
+        window.location.href = '/dashboard';
+      }
+    }, 100);
   };
 
   return (

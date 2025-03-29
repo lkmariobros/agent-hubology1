@@ -19,14 +19,15 @@ export const roleUtils = {
     // Special admin access for josephkwantum@gmail.com
     const isSpecialAdminEmail = document.cookie.includes('userEmail=josephkwantum%40gmail.com');
     
-    // Force enable admin role for special email
-    if (newRole === 'admin' && isSpecialAdminEmail) {
-      console.log('Special admin access granted via email check');
-      onRoleChange('admin');
-      return;
-    } else if (currentRoles.includes(newRole)) {
+    // Check if the user has the requested role or is the special admin user
+    if ((currentRoles.includes(newRole) || (newRole === 'admin' && isSpecialAdminEmail))) {
       console.log('Role switch successful:', newRole);
       onRoleChange(newRole);
+      return;
+    } else if (newRole === 'agent' && isSpecialAdminEmail) {
+      // Special case for josephkwantum@gmail.com switching back to agent role
+      console.log('Special user switching to agent role:', newRole);
+      onRoleChange('agent');
       return;
     } else {
       console.warn('Role switch failed - role not available:', newRole);

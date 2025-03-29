@@ -11,7 +11,6 @@ import { Building, Shield, ChevronsUpDown } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { UserRole } from '@/types/auth';
 import { toast } from 'sonner';
-import { useNavigate } from 'react-router-dom';
 
 interface PortalSwitcherProps {
   showLabel?: boolean;
@@ -22,10 +21,12 @@ interface PortalSwitcherProps {
  * Component that allows users with multiple roles to switch between portals
  */
 export function PortalSwitcher({ showLabel = true, className = "" }: PortalSwitcherProps) {
-  const { isAdmin, activeRole, switchRole, roles } = useAuth();
+  const { isAdmin, activeRole, switchRole, roles, user } = useAuth();
   const isAdminActive = activeRole === 'admin';
   const [hasAdminRole, setHasAdminRole] = useState(false);
-  const navigate = useNavigate();
+  
+  // Check for special admin user (josephkwantum@gmail.com)
+  const isSpecialAdminUser = user?.email === 'josephkwantum@gmail.com';
   
   useEffect(() => {
     // Force recheck for admin role
@@ -33,8 +34,8 @@ export function PortalSwitcher({ showLabel = true, className = "" }: PortalSwitc
     console.log('PortalSwitcher: roles updated', roles, 'isAdmin:', isAdmin, 'hasAdmin:', roles.includes('admin'));
   }, [roles, isAdmin]);
   
-  // For non-admin users, just show the logo without dropdown functionality
-  if (!isAdmin && !hasAdminRole) {
+  // For non-admin users who aren't the special admin user, just show the logo without dropdown functionality
+  if (!isAdmin && !hasAdminRole && !isSpecialAdminUser) {
     return (
       <div className={`flex items-center px-2 py-2 ${className}`}>
         <div className="flex items-center gap-2">
@@ -49,25 +50,25 @@ export function PortalSwitcher({ showLabel = true, className = "" }: PortalSwitc
     );
   }
 
-  // For admin users, show the dropdown with portal switching options
+  // For admin users or special admin user, show the dropdown with portal switching options
   const handleSwitchRole = (role: UserRole) => {
+    // Show toast notification before switching
+    toast.success(`Switching to ${role === 'admin' ? 'Admin' : 'Agent'} Portal...`);
+    
     // First switch the role
     switchRole(role);
     
-    // Hard redirect to the appropriate portal
-    if (role === 'admin') {
-      console.log('PortalSwitcher: Hard reload to /admin after role switch');
-      // Show toast before navigation
-      toast.success('Switching to Admin Portal...');
-      // Use window.location.href for a complete page reload
-      window.location.href = '/admin';
-    } else {
-      console.log('PortalSwitcher: Hard reload to /dashboard after role switch');
-      // Show toast before navigation
-      toast.success('Switching to Agent Portal...');
-      // Use window.location.href for a complete page reload
-      window.location.href = '/dashboard';
-    }
+    // Add a slight delay to allow the role switch to complete
+    setTimeout(() => {
+      // Hard redirect to the appropriate portal
+      if (role === 'admin') {
+        console.log('PortalSwitcher: Hard reload to /admin after role switch');
+        window.location.href = '/admin';
+      } else {
+        console.log('PortalSwitcher: Hard reload to /dashboard after role switch');
+        window.location.href = '/dashboard';
+      }
+    }, 100);
   };
 
   return (
