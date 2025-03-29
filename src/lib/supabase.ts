@@ -80,18 +80,20 @@ export const supabaseUtils = {
     if (!user) return ['agent']; // Default fallback role
     
     try {
-      // Use our database function to get user roles
-      const { data, error } = await supabase.rpc('get_user_roles', {
-        user_id: user.id
-      });
+      // Use a query on the user_roles table instead of rpc
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id);
       
       if (error) {
         console.error('Error getting user roles:', error);
         return ['agent']; // Default fallback role
       }
       
-      if (data && Array.isArray(data)) {
-        return data as UserRole[];
+      if (data && Array.isArray(data) && data.length > 0) {
+        // Extract the role values from the returned objects
+        return data.map(item => item.role) as UserRole[];
       } else {
         return ['agent']; // Default fallback role
       }
@@ -106,17 +108,19 @@ export const supabaseUtils = {
     if (!user) return false;
     
     try {
-      const { data, error } = await supabase.rpc('has_role', {
-        user_id: user.id,
-        role_name: roleName
-      });
+      // Check directly in the user_roles table instead of using rpc
+      const { data, error, count } = await supabase
+        .from('user_roles')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('role', roleName);
       
       if (error) {
         console.error('Error checking role:', error);
         return false;
       }
       
-      return !!data;
+      return count !== null && count > 0;
     } catch (error) {
       console.error('Error in hasRole function:', error);
       return false;
