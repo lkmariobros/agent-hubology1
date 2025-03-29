@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useProperty } from '@/hooks/useProperties';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { getMockDataMode } from '@/config';
 import { normalizeUuid, isValidUuid, createMockUuid } from '@/utils/uuidUtils';
