@@ -103,12 +103,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } catch (err) {
       console.error('Error fetching user profile or roles', { userId, error: err });
       // Still return a basic profile even if there's an error
+      const defaultRoles: UserRole[] = ['agent'];
       return {
         id: userId,
         email: session?.user?.email || '',
         name: session?.user?.email?.split('@')[0] || '',
-        roles: ['agent'],
-        activeRole: 'agent',
+        roles: defaultRoles,
+        activeRole: defaultRoles[0],
       };
     }
   };
@@ -130,12 +131,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (initialSession?.user) {
           setSession(initialSession);
           // Create minimal user while we fetch the full profile
+          const defaultRoles: UserRole[] = ['agent'];
           setUser({
             id: initialSession.user.id,
             email: initialSession.user.email || '',
             name: initialSession.user.email?.split('@')[0] || '',
-            roles: ['agent'],
-            activeRole: 'agent',
+            roles: defaultRoles,
+            activeRole: defaultRoles[0],
           });
           
           // Fetch complete profile in the background
@@ -180,12 +182,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         
         if (newSession?.user) {
           // Create minimal user while we fetch the full profile
+          const defaultRoles: UserRole[] = ['agent'];
           const basicUser = {
             id: newSession.user.id,
             email: newSession.user.email || '',
             name: newSession.user.email?.split('@')[0] || '',
-            roles: ['agent'],
-            activeRole: 'agent',
+            roles: defaultRoles,
+            activeRole: defaultRoles[0],
           };
           
           setUser(basicUser);
