@@ -78,14 +78,19 @@ export const supabaseUtils = {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return [];
     
-    const { data, error } = await supabase.rpc('get_user_roles', { user_id: user.id });
+    // Fix: Use a SQL query instead of RPC function since get_user_roles doesn't exist as an RPC
+    const { data, error } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id);
     
     if (error) {
       handleSupabaseError(error, 'getRoles');
       return [];
     }
     
-    return data || [];
+    // Extract the role values from the data
+    return (data || []).map(item => item.role);
   },
   
   refreshSession: async () => {

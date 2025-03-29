@@ -1,4 +1,3 @@
-
 export interface DashboardMetric {
   id: string;
   label: string;
@@ -38,6 +37,7 @@ export interface Property {
   transactionType?: string;
   featured?: boolean;
   listedBy?: string;
+  reference?: string;
 }
 
 export interface PropertyStock {
