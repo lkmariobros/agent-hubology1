@@ -183,7 +183,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (newSession?.user) {
           // Create minimal user while we fetch the full profile
           const defaultRoles: UserRole[] = ['agent'];
-          const basicUser = {
+          const basicUser: UserProfile = {
             id: newSession.user.id,
             email: newSession.user.email || '',
             name: newSession.user.email?.split('@')[0] || '',
@@ -398,8 +398,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     session,
     loading,
     error,
-    isAuthenticated,
-    isAdmin,
+    isAuthenticated: !!user,
+    isAdmin: !!user && user.roles.includes('admin'),
     roles,
     activeRole,
     signIn,
