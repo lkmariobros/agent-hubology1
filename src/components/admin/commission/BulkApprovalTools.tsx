@@ -23,7 +23,7 @@ import { formatCurrency } from '@/utils/propertyUtils';
 import { Loader2, CheckCircle2, AlertTriangle } from 'lucide-react';
 import StatusBadge from './StatusBadge';
 import { toast } from 'sonner';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 
 interface BulkApprovalToolsProps {
   onComplete?: () => void;

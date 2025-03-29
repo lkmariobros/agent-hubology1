@@ -10,7 +10,7 @@ type ApprovalStatus = 'Pending' | 'Under Review' | 'Approved' | 'Ready for Payme
 /**
  * Commission approval interface
  */
-interface CommissionApproval {
+export interface CommissionApproval {
   id: string;
   transaction_id: string;
   status: ApprovalStatus;
@@ -21,6 +21,30 @@ interface CommissionApproval {
   created_at: string;
   updated_at: string;
   reviewed_at: string | null;
+}
+
+/**
+ * Commission approval history interface
+ */
+export interface CommissionApprovalHistory {
+  id: string;
+  approval_id: string;
+  previous_status: string;
+  new_status: string;
+  changed_by: string;
+  notes: string | null;
+  created_at: string;
+}
+
+/**
+ * Commission approval comment interface
+ */
+export interface CommissionApprovalComment {
+  id: string;
+  approval_id: string;
+  content: string;
+  created_by: string;
+  created_at: string;
 }
 
 /**
@@ -85,88 +109,80 @@ export const fetchApprovals = async (
       .order('created_at', { ascending: false })
       .range(page * pageSize, (page + 1) * pageSize - 1);
 
-    const { data, error } = await query;
+    const { data, error, count } = await query;
 
     if (error) throw error;
 
-    return data || [];
+    return {
+      approvals: data || [],
+      totalCount: count || 0
+    };
   } catch (error) {
     console.error('Error fetching approvals:', error);
-    return [];
+    return { approvals: [], totalCount: 0 };
   }
 };
 
 /**
  * Function to fetch approval statistics
  */
-export const fetchApprovalStats = async (): Promise<ApprovalStats> => {
+export const fetchApprovalStatusCounts = async (): Promise<Record<string, number>> => {
   try {
     // Get total counts by status
-    const { data: statusCounts, error: statusError } = await supabase
-      .from('commission_approvals')
-      .select('status', { count: 'exact', head: false })
-      .then((res) => {
-        const counts: Record<string, number> = {
-          pending: 0,
-          under_review: 0,
-          approved: 0,
-          ready_for_payment: 0,
-          paid: 0,
-          rejected: 0,
-          high_value: 0,
-        };
-        
-        if (res.data) {
-          res.data.forEach((item: any) => {
-            const status = item.status.toLowerCase().replace(' ', '_');
-            if (counts.hasOwnProperty(status)) {
-              counts[status]++;
-            }
-          });
-        }
-        
-        return { data: counts, error: res.error };
-      });
+    const { data, error } = await supabase.rpc('get_approval_status_counts');
 
-    if (statusError) throw statusError;
+    if (error) throw error;
 
-    // Count high value approvals
-    const { count: highValueCount, error: highValueError } = await supabase
-      .from('commission_approvals')
-      .select('*', { count: 'exact', head: true })
-      .eq('threshold_exceeded', true);
-
-    if (highValueError) throw highValueError;
-
-    // Count total approvals
-    const { count: totalCount, error: totalError } = await supabase
-      .from('commission_approvals')
-      .select('*', { count: 'exact', head: true });
-
-    if (totalError) throw totalError;
-
-    return {
-      total: totalCount || 0,
-      pending: statusCounts?.pending || 0,
-      under_review: statusCounts?.under_review || 0,
-      approved: statusCounts?.approved || 0,
-      ready_for_payment: statusCounts?.ready_for_payment || 0,
-      paid: statusCounts?.paid || 0,
-      rejected: statusCounts?.rejected || 0,
-      high_value: highValueCount || 0,
-    };
-  } catch (error) {
-    console.error('Error fetching approval stats:', error);
-    return {
-      total: 0,
+    return data || {
       pending: 0,
       under_review: 0,
       approved: 0,
       ready_for_payment: 0,
       paid: 0,
-      rejected: 0,
-      high_value: 0,
+      rejected: 0
     };
+  } catch (error) {
+    console.error('Error fetching approval status counts:', error);
+    return {
+      pending: 0,
+      under_review: 0,
+      approved: 0,
+      ready_for_payment: 0,
+      paid: 0,
+      rejected: 0
+    };
+  }
+};
+
+/**
+ * Function to fetch pending commission total
+ */
+export const fetchPendingCommissionTotal = async (): Promise<number> => {
+  try {
+    const { data, error } = await supabase.functions.invoke('get_pending_commission_total');
+
+    if (error) throw error;
+
+    return data?.total || 0;
+  } catch (error) {
+    console.error('Error fetching pending commission total:', error);
+    return 0;
+  }
+};
+
+/**
+ * Function to fetch approved commission total
+ */
+export const fetchApprovedCommissionTotal = async (): Promise<number> => {
+  try {
+    const { data, error } = await supabase.functions.invoke('get_approved_commission_total');
+
+    if (error) throw error;
+
+    return data?.total || 0;
+  } catch (error) {
+    console.error('Error fetching approved commission total:', error);
+    return 0;
   }
 };
 
@@ -179,33 +195,54 @@ export const fetchApprovalById = async (approvalId: string) => {
       .from('commission_approvals')
       .select(`
         *,
-        transaction:transaction_id(
-          *,
-          property:property_id(title, id, property_type_id, transaction_type_id),
-          agent:agent_id(id, full_name, email, tier, tier_name, commission_percentage)
-        ),
-        submitted_by_profile:submitted_by(
-          full_name, email
-        ),
-        reviewer:reviewer_id(
-          full_name, email
+        property_transactions!transaction_id(
+          transaction_value,
+          commission_amount,
+          transaction_date,
+          property_id,
+          commission_rate,
+          agent_id,
+          notes
         )
       `)
       .eq('id', approvalId)
       .single();
 
     if (error) throw error;
-    return data;
+
+    // Fetch approval history
+    const { data: historyData, error: historyError } = await supabase
+      .from('approval_history')
+      .select('*')
+      .eq('approval_id', approvalId)
+      .order('created_at', { ascending: false });
+
+    if (historyError) throw historyError;
+
+    // Fetch approval comments
+    const { data: commentsData, error: commentsError } = await supabase
+      .from('approval_comments')
+      .select('*')
+      .eq('approval_id', approvalId)
+      .order('created_at', { ascending: true });
+
+    if (commentsError) throw commentsError;
+
+    return {
+      approval: data,
+      history: historyData || [],
+      comments: commentsData || []
+    };
   } catch (error) {
     console.error('Error fetching approval by ID:', error);
-    return null;
+    throw error;
   }
 };
 
 /**
  * Function to fetch approval history
  */
-export const fetchApprovalHistory = async (approvalId: string) => {
+export const fetchApprovalHistory = async (approvalId: string): Promise<CommissionApprovalHistory[]> => {
   try {
     const { data, error } = await supabase
       .from('approval_history')
@@ -229,7 +266,7 @@ export const fetchApprovalHistory = async (approvalId: string) => {
 /**
  * Function to fetch approval comments
  */
-export const fetchApprovalComments = async (approvalId: string) => {
+export const fetchApprovalComments = async (approvalId: string): Promise<CommissionApprovalComment[]> => {
   try {
     const { data, error } = await supabase
       .from('approval_comments')
@@ -253,21 +290,16 @@ export const fetchApprovalComments = async (approvalId: string) => {
 /**
  * Function to add a comment to an approval
  */
-export const addApprovalComment = async (approvalId: string, comment: string, userId: string) => {
+export const addApprovalComment = async ({ approvalId, content }: { approvalId: string; content: string }) => {
   try {
     const { data, error } = await supabase
       .from('approval_comments')
       .insert({
         approval_id: approvalId,
-        comment_text: comment,
-        created_by: userId
+        content: content,
+        created_by: supabase.auth.getUser().then(data => data.data.user?.id || '')
       })
-      .select(`
-        *,
-        user:created_by(
-          full_name, email, avatar_url
-        )
-      `)
+      .select()
       .single();
 
     if (error) throw error;
@@ -279,26 +311,47 @@ export const addApprovalComment = async (approvalId: string, comment: string, us
 };
 
 /**
- * Function to update approval status
+ * Function to delete a comment
  */
-export const updateApprovalStatus = async (
-  approvalId: string,
-  newStatus: ApprovalStatus,
-  notes?: string
-) => {
+export const deleteApprovalComment = async ({ commentId, approvalId }: { commentId: string; approvalId: string }) => {
   try {
-    // We use an RPC call to a custom function that handles status updates
-    const { data, error } = await supabase.rpc(
-      'update_commission_approval_status',
-      {
-        p_approval_id: approvalId,
-        p_new_status: newStatus,
-        p_notes: notes
-      }
-    );
+    const { error } = await supabase
+      .from('approval_comments')
+      .delete()
+      .eq('id', commentId);
 
     if (error) throw error;
-    return data;
+    return { success: true };
+  } catch (error) {
+    console.error('Error deleting approval comment:', error);
+    throw error;
+  }
+};
+
+/**
+ * Function to update approval status
+ */
+export const updateApprovalStatus = async ({
+  approvalId,
+  status,
+  notes
+}: {
+  approvalId: string;
+  status: string;
+  notes?: string;
+}) => {
+  try {
+    // We use an RPC call to a custom function that handles status updates
+    const { data, error } = await supabase.functions.invoke('update_commission_approval_status', {
+      body: {
+        p_approval_id: approvalId,
+        p_new_status: status,
+        p_notes: notes
+      }
+    });
+
+    if (error) throw error;
+    return data || { success: true };
   } catch (error) {
     console.error('Error updating approval status:', error);
     throw error;
@@ -306,187 +359,179 @@ export const updateApprovalStatus = async (
 };
 
 /**
- * Hook for fetching commission approvals with filters
+ * Function to fetch system configuration
  */
-export const useApprovalsQuery = (
-  status?: ApprovalStatus | 'All',
-  pendingOnly = false,
-  highValueOnly = false,
-  page = 0,
-  pageSize = 10
-) => {
-  return useQuery({
-    queryKey: ['approvals', status, pendingOnly, highValueOnly, page, pageSize],
-    queryFn: () => fetchApprovals(status, pendingOnly, highValueOnly, page, pageSize)
-  });
-};
-
-/**
- * Hook for fetching approval statistics
- */
-export const useApprovalStatsQuery = () => {
-  return useQuery({
-    queryKey: ['approvalStats'],
-    queryFn: fetchApprovalStats
-  });
-};
-
-/**
- * Hook for fetching a single approval by ID
- */
-export const useApprovalByIdQuery = (approvalId: string) => {
-  return useQuery({
-    queryKey: ['approval', approvalId],
-    queryFn: () => fetchApprovalById(approvalId),
-    enabled: !!approvalId
-  });
-};
-
-/**
- * Hook for fetching approval history
- */
-export const useApprovalHistoryQuery = (approvalId: string) => {
-  return useQuery({
-    queryKey: ['approvalHistory', approvalId],
-    queryFn: () => fetchApprovalHistory(approvalId),
-    enabled: !!approvalId
-  });
-};
-
-/**
- * Hook for fetching approval comments
- */
-export const useApprovalCommentsQuery = (approvalId: string) => {
-  return useQuery({
-    queryKey: ['approvalComments', approvalId],
-    queryFn: () => fetchApprovalComments(approvalId),
-    enabled: !!approvalId
-  });
-};
-
-/**
- * Hook for adding a comment to an approval
- */
-export const useAddApprovalCommentMutation = (approvalId: string) => {
-  const queryClient = useQueryClient();
-  const { user } = useAuth();
-
-  return useMutation({
-    mutationFn: (comment: string) => {
-      if (!user) {
-        throw new Error('User not authenticated');
-      }
-      return addApprovalComment(approvalId, comment, user.id);
-    },
-    onSuccess: () => {
-      toast.success('Comment added successfully');
-      queryClient.invalidateQueries({ queryKey: ['approvalComments', approvalId] });
-    },
-    onError: (error: Error) => {
-      toast.error(`Failed to add comment: ${error.message}`);
-    }
-  });
-};
-
-/**
- * Hook for updating approval status
- */
-export const useUpdateApprovalStatusMutation = (approvalId: string) => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ newStatus, notes }: { newStatus: ApprovalStatus; notes?: string }) => {
-      return updateApprovalStatus(approvalId, newStatus, notes);
-    },
-    onSuccess: (data) => {
-      if (data.success) {
-        toast.success(`Status updated successfully`);
-        // Invalidate relevant queries
-        queryClient.invalidateQueries({ queryKey: ['approval', approvalId] });
-        queryClient.invalidateQueries({ queryKey: ['approvalHistory', approvalId] });
-        queryClient.invalidateQueries({ queryKey: ['approvals'] });
-        queryClient.invalidateQueries({ queryKey: ['approvalStats'] });
-      } else {
-        toast.error(`Failed to update status: ${data.message}`);
-      }
-    },
-    onError: (error: Error) => {
-      toast.error(`Failed to update status: ${error.message}`);
-    }
-  });
-};
-
-/**
- * Function to fetch high value commission metrics
- */
-export const fetchHighValueCommissionMetrics = async () => {
+export const fetchSystemConfiguration = async () => {
   try {
-    // Get average commission amount for high value approvals
-    const { data: avgData, error: avgError } = await supabase
-      .from('commission_approvals')
-      .select(`
-        transaction:transaction_id(
-          commission_amount
-        )
-      `)
-      .eq('threshold_exceeded', true);
+    const { data, error } = await supabase
+      .from('system_configuration')
+      .select('key, value')
+      .in('key', ['commission_threshold_amount', 'commission_approval_required']);
 
-    if (avgError) throw avgError;
+    if (error) throw error;
 
-    if (!avgData || avgData.length === 0) {
-      return {
-        averageCommission: 0,
-        totalHighValue: 0,
-        percentageApproved: 0
-      };
-    }
-
-    // Calculate average commission amount
-    const commissionValues = avgData.map(item => item.transaction.commission_amount);
-    const totalCommission = commissionValues.reduce((sum, amount) => sum + amount, 0);
-    const averageCommission = totalCommission / commissionValues.length;
-
-    // Get count of high value approvals
-    const { count: totalHighValue, error: countError } = await supabase
-      .from('commission_approvals')
-      .select('*', { count: 'exact', head: true })
-      .eq('threshold_exceeded', true);
-
-    if (countError) throw countError;
-
-    // Get count of approved high value approvals
-    const { count: approvedHighValue, error: approvedError } = await supabase
-      .from('commission_approvals')
-      .select('*', { count: 'exact', head: true })
-      .eq('threshold_exceeded', true)
-      .in('status', ['Approved', 'Ready for Payment', 'Paid']);
-
-    if (approvedError) throw approvedError;
-
-    // Calculate percentage approved
-    const percentageApproved = totalHighValue ? (approvedHighValue / totalHighValue) * 100 : 0;
+    const configMap: Record<string, string> = {};
+    data?.forEach(item => {
+      configMap[item.key] = item.value;
+    });
 
     return {
-      averageCommission,
-      totalHighValue,
-      percentageApproved
+      thresholdAmount: Number(configMap.commission_threshold_amount) || 10000,
+      approvalRequired: configMap.commission_approval_required === 'true'
     };
   } catch (error) {
-    console.error('Error fetching high value commission metrics:', error);
+    console.error('Error fetching system configuration:', error);
     return {
-      averageCommission: 0,
-      totalHighValue: 0,
-      percentageApproved: 0
+      thresholdAmount: 10000, // Default threshold
+      approvalRequired: true  // Default to require approval
     };
   }
 };
 
 /**
- * Hook for fetching high value commission metrics
+ * Function to check if commission amount exceeds threshold
  */
-export const useHighValueCommissionMetricsQuery = () => {
-  return useQuery({
-    queryKey: ['highValueCommissionMetrics'],
-    queryFn: fetchHighValueCommissionMetrics
-  });
+export const checkCommissionApproval = async (commissionAmount: number) => {
+  try {
+    const config = await fetchSystemConfiguration();
+    
+    return {
+      threshold: config.thresholdAmount,
+      exceedsThreshold: commissionAmount > config.thresholdAmount,
+      approvalRequired: config.approvalRequired
+    };
+  } catch (error) {
+    console.error('Error checking commission approval:', error);
+    return {
+      threshold: 10000,
+      exceedsThreshold: false,
+      approvalRequired: true
+    };
+  }
 };
+
+// === HOOK DEFINITIONS ===
+
+/**
+ * Hook for fetching approval status counts
+ */
+export function useApprovalStatusCounts() {
+  return useQuery({
+    queryKey: ['approvalStatusCounts'],
+    queryFn: fetchApprovalStatusCounts
+  });
+}
+
+/**
+ * Hook for fetching pending commission total
+ */
+export function usePendingCommissionTotal() {
+  return useQuery({
+    queryKey: ['pendingCommissionTotal'],
+    queryFn: fetchPendingCommissionTotal
+  });
+}
+
+/**
+ * Hook for fetching approved commission total
+ */
+export function useApprovedCommissionTotal() {
+  return useQuery({
+    queryKey: ['approvedCommissionTotal'],
+    queryFn: fetchApprovedCommissionTotal
+  });
+}
+
+/**
+ * Hook for fetching commission approvals
+ */
+export function useCommissionApprovals(
+  status?: ApprovalStatus | 'All',
+  isAdmin: boolean = false,
+  userId?: string,
+  page: number = 1,
+  pageSize: number = 10
+) {
+  return useQuery({
+    queryKey: ['commissionApprovals', status, isAdmin, userId, page, pageSize],
+    queryFn: () => fetchApprovals(status, false, false, page - 1, pageSize)
+  });
+}
+
+/**
+ * Hook for fetching a single commission approval detail
+ */
+export function useCommissionApprovalDetail(approvalId: string) {
+  return useQuery({
+    queryKey: ['commissionApproval', approvalId],
+    queryFn: () => fetchApprovalById(approvalId),
+    enabled: !!approvalId
+  });
+}
+
+/**
+ * Hook for updating approval status
+ */
+export function useUpdateApprovalStatus() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: updateApprovalStatus,
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['commissionApproval', variables.approvalId] });
+      queryClient.invalidateQueries({ queryKey: ['commissionApprovals'] });
+      queryClient.invalidateQueries({ queryKey: ['approvalStatusCounts'] });
+      queryClient.invalidateQueries({ queryKey: ['pendingCommissionTotal'] });
+      queryClient.invalidateQueries({ queryKey: ['approvedCommissionTotal'] });
+    }
+  });
+}
+
+/**
+ * Hook for adding a comment
+ */
+export function useAddApprovalComment() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: addApprovalComment,
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['commissionApproval', variables.approvalId] });
+    }
+  });
+}
+
+/**
+ * Hook for deleting a comment
+ */
+export function useDeleteApprovalComment() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: deleteApprovalComment,
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['commissionApproval', variables.approvalId] });
+    }
+  });
+}
+
+/**
+ * Hook for checking commission approval requirements
+ */
+export function useCommissionApprovalCheck(commissionAmount: number) {
+  return useQuery({
+    queryKey: ['commissionApprovalCheck', commissionAmount],
+    queryFn: () => checkCommissionApproval(commissionAmount),
+    enabled: commissionAmount > 0
+  });
+}
+
+/**
+ * Hook for system configuration
+ */
+export function useSystemConfiguration() {
+  return useQuery({
+    queryKey: ['systemConfiguration'],
+    queryFn: fetchSystemConfiguration
+  });
+}
