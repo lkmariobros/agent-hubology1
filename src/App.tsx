@@ -37,6 +37,12 @@ import NotFound from './pages/NotFound';
 import Opportunities from './pages/Opportunities';
 import Reports from './pages/Reports';
 import ProtectedRoute from './components/auth/ProtectedRoute';
+import Team from './pages/Team';
+
+// Leaderboard Pages
+import Leaderboard from './pages/leaderboard/Leaderboard';
+import PointsLeaderboard from './pages/leaderboard/Points';
+import SalesLeaderboard from './pages/leaderboard/Sales';
 
 // Admin System Pages
 import AdminSettings from './pages/admin/Settings';
@@ -93,12 +99,14 @@ function App() {
                   <Route path="properties/new" element={<NewProperty />} />
                   <Route path="profile" element={<Profile />} />
                   <Route path="settings" element={<Settings />} />
-                  <Route path="team" element={<Home />} /> {/* Temporary placeholder */}
+                  <Route path="team" element={<Team />} />
                   <Route path="opportunities" element={<Opportunities />} />
                   <Route path="reports" element={<Reports />} />
-                  <Route path="leaderboard" element={<Home />} /> {/* Temporary placeholder */}
-                  <Route path="leaderboard/points" element={<Home />} /> {/* Temporary placeholder */}
-                  <Route path="leaderboard/sales" element={<Home />} /> {/* Temporary placeholder */}
+                  
+                  {/* Leaderboard Routes */}
+                  <Route path="leaderboard" element={<Leaderboard />} />
+                  <Route path="leaderboard/points" element={<PointsLeaderboard />} />
+                  <Route path="leaderboard/sales" element={<SalesLeaderboard />} />
                 </Route>
 
                 {/* Admin Routes */}

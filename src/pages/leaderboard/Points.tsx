@@ -1,7 +1,7 @@
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"; 
 import { User } from '@/types';
 
 const users: User[] = [
@@ -109,30 +109,41 @@ const users: User[] = [
 
 const PointsLeaderboard = () => {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Points Leaderboard</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="grid gap-4">
-          {users.map((user) => (
-            <div key={user.id} className="flex items-center justify-between py-2 border-b last:border-b-0">
-              <div className="flex items-center space-x-4">
-                <Avatar>
-                  <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-                </Avatar>
-                <div>
-                  <p className="text-sm font-medium">{user.name}</p>
-                  <p className="text-xs text-muted-foreground">{user.role}</p>
-                </div>
-              </div>
-              <div className="font-bold">{user.points} Points</div>
+    <div className="grid gap-4">
+      {users.map((user, index) => (
+        <div 
+          key={user.id} 
+          className={`flex items-center justify-between p-4 rounded-md ${index === 0 ? 'bg-amber-50 dark:bg-amber-950/20' : 'bg-card hover:bg-accent/5'}`}
+        >
+          <div className="flex items-center space-x-4">
+            <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center">
+              <span className={`w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold
+                ${index === 0 ? 'bg-amber-500 text-white' : 
+                  index === 1 ? 'bg-gray-400 text-white' :
+                  index === 2 ? 'bg-amber-700 text-white' :
+                  'bg-gray-200 dark:bg-gray-800 text-gray-500 dark:text-gray-400'}`}
+              >
+                {index + 1}
+              </span>
             </div>
-          ))}
+            <Avatar>
+              <AvatarImage src={user.avatar} alt={user.name} />
+              <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+            </Avatar>
+            <div>
+              <p className="text-sm font-medium">{user.name}</p>
+              <div className="flex items-center">
+                <p className="text-xs text-muted-foreground mr-2">{user.role}</p>
+                <Badge variant="outline" className="text-xs h-5">
+                  {user.tier}
+                </Badge>
+              </div>
+            </div>
+          </div>
+          <div className="font-bold">{user.points?.toLocaleString()} Points</div>
         </div>
-      </CardContent>
-    </Card>
+      ))}
+    </div>
   );
 };
 
