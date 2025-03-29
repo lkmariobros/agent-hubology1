@@ -1,12 +1,13 @@
 
-import React, { useState } from 'react';
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '@/context/AuthContext';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Separator } from "@/components/ui/separator";
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
 
 const AuthForm = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -14,7 +15,14 @@ const AuthForm = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { signIn, signUp, resetPassword } = useAuth();
+  const { signIn, signUp, resetPassword, isAuthenticated } = useAuth();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,8 +34,10 @@ const AuthForm = () => {
     
     try {
       setLoading(true);
+      console.log('Attempting sign in with:', email);
       await signIn(email, password);
-      navigate('/dashboard');
+      // No need to manually navigate, the auth state change will trigger the useEffect
+      console.log('Sign in successful');
     } catch (error) {
       console.error('Login error:', error);
       // Error handling already done in signIn function
@@ -132,9 +142,14 @@ const AuthForm = () => {
           className="w-full mt-6 bg-purple-600 hover:bg-purple-700 text-white transition-all"
           disabled={loading}
         >
-          {loading 
-            ? (isLogin ? 'Signing in...' : 'Creating account...') 
-            : (isLogin ? 'Sign in' : 'Create an account')}
+          {loading ? (
+            <span className="flex items-center">
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              {isLogin ? 'Signing in...' : 'Creating account...'}
+            </span>
+          ) : (
+            isLogin ? 'Sign in' : 'Create an account'
+          )}
         </Button>
       </form>
       
