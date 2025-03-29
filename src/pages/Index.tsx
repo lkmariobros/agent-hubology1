@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthForm from '../components/AuthForm';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/AuthContext';  // Updated import path
 import LoadingIndicator from '@/components/ui/loading-indicator';
 
 const Index = () => {
