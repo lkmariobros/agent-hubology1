@@ -7,6 +7,7 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://synabhmsxsvsx
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN5bmFiaG1zeHN2c3hreXpoZnNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIzNjg2MjMsImV4cCI6MjA1Nzk0NDYyM30.jzCMXi4f7i6EAdABneTYc55oVI2bs8e5CVtnyWJ1rG0";
 
 // Create a Supabase client instance without complex type parameters
+// Using "any" type to bypass TypeScript's excessive type checking for this client
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
     persistSession: true,
@@ -86,7 +87,7 @@ export const supabaseUtils = {
         .from('agent_profiles')
         .select('*')
         // Use type assertion to handle typing issues
-        .eq('id' as any, userId)
+        .eq('id', userId)
         .single();
         
       if (error) throw error;
