@@ -23,12 +23,11 @@ export const roleUtils = {
     if (newRole === 'admin' && isSpecialAdminEmail) {
       console.log('Special admin access granted via email check');
       onRoleChange('admin');
-      // We don't return early here to allow the navigation to happen
-      // Navigation is now handled by the components directly
+      return;
     } else if (currentRoles.includes(newRole)) {
       console.log('Role switch successful:', newRole);
       onRoleChange(newRole);
-      // Navigation is now handled by the components directly
+      return;
     } else {
       console.warn('Role switch failed - role not available:', newRole);
       toast.error(`You do not have the ${newRole} role`);

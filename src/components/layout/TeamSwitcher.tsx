@@ -49,15 +49,15 @@ export function TeamSwitcher() {
     // First switch the role
     switchRole(role);
     
-    // Force browser navigation (full page reload) to ensure proper context
+    // Hard redirect to correct portal with logout/login behavior
     if (role === 'admin') {
-      console.log('TeamSwitcher: Navigating to /admin after role switch');
-      // Use replace to avoid adding to browser history
-      window.location.replace('/admin');
+      console.log('TeamSwitcher: Hard reload to /admin after role switch');
+      // Use window.location.href = for a complete page reload
+      window.location.href = '/admin';
     } else {
-      console.log('TeamSwitcher: Navigating to /dashboard after role switch');
-      // Use replace to avoid adding to browser history
-      window.location.replace('/dashboard');
+      console.log('TeamSwitcher: Hard reload to /dashboard after role switch');
+      // Use window.location.href = for a complete page reload
+      window.location.href = '/dashboard';
     }
   };
 

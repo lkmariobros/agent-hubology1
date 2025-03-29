@@ -1,9 +1,9 @@
 
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
-import { AuthProvider } from './context/auth';  // Updated import path
+import { AuthProvider } from './context/auth';
 import { NotificationProvider } from './context/NotificationContext';
 
 // Layouts
@@ -129,6 +129,10 @@ function App() {
                   <Route path="system-logs" element={<SystemLogs />} />
                   <Route path="database" element={<Database />} />
                 </Route>
+                
+                {/* Root redirects based on role */}
+                <Route path="/admin-redirect" element={<Navigate to="/admin" replace />} />
+                <Route path="/agent-redirect" element={<Navigate to="/dashboard" replace />} />
                 
                 {/* Fallback */}
                 <Route path="*" element={<NotFound />} />

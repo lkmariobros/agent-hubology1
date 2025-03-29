@@ -20,7 +20,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   requireRoles = [],
   redirectTo = '/' 
 }) => {
-  const { user, loading, isAuthenticated, isAdmin, hasRole, error } = useAuth();
+  const { user, loading, isAuthenticated, isAdmin, hasRole, error, activeRole } = useAuth();
   const location = useLocation();
   const [timeoutOccurred, setTimeoutOccurred] = useState(false);
   
@@ -29,6 +29,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const timeoutRef = useRef<number | null>(null);
   
   useEffect(() => {
+    console.log("[ProtectedRoute] Current user role:", activeRole);
+    console.log("[ProtectedRoute] Is admin:", isAdmin, "RequireAdmin:", requireAdmin);
+    console.log("[ProtectedRoute] Current location:", location.pathname);
+    
     // Set timeout to detect prolonged loading states
     if (loading && !timeoutRef.current) {
       timeoutRef.current = window.setTimeout(() => {
@@ -37,7 +41,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
           setTimeoutOccurred(true);
           toast.error('Authentication verification timed out.');
         }
-      }, 30000); // 30 seconds timeout (increased from 20s)
+      }, 30000); // 30 seconds timeout
     }
     
     // Clear timeout when loading completes
@@ -54,7 +58,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         timeoutRef.current = null;
       }
     };
-  }, [loading]);
+  }, [loading, activeRole, isAdmin, requireAdmin, location.pathname]);
 
   // If we hit a timeout and still loading, show error UI
   if (timeoutOccurred && loading) {
@@ -135,13 +139,29 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // Check for admin requirement
   if (requireAdmin && !isAdmin) {
-    console.log('[ProtectedRoute] Admin access required but user is not admin');
+    console.log('[ProtectedRoute] Admin access required but user is not admin, redirecting to dashboard');
+    toast.error("You need admin privileges to access this page");
     return <Navigate to="/dashboard" replace />;
+  }
+  
+  // Check if we're trying to access admin routes with agent role
+  if (location.pathname.startsWith('/admin') && activeRole !== 'admin') {
+    console.log('[ProtectedRoute] Trying to access admin route with non-admin role, redirecting to admin portal switcher');
+    toast.error("Please switch to admin role to access this section");
+    return <Navigate to="/dashboard" replace />;
+  }
+  
+  // Check if we're trying to access agent routes with admin role
+  if (!location.pathname.startsWith('/admin') && activeRole === 'admin' && isAdmin) {
+    console.log('[ProtectedRoute] Trying to access agent route with admin role, redirecting to agent portal switcher');
+    toast.error("Please switch to agent role to access this section");
+    return <Navigate to="/admin" replace />;
   }
 
   // Check for specific role requirements
   if (requireRoles.length > 0 && !requireRoles.some(role => hasRole(role))) {
     console.log('[ProtectedRoute] Required roles not found:', requireRoles);
+    toast.error(`You need ${requireRoles.join(' or ')} privileges to access this page`);
     return <Navigate to="/dashboard" replace />;
   }
 
