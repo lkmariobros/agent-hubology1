@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -10,7 +9,8 @@ import {
 } from '@/components/ui/card';
 import { 
   useCommissionApprovalDetail, 
-  useUpdateApprovalStatus
+  useUpdateApprovalStatus,
+  ApprovalStatus
 } from '@/hooks/useCommissionApproval';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -33,7 +33,7 @@ const ApprovalDetail: React.FC<ApprovalDetailProps> = ({ id }) => {
   const { data, isLoading, error } = useCommissionApprovalDetail(id);
   const updateStatusMutation = useUpdateApprovalStatus();
   const [statusNotes, setStatusNotes] = React.useState('');
-  const [newStatus, setNewStatus] = React.useState<string>('');
+  const [newStatus, setNewStatus] = React.useState<ApprovalStatus | ''>('');
   
   if (isLoading) {
     return (
@@ -64,7 +64,7 @@ const ApprovalDetail: React.FC<ApprovalDetailProps> = ({ id }) => {
     );
   }
   
-  const { approval, history, comments } = data;
+  const { approval, history } = data;
   
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -80,7 +80,7 @@ const ApprovalDetail: React.FC<ApprovalDetailProps> = ({ id }) => {
     try {
       await updateStatusMutation.mutateAsync({
         approvalId: id,
-        status: newStatus,
+        status: newStatus as ApprovalStatus,
         notes: statusNotes.trim() ? statusNotes : undefined
       });
       
@@ -219,7 +219,7 @@ const ApprovalDetail: React.FC<ApprovalDetailProps> = ({ id }) => {
                       </label>
                       <Select 
                         value={newStatus} 
-                        onValueChange={setNewStatus}
+                        onValueChange={(value) => setNewStatus(value as ApprovalStatus)}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select new status" />
@@ -279,10 +279,7 @@ const ApprovalDetail: React.FC<ApprovalDetailProps> = ({ id }) => {
         </TabsContent>
         
         <TabsContent value="comments" className="mt-6">
-          <CommentsSection 
-            approvalId={id} 
-            comments={comments}
-          />
+          <CommentsSection approvalId={id} />
         </TabsContent>
       </Tabs>
     </div>

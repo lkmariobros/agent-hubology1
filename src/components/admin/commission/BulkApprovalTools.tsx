@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   Card, 
@@ -18,7 +19,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useCommissionApprovals, useUpdateApprovalStatus } from '@/hooks/useCommissionApproval';
+import { useCommissionApprovals, useUpdateApprovalStatus, ApprovalStatus } from '@/hooks/useCommissionApproval';
 import { formatCurrency } from '@/utils/propertyUtils';
 import { Loader2, CheckCircle2, AlertTriangle } from 'lucide-react';
 import StatusBadge from './StatusBadge';
@@ -32,7 +33,7 @@ interface BulkApprovalToolsProps {
 const BulkApprovalTools: React.FC<BulkApprovalToolsProps> = ({ onComplete }) => {
   const { user, isAdmin } = useAuth();
   const [selectedApprovals, setSelectedApprovals] = useState<string[]>([]);
-  const [targetStatus, setTargetStatus] = useState<string>('');
+  const [targetStatus, setTargetStatus] = useState<ApprovalStatus | ''>('');
   const [isProcessing, setIsProcessing] = useState(false);
   
   const { data, isLoading, refetch } = useCommissionApprovals(
@@ -85,7 +86,7 @@ const BulkApprovalTools: React.FC<BulkApprovalToolsProps> = ({ onComplete }) => 
       try {
         await updateStatusMutation.mutateAsync({
           approvalId,
-          status: targetStatus,
+          status: targetStatus as ApprovalStatus,
           notes: `Bulk updated to ${targetStatus} status`
         });
         successCount++;
@@ -203,7 +204,7 @@ const BulkApprovalTools: React.FC<BulkApprovalToolsProps> = ({ onComplete }) => 
         <div className="w-full sm:w-auto">
           <Select
             value={targetStatus}
-            onValueChange={setTargetStatus}
+            onValueChange={(value) => setTargetStatus(value as ApprovalStatus)}
             disabled={isProcessing || selectedApprovals.length === 0}
           >
             <SelectTrigger className="w-full sm:w-[200px]">
