@@ -7,7 +7,7 @@ import { UserRole } from '@/types/auth';
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://synabhmsxsvsxkyzhfss.supabase.co";
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN5bmFiaG1zeHN2c3hreXpoZnNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIzNjg2MjMsImV4cCI6MjA1Nzk0NDYyM30.jzCMXi4f7i6EAdABneTYc55oVI2bs8e5CVtnyWJ1rG0";
 
-// Create Supabase client with explicit auth configuration
+// Create a single Supabase client instance
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
     persistSession: true,
@@ -63,6 +63,48 @@ export const supabaseUtils = {
     }
   },
 
+  // Utility function for fetching a user profile by ID
+  getUserProfile: async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('agent_profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+        
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+      return null;
+    }
+  },
+  
+  // Upload a file to storage
+  uploadFile: async (bucket: string, filePath: string, file: File) => {
+    try {
+      const { data, error } = await supabase.storage
+        .from(bucket)
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+      
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      throw error;
+    }
+  },
+  
+  // Get a public URL for a file
+  getPublicUrl: (bucket: string, filePath: string) => {
+    return supabase.storage
+      .from(bucket)
+      .getPublicUrl(filePath);
+  },
+  
   // Additional utility functions can be added here
 };
 

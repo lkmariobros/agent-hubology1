@@ -2,7 +2,6 @@
 import { supabase } from '@/lib/supabase';
 import { PropertyFormState, PropertyFormData } from '@/types/property-form';
 import { toast } from 'sonner';
-import { useStorageUpload } from '@/hooks/useStorageUpload';
 
 // Save form as draft
 export const saveFormAsDraft = async (state: PropertyFormState): Promise<void> => {

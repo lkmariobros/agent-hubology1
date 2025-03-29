@@ -1,10 +1,16 @@
 
-// Simple re-export of the auth context hook for backward compatibility
-import { useAuthContext } from '@/context/auth';
+import { useAuthContext } from '@/context/auth/AuthContext';
 import type { AuthContextType } from '@/types/auth';
 
-// Export the useAuthContext hook as the default export for backward compatibility
-export default useAuthContext;
+/**
+ * Primary hook for accessing authentication context
+ */
+export function useAuth(): AuthContextType {
+  return useAuthContext();
+}
 
 // Export the type for use in components
 export type { AuthContextType };
+
+// Export the hook as default for backwards compatibility
+export default useAuth;
