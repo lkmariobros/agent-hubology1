@@ -42,7 +42,7 @@ export async function safeSelect<T>(
     
     // Apply any conditions if provided
     Object.entries(conditions).forEach(([key, value]) => {
-      query = query.eq(key as any, value as any);
+      query = query.eq(key, value);
     });
     
     const { data, error } = await query;
@@ -67,7 +67,7 @@ export async function safeInsert<T>(
   try {
     const { data: result, error } = await supabase
       .from(table)
-      .insert(data as any)
+      .insert(data)
       .select()
       .single();
     
@@ -90,11 +90,11 @@ export async function safeUpdate<T>(
   conditions: Record<string, any>
 ): Promise<{ data: T | null; error: string | null }> {
   try {
-    let query = supabase.from(table).update(data as any);
+    let query = supabase.from(table).update(data);
     
     // Apply any conditions
     Object.entries(conditions).forEach(([key, value]) => {
-      query = query.eq(key as any, value as any);
+      query = query.eq(key, value);
     });
     
     const { data: result, error } = await query.select().single();
@@ -121,7 +121,7 @@ export async function safeDelete(
     
     // Apply any conditions
     Object.entries(conditions).forEach(([key, value]) => {
-      query = query.eq(key as any, value as any);
+      query = query.eq(key, value);
     });
     
     const { error } = await query;
