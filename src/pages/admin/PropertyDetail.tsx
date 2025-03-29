@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -5,9 +6,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { useAuth } from '@/hooks/useAuth';
+import LoadingIndicator from '@/components/ui/loading-indicator';
 
 const AdminPropertyDetail = () => {
+  console.log('AdminPropertyDetail: Component rendering');
   const { id } = useParams<{ id: string }>();
+  const { loading: authLoading } = useAuth();
+  
+  // If auth is still loading, show a minimal loading indicator
+  if (authLoading) {
+    return <LoadingIndicator fullScreen size="lg" text="Verifying authentication..." />;
+  }
   
   return (
     <div className="p-6">

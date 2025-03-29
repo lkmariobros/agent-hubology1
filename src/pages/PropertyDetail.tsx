@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useProperty } from '@/hooks/useProperties';
-import { useAuth } from '@/hooks/useAuth';  // Ensure this is imported from hooks, not context
+import { useAuth } from '@/hooks/useAuth';  // Using the hook from hooks folder
 import { toast } from 'sonner';
 import { getMockDataMode } from '@/config';
 import { normalizeUuid, isValidUuid, createMockUuid } from '@/utils/uuidUtils';
@@ -13,6 +13,7 @@ import PropertyTabsSection from '@/components/property/PropertyTabsSection';
 import PropertyErrorState from '@/components/property/PropertyErrorState';
 import PropertyLoadingSkeleton from '@/components/property/PropertyLoadingSkeleton';
 import { TeamNote } from '@/components/property/TeamNotes';
+import LoadingIndicator from '@/components/ui/loading-indicator';
 
 // Mock data for team notes
 const mockNotes: TeamNote[] = [{
@@ -36,13 +37,18 @@ const mockNotes: TeamNote[] = [{
 }];
 
 const PropertyDetail = () => {
+  console.log('PropertyDetail: Component rendering');
   const { id } = useParams<{ id: string }>();
-  const { isAdmin } = useAuth();
+  const { isAdmin, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const normalizedId = id ? normalizeUuid(id) : null;
 
+  console.log('PropertyDetail: ID param =', id, 'normalized =', normalizedId);
+  console.log('PropertyDetail: Auth state =', { isAdmin, authLoading });
+
   // Check whether to use mock data based on config and localStorage
   const useMockData = getMockDataMode();
+  console.log('PropertyDetail: Using mock data =', useMockData);
   
   // Only enable the query if we're not using mock data and we have a valid UUID
   const isValidPropertyId = normalizedId ? isValidUuid(normalizedId) : false;
@@ -56,6 +62,8 @@ const PropertyDetail = () => {
   const [isLocalLoading, setIsLocalLoading] = useState(true);
   
   useEffect(() => {
+    console.log('PropertyDetail: useEffect running with propertyResponse =', propertyResponse);
+    
     dbLogger.log(`Property detail loaded for ID: ${normalizedId}`, { id: normalizedId, useMockData }, {
       table: 'enhanced_properties',
       operation: 'select'
@@ -114,14 +122,17 @@ const PropertyDetail = () => {
         }]
       };
       setProperty(mockProperty);
+      console.log('PropertyDetail: Mock property set', mockProperty);
     } else if (propertyResponse?.data) {
       dbLogger.success('Property data loaded from Supabase', propertyResponse.data, 'enhanced_properties', 'select', false);
       setProperty(propertyResponse.data);
+      console.log('PropertyDetail: Real property data set', propertyResponse.data);
     }
 
     // Set local loading state to give the app time to process mock data
     const timer = setTimeout(() => {
       setIsLocalLoading(false);
+      console.log('PropertyDetail: Local loading complete');
     }, 800);
 
     return () => clearTimeout(timer);
@@ -165,8 +176,15 @@ const PropertyDetail = () => {
     toast.info('Retrying...');
   };
 
+  // If auth is still loading, show a minimal loading indicator
+  if (authLoading) {
+    console.log('PropertyDetail: Auth is still loading');
+    return <LoadingIndicator fullScreen size="lg" text="Verifying authentication..." />;
+  }
+
   // Show skeleton during loading
   if (isLoading || isLocalLoading) {
+    console.log('PropertyDetail: Showing loading skeleton');
     return <PropertyLoadingSkeleton />;
   }
 
@@ -185,6 +203,7 @@ const PropertyDetail = () => {
 
   // Handle missing property data
   if (!property) {
+    console.log('PropertyDetail: Property is null, showing error state');
     return <PropertyErrorState 
       title="Property Not Found" 
       message="The requested property could not be found or may have been removed."
@@ -199,6 +218,8 @@ const PropertyDetail = () => {
     operation: 'select',
     showData: false
   });
+
+  console.log('PropertyDetail: Rendering property', property);
 
   // Extract property type from property_types relation
   const propertyType = property.property_types?.name || 'Property';

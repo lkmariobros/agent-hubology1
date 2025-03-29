@@ -8,3 +8,5 @@ export const useAuth = useAuthContext;
 
 // Export the type for use in components
 export type { AuthContextType };
+
+export default useAuth;

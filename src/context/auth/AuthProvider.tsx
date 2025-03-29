@@ -1,348 +1,243 @@
 
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { Session } from '@supabase/supabase-js';
-import { supabase } from '@/lib/supabase';
-import { toast } from 'sonner';
+import React, { useEffect, useMemo, useReducer, useState } from 'react';
+import { supabase, supabaseUtils } from '@/lib/supabase';
 import { AuthContext } from './AuthContext';
-import { fetchProfileAndRoles } from './authUtils';
-import { AuthProviderProps, UserProfile, UserRole, AuthContextType } from './types';
+import { UserRole, UserProfile } from '@/types/auth';
+import { toast } from 'sonner';
+import { Session } from '@supabase/supabase-js';
+
+// AuthProvider Props from types
+import { AuthProviderProps, AuthState } from './types';
+
+// Initial state for the auth context
+const initialState: AuthState = {
+  user: null,
+  profile: null,
+  session: null,
+  loading: true,
+  error: null,
+  roles: [],
+  activeRole: 'agent', // Default role
+};
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  // Router hooks
-  const navigate = useNavigate();
-  const location = useLocation();
-  
-  // Core auth state
-  const [session, setSession] = useState<Session | null>(null);
-  const [user, setUser] = useState<UserProfile | null>(null);
-  const [profile, setProfile] = useState<any | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<Error | null>(null);
-  const [roles, setRoles] = useState<UserRole[]>(['agent']);
-  const [activeRole, setActiveRole] = useState<UserRole>('agent');
-  
-  // Initialize auth state and set up listener for auth changes
+  const [state, setState] = useState<AuthState>(initialState);
+
+  // Effect to initialize auth session and subscribe to auth changes
   useEffect(() => {
-    console.log('Setting up auth state listener');
-    let isMounted = true;
+    console.log('AuthProvider: Setting up auth listener');
     
-    // First check for existing session
-    const checkExistingSession = async () => {
+    // Function to get and set the initial session
+    const initializeAuth = async () => {
       try {
-        const { data: { session: initialSession } } = await supabase.auth.getSession();
+        // Get the current session
+        const { data: { session } } = await supabase.auth.getSession();
         
-        if (!isMounted) return;
-        
-        console.log('Initial session check:', initialSession ? 'Session exists' : 'No session');
-        
-        if (initialSession?.user) {
-          setSession(initialSession);
-          // Create minimal user while we fetch the full profile
-          const defaultRoles: UserRole[] = ['agent'];
-          setUser({
-            id: initialSession.user.id,
-            email: initialSession.user.email || '',
-            name: initialSession.user.email?.split('@')[0] || '',
-            roles: defaultRoles,
-            activeRole: defaultRoles[0],
+        // If there's a session, get the user's profile and roles
+        if (session) {
+          const profile = await supabaseUtils.getProfile();
+          const roles = await supabaseUtils.getRoles();
+          
+          // Set the default active role (prefer admin if available)
+          const activeRole = roles.includes('admin') ? 'admin' : roles[0] || 'agent';
+          
+          const userProfile: UserProfile = {
+            id: session.user.id,
+            email: session.user.email || '',
+            name: profile?.full_name || session.user.email?.split('@')[0] || 'User',
+            roles: roles,
+            activeRole: activeRole,
+          };
+          
+          setState({
+            user: userProfile,
+            profile,
+            session,
+            loading: false,
+            error: null,
+            roles,
+            activeRole,
           });
           
-          // Fetch complete profile in the background
-          fetchProfileAndRoles(initialSession.user.id, initialSession.user.email)
-            .then(({ profile, userProfile, roles, activeRole }) => {
-              if (isMounted) {
-                setProfile(profile);
-                setUser(userProfile);
-                setRoles(roles);
-                setActiveRole(activeRole);
-                
-                // Check current location and redirect if needed
-                if (location.pathname === '/') {
-                  console.log('User is authenticated and on landing page, redirecting to dashboard');
-                  navigate('/dashboard');
-                }
-                setLoading(false);
-              }
-            })
-            .catch(err => {
-              console.error('Error setting up user profile:', err);
-              if (isMounted) setLoading(false);
-            });
+          console.log('AuthProvider: Auth session initialized with roles', roles);
         } else {
-          if (isMounted) {
-            setLoading(false);
-            // If no session and not on login page, redirect to login
-            if (location.pathname !== '/' && location.pathname !== '/reset-password') {
-              navigate('/');
-            }
-          }
+          // No session, reset state
+          setState({
+            ...initialState,
+            loading: false,
+          });
+          console.log('AuthProvider: No auth session found');
         }
-      } catch (err) {
-        console.error('Error checking initial session:', err);
-        if (isMounted) setLoading(false);
+      } catch (error) {
+        console.error('AuthProvider: Error initializing auth', error);
+        setState({
+          ...initialState,
+          error: error instanceof Error ? error : new Error('Unknown error occurred'),
+          loading: false,
+        });
       }
     };
     
-    // Set up auth state listener FIRST
+    // Initialize auth immediately
+    initializeAuth();
+    
+    // Subscribe to auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, newSession) => {
-        console.log('Auth state changed:', event);
+      async (event, session) => {
+        console.log('AuthProvider: Auth state changed', event);
         
-        if (!isMounted) return;
-        
-        setSession(newSession);
-        
-        if (newSession?.user) {
-          // Create minimal user while we fetch the full profile
-          const defaultRoles: UserRole[] = ['agent'];
-          const basicUser: UserProfile = {
-            id: newSession.user.id,
-            email: newSession.user.email || '',
-            name: newSession.user.email?.split('@')[0] || '',
-            roles: defaultRoles,
-            activeRole: defaultRoles[0],
-          };
-          
-          setUser(basicUser);
-          
-          // Fetch complete profile in the background
-          fetchProfileAndRoles(newSession.user.id, newSession.user.email)
-            .then(({ profile, userProfile, roles, activeRole }) => {
-              if (!isMounted) return;
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+          try {
+            if (session) {
+              const profile = await supabaseUtils.getProfile();
+              const roles = await supabaseUtils.getRoles();
+              const activeRole = roles.includes('admin') ? 'admin' : roles[0] || 'agent';
               
-              setProfile(profile);
-              setUser(userProfile);
-              setRoles(roles);
-              setActiveRole(activeRole);
+              const userProfile: UserProfile = {
+                id: session.user.id,
+                email: session.user.email || '',
+                name: profile?.full_name || session.user.email?.split('@')[0] || 'User',
+                roles: roles,
+                activeRole: activeRole,
+              };
               
-              // Handle specific auth events
-              if (event === 'SIGNED_IN') {
-                console.log('User signed in, navigating to dashboard');
-                toast.success('Signed in successfully');
-                navigate('/dashboard');
-              }
-            })
-            .catch(err => {
-              console.error('Error updating user profile after auth change:', err);
-            });
-        } else {
-          // Clear user when session is null
-          setUser(null);
-          setProfile(null);
-          setRoles(['agent']);
-          setActiveRole('agent');
-          
-          // Handle sign out
-          if (event === 'SIGNED_OUT') {
-            console.log('User signed out, navigating to login page');
-            toast.info('Signed out successfully');
-            navigate('/');
+              setState({
+                user: userProfile,
+                profile,
+                session,
+                loading: false,
+                error: null,
+                roles,
+                activeRole,
+              });
+            }
+          } catch (error) {
+            console.error('AuthProvider: Error updating auth state', error);
+            toast.error('Error updating authentication state');
           }
+        } else if (event === 'SIGNED_OUT') {
+          setState({
+            ...initialState,
+            loading: false,
+          });
         }
       }
     );
-
-    // Then check for existing session
-    checkExistingSession();
-
+    
     // Cleanup subscription on unmount
     return () => {
-      console.log('Cleaning up auth subscriptions');
-      isMounted = false;
       subscription.unsubscribe();
     };
-  }, [navigate, location.pathname]);
-
-  /**
-   * Sign in with email and password
-   */
-  const signIn = async (email: string, password: string): Promise<void> => {
+  }, []);
+  
+  // Authentication methods
+  const signIn = async (email: string, password: string) => {
+    setState(prev => ({ ...prev, loading: true }));
     try {
-      setLoading(true);
-      setError(null);
-      
-      console.log('Attempting to sign in with email:', email);
-      
       const { error } = await supabase.auth.signInWithPassword({ email, password });
-      
       if (error) throw error;
-      
-      console.log('Sign in successful - auth state change will handle redirection');
-      // Navigation and state changes are handled by onAuthStateChange
-      
-    } catch (err: any) {
-      console.error('Sign in error:', err.message);
-      setError(err);
-      toast.error(`Error signing in: ${err.message}`);
-      throw err;
-    } finally {
-      // Don't set loading to false here - let the auth state change handle it
+    } catch (error) {
+      console.error('AuthProvider: Sign in error', error);
+      setState(prev => ({
+        ...prev,
+        error: error instanceof Error ? error : new Error('Sign in failed'),
+        loading: false,
+      }));
+      throw error;
     }
   };
-
-  /**
-   * Sign up with email and password
-   */
-  const signUp = async (email: string, password: string): Promise<void> => {
+  
+  const signUp = async (email: string, password: string) => {
+    setState(prev => ({ ...prev, loading: true }));
     try {
-      setLoading(true);
-      setError(null);
-      
-      console.log('Attempting to sign up with email:', email);
-      
       const { error } = await supabase.auth.signUp({ email, password });
-      
       if (error) throw error;
-      
-      toast.success('Sign up successful! Please check your email for confirmation.');
-      console.log('Sign up successful');
-      
-    } catch (err: any) {
-      console.error('Sign up error:', err.message);
-      setError(err);
-      toast.error(`Error signing up: ${err.message}`);
-      throw err;
-    } finally {
-      setLoading(false);
+      toast.success('Sign up successful! Please verify your email.');
+    } catch (error) {
+      console.error('AuthProvider: Sign up error', error);
+      setState(prev => ({
+        ...prev,
+        error: error instanceof Error ? error : new Error('Sign up failed'),
+        loading: false,
+      }));
+      throw error;
     }
   };
-
-  /**
-   * Sign out the current user
-   */
-  const signOut = async (): Promise<void> => {
+  
+  const signOut = async () => {
+    setState(prev => ({ ...prev, loading: true }));
     try {
-      setLoading(true);
-      setError(null);
-      
-      console.log('Attempting to sign out');
-      
       const { error } = await supabase.auth.signOut();
-      
       if (error) throw error;
-      
-      localStorage.removeItem('user-role');
-      console.log('Sign out successful');
-      
-    } catch (err: any) {
-      console.error('Sign out error:', err.message);
-      setError(err);
-      toast.error(`Error signing out: ${err.message}`);
-      throw err;
-    } finally {
-      // Don't set loading to false here - let the auth state change handle it
+    } catch (error) {
+      console.error('AuthProvider: Sign out error', error);
+      setState(prev => ({
+        ...prev,
+        error: error instanceof Error ? error : new Error('Sign out failed'),
+        loading: false,
+      }));
+      throw error;
     }
   };
-
-  /**
-   * Send a password reset email
-   */
-  const resetPassword = async (email: string): Promise<void> => {
+  
+  const resetPassword = async (email: string) => {
+    setState(prev => ({ ...prev, loading: true }));
     try {
-      setLoading(true);
-      setError(null);
-      
-      console.log('Attempting to send password reset for:', email);
-      
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
-      });
-      
+      const { error } = await supabase.auth.resetPasswordForEmail(email);
       if (error) throw error;
-      
-      toast.success('Password reset link sent to your email!');
-      console.log('Password reset email sent successfully');
-      
-    } catch (err: any) {
-      console.error('Password reset error:', err.message);
-      setError(err);
-      toast.error(`Error resetting password: ${err.message}`);
-      throw err;
-    } finally {
-      setLoading(false);
+      toast.success('Password reset instructions sent to your email');
+      setState(prev => ({ ...prev, loading: false }));
+    } catch (error) {
+      console.error('AuthProvider: Reset password error', error);
+      setState(prev => ({
+        ...prev,
+        error: error instanceof Error ? error : new Error('Password reset failed'),
+        loading: false,
+      }));
+      throw error;
     }
   };
-
-  /**
-   * Switch between available user roles
-   */
-  const switchRole = (role: UserRole): void => {
-    if (!user) return;
-    
-    console.log('Switching to role:', role);
-    
-    // Verify user has the requested role
-    if (!user.roles.includes(role)) {
-      toast.error(`You do not have access to the ${role} role`);
-      return;
-    }
-    
-    // Update user with new active role
-    setActiveRole(role);
-    localStorage.setItem('user-role', role);
-    
-    // Update user state
-    setUser({
-      ...user,
-      activeRole: role
-    });
-    
-    // Navigate based on role
-    if (role === 'admin') {
-      navigate('/admin');
+  
+  const switchRole = (role: UserRole) => {
+    if (state.roles.includes(role)) {
+      setState(prev => ({
+        ...prev,
+        activeRole: role,
+        user: prev.user ? { ...prev.user, activeRole: role } : null,
+      }));
     } else {
-      navigate('/dashboard');
+      toast.error(`You do not have the ${role} role`);
     }
-    
-    toast.success(`Switched to ${role} portal`);
   };
-
-  /**
-   * Check if user has a specific role
-   */
-  const hasRole = (role: UserRole): boolean => {
-    return !!user && user.roles.includes(role);
+  
+  const hasRole = (role: UserRole) => {
+    return state.roles.includes(role);
   };
-
-  // Derived properties
-  const isAuthenticated = !!user;
-  const isAdmin = !!user && user.roles.includes('admin');
-
-  // Context value
-  const contextValue: AuthContextType = {
-    user,
-    profile,
-    session,
-    loading,
-    error,
-    isAuthenticated,
-    isAdmin,
-    roles,
-    activeRole,
+  
+  // Prepare the auth context value
+  const authContextValue = {
+    user: state.user,
+    profile: state.profile,
+    session: state.session,
+    loading: state.loading,
+    error: state.error,
+    isAuthenticated: !!state.session,
+    isAdmin: state.roles.includes('admin'),
+    roles: state.roles,
+    activeRole: state.activeRole,
     signIn,
     signUp,
     signOut,
     resetPassword,
     switchRole,
-    hasRole
+    hasRole,
   };
-
-  // Show loading state or render children
-  if (loading && !user) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-black">
-        <div className="flex flex-col items-center gap-4">
-          <div className="h-12 w-12 rounded-full border-4 border-t-purple-600 border-purple-300/30 animate-spin"></div>
-          <div className="text-white text-lg font-medium">Loading authentication...</div>
-        </div>
-      </div>
-    );
-  }
-
+  
   return (
-    <AuthContext.Provider value={contextValue}>
+    <AuthContext.Provider value={authContextValue}>
       {children}
     </AuthContext.Provider>
   );
 };
+
+export default AuthProvider;
