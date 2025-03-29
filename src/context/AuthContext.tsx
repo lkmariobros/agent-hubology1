@@ -59,9 +59,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [roles, setRoles] = useState<UserRole[]>(['agent']);
   const [activeRole, setActiveRole] = useState<UserRole>('agent');
   
-  // Fetch user profile and roles
+  // Fetch user profile and roles - moved outside useEffect to avoid closures
   const fetchProfileAndRoles = async (userId: string) => {
     try {
+      console.log('Fetching profile for user:', userId);
+      
       // Fetch profile
       const { data: profileData, error: profileError } = await supabase
         .from('agent_profiles')
@@ -69,11 +71,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         .eq('id', userId)
         .single();
         
-      if (profileError) throw profileError;
-      setProfile(profileData);
+      if (profileError) {
+        console.error('Profile fetch error:', profileError);
+        // Continue anyway - profile is optional
+      } else {
+        console.log('Profile fetched successfully');
+        setProfile(profileData);
+      }
       
       // Get full user profile with roles
-      const userProfile = await createUserProfile({ id: userId } as User);
+      const userProfile = await createUserProfile({ id: userId, email: session?.user?.email } as User);
+      console.log('User profile created:', userProfile);
+      
       setUser(userProfile);
       setRoles(userProfile.roles);
       setActiveRole(userProfile.activeRole);
@@ -89,74 +98,38 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           setActiveRole(savedRole);
         }
       }
+      
+      return userProfile;
     } catch (err) {
-      logger.error('Error fetching user profile or roles', { userId, error: err });
-      setError(err instanceof Error ? err : new Error('Failed to fetch profile or roles'));
+      console.error('Error fetching user profile or roles', { userId, error: err });
+      // Still return a basic profile even if there's an error
+      return {
+        id: userId,
+        email: session?.user?.email || '',
+        name: session?.user?.email?.split('@')[0] || '',
+        roles: ['agent'],
+        activeRole: 'agent',
+      };
     }
   };
   
   // Initialize auth state and set up listener for auth changes
   useEffect(() => {
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, newSession) => {
-        console.log('Auth state changed:', event);
+    console.log('Setting up auth state listener');
+    let isMounted = true;
+    
+    // First check for existing session
+    const checkExistingSession = async () => {
+      try {
+        const { data: { session: initialSession } } = await supabase.auth.getSession();
         
-        setSession(newSession);
+        if (!isMounted) return;
         
-        if (newSession?.user) {
-          try {
-            // Create user profile from session user with roles
-            await fetchProfileAndRoles(newSession.user.id);
-          } catch (err) {
-            console.error('Error creating user profile:', err);
-            // Still set basic user info even if role fetch fails
-            setUser({
-              id: newSession.user.id,
-              email: newSession.user.email || '',
-              name: newSession.user.email?.split('@')[0] || '',
-              roles: ['agent'],
-              activeRole: 'agent',
-            });
-          }
-        } else {
-          // Clear user when session is null
-          setUser(null);
-          setProfile(null);
-          setRoles(['agent']);
-          setActiveRole('agent');
-        }
+        console.log('Initial session check:', initialSession ? 'Session exists' : 'No session');
         
-        setLoading(false);
-        
-        // Handle specific auth events
-        if (event === 'SIGNED_IN') {
-          toast.success('Signed in successfully');
-          
-          // Navigate to dashboard if on landing page
-          if (location.pathname === '/') {
-            navigate('/dashboard');
-          }
-        } else if (event === 'SIGNED_OUT') {
-          toast.info('Signed out successfully');
-          navigate('/');
-        } else if (event === 'PASSWORD_RECOVERY') {
-          navigate('/reset-password');
-        }
-      }
-    );
-
-    // THEN check for existing session
-    supabase.auth.getSession().then(async ({ data: { session: initialSession } }) => {
-      setSession(initialSession);
-      
-      if (initialSession?.user) {
-        try {
-          // Create user profile from session user with roles
-          await fetchProfileAndRoles(initialSession.user.id);
-        } catch (err) {
-          console.error('Error creating user profile:', err);
-          // Still set basic user info even if role fetch fails
+        if (initialSession?.user) {
+          setSession(initialSession);
+          // Create minimal user while we fetch the full profile
           setUser({
             id: initialSession.user.id,
             email: initialSession.user.email || '',
@@ -164,14 +137,98 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             roles: ['agent'],
             activeRole: 'agent',
           });
+          
+          // Fetch complete profile in the background
+          fetchProfileAndRoles(initialSession.user.id)
+            .then(() => {
+              if (isMounted) {
+                // Check current location and redirect if needed
+                if (location.pathname === '/') {
+                  console.log('User is authenticated and on landing page, redirecting to dashboard');
+                  navigate('/dashboard');
+                }
+                setLoading(false);
+              }
+            })
+            .catch(err => {
+              console.error('Error setting up user profile:', err);
+              if (isMounted) setLoading(false);
+            });
+        } else {
+          if (isMounted) {
+            setLoading(false);
+            // If no session and not on login page, redirect to login
+            if (location.pathname !== '/' && location.pathname !== '/reset-password') {
+              navigate('/');
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Error checking initial session:', err);
+        if (isMounted) setLoading(false);
+      }
+    };
+    
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, newSession) => {
+        console.log('Auth state changed:', event);
+        
+        if (!isMounted) return;
+        
+        setSession(newSession);
+        
+        if (newSession?.user) {
+          // Create minimal user while we fetch the full profile
+          const basicUser = {
+            id: newSession.user.id,
+            email: newSession.user.email || '',
+            name: newSession.user.email?.split('@')[0] || '',
+            roles: ['agent'],
+            activeRole: 'agent',
+          };
+          
+          setUser(basicUser);
+          
+          // Fetch complete profile in the background
+          fetchProfileAndRoles(newSession.user.id)
+            .then(() => {
+              if (!isMounted) return;
+              
+              // Handle specific auth events
+              if (event === 'SIGNED_IN') {
+                console.log('User signed in, navigating to dashboard');
+                toast.success('Signed in successfully');
+                navigate('/dashboard');
+              }
+            })
+            .catch(err => {
+              console.error('Error updating user profile after auth change:', err);
+            });
+        } else {
+          // Clear user when session is null
+          setUser(null);
+          setProfile(null);
+          setRoles(['agent']);
+          setActiveRole('agent');
+          
+          // Handle sign out
+          if (event === 'SIGNED_OUT') {
+            console.log('User signed out, navigating to login page');
+            toast.info('Signed out successfully');
+            navigate('/');
+          }
         }
       }
-      
-      setLoading(false);
-    });
+    );
+
+    // Then check for existing session
+    checkExistingSession();
 
     // Cleanup subscription on unmount
     return () => {
+      console.log('Cleaning up auth subscriptions');
+      isMounted = false;
       subscription.unsubscribe();
     };
   }, [navigate, location.pathname]);
@@ -184,15 +241,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setLoading(true);
       setError(null);
       
+      console.log('Attempting to sign in with email:', email);
+      
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       
       if (error) throw error;
+      
+      console.log('Sign in successful - auth state change will handle redirection');
+      // Navigation and state changes are handled by onAuthStateChange
+      
     } catch (err: any) {
+      console.error('Sign in error:', err.message);
       setError(err);
       toast.error(`Error signing in: ${err.message}`);
       throw err;
     } finally {
-      setLoading(false);
+      // Don't set loading to false here - let the auth state change handle it
     }
   };
 
@@ -204,12 +268,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setLoading(true);
       setError(null);
       
+      console.log('Attempting to sign up with email:', email);
+      
       const { error } = await supabase.auth.signUp({ email, password });
       
       if (error) throw error;
       
       toast.success('Sign up successful! Please check your email for confirmation.');
+      console.log('Sign up successful');
+      
     } catch (err: any) {
+      console.error('Sign up error:', err.message);
       setError(err);
       toast.error(`Error signing up: ${err.message}`);
       throw err;
@@ -226,17 +295,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setLoading(true);
       setError(null);
       
+      console.log('Attempting to sign out');
+      
       const { error } = await supabase.auth.signOut();
       
       if (error) throw error;
       
       localStorage.removeItem('user-role');
+      console.log('Sign out successful');
+      
     } catch (err: any) {
+      console.error('Sign out error:', err.message);
       setError(err);
       toast.error(`Error signing out: ${err.message}`);
       throw err;
     } finally {
-      setLoading(false);
+      // Don't set loading to false here - let the auth state change handle it
     }
   };
 
@@ -248,6 +322,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setLoading(true);
       setError(null);
       
+      console.log('Attempting to send password reset for:', email);
+      
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/reset-password`,
       });
@@ -255,7 +331,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (error) throw error;
       
       toast.success('Password reset link sent to your email!');
+      console.log('Password reset email sent successfully');
+      
     } catch (err: any) {
+      console.error('Password reset error:', err.message);
       setError(err);
       toast.error(`Error resetting password: ${err.message}`);
       throw err;
@@ -269,6 +348,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
    */
   const switchRole = (role: UserRole): void => {
     if (!user) return;
+    
+    console.log('Switching to role:', role);
     
     // Verify user has the requested role
     if (!user.roles.includes(role)) {
@@ -325,6 +406,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     switchRole,
     hasRole
   };
+
+  // Show loading state or render children
+  if (loading && !user) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-black">
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-12 w-12 rounded-full border-4 border-t-purple-600 border-purple-300/30 animate-spin"></div>
+          <div className="text-white text-lg font-medium">Loading authentication...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <AuthContext.Provider value={contextValue}>

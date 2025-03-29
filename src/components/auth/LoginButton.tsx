@@ -27,13 +27,11 @@ const LoginButton: React.FC<LoginButtonProps> = ({
       console.log('Starting demo login process');
       // This is just a demo - in a real app, you'd have a proper login form
       await signIn('demo@example.com', 'password123');
-      console.log('Demo login successful, navigating to dashboard');
-      navigate('/dashboard');
-      toast.success('Signed in as demo user');
+      // Auth state change listener will handle navigation
+      console.log('Demo login request completed');
     } catch (error) {
       console.error('Demo login error:', error);
       toast.error('Failed to sign in with demo account');
-    } finally {
       setLoading(false);
     }
   };

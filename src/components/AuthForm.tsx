@@ -36,13 +36,11 @@ const AuthForm = () => {
       setLoading(true);
       console.log('Attempting sign in with:', email);
       await signIn(email, password);
-      // No need to manually navigate, the auth state change will trigger the useEffect
-      console.log('Sign in successful');
+      // The navigation will be handled by the auth state change in the useEffect above
+      console.log('Sign in request completed');
     } catch (error) {
       console.error('Login error:', error);
-      // Error handling already done in signIn function
-    } finally {
-      setLoading(false);
+      setLoading(false); // Make sure to set loading to false on error
     }
   };
   
@@ -58,10 +56,9 @@ const AuthForm = () => {
       setLoading(true);
       await signUp(email, password);
       setIsLogin(true); // Switch to login view
+      setLoading(false);
     } catch (error) {
       console.error('Registration error:', error);
-      // Error handling already done in signUp function
-    } finally {
       setLoading(false);
     }
   };
@@ -75,10 +72,9 @@ const AuthForm = () => {
     try {
       setLoading(true);
       await resetPassword(email);
+      setLoading(false);
     } catch (error) {
       console.error('Reset password error:', error);
-      // Error handling already done in resetPassword function
-    } finally {
       setLoading(false);
     }
   };
