@@ -1,8 +1,7 @@
-
 import { supabase } from '@/lib/supabase';
 import { PropertyFormState, PropertyFormData } from '@/types/property-form';
 import { toast } from 'sonner';
-import { propertyFormHelpers } from '@/utils/dbHelpers';
+import propertyFormHelpers from '@/utils/propertyFormHelpers';
 import { castParam } from '@/utils/supabaseHelpers';
 
 // Save form as draft

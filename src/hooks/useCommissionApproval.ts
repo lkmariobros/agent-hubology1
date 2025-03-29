@@ -319,8 +319,21 @@ export const useCommissionApprovals = (
       const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
       
-      // Get total count for pagination
-      const { count: totalCount, error: countError } = await query.count();
+      // Get total count for pagination - fixed version using proper count() method
+      const countQuery = supabase
+        .from('commission_approvals')
+        .select('*', { count: 'exact', head: true });
+      
+      // Apply the same filters to count query
+      if (status && status !== 'All') {
+        countQuery.eq('status' as any, status as any);
+      }
+      
+      if (agentId) {
+        countQuery.eq('submitted_by' as any, agentId as any);
+      }
+      
+      const { count, error: countError } = await countQuery;
       
       if (countError) {
         console.error('Error counting approvals:', countError);
@@ -339,7 +352,7 @@ export const useCommissionApprovals = (
       
       return { 
         approvals: mapApprovalData(data || []),
-        totalCount: totalCount || 0
+        totalCount: count || 0
       };
     },
     enabled: !!user

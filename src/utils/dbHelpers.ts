@@ -1,5 +1,6 @@
 
 import { supabase } from '@/lib/supabase';
+import { PostgrestSingleResponse } from '@supabase/supabase-js';
 
 /**
  * Helper functions for database operations with proper typing
@@ -11,7 +12,7 @@ import { supabase } from '@/lib/supabase';
  * @returns Result with data and error
  */
 export async function safeQueryExecution<T>(
-  queryFn: () => Promise<{ data: T | null; error: any }>
+  queryFn: () => Promise<PostgrestSingleResponse<T>>
 ): Promise<{ data: T | null; error: string | null }> {
   try {
     const { data, error } = await queryFn();
@@ -36,7 +37,7 @@ export async function safeSelect<T>(
   columns: string = '*',
   conditions: Record<string, any> = {}
 ): Promise<{ data: T[] | null; error: string | null }> {
-  return safeQueryExecution<T[]>(async () => {
+  try {
     let query = supabase.from(table).select(columns);
     
     // Apply any conditions if provided
@@ -44,8 +45,16 @@ export async function safeSelect<T>(
       query = query.eq(key as any, value as any);
     });
     
-    return await query;
-  });
+    const { data, error } = await query;
+    
+    if (error) {
+      return { data: null, error: error.message };
+    }
+    
+    return { data: data as T[], error: null };
+  } catch (err: any) {
+    return { data: null, error: err.message || 'An unexpected error occurred' };
+  }
 }
 
 /**
@@ -55,13 +64,21 @@ export async function safeInsert<T>(
   table: string,
   data: Record<string, any>
 ): Promise<{ data: T | null; error: string | null }> {
-  return safeQueryExecution<T>(async () => {
-    return await supabase
+  try {
+    const { data: result, error } = await supabase
       .from(table)
       .insert(data as any)
       .select()
       .single();
-  });
+    
+    if (error) {
+      return { data: null, error: error.message };
+    }
+    
+    return { data: result as T, error: null };
+  } catch (err: any) {
+    return { data: null, error: err.message || 'An unexpected error occurred' };
+  }
 }
 
 /**
@@ -72,7 +89,7 @@ export async function safeUpdate<T>(
   data: Record<string, any>,
   conditions: Record<string, any>
 ): Promise<{ data: T | null; error: string | null }> {
-  return safeQueryExecution<T>(async () => {
+  try {
     let query = supabase.from(table).update(data as any);
     
     // Apply any conditions
@@ -80,8 +97,16 @@ export async function safeUpdate<T>(
       query = query.eq(key as any, value as any);
     });
     
-    return await query.select().single();
-  });
+    const { data: result, error } = await query.select().single();
+    
+    if (error) {
+      return { data: null, error: error.message };
+    }
+    
+    return { data: result as T, error: null };
+  } catch (err: any) {
+    return { data: null, error: err.message || 'An unexpected error occurred' };
+  }
 }
 
 /**
@@ -91,7 +116,7 @@ export async function safeDelete(
   table: string,
   conditions: Record<string, any>
 ): Promise<{ error: string | null }> {
-  return safeQueryExecution(async () => {
+  try {
     let query = supabase.from(table).delete();
     
     // Apply any conditions
@@ -99,8 +124,16 @@ export async function safeDelete(
       query = query.eq(key as any, value as any);
     });
     
-    return await query;
-  });
+    const { error } = await query;
+    
+    if (error) {
+      return { error: error.message };
+    }
+    
+    return { error: null };
+  } catch (err: any) {
+    return { error: err.message || 'An unexpected error occurred' };
+  }
 }
 
 export default {

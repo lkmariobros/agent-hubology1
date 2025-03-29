@@ -22,7 +22,7 @@ const ApprovalInfo: React.FC<ApprovalInfoProps> = ({ commissionAmount }) => {
     <Card>
       <CardContent className="p-4">
         {needsApproval ? (
-          <Alert variant="warning">
+          <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertTitle>Approval Required</AlertTitle>
             <AlertDescription>
