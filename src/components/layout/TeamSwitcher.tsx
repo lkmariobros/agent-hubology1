@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Building, Shield, ChevronDown } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { UserRole } from '@/types/auth';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * Component that allows users to switch between different roles/portals
@@ -18,6 +19,7 @@ import { UserRole } from '@/types/auth';
  */
 export function TeamSwitcher() {
   const { user, switchRole, isAdmin, activeRole } = useAuth();
+  const navigate = useNavigate();
   
   if (!user) return null;
   
@@ -43,6 +45,17 @@ export function TeamSwitcher() {
   
   if (!currentRoleInfo) return null;
 
+  const handleSwitchRole = (role: UserRole) => {
+    switchRole(role);
+    
+    // Navigate to the appropriate route based on the role
+    if (role === 'admin') {
+      navigate('/admin');
+    } else {
+      navigate('/dashboard');
+    }
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -65,7 +78,7 @@ export function TeamSwitcher() {
         {otherRoles.map((item) => (
           <DropdownMenuItem 
             key={item.role}
-            onClick={() => switchRole(item.role)}
+            onClick={() => handleSwitchRole(item.role)}
             className="cursor-pointer"
           >
             <div className="flex items-center">

@@ -16,18 +16,20 @@ export const roleUtils = {
   ): void => {
     console.log('Attempting to switch role:', { currentRoles, newRole });
     
-    // Force enable admin role for josephkwantum@gmail.com
-    if (newRole === 'admin' && document.cookie.includes('userEmail=josephkwantum%40gmail.com')) {
+    // Special admin access for josephkwantum@gmail.com
+    const isSpecialAdminEmail = document.cookie.includes('userEmail=josephkwantum%40gmail.com');
+    
+    // Force enable admin role for special email
+    if (newRole === 'admin' && isSpecialAdminEmail) {
       console.log('Special admin access granted via email check');
       onRoleChange('admin');
-      toast.success(`Switched to admin role`);
-      return;
+      return; // Exit early - toast will be shown by the calling component
     }
     
     if (currentRoles.includes(newRole)) {
       console.log('Role switch successful:', newRole);
       onRoleChange(newRole);
-      toast.success(`Switched to ${newRole} role`);
+      // Toast will be shown by the calling component
     } else {
       console.warn('Role switch failed - role not available:', newRole);
       toast.error(`You do not have the ${newRole} role`);

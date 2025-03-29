@@ -11,6 +11,7 @@ import { Building, Shield, ChevronsUpDown } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { UserRole } from '@/types/auth';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 interface PortalSwitcherProps {
   showLabel?: boolean;
@@ -24,6 +25,7 @@ export function PortalSwitcher({ showLabel = true, className = "" }: PortalSwitc
   const { isAdmin, activeRole, switchRole, roles } = useAuth();
   const isAdminActive = activeRole === 'admin';
   const [hasAdminRole, setHasAdminRole] = useState(false);
+  const navigate = useNavigate();
   
   useEffect(() => {
     // Force recheck for admin role
@@ -50,7 +52,15 @@ export function PortalSwitcher({ showLabel = true, className = "" }: PortalSwitc
   // For admin users, show the dropdown with portal switching options
   const handleSwitchRole = (role: UserRole) => {
     switchRole(role);
-    toast.success(`Switched to ${role === 'admin' ? 'Admin' : 'Agent'} Portal`);
+    
+    // Add navigation based on role
+    if (role === 'admin') {
+      navigate('/admin');
+      toast.success('Switched to Admin Portal');
+    } else {
+      navigate('/dashboard');
+      toast.success('Switched to Agent Portal');
+    }
   };
 
   return (
