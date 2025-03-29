@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
-import { AuthProvider } from './context/AuthContext';  // Using the consolidated AuthProvider
+import { AuthProvider } from './context/auth';  // Updated import path
 import { NotificationProvider } from './context/NotificationContext';
 
 // Layouts
