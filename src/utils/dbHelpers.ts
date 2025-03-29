@@ -135,7 +135,7 @@ export const dbHelpers = {
   }
 };
 
-// Wrapper for the formSubmission.ts file
+// Wrapper for working with property-related database operations
 export const propertyFormHelpers = {
   /**
    * Get or create a property type

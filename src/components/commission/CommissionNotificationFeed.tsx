@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
@@ -38,8 +37,8 @@ const CommissionNotificationFeed: React.FC<CommissionNotificationFeedProps> = ({
       const { data, error } = await supabase
         .from('notifications')
         .select('*')
-        .eq('user_id', userId as any)
-        .in('type', [
+        .eq('user_id' as any, userId as any)
+        .in('type' as any, [
           'approval_status_change',
           'tier_update',
           'commission_milestone'

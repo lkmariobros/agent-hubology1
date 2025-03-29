@@ -39,7 +39,7 @@ if (import.meta.env.DEV && (!SUPABASE_URL || !SUPABASE_ANON_KEY)) {
   console.warn('Missing Supabase environment variables. Using fallback values.');
 }
 
-// Add a listener for auth state changes
+// Set up a listener for auth state changes (outside the client initialization)
 supabase.auth.onAuthStateChange((event, session) => {
   console.log('[Supabase Client] Auth state change:', event, !!session);
 });
@@ -56,7 +56,7 @@ export const handleSupabaseError = (error: any, operation: string) => {
   };
 };
 
-// Utility functions for Supabase operations
+// Type-safe utility functions for Supabase operations
 export const supabaseUtils = {
   // Get user roles from the database
   getRoles: async (): Promise<UserRole[]> => {
@@ -70,12 +70,13 @@ export const supabaseUtils = {
     }
   },
 
-  // Utility function for fetching a user profile by ID
+  // Utility function for fetching a user profile by ID using type assertions safely
   getUserProfile: async (userId: string) => {
     try {
       const { data, error } = await supabase
         .from('agent_profiles')
         .select('*')
+        // Use type assertion to handle the deep typing issue
         .eq('id' as any, userId as any)
         .single();
         
@@ -111,8 +112,6 @@ export const supabaseUtils = {
       .from(bucket)
       .getPublicUrl(filePath);
   },
-  
-  // Additional utility functions can be added here
 };
 
 // Export default supabase instance
