@@ -1,5 +1,5 @@
 
-import { Session, User } from '@supabase/supabase-js';
+import { Session } from '@supabase/supabase-js';
 import { UserProfile, UserRole, AuthContextType } from '@/types/auth';
 
 // Re-export the types from the main types file for convenience

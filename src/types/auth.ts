@@ -1,70 +1,30 @@
 
-import { Session, User as SupabaseUser } from '@supabase/supabase-js';
+import { Session, User } from '@supabase/supabase-js';
 
-/**
- * Defines the available user roles in the application
- * - agent: Standard property agent role
- * - admin: Administrator with elevated permissions
- * - manager: Manager role with team oversight
- * - team_leader: Team leader role 
- * - finance: Finance department role
- */
-export type UserRole = 'agent' | 'admin' | 'manager' | 'team_leader' | 'finance';
+export type UserRole = 'admin' | 'agent' | 'team_leader' | 'finance' | 'viewer';
 
-/**
- * Extended user profile with application-specific fields
- * beyond the basic Supabase user information
- */
 export interface UserProfile {
   id: string;
   email: string;
-  name?: string;
-  avatar?: string;
+  name: string;
   roles: UserRole[];
   activeRole: UserRole;
-  tier?: string;
-  joinDate?: string;
 }
 
-/**
- * Authentication context interface defining all
- * available auth-related state and methods
- */
 export interface AuthContextType {
-  // Session State
   user: UserProfile | null;
-  profile: any | null; // Agent profile data from database
+  profile: any | null;
   session: Session | null;
   loading: boolean;
   error: Error | null;
   isAuthenticated: boolean;
-  
-  // Role Management
   isAdmin: boolean;
-  activeRole: UserRole;
   roles: UserRole[];
-  switchRole: (role: UserRole) => void;
-  hasRole: (role: UserRole) => boolean;
-  
-  // Auth Actions
+  activeRole: UserRole;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
-}
-
-/**
- * Type guard to check if a user has a specific role
- */
-export function hasRole(user: UserProfile | null, role: UserRole): boolean {
-  return !!user && user.roles.includes(role);
-}
-
-/**
- * Type for protected route component props
- */
-export interface ProtectedRouteProps {
-  children: React.ReactNode;
-  requireAdmin?: boolean;
-  redirectTo?: string;
+  switchRole: (role: UserRole) => void;
+  hasRole: (role: UserRole) => boolean;
 }
