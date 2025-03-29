@@ -2,12 +2,14 @@
 import { useQuery } from '@tanstack/react-query';
 import { dashboardApi } from '@/lib/api';
 import { DashboardMetric, Property, Transaction, Opportunity, ApiResponse } from '@/types';
+import { Building2, Users, DollarSign, LineChart } from 'lucide-react';
 
 // Using these constants as fallbacks and default values
 const DEFAULT_METRICS = {
   data: {
     metrics: [
       {
+        id: "1",
         label: 'Total Listings',
         value: '142',
         change: 12.5,
@@ -15,6 +17,7 @@ const DEFAULT_METRICS = {
         icon: 'building'
       },
       {
+        id: "2",
         label: 'Active Agents',
         value: '38',
         change: 4.2,
@@ -22,6 +25,7 @@ const DEFAULT_METRICS = {
         icon: 'users'
       },
       {
+        id: "3",
         label: 'Monthly Revenue',
         value: '$92,428',
         change: -2.8,
@@ -29,6 +33,7 @@ const DEFAULT_METRICS = {
         icon: 'dollar'
       },
       {
+        id: "4",
         label: 'Conversion Rate',
         value: '24.3%',
         change: 6.1,

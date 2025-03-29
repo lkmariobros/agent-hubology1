@@ -242,7 +242,7 @@ function getMockOpportunities(): ApiResponse<any[]> {
         location: 'Kuala Lumpur (KLCC, Bangsar)',
         status: 'Urgent',
         postedBy: 'Sarah Johnson',
-        postedAt: '2024-06-01T09:30:00Z'
+        postedDate: '2024-06-01T09:30:00Z'  // Updated from postedAt to postedDate
       },
       {
         id: '2',
@@ -253,7 +253,7 @@ function getMockOpportunities(): ApiResponse<any[]> {
         location: 'Bukit Bintang, Pavilion area',
         status: 'New',
         postedBy: 'Michael Brown',
-        postedAt: '2024-06-05T14:15:00Z'
+        postedDate: '2024-06-05T14:15:00Z'  // Updated from postedAt to postedDate
       },
       {
         id: '3',
@@ -264,7 +264,7 @@ function getMockOpportunities(): ApiResponse<any[]> {
         location: 'Selangor (Rawang, Semenyih)',
         status: 'Featured',
         postedBy: 'John Smith',
-        postedAt: '2024-06-03T11:45:00Z'
+        postedDate: '2024-06-03T11:45:00Z'  // Updated from postedAt to postedDate
       }
     ],
     message: 'Opportunities retrieved successfully',
