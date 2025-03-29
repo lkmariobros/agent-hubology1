@@ -1,37 +1,37 @@
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { MessageSquare, Trash2 } from 'lucide-react';
-import { CommissionApprovalComment, useAddApprovalComment, useDeleteApprovalComment } from '@/hooks/useCommissionApproval';
-import { toast } from 'sonner';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Trash2 } from "lucide-react";
+import { format, formatDistanceToNow } from 'date-fns';
+import { CommissionApprovalComment, useApprovalComments, useAddApprovalComment, useDeleteApprovalComment } from '@/hooks/useCommissionApproval';
 import { useAuth } from '@/hooks/useAuth';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { toast } from 'sonner';
 
 interface CommentsSectionProps {
   approvalId: string;
-  comments: CommissionApprovalComment[];
-  isLoading?: boolean;
 }
 
-const CommentsSection: React.FC<CommentsSectionProps> = ({ approvalId, comments, isLoading }) => {
+export const CommentsSection: React.FC<CommentsSectionProps> = ({ approvalId }) => {
+  const { data: comments = [], isLoading, error } = useApprovalComments(approvalId);
+  const addComment = useAddApprovalComment();
+  const deleteComment = useDeleteApprovalComment();
   const [newComment, setNewComment] = useState('');
-  const { user } = useAuth();
-  const addCommentMutation = useAddApprovalComment();
-  const deleteCommentMutation = useDeleteApprovalComment();
+  const { user, isAdmin } = useAuth();
   
   const handleAddComment = async () => {
     if (!newComment.trim()) {
-      toast.error("Comment cannot be empty");
+      toast.error('Comment cannot be empty');
       return;
     }
     
     try {
-      await addCommentMutation.mutateAsync({
+      await addComment.mutateAsync({
         approvalId,
-        content: newComment
+        commentText: newComment
       });
       setNewComment('');
     } catch (error) {
@@ -40,140 +40,132 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ approvalId, comments,
   };
   
   const handleDeleteComment = async (commentId: string) => {
-    if (window.confirm('Are you sure you want to delete this comment?')) {
-      try {
-        await deleteCommentMutation.mutateAsync({
-          commentId,
-          approvalId
-        });
-      } catch (error) {
-        console.error('Error deleting comment:', error);
+    try {
+      await deleteComment.mutateAsync({
+        commentId,
+        approvalId
+      });
+    } catch (error) {
+      console.error('Error deleting comment:', error);
+    }
+  };
+  
+  const getInitials = (name?: string, email?: string): string => {
+    if (name) {
+      const parts = name.split(' ');
+      if (parts.length > 1) {
+        return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
       }
-    }
-  };
-  
-  // Format date string
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-  
-  // Generate user initials from email or ID
-  const getUserInitials = (userString: string) => {
-    if (!userString) return 'U';
-    
-    // If it's an email address
-    if (userString.includes('@')) {
-      const parts = userString.split('@')[0].split(/[._-]/);
-      return parts.length > 1 
-        ? (parts[0][0] + parts[1][0]).toUpperCase()
-        : userString.slice(0, 2).toUpperCase();
+      return name.substring(0, 2).toUpperCase();
     }
     
-    // If it's a UUID
-    return userString.slice(0, 2).toUpperCase();
+    if (email) {
+      return email.substring(0, 2).toUpperCase();
+    }
+    
+    return 'UN';
   };
   
-  const getUserColor = (userString: string) => {
+  const getAvatarColor = (str?: string): string => {
+    if (!str) return 'bg-primary';
+    
     const colors = [
-      'bg-blue-500', 'bg-green-500', 'bg-purple-500', 
-      'bg-amber-500', 'bg-red-500', 'bg-indigo-500'
+      'bg-red-500',
+      'bg-blue-500',
+      'bg-green-500',
+      'bg-yellow-500',
+      'bg-purple-500',
+      'bg-pink-500',
+      'bg-indigo-500',
+      'bg-orange-500',
+      'bg-teal-500',
     ];
     
-    // Simple hash for consistent color per user
-    const hash = userString.split('').reduce((acc, char) => {
-      return acc + char.charCodeAt(0);
-    }, 0);
+    // Simple hash function
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
     
-    return colors[hash % colors.length];
+    return colors[Math.abs(hash) % colors.length];
   };
   
-  if (isLoading) {
-    return (
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-md flex items-center">
-            <MessageSquare className="h-4 w-4 mr-2" />
-            Comments
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex justify-center py-6">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-          </div>
-        </CardContent>
-      </Card>
-    );
+  if (error) {
+    return <div>Error loading comments: {error.message}</div>;
   }
   
   return (
-    <Card className="h-full flex flex-col">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-md flex items-center">
-          <MessageSquare className="h-4 w-4 mr-2" />
-          Comments
-        </CardTitle>
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-lg">Comments</CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col h-full">
-        <ScrollArea className="flex-grow mb-4 max-h-[400px]">
-          {comments && comments.length > 0 ? (
-            <div className="space-y-4">
-              {comments.map((comment) => (
-                <div key={comment.id} className="flex items-start gap-3">
-                  <Avatar className="h-8 w-8">
-                    <AvatarFallback className={getUserColor(comment.created_by)}>
-                      {getUserInitials(comment.created_by)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 bg-muted p-3 rounded-lg text-sm">
-                    <div className="flex justify-between items-start">
-                      <span className="font-medium text-xs text-muted-foreground">
-                        {formatDate(comment.created_at)}
-                      </span>
-                      {user?.id === comment.created_by && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6"
-                          onClick={() => handleDeleteComment(comment.id)}
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      )}
-                    </div>
-                    <p className="mt-1 whitespace-pre-wrap">{comment.content}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-center py-4 text-sm text-muted-foreground">
-              No comments yet
-            </p>
-          )}
-        </ScrollArea>
-        
-        <div className="mt-auto">
-          <Textarea
+      <CardContent className="space-y-4">
+        <div className="flex gap-2">
+          <Textarea 
+            placeholder="Add a comment..."
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
-            placeholder="Add a comment..."
-            className="min-h-[80px] mb-2"
+            className="resize-none min-h-[80px]"
           />
-          <div className="flex justify-end">
-            <Button
+          <div className="flex flex-col justify-end">
+            <Button 
               onClick={handleAddComment}
-              disabled={addCommentMutation.isPending || !newComment.trim()}
+              disabled={addComment.isPending || !newComment.trim()}
             >
-              {addCommentMutation.isPending ? 'Posting...' : 'Post Comment'}
+              {addComment.isPending ? 'Posting...' : 'Post'}
             </Button>
           </div>
         </div>
+        
+        {isLoading ? (
+          <p>Loading comments...</p>
+        ) : comments.length === 0 ? (
+          <p className="text-muted-foreground text-center py-4">No comments yet</p>
+        ) : (
+          <div className="space-y-4 pt-2">
+            {comments.map((comment: CommissionApprovalComment) => (
+              <div key={comment.id} className="relative">
+                <div className="flex gap-3">
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback className={getAvatarColor(comment.user?.name || comment.user?.email)}>
+                      {getInitials(comment.user?.name, comment.user?.email)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="font-medium text-sm">
+                          {comment.user?.name || comment.user?.email || 'Unknown User'}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {comment.created_at ? (
+                            <span title={format(new Date(comment.created_at), 'PPpp')}>
+                              {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
+                            </span>
+                          ) : 'Unknown time'}
+                        </p>
+                      </div>
+                      
+                      {(user?.id === comment.created_by || isAdmin) && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-6 w-6 p-0 text-destructive"
+                          onClick={() => handleDeleteComment(comment.id)}
+                          disabled={deleteComment.isPending}
+                        >
+                          <Trash2 size={14} />
+                        </Button>
+                      )}
+                    </div>
+                    <p className="mt-1 text-sm">{comment.comment_text}</p>
+                  </div>
+                </div>
+                <Separator className="my-4" />
+              </div>
+            ))}
+          </div>
+        )}
       </CardContent>
     </Card>
   );

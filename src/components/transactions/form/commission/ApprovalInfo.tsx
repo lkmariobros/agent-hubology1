@@ -20,10 +20,6 @@ const ApprovalInfo: React.FC<ApprovalInfoProps> = ({
     isLoading
   } = useCommissionApprovalCheck(commissionAmount);
   
-  // Extract threshold and exceedsThreshold from data
-  const threshold = data?.threshold || 0;
-  const exceedsThreshold = data?.exceedsThreshold || false;
-
   // Format currency
   const formatCurrency = (value: number) => {
     return value.toLocaleString('en-US', {
@@ -48,6 +44,9 @@ const ApprovalInfo: React.FC<ApprovalInfoProps> = ({
         </CardContent>
       </Card>;
   }
+
+  const threshold = data?.threshold || 0;
+  const exceedsThreshold = data?.exceedsThreshold || false;
 
   return (
     <Card>
