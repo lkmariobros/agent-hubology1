@@ -2,7 +2,7 @@
 import * as Sentry from '@sentry/react';
 
 export function initSentry() {
-  const dsn = "https://0daa1b896105f2b8507f5b6783948871@o4509071816523776.ingest.us.sentry.io/4509071830810624";
+  const dsn = "https://ca140a22d2c0617d9c0eb3b996fa799f@o4509071816523776.ingest.us.sentry.io/4509071846014976";
   
   // Always initialize Sentry, but with different settings for dev/prod
   Sentry.init({
