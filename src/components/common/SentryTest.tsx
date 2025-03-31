@@ -63,6 +63,16 @@ const SentryTest = () => {
     });
   };
   
+  // Direct "Break the world" button that throws error immediately
+  const breakTheWorld = () => {
+    toast.error('Breaking the world!', {
+      description: 'This error should appear in your Sentry dashboard'
+    });
+    
+    // Throw an error directly, will be caught by Sentry's global handler
+    throw new Error("This is your first error! The world is broken!");
+  };
+  
   // Function to test breadcrumbs
   const addBreadcrumb = () => {
     Sentry.addBreadcrumb({
@@ -150,6 +160,13 @@ const SentryTest = () => {
               variant="destructive"
             >
               Trigger Unhandled Error
+            </Button>
+            <Button 
+              onClick={breakTheWorld}
+              variant="destructive"
+              className="bg-red-700 hover:bg-red-800"
+            >
+              Break the World!
             </Button>
           </div>
         </div>
