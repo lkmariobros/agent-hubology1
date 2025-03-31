@@ -3,6 +3,7 @@ import React, { Component, ErrorInfo, PropsWithChildren } from 'react';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle } from 'lucide-react';
 import { logError } from '@/services/logging';
+import * as Sentry from '@sentry/react';
 
 interface ErrorBoundaryProps extends PropsWithChildren {
   fallback?: React.ReactNode;
@@ -28,8 +29,17 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-    // Log the error
+    // Log the error to our logging service
     logError(error, errorInfo.componentStack);
+    
+    // Report to Sentry in production
+    if (import.meta.env.PROD) {
+      Sentry.captureException(error, {
+        contexts: {
+          react: { componentStack: errorInfo.componentStack }
+        }
+      });
+    }
     
     // Call the optional onError callback
     if (this.props.onError) {
@@ -83,6 +93,29 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     return this.props.children;
   }
 }
+
+// Create a Sentry-wrapped error boundary for easier usage
+export const SentryErrorBoundary = Sentry.withErrorBoundary(ErrorBoundary, {
+  fallback: (props) => (
+    <div className="flex flex-col items-center justify-center p-6 rounded-lg border border-destructive/20 bg-destructive/10 text-destructive-foreground space-y-4 my-4">
+      <AlertTriangle className="h-12 w-12" />
+      <div className="space-y-2 text-center">
+        <h3 className="text-lg font-semibold">Something went wrong</h3>
+        <p className="text-sm text-muted-foreground">
+          The application encountered an unexpected error.
+        </p>
+      </div>
+      <div className="flex gap-2">
+        <Button 
+          variant="outline" 
+          onClick={() => window.location.reload()}
+        >
+          Reload Page
+        </Button>
+      </div>
+    </div>
+  )
+});
 
 // Functional component wrapper for easier use with hooks
 export const withErrorBoundary = <P extends {}>(
