@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useProperty } from '@/hooks/useProperties';
-import useAuth from '@/hooks/useAuth';  // Updated import
+import useAuth from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { getMockDataMode } from '@/config';
 import { normalizeUuid, isValidUuid, createMockUuid } from '@/utils/uuidUtils';
@@ -14,6 +13,9 @@ import PropertyErrorState from '@/components/property/PropertyErrorState';
 import PropertyLoadingSkeleton from '@/components/property/PropertyLoadingSkeleton';
 import { TeamNote } from '@/components/property/TeamNotes';
 import LoadingIndicator from '@/components/ui/loading-indicator';
+import SentryTest from '@/components/common/SentryTest';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 
 // Mock data for team notes
 const mockNotes: TeamNote[] = [{
@@ -257,6 +259,11 @@ const PropertyDetail = () => {
         notes={notes}
         onAddNote={handleAddNote}
       />
+
+      {/* Sentry Test Component */}
+      <Card className="mt-6">
+        <SentryTest />
+      </Card>
     </div>
   );
 };
