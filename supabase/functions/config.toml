@@ -1,0 +1,11 @@
+
+project_id = "synabhmsxsvsxkyzhfss"
+
+[functions.get_commission_forecast]
+verify_jwt = true
+
+[functions.generate_payment_schedule]
+verify_jwt = true
+
+[functions.process_commission_installment]
+verify_jwt = true
