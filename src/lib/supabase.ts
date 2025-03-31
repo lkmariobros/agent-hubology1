@@ -1,27 +1,14 @@
-
 import { createClient } from '@supabase/supabase-js';
 import { UserRole } from '@/types/auth';
+import { SUPABASE_API_URL, SUPABASE_ANON_KEY, validateEnvironment } from '@/config/supabase';
 
-// Get environment variables with better error handling for production
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-// Validate required environment variables in production
-if (import.meta.env.PROD && (!SUPABASE_URL || !SUPABASE_ANON_KEY)) {
-  console.error(
-    'Missing required Supabase environment variables. ' + 
-    'Make sure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set in your production environment.'
-  );
-}
-
-// Fallback values for development only
-const devFallbackUrl = "https://synabhmsxsvsxkyzhfss.supabase.co";
-const devFallbackKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN5bmFiaG1zeHN2c3hreXpoZnNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIzNjg2MjMsImV4cCI6MjA1Nzk0NDYyM30.jzCMXi4f7i6EAdABneTYc55oVI2bs8e5CVtnyWJ1rG0";
+// Validate environment variables in production
+validateEnvironment();
 
 // Create a Supabase client instance with explicit auth configuration
 export const supabase = createClient(
-  SUPABASE_URL || devFallbackUrl,
-  SUPABASE_ANON_KEY || devFallbackKey, 
+  SUPABASE_API_URL,
+  SUPABASE_ANON_KEY, 
   {
     auth: {
       persistSession: true,
@@ -49,8 +36,11 @@ export const supabase = createClient(
 );
 
 // Log if environment variables are missing in non-production environments
-if (import.meta.env.DEV && (!SUPABASE_URL || !SUPABASE_ANON_KEY)) {
-  console.warn('Missing Supabase environment variables. Using fallback values for development only.');
+if (import.meta.env.DEV && (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY)) {
+  console.warn(
+    'Running in development mode with fallback Supabase credentials. ' +
+    'For production, ensure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set.'
+  );
 }
 
 // Error handling utilities for Supabase operations
