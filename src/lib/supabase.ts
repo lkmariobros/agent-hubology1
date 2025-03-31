@@ -2,53 +2,69 @@
 import { createClient } from '@supabase/supabase-js';
 import { UserRole } from '@/types/auth';
 
-// Get environment variables or fallback to hardcoded values for development
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "https://synabhmsxsvsxkyzhfss.supabase.co";
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN5bmFiaG1zeHN2c3hreXpoZnNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIzNjg2MjMsImV4cCI6MjA1Nzk0NDYyM30.jzCMXi4f7i6EAdABneTYc55oVI2bs8e5CVtnyWJ1rG0";
+// Get environment variables with better error handling for production
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-// Create a Supabase client instance explicitly without complex type parameters
-export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true,
-    storageKey: 'property-agency-auth-token',
-    storage: localStorage,
-  },
-  global: {
-    headers: {
-      'x-application-name': 'property-agency-system',
-    }
-  },
-  db: {
-    schema: 'public'
-  },
-  realtime: {
-    timeout: 30000, // 30s timeout for realtime channels (default is 10s)
-    params: {
-      eventsPerSecond: 10
+// Validate required environment variables in production
+if (import.meta.env.PROD && (!SUPABASE_URL || !SUPABASE_ANON_KEY)) {
+  console.error(
+    'Missing required Supabase environment variables. ' + 
+    'Make sure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set in your production environment.'
+  );
+}
+
+// Fallback values for development only
+const devFallbackUrl = "https://synabhmsxsvsxkyzhfss.supabase.co";
+const devFallbackKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN5bmFiaG1zeHN2c3hreXpoZnNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIzNjg2MjMsImV4cCI6MjA1Nzk0NDYyM30.jzCMXi4f7i6EAdABneTYc55oVI2bs8e5CVtnyWJ1rG0";
+
+// Create a Supabase client instance with explicit auth configuration
+export const supabase = createClient(
+  SUPABASE_URL || devFallbackUrl,
+  SUPABASE_ANON_KEY || devFallbackKey, 
+  {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+      storageKey: 'property-agency-auth-token',
+      storage: localStorage,
+    },
+    global: {
+      headers: {
+        'x-application-name': 'property-agency-system',
+        'x-application-version': import.meta.env.VITE_APP_VERSION || '1.0.0',
+      }
+    },
+    db: {
+      schema: 'public'
+    },
+    realtime: {
+      timeout: 30000, // 30s timeout for realtime channels
+      params: {
+        eventsPerSecond: 10
+      }
     }
   }
-});
+);
 
 // Log if environment variables are missing in non-production environments
 if (import.meta.env.DEV && (!SUPABASE_URL || !SUPABASE_ANON_KEY)) {
-  console.warn('Missing Supabase environment variables. Using fallback values.');
+  console.warn('Missing Supabase environment variables. Using fallback values for development only.');
 }
-
-// Create separate auth state listener
-supabase.auth.onAuthStateChange((event, session) => {
-  console.log('[Supabase Client] Auth state change:', event, !!session);
-});
 
 // Error handling utilities for Supabase operations
 export const handleSupabaseError = (error: any, operation: string) => {
-  console.error(`Supabase ${operation} error:`, error);
+  const errorMessage = error?.message || `An error occurred during ${operation}`;
+  
+  if (import.meta.env.DEV) {
+    console.error(`Supabase ${operation} error:`, error);
+  }
   
   // Return user-friendly error message
   return {
     success: false, 
-    error: error.message || `An error occurred during ${operation}`,
+    error: errorMessage,
     details: import.meta.env.DEV ? error : undefined
   };
 };

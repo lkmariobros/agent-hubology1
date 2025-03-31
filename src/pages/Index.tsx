@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { AUTH_SETTINGS } from '@/config/supabase';
 
 const Index = () => {
   const { isAuthenticated, loading, session, error } = useAuth();
@@ -22,6 +23,19 @@ const Index = () => {
   // Use a timeout to prevent getting stuck in loading state
   const timeoutRef = useRef<number | null>(null);
   
+  // Monitor for auth state in development
+  const logAuthState = () => {
+    if (import.meta.env.DEV) {
+      console.log('[IndexPage] Auth state:', { 
+        isAuthenticated, 
+        loading, 
+        sessionExists: !!session,
+        initialCheckDone,
+        error: error?.message
+      });
+    }
+  };
+  
   useEffect(() => {
     // Set up cleanup function
     return () => {
@@ -32,15 +46,9 @@ const Index = () => {
   
   // If user is already authenticated, redirect to dashboard
   useEffect(() => {
-    console.log('[IndexPage] Auth state:', { 
-      isAuthenticated, 
-      loading, 
-      sessionExists: !!session,
-      initialCheckDone,
-      error: error?.message
-    });
+    logAuthState();
     
-    // Set a timeout to avoid infinite loading state - increased to 25 seconds
+    // Set a timeout to avoid infinite loading state
     if (loading && !timeoutRef.current) {
       timeoutRef.current = window.setTimeout(() => {
         if (isMounted.current && loading) {
@@ -49,7 +57,7 @@ const Index = () => {
           setTimeoutCount(prev => prev + 1);
           toast.error('Authentication check timed out. Please try refreshing.');
         }
-      }, 25000); // 25 seconds timeout (increased from 15s)
+      }, AUTH_SETTINGS.AUTH_TIMEOUT);
     }
     
     // Clear timeout when loading completes
@@ -60,14 +68,12 @@ const Index = () => {
     
     // Only redirect after the initial auth check is complete
     if (!loading && isAuthenticated && !isRedirecting) {
-      console.log('[IndexPage] User authenticated, redirecting to dashboard');
       setIsRedirecting(true);
-      navigate('/dashboard');
+      navigate(AUTH_SETTINGS.REDIRECT_PATHS.AFTER_LOGIN);
     }
     
     // Mark initial check as done when loading is complete
     if (!loading && !initialCheckDone) {
-      console.log('[IndexPage] Initial auth check completed');
       setInitialCheckDone(true);
     }
   }, [isAuthenticated, loading, navigate, initialCheckDone, session, error]);
@@ -93,15 +99,18 @@ const Index = () => {
               {error?.message || "Authentication verification timed out repeatedly."}
             </AlertDescription>
           </Alert>
+          
           <p className="text-white mb-4">
             This could be due to network issues, server problems, or browser settings. Try these options:
           </p>
+          
           <ul className="list-disc list-inside text-gray-300 mb-4 space-y-2">
             <li>Check your internet connection</li>
             <li>Clear your browser cache and cookies</li>
             <li>Try using a different browser</li>
             <li>Disable any VPN or proxy services</li>
           </ul>
+          
           <div className="flex space-x-3">
             <Button 
               onClick={handleRetry} 
