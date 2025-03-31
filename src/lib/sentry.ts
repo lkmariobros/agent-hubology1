@@ -5,7 +5,7 @@ export function initSentry() {
   // Only initialize Sentry in production
   if (import.meta.env.PROD) {
     Sentry.init({
-      dsn: import.meta.env.VITE_SENTRY_DSN || '',
+      dsn: "https://0daa1b896105f2b8507f5b6783948871@o4509071816523776.ingest.us.sentry.io/4509071830810624",
       environment: import.meta.env.MODE,
       integrations: [
         new Sentry.BrowserTracing({
