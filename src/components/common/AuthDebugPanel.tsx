@@ -62,7 +62,7 @@ const AuthDebugPanel = () => {
                   <span className="text-slate-400">Email:</span> {user?.email || 'null'}
                 </div>
                 <div className="mb-2">
-                  <span className="text-slate-400">Name:</span> {user?.full_name || 'null'}
+                  <span className="text-slate-400">Name:</span> {user?.name || 'null'}
                 </div>
                 <div className="mb-2">
                   <span className="text-slate-400">Roles:</span> {roles.join(', ') || 'none'}

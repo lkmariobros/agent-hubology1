@@ -20,7 +20,7 @@ export function useAuth(): AuthContextType {
   
   // Set Sentry user context when authenticated
   if (auth.user?.id && !auth.loading) {
-    setUser(auth.user.id, auth.user.email, auth.user.full_name);
+    setUser(auth.user.id, auth.user.email, auth.user.name);
   }
   
   return auth;
