@@ -22,6 +22,7 @@ export interface ApprovalComment {
   created_by_name?: string;
   comment: string;
   created_at: string;
+  user_name?: string; // Added missing property
 }
 
 export interface CommissionApproval {
@@ -54,19 +55,19 @@ export interface ApprovalCountResult {
   rejected: number;
 }
 
-// Export individual hooks for direct imports
+// Export individual hooks directly for use with the hook object pattern
 export const useSystemConfiguration = (configKey: string) => {
   return useQuery({
     queryKey: ['system-config', configKey],
     queryFn: async () => {
       // Default values for testing/development
-      const defaultConfigs = {
+      const defaultConfigs: Record<string, { value: string }> = {
         commission_approval_threshold: { value: '10000' },
         commission_auto_approve_below: { value: '5000' },
         commission_approval_levels: { value: '3' }
       };
       
-      return defaultConfigs[configKey as keyof typeof defaultConfigs] || null;
+      return defaultConfigs[configKey] || null;
     }
   });
 };
@@ -236,7 +237,13 @@ export const useApprovalComments = (approvalId: string) => {
       
       if (error) throw error;
       
-      return data || [];
+      // Ensure all comments have user_name property
+      const commentsWithUserNames = (data || []).map(comment => ({
+        ...comment,
+        user_name: comment.created_by_name || 'Unknown User'
+      }));
+      
+      return commentsWithUserNames;
     },
     staleTime: 60 * 1000 // 1 minute
   });
@@ -300,21 +307,19 @@ export const useDeleteApprovalCommentMutation = () => {
 // Import for sendNotification functionality
 import { useSendNotification } from './useSendNotification';
 
-// Wrapper for hooks object - this is what we'll export as default
-const useCommissionApproval = () => {
-  return {
-    useSystemConfiguration,
-    useCommissionApprovalCheck,
-    useApprovalStatusCounts,
-    usePendingCommissionTotal,
-    useApprovedCommissionTotal,
-    useCommissionApprovals,
-    useCommissionApprovalDetail,
-    useUpdateApprovalStatusMutation,
-    useApprovalComments,
-    useAddApprovalCommentMutation,
-    useDeleteApprovalCommentMutation
-  };
-};
+// We export the hooks directly rather than wrapping them in a function
+const useCommissionApproval = () => ({
+  useSystemConfiguration,
+  useCommissionApprovalCheck,
+  useApprovalStatusCounts,
+  usePendingCommissionTotal,
+  useApprovedCommissionTotal,
+  useCommissionApprovals,
+  useCommissionApprovalDetail,
+  useUpdateApprovalStatusMutation,
+  useApprovalComments,
+  useAddApprovalCommentMutation,
+  useDeleteApprovalCommentMutation
+});
 
 export default useCommissionApproval;

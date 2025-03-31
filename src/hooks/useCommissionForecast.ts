@@ -1,7 +1,23 @@
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-import { CommissionForecast } from '@/types/commission';
+import { toast } from 'sonner';
+
+export interface CommissionForecast {
+  months: MonthlyForecast[];
+  total: number;
+}
+
+export interface MonthlyForecast {
+  month: string;
+  amount: number;
+}
+
+export interface ForecastSettings {
+  installmentCount: number;
+  paymentCutoffDay: number;
+  firstPaymentDelay: number;
+}
 
 export const useFetchCommissionForecast = (agentId?: string, months: number = 6) => {
   return useQuery({
@@ -26,10 +42,46 @@ export const useFetchCommissionForecast = (agentId?: string, months: number = 6)
   });
 };
 
+export const useForecastSettings = () => {
+  return useQuery({
+    queryKey: ['forecast-settings'],
+    queryFn: async (): Promise<ForecastSettings> => {
+      // This would normally get data from Supabase but for now return default values
+      return {
+        installmentCount: 3,
+        paymentCutoffDay: 15,
+        firstPaymentDelay: 30
+      };
+    }
+  });
+};
+
+export const useUpdateForecastSettingsMutation = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (settings: ForecastSettings) => {
+      // This would normally update data in Supabase
+      return settings;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['forecast-settings'] });
+      toast.success('Forecast settings updated');
+    },
+    onError: (error: Error) => {
+      toast.error('Failed to update forecast settings', {
+        description: error.message
+      });
+    }
+  });
+};
+
 // Create a useCommissionForecast hook that returns all the forecast-related hooks
 export const useCommissionForecast = () => {
   return {
-    useFetchCommissionForecast
+    useFetchCommissionForecast,
+    useForecastSettings,
+    useUpdateForecastSettingsMutation
   };
 };
 

@@ -10,9 +10,9 @@ interface ApprovalInfoProps {
 }
 
 const ApprovalInfo: React.FC<ApprovalInfoProps> = ({ commissionAmount }) => {
-  const { useSystemConfiguration, useCommissionApprovalCheck } = useCommissionApproval;
-  const { data: thresholdConfig, isLoading } = useSystemConfiguration('commission_approval_threshold');
-  const { requiresApproval } = useCommissionApprovalCheck(commissionAmount);
+  const commissionApprovalHooks = useCommissionApproval();
+  const { data: thresholdConfig, isLoading } = commissionApprovalHooks.useSystemConfiguration('commission_approval_threshold');
+  const { requiresApproval } = commissionApprovalHooks.useCommissionApprovalCheck(commissionAmount);
   
   // Get threshold from config or use default
   const threshold = thresholdConfig?.value ? parseInt(thresholdConfig.value, 10) : 10000;

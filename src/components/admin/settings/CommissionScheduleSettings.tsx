@@ -1,209 +1,147 @@
 
-import React from 'react';
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
+import React, { useState, useEffect } from 'react';
+import { 
+  Card, 
+  CardHeader, 
+  CardTitle, 
+  CardContent,
+  CardFooter
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useForm } from 'react-hook-form';
-import { Trash, Plus, Save } from 'lucide-react';
-import { useCommissionForecast } from '@/hooks/useCommissionForecast';
-import { CommissionForecastSettings, InstallmentAmountConfig } from '@/types/commission';
-import { Skeleton } from '@/components/ui/skeleton';
-import { toast } from 'sonner';
+import { Separator } from '@/components/ui/separator';
+import { useCommissionForecast, ForecastSettings } from '@/hooks/useCommissionForecast';
+import { Loader2 } from 'lucide-react';
 
-interface CommissionScheduleSettingsProps {
-  agencyId: string;
-}
-
-const CommissionScheduleSettings: React.FC<CommissionScheduleSettingsProps> = ({ agencyId }) => {
-  const { useForecastSettings, useUpdateForecastSettingsMutation } = useCommissionForecast();
-  const { data: settings, isLoading } = useForecastSettings(agencyId);
-  const updateSettings = useUpdateForecastSettingsMutation();
+const CommissionScheduleSettings = () => {
+  const commissionForecastHooks = useCommissionForecast();
   
-  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<CommissionForecastSettings>();
-  const installments = watch('default_installment_amounts') || [];
-
-  // Initialize form values when settings load
-  React.useEffect(() => {
+  const { 
+    data: settings, 
+    isLoading 
+  } = commissionForecastHooks.useForecastSettings();
+  
+  const { 
+    mutateAsync: updateSettings, 
+    isPending: isUpdating 
+  } = commissionForecastHooks.useUpdateForecastSettingsMutation();
+  
+  const [formValues, setFormValues] = useState<ForecastSettings>({
+    installmentCount: 3,
+    paymentCutoffDay: 15,
+    firstPaymentDelay: 30
+  });
+  
+  useEffect(() => {
     if (settings) {
-      setValue('payment_cutoff_day', settings.payment_cutoff_day);
-      setValue('default_installment_count', settings.default_installment_count);
-      setValue('default_installment_amounts', settings.default_installment_amounts);
-      setValue('forecast_horizon_months', settings.forecast_horizon_months);
+      setFormValues(settings);
     }
-  }, [settings, setValue]);
-
-  // Handle form submission
-  const onSubmit = (data: CommissionForecastSettings) => {
-    // Validate installments add up to expected total or include remainder
-    const hasRemainder = data.default_installment_amounts.some(
-      i => i.amount === 'remainder'
-    );
-    
-    updateSettings.mutate({
-      ...data,
-      agency_id: agencyId
-    });
+  }, [settings]);
+  
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormValues(prev => ({
+      ...prev,
+      [name]: Number(value)
+    }));
   };
-
-  // Add new installment
-  const addInstallment = () => {
-    const newInstallments = [...(installments || [])];
-    newInstallments.push({
-      number: newInstallments.length + 1,
-      amount: 0
-    });
-    setValue('default_installment_amounts', newInstallments);
-  };
-
-  // Remove installment
-  const removeInstallment = (index: number) => {
-    const newInstallments = [...(installments || [])];
-    newInstallments.splice(index, 1);
-    
-    // Renumber installments
-    newInstallments.forEach((item, i) => {
-      item.number = i + 1;
-    });
-    
-    setValue('default_installment_amounts', newInstallments);
-  };
-
-  // Update installment amount
-  const updateInstallmentAmount = (index: number, value: string) => {
-    const newInstallments = [...(installments || [])];
-    
-    if (value.toLowerCase() === 'remainder') {
-      newInstallments[index].amount = 'remainder';
-    } else {
-      const numValue = parseFloat(value);
-      newInstallments[index].amount = isNaN(numValue) ? 0 : numValue;
+  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await updateSettings(formValues);
+    } catch (error) {
+      console.error('Failed to update settings:', error);
     }
-    
-    setValue('default_installment_amounts', newInstallments);
   };
-
+  
   if (isLoading) {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle>Commission Schedule Settings</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Skeleton className="h-8 w-full" />
-          <Skeleton className="h-8 w-full" />
-          <Skeleton className="h-8 w-full" />
-          <Skeleton className="h-20 w-full" />
+        <CardContent className="py-10">
+          <div className="flex justify-center items-center">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
         </CardContent>
       </Card>
     );
   }
-
+  
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Commission Schedule Settings</CardTitle>
-        <CardDescription>Configure default payment schedule settings</CardDescription>
+        <CardTitle>Commission Payment Schedule Settings</CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="payment_cutoff_day">Payment Cutoff Day</Label>
-              <Input
-                id="payment_cutoff_day"
+        <form onSubmit={handleSubmit}>
+          <div className="space-y-6">
+            <div>
+              <Label htmlFor="installmentCount">Default Number of Installments</Label>
+              <Input 
+                id="installmentCount"
+                name="installmentCount"
                 type="number"
-                {...register('payment_cutoff_day', { 
-                  required: 'Required',
-                  min: { value: 1, message: 'Must be between 1 and 31' },
-                  max: { value: 31, message: 'Must be between 1 and 31' }
-                })}
+                min="1"
+                max="12"
+                value={formValues.installmentCount}
+                onChange={handleChange}
               />
-              {errors.payment_cutoff_day && (
-                <p className="text-xs text-red-500">{errors.payment_cutoff_day.message}</p>
-              )}
-              <p className="text-xs text-muted-foreground">
-                Day of month when installments are processed
+              <p className="text-sm text-muted-foreground mt-1">
+                The default number of installments for commission payments
               </p>
             </div>
             
-            <div className="space-y-2">
-              <Label htmlFor="forecast_horizon_months">Forecast Horizon (Months)</Label>
-              <Input
-                id="forecast_horizon_months"
+            <Separator />
+            
+            <div>
+              <Label htmlFor="paymentCutoffDay">Payment Cutoff Day</Label>
+              <Input 
+                id="paymentCutoffDay"
+                name="paymentCutoffDay"
                 type="number"
-                {...register('forecast_horizon_months', { 
-                  required: 'Required',
-                  min: { value: 1, message: 'Must be at least 1' },
-                  max: { value: 36, message: 'Cannot exceed 36 months' }
-                })}
+                min="1"
+                max="28"
+                value={formValues.paymentCutoffDay}
+                onChange={handleChange}
               />
-              {errors.forecast_horizon_months && (
-                <p className="text-xs text-red-500">{errors.forecast_horizon_months.message}</p>
-              )}
-              <p className="text-xs text-muted-foreground">
-                Number of months to include in forecasts
+              <p className="text-sm text-muted-foreground mt-1">
+                Day of the month (1-28) used as cutoff for payment processing
               </p>
             </div>
             
-            <div className="md:col-span-2 space-y-2">
-              <Label>Default Installment Configuration</Label>
-              
-              <div className="space-y-2">
-                {installments?.map((installment, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <div className="w-14 shrink-0">
-                      <Label className="sr-only" htmlFor={`installment-${index}`}>
-                        Installment {installment.number}
-                      </Label>
-                      <div className="h-10 flex items-center justify-center bg-muted rounded-md">
-                        #{installment.number}
-                      </div>
-                    </div>
-                    
-                    <Input
-                      id={`installment-${index}`}
-                      value={installment.amount === 'remainder' ? 'remainder' : installment.amount}
-                      onChange={(e) => updateInstallmentAmount(index, e.target.value)}
-                      placeholder="Amount or 'remainder'"
-                    />
-                    
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeInstallment(index)}
-                    >
-                      <Trash className="h-4 w-4" />
-                      <span className="sr-only">Remove installment {installment.number}</span>
-                    </Button>
-                  </div>
-                ))}
-                
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="mt-2"
-                  onClick={addInstallment}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Installment
-                </Button>
-                
-                <p className="text-xs text-muted-foreground mt-2">
-                  Set installment amounts or use 'remainder' for the final installment to automatically calculate the balance
-                </p>
-              </div>
+            <Separator />
+            
+            <div>
+              <Label htmlFor="firstPaymentDelay">First Payment Delay (days)</Label>
+              <Input 
+                id="firstPaymentDelay"
+                name="firstPaymentDelay"
+                type="number"
+                min="0"
+                max="90"
+                value={formValues.firstPaymentDelay}
+                onChange={handleChange}
+              />
+              <p className="text-sm text-muted-foreground mt-1">
+                Number of days to delay the first installment payment after approval
+              </p>
             </div>
           </div>
           
-          <div className="flex justify-end">
-            <Button type="submit" disabled={updateSettings.isPending}>
-              <Save className="h-4 w-4 mr-2" />
-              Save Settings
+          <CardFooter className="flex justify-end pt-6 px-0">
+            <Button 
+              type="submit" 
+              disabled={isUpdating}
+            >
+              {isUpdating ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : 'Save Settings'}
             </Button>
-          </div>
+          </CardFooter>
         </form>
       </CardContent>
     </Card>

@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import useCommissionApproval from '@/hooks/useCommissionApproval';
+import useCommissionApproval, { CommissionApproval } from '@/hooks/useCommissionApproval';
 import useCommissionSchedules from '@/hooks/useCommissionSchedules';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -13,6 +12,7 @@ import ApprovalComments from './ApprovalComments';
 import ApprovalHistory from './ApprovalHistory';
 import PaymentScheduleCard from '@/components/commission/schedules/PaymentScheduleCard';
 import PaymentScheduleGenerator from './PaymentScheduleGenerator';
+import { formatCurrency } from '@/lib/utils';
 
 interface ApprovalDetailProps {
   id: string;
@@ -23,8 +23,8 @@ const ApprovalDetail: React.FC<ApprovalDetailProps> = ({ id }) => {
   const [currentTab, setCurrentTab] = useState('details');
   const [refreshCounter, setRefreshCounter] = useState(0);
   
-  const { useCommissionApprovalDetail } = useCommissionApproval();
-  const { data: approvalData, isLoading, error, refetch } = useCommissionApprovalDetail(id);
+  const commissionApprovalHooks = useCommissionApproval();
+  const { data: approvalData, isLoading, error, refetch } = commissionApprovalHooks.useCommissionApprovalDetail(id);
   
   const { useApprovalPaymentSchedule } = useCommissionSchedules();
   const { data: paymentSchedule, isLoading: scheduleLoading } = useApprovalPaymentSchedule(id);
@@ -41,32 +41,6 @@ const ApprovalDetail: React.FC<ApprovalDetailProps> = ({ id }) => {
     if (!dateString) return 'Not available';
     const date = new Date(dateString);
     return date.toLocaleString();
-  };
-  
-  const formatCurrency = (amount: number) => {
-    if (!amount && amount !== 0) return 'Not available';
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      maximumFractionDigits: 0
-    }).format(amount);
-  };
-  
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'Approved':
-        return <CheckCircle className="h-5 w-5 text-green-500" />;
-      case 'Rejected':
-        return <AlertCircle className="h-5 w-5 text-red-500" />;
-      case 'Pending':
-      case 'Under Review':
-        return <Clock className="h-5 w-5 text-orange-500" />;
-      case 'Ready for Payment':
-      case 'Paid':
-        return <DollarSign className="h-5 w-5 text-blue-500" />;
-      default:
-        return <Clock className="h-5 w-5" />;
-    }
   };
   
   if (isLoading) {
@@ -122,7 +96,15 @@ const ApprovalDetail: React.FC<ApprovalDetailProps> = ({ id }) => {
     );
   }
   
-  const transactionDetails = approval.property_transactions || {};
+  // Safely access property_transactions with default values
+  const transactionDetails = approval.property_transactions || {
+    commission_amount: 0,
+    transaction_value: 0,
+    commission_rate: 0,
+    transaction_date: '',
+    notes: ''
+  };
+  
   const hasSchedule = !!paymentSchedule || !!approval.payment_schedule_id;
   const showScheduleGenerator = approval.status === 'Approved' && !hasSchedule;
   

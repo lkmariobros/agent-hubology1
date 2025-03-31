@@ -5,20 +5,18 @@ import LoadingIndicator from '@/components/ui/loading-indicator';
 
 interface ApprovalHistoryProps {
   approvalId: string;
-  history?: ApprovalHistoryItem[];
 }
 
 const ApprovalHistory: React.FC<ApprovalHistoryProps> = ({
-  approvalId,
-  history
+  approvalId
 }) => {
-  const { useCommissionApprovalDetail } = useCommissionApproval();
-  const { data, isLoading: isLoadingHistory } = useCommissionApprovalDetail(approvalId);
+  const commissionApprovalHooks = useCommissionApproval();
+  const { data, isLoading: isLoadingHistory } = commissionApprovalHooks.useCommissionApprovalDetail(approvalId);
   
-  // If history is provided as a prop, use it; otherwise, use data from the hook
-  const historyItems = history || data?.history || [];
+  // Use data from the hook
+  const historyItems = data?.history || [];
   
-  if (isLoadingHistory && !history) {
+  if (isLoadingHistory) {
     return <LoadingIndicator text="Loading history..." />;
   }
   

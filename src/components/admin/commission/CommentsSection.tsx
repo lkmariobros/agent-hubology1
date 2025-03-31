@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -15,13 +14,13 @@ interface CommentsSectionProps {
 }
 
 const CommentsSection: React.FC<CommentsSectionProps> = ({ approvalId }) => {
-  const { useApprovalComments, useAddApprovalCommentMutation, useDeleteApprovalCommentMutation } = useCommissionApproval;
+  const commissionApprovalHooks = useCommissionApproval();
   const [comment, setComment] = useState('');
   const { user } = useAuth();
   
-  const { data: comments = [], isLoading } = useApprovalComments(approvalId);
-  const addCommentMutation = useAddApprovalCommentMutation();
-  const deleteCommentMutation = useDeleteApprovalCommentMutation();
+  const { data: comments = [], isLoading } = commissionApprovalHooks.useApprovalComments(approvalId);
+  const addCommentMutation = commissionApprovalHooks.useAddApprovalCommentMutation();
+  const deleteCommentMutation = commissionApprovalHooks.useDeleteApprovalCommentMutation();
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -14,13 +14,10 @@ const ApprovalComments: React.FC<ApprovalCommentsProps> = ({
   approvalId
 }) => {
   const [comment, setComment] = useState('');
-  const { 
-    useApprovalComments, 
-    useAddApprovalCommentMutation 
-  } = useCommissionApproval();
+  const commissionApprovalHooks = useCommissionApproval();
   
-  const { data: comments, isLoading } = useApprovalComments(approvalId);
-  const { mutateAsync: addComment, isPending: isAddingComment } = useAddApprovalCommentMutation();
+  const { data: comments, isLoading } = commissionApprovalHooks.useApprovalComments(approvalId);
+  const { mutateAsync: addComment, isPending: isAddingComment } = commissionApprovalHooks.useAddApprovalCommentMutation();
   
   const handleAddComment = async () => {
     if (!comment.trim()) return;

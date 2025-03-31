@@ -26,8 +26,8 @@ import { Textarea } from '@/components/ui/textarea';
 
 const BulkApprovalTools = () => {
   const navigate = useNavigate();
-  const { useUpdateApprovalStatusMutation, useCommissionApprovals } = useCommissionApproval;
-  const updateStatusMutation = useUpdateApprovalStatusMutation();
+  const commissionApprovalHooks = useCommissionApproval();
+  const updateStatusMutation = commissionApprovalHooks.useUpdateApprovalStatusMutation();
   
   // Initialize state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -39,7 +39,7 @@ const BulkApprovalTools = () => {
   const pageSize = 10;
   
   // Get approval data
-  const { data: approvalsData, isLoading } = useCommissionApprovals(
+  const { data: approvalsData, isLoading } = commissionApprovalHooks.useCommissionApprovals(
     activeStatus,
     true,
     undefined,

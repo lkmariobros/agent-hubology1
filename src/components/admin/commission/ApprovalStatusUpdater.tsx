@@ -22,8 +22,8 @@ const ApprovalStatusUpdater: React.FC<ApprovalStatusUpdaterProps> = ({
   onStatusUpdate
 }) => {
   const [status, setStatus] = useState<string>(approval.status || 'Pending');
-  const { useUpdateApprovalStatusMutation } = useCommissionApproval();
-  const { mutateAsync: updateApprovalStatus, isPending: isUpdating } = useUpdateApprovalStatusMutation();
+  const commissionApprovalHooks = useCommissionApproval();
+  const { mutateAsync: updateApprovalStatus, isPending: isUpdating } = commissionApprovalHooks.useUpdateApprovalStatusMutation();
   
   const handleUpdateStatus = async () => {
     try {
