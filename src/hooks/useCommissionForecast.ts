@@ -26,9 +26,12 @@ export const useFetchCommissionForecast = (agentId?: string, months: number = 6)
   });
 };
 
-// Export a default object with all hooks for easier importing
-const useCommissionForecast = {
-  useFetchCommissionForecast
+// Create a useCommissionForecast hook that returns all the forecast-related hooks
+export const useCommissionForecast = () => {
+  return {
+    useFetchCommissionForecast
+  };
 };
 
+// Export a default object with all hooks for easier importing
 export default useCommissionForecast;

@@ -2,10 +2,9 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { useCommissionApproval } from '@/hooks/useCommissionApproval';
-import { CommissionApproval } from '@/types/commission';
-import { toast } from 'sonner';
+import useCommissionApproval from '@/hooks/useCommissionApproval';
 import LoadingIndicator from '@/components/ui/loading-indicator';
+import { toast } from 'sonner';
 
 interface ApprovalCommentsProps {
   approvalId: string;
@@ -15,13 +14,19 @@ const ApprovalComments: React.FC<ApprovalCommentsProps> = ({
   approvalId
 }) => {
   const [comment, setComment] = useState('');
-  const { addComment, comments, isLoading, isAddingComment } = useCommissionApproval();
+  const { 
+    useApprovalComments, 
+    useAddApprovalCommentMutation 
+  } = useCommissionApproval();
+  
+  const { data: comments, isLoading } = useApprovalComments(approvalId);
+  const { mutateAsync: addComment, isPending: isAddingComment } = useAddApprovalCommentMutation();
   
   const handleAddComment = async () => {
     if (!comment.trim()) return;
     
     try {
-      await addComment(approvalId, comment);
+      await addComment({ approvalId, comment });
       setComment('');
       toast.success('Comment added');
     } catch (error) {

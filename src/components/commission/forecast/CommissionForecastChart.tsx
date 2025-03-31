@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Area, AreaChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { useCommissionForecast } from '@/hooks/useCommissionForecast';
+import { useFetchCommissionForecast } from '@/hooks/useCommissionForecast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatCurrency } from '@/lib/utils';
 
@@ -15,7 +15,6 @@ const CommissionForecastChart: React.FC<CommissionForecastChartProps> = ({
   agentId,
   months = 6
 }) => {
-  const { useFetchCommissionForecast } = useCommissionForecast;
   const { data: forecast, isLoading, error } = useFetchCommissionForecast(agentId, months);
   
   if (isLoading) {

@@ -21,15 +21,21 @@ interface ApprovalDetailProps {
 const ApprovalDetail: React.FC<ApprovalDetailProps> = ({ id }) => {
   const navigate = useNavigate();
   const [currentTab, setCurrentTab] = useState('details');
+  const [refreshCounter, setRefreshCounter] = useState(0);
   
-  const { useCommissionApprovalDetail } = useCommissionApproval;
-  const { data: approvalData, isLoading, error } = useCommissionApprovalDetail(id);
+  const { useCommissionApprovalDetail } = useCommissionApproval();
+  const { data: approvalData, isLoading, error, refetch } = useCommissionApprovalDetail(id);
   
   const { useApprovalPaymentSchedule } = useCommissionSchedules();
   const { data: paymentSchedule, isLoading: scheduleLoading } = useApprovalPaymentSchedule(id);
   
   const approval = approvalData?.approval;
   const history = approvalData?.history || [];
+  
+  const handleStatusUpdate = () => {
+    refetch();
+    setRefreshCounter(prev => prev + 1);
+  };
   
   const formatDate = (dateString: string) => {
     if (!dateString) return 'Not available';
@@ -136,12 +142,15 @@ const ApprovalDetail: React.FC<ApprovalDetailProps> = ({ id }) => {
           <h1 className="text-2xl font-bold flex items-center">
             {getStatusIcon(approval.status)}
             <span className="ml-2">
-              Commission Approval - {formatCurrency(transactionDetails.commission_amount)}
+              Commission Approval - {formatCurrency(transactionDetails.commission_amount || 0)}
             </span>
           </h1>
         </div>
         
-        <ApprovalStatusUpdater approval={approval} />
+        <ApprovalStatusUpdater 
+          approval={approval} 
+          onStatusUpdate={handleStatusUpdate}
+        />
       </div>
       
       <Tabs value={currentTab} onValueChange={setCurrentTab}>
@@ -162,25 +171,25 @@ const ApprovalDetail: React.FC<ApprovalDetailProps> = ({ id }) => {
                 <div>
                   <h3 className="text-sm font-medium text-muted-foreground">Transaction Value</h3>
                   <p className="text-lg font-semibold">
-                    {formatCurrency(transactionDetails.transaction_value)}
+                    {formatCurrency(transactionDetails.transaction_value || 0)}
                   </p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-muted-foreground">Commission Amount</h3>
                   <p className="text-lg font-semibold">
-                    {formatCurrency(transactionDetails.commission_amount)}
+                    {formatCurrency(transactionDetails.commission_amount || 0)}
                   </p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-muted-foreground">Commission Rate</h3>
                   <p className="text-lg font-semibold">
-                    {transactionDetails.commission_rate}%
+                    {transactionDetails.commission_rate || 0}%
                   </p>
                 </div>
                 <div>
                   <h3 className="text-sm font-medium text-muted-foreground">Transaction Date</h3>
                   <p className="text-lg font-semibold">
-                    {formatDate(transactionDetails.transaction_date)}
+                    {formatDate(transactionDetails.transaction_date || '')}
                   </p>
                 </div>
               </div>
@@ -216,7 +225,7 @@ const ApprovalDetail: React.FC<ApprovalDetailProps> = ({ id }) => {
                 <div>
                   <h3 className="text-sm font-medium text-muted-foreground">Last Updated</h3>
                   <p className="text-lg font-semibold">
-                    {formatDate(approval.updated_at)}
+                    {formatDate(approval.updated_at || '')}
                   </p>
                 </div>
                 <div>

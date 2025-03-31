@@ -8,9 +8,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useCommissionApproval } from '@/hooks/useCommissionApproval';
+import useCommissionApproval, { CommissionApproval } from '@/hooks/useCommissionApproval';
 import LoadingIndicator from '@/components/ui/loading-indicator';
-import { CommissionApproval } from '@/types/commission';
 import { toast } from 'sonner';
 
 interface ApprovalStatusUpdaterProps {
@@ -23,11 +22,15 @@ const ApprovalStatusUpdater: React.FC<ApprovalStatusUpdaterProps> = ({
   onStatusUpdate
 }) => {
   const [status, setStatus] = useState<string>(approval.status || 'Pending');
-  const { updateApprovalStatus, isUpdating } = useCommissionApproval();
+  const { useUpdateApprovalStatusMutation } = useCommissionApproval();
+  const { mutateAsync: updateApprovalStatus, isPending: isUpdating } = useUpdateApprovalStatusMutation();
   
   const handleUpdateStatus = async () => {
     try {
-      await updateApprovalStatus(approval.id, status);
+      await updateApprovalStatus({
+        approvalId: approval.id,
+        newStatus: status
+      });
       toast.success(`Status updated to ${status}`);
       onStatusUpdate();
     } catch (error) {

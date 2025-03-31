@@ -5,7 +5,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from './ThemeProvider';
 import { Toaster } from '@/components/ui/sonner';
 import { useAuth } from '@/hooks/useAuth';
-import { AuthContext } from '@/context/AuthContext';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -21,6 +20,12 @@ const queryClient = new QueryClient({
 interface AuthProviderProps {
   children: React.ReactNode;
 }
+
+// Create a context for the auth state
+import { createContext } from 'react';
+import { AuthContextType } from '@/types/auth';
+
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   // Use the auth hook to get all auth state
