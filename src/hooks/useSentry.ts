@@ -4,9 +4,11 @@ import * as Sentry from '@sentry/react';
 
 export const useSentry = () => {
   const logError = useCallback((error: unknown, context?: Record<string, any>) => {
-    console.error('Error logged to Sentry:', error instanceof Error ? error.message : String(error));
+    // Only log to console in development
+    if (import.meta.env.DEV) {
+      console.error('Error logged to Sentry:', error instanceof Error ? error.message : String(error));
+    }
     
-    // Always capture in any environment for testing purposes
     Sentry.captureException(error, {
       contexts: { 
         custom: context || {},
@@ -17,7 +19,9 @@ export const useSentry = () => {
       }
     });
     
-    console.log('Error sent to Sentry');
+    if (import.meta.env.DEV) {
+      console.log('Error sent to Sentry');
+    }
   }, []);
 
   const setUser = useCallback((userId: string | null, email?: string | null, username?: string | null) => {
@@ -27,10 +31,16 @@ export const useSentry = () => {
         email: email || undefined,
         username: username || undefined
       });
-      console.log('Sentry user context set:', userId);
+      
+      if (import.meta.env.DEV) {
+        console.log('Sentry user context set:', userId);
+      }
     } else {
       Sentry.setUser(null);
-      console.log('Sentry user context cleared');
+      
+      if (import.meta.env.DEV) {
+        console.log('Sentry user context cleared');
+      }
     }
   }, []);
 
@@ -45,7 +55,9 @@ export const useSentry = () => {
       level: 'info'
     });
     
-    console.log('Sentry breadcrumb added:', message);
+    if (import.meta.env.DEV) {
+      console.log('Sentry breadcrumb added:', message);
+    }
   }, []);
 
   return {

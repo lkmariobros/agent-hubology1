@@ -4,53 +4,65 @@ import * as Sentry from '@sentry/react';
 export function initSentry() {
   const dsn = "https://ca140a22d2c0617d9c0eb3b996fa799f@o4509071816523776.ingest.us.sentry.io/4509071846014976";
   
-  // Always initialize Sentry, but with different settings for dev/prod
+  // Initialize Sentry with environment-appropriate settings
   Sentry.init({
     dsn: dsn,
     environment: import.meta.env.MODE,
     integrations: [
       new Sentry.BrowserTracing({
-        // Set sampling rate for transactions
-        tracePropagationTargets: ['localhost', /^https:\/\/yourdomain\.com/],
+        // Trace sampling based on environment
+        tracePropagationTargets: [
+          'localhost', 
+          /^https:\/\/synabhmsxsvsxkyzhfss\.supabase\.co/,
+          /^https:\/\/yourdomain\.com/
+        ],
       }),
       // Enable performance monitoring
       new Sentry.Replay({
-        maskAllText: false, // Change to true in production
+        maskAllText: import.meta.env.PROD, // Mask text in production only
         blockAllMedia: true,
       }),
     ],
-    // Always capture errors in development for testing
-    // In production, use sampling to avoid hitting quota limits
-    tracesSampleRate: 1.0,
-    replaysSessionSampleRate: 1.0,
-    replaysOnErrorSampleRate: 1.0,
+    // Production-appropriate sampling rates
+    tracesSampleRate: import.meta.env.PROD ? 0.2 : 1.0,
+    replaysSessionSampleRate: import.meta.env.PROD ? 0.1 : 1.0,
+    replaysOnErrorSampleRate: import.meta.env.PROD ? 1.0 : 1.0,
     
-    // This ensures we always capture errors even in development
+    // Always enabled
     enabled: true,
     
-    // Debug mode to see what's happening with Sentry
+    // Debug mode only in development
     debug: import.meta.env.DEV,
     
-    // Uncomment to see verbose logs during development
+    // Only log to console in development
     beforeSend(event) {
-      console.log('Sending event to Sentry:', event);
+      if (import.meta.env.DEV) {
+        console.log('Sending event to Sentry:', event);
+      }
       return event;
     }
   });
   
-  console.log('Sentry initialized in', import.meta.env.MODE, 'mode with DSN:', dsn);
+  // Log initialization only in development
+  if (import.meta.env.DEV) {
+    console.log('Sentry initialized in', import.meta.env.MODE, 'mode with DSN:', dsn);
+  }
 }
 
 // Helper function to capture exceptions with Sentry
 export const captureException = (error: unknown, context?: Record<string, any>) => {
-  console.error('Error captured:', error);
+  // Only log to console in development
+  if (import.meta.env.DEV) {
+    console.error('Error captured:', error);
+  }
   
-  // Always send to Sentry for testing purposes
   Sentry.captureException(error, {
     contexts: {
       custom: context || {},
     },
   });
   
-  console.log('Exception sent to Sentry');
+  if (import.meta.env.DEV) {
+    console.log('Exception sent to Sentry');
+  }
 };
