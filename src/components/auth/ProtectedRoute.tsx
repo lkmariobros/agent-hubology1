@@ -1,7 +1,7 @@
 
 import React, { ReactNode, useEffect, useState, useRef } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/context/AuthContext'; // Use from context directly
 import LoadingIndicator from '../ui/loading-indicator';
 import { UserRole } from '@/types/auth';
 import { toast } from 'sonner';

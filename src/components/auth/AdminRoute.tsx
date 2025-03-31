@@ -1,7 +1,7 @@
 
 import React, { ReactNode } from 'react';
 import { Navigate } from 'react-router-dom';
-import useAuth from '@/hooks/useAuth';
+import { useAuth } from '@/context/AuthContext'; // Use from context directly
 import ProtectedRoute from './ProtectedRoute';
 import LoadingIndicator from '../ui/loading-indicator';
 
