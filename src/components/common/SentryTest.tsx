@@ -5,7 +5,7 @@ import { captureException } from '@/lib/sentry';
 import { toast } from 'sonner';
 import * as Sentry from '@sentry/react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { InfoCircledIcon, CheckCircledIcon, CrossCircledIcon } from '@radix-ui/react-icons';
+import { InfoIcon, CheckCircle, XCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const SentryTest = () => {
@@ -113,13 +113,13 @@ const SentryTest = () => {
         <CardTitle className="flex items-center">
           <span>Sentry Integration Test</span>
           {sentryStatus === 'success' && (
-            <CheckCircledIcon className="ml-2 h-5 w-5 text-green-500" />
+            <CheckCircle className="ml-2 h-5 w-5 text-green-500" />
           )}
           {sentryStatus === 'error' && (
-            <CrossCircledIcon className="ml-2 h-5 w-5 text-red-500" />
+            <XCircle className="ml-2 h-5 w-5 text-red-500" />
           )}
           {sentryStatus === 'unknown' && (
-            <InfoCircledIcon className="ml-2 h-5 w-5 text-yellow-500" />
+            <InfoIcon className="ml-2 h-5 w-5 text-yellow-500" />
           )}
         </CardTitle>
       </CardHeader>
