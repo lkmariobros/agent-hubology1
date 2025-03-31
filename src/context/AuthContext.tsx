@@ -1,15 +1,15 @@
 
 // This file is a wrapper around the refactored auth context for backward compatibility
-import { AuthProvider as CoreAuthProvider } from './auth/AuthProvider';
-import { useAuthContext } from './auth/AuthContext';
+import { AuthProvider } from './auth/AuthProvider';
+import { useAuth } from '@/hooks/useAuth';
 import type { AuthContextType } from '@/types/auth';
 
 // Re-export for backward compatibility
-export const AuthProvider = CoreAuthProvider;
-export { useAuthContext };
+export { AuthProvider };
+export { useAuth as useAuthContext };
 
-// Export default useAuthContext as useAuth for backward compatibility
-export const useAuth = useAuthContext;
+// Export default useAuth for backward compatibility
+export const useAuth = useAuth;
 export type { AuthContextType };
 
-export default CoreAuthProvider;
+export default AuthProvider;

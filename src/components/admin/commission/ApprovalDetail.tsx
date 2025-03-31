@@ -1,265 +1,165 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import useCommissionApproval, { CommissionApproval } from '@/hooks/useCommissionApproval';
-import useCommissionSchedules from '@/hooks/useCommissionSchedules';
+
+import React from 'react';
+import useCommissionApproval from '@/hooks/useCommissionApproval';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
-import { AlertCircle, ArrowLeft, Clock, CheckCircle, DollarSign, Calendar } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
-import ApprovalStatusUpdater from './ApprovalStatusUpdater';
-import ApprovalComments from './ApprovalComments';
+import { 
+  CheckCircle, 
+  Clock, 
+  AlertCircle, 
+  XCircle, 
+  CalendarClock, 
+  DollarSign 
+} from 'lucide-react';
 import ApprovalHistory from './ApprovalHistory';
-import PaymentScheduleCard from '@/components/commission/schedules/PaymentScheduleCard';
-import PaymentScheduleGenerator from './PaymentScheduleGenerator';
+import ApprovalStatusUpdater from './ApprovalStatusUpdater';
+import { CommentsSection } from './CommentsSection';
 import { formatCurrency } from '@/lib/utils';
 
-interface ApprovalDetailProps {
-  id: string;
-}
+// Helper function to get the status icon based on status
+const getStatusIcon = (status: string) => {
+  switch (status.toLowerCase()) {
+    case 'pending':
+      return <Clock className="h-4 w-4 text-amber-500" />;
+    case 'under review':
+      return <AlertCircle className="h-4 w-4 text-blue-500" />;
+    case 'approved':
+      return <CheckCircle className="h-4 w-4 text-green-500" />;
+    case 'ready for payment':
+      return <DollarSign className="h-4 w-4 text-emerald-500" />;
+    case 'paid':
+      return <CheckCircle className="h-4 w-4 text-indigo-500" />;
+    case 'rejected':
+      return <XCircle className="h-4 w-4 text-red-500" />;
+    default:
+      return <CalendarClock className="h-4 w-4 text-gray-500" />;
+  }
+};
 
-const ApprovalDetail: React.FC<ApprovalDetailProps> = ({ id }) => {
-  const navigate = useNavigate();
-  const [currentTab, setCurrentTab] = useState('details');
-  const [refreshCounter, setRefreshCounter] = useState(0);
-  
+const ApprovalDetail = () => {
   const commissionApprovalHooks = useCommissionApproval();
-  const { data: approvalData, isLoading, error, refetch } = commissionApprovalHooks.useCommissionApprovalDetail(id);
-  
-  const { useApprovalPaymentSchedule } = useCommissionSchedules();
-  const { data: paymentSchedule, isLoading: scheduleLoading } = useApprovalPaymentSchedule(id);
-  
-  const approval = approvalData?.approval;
-  const history = approvalData?.history || [];
-  
-  const handleStatusUpdate = () => {
-    refetch();
-    setRefreshCounter(prev => prev + 1);
-  };
-  
-  const formatDate = (dateString: string) => {
-    if (!dateString) return 'Not available';
-    const date = new Date(dateString);
-    return date.toLocaleString();
-  };
-  
+  const { 
+    approval, 
+    approvalId,
+    isLoading, 
+    refetch 
+  } = commissionApprovalHooks.useCommissionApprovalDetail();
+
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <div className="flex items-center">
-          <Button
-            variant="outline"
-            size="sm"
-            className="mr-4"
-            onClick={() => navigate('/admin/commission-approval')}
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
-          </Button>
-          <Skeleton className="h-8 w-80" />
-        </div>
-        
-        <Card>
-          <CardContent className="p-6 space-y-4">
-            <Skeleton className="h-8 w-full" />
-            <Skeleton className="h-40 w-full" />
-          </CardContent>
-        </Card>
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
   }
-  
-  if (error || !approval) {
+
+  if (!approval) {
     return (
-      <div className="space-y-6">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => navigate('/admin/commission-approval')}
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back
-        </Button>
+      <div className="p-6 text-center">
+        <h3 className="text-lg font-medium">No approval found</h3>
+        <p className="text-muted-foreground">The requested approval could not be found or has been deleted.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-start">
+        <div>
+          <h2 className="text-2xl font-bold">
+            Commission Approval #{approval.id?.substring(0, 8)}
+          </h2>
+          <p className="text-muted-foreground">
+            Created on {new Date(approval.created_at).toLocaleDateString()}
+          </p>
+        </div>
+        
+        <div className="flex items-center space-x-2">
+          <Badge className="flex items-center gap-1 px-3 py-1">
+            {getStatusIcon(approval.status)}
+            <span className="capitalize">{approval.status}</span>
+          </Badge>
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Commission Details</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm text-muted-foreground">Commission Amount</p>
+                <p className="text-lg font-medium">{formatCurrency(approval.amount || 0)}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Transaction Date</p>
+                <p className="text-lg font-medium">
+                  {approval.transaction_date ? 
+                    new Date(approval.transaction_date).toLocaleDateString() : 
+                    'N/A'}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Agent</p>
+                <p className="text-lg font-medium">{approval.agent_name || 'N/A'}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Transaction</p>
+                <p className="text-lg font-medium truncate">
+                  {approval.property_transaction || 'N/A'}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Property</p>
+                <p className="text-lg font-medium truncate">
+                  {approval.property_name || 'N/A'}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Payment Schedule</p>
+                <p className="text-lg font-medium">
+                  {approval.payment_schedule_id ? 
+                    `#${approval.payment_schedule_id.substring(0, 8)}` : 
+                    'None'}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
         
         <Card>
-          <CardContent className="p-6">
-            <div className="flex flex-col items-center justify-center py-8">
-              <AlertCircle className="h-12 w-12 text-red-500 mb-4" />
-              <h3 className="text-xl font-bold mb-2">Approval Not Found</h3>
-              <p className="text-muted-foreground">
-                The approval you're looking for could not be found or you don't have permission to view it.
+          <CardHeader>
+            <CardTitle>Approval Management</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <ApprovalStatusUpdater 
+              approval={approval} 
+              onStatusUpdate={() => refetch()} 
+            />
+            
+            <div className="mt-6">
+              <h3 className="text-lg font-medium mb-2">Approval Notes</h3>
+              <p className="text-muted-foreground text-sm">
+                {approval.notes || 'No notes added for this approval.'}
               </p>
             </div>
           </CardContent>
         </Card>
       </div>
-    );
-  }
-  
-  // Safely access property_transactions with default values
-  const transactionDetails = approval.property_transactions || {
-    commission_amount: 0,
-    transaction_value: 0,
-    commission_rate: 0,
-    transaction_date: '',
-    notes: ''
-  };
-  
-  const hasSchedule = !!paymentSchedule || !!approval.payment_schedule_id;
-  const showScheduleGenerator = approval.status === 'Approved' && !hasSchedule;
-  
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center">
-          <Button
-            variant="outline"
-            size="sm"
-            className="mr-4"
-            onClick={() => navigate('/admin/commission-approval')}
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
-          </Button>
-          <h1 className="text-2xl font-bold flex items-center">
-            {getStatusIcon(approval.status)}
-            <span className="ml-2">
-              Commission Approval - {formatCurrency(transactionDetails.commission_amount || 0)}
-            </span>
-          </h1>
-        </div>
-        
-        <ApprovalStatusUpdater 
-          approval={approval} 
-          onStatusUpdate={handleStatusUpdate}
-        />
-      </div>
       
-      <Tabs value={currentTab} onValueChange={setCurrentTab}>
+      <Tabs defaultValue="comments">
         <TabsList>
-          <TabsTrigger value="details">Details</TabsTrigger>
-          <TabsTrigger value="schedule">Payment Schedule</TabsTrigger>
-          <TabsTrigger value="history">History</TabsTrigger>
           <TabsTrigger value="comments">Comments</TabsTrigger>
+          <TabsTrigger value="history">Status History</TabsTrigger>
         </TabsList>
-        
-        <TabsContent value="details" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Transaction Details</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground">Transaction Value</h3>
-                  <p className="text-lg font-semibold">
-                    {formatCurrency(transactionDetails.transaction_value || 0)}
-                  </p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground">Commission Amount</h3>
-                  <p className="text-lg font-semibold">
-                    {formatCurrency(transactionDetails.commission_amount || 0)}
-                  </p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground">Commission Rate</h3>
-                  <p className="text-lg font-semibold">
-                    {transactionDetails.commission_rate || 0}%
-                  </p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground">Transaction Date</h3>
-                  <p className="text-lg font-semibold">
-                    {formatDate(transactionDetails.transaction_date || '')}
-                  </p>
-                </div>
-              </div>
-              
-              {transactionDetails.notes && (
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground mb-1">Notes</h3>
-                  <p>{transactionDetails.notes}</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Approval Details</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground">Status</h3>
-                  <p className="text-lg font-semibold flex items-center">
-                    {getStatusIcon(approval.status)}
-                    <span className="ml-2">{approval.status}</span>
-                  </p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground">Created At</h3>
-                  <p className="text-lg font-semibold">
-                    {formatDate(approval.created_at)}
-                  </p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground">Last Updated</h3>
-                  <p className="text-lg font-semibold">
-                    {formatDate(approval.updated_at || '')}
-                  </p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground">Threshold Exceeded</h3>
-                  <p className="text-lg font-semibold">
-                    {approval.threshold_exceeded ? 'Yes' : 'No'}
-                  </p>
-                </div>
-              </div>
-              
-              {approval.notes && (
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground mb-1">Notes</h3>
-                  <p>{approval.notes}</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+        <TabsContent value="comments" className="p-4 bg-card rounded-md border mt-2">
+          <CommentsSection approvalId={approvalId} />
         </TabsContent>
-        
-        <TabsContent value="schedule">
-          {scheduleLoading ? (
-            <Card>
-              <CardContent className="p-6">
-                <Skeleton className="h-64 w-full" />
-              </CardContent>
-            </Card>
-          ) : hasSchedule ? (
-            <PaymentScheduleCard schedule={paymentSchedule} />
-          ) : showScheduleGenerator ? (
-            <PaymentScheduleGenerator approvalId={id} />
-          ) : (
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex flex-col items-center justify-center py-8">
-                  <Calendar className="h-12 w-12 text-muted-foreground mb-4" />
-                  <h3 className="text-xl font-bold mb-2">No Payment Schedule</h3>
-                  <p className="text-muted-foreground mb-6">
-                    This commission doesn't have a payment schedule yet. The approval status must be "Approved" to create a payment schedule.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-        
-        <TabsContent value="history">
-          <ApprovalHistory approvalId={id} history={history} />
-        </TabsContent>
-        
-        <TabsContent value="comments">
-          <ApprovalComments approvalId={id} />
+        <TabsContent value="history" className="p-4 bg-card rounded-md border mt-2">
+          <ApprovalHistory approvalId={approvalId} />
         </TabsContent>
       </Tabs>
     </div>

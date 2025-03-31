@@ -1,21 +1,6 @@
 
-import React, { createContext, useContext } from 'react';
+import { createContext } from 'react';
 import { AuthContextType } from '@/types/auth';
 
-// Create context with default values (undefined for type safety)
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-/**
- * Custom hook to use the auth context
- */
-export const useAuthContext = (): AuthContextType => {
-  const context = useContext(AuthContext);
-  
-  if (context === undefined) {
-    throw new Error('useAuthContext must be used within an AuthProvider');
-  }
-  
-  return context;
-};
-
-export { AuthContext };
+// Create context with undefined default value
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);

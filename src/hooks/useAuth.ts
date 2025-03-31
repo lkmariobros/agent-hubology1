@@ -6,8 +6,6 @@ import { useSentry } from './useSentry';
 
 /**
  * Enhanced useAuth hook with additional error tracking
- * 
- * This implementation avoids using useAuthContext which creates circular dependencies
  */
 export function useAuth(): AuthContextType {
   const auth = useContext(AuthContext);

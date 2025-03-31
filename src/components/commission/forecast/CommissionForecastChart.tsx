@@ -1,21 +1,19 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Area, AreaChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { useFetchCommissionForecast } from '@/hooks/useCommissionForecast';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
+import { useCommissionForecast } from '@/hooks/useCommissionForecast';
+import useAuth from '@/hooks/useAuth';
 import { formatCurrency } from '@/lib/utils';
 
 interface CommissionForecastChartProps {
-  agentId?: string;
   months?: number;
 }
 
-const CommissionForecastChart: React.FC<CommissionForecastChartProps> = ({
-  agentId,
-  months = 6
-}) => {
-  const { data: forecast, isLoading, error } = useFetchCommissionForecast(agentId, months);
+const CommissionForecastChart: React.FC<CommissionForecastChartProps> = ({ months = 6 }) => {
+  const { user } = useAuth();
+  const forecastHooks = useCommissionForecast();
+  const { data: forecast, isLoading } = forecastHooks.useFetchCommissionForecast(user?.id, months);
   
   if (isLoading) {
     return (
@@ -23,80 +21,70 @@ const CommissionForecastChart: React.FC<CommissionForecastChartProps> = ({
         <CardHeader>
           <CardTitle>Commission Forecast</CardTitle>
         </CardHeader>
-        <CardContent className="h-80">
-          <Skeleton className="w-full h-full" />
+        <CardContent className="h-[300px] flex items-center justify-center">
+          <p className="text-muted-foreground">Loading forecast data...</p>
         </CardContent>
       </Card>
     );
   }
   
-  if (error || !forecast) {
+  if (!forecast || !forecast.months || forecast.months.length === 0) {
     return (
       <Card>
         <CardHeader>
           <CardTitle>Commission Forecast</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-center h-80 text-muted-foreground">
-            Failed to load forecast data.
-          </div>
+        <CardContent className="h-[300px] flex items-center justify-center">
+          <p className="text-muted-foreground">No forecast data available</p>
         </CardContent>
       </Card>
     );
   }
   
-  const chartData = forecast.periods.map(period => ({
-    name: period.month.split('-')[1], // Just show the month part from 'YYYY-MM'
-    Expected: period.expectedAmount,
-    Confirmed: period.confirmedAmount,
-    Pending: period.pendingAmount,
+  // Transform data for charting
+  const chartData = forecast.months.map(month => ({
+    name: month.month,
+    amount: month.amount
   }));
-  
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex justify-between items-center">
-          <span>Commission Forecast</span>
-          <span className="text-sm font-normal text-muted-foreground">
-            6 Month Total: {formatCurrency(forecast.totalExpected)}
-          </span>
-        </CardTitle>
+        <CardTitle>Commission Forecast</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="h-80">
+        <div className="h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart
-              data={chartData}
-              margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
+            <BarChart data={chartData}>
               <XAxis dataKey="name" />
-              <YAxis tickFormatter={(value) => `$${value / 1000}k`} />
-              <Tooltip formatter={(value) => formatCurrency(value as number)} />
-              <Legend />
-              <Area 
-                type="monotone" 
-                dataKey="Confirmed" 
-                stackId="1"
-                stroke="#10b981" 
-                fill="#10b981" 
+              <YAxis 
+                tickFormatter={(value) => formatCurrency(value, 0)}
               />
-              <Area 
-                type="monotone" 
-                dataKey="Pending" 
-                stackId="1"
-                stroke="#f59e0b" 
-                fill="#f59e0b" 
+              <Tooltip 
+                formatter={(value) => formatCurrency(Number(value))}
+                labelFormatter={(label) => `Month: ${label}`}
               />
-              <Area 
-                type="monotone" 
-                dataKey="Expected" 
-                stackId="1"
-                stroke="#3b82f6" 
-                fill="#3b82f6" 
+              <Bar 
+                dataKey="amount" 
+                fill="currentColor" 
+                className="fill-primary" 
+                radius={[4, 4, 0, 0]}
               />
-            </AreaChart>
+            </BarChart>
           </ResponsiveContainer>
+        </div>
+        <div className="mt-4 flex justify-between items-center">
+          <div>
+            <p className="text-sm text-muted-foreground">
+              Forecast Total
+            </p>
+            <p className="text-2xl font-bold">
+              {formatCurrency(forecast.total)}
+            </p>
+          </div>
+          <div className="text-sm text-right">
+            <p className="text-muted-foreground">Next {months} months</p>
+          </div>
         </div>
       </CardContent>
     </Card>

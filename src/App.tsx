@@ -1,3 +1,4 @@
+
 import React, { Suspense } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Dashboard from '@/pages/Dashboard';
@@ -16,7 +17,7 @@ import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import AdminRoute from '@/components/auth/AdminRoute';
 import { LoadingPage } from '@/components/ui/loading';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
-import { AuthProvider } from '@/providers/AuthProvider'; // Using the wrapper AuthProvider
+import { AuthProvider } from '@/providers/AuthProvider';
 
 function App() {
   return (
