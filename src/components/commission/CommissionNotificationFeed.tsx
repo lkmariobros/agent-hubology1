@@ -22,7 +22,7 @@ interface NotificationRow {
   read: boolean;
   related_id?: string;
   created_at: string;
-  data?: string | Record<string, any>;
+  data?: any; // Using any to avoid deep instantiation issues
 }
 
 const CommissionNotificationFeed: React.FC<CommissionNotificationFeedProps> = ({ 
@@ -37,12 +37,12 @@ const CommissionNotificationFeed: React.FC<CommissionNotificationFeedProps> = ({
       const { data, error } = await supabase
         .from('notifications')
         .select('*')
-        .eq('user_id' as any, userId as any)
-        .in('type' as any, [
+        .eq('user_id', userId)
+        .in('type', [
           'approval_status_change',
           'tier_update',
           'commission_milestone'
-        ] as any[])
+        ])
         .order('created_at', { ascending: false })
         .limit(limit);
       
@@ -53,8 +53,8 @@ const CommissionNotificationFeed: React.FC<CommissionNotificationFeedProps> = ({
       
       console.log('Raw notification data:', data);
       
-      // Map the database rows to our Notification type with safe type assertions
-      return (data || []).map((item: any) => {
+      // Map the database rows to our Notification type with safer type handling
+      return (data || []).map((item: NotificationRow) => {
         // Parse the data JSON field if it exists, otherwise create an empty object
         let notificationData: Record<string, any> = {};
         
