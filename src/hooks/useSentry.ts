@@ -1,32 +1,36 @@
 
 import { useCallback } from 'react';
 import * as Sentry from '@sentry/react';
-import { logger } from '@/services/logging';
 
 export const useSentry = () => {
   const logError = useCallback((error: unknown, context?: Record<string, any>) => {
-    // Log locally first
-    logger.error(
-      error instanceof Error ? error.message : String(error), 
-      {
-        stack: error instanceof Error ? error.stack : undefined,
-        ...context
-      }
-    );
+    console.error('Error logged to Sentry:', error instanceof Error ? error.message : String(error));
     
-    // Send to Sentry in production
-    if (import.meta.env.PROD) {
-      Sentry.captureException(error, {
-        contexts: { custom: context || {} }
-      });
-    }
+    // Always capture in any environment for testing purposes
+    Sentry.captureException(error, {
+      contexts: { 
+        custom: context || {},
+        environment: {
+          mode: import.meta.env.MODE,
+          timestamp: new Date().toISOString()
+        }
+      }
+    });
+    
+    console.log('Error sent to Sentry');
   }, []);
 
-  const setUser = useCallback((userId: string | null, email?: string | null) => {
+  const setUser = useCallback((userId: string | null, email?: string | null, username?: string | null) => {
     if (userId) {
-      Sentry.setUser({ id: userId, email: email || undefined });
+      Sentry.setUser({ 
+        id: userId, 
+        email: email || undefined,
+        username: username || undefined
+      });
+      console.log('Sentry user context set:', userId);
     } else {
-      Sentry.setUser(null); // Clear user on logout
+      Sentry.setUser(null);
+      console.log('Sentry user context cleared');
     }
   }, []);
 
@@ -34,14 +38,22 @@ export const useSentry = () => {
     Sentry.addBreadcrumb({
       message,
       category: category || 'app',
-      data,
+      data: {
+        ...data,
+        timestamp: new Date().toISOString()
+      },
       level: 'info'
     });
+    
+    console.log('Sentry breadcrumb added:', message);
   }, []);
 
   return {
     logError,
     setUser,
-    addBreadcrumb
+    addBreadcrumb,
+    Sentry
   };
 };
+
+export default useSentry;
