@@ -1,74 +1,23 @@
 
 import React from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Area, AreaChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { useCommissionForecast } from '@/hooks/useCommissionForecast';
-import useAuth from '@/hooks/useAuth';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ForecastPeriod } from '@/types/commission';
+import { formatCurrency } from '@/lib/utils';
 
 interface CommissionForecastChartProps {
   agentId?: string;
   months?: number;
 }
 
-const CommissionForecastChart: React.FC<CommissionForecastChartProps> = ({ 
+const CommissionForecastChart: React.FC<CommissionForecastChartProps> = ({
   agentId,
   months = 6
 }) => {
-  const { user } = useAuth();
-  const { useAgentForecast } = useCommissionForecast();
+  const { useFetchCommissionForecast } = useCommissionForecast;
+  const { data: forecast, isLoading, error } = useFetchCommissionForecast(agentId, months);
   
-  // If no agentId is provided, use the current user's ID
-  const targetAgentId = agentId || user?.id;
-  
-  const { data: forecastData, isLoading, error } = useAgentForecast(targetAgentId, months);
-
-  // Format month for display
-  const formatMonth = (month: string) => {
-    const [year, monthNum] = month.split('-');
-    const date = new Date(parseInt(year), parseInt(monthNum) - 1);
-    return date.toLocaleString('default', { month: 'short' });
-  };
-
-  // Format chart data
-  const formatChartData = (periods: ForecastPeriod[]) => {
-    return periods.map(period => ({
-      month: formatMonth(period.month),
-      Confirmed: period.confirmedAmount,
-      Pending: period.pendingAmount,
-    }));
-  };
-
-  // Format currency
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
-
-  // Custom tooltip
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-background border rounded p-3 shadow-md">
-          <p className="font-medium">{label}</p>
-          {payload.map((item: any, index: number) => (
-            <p key={index} style={{ color: item.color }}>
-              {item.name}: {formatCurrency(item.value)}
-            </p>
-          ))}
-          <p className="font-medium">
-            Total: {formatCurrency((payload[0]?.value || 0) + (payload[1]?.value || 0))}
-          </p>
-        </div>
-      );
-    }
-    return null;
-  };
-
   if (isLoading) {
     return (
       <Card>
@@ -81,49 +30,73 @@ const CommissionForecastChart: React.FC<CommissionForecastChartProps> = ({
       </Card>
     );
   }
-
-  if (error || !forecastData) {
+  
+  if (error || !forecast) {
     return (
       <Card>
         <CardHeader>
           <CardTitle>Commission Forecast</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-center text-muted-foreground">
-            Failed to load forecast data
-          </p>
+          <div className="flex items-center justify-center h-80 text-muted-foreground">
+            Failed to load forecast data.
+          </div>
         </CardContent>
       </Card>
     );
   }
-
+  
+  const chartData = forecast.periods.map(period => ({
+    name: period.month.split('-')[1], // Just show the month part from 'YYYY-MM'
+    Expected: period.expectedAmount,
+    Confirmed: period.confirmedAmount,
+    Pending: period.pendingAmount,
+  }));
+  
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Commission Forecast</CardTitle>
+        <CardTitle className="flex justify-between items-center">
+          <span>Commission Forecast</span>
+          <span className="text-sm font-normal text-muted-foreground">
+            6 Month Total: {formatCurrency(forecast.totalExpected)}
+          </span>
+        </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="mb-4">
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground">Total Expected</span>
-            <span className="text-xl font-bold">
-              {formatCurrency(forecastData.totalExpected)}
-            </span>
-          </div>
-        </div>
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              data={formatChartData(forecastData.periods)}
-              margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+            <AreaChart
+              data={chartData}
+              margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
             >
-              <XAxis dataKey="month" />
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
               <YAxis tickFormatter={(value) => `$${value / 1000}k`} />
-              <Tooltip content={<CustomTooltip />} />
+              <Tooltip formatter={(value) => formatCurrency(value as number)} />
               <Legend />
-              <Bar dataKey="Confirmed" stackId="a" fill="#16a34a" />
-              <Bar dataKey="Pending" stackId="a" fill="#f59e0b" />
-            </BarChart>
+              <Area 
+                type="monotone" 
+                dataKey="Confirmed" 
+                stackId="1"
+                stroke="#10b981" 
+                fill="#10b981" 
+              />
+              <Area 
+                type="monotone" 
+                dataKey="Pending" 
+                stackId="1"
+                stroke="#f59e0b" 
+                fill="#f59e0b" 
+              />
+              <Area 
+                type="monotone" 
+                dataKey="Expected" 
+                stackId="1"
+                stroke="#3b82f6" 
+                fill="#3b82f6" 
+              />
+            </AreaChart>
           </ResponsiveContainer>
         </div>
       </CardContent>
