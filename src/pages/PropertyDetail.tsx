@@ -13,7 +13,6 @@ import PropertyErrorState from '@/components/property/PropertyErrorState';
 import PropertyLoadingSkeleton from '@/components/property/PropertyLoadingSkeleton';
 import { TeamNote } from '@/components/property/TeamNotes';
 import LoadingIndicator from '@/components/ui/loading-indicator';
-import SentryTest from '@/components/common/SentryTest';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
@@ -259,11 +258,6 @@ const PropertyDetail = () => {
         notes={notes}
         onAddNote={handleAddNote}
       />
-
-      {/* Sentry Test Component */}
-      <Card className="mt-6">
-        <SentryTest />
-      </Card>
     </div>
   );
 };
