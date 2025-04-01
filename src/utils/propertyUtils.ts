@@ -15,11 +15,33 @@ export const formatPrice = (price?: number): string => {
 };
 
 /**
+ * Format currency with symbol and thousand separators
+ */
+export const formatCurrency = (amount?: number): string => {
+  if (amount === undefined || amount === null) return '$0';
+  
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(amount);
+};
+
+/**
  * Calculate stock availability percentage
  */
 export const calculateStockPercentage = (property?: Property): number => {
   if (!property?.stock) return 0;
   const { total, available } = property.stock;
+  if (total === 0) return 0;
+  return Math.round((available / total) * 100);
+};
+
+/**
+ * Calculate stock availability percentage with direct values
+ */
+export const calculateStockPercentage2 = (available: number, total: number): number => {
   if (total === 0) return 0;
   return Math.round((available / total) * 100);
 };
@@ -32,6 +54,16 @@ export const getStockStatusLabel = (property?: Property): string => {
   
   const percentage = calculateStockPercentage(property);
   
+  if (percentage === 0) return 'Sold Out';
+  if (percentage <= 20) return 'Limited Units';
+  if (percentage <= 50) return 'Selling Fast';
+  return 'Available';
+};
+
+/**
+ * Get status label for stock availability using percentage
+ */
+export const getStockStatusLabelFromPercentage = (percentage: number): string => {
   if (percentage === 0) return 'Sold Out';
   if (percentage <= 20) return 'Limited Units';
   if (percentage <= 50) return 'Selling Fast';
@@ -79,3 +111,4 @@ export const mapPropertyData = (apiData: any): Property => {
     // Map other fields as needed
   };
 };
+

@@ -60,6 +60,16 @@ export interface Property {
     reserved: number;
     sold: number;
   };
+  // Add additional properties used in components
+  featured?: boolean;
+  reference?: string;
+  transactionType?: string;
+  agent?: {
+    firstName?: string;
+    lastName?: string;
+    id?: string;
+  };
+  size?: string | number;
 }
 
 export interface Transaction {
@@ -108,12 +118,16 @@ export interface User {
   transactions?: number;
   salesVolume?: number;
   points?: number;
+  phone?: string;
+  properties?: number;
+  sales?: number;
 }
 
 export interface AgentWithHierarchy {
   id: string;
   name: string;
-  tier: AgentRank;
+  tier?: string;
+  rank?: string;
   avatar?: string;
   email?: string;
   phone?: string;
@@ -122,6 +136,11 @@ export interface AgentWithHierarchy {
   commissionRate?: number;
   upline?: AgentWithHierarchy | null;
   downlines?: AgentWithHierarchy[];
+  downline?: AgentWithHierarchy[]; // Alias for downlines for backward compatibility
+  joinDate?: string;
+  personalCommission?: number;
+  overrideCommission?: number;
+  totalCommission?: number;
 }
 
 // Commission related types
@@ -132,6 +151,14 @@ export interface CommissionHistory {
   transactionId: string;
   propertyTitle?: string;
   status: string;
+  // Add the properties used in components
+  transactionReference?: string;
+  property?: {
+    title: string;
+    location: string;
+  };
+  type?: string;
+  source?: string;
 }
 
 export interface CommissionTier {
@@ -143,6 +170,10 @@ export interface CommissionTier {
   minSalesVolume?: number;
   isDefault?: boolean;
   thresholdAmount?: number;
+  // Add the properties used in components
+  tier?: string;
+  rate?: number;
+  color?: string;
 }
 
 export interface OverrideCommission {
@@ -150,6 +181,13 @@ export interface OverrideCommission {
   agentName: string;
   tier: string;
   amount: number;
+  // Additional properties used in components
+  id?: string;
+  baseAgentId?: string;
+  transactionId?: string;
+  percentage?: number;
+  status?: string;
+  rank?: string;
 }
 
 export interface RankRequirement {
@@ -187,4 +225,9 @@ export interface PropertyFormValues {
   floorArea?: number;
   landArea?: number;
   agentNotes?: string;
+  // Add propertyType explicitly as some components are using it
+  type?: string;
+  area?: number;
+  features?: string[];
 }
+

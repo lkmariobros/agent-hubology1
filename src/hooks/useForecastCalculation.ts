@@ -114,3 +114,31 @@ export function useMonthlyForecastData() {
 
   return months;
 }
+
+// Main hook for forecast calculations that combines all forecast functionality
+export function useForecastCalculation(agentId?: string) {
+  const forecastData = useForecastData(12);
+  const forecastRefresh = useForecastRefresh();
+  const monthlyOptions = useMonthlyForecastData();
+
+  // Process the forecast data for different views
+  const forecastSummary = forecastData.data?.map(month => ({
+    month: month.month,
+    total_amount: month.totalAmount,
+    scheduled_count: month.installments.length
+  })) || [];
+
+  // Forecast by month (detailed)
+  const forecastByMonth = forecastData.data || [];
+
+  return {
+    forecastSummary,
+    forecastByMonth,
+    monthlyOptions,
+    isLoadingForecastByMonth: forecastData.isLoading,
+    isLoadingSummary: forecastData.isLoading,
+    generateForecast: forecastRefresh,
+    refetch: forecastData.refetch
+  };
+}
+
