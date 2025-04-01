@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
@@ -25,6 +24,7 @@ import {
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { Loader2, Plus, Trash2, Edit, CheckCircle } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 const PaymentSchedules: React.FC = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -207,17 +207,17 @@ const PaymentSchedules: React.FC = () => {
   const resetForm = () => {
     setScheduleName('');
     setScheduleDescription('');
-    setInstallments([{ installment_number: 1, percentage: 100, days_after_transaction: 0 }]);
+    setInstallments([{ installmentNumber: 1, percentage: 100, daysAfterTransaction: 0 }]);
     setCurrentSchedule(null);
   };
   
   const handleAddInstallment = () => {
     const lastInstallment = installments[installments.length - 1];
-    const newInstallmentNumber = (lastInstallment?.installment_number || 0) + 1;
+    const newInstallmentNumber = (lastInstallment?.installmentNumber || 0) + 1;
     
     setInstallments([
       ...installments, 
-      { installment_number: newInstallmentNumber, percentage: 0, days_after_transaction: 0 }
+      { installmentNumber: newInstallmentNumber, percentage: 0, daysAfterTransaction: 0 }
     ]);
   };
   
@@ -228,7 +228,7 @@ const PaymentSchedules: React.FC = () => {
     // Renumber installments
     const renumberedInstallments = newInstallments.map((inst, idx) => ({
       ...inst,
-      installment_number: idx + 1
+      installmentNumber: idx + 1
     }));
     
     setInstallments(renumberedInstallments);
@@ -284,7 +284,7 @@ const PaymentSchedules: React.FC = () => {
   
   const handleNewSchedule = () => {
     resetForm();
-    setInstallments([{ installment_number: 1, percentage: 100, days_after_transaction: 0 }]);
+    setInstallments([{ installmentNumber: 1, percentage: 100, daysAfterTransaction: 0 }]);
     setIsEditing(false);
     setIsDialogOpen(true);
   };
@@ -442,7 +442,7 @@ const PaymentSchedules: React.FC = () => {
                   <TableBody>
                     {installments.map((installment, index) => (
                       <TableRow key={index}>
-                        <TableCell>{installment.installment_number}</TableCell>
+                        <TableCell>{installment.installmentNumber}</TableCell>
                         <TableCell>
                           <Input
                             type="number"
@@ -456,8 +456,8 @@ const PaymentSchedules: React.FC = () => {
                         <TableCell>
                           <Input
                             type="number"
-                            value={installment.days_after_transaction}
-                            onChange={(e) => handleInstallmentChange(index, 'days_after_transaction', Number(e.target.value))}
+                            value={installment.daysAfterTransaction}
+                            onChange={(e) => handleInstallmentChange(index, 'daysAfterTransaction', Number(e.target.value))}
                             min="0"
                             className="w-20"
                           />

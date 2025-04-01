@@ -49,6 +49,17 @@ export interface CommissionInstallment {
   notes?: string;
   createdAt?: string;
   updatedAt?: string;
+  // Include transaction data in the response
+  transaction?: {
+    property?: {
+      title: string;
+      address?: string;
+    };
+    agent?: {
+      first_name?: string;
+      last_name?: string;
+    };
+  };
 }
 
 export interface CommissionForecast {
