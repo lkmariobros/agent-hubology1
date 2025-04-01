@@ -1,154 +1,117 @@
-import React from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
+
+import React, { useEffect, useState } from 'react';
+import { 
+  Card, 
+  CardContent, 
+  CardHeader, 
+  CardTitle,
+  CardDescription,
+  CardFooter
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Bell, CheckCheck, RefreshCw } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
 import { Notification } from '@/types/notification';
-import CommissionNotification from './CommissionNotification';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Bell } from 'lucide-react';
+import { useNotificationActions } from '@/hooks/useNotificationActions';
+import { useAuth } from '@/hooks/useAuth';
 
 interface CommissionNotificationFeedProps {
-  userId?: string;
   limit?: number;
-}
-
-// Define the type for the data returned from the database
-interface NotificationRow {
-  id: string;
-  user_id: string;
-  type: string;
-  title: string;
-  message: string;
-  read: boolean;
-  related_id?: string;
-  created_at: string;
-  data?: any; // Using any to avoid deep instantiation issues
+  showMarkAllRead?: boolean;
+  showFooter?: boolean;
 }
 
 const CommissionNotificationFeed: React.FC<CommissionNotificationFeedProps> = ({ 
-  userId,
-  limit = 3
+  limit = 5,
+  showMarkAllRead = true,
+  showFooter = true
 }) => {
-  const { data: notifications, isLoading } = useQuery({
-    queryKey: ['notifications', 'commission', userId, limit],
-    queryFn: async () => {
-      if (!userId) return [];
-      
-      const { data, error } = await supabase
-        .from('notifications')
-        .select('*')
-        .eq('user_id', userId)
-        .in('type', [
-          'approval_status_change',
-          'tier_update',
-          'commission_milestone'
-        ])
-        .order('created_at', { ascending: false })
-        .limit(limit);
-      
-      if (error) {
-        console.error('Error fetching commission notifications:', error);
-        return [];
-      }
-      
-      console.log('Raw notification data:', data);
-      
-      // Map the database rows to our Notification type with safer type handling
-      return (data || []).map((item: NotificationRow) => {
-        // Parse the data JSON field if it exists, otherwise create an empty object
-        let notificationData: Record<string, any> = {};
-        
-        try {
-          // Check if the data field exists as a string and try to parse it
-          if (typeof item.data === 'string' && item.data) {
-            notificationData = JSON.parse(item.data);
-          } 
-          // If it's already an object, use it directly
-          else if (typeof item.data === 'object' && item.data !== null) {
-            notificationData = item.data;
-          }
-        } catch (e) {
-          console.error('Error parsing notification data:', e);
-        }
-        
-        // If there's a related_id, add it to the data object too
-        if (item.related_id) {
-          notificationData.relatedId = item.related_id;
-        }
-        
-        return {
-          id: item.id,
-          userId: item.user_id,
-          type: item.type as Notification['type'],
-          title: item.title,
-          message: item.message,
-          read: item.read || false,
-          data: notificationData,
-          createdAt: item.created_at
-        } as Notification;
-      });
-    },
-    enabled: !!userId,
-  });
-
-  const mapNotificationToProps = (notification: Notification) => {
-    const data = notification.data || {};
-    
-    // Default to notification type from the data if available, otherwise use a fallback mapping
-    const notificationType = data.notificationType || mapTypeToNotificationType(notification.type);
-    
-    return {
-      type: notificationType,
-      title: notification.title,
-      message: notification.message,
-      commissionAmount: data.commissionAmount,
-      tierName: data.tierName,
-      progressPercentage: data.progressPercentage,
-      date: data.date || notification.createdAt
-    };
-  };
+  const { user } = useAuth();
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const { markAsRead, markAllAsRead, refreshNotifications } = useNotificationActions();
   
-  // Map notification type to CommissionNotificationType
-  const mapTypeToNotificationType = (type: string): any => {
-    switch (type) {
-      case 'approval_status_change':
-        return 'approval_approved';
-      case 'tier_update':
-        return 'tier_progress';
-      case 'commission_milestone':
-        return 'commission_milestone';
-      default:
-        return 'approval_pending';
+  // Filter for commission-related notifications
+  const commissionTypes: string[] = [
+    'approval_status_change',
+    'tier_update',
+    'commission_milestone',
+    'transaction_status'
+  ];
+  
+  const loadNotifications = async () => {
+    if (!user?.id) return;
+    
+    setIsLoading(true);
+    try {
+      const allNotifications = await refreshNotifications(user.id);
+      const commissionNotifications = allNotifications.filter(
+        notification => commissionTypes.includes(notification.type)
+      );
+      setNotifications(commissionNotifications.slice(0, limit));
+    } finally {
+      setIsLoading(false);
     }
   };
   
-  if (isLoading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Bell className="h-5 w-5" /> Recent Notifications
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {Array(limit).fill(0).map((_, i) => (
-            <Skeleton key={i} className="w-full h-20" />
-          ))}
-        </CardContent>
-      </Card>
-    );
-  }
+  useEffect(() => {
+    loadNotifications();
+  }, [user?.id]);
   
-  if (!notifications || notifications.length === 0) {
+  const handleMarkAsRead = async (notificationId: string) => {
+    await markAsRead(notificationId);
+    setNotifications(prev => 
+      prev.map(n => n.id === notificationId ? { ...n, read: true } : n)
+    );
+  };
+  
+  const handleMarkAllAsRead = async () => {
+    if (!user?.id) return;
+    
+    await markAllAsRead(user.id);
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+  };
+  
+  const getNotificationColor = (type: string): string => {
+    switch (type) {
+      case 'approval_status_change':
+        return 'bg-blue-100 text-blue-800';
+      case 'tier_update':
+        return 'bg-green-100 text-green-800';
+      case 'commission_milestone':
+        return 'bg-purple-100 text-purple-800';
+      case 'transaction_status':
+        return 'bg-amber-100 text-amber-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+  
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case 'approval_status_change':
+        return <Badge className="bg-blue-100 text-blue-800">Approval</Badge>;
+      case 'tier_update':
+        return <Badge className="bg-green-100 text-green-800">Tier</Badge>;
+      case 'commission_milestone':
+        return <Badge className="bg-purple-100 text-purple-800">Milestone</Badge>;
+      case 'transaction_status':
+        return <Badge className="bg-amber-100 text-amber-800">Transaction</Badge>;
+      default:
+        return <Badge>System</Badge>;
+    }
+  };
+  
+  if (notifications.length === 0 && !isLoading) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Bell className="h-5 w-5" /> Recent Notifications
-          </CardTitle>
+          <CardTitle>Commission Notifications</CardTitle>
         </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground text-sm">No recent commission notifications</p>
+        <CardContent className="text-center py-8">
+          <Bell className="mx-auto h-12 w-12 text-muted-foreground opacity-20 mb-3" />
+          <p className="text-muted-foreground">No commission notifications</p>
         </CardContent>
       </Card>
     );
@@ -157,18 +120,77 @@ const CommissionNotificationFeed: React.FC<CommissionNotificationFeedProps> = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg flex items-center gap-2">
-          <Bell className="h-5 w-5" /> Recent Notifications
-        </CardTitle>
+        <div className="flex justify-between items-center">
+          <div>
+            <CardTitle>Commission Notifications</CardTitle>
+            <CardDescription>Updates on your commissions and transactions</CardDescription>
+          </div>
+          {showMarkAllRead && notifications.some(n => !n.read) && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleMarkAllAsRead}
+              className="flex items-center gap-1"
+            >
+              <CheckCheck className="h-4 w-4" />
+              <span>Mark all read</span>
+            </Button>
+          )}
+        </div>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {notifications.map((notification) => (
-          <CommissionNotification
-            key={notification.id}
-            {...mapNotificationToProps(notification)}
-          />
-        ))}
+      
+      <CardContent>
+        <div className="space-y-4">
+          {isLoading ? (
+            <div className="flex justify-center py-4">
+              <RefreshCw className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : (
+            notifications.map(notification => (
+              <div 
+                key={notification.id} 
+                className={`p-3 rounded-md ${notification.read ? 'bg-muted/40' : 'bg-muted'}`}
+              >
+                <div className="flex justify-between items-start">
+                  <div className="flex gap-2 items-center">
+                    {getNotificationIcon(notification.type)}
+                    <span className="text-xs text-muted-foreground">
+                      {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
+                    </span>
+                  </div>
+                  
+                  {!notification.read && (
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-6 w-6 p-0" 
+                      onClick={() => handleMarkAsRead(notification.id)}
+                    >
+                      <span className="sr-only">Mark as read</span>
+                      <CheckCheck className="h-3 w-3" />
+                    </Button>
+                  )}
+                </div>
+                
+                <h4 className="font-medium mt-1">{notification.title}</h4>
+                <p className="text-sm">{notification.message}</p>
+              </div>
+            ))
+          )}
+        </div>
       </CardContent>
+      
+      {showFooter && (
+        <CardFooter className="border-t pt-4 flex justify-between">
+          <Button variant="outline" size="sm" onClick={loadNotifications}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh
+          </Button>
+          <Button variant="link" size="sm">
+            View all notifications
+          </Button>
+        </CardFooter>
+      )}
     </Card>
   );
 };
