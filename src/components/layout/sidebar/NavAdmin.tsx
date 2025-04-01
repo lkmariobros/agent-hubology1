@@ -79,30 +79,6 @@ export function NavAdmin() {
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton 
-              asChild 
-              isActive={location.pathname.includes('/admin/commission/schedules')}
-              tooltip="Payment Schedules"
-            >
-              <NavLink to="/admin/commission/schedules">
-                <Calendar className="h-4 w-4" />
-                <span>Payment Schedules</span>
-              </NavLink>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton 
-              asChild 
-              isActive={location.pathname.includes('/admin/commission/forecast')}
-              tooltip="Forecast"
-            >
-              <NavLink to="/admin/commission/forecast">
-                <BarChart3 className="h-4 w-4" />
-                <span>Forecast</span>
-              </NavLink>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>
