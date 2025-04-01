@@ -3,6 +3,9 @@ import { AgentRank } from '@/types';
 
 // Agent tier commission percentages
 export const AGENT_TIER_PERCENTAGES: Record<AgentRank, number> = {
+  'Junior': 65,
+  'Agent': 70,
+  'Senior': 72,
   'Associate': 70,
   'Senior Associate': 75,
   'Advisor': 70,

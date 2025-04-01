@@ -1,173 +1,116 @@
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+import { CommissionInstallment, CommissionForecast } from '@/types/commission';
+import { format, parseISO, addMonths, startOfMonth } from 'date-fns';
 import { toast } from 'sonner';
-import { CommissionForecast } from '@/types/commission';
 
-export function useForecastCalculation(agentId?: string) {
-  const queryClient = useQueryClient();
+interface ForecastResponse {
+  installments: any[];
+  month_totals: {
+    month: string;
+    total_amount: number;
+  }[];
+}
 
-  // Generate forecast for an agent
-  const generateForecast = useMutation({
-    mutationFn: async ({ agentId, months = 12 }: { agentId: string; months?: number }) => {
-      const response = await supabase.functions.invoke('generate_commission_forecast', {
-        body: { agentId, months }
+export function useForecastData(months: number = 12) {
+  return useQuery({
+    queryKey: ['commission', 'forecast', months],
+    queryFn: async () => {
+      const { data, error } = await supabase.functions.invoke('generate_commission_forecast', {
+        body: { months }
       });
-      
-      if (response.error) throw new Error(response.error.message || 'Failed to generate forecast');
-      return response.data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['commissionForecast'] });
-      queryClient.invalidateQueries({ queryKey: ['forecastProjections', agentId] });
-      toast.success('Commission forecast generated successfully');
-    },
-    onError: (error: Error) => {
-      toast.error(`Error generating forecast: ${error.message}`);
-    }
-  });
 
-  // Get forecast summary
-  const { data: forecastSummary, isLoading: isLoadingSummary } = useQuery({
-    queryKey: ['commissionForecast'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .rpc('calculate_commission_forecast_totals');
-      
-      if (error) throw error;
-      return data as { month: string; total_amount: number; scheduled_count: number }[];
-    }
-  });
+      if (error) {
+        console.error('Error fetching forecast data:', error);
+        throw new Error('Failed to fetch forecast data');
+      }
 
-  // Get forecast projections for an agent
-  const { data: forecastProjections, isLoading: isLoadingProjections } = useQuery({
-    queryKey: ['forecastProjections', agentId],
-    queryFn: async () => {
-      if (!agentId) return [];
-      
-      const { data, error } = await supabase
-        .from('forecast_projections')
-        .select('*')
-        .eq('agent_id', agentId)
-        .order('scheduled_date');
+      // Process the response into the expected format
+      const response = data as ForecastResponse;
+
+      const installmentsByMonth: Record<string, CommissionInstallment[]> = {};
+      const installments = response.installments.map((item: any) => {
+        // Convert snake_case to camelCase
+        return {
+          id: item.id,
+          transactionId: item.transaction_id,
+          installmentNumber: item.installment_number,
+          agentId: item.agent_id,
+          amount: item.amount,
+          percentage: item.percentage,
+          scheduledDate: item.scheduled_date,
+          actualPaymentDate: item.actual_payment_date,
+          status: item.status || 'Projected',
+          notes: item.notes,
+          createdAt: item.created_at,
+          updatedAt: item.updated_at,
+          // Include any transaction/property data if available
+          transaction: item.transaction
+        } as CommissionInstallment;
+      });
+
+      // Group the installments by month
+      installments.forEach(installment => {
+        const monthKey = format(parseISO(installment.scheduledDate), 'yyyy-MM');
+        
+        if (!installmentsByMonth[monthKey]) {
+          installmentsByMonth[monthKey] = [];
+        }
+        
+        installmentsByMonth[monthKey].push(installment);
+      });
+
+      // Create the forecast data with monthly totals
+      const forecast: CommissionForecast[] = response.month_totals.map(monthTotal => {
+        const monthKey = monthTotal.month;
+        return {
+          month: monthKey,
+          totalAmount: monthTotal.total_amount,
+          installments: installmentsByMonth[monthKey] || []
+        };
+      });
+
+      return forecast;
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+}
+
+export function useForecastRefresh() {
+  return useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.functions.invoke('generate_commission_forecast', {
+        body: { refresh: true }
+      });
       
       if (error) throw error;
       return data;
     },
-    enabled: !!agentId
-  });
-
-  // Get commission forecast by month
-  const { data: forecastByMonth, isLoading: isLoadingForecastByMonth } = useQuery({
-    queryKey: ['commissionForecastByMonth', agentId],
-    queryFn: async () => {
-      if (!agentId) return [];
-      
-      const today = new Date();
-      const nextYear = new Date(today);
-      nextYear.setFullYear(today.getFullYear() + 1);
-      
-      // Get actual installments
-      const { data: actualInstallments, error: actualError } = await supabase
-        .from('commission_installments')
-        .select(`
-          id,
-          transaction_id,
-          installment_number,
-          agent_id,
-          amount,
-          percentage,
-          scheduled_date,
-          status,
-          actual_payment_date,
-          notes,
-          created_at,
-          updated_at
-        `)
-        .eq('agent_id', agentId)
-        .gte('scheduled_date', today.toISOString().split('T')[0])
-        .lt('scheduled_date', nextYear.toISOString().split('T')[0])
-        .in('status', ['Pending', 'Processing']);
-      
-      if (actualError) throw actualError;
-      
-      // Get projected installments
-      const { data: projectedInstallments, error: projectedError } = await supabase
-        .from('forecast_projections')
-        .select(`
-          id,
-          projected_transaction_id as transaction_id,
-          installment_number,
-          agent_id,
-          amount,
-          percentage,
-          scheduled_date,
-          status,
-          null as actual_payment_date,
-          null as notes,
-          created_at,
-          updated_at
-        `)
-        .eq('agent_id', agentId)
-        .gte('scheduled_date', today.toISOString().split('T')[0])
-        .lt('scheduled_date', nextYear.toISOString().split('T')[0]);
-      
-      if (projectedError) throw projectedError;
-      
-      // Combine and group by month
-      const allInstallments = [
-        ...(actualInstallments || []).map(item => ({
-          ...item,
-          // Add camelCase versions of snake_case properties
-          scheduledDate: item.scheduled_date,
-          installmentNumber: item.installment_number,
-          actualPaymentDate: item.actual_payment_date
-        })), 
-        ...(projectedInstallments || []).map(item => ({
-          ...item,
-          // Add camelCase versions of snake_case properties
-          scheduledDate: item.scheduled_date,
-          installmentNumber: item.installment_number,
-          actualPaymentDate: item.actual_payment_date
-        }))
-      ];
-      
-      const groupedByMonth: { [key: string]: CommissionForecast } = {};
-      
-      allInstallments.forEach(installment => {
-        // Extract month from scheduled_date (YYYY-MM)
-        const dateObj = new Date(installment.scheduled_date || installment.scheduledDate);
-        const monthKey = dateObj.toLocaleString('default', { month: 'long', year: 'numeric' });
-        
-        if (!groupedByMonth[monthKey]) {
-          groupedByMonth[monthKey] = {
-            month: monthKey,
-            totalAmount: 0,
-            installments: []
-          };
-        }
-        
-        groupedByMonth[monthKey].totalAmount += Number(installment.amount);
-        groupedByMonth[monthKey].installments.push(installment as any);
-      });
-      
-      // Convert to array and sort by date
-      return Object.values(groupedByMonth).sort((a, b) => {
-        const dateA = new Date(a.installments[0].scheduledDate || a.installments[0].scheduled_date);
-        const dateB = new Date(b.installments[0].scheduledDate || b.installments[0].scheduled_date);
-        return dateA.getTime() - dateB.getTime();
-      });
+    onSuccess: () => {
+      toast.success('Commission forecast data refreshed');
     },
-    enabled: !!agentId
+    onError: (error) => {
+      console.error('Error refreshing forecast data:', error);
+      toast.error('Failed to refresh forecast data');
+    }
   });
-  
-  return {
-    generateForecast,
-    forecastSummary,
-    forecastProjections,
-    forecastByMonth,
-    isLoadingSummary,
-    isLoadingProjections,
-    isLoadingForecastByMonth
-  };
+}
+
+export function useMonthlyForecastData() {
+  // Get data for the next 12 months
+  const currentDate = new Date();
+  const months: { label: string; value: string }[] = [];
+
+  for (let i = 0; i < 12; i++) {
+    const date = addMonths(currentDate, i);
+    const monthStart = startOfMonth(date);
+    
+    months.push({
+      label: format(monthStart, 'MMMM yyyy'),
+      value: format(monthStart, 'yyyy-MM')
+    });
+  }
+
+  return months;
 }
