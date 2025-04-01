@@ -1,12 +1,14 @@
 
 import React from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
+  SidebarRail,
+  SidebarTrigger,
 } from "@/components/ui/sidebar";
 
 import { NavAdmin } from './sidebar/NavAdmin';
@@ -23,21 +25,24 @@ export function AdminSidebar() {
   }
 
   return (
-    <Sidebar className="border-none bg-[#1F232D] AdminSidebar">
-      <SidebarHeader>
-        {/* Use the consistent PortalSwitcher component */}
-        <PortalSwitcher showLabel={true} className="px-2 py-3 w-full" />
-      </SidebarHeader>
-      
-      <SidebarContent>
-        <NavAdmin />
-        <NavReports />
-        <NavSystem />
-      </SidebarContent>
-      
-      <SidebarFooter>
-        <AdminProfile />
-      </SidebarFooter>
-    </Sidebar>
+    <>
+      <Sidebar className="border-none bg-[#1F232D] AdminSidebar">
+        <SidebarHeader>
+          {/* Use the consistent PortalSwitcher component */}
+          <PortalSwitcher showLabel={true} className="px-2 py-3 w-full" />
+        </SidebarHeader>
+        
+        <SidebarContent>
+          <NavAdmin />
+          <NavReports />
+          <NavSystem />
+        </SidebarContent>
+        
+        <SidebarFooter>
+          <AdminProfile />
+        </SidebarFooter>
+      </Sidebar>
+      <SidebarRail />
+    </>
   );
 }
