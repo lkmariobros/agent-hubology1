@@ -1,3 +1,4 @@
+
 export interface User {
   id: string;
   name: string;
@@ -10,6 +11,7 @@ export interface User {
   sales?: number;
   joinDate?: string;
   transactions?: number;
+  phone?: string;
 }
 
 export interface DashboardMetric {
@@ -94,6 +96,18 @@ export interface AgentWithHierarchy {
   tier: string;
   commission: number;
   upline?: AgentWithHierarchy;
+  // Add missing properties used in components
+  avatar?: string;
+  email?: string;
+  phone?: string;
+  joinDate?: string;
+  rank?: string;
+  transactions?: number;
+  personalCommission?: number;
+  overrideCommission?: number;
+  totalCommission?: number;
+  downline?: AgentWithHierarchy[];
+  salesVolume?: number;
 }
 
 export interface CommissionTier {
@@ -101,19 +115,43 @@ export interface CommissionTier {
   name: string;
   commissionRate: number;
   requirements: string[];
+  // Add missing properties used in components
+  tier?: string;
+  rate?: number;
+  minTransactions?: number;
+  color?: string;
+  rank?: string;
+  agentPercentage?: number;
 }
 
 export interface CommissionHistory {
   id: string;
   date: string;
   amount: number;
-  property: string;
+  property: string | {
+    title: string;
+    location: string;
+  };
   status: string;
+  // Add missing properties used in components
+  type?: string;
+  source?: string;
+  transactionReference?: string;
+  transactionId?: string;
 }
 
 export interface OverrideCommission {
   agentId: string;
   amount: number;
+  // Add missing properties used in components
+  id?: string;
+  baseAgentId?: string;
+  transactionId?: string;
+  percentage?: number;
+  status?: string;
+  agentName?: string;
+  rank?: string | AgentRank;
+  tier?: string | AgentRank;
 }
 
 export interface RankRequirement {
@@ -173,5 +211,16 @@ export interface Property {
     email?: string;
     firstName?: string;
     lastName?: string;
+    phone?: string;
   };
+  // Add missing properties used in components
+  featured?: boolean;
+  stock?: {
+    total: number;
+    available: number;
+    reserved: number;
+    sold: number;
+  };
+  subtype?: string;
+  transactionType?: string;
 }

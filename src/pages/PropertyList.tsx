@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { PropertyGrid } from '@/components/property/PropertyGrid';
-import PropertyFilterBar from '@/components/property/PropertyFilterBar';
+import { PropertyFilterBar } from '@/components/property/PropertyFilterBar';
 import { Property } from '@/types';
 
 const PropertyList = () => {

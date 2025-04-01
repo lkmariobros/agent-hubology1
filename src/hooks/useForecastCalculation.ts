@@ -64,6 +64,12 @@ export const useForecastCalculation = (agentId?: string) => {
     forecastSummary,
     forecastByMonth,
     isLoadingSummary,
-    isLoadingForecastByMonth
+    isLoadingForecastByMonth,
+    // For backward compatibility with older code
+    calculateForecast: (agentId: string, months: number) => {
+      return generateForecast.mutateAsync({ agentId, months });
+    },
+    isLoading: generateForecast.isPending,
+    error: generateForecast.error
   };
 };

@@ -20,7 +20,9 @@ const fallbackTiers: CommissionTier[] = [{
   minTransactions: 0,
   color: 'orange',
   rank: 'Associate',
-  agentPercentage: 70
+  agentPercentage: 70,
+  commissionRate: 70,
+  requirements: []
 }, {
   id: 'silver',
   name: 'Silver',
@@ -29,7 +31,9 @@ const fallbackTiers: CommissionTier[] = [{
   minTransactions: 10,
   color: 'blue',
   rank: 'Senior Associate',
-  agentPercentage: 75
+  agentPercentage: 75,
+  commissionRate: 75,
+  requirements: []
 }, {
   id: 'gold',
   name: 'Gold',
@@ -38,7 +42,9 @@ const fallbackTiers: CommissionTier[] = [{
   minTransactions: 25,
   color: 'orange',
   rank: 'Team Leader',
-  agentPercentage: 80
+  agentPercentage: 80,
+  commissionRate: 80,
+  requirements: []
 }, {
   id: 'platinum',
   name: 'Platinum',
@@ -47,7 +53,9 @@ const fallbackTiers: CommissionTier[] = [{
   minTransactions: 50,
   color: 'purple',
   rank: 'Sales Leader',
-  agentPercentage: 85
+  agentPercentage: 85,
+  commissionRate: 85,
+  requirements: []
 }, {
   id: 'diamond',
   name: 'Diamond',
@@ -56,7 +64,9 @@ const fallbackTiers: CommissionTier[] = [{
   minTransactions: 100,
   color: 'pink',
   rank: 'Director',
-  agentPercentage: 90
+  agentPercentage: 90,
+  commissionRate: 90,
+  requirements: []
 }];
 
 // Sample agent hierarchy for fallback when API fails
@@ -74,6 +84,7 @@ const fallbackAgentHierarchy: AgentWithHierarchy = {
   personalCommission: 112500,
   overrideCommission: 45000,
   totalCommission: 157500,
+  commission: 157500,
   downline: [{
     id: 'agent456',
     name: 'Robert Wilson',
@@ -88,6 +99,7 @@ const fallbackAgentHierarchy: AgentWithHierarchy = {
     personalCommission: 70000,
     overrideCommission: 15000,
     totalCommission: 85000,
+    commission: 85000,
     downline: []
   }]
 };
