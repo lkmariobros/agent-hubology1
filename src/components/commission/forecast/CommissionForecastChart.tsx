@@ -3,17 +3,21 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
 import { useCommissionForecast } from '@/hooks/useCommissionForecast';
-import useAuth from '@/hooks/useAuth';
+import { useAuth } from '@/context/AuthContext';
 import { formatCurrency } from '@/lib/utils';
 
 interface CommissionForecastChartProps {
   months?: number;
+  userId?: string;
 }
 
-const CommissionForecastChart: React.FC<CommissionForecastChartProps> = ({ months = 6 }) => {
+const CommissionForecastChart: React.FC<CommissionForecastChartProps> = ({ 
+  months = 6,
+  userId
+}) => {
   const { user } = useAuth();
   const forecastHooks = useCommissionForecast();
-  const { data: forecast, isLoading } = forecastHooks.useFetchCommissionForecast(user?.id, months);
+  const { data: forecast, isLoading } = forecastHooks.useFetchCommissionForecast(userId || user?.id, months);
   
   if (isLoading) {
     return (

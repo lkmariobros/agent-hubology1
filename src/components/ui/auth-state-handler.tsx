@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/context/AuthContext';
 import LoadingIndicator from '@/components/ui/loading-indicator';
 import { Button } from '@/components/ui/button';
 import { AlertCircle } from 'lucide-react';

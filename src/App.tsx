@@ -17,7 +17,7 @@ import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import AdminRoute from '@/components/auth/AdminRoute';
 import { LoadingPage } from '@/components/ui/loading';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
-import { AuthProvider } from '@/providers/AuthProvider';
+import { AuthProvider } from '@/context/AuthContext';
 
 function App() {
   return (
@@ -33,8 +33,8 @@ function App() {
 function AppRoutes() {
   return (
     <Routes>
+      <Route index element={<Navigate to="/dashboard" />} />
       <Route path="/" element={<Layout />}>
-        <Route index element={<Navigate to="/dashboard" />} />
         <Route
           path="dashboard"
           element={

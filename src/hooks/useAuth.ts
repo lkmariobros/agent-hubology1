@@ -34,6 +34,3 @@ export function useAuth(): AuthContextType {
 
 // Export the type for use in components
 export type { AuthContextType };
-
-// Export the hook as default for backwards compatibility
-export default useAuth;
