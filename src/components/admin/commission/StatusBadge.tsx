@@ -1,7 +1,14 @@
 
 import React from 'react';
-import { Clock, AlertTriangle, CheckCircle2, Banknote, Ban, HelpCircle } from 'lucide-react';
-import { ApprovalStatus } from '@/types';
+import { 
+  Clock, 
+  AlertTriangle, 
+  CheckCircle2, 
+  Banknote, 
+  Ban, 
+  HelpCircle 
+} from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 interface StatusBadgeProps {
   status: string;
@@ -18,19 +25,19 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({
   const getStatusBadgeClass = (status: string) => {
     switch(status) {
       case 'Pending':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-amber-100 text-amber-800 border border-amber-200';
       case 'Under Review':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-blue-100 text-blue-800 border border-blue-200';
       case 'Approved':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-100 text-green-800 border border-green-200';
       case 'Ready for Payment':
-        return 'bg-purple-100 text-purple-800';
+        return 'bg-purple-100 text-purple-800 border border-purple-200';
       case 'Paid':
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-slate-100 text-slate-800 border border-slate-200';
       case 'Rejected':
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-100 text-red-800 border border-red-200';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 text-gray-800 border border-gray-200';
     }
   };
   
@@ -55,15 +62,15 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({
   };
   
   const sizeClass = {
-    sm: 'px-1.5 py-0.5 text-xs',
-    md: 'px-2.5 py-0.5 text-xs',
-    lg: 'px-3 py-1 text-sm'
+    sm: 'px-1.5 py-0.5 text-xs gap-0.5',
+    md: 'px-2.5 py-1 text-xs gap-1',
+    lg: 'px-3 py-1.5 text-sm gap-1.5'
   };
   
   return (
     <span className={`inline-flex items-center rounded-full font-medium ${sizeClass[size]} ${getStatusBadgeClass(status)} ${className}`}>
       {getStatusIcon(status)}
-      <span className={`ml-${size === 'sm' ? '0.5' : '1'}`}>{status}</span>
+      <span>{status}</span>
     </span>
   );
 };
