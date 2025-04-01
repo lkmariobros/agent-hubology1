@@ -1,80 +1,69 @@
 
 import { useState } from 'react';
-import { CommissionForecast } from '@/types';
-import { supabase } from '@/lib/supabase';
+import { useAuth } from './useAuth';
+import { useMutation } from '@tanstack/react-query';
 
-export const useForecastCalculation = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-  
-  const calculateForecast = async (agentId: string, months: number): Promise<CommissionForecast[]> => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      // In a real implementation, this would fetch from an API endpoint
-      // or call an Edge Function to calculate the forecast
-      const { data, error } = await supabase
-        .from('commission_installments')
-        .select(`
-          id,
-          amount,
-          percentage,
-          scheduled_date,
-          status
-        `)
-        .eq('agent_id', agentId)
-        .gte('scheduled_date', new Date(new Date().setDate(1)).toISOString())
-        .lte('scheduled_date', new Date(new Date().setMonth(new Date().getMonth() + months)).toISOString())
-        .order('scheduled_date', { ascending: true });
+export interface CommissionForecast {
+  id: string;
+  month: string;
+  total_amount: number;
+  scheduled_count: number;
+  installments: any[];
+}
+
+interface MonthlyForecastData {
+  month: string;
+  totalAmount: number;
+  installments: any[];
+}
+
+export const useForecastCalculation = (agentId?: string) => {
+  const [forecastSummary, setForecastSummary] = useState<CommissionForecast[]>([]);
+  const [forecastByMonth, setForecastByMonth] = useState<MonthlyForecastData[]>([]);
+  const [isLoadingSummary, setIsLoadingSummary] = useState(false);
+  const [isLoadingForecastByMonth, setIsLoadingForecastByMonth] = useState(false);
+
+  const generateForecast = useMutation({
+    mutationFn: async ({ agentId, months }: { agentId: string, months: number }) => {
+      setIsLoadingSummary(true);
+      setIsLoadingForecastByMonth(true);
+      
+      try {
+        // Mock data for now - in real app this would call an API
+        const mockData = Array.from({ length: 6 }, (_, i) => ({
+          id: `forecast-${i}`,
+          month: new Date(Date.now() + i * 30 * 24 * 60 * 60 * 1000).toLocaleString('default', { month: 'long', year: 'numeric' }),
+          total_amount: Math.floor(Math.random() * 50000) + 5000,
+          scheduled_count: Math.floor(Math.random() * 5) + 1,
+          installments: Array.from({ length: Math.floor(Math.random() * 3) + 1 }, (_, j) => ({
+            id: `installment-${i}-${j}`,
+            installmentNumber: j + 1,
+            amount: Math.floor(Math.random() * 10000) + 1000,
+            scheduledDate: new Date(Date.now() + (i * 30 + j * 10) * 24 * 60 * 60 * 1000).toISOString(),
+            status: 'Projected'
+          }))
+        }));
         
-      if (error) throw new Error(error.message);
-      
-      // Group by month
-      const forecastByMonth: { [key: string]: CommissionForecast } = {};
-      
-      data.forEach((installment) => {
-        const date = new Date(installment.scheduled_date);
-        const month = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        setForecastSummary(mockData);
+        setForecastByMonth(mockData.map(month => ({
+          month: month.month,
+          totalAmount: month.total_amount,
+          installments: month.installments
+        })));
         
-        if (!forecastByMonth[month]) {
-          forecastByMonth[month] = {
-            month,
-            totalAmount: 0,
-            installments: []
-          };
-        }
-        
-        forecastByMonth[month].totalAmount += installment.amount;
-        forecastByMonth[month].installments.push({
-          id: installment.id,
-          transactionId: '',
-          installmentNumber: 0,
-          agentId,
-          amount: installment.amount,
-          percentage: installment.percentage,
-          scheduledDate: installment.scheduled_date,
-          status: installment.status,
-          createdAt: '',
-          updatedAt: ''
-        });
-      });
-      
-      // Convert to array and sort by month
-      const forecast = Object.values(forecastByMonth).sort((a, b) => 
-        a.month.localeCompare(b.month)
-      );
-      
-      return forecast;
-    } catch (err: any) {
-      setError(err);
-      return [];
-    } finally {
-      setIsLoading(false);
+        return mockData;
+      } finally {
+        setIsLoadingSummary(false);
+        setIsLoadingForecastByMonth(false);
+      }
     }
-  };
-  
-  return { calculateForecast, isLoading, error };
-};
+  });
 
-export default useForecastCalculation;
+  return {
+    generateForecast,
+    forecastSummary,
+    forecastByMonth,
+    isLoadingSummary,
+    isLoadingForecastByMonth
+  };
+};

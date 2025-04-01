@@ -1,147 +1,92 @@
 
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Search, Filter, SortDesc, FileText, DollarSign, AlertCircle, CheckCircle2, Clock, ArrowUpDown, ArrowRight } from 'lucide-react';
-import PropertiesBoard from '@/components/property/PropertiesBoard';
-import OpportunitiesBoard from '@/components/opportunity/OpportunitiesBoard';
-import { Property, Opportunity } from '@/types';
+import { Opportunity, User } from '@/types';
 
 const Home = () => {
-  const navigate = useNavigate();
-
-  // Sample properties with all required fields
-  const sampleProperties: Property[] = [
-    { 
-      id: 'P-001', 
-      title: 'Luxury Villa in Tuscany', 
-      description: 'Stunning villa with panoramic views.', 
-      price: 2500000, 
-      address: { street: 'Via del Sole, 12', city: 'Florence', state: 'Tuscany', zip: '50123', country: 'Italy' }, 
-      images: ['/properties/property-1.jpg'], 
-      bedrooms: 5, 
-      bathrooms: 4, 
-      area: 4500, 
-      type: 'residential', 
-      status: 'available', 
-      featured: true,
-      features: ['Pool', 'Garden', 'Terrace'],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+  // Mock data with correct types
+  const opportunities: Opportunity[] = [
+    {
+      id: '1',
+      title: 'Luxury Condo Buyer',
+      description: 'Looking for a luxury condo in downtown area with 2+ bedrooms',
+      budget: '$800,000 - $1,200,000',
+      location: 'Downtown',
+      status: 'Active',
+      postedBy: 'John Smith',
+      postedDate: '2023-06-15T10:30:00Z'
     },
-    { 
-      id: 'P-002', 
-      title: 'Modern Apartment in Manhattan', 
-      description: 'Sleek apartment in the heart of NYC.', 
-      price: 1800000, 
-      address: { street: 'Central Park West, 75', city: 'New York', state: 'NY', zip: '10023', country: 'USA' }, 
-      images: ['/properties/property-2.jpg'], 
-      bedrooms: 2, 
-      bathrooms: 2, 
-      area: 1800, 
-      type: 'residential', 
-      status: 'available', 
-      featured: true,
-      features: ['Doorman', 'Gym', 'Balcony'],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    },
-    { 
-      id: 'P-003', 
-      title: 'Charming Cottage in Cotswolds', 
-      description: 'Idyllic retreat in the English countryside.', 
-      price: 950000, 
-      address: { street: 'High Street, 4', city: 'Cotswolds', state: 'Gloucestershire', zip: 'GL54 1BT', country: 'UK' }, 
-      images: ['/properties/property-3.jpg'], 
-      bedrooms: 3, 
-      bathrooms: 2, 
-      area: 2200, 
-      type: 'residential', 
-      status: 'available', 
-      featured: true,
-      features: ['Garden', 'Fireplace', 'Countryside View'],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    },
+    {
+      id: '2',
+      title: 'Office Space Rental',
+      description: 'Corporate client seeking 2000-3000 sq ft office space',
+      budget: '$5,000 - $8,000/mo',
+      location: 'Business District',
+      status: 'Urgent',
+      postedBy: 'Sarah Johnson',
+      postedDate: '2023-06-18T14:45:00Z'
+    }
   ];
 
-  const opportunities: Opportunity[] = [
-    { 
-      id: 'O-001', 
-      title: 'Investment Opportunity in Downtown LA', 
-      description: 'Prime commercial space with high potential.', 
-      propertyType: 'commercial', 
-      budget: '$5M - $10M', 
-      location: 'Los Angeles, CA', 
-      status: 'open', 
-      postedBy: 'Acme Corp', 
-      postedDate: '2023-03-15' 
+  const teammates: User[] = [
+    {
+      id: '1',
+      name: 'John Doe',
+      email: 'john@example.com',
+      role: 'Team Leader',
+      tier: 'Gold',
+      points: 2500
     },
-    { 
-      id: 'O-002', 
-      title: 'Land Development Project in Austin', 
-      description: 'Large plot of land for residential development.', 
-      propertyType: 'land', 
-      budget: '$2M - $4M', 
-      location: 'Austin, TX', 
-      status: 'pending', 
-      postedBy: 'Beta Builders', 
-      postedDate: '2023-03-10' 
-    },
+    {
+      id: '2',
+      name: 'Jane Smith',
+      email: 'jane@example.com',
+      role: 'Senior Agent',
+      tier: 'Silver',
+      points: 1800
+    }
   ];
 
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
+    <div className="container p-6">
+      <h1 className="text-2xl font-bold mb-6">Welcome to Property Agency System</h1>
       
-      <Card className="mb-6">
-        <CardContent className="pt-6">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Search properties..." className="pl-9" />
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline">
-                <Filter className="h-4 w-4 mr-2" />
-                Filter
-              </Button>
-              <Button variant="outline">
-                <SortDesc className="h-4 w-4 mr-2" />
-                Sort
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <div>
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">Featured Properties</h2>
-            <Button variant="link" size="sm" onClick={() => navigate('/properties')}>
-              View All
-              <ArrowRight className="h-4 w-4 ml-2" />
-            </Button>
-          </div>
-          <PropertiesBoard properties={sampleProperties} />
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardContent className="p-6">
+            <h2 className="text-xl font-semibold mb-4">Recent Opportunities</h2>
+            <ul className="space-y-4">
+              {opportunities.map(opp => (
+                <li key={opp.id} className="border-b pb-3">
+                  <h3 className="font-medium">{opp.title}</h3>
+                  <p className="text-sm text-muted-foreground">{opp.description}</p>
+                  <div className="flex justify-between mt-1">
+                    <span className="text-xs">{opp.budget}</span>
+                    <span className="text-xs">{opp.location}</span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
         
-        <div>
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">Latest Opportunities</h2>
-            <Button variant="link" size="sm" onClick={() => navigate('/opportunities')}>
-              View All
-              <ArrowRight className="h-4 w-4 ml-2" />
-            </Button>
-          </div>
-          <OpportunitiesBoard 
-            opportunities={opportunities} 
-            onViewAll={() => navigate('/opportunities')} 
-          />
-        </div>
+        <Card>
+          <CardContent className="p-6">
+            <h2 className="text-xl font-semibold mb-4">Team Members</h2>
+            <ul className="space-y-4">
+              {teammates.map(member => (
+                <li key={member.id} className="border-b pb-3">
+                  <h3 className="font-medium">{member.name}</h3>
+                  <p className="text-sm text-muted-foreground">{member.role}</p>
+                  <div className="flex justify-between mt-1">
+                    <span className="text-xs">{member.email}</span>
+                    <span className="text-xs">{member.tier}</span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

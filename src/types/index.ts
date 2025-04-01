@@ -1,88 +1,144 @@
-
-export interface CommissionInstallment {
-  id: string;
-  transactionId: string;
-  installmentNumber: number;
-  agentId: string;
-  amount: number;
-  percentage: number;
-  scheduledDate: string;
-  actualPaymentDate?: string;
-  status: string;
-  notes?: string;
-  createdAt: string;
-  updatedAt: string;
-  transaction?: any;
-  // Snake case alternatives for API compatibility
-  transaction_id?: string;
-  installment_number?: number;
-  agent_id?: string;
-  scheduled_date?: string;
-  actual_payment_date?: string;
-  created_at?: string;
-  updated_at?: string;
-}
-
-export interface CommissionForecast {
-  month: string;
-  totalAmount: number;
-  installments: CommissionInstallment[];
-  // Snake case alternatives for API compatibility
-  total_amount?: number;
-}
-
-export interface PaymentSchedule {
+export interface User {
   id: string;
   name: string;
-  description?: string;
-  isDefault: boolean;
-  installments: PaymentScheduleInstallment[];
+  email: string;
+  role: string;
+  avatar?: string;
+  // Add missing properties that are used in components
+  tier?: string;
+  points?: number;
+  sales?: number;
+  joinDate?: string;
+  transactions?: number;
 }
 
-export interface PaymentScheduleInstallment {
+export interface DashboardMetric {
   id: string;
-  scheduleId: string;
-  installmentNumber: number;
-  daysAfterTransaction: number;
-  percentage: number;
-  description?: string;
+  label: string;
+  value: string | number;
+  change?: number;
+  trend?: 'up' | 'down' | 'neutral';
+  icon?: React.ReactNode;
 }
 
-// Alias for backward compatibility
-export type ScheduleInstallment = PaymentScheduleInstallment;
+export interface Opportunity {
+  id: string;
+  title: string;
+  description: string;
+  budget: string;
+  location: string;
+  status: string;
+  postedBy: string;
+  postedDate: string;
+  propertyType?: string;
+}
+
+export interface Transaction {
+  id: string;
+  date: string;
+  propertyId: string;
+  property?: {
+    title: string;
+  };
+  commission: number;
+  status: string;
+}
 
 export interface PropertyFormValues {
   id?: string;
-  title: string;
-  description: string;
+  title?: string;
+  description?: string;
   transactionType?: 'Sale' | 'Rent' | 'Primary';
-  propertyType: string;
-  price: number;
+  propertyType?: string;
+  price?: number;
   rentalRate?: number;
   builtUpArea?: number;
   floorArea?: number;
   landArea?: number;
-  bedrooms: number;
-  bathrooms: number;
-  features: string[];
-  status: 'Available' | 'Under Offer' | 'Pending' | 'Sold' | 'Rented';
-  address: {
-    street: string;
-    city: string;
-    state: string;
+  bedrooms?: number;
+  bathrooms?: number;
+  address?: {
+    street?: string;
+    city?: string;
+    state?: string;
     zip?: string;
-    country: string;
+    country?: string;
   };
-  images: any[]; // Add this property for file uploads
-  agentNotes?: string;
+  status?: string;
+  images?: string[];
+  features?: string[];
   stock?: {
     total: number;
     available: number;
     reserved: number;
     sold: number;
   };
-  type?: string; // Added for backward compatibility
-  area?: number; // Added for backward compatibility
+}
+
+export type AgentRank = 
+  | 'Junior' 
+  | 'Agent' 
+  | 'Senior' 
+  | 'Associate' 
+  | 'Senior Associate' 
+  | 'Advisor' 
+  | 'Sales Leader' 
+  | 'Team Leader' 
+  | 'Group Leader' 
+  | 'Director' 
+  | 'Supreme Leader';
+
+export interface AgentWithHierarchy {
+  id: string;
+  name: string;
+  tier: string;
+  commission: number;
+  upline?: AgentWithHierarchy;
+}
+
+export interface CommissionTier {
+  id: string;
+  name: string;
+  commissionRate: number;
+  requirements: string[];
+}
+
+export interface CommissionHistory {
+  id: string;
+  date: string;
+  amount: number;
+  property: string;
+  status: string;
+}
+
+export interface OverrideCommission {
+  agentId: string;
+  amount: number;
+}
+
+export interface RankRequirement {
+  rank: AgentRank;
+  salesTarget: number;
+  transactionCount: number;
+}
+
+export interface ApprovalStatus {
+  status: string;
+  count: number;
+  color: string;
+}
+
+export interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T;
+}
+
+export interface PaginatedResponse<T> extends ApiResponse<T> {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
 }
 
 export interface Property {
@@ -92,184 +148,30 @@ export interface Property {
   price: number;
   rentalRate?: number;
   type: string;
-  subtype?: string;
+  propertyType?: string;
   bedrooms: number;
   bathrooms: number;
-  area: number;
-  features: string[];
-  images: string[];
+  builtUpArea: number;
+  area?: number;
+  size?: number;
   status: string;
   address: {
     street: string;
     city: string;
     state: string;
-    zip?: string;
+    zip: string;
     country: string;
   };
-  agent?: {
-    id?: string;
-    firstName?: string;
-    lastName?: string;
-    name?: string;
-    email?: string;
-    phone?: string;
-  };
-  stock?: {
-    total: number;
-    available: number;
-    reserved?: number;
-    sold?: number;
-  };
-  featured?: boolean;
-  reference?: string;
-  size?: number; // For sample properties compatibility
+  features: string[];
+  images: string[];
   createdAt: string;
   updatedAt: string;
-  transactionType?: 'Sale' | 'Rent' | 'Primary';
-}
-
-// Agent and Commission related types
-export type AgentRank = 
-  | 'Junior Agent'
-  | 'Agent'
-  | 'Senior Agent'
-  | 'Team Leader'
-  | 'Sales Leader'
-  | 'Group Leader'
-  | 'Associate Director'
-  | 'Director';
-
-export interface AgentWithHierarchy {
-  id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  avatar?: string;
-  rank?: string;
-  tier?: string;
-  joinDate?: string;
-  transactions?: number;
-  salesVolume?: number;
-  personalCommission?: number;
-  overrideCommission?: number;
-  totalCommission?: number;
-  downline?: AgentWithHierarchy[];
-  downlines?: AgentWithHierarchy[];
-}
-
-export interface CommissionTier {
-  id: string;
-  name: string;
-  tier?: string;
-  rate?: number;
-  minTransactions?: number;
-  color?: string;
-  rank?: string;
-  agentPercentage: number;
-}
-
-export interface OverrideCommission {
-  id: string;
-  agentId: string;
-  baseAgentId: string;
-  transactionId: string;
-  percentage: number;
-  amount: number;
-  status: string;
-  agentName?: string;
-  rank?: AgentRank;
-  tier?: string;
-}
-
-export interface CommissionHistory {
-  id: string;
-  transactionId: string;
-  transactionReference?: string;
-  date: string;
-  amount: number;
-  status: string;
-  type?: string;
-  source?: string;
-  property?: {
-    title: string;
-    location: string;
+  reference?: string;
+  agent?: {
+    id: string;
+    name: string;
+    email?: string;
+    firstName?: string;
+    lastName?: string;
   };
-}
-
-export interface ApprovalStatus {
-  id: string;
-  name: string;
-  color: string;
-}
-
-export interface RankRequirement {
-  id: string;
-  rank: AgentRank;
-  minTransactions: number;
-  minSalesVolume: number;
-}
-
-// Dashboard types
-export interface DashboardMetric {
-  id: string;
-  title: string;
-  value: string | number;
-  change?: number;
-  trend?: 'up' | 'down' | 'neutral';
-  icon?: string;
-}
-
-export interface Transaction {
-  id: string;
-  reference: string;
-  date: string;
-  clientName: string;
-  propertyAddress: string;
-  amount: number;
-  status: string;
-  type: string;
-  agentId?: string;
-  agentName?: string;
-}
-
-export interface Opportunity {
-  id: string;
-  title: string;
-  description: string;
-  budget: number;
-  location: string;
-  propertyType: string;
-  createdAt: string;
-  status: string;
-  urgency: 'low' | 'medium' | 'high';
-  clientId?: string;
-  clientName?: string;
-  agentId?: string;
-  agentName?: string;
-}
-
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  avatar?: string;
-  phone?: string;
-  properties?: any[];
-  sales?: number;
-}
-
-export interface ApiResponse<T> {
-  success: boolean;
-  data?: T;
-  error?: string;
-  message?: string;
-}
-
-export interface PaginatedResponse<T> {
-  data: T[];
-  totalCount: number;
-  page: number;
-  pageSize: number;
-  totalPages: number;
 }
