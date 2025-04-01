@@ -1,6 +1,7 @@
 
 import { AgentRank } from './index';
 
+// Base commission tier structure
 export interface CommissionTier {
   id: string;
   name: string;
@@ -10,13 +11,12 @@ export interface CommissionTier {
   minSalesVolume?: number;
   isDefault?: boolean;
   thresholdAmount?: number;
-  // Properties needed by CommissionTiers component
   tier?: string;
   rate?: number;
   color?: string;
 }
 
-// New types for commission payment schedules
+// Commission payment schedule
 export interface PaymentSchedule {
   id: string;
   name: string;
@@ -27,6 +27,7 @@ export interface PaymentSchedule {
   updatedAt?: string;
 }
 
+// Individual installment in a payment schedule
 export interface ScheduleInstallment {
   id: string;
   scheduleId: string;
@@ -36,6 +37,7 @@ export interface ScheduleInstallment {
   description?: string;
 }
 
+// Commission installment (actual payment record)
 export interface CommissionInstallment {
   id: string;
   transactionId: string;
@@ -62,8 +64,20 @@ export interface CommissionInstallment {
   };
 }
 
+// Commission forecast grouped by month
 export interface CommissionForecast {
   month: string;
   totalAmount: number;
   installments: CommissionInstallment[];
+}
+
+// Consolidated RankRequirement interface to avoid duplication
+export interface RankRequirement {
+  minSalesVolume: number;
+  minTransactions: number;
+  overrideRate: number;
+  rank?: string;
+  color?: string;
+  personalSales?: number;
+  recruitedAgents?: number;
 }
