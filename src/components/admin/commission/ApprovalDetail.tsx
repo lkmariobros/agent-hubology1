@@ -56,7 +56,11 @@ const ApprovalDetail: React.FC<{ id: string }> = ({ id }) => {
         <h1 className="text-2xl font-bold">Approval Details</h1>
       </div>
       
-      <SummaryCards approval={approvalData} />
+      <SummaryCards summaryData={[
+        { label: 'Status', value: approvalData.status, description: 'Current status of the approval' },
+        { label: 'Transaction ID', value: approvalData.transaction_id?.slice(0, 8) || 'N/A', description: 'Related transaction' },
+        { label: 'Submitted', value: new Date(approvalData.created_at).toLocaleDateString(), description: 'Date submitted' }
+      ]} />
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
@@ -66,8 +70,8 @@ const ApprovalDetail: React.FC<{ id: string }> = ({ id }) => {
           <CardContent>
             {isAdmin && (
               <ApprovalStatusUpdater 
-                approvalId={id} 
-                currentStatus={approvalData.status} 
+                approval={approvalData}
+                onStatusUpdate={() => {}}
               />
             )}
             <div className="mt-6">

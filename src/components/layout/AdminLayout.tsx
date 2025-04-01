@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { Outlet, Navigate, useLocation } from 'react-router-dom';
 import { BellRing } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
-import useAuth from '@/hooks/useAuth';
+import { useAuth } from '@/context/AuthContext';
 
 import {
   SidebarProvider,

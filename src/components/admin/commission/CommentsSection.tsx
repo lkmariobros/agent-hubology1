@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -7,7 +8,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import useCommissionApproval, {
   ApprovalComment
 } from '@/hooks/useCommissionApproval';
-import useAuth from '@/hooks/useAuth';
+import { useAuth } from '@/context/AuthContext';
 
 interface CommentsSectionProps {
   approvalId: string;

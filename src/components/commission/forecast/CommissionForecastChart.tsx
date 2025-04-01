@@ -1,10 +1,15 @@
-
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
-import { useCommissionForecast } from '@/hooks/useCommissionForecast';
-import { useAuth } from '@/context/AuthContext';
-import { formatCurrency } from '@/lib/utils';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { format, subMonths } from 'date-fns';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/lib/supabase';
+import { Skeleton } from '@/components/ui/skeleton';
+
+interface ForecastData {
+  month: string;
+  forecastedCommission: number;
+}
 
 interface CommissionForecastChartProps {
   months?: number;
@@ -15,81 +20,86 @@ const CommissionForecastChart: React.FC<CommissionForecastChartProps> = ({
   months = 6,
   userId
 }) => {
-  const { user } = useAuth();
-  const forecastHooks = useCommissionForecast();
-  const { data: forecast, isLoading } = forecastHooks.useFetchCommissionForecast(userId || user?.id, months);
+  const [forecastData, setForecastData] = useState<ForecastData[]>([]);
   
-  if (isLoading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Commission Forecast</CardTitle>
-        </CardHeader>
-        <CardContent className="h-[300px] flex items-center justify-center">
-          <p className="text-muted-foreground">Loading forecast data...</p>
-        </CardContent>
-      </Card>
-    );
-  }
+  const useForecast = (userId: string | undefined) => {
+    return useQuery({
+      queryKey: ['commission-forecast', userId, months],
+      queryFn: async () => {
+        if (!userId) return [];
+        
+        const endDate = new Date();
+        const startDate = subMonths(endDate, months - 1);
+        
+        const { data, error } = await supabase.functions.invoke('commission-forecast', {
+          body: {
+            user_id: userId,
+            start_date: format(startDate, 'yyyy-MM-dd'),
+            end_date: format(endDate, 'yyyy-MM-dd')
+          }
+        });
+        
+        if (error) {
+          console.error('Error fetching commission forecast:', error);
+          return [];
+        }
+        
+        return data as ForecastData[];
+      },
+      enabled: !!userId,
+    });
+  };
   
-  if (!forecast || !forecast.months || forecast.months.length === 0) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Commission Forecast</CardTitle>
-        </CardHeader>
-        <CardContent className="h-[300px] flex items-center justify-center">
-          <p className="text-muted-foreground">No forecast data available</p>
-        </CardContent>
-      </Card>
-    );
-  }
-  
-  // Transform data for charting
-  const chartData = forecast.months.map(month => ({
-    name: month.month,
-    amount: month.amount
-  }));
+  const { data: forecastData, isLoading } = useForecast(userId);
+
+  useEffect(() => {
+    if (forecastData) {
+      setForecastData(forecastData);
+    }
+  }, [forecastData]);
+
+  const formatTick = (value: string) => {
+    return format(new Date(value), 'MMM');
+  };
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Commission Forecast</CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="h-[300px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData}>
-              <XAxis dataKey="name" />
+      <CardContent className="pl-2">
+        {isLoading ? (
+          <Skeleton className="w-full h-[300px]" />
+        ) : (
+          <ResponsiveContainer width="100%" height={300}>
+            <AreaChart data={forecastData}>
+              <defs>
+                <linearGradient id="commissionGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8}/>
+                  <stop offset="95%" stopColor="#8884d8" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <XAxis 
+                dataKey="month" 
+                tickFormatter={formatTick}
+                stroke="#8884d8"
+              />
               <YAxis 
-                tickFormatter={(value) => formatCurrency(value, 0)}
+                stroke="#8884d8"
+                tickFormatter={(value) => `$${value}`}
               />
-              <Tooltip 
-                formatter={(value) => formatCurrency(Number(value))}
-                labelFormatter={(label) => `Month: ${label}`}
+              <CartesianGrid strokeDasharray="3 3" />
+              <Tooltip formatter={(value) => [`$${value}`, 'Forecasted Commission']} />
+              <Area 
+                type="monotone" 
+                dataKey="forecastedCommission" 
+                stroke="#8884d8" 
+                fillOpacity={1} 
+                fill="url(#commissionGradient)" 
               />
-              <Bar 
-                dataKey="amount" 
-                fill="currentColor" 
-                className="fill-primary" 
-                radius={[4, 4, 0, 0]}
-              />
-            </BarChart>
+            </AreaChart>
           </ResponsiveContainer>
-        </div>
-        <div className="mt-4 flex justify-between items-center">
-          <div>
-            <p className="text-sm text-muted-foreground">
-              Forecast Total
-            </p>
-            <p className="text-2xl font-bold">
-              {formatCurrency(forecast.total)}
-            </p>
-          </div>
-          <div className="text-sm text-right">
-            <p className="text-muted-foreground">Next {months} months</p>
-          </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   );

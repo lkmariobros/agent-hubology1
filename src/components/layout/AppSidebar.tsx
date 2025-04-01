@@ -1,52 +1,43 @@
 import React from 'react';
-import useAuth from '@/hooks/useAuth';
+import { useAuth } from '@/context/AuthContext';
 
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
-  SidebarRail,
-  useSidebar,
 } from "@/components/ui/sidebar";
 
-import { NavMain } from './sidebar/NavMain';
-import { NavAnalytics } from './sidebar/NavAnalytics';
-import { NavPreferences } from './sidebar/NavPreferences';
-import { SidebarProfile } from './sidebar/SidebarProfile';
+import { NavAdmin } from './sidebar/NavAdmin';
+import { NavReports } from './sidebar/NavReports';
+import { NavSystem } from './sidebar/NavSystem';
+import { AdminProfile } from './sidebar/AdminProfile';
 import { PortalSwitcher } from './PortalSwitcher';
 
-export function AppSidebar() {
-  const { state } = useSidebar();
-  const isCollapsed = state === "collapsed";
+export function AdminSidebar() {
   const { isAdmin } = useAuth();
   
-  console.log('AppSidebar rendering with isAdmin:', isAdmin);
-  
+  if (!isAdmin) {
+    return null; // Hide sidebar completely if not admin
+  }
+
   return (
-    <>
-      <Sidebar 
-        className="border-none bg-[#0F0E11] transition-all duration-300 ease-in-out" 
-        collapsible="icon" 
-        side="left" 
-        variant="sidebar"
-      >
-        <SidebarHeader>
-          {/* Always use PortalSwitcher whether admin or not, but it will only show the dropdown for admins */}
-          <PortalSwitcher showLabel={!isCollapsed} className="px-2 py-3" />
-        </SidebarHeader>
-        
-        <SidebarContent>
-          <NavMain collapsed={isCollapsed} />
-          <NavAnalytics collapsed={isCollapsed} />
-          <NavPreferences collapsed={isCollapsed} />
-        </SidebarContent>
-        
-        <SidebarFooter>
-          <SidebarProfile collapsed={isCollapsed} />
-        </SidebarFooter>
-      </Sidebar>
-      <SidebarRail className="group-hover:after:bg-accent-foreground/10" />
-    </>
+    <Sidebar className="border-none bg-[#1F232D] AdminSidebar">
+      <SidebarHeader>
+        {/* Use the consistent PortalSwitcher component */}
+        <PortalSwitcher showLabel={true} className="px-2 py-3 w-full" />
+      </SidebarHeader>
+      
+      <SidebarContent>
+        <NavAdmin />
+        <NavReports />
+        <NavSystem />
+      </SidebarContent>
+      
+      <SidebarFooter>
+        <AdminProfile />
+      </SidebarFooter>
+    </Sidebar>
   );
 }
+
