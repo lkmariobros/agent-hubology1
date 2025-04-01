@@ -1,3 +1,4 @@
+
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -124,6 +125,7 @@ function App() {
                   <Route path="commission/settings" element={<AdminSettings />} />
                   <Route path="commission/tiers" element={<CommissionTiers />} />
                   <Route path="commission/schedules" element={<PaymentSchedulesAdmin />} />
+                  <Route path="commission/forecast" element={<CommissionForecastPage />} />
                   <Route path="agents" element={<AdminAgents />} />
                   <Route path="transactions" element={<AdminTransactions />} />
                   <Route path="properties" element={<AdminProperties />} />
