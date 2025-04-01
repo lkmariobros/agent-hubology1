@@ -1,4 +1,4 @@
-import { AgentRank } from '@/types';
+
 import { PaymentSchedule } from '@/types/commission';
 
 // Transaction form types
@@ -114,14 +114,20 @@ export interface TransactionFormContextType {
   state: TransactionFormState;
   dispatch: React.Dispatch<TransactionFormAction>;
   updateFormData: (data: Partial<TransactionFormData>) => void;
+  updateTransactionType: (type: TransactionType) => void;
   addDocument: (document: TransactionDocument) => void;
+  removeDocument: (index: number) => void;
   updateDocument: (document: TransactionDocument) => void;
   deleteDocument: (documentId: string) => void;
   setError: (field: string, message: string) => void;
   clearError: (field: string) => void;
+  nextStep: () => boolean;
+  prevStep: () => void;
   goToStep: (step: number) => void;
   submitForm: () => Promise<void>;
   resetForm: () => void;
   calculateCommission: () => CommissionBreakdown;
   selectPaymentSchedule: (scheduleId: string) => void;
+  validateCurrentStep: () => boolean;
+  saveForm: () => Promise<void>;
 }

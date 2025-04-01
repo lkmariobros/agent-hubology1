@@ -1,28 +1,14 @@
 
-import { TransactionFormState } from './types';
+import { TransactionFormState, TransactionFormAction } from './types';
 import { initialTransactionFormState } from './initialState';
-
-// Action types
-type ActionType = 
-  | { type: 'UPDATE_FORM_DATA'; payload: any }
-  | { type: 'UPDATE_TRANSACTION_TYPE'; payload: any }
-  | { type: 'ADD_DOCUMENT'; payload: any }
-  | { type: 'REMOVE_DOCUMENT'; payload: number }
-  | { type: 'SET_ERRORS'; payload: Record<string, string> }
-  | { type: 'NEXT_STEP' }
-  | { type: 'PREV_STEP' }
-  | { type: 'GO_TO_STEP'; payload: number }
-  | { type: 'RESET_FORM' }
-  | { type: 'FORM_SAVED'; payload: Date }
-  | { type: 'SUBMITTING'; payload: boolean };
 
 // Reducer function
 export const transactionFormReducer = (
   state: TransactionFormState,
-  action: ActionType
+  action: TransactionFormAction
 ): TransactionFormState => {
   switch (action.type) {
-    case 'UPDATE_FORM_DATA':
+    case 'SET_FORM_DATA':
       return {
         ...state,
         formData: {
@@ -54,6 +40,39 @@ export const transactionFormReducer = (
         ...state,
         documents: state.documents.filter((_, index) => index !== action.payload),
         isDirty: true
+      };
+      
+    case 'UPDATE_DOCUMENT':
+      return {
+        ...state,
+        documents: state.documents.map(doc => 
+          doc.id === action.payload.id ? action.payload : doc
+        ),
+        isDirty: true
+      };
+      
+    case 'DELETE_DOCUMENT':
+      return {
+        ...state,
+        documents: state.documents.filter(doc => doc.id !== action.payload),
+        isDirty: true
+      };
+      
+    case 'SET_ERROR':
+      return {
+        ...state,
+        errors: {
+          ...state.errors,
+          [action.payload.field]: action.payload.message
+        }
+      };
+      
+    case 'CLEAR_ERROR':
+      const newErrors = { ...state.errors };
+      delete newErrors[action.payload];
+      return {
+        ...state,
+        errors: newErrors
       };
       
     case 'SET_ERRORS':
@@ -94,6 +113,17 @@ export const transactionFormReducer = (
       return {
         ...state,
         isSubmitting: action.payload
+      };
+      
+    case 'SET_PAYMENT_SCHEDULE':
+      return {
+        ...state,
+        paymentScheduleId: action.payload,
+        formData: {
+          ...state.formData,
+          paymentScheduleId: action.payload
+        },
+        isDirty: true
       };
       
     default:

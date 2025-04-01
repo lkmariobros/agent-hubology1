@@ -7,7 +7,7 @@ import {
   CommissionBreakdown,
   TransactionType,
   AgentRank
-} from '@/types/transaction-form';
+} from './types';
 import { transactionFormReducer } from './reducer';
 import { initialTransactionFormState, getDefaultCommissionRate } from './initialState';
 import { saveFormAsDraft, submitTransactionForm } from './formSubmission';
@@ -53,6 +53,35 @@ export const useTransactionFormActions = () => {
   const removeDocument = useCallback((index: number) => {
     dispatch({ type: 'REMOVE_DOCUMENT', payload: index });
   }, []);
+
+  // Additional document management functions required by the interface
+  const updateDocument = useCallback((document: TransactionDocument) => {
+    dispatch({ type: 'UPDATE_DOCUMENT', payload: document });
+  }, []);
+
+  const deleteDocument = useCallback((documentId: string) => {
+    const index = state.documents.findIndex(doc => doc.id === documentId);
+    if (index !== -1) {
+      dispatch({ type: 'REMOVE_DOCUMENT', payload: index });
+    }
+  }, [state.documents]);
+
+  // Error handling functions
+  const setError = useCallback((field: string, message: string) => {
+    dispatch({ type: 'SET_ERRORS', payload: { ...state.errors, [field]: message } });
+  }, [state.errors]);
+
+  const clearError = useCallback((field: string) => {
+    const newErrors = { ...state.errors };
+    delete newErrors[field];
+    dispatch({ type: 'SET_ERRORS', payload: newErrors });
+  }, [state.errors]);
+
+  // Payment schedule selection
+  const selectPaymentSchedule = useCallback((scheduleId: string) => {
+    dispatch({ type: 'SET_PAYMENT_SCHEDULE', payload: scheduleId });
+    updateFormData({ paymentScheduleId: scheduleId });
+  }, [updateFormData]);
 
   // Validate current step
   const validateCurrentStep = useCallback((): boolean => {
@@ -141,7 +170,7 @@ export const useTransactionFormActions = () => {
     
     // Return true if there are no errors
     return Object.keys(errors).length === 0;
-  }, [state, dispatch]);
+  }, [state]);
 
   // Navigation functions
   const nextStep = useCallback(() => {
@@ -257,6 +286,10 @@ export const useTransactionFormActions = () => {
     updateTransactionType,
     addDocument,
     removeDocument,
+    updateDocument,
+    deleteDocument,
+    setError,
+    clearError,
     nextStep,
     prevStep,
     goToStep,
@@ -265,5 +298,6 @@ export const useTransactionFormActions = () => {
     submitForm,
     calculateCommission,
     validateCurrentStep,
+    selectPaymentSchedule
   };
 };
