@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -36,11 +35,11 @@ const mapPropertyData = (property: any): Property => {
     status: property.property_statuses?.name?.toLowerCase() || 'available',
     agent: {
       id: property.agent_id || '',
-      name: 'Agent Name', // This would come from a join in a real app
       firstName: 'Unknown',
       lastName: 'Agent',
-      email: 'agent@example.com',
-      phone: '123-456-7890'
+      name: 'Agent Name', // This would come from a join in a real app
+      phone: '123-456-7890',
+      email: 'agent@example.com'
     },
     createdAt: property.created_at || new Date().toISOString(),
     updatedAt: property.updated_at || new Date().toISOString()

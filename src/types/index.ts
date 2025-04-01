@@ -1,214 +1,69 @@
-
-// Agent rank type
-export type AgentRank = 'Junior' | 'Agent' | 'Senior' | 'Associate' | 'Director' | 
-  'Senior Associate' | 'Advisor' | 'Sales Leader' | 'Team Leader' | 'Group Leader' | 'Supreme Leader';
-
-// Property status type
-export type PropertyStatus = 'Available' | 'Pending' | 'Sold' | 'Reserved' | 'Expired';
-
-// Transaction status type
-export type TransactionStatus = 'Draft' | 'Pending' | 'Completed' | 'Cancelled';
-
-// User role type 
-export type UserRole = 'agent' | 'admin' | 'viewer' | 'team_leader' | 'finance';
-
-// Approval status type
-export type ApprovalStatus = 'Pending' | 'Under Review' | 'Approved' | 'Ready for Payment' | 'Paid' | 'Rejected';
-
-// API Response types
-export interface ApiResponse<T> {
-  data: T;
-  message: string;
-  success: boolean;
-}
-
-export interface PaginatedResponse<T> extends ApiResponse<T> {
-  page: number;
-  pageSize: number;
-  totalCount: number;
-  totalPages: number;
-}
-
-// Property and transaction related types
-export interface Property {
+export interface CommissionInstallment {
   id: string;
-  title: string;
-  description?: string;
-  price?: number;
-  rentalRate?: number;
-  address?: {
-    street: string;
-    city: string;
-    state: string;
-    zip: string;
-    country: string;
-  };
-  type?: string;
-  subtype?: string;
-  features?: string[];
-  bedrooms?: number;
-  bathrooms?: number;
-  area?: number;
-  images?: string[];
-  status?: string;
-  listedBy?: string;
-  createdAt?: string;
-  updatedAt?: string;
-  stock?: {
-    total: number;
-    available: number;
-    reserved: number;
-    sold: number;
-  };
-  // Add additional properties used in components
-  featured?: boolean;
-  reference?: string;
-  transactionType?: string;
-  agent?: {
-    firstName?: string;
-    lastName?: string;
-    id?: string;
-    name?: string;
-  };
-  size?: string | number;
-}
-
-export interface Transaction {
-  id: string;
-  propertyId?: string;
-  property?: Property;
-  agentId?: string;
-  buyerId?: string;
-  sellerId?: string;
-  commission?: number;
-  status?: string;
-  date?: string;
-}
-
-export interface Opportunity {
-  id: string;
-  title: string;
-  description?: string;
-  propertyType?: string;
-  budget?: string;
-  location?: string;
-  status?: string;
-  postedBy?: string;
-  postedDate?: string;
-}
-
-// Dashboard related types
-export interface DashboardMetric {
-  id: string;
-  label: string;
-  value: string;
-  change?: number;
-  trend?: 'up' | 'down' | 'neutral';
-  icon?: string;
-}
-
-// User and agent related types
-export interface User {
-  id: string;
-  name: string;
-  email?: string;
-  avatar?: string;
-  role?: string;
-  tier?: string;
-  joinDate?: string;
-  transactions?: number;
-  salesVolume?: number;
-  points?: number;
-  phone?: string;
-  properties?: number;
-  sales?: number;
-}
-
-export interface AgentWithHierarchy {
-  id: string;
-  name: string;
-  tier?: string;
-  rank?: string;
-  avatar?: string;
-  email?: string;
-  phone?: string;
-  salesVolume?: number;
-  transactions?: number;
-  commissionRate?: number;
-  upline?: AgentWithHierarchy | null;
-  downlines?: AgentWithHierarchy[];
-  downline?: AgentWithHierarchy[]; // Alias for downlines for backward compatibility
-  joinDate?: string;
-  personalCommission?: number;
-  overrideCommission?: number;
-  totalCommission?: number;
-}
-
-// Commission related types
-export interface CommissionHistory {
-  id: string;
-  date: string;
-  amount: number;
   transactionId: string;
-  propertyTitle?: string;
+  installmentNumber: number;
+  agentId: string;
+  amount: number;
+  percentage: number;
+  scheduledDate: string;
+  actualPaymentDate?: string;
   status: string;
-  // Add the properties used in components
-  transactionReference?: string;
-  property?: {
-    title: string;
-    location: string;
-  };
-  type?: string;
-  source?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+  transaction?: any;
+  // Snake case alternatives for API compatibility
+  transaction_id?: string;
+  installment_number?: number;
+  agent_id?: string;
+  scheduled_date?: string;
+  actual_payment_date?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
-export interface CommissionTier {
+export interface CommissionForecast {
+  month: string;
+  totalAmount: number;
+  installments: CommissionInstallment[];
+  // Snake case alternatives for API compatibility
+  total_amount?: number;
+}
+
+export interface PaymentSchedule {
   id: string;
   name: string;
-  rank: AgentRank;
-  agentPercentage: number;
-  minTransactions?: number;
-  minSalesVolume?: number;
-  isDefault?: boolean;
-  thresholdAmount?: number;
-  // Add the properties used in components
-  tier?: string;
-  rate?: number;
-  color?: string;
+  description?: string;
+  isDefault: boolean;
+  installments: PaymentScheduleInstallment[];
 }
 
-export interface OverrideCommission {
-  agentId: string;
-  agentName: string;
-  tier: string;
-  amount: number;
-  // Additional properties used in components
-  id?: string;
-  baseAgentId?: string;
-  transactionId?: string;
-  percentage?: number;
-  status?: string;
-  rank?: string;
+export interface PaymentScheduleInstallment {
+  id: string;
+  scheduleId: string;
+  installmentNumber: number;
+  daysAfterTransaction: number;
+  percentage: number;
+  description?: string;
 }
 
-export interface RankRequirement {
-  minSalesVolume: number;
-  minTransactions: number;
-  overrideRate: number;
-  rank?: string;
-  color?: string;
-  personalSales?: number;
-  recruitedAgents?: number;
-}
+// Alias for backward compatibility
+export type ScheduleInstallment = PaymentScheduleInstallment;
 
-// Property form values
 export interface PropertyFormValues {
   id?: string;
   title: string;
   description: string;
-  transactionType: 'Sale' | 'Rent' | 'Primary';
-  propertyType: 'Residential' | 'Commercial' | 'Industrial' | 'Land';
-  featured: boolean;
+  transactionType?: 'Sale' | 'Rent' | 'Primary';
+  propertyType: string;
+  price: number;
+  rentalRate?: number;
+  builtUpArea?: number;
+  floorArea?: number;
+  landArea?: number;
+  bedrooms: number;
+  bathrooms: number;
+  features: string[];
   status: 'Available' | 'Under Offer' | 'Pending' | 'Sold' | 'Rented';
   address: {
     street: string;
@@ -217,17 +72,53 @@ export interface PropertyFormValues {
     zip?: string;
     country: string;
   };
-  price: number | null;
-  rentalRate: number | null;
-  bedrooms?: number;
-  bathrooms?: number;
-  builtUpArea?: number;
-  furnishingStatus?: 'Unfurnished' | 'Partially Furnished' | 'Fully Furnished';
-  floorArea?: number;
-  landArea?: number;
+  images: any[]; // Add this property for file uploads
   agentNotes?: string;
-  // Add propertyType explicitly as some components are using it
-  type?: string;
-  area?: number;
-  features?: string[];
+  stock?: {
+    total: number;
+    available: number;
+    reserved: number;
+    sold: number;
+  };
+}
+
+export interface Property {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  rentalRate?: number;
+  type: string;
+  subtype?: string;
+  bedrooms: number;
+  bathrooms: number;
+  area: number;
+  features: string[];
+  images: string[];
+  status: string;
+  address: {
+    street: string;
+    city: string;
+    state: string;
+    zip?: string;
+    country: string;
+  };
+  agent?: {
+    id?: string;
+    firstName?: string;
+    lastName?: string;
+    name?: string;
+    email?: string; // Add email field
+    phone?: string;
+  };
+  stock?: {
+    total: number;
+    available: number;
+    reserved?: number;
+    sold?: number;
+  };
+  featured?: boolean; // Added for compatibility
+  createdAt: string;
+  updatedAt: string;
+  transactionType?: 'Sale' | 'Rent' | 'Primary'; // Added for PropertyCard
 }
