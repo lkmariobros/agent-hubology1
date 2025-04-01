@@ -1,7 +1,5 @@
 
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
 import { PaymentSchedulesManagement } from '@/components/admin/commission/PaymentSchedulesManagement';
 
 const PaymentSchedulesAdmin = () => {

@@ -124,7 +124,7 @@ export function PaymentSchedulesManagement() {
     }
     
     if (isEditing && currentSchedule) {
-      updatePaymentSchedule({
+      updatePaymentSchedule.mutate({
         scheduleId: currentSchedule.id,
         schedule: {
           name: scheduleName,
@@ -133,7 +133,7 @@ export function PaymentSchedulesManagement() {
         }
       });
     } else {
-      createPaymentSchedule({
+      createPaymentSchedule.mutate({
         name: scheduleName,
         description: scheduleDescription,
         installments
@@ -154,7 +154,7 @@ export function PaymentSchedulesManagement() {
   
   const handleDeleteSchedule = (scheduleId: string) => {
     if (confirm('Are you sure you want to delete this payment schedule?')) {
-      deletePaymentSchedule(scheduleId);
+      deletePaymentSchedule.mutate(scheduleId);
     }
   };
   
@@ -166,7 +166,7 @@ export function PaymentSchedulesManagement() {
   };
   
   const handleSetDefault = (scheduleId: string) => {
-    setDefaultSchedule(scheduleId);
+    setDefaultSchedule.mutate(scheduleId);
   };
   
   if (isLoading) {
