@@ -4,7 +4,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { 
   Settings, Database, 
   ClipboardList, Shield,
-  FileText
+  FileText, DollarSign
 } from 'lucide-react';
 import { 
   SidebarGroup, 
@@ -32,6 +32,18 @@ export function NavSystem() {
               <NavLink to="/admin/settings">
                 <Settings className="h-4 w-4" />
                 <span>Settings</span>
+              </NavLink>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton 
+              asChild 
+              isActive={location.pathname.includes('/admin/commission/settings')}
+              tooltip="Commission Settings"
+            >
+              <NavLink to="/admin/commission/settings">
+                <DollarSign className="h-4 w-4" />
+                <span>Commission Settings</span>
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>

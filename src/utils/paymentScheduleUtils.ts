@@ -1,6 +1,7 @@
 
 import { addDays, format } from 'date-fns';
 import { PaymentSchedule, CommissionInstallment } from '@/types/commission';
+import { supabase } from '@/lib/supabase';
 
 /**
  * Generates commission installments based on a payment schedule
@@ -40,9 +41,34 @@ export const generateCommissionInstallments = (
 };
 
 /**
+ * Fetches the cutoff date configuration from the database
+ * Defaults to 26 if not configured
+ */
+export const getPaymentCutoffDay = async (): Promise<number> => {
+  try {
+    const { data } = await supabase
+      .from('system_configuration')
+      .select('value')
+      .eq('key', 'commission_payment_cutoff_day')
+      .single();
+      
+    if (data?.value) {
+      const cutoffDay = parseInt(data.value, 10);
+      return isNaN(cutoffDay) ? 26 : cutoffDay;
+    }
+    
+    return 26; // Default to 26th if not found
+  } catch (error) {
+    console.error('Error fetching payment cutoff day:', error);
+    return 26; // Default to 26th on error
+  }
+};
+
+/**
  * Determines if a date is after the payment cutoff date (e.g., 26th of the month)
  */
-export const isAfterCutoffDate = (date: Date, cutoffDay: number = 26): boolean => {
+export const isAfterCutoffDate = async (date: Date): Promise<boolean> => {
+  const cutoffDay = await getPaymentCutoffDay();
   return date.getDate() > cutoffDay;
 };
 

@@ -14,6 +14,7 @@ import CommissionTiers from './pages/admin/CommissionTiers';
 import PaymentSchedules from './pages/admin/PaymentSchedules';
 import CommissionApproval from './pages/admin/CommissionApproval';
 import CommissionForecast from './pages/admin/CommissionForecast';
+import CommissionSettings from './pages/admin/CommissionSettings';
 import NewTransaction from './pages/NewTransaction';
 import TransactionList from './pages/TransactionList';
 import TransactionDetail from './pages/TransactionDetail';
@@ -47,6 +48,7 @@ const router = createBrowserRouter([
           { path: 'properties', element: <AdminProperties /> },
           { path: 'commission/tiers', element: <CommissionTiers /> },
           { path: 'commission/schedules', element: <PaymentSchedules /> },
+          { path: 'commission/settings', element: <CommissionSettings /> },
           { path: 'commission/forecast', element: <CommissionForecast /> },
           { path: 'commissions', element: <CommissionApproval /> },
           { path: 'commissions/:id', element: <CommissionApproval /> },
