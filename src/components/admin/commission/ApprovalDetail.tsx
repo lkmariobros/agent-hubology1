@@ -11,8 +11,18 @@ import ApprovalWorkflow from './ApprovalWorkflow';
 import ApprovalHistory from '@/components/commission/ApprovalHistory';
 import ApprovalActions from '@/components/commission/ApprovalActions';
 import useCommissionApproval from '@/hooks/useCommissionApproval';
-import { formatCurrency } from '@/utils/formattingUtils';
+import { formatCurrency, formatDate } from '@/lib/utils';
 import { format, parseISO } from 'date-fns';
+
+// Update the CommissionApproval interface to include the necessary properties
+interface ExtendedTransaction {
+  commission_amount: number;
+  transaction_date: string;
+  property?: {
+    title?: string;
+  };
+  transaction_value?: number;
+}
 
 interface ApprovalDetailProps {
   id: string;
@@ -72,6 +82,9 @@ const ApprovalDetail: React.FC<ApprovalDetailProps> = ({ id }) => {
   }
   
   const { approval, history } = data;
+
+  // Type assertion to ensure our transaction has the expected properties
+  const transaction = approval.transaction as ExtendedTransaction;
   
   return (
     <div className="container py-8">
@@ -127,7 +140,7 @@ const ApprovalDetail: React.FC<ApprovalDetailProps> = ({ id }) => {
                   <div className="flex flex-col gap-1">
                     <span className="text-sm text-muted-foreground">Commission Amount</span>
                     <span className="text-lg font-semibold">
-                      {formatCurrency(approval.transaction?.commission_amount || 0)}
+                      {formatCurrency(transaction?.commission_amount || 0)}
                     </span>
                   </div>
                   
@@ -188,7 +201,7 @@ const ApprovalDetail: React.FC<ApprovalDetailProps> = ({ id }) => {
               </TabsContent>
               
               <TabsContent value="transaction" className="space-y-4 pt-4">
-                {approval.transaction ? (
+                {transaction ? (
                   <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="flex flex-col gap-1">
@@ -199,21 +212,21 @@ const ApprovalDetail: React.FC<ApprovalDetailProps> = ({ id }) => {
                       <div className="flex flex-col gap-1">
                         <span className="text-sm text-muted-foreground">Transaction Date</span>
                         <span>
-                          {approval.transaction.transaction_date 
-                            ? format(parseISO(approval.transaction.transaction_date), 'MMM d, yyyy')
+                          {transaction.transaction_date 
+                            ? format(parseISO(transaction.transaction_date), 'MMM d, yyyy')
                             : 'Not specified'}
                         </span>
                       </div>
                       
                       <div className="flex flex-col gap-1">
                         <span className="text-sm text-muted-foreground">Property</span>
-                        <span>{approval.transaction.property?.title || 'Not specified'}</span>
+                        <span>{transaction.property?.title || 'Not specified'}</span>
                       </div>
                       
                       <div className="flex flex-col gap-1">
                         <span className="text-sm text-muted-foreground">Transaction Value</span>
                         <span className="font-semibold">
-                          {formatCurrency(approval.transaction.transaction_value || 0)}
+                          {formatCurrency(transaction.transaction_value || 0)}
                         </span>
                       </div>
                     </div>
