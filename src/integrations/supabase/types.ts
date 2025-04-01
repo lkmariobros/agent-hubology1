@@ -216,6 +216,105 @@ export type Database = {
           },
         ]
       }
+      commission_forecast_settings: {
+        Row: {
+          description: string | null
+          id: string
+          key: string
+          updated_at: string | null
+          updated_by: string | null
+          value: string
+        }
+        Insert: {
+          description?: string | null
+          id?: string
+          key: string
+          updated_at?: string | null
+          updated_by?: string | null
+          value: string
+        }
+        Update: {
+          description?: string | null
+          id?: string
+          key?: string
+          updated_at?: string | null
+          updated_by?: string | null
+          value?: string
+        }
+        Relationships: []
+      }
+      commission_installments: {
+        Row: {
+          actual_payment_date: string | null
+          agent_id: string
+          amount: number
+          created_at: string | null
+          id: string
+          installment_number: number
+          notes: string | null
+          percentage: number
+          scheduled_date: string
+          status: string
+          transaction_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          actual_payment_date?: string | null
+          agent_id: string
+          amount: number
+          created_at?: string | null
+          id?: string
+          installment_number: number
+          notes?: string | null
+          percentage: number
+          scheduled_date: string
+          status?: string
+          transaction_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          actual_payment_date?: string | null
+          agent_id?: string
+          amount?: number
+          created_at?: string | null
+          id?: string
+          installment_number?: number
+          notes?: string | null
+          percentage?: number
+          scheduled_date?: string
+          status?: string
+          transaction_id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      commission_payment_schedules: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          is_default: boolean
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_default?: boolean
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_default?: boolean
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       documents: {
         Row: {
           content: string | null
@@ -520,8 +619,10 @@ export type Database = {
           commission_split: boolean | null
           created_at: string | null
           id: string
+          installments_generated: boolean | null
           listing_fee: number | null
           notes: string | null
+          payment_schedule_id: string | null
           property_id: string | null
           seller_email: string | null
           seller_name: string | null
@@ -545,8 +646,10 @@ export type Database = {
           commission_split?: boolean | null
           created_at?: string | null
           id?: string
+          installments_generated?: boolean | null
           listing_fee?: number | null
           notes?: string | null
+          payment_schedule_id?: string | null
           property_id?: string | null
           seller_email?: string | null
           seller_name?: string | null
@@ -570,8 +673,10 @@ export type Database = {
           commission_split?: boolean | null
           created_at?: string | null
           id?: string
+          installments_generated?: boolean | null
           listing_fee?: number | null
           notes?: string | null
+          payment_schedule_id?: string | null
           property_id?: string | null
           seller_email?: string | null
           seller_name?: string | null
@@ -583,6 +688,13 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "property_transactions_payment_schedule_id_fkey"
+            columns: ["payment_schedule_id"]
+            isOneToOne: false
+            referencedRelation: "commission_payment_schedules"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "property_transactions_property_id_fkey"
             columns: ["property_id"]
@@ -616,6 +728,47 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      schedule_installments: {
+        Row: {
+          created_at: string | null
+          days_after_transaction: number
+          description: string | null
+          id: string
+          installment_number: number
+          percentage: number
+          schedule_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          days_after_transaction: number
+          description?: string | null
+          id?: string
+          installment_number: number
+          percentage: number
+          schedule_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          days_after_transaction?: number
+          description?: string | null
+          id?: string
+          installment_number?: number
+          percentage?: number
+          schedule_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "schedule_installments_schedule_id_fkey"
+            columns: ["schedule_id"]
+            isOneToOne: false
+            referencedRelation: "commission_payment_schedules"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       system_configuration: {
         Row: {

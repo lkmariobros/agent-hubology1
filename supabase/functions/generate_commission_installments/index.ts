@@ -114,7 +114,7 @@ serve(async (req) => {
       );
     }
     
-    // Update the transaction to mark that installments have been created
+    // Update the transaction to mark that installments have been generated
     await supabase
       .from('property_transactions')
       .update({ installments_generated: true })
