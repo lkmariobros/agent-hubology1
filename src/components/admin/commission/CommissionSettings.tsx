@@ -3,6 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
+import { NavLink } from 'react-router-dom';
 import CutoffDateSettings from './CutoffDateSettings';
 import TestEdgeFunctionButton from './TestEdgeFunctionButton';
 
@@ -38,13 +39,13 @@ export function CommissionSettings() {
             <CardContent>
               <p className="text-sm text-muted-foreground mb-4">
                 Default payment schedules can be configured in the{" "}
-                <a href="/admin/commission/schedules" className="text-primary underline">
+                <NavLink to="/admin/commission/schedules" className="text-primary underline">
                   Payment Schedules
-                </a>{" "}
+                </NavLink>{" "}
                 section.
               </p>
               <Button asChild variant="outline">
-                <a href="/admin/commission/schedules">Manage Payment Schedules</a>
+                <NavLink to="/admin/commission/schedules">Manage Payment Schedules</NavLink>
               </Button>
             </CardContent>
           </Card>
@@ -61,13 +62,13 @@ export function CommissionSettings() {
             <CardContent>
               <p className="text-sm text-muted-foreground mb-4">
                 Commission rules can be configured in the{" "}
-                <a href="/admin/commission/tiers" className="text-primary underline">
+                <NavLink to="/admin/commission/tiers" className="text-primary underline">
                   Commission Tiers
-                </a>{" "}
+                </NavLink>{" "}
                 section.
               </p>
               <Button asChild variant="outline">
-                <a href="/admin/commission/tiers">Manage Commission Tiers</a>
+                <NavLink to="/admin/commission/tiers">Manage Commission Tiers</NavLink>
               </Button>
             </CardContent>
           </Card>

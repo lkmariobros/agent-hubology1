@@ -30,8 +30,11 @@ export const usePaymentScheduleAdmin = () => {
       
       // Then create the installments
       const installmentsWithScheduleId = schedule.installments.map(installment => ({
-        ...installment,
-        schedule_id: scheduleId
+        schedule_id: scheduleId,
+        installment_number: installment.installmentNumber,
+        percentage: installment.percentage,
+        days_after_transaction: installment.daysAfterTransaction,
+        description: installment.description
       }));
       
       const { error: installmentsError } = await supabase
@@ -46,7 +49,7 @@ export const usePaymentScheduleAdmin = () => {
       queryClient.invalidateQueries({ queryKey: ['paymentSchedules'] });
       toast.success('Payment schedule created successfully');
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast.error(`Error creating payment schedule: ${error.message}`);
     }
   });
@@ -85,8 +88,11 @@ export const usePaymentScheduleAdmin = () => {
       
       // Create new installments
       const installmentsWithScheduleId = schedule.installments.map(installment => ({
-        ...installment,
-        schedule_id: scheduleId
+        schedule_id: scheduleId,
+        installment_number: installment.installmentNumber,
+        percentage: installment.percentage,
+        days_after_transaction: installment.daysAfterTransaction,
+        description: installment.description
       }));
       
       const { error: installmentsError } = await supabase
@@ -101,7 +107,7 @@ export const usePaymentScheduleAdmin = () => {
       queryClient.invalidateQueries({ queryKey: ['paymentSchedules'] });
       toast.success('Payment schedule updated successfully');
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast.error(`Error updating payment schedule: ${error.message}`);
     }
   });
@@ -122,7 +128,7 @@ export const usePaymentScheduleAdmin = () => {
       queryClient.invalidateQueries({ queryKey: ['paymentSchedules'] });
       toast.success('Payment schedule deleted successfully');
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast.error(`Error deleting payment schedule: ${error.message}`);
     }
   });
@@ -152,39 +158,8 @@ export const usePaymentScheduleAdmin = () => {
       queryClient.invalidateQueries({ queryKey: ['paymentSchedules'] });
       toast.success('Default payment schedule updated');
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast.error(`Error setting default schedule: ${error.message}`);
-    }
-  });
-  
-  // Generate installments for a transaction
-  const generateInstallments = useMutation({
-    mutationFn: async (transactionId: string) => {
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_FUNCTIONS_URL}/generate_commission_installments`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
-          },
-          body: JSON.stringify({ transactionId })
-        }
-      );
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to generate installments');
-      }
-      
-      return await response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['commissionInstallments'] });
-      toast.success('Commission installments generated successfully');
-    },
-    onError: (error) => {
-      toast.error(`Error generating installments: ${error.message}`);
     }
   });
   
@@ -192,7 +167,6 @@ export const usePaymentScheduleAdmin = () => {
     createPaymentSchedule,
     updatePaymentSchedule,
     deletePaymentSchedule,
-    setDefaultSchedule,
-    generateInstallments
+    setDefaultSchedule
   };
 };

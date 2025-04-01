@@ -11,7 +11,7 @@ import AdminDashboard from './pages/admin/Dashboard';
 import AdminAgents from './pages/admin/Agents';
 import AdminProperties from './pages/admin/Properties';
 import CommissionTiers from './pages/admin/CommissionTiers';
-import PaymentSchedules from './pages/admin/PaymentSchedules';
+import PaymentSchedulesAdmin from './pages/admin/PaymentSchedulesAdmin';
 import CommissionApproval from './pages/admin/CommissionApproval';
 import CommissionForecast from './pages/admin/CommissionForecast';
 import CommissionSettings from './pages/admin/CommissionSettings';
@@ -47,7 +47,7 @@ const router = createBrowserRouter([
           { path: 'agents', element: <AdminAgents /> },
           { path: 'properties', element: <AdminProperties /> },
           { path: 'commission/tiers', element: <CommissionTiers /> },
-          { path: 'commission/schedules', element: <PaymentSchedules /> },
+          { path: 'commission/schedules', element: <PaymentSchedulesAdmin /> },
           { path: 'commission/settings', element: <CommissionSettings /> },
           { path: 'commission/forecast', element: <CommissionForecast /> },
           { path: 'commissions', element: <CommissionApproval /> },
