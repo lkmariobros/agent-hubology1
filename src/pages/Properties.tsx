@@ -32,7 +32,31 @@ const Properties = () => {
   const propertiesRaw = data?.properties || [];
   
   // Map the API data to ensure correct types
-  const properties: Property[] = propertiesRaw.map(property => mapPropertyData(property));
+  const properties: Property[] = propertiesRaw.map(property => {
+    // Ensure each property conforms to the Property interface
+    return {
+      id: property.id || '',
+      title: property.title || '',
+      description: property.description || '',
+      price: Number(property.price) || 0,
+      type: property.propertyType?.toLowerCase() || 'residential',
+      bedrooms: Number(property.bedrooms) || 0,
+      bathrooms: Number(property.bathrooms) || 0,
+      builtUpArea: Number(property.builtUpArea) || 0,
+      status: property.status || 'available',
+      address: {
+        street: property.location?.street || '',
+        city: property.location?.city || '',
+        state: property.location?.state || '',
+        zip: property.location?.zip || '',
+        country: property.location?.country || ''
+      },
+      features: property.features || [],
+      images: property.images || [],
+      createdAt: property.createdAt || new Date().toISOString(),
+      updatedAt: property.updatedAt || new Date().toISOString()
+    };
+  });
 
   // Handle property type change
   const handlePropertyTypeChange = (value: string) => {

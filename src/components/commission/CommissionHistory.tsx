@@ -20,6 +20,22 @@ const CommissionHistoryComponent: React.FC<CommissionHistoryProps> = ({ commissi
     });
   };
 
+  // Helper function to safely extract property title
+  const getPropertyTitle = (property: string | { title: string; location: string }): string => {
+    if (typeof property === 'string') {
+      return property;
+    }
+    return property.title;
+  };
+
+  // Helper function to safely extract property location
+  const getPropertyLocation = (property: string | { title: string; location: string }): string => {
+    if (typeof property === 'string') {
+      return '';
+    }
+    return property.location;
+  };
+
   return (
     <div className="space-y-4">
       {commissions.length > 0 ? (
@@ -32,10 +48,10 @@ const CommissionHistoryComponent: React.FC<CommissionHistoryProps> = ({ commissi
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate">
-                    {commission.property.title}
+                    {getPropertyTitle(commission.property)}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {formatDate(commission.date)} • {commission.property.location}
+                    {formatDate(commission.date)} • {getPropertyLocation(commission.property)}
                   </p>
                 </div>
               </div>

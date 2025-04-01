@@ -1,11 +1,29 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { PropertyGrid } from '@/components/property/PropertyGrid';
 import { PropertyFilterBar } from '@/components/property/PropertyFilterBar';
 import { Property } from '@/types';
 
 const PropertyList = () => {
+  const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
+  const [filters, setFilters] = useState({
+    propertyType: '',
+    priceRange: { min: 0, max: 10000000 },
+    bedrooms: 0,
+    bathrooms: 0
+  });
+
+  // Handle filter change
+  const handleFilterChange = (newFilters: any) => {
+    setFilters(newFilters);
+  };
+
+  // Handle view mode change
+  const handleViewChange = (view: 'grid' | 'map') => {
+    setViewMode(view);
+  };
+
   // Sample property data
   const properties: Property[] = [
     {
@@ -80,7 +98,12 @@ const PropertyList = () => {
     <div className="container mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6">Properties</h1>
       
-      <PropertyFilterBar />
+      <PropertyFilterBar 
+        onFilter={handleFilterChange} 
+        onViewChange={handleViewChange} 
+        currentView={viewMode}
+        filters={filters}
+      />
       
       <Card className="mt-6">
         <CardContent className="p-6">

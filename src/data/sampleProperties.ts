@@ -1,3 +1,4 @@
+
 import { Property } from '@/types';
 
 const sampleProperties: Property[] = [
@@ -18,6 +19,7 @@ const sampleProperties: Property[] = [
     features: ['5 bedrooms', '6 bathrooms', 'Private pool', 'Ocean view'],
     bedrooms: 5,
     bathrooms: 6,
+    builtUpArea: 5000, // Add builtUpArea
     area: 5000,
     images: [
       '/property-images/luxury-villa-1.webp',
@@ -45,6 +47,7 @@ const sampleProperties: Property[] = [
     features: ['2 bedrooms', '2 bathrooms', 'Balcony', 'City view'],
     bedrooms: 2,
     bathrooms: 2,
+    builtUpArea: 1200, // Add builtUpArea
     area: 1200,
     images: [
       '/property-images/modern-apartment-1.webp',
@@ -72,6 +75,7 @@ const sampleProperties: Property[] = [
     features: ['3 bedrooms', '2 bathrooms', 'Large backyard', 'Garage'],
     bedrooms: 3,
     bathrooms: 2,
+    builtUpArea: 1800, // Add builtUpArea
     area: 1800,
     images: [
       '/property-images/charming-house-1.webp',
@@ -99,6 +103,7 @@ const sampleProperties: Property[] = [
     features: ['2 bedrooms', '3 bathrooms', 'City view', 'Gym'],
     bedrooms: 2,
     bathrooms: 3,
+    builtUpArea: 1500, // Add builtUpArea
     area: 1500,
     images: [
       '/property-images/spacious-condo-1.webp',
@@ -126,6 +131,7 @@ const sampleProperties: Property[] = [
     features: ['1 bedroom', '1 bathroom', 'Fireplace', 'Nature view'],
     bedrooms: 1,
     bathrooms: 1,
+    builtUpArea: 800, // Add builtUpArea
     area: 800,
     images: [
       '/property-images/secluded-cabin-1.webp',
@@ -153,6 +159,7 @@ const sampleProperties: Property[] = [
     features: ['2 bedrooms', '1 bathroom', 'Beach access', 'Ocean view'],
     bedrooms: 2,
     bathrooms: 1,
+    builtUpArea: 1000, // Add builtUpArea
     area: 1000,
     images: [
       '/property-images/beachfront-bungalow-1.webp',

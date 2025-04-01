@@ -16,30 +16,31 @@ const mapPropertyData = (property: any): Property => {
   return {
     id: property.id,
     title: property.title,
-    description: property.description,
+    description: property.description || '',
     price: Number(property.price) || 0,
     address: {
-      street: property.street,
-      city: property.city,
-      state: property.state,
-      zip: property.zip,
-      country: property.country
+      street: property.street || '',
+      city: property.city || '',
+      state: property.state || '',
+      zip: property.zip || '',
+      country: property.country || ''
     },
     type: property.property_types?.name?.toLowerCase() || 'residential',
     subtype: property.subtype || '',
-    features: [],
+    features: property.features || [],
     bedrooms: property.bedrooms || 0,
     bathrooms: property.bathrooms || 0,
-    area: property.built_up_area || 0,
+    builtUpArea: property.built_up_area || 0,
+    area: property.area || property.built_up_area || 0,
     images: property.property_images?.map((img: any) => img.storage_path) || [],
     status: property.property_statuses?.name?.toLowerCase() || 'available',
     agent: {
       id: property.agent_id || '',
+      name: 'Agent Name', // This would come from a join in a real app
       firstName: 'Unknown',
       lastName: 'Agent',
-      name: 'Agent Name', // This would come from a join in a real app
-      phone: '123-456-7890',
-      email: 'agent@example.com'
+      email: 'agent@example.com',
+      phone: '123-456-7890'
     },
     createdAt: property.created_at || new Date().toISOString(),
     updatedAt: property.updated_at || new Date().toISOString()

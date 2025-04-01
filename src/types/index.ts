@@ -1,4 +1,5 @@
 
+
 export interface User {
   id: string;
   name: string;
@@ -189,7 +190,7 @@ export interface Property {
   propertyType?: string;
   bedrooms: number;
   bathrooms: number;
-  builtUpArea: number;
+  builtUpArea?: number; // Make this optional since sample data doesn't always have it
   area?: number;
   size?: number;
   status: string;
