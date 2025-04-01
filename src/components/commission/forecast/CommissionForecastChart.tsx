@@ -18,13 +18,20 @@ interface CommissionForecastChartProps {
   projectedData: { month: string; amount: number }[];
 }
 
+// Modified type to include projected field
+interface CombinedDataPoint {
+  month: string;
+  amount?: number;
+  projected?: number;
+}
+
 const CommissionForecastChart: React.FC<CommissionForecastChartProps> = ({
   historicalData,
   projectedData,
 }) => {
   // Combine historical and projected data
   const combinedData = useMemo(() => {
-    const combined = [...historicalData];
+    const combined: CombinedDataPoint[] = [...historicalData];
     
     // Add projected data with a different key
     projectedData.forEach((item) => {

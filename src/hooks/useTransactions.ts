@@ -1,5 +1,5 @@
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 
@@ -31,6 +31,8 @@ export interface Transaction {
 }
 
 export const useTransactions = () => {
+  const queryClient = useQueryClient();
+  
   const useTransactionsQuery = (params?: TransactionQueryParams) => {
     return useQuery({
       queryKey: ['transactions', params],
@@ -76,8 +78,34 @@ export const useTransactions = () => {
     });
   };
 
+  // Add the missing mutation
+  const useCreateTransactionMutation = () => {
+    return useMutation({
+      mutationFn: async (formData: any) => {
+        try {
+          // In a real implementation, this would create a transaction in the database
+          // For now, return a mock response
+          console.log('Creating transaction with data:', formData);
+          
+          return {
+            id: 'new-transaction-' + Date.now(),
+            ...formData
+          };
+        } catch (error) {
+          console.error('Error creating transaction:', error);
+          throw error;
+        }
+      },
+      onSuccess: () => {
+        // Invalidate transactions query to refetch the data
+        queryClient.invalidateQueries({ queryKey: ['transactions'] });
+      }
+    });
+  };
+
   return {
-    useTransactionsQuery
+    useTransactionsQuery,
+    useCreateTransactionMutation
   };
 };
 

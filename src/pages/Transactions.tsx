@@ -22,7 +22,8 @@ const Transactions = () => {
   });
   
   const transactions = data?.transactions || [];
-  const totalTransactions = data?.total || 0;
+  // Fix this line to use totalCount instead of total
+  const totalTransactions = data?.totalCount || 0;
   const totalPages = Math.ceil(totalTransactions / 10);
 
   const handleSearch = (e: React.FormEvent) => {
