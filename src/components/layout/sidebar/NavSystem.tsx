@@ -75,7 +75,7 @@ export function NavSystem() {
           <SidebarMenuItem>
             <SidebarMenuButton 
               asChild 
-              isActive={location.pathname.includes('/admin/roles')}
+              isActive={location.pathname === '/admin/roles'}
               tooltip="Roles & Permissions"
             >
               <NavLink to="/admin/roles">

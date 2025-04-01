@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -48,6 +47,7 @@ import SalesLeaderboard from './pages/leaderboard/Sales';
 import AdminSettings from './pages/admin/Settings';
 import Roles from './pages/admin/Roles';
 import CommissionTiers from './pages/admin/CommissionTiers';
+import PaymentSchedulesAdmin from './pages/admin/PaymentSchedulesAdmin';
 import SystemLogs from './pages/admin/SystemLogs';
 import Database from './pages/admin/Database';
 
@@ -119,23 +119,25 @@ function App() {
                   <Route path="commission" element={<AdminCommission />} />
                   <Route path="commission/approvals" element={<AdminCommissionApproval />} />
                   <Route path="commission/approvals/:id" element={<AdminCommissionApproval />} />
+                  <Route path="commission/settings" element={<AdminSettings />} />
+                  <Route path="commission/tiers" element={<CommissionTiers />} />
+                  <Route path="commission/schedules" element={<PaymentSchedulesAdmin />} />
                   <Route path="agents" element={<AdminAgents />} />
                   <Route path="transactions" element={<AdminTransactions />} />
                   <Route path="properties" element={<AdminProperties />} />
                   <Route path="properties/:id" element={<AdminPropertyDetail />} />
+                  
+                  {/* System Routes */}
+                  <Route path="settings" element={<AdminSettings />} />
+                  <Route path="roles" element={<Roles />} />
+                  <Route path="system-logs" element={<SystemLogs />} />
+                  <Route path="database" element={<Database />} />
                   
                   {/* Reports Routes */}
                   <Route path="reports/overview" element={<Reports />} />
                   <Route path="reports/performance" element={<Reports />} />
                   <Route path="reports/sales" element={<Reports />} />
                   <Route path="reports/custom" element={<Reports />} />
-                  
-                  {/* System Routes */}
-                  <Route path="settings" element={<AdminSettings />} />
-                  <Route path="roles" element={<Roles />} />
-                  <Route path="commission-tiers" element={<CommissionTiers />} />
-                  <Route path="system-logs" element={<SystemLogs />} />
-                  <Route path="database" element={<Database />} />
                 </Route>
                 
                 {/* Root redirects based on role */}
