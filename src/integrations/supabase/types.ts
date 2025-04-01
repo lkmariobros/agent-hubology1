@@ -466,6 +466,48 @@ export type Database = {
           },
         ]
       }
+      forecast_projections: {
+        Row: {
+          agent_id: string
+          amount: number
+          created_at: string
+          id: string
+          installment_number: number
+          percentage: number
+          projected_transaction_id: string
+          scheduled_date: string
+          status: string
+          transaction_date: string
+          updated_at: string
+        }
+        Insert: {
+          agent_id: string
+          amount: number
+          created_at?: string
+          id?: string
+          installment_number: number
+          percentage: number
+          projected_transaction_id: string
+          scheduled_date: string
+          status?: string
+          transaction_date: string
+          updated_at?: string
+        }
+        Update: {
+          agent_id?: string
+          amount?: number
+          created_at?: string
+          id?: string
+          installment_number?: number
+          percentage?: number
+          projected_transaction_id?: string
+          scheduled_date?: string
+          status?: string
+          transaction_date?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       n8n_chat_histories: {
         Row: {
           id: number
@@ -865,6 +907,26 @@ export type Database = {
             }
             Returns: unknown
           }
+      calculate_commission_forecast_totals: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          month: string
+          total_amount: number
+          scheduled_count: number
+        }[]
+      }
+      get_commission_approval_detail: {
+        Args: {
+          p_approval_id: string
+        }
+        Returns: Json
+      }
+      get_commission_approval_installments: {
+        Args: {
+          p_approval_id: string
+        }
+        Returns: Json[]
+      }
       halfvec_avg: {
         Args: {
           "": number[]
