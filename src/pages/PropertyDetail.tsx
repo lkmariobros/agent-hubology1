@@ -216,8 +216,9 @@ const PropertyDetail = () => {
                 </Card>
               </div>
             </div>
-          </div>
+          </Tabs>
         </div>
+      </div>
     </div>
   );
 };
