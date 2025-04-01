@@ -53,7 +53,7 @@ const PropertyDetailsInfo: React.FC<PropertyDetailsInfoProps> = ({ form, nextTab
             <FormItem>
               <FormLabel>Area (sq ft) *</FormLabel>
               <FormControl>
-                <Input type="number" placeholder="0" {...field} />
+                <Input type="number" placeholder="0" {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -70,7 +70,7 @@ const PropertyDetailsInfo: React.FC<PropertyDetailsInfoProps> = ({ form, nextTab
                 <FormItem>
                   <FormLabel>Bedrooms</FormLabel>
                   <FormControl>
-                    <Input type="number" min="0" {...field} />
+                    <Input type="number" min="0" {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -83,7 +83,7 @@ const PropertyDetailsInfo: React.FC<PropertyDetailsInfoProps> = ({ form, nextTab
                 <FormItem>
                   <FormLabel>Bathrooms</FormLabel>
                   <FormControl>
-                    <Input type="number" min="0" step="0.5" {...field} />
+                    <Input type="number" min="0" step="0.5" {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

@@ -126,6 +126,7 @@ const PropertyEssentialInfo: React.FC<PropertyEssentialInfoProps> = ({ form, nex
                   placeholder="0.00" 
                   className="pl-7" 
                   {...field}
+                  onChange={(e) => field.onChange(Number(e.target.value))}
                 />
               </div>
             </FormControl>

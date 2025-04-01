@@ -8,6 +8,40 @@ export const formatCurrency = (value: number, currency = 'USD'): string => {
   }).format(value);
 };
 
+// Format price with currency symbol
+export const formatPrice = (price: number): string => {
+  return `$${formatCurrency(price)}`;
+};
+
+// Calculate stock percentage
+export const calculateStockPercentage = (sold: number, total: number): number => {
+  if (total === 0) return 0;
+  return Math.round((sold / total) * 100);
+};
+
+// Get stock status label
+export const getStockStatusLabel = (percentage: number): string => {
+  if (percentage >= 90) return 'Almost Sold Out';
+  if (percentage >= 75) return 'Selling Fast';
+  if (percentage >= 50) return 'Selling Well';
+  if (percentage >= 25) return 'Available';
+  return 'Just Launched';
+};
+
+// Get stock status class
+export const getStockStatusClass = (percentage: number): string => {
+  if (percentage >= 90) return 'bg-red-500';
+  if (percentage >= 75) return 'bg-orange-500';
+  if (percentage >= 50) return 'bg-yellow-500';
+  if (percentage >= 25) return 'bg-blue-500';
+  return 'bg-green-500';
+};
+
+// Get status badge from percentage
+export const getStockStatusLabelFromPercentage = (percentage: number): string => {
+  return getStockStatusLabel(percentage);
+};
+
 // Convert snake_case property data from the API to camelCase for the frontend
 export const mapPropertyFromApi = (propertyData: any): any => {
   if (!propertyData) return null;
@@ -34,6 +68,7 @@ export const mapPropertyFromApi = (propertyData: any): any => {
     updatedAt: propertyData.updated_at,
     features: propertyData.features || [],
     images: propertyData.property_images?.map((img: any) => img.storage_path) || [],
+    reference: propertyData.reference || `P-${propertyData.id.substring(0, 8)}`
   };
 };
 
@@ -91,4 +126,27 @@ export const getPropertyTypeBadge = (type: string): { icon: string; color: strin
         color: 'bg-gray-100 text-gray-800',
       };
   }
+};
+
+// Map property data for admin views
+export const mapPropertyData = (data: any) => {
+  if (!data) return null;
+  
+  return {
+    id: data.id,
+    title: data.title,
+    price: data.price,
+    status: data.status,
+    propertyType: data.property_type || 'residential',
+    location: `${data.city || ''}, ${data.state || ''}`,
+    agentId: data.agent_id,
+    agent: {
+      id: data.agent?.id,
+      name: data.agent?.name,
+      email: data.agent?.email,
+      firstName: data.agent?.first_name,
+      lastName: data.agent?.last_name,
+    },
+    createdAt: data.created_at
+  };
 };

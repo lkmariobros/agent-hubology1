@@ -3,7 +3,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import AppLayout from './components/layout/AppLayout';
 import AdminLayout from './components/layout/AdminLayout';
 import Dashboard from './pages/Dashboard';
-import { PropertyList } from './pages/PropertyList';
+import PropertyList from './pages/PropertyList';
 import PropertyDetail from './pages/PropertyDetail';
 import Team from './pages/Team';
 import Commission from './pages/Commission';
