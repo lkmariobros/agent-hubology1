@@ -102,7 +102,8 @@ export function calculateOverrideCommissions(
         amount: overrideAmount,
         status: 'Pending',
         agentName: currentUpline.name,
-        rank: uplineRank
+        rank: uplineRank,
+        tier: uplineRank // Adding tier field to match the required structure
       });
     }
     

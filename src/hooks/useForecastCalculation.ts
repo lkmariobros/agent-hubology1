@@ -79,9 +79,9 @@ export function useForecastData(months: number = 12) {
 
 export function useForecastRefresh() {
   return useMutation({
-    mutationFn: async () => {
+    mutationFn: async (params?: { agentId?: string; months?: number; refresh?: boolean }) => {
       const { data, error } = await supabase.functions.invoke('generate_commission_forecast', {
-        body: { refresh: true }
+        body: { ...params, refresh: true }
       });
       
       if (error) throw error;
@@ -141,4 +141,3 @@ export function useForecastCalculation(agentId?: string) {
     refetch: forecastData.refetch
   };
 }
-

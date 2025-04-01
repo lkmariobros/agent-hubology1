@@ -68,6 +68,7 @@ export interface Property {
     firstName?: string;
     lastName?: string;
     id?: string;
+    name?: string;
   };
   size?: string | number;
 }
@@ -230,4 +231,3 @@ export interface PropertyFormValues {
   area?: number;
   features?: string[];
 }
-

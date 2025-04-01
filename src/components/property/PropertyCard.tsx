@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Bed, Bath, Grid2X2, Square, MapPin, Tag, Package, Home, Building } from 'lucide-react';
-import { formatCurrency, calculateStockPercentage, getStockStatusLabel } from '@/utils/propertyUtils';
+import { formatCurrency, formatPrice, getStockStatusLabelFromPercentage } from '@/utils/propertyUtils';
 import { Property } from '@/types';
 import { cn } from '@/lib/utils';
 import { LoadingIndicator } from '@/components/ui/loading-indicator';
@@ -51,12 +51,12 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
   
   // Calculate stock percentage if this is a development
   const stockPercentage = isDevelopment && property.stock ? 
-    calculateStockPercentage(property.stock.available, property.stock.total) : 
+    Math.round((property.stock.available / property.stock.total) * 100) : 
     null;
   
   // Get stock status label if this is a development
   const stockLabel = stockPercentage !== null ? 
-    getStockStatusLabel(stockPercentage) : 
+    getStockStatusLabelFromPercentage(stockPercentage) : 
     null;
   
   // Handle click for analytics
@@ -145,7 +145,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
         </div>
         
         <div className="mt-3 text-lg font-bold">
-          {formatCurrency(property.price)}
+          {formatPrice(property.price)}
           {(property.transactionType?.toLowerCase() === 'rent' || property.transactionType?.toLowerCase() === 'rental') ? '/month' : ''}
         </div>
         

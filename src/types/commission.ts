@@ -48,3 +48,6 @@ export interface PaymentScheduleInstallment {
   description?: string;
 }
 
+// Alias for backward compatibility
+export type ScheduleInstallment = PaymentScheduleInstallment;
+

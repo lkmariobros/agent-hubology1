@@ -20,7 +20,7 @@ const PropertyForm = () => {
       bedrooms: 0,
       bathrooms: 0,
       features: [],
-      status: 'available',
+      status: 'Available', // Capitalized to match the enum type
       address: {
         street: '',
         city: '',

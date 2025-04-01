@@ -1,4 +1,3 @@
-
 import { Property } from '@/types';
 
 /**
@@ -31,7 +30,7 @@ export const formatCurrency = (amount?: number): string => {
 /**
  * Calculate stock availability percentage
  */
-export const calculateStockPercentage = (property?: Property): number => {
+export const calculateStockPercentage = (property?: Property | { stock?: { total: number, available: number } }): number => {
   if (!property?.stock) return 0;
   const { total, available } = property.stock;
   if (total === 0) return 0;
@@ -49,8 +48,17 @@ export const calculateStockPercentage2 = (available: number, total: number): num
 /**
  * Get status label for stock availability
  */
-export const getStockStatusLabel = (property?: Property): string => {
-  if (!property?.stock) return 'N/A';
+export const getStockStatusLabel = (property?: Property | number): string => {
+  // If property is a number, treat it as a percentage directly
+  if (typeof property === 'number') {
+    if (property === 0) return 'Sold Out';
+    if (property <= 20) return 'Limited Units';
+    if (property <= 50) return 'Selling Fast';
+    return 'Available';
+  }
+  
+  // Otherwise calculate from property object
+  if (!property || !('stock' in property)) return 'N/A';
   
   const percentage = calculateStockPercentage(property);
   
@@ -73,8 +81,17 @@ export const getStockStatusLabelFromPercentage = (percentage: number): string =>
 /**
  * Get CSS class for stock status
  */
-export const getStockStatusClass = (property?: Property): string => {
-  if (!property?.stock) return 'bg-gray-100 text-gray-800';
+export const getStockStatusClass = (property?: Property | number): string => {
+  // If property is a number, treat it as a percentage directly
+  if (typeof property === 'number') {
+    if (property === 0) return 'bg-red-100 text-red-800';
+    if (property <= 20) return 'bg-orange-100 text-orange-800';
+    if (property <= 50) return 'bg-yellow-100 text-yellow-800';
+    return 'bg-green-100 text-green-800';
+  }
+  
+  // Otherwise calculate from property object
+  if (!property || !('stock' in property)) return 'bg-gray-100 text-gray-800';
   
   const percentage = calculateStockPercentage(property);
   
@@ -111,4 +128,3 @@ export const mapPropertyData = (apiData: any): Property => {
     // Map other fields as needed
   };
 };
-

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
@@ -66,6 +67,7 @@ const fallbackAgentHierarchy: AgentWithHierarchy = {
   phone: '+1-555-123-4567',
   avatar: '',
   rank: 'Team Leader',
+  tier: 'Team Leader',
   joinDate: '2023-01-15',
   transactions: 42,
   salesVolume: 4500000,
@@ -79,6 +81,7 @@ const fallbackAgentHierarchy: AgentWithHierarchy = {
     phone: '+1-555-987-6543',
     avatar: '',
     rank: 'Sales Leader',
+    tier: 'Sales Leader',
     joinDate: '2023-03-10',
     transactions: 28,
     salesVolume: 2800000,
@@ -93,26 +96,31 @@ const fallbackAgentHierarchy: AgentWithHierarchy = {
 const recentCommissions: CommissionHistory[] = [{
   id: '1',
   transactionReference: 'tx1',
+  transactionId: 'tx1',
   property: {
     title: 'Suburban Family Home',
     location: 'Palo Alto, CA'
   },
   date: '2024-02-15T10:30:00Z',
   amount: 22500,
-  type: 'personal'
+  type: 'personal',
+  status: 'Completed'
 }, {
   id: '2',
   transactionReference: 'tx2',
+  transactionId: 'tx2',
   property: {
     title: 'Downtown Loft',
     location: 'San Francisco, CA'
   },
   date: '2024-02-28T09:15:00Z',
   amount: 30000,
-  type: 'personal'
+  type: 'personal',
+  status: 'Completed'
 }, {
   id: '3',
   transactionReference: 'tx3',
+  transactionId: 'tx3',
   property: {
     title: 'Luxury Beach Condo',
     location: 'Santa Monica, CA'
@@ -120,10 +128,12 @@ const recentCommissions: CommissionHistory[] = [{
   date: '2024-03-10T14:45:00Z',
   amount: 8500,
   type: 'override',
-  source: 'Robert Wilson'
+  source: 'Robert Wilson',
+  status: 'Completed'
 }, {
   id: '4',
   transactionReference: 'tx4',
+  transactionId: 'tx4',
   property: {
     title: 'Modern Townhouse',
     location: 'Berkeley, CA'
@@ -131,7 +141,8 @@ const recentCommissions: CommissionHistory[] = [{
   date: '2024-03-18T11:20:00Z',
   amount: 6200,
   type: 'override',
-  source: 'Emily Davis'
+  source: 'Emily Davis',
+  status: 'Completed'
 }];
 
 // Sample commission data - would come from API in production
