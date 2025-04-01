@@ -1,10 +1,12 @@
+
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { Home, Users, FileText, Calendar, Settings, ShieldCheck } from 'lucide-react';
 
 export function NavigationSidebar() {
   const { user, isAdmin } = useAuth();
+  const location = useLocation();
 
   return (
     <div className="flex flex-col h-full bg-secondary border-r border-muted/50">

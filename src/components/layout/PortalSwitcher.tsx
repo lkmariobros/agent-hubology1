@@ -58,17 +58,12 @@ export function PortalSwitcher({ showLabel = true, className = "" }: PortalSwitc
     // First switch the role
     switchRole(role);
     
-    // Add a slight delay to allow the role switch to complete
-    setTimeout(() => {
-      // Hard redirect to the appropriate portal
-      if (role === 'admin') {
-        console.log('PortalSwitcher: Hard reload to /admin after role switch');
-        window.location.href = '/admin';
-      } else {
-        console.log('PortalSwitcher: Hard reload to /dashboard after role switch');
-        window.location.href = '/dashboard';
-      }
-    }, 100);
+    // Navigate using window.location instead of router components
+    if (role === 'admin') {
+      window.location.href = '/admin';
+    } else {
+      window.location.href = '/dashboard';
+    }
   };
 
   return (
