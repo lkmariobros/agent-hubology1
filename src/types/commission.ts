@@ -47,3 +47,48 @@ export interface ApprovalStatus {
   count: number;
   color: string;
 }
+
+// Add PaymentSchedule and related types
+export interface ScheduleInstallment {
+  id: string;
+  scheduleId: string;
+  installmentNumber: number;
+  percentage: number;
+  daysAfterTransaction: number;
+  description?: string;
+}
+
+export interface PaymentSchedule {
+  id: string;
+  name: string;
+  description?: string;
+  isDefault: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  installments: ScheduleInstallment[];
+}
+
+export interface CommissionInstallment {
+  id: string;
+  transactionId: string;
+  installmentNumber: number;
+  agentId: string;
+  amount: number;
+  percentage: number;
+  scheduledDate: string;
+  actualPaymentDate?: string | null;
+  status: string;
+  notes?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  transaction?: {
+    property?: {
+      title?: string;
+      address?: string;
+    };
+    agent?: {
+      first_name?: string;
+      last_name?: string;
+    };
+  };
+}
