@@ -1,53 +1,49 @@
 
-export interface CommissionInstallment {
-  id: string;
-  transactionId: string;
-  installmentNumber: number;
-  agentId: string;
-  amount: number;
-  percentage: number;
-  scheduledDate: string;
-  actualPaymentDate?: string;
-  status: string;
-  notes?: string;
-  createdAt: string;
-  updatedAt: string;
-  transaction?: any;
-  // Snake case alternatives for API compatibility
-  transaction_id?: string;
-  installment_number?: number;
-  agent_id?: string;
-  scheduled_date?: string;
-  actual_payment_date?: string;
-  created_at?: string;
-  updated_at?: string;
-}
+import { AgentRank } from './user';
 
-export interface CommissionForecast {
-  month: string;
-  totalAmount: number;
-  installments: CommissionInstallment[];
-  // Snake case alternatives for API compatibility
-  total_amount?: number;
-}
-
-export interface PaymentSchedule {
+export interface CommissionTier {
   id: string;
   name: string;
-  description?: string;
-  isDefault: boolean;
-  installments: PaymentScheduleInstallment[];
+  commissionRate: number;
+  requirements: string[];
+  tier?: string;
+  rate?: number;
+  minTransactions?: number;
+  color?: string;
+  rank?: string;
+  agentPercentage?: number;
 }
 
-export interface PaymentScheduleInstallment {
+export interface CommissionHistory {
   id: string;
-  scheduleId: string;
-  installmentNumber: number;
-  daysAfterTransaction: number;
-  percentage: number;
-  description?: string;
+  date: string;
+  amount: number;
+  property: string | {
+    title: string;
+    location: string;
+  };
+  status: string;
+  type?: string;
+  source?: string;
+  transactionReference?: string;
+  transactionId?: string;
 }
 
-// Alias for backward compatibility
-export type ScheduleInstallment = PaymentScheduleInstallment;
+export interface OverrideCommission {
+  agentId: string;
+  amount: number;
+  id?: string;
+  baseAgentId?: string;
+  transactionId?: string;
+  percentage?: number;
+  status?: string;
+  agentName?: string;
+  rank?: string | AgentRank;
+  tier?: string | AgentRank;
+}
 
+export interface ApprovalStatus {
+  status: string;
+  count: number;
+  color: string;
+}
