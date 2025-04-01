@@ -111,7 +111,7 @@ export const PropertyCardDetails: React.FC<PropertyCardDetailsProps> = ({
             <div className="flex items-center gap-2">
               <User className="h-4 w-4 text-neutral-400" />
               <span className="text-sm">
-                {property.agent.firstName || property.agent.firstName} {property.agent.lastName}
+                {property.agent.name || `${property.agent.firstName || ''} ${property.agent.lastName || ''}`}
               </span>
             </div>
           )}

@@ -23,7 +23,7 @@ interface PropertyDetailsInfoProps {
 }
 
 const PropertyDetailsInfo: React.FC<PropertyDetailsInfoProps> = ({ form, nextTab, prevTab }) => {
-  const propertyType = form.watch('type');
+  const propertyType = form.watch('propertyType');
 
   return (
     <div className="space-y-6">
@@ -48,7 +48,7 @@ const PropertyDetailsInfo: React.FC<PropertyDetailsInfoProps> = ({ form, nextTab
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <FormField
           control={form.control}
-          name="area"
+          name="builtUpArea"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Area (sq ft) *</FormLabel>
@@ -120,9 +120,9 @@ const PropertyDetailsInfo: React.FC<PropertyDetailsInfoProps> = ({ form, nextTab
                         >
                           <FormControl>
                             <Checkbox
-                              checked={field.value.includes(feature.id)}
+                              checked={Array.isArray(field.value) && field.value.includes(feature.id)}
                               onCheckedChange={(checked) => {
-                                const currentValues = [...field.value];
+                                const currentValues = Array.isArray(field.value) ? [...field.value] : [];
                                 if (checked) {
                                   field.onChange([...currentValues, feature.id]);
                                 } else {

@@ -21,7 +21,7 @@ interface PropertyEssentialInfoProps {
 }
 
 const PropertyEssentialInfo: React.FC<PropertyEssentialInfoProps> = ({ form, nextTab }) => {
-  const propertyType = form.watch('type');
+  const propertyType = form.watch('propertyType');
 
   // Update when property type changes
   useEffect(() => {
@@ -40,7 +40,7 @@ const PropertyEssentialInfo: React.FC<PropertyEssentialInfoProps> = ({ form, nex
       {/* Property Type Selection */}
       <FormField
         control={form.control}
-        name="type"
+        name="propertyType"
         render={({ field }) => (
           <FormItem className="space-y-3">
             <FormLabel>Property Type *</FormLabel>
@@ -97,13 +97,13 @@ const PropertyEssentialInfo: React.FC<PropertyEssentialInfoProps> = ({ form, nex
           <FormLabel>Property Subtype *</FormLabel>
           <select
             className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-            value={propertySubtypes[propertyType]?.[0] || ''}
+            value={propertySubtypes[propertyType as keyof typeof propertySubtypes]?.[0] || ''}
             onChange={(e) => {
               // Handle subtype change without using form.setValue
               console.log("Selected subtype:", e.target.value);
             }}
           >
-            {propertySubtypes[propertyType]?.map((subtype: string) => (
+            {propertySubtypes[propertyType as keyof typeof propertySubtypes]?.map((subtype: string) => (
               <option key={subtype} value={subtype}>
                 {subtype}
               </option>
@@ -145,9 +145,9 @@ const PropertyEssentialInfo: React.FC<PropertyEssentialInfoProps> = ({ form, nex
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 {...field}
               >
-                <option value="available">Available</option>
-                <option value="pending">Pending</option>
-                <option value="sold">Sold</option>
+                <option value="Available">Available</option>
+                <option value="Pending">Pending</option>
+                <option value="Sold">Sold</option>
               </select>
             </FormControl>
             <FormMessage />

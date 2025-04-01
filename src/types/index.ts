@@ -1,3 +1,4 @@
+
 export interface CommissionInstallment {
   id: string;
   transactionId: string;
@@ -80,6 +81,8 @@ export interface PropertyFormValues {
     reserved: number;
     sold: number;
   };
+  type?: string; // Added for backward compatibility
+  area?: number; // Added for backward compatibility
 }
 
 export interface Property {
@@ -108,7 +111,7 @@ export interface Property {
     firstName?: string;
     lastName?: string;
     name?: string;
-    email?: string; // Add email field
+    email?: string;
     phone?: string;
   };
   stock?: {
@@ -117,8 +120,156 @@ export interface Property {
     reserved?: number;
     sold?: number;
   };
-  featured?: boolean; // Added for compatibility
+  featured?: boolean;
+  reference?: string;
+  size?: number; // For sample properties compatibility
   createdAt: string;
   updatedAt: string;
-  transactionType?: 'Sale' | 'Rent' | 'Primary'; // Added for PropertyCard
+  transactionType?: 'Sale' | 'Rent' | 'Primary';
+}
+
+// Agent and Commission related types
+export type AgentRank = 
+  | 'Junior Agent'
+  | 'Agent'
+  | 'Senior Agent'
+  | 'Team Leader'
+  | 'Sales Leader'
+  | 'Group Leader'
+  | 'Associate Director'
+  | 'Director';
+
+export interface AgentWithHierarchy {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  avatar?: string;
+  rank?: string;
+  tier?: string;
+  joinDate?: string;
+  transactions?: number;
+  salesVolume?: number;
+  personalCommission?: number;
+  overrideCommission?: number;
+  totalCommission?: number;
+  downline?: AgentWithHierarchy[];
+  downlines?: AgentWithHierarchy[];
+}
+
+export interface CommissionTier {
+  id: string;
+  name: string;
+  tier?: string;
+  rate?: number;
+  minTransactions?: number;
+  color?: string;
+  rank?: string;
+  agentPercentage: number;
+}
+
+export interface OverrideCommission {
+  id: string;
+  agentId: string;
+  baseAgentId: string;
+  transactionId: string;
+  percentage: number;
+  amount: number;
+  status: string;
+  agentName?: string;
+  rank?: AgentRank;
+  tier?: string;
+}
+
+export interface CommissionHistory {
+  id: string;
+  transactionId: string;
+  transactionReference?: string;
+  date: string;
+  amount: number;
+  status: string;
+  type?: string;
+  source?: string;
+  property?: {
+    title: string;
+    location: string;
+  };
+}
+
+export interface ApprovalStatus {
+  id: string;
+  name: string;
+  color: string;
+}
+
+export interface RankRequirement {
+  id: string;
+  rank: AgentRank;
+  minTransactions: number;
+  minSalesVolume: number;
+}
+
+// Dashboard types
+export interface DashboardMetric {
+  id: string;
+  title: string;
+  value: string | number;
+  change?: number;
+  trend?: 'up' | 'down' | 'neutral';
+  icon?: string;
+}
+
+export interface Transaction {
+  id: string;
+  reference: string;
+  date: string;
+  clientName: string;
+  propertyAddress: string;
+  amount: number;
+  status: string;
+  type: string;
+  agentId?: string;
+  agentName?: string;
+}
+
+export interface Opportunity {
+  id: string;
+  title: string;
+  description: string;
+  budget: number;
+  location: string;
+  propertyType: string;
+  createdAt: string;
+  status: string;
+  urgency: 'low' | 'medium' | 'high';
+  clientId?: string;
+  clientName?: string;
+  agentId?: string;
+  agentName?: string;
+}
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  avatar?: string;
+  phone?: string;
+  properties?: any[];
+  sales?: number;
+}
+
+export interface ApiResponse<T> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  message?: string;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
 }

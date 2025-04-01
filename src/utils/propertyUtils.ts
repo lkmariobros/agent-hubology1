@@ -1,130 +1,94 @@
-import { Property } from '@/types';
 
-/**
- * Format price with currency symbol and thousand separators
- */
-export const formatPrice = (price?: number): string => {
-  if (price === undefined || price === null) return 'Price on request';
+// Add formatCurrency utility that's imported by various components
+export const formatCurrency = (value: number, currency = 'USD'): string => {
   return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'MYR',
+    style: 'decimal',
     minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  }).format(price);
+    maximumFractionDigits: 0,
+  }).format(value);
 };
 
-/**
- * Format currency with symbol and thousand separators
- */
-export const formatCurrency = (amount?: number): string => {
-  if (amount === undefined || amount === null) return '$0';
+// Convert snake_case property data from the API to camelCase for the frontend
+export const mapPropertyFromApi = (propertyData: any): any => {
+  if (!propertyData) return null;
   
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  }).format(amount);
-};
-
-/**
- * Calculate stock availability percentage
- */
-export const calculateStockPercentage = (property?: Property | { stock?: { total: number, available: number } }): number => {
-  if (!property?.stock) return 0;
-  const { total, available } = property.stock;
-  if (total === 0) return 0;
-  return Math.round((available / total) * 100);
-};
-
-/**
- * Calculate stock availability percentage with direct values
- */
-export const calculateStockPercentage2 = (available: number, total: number): number => {
-  if (total === 0) return 0;
-  return Math.round((available / total) * 100);
-};
-
-/**
- * Get status label for stock availability
- */
-export const getStockStatusLabel = (property?: Property | number): string => {
-  // If property is a number, treat it as a percentage directly
-  if (typeof property === 'number') {
-    if (property === 0) return 'Sold Out';
-    if (property <= 20) return 'Limited Units';
-    if (property <= 50) return 'Selling Fast';
-    return 'Available';
-  }
-  
-  // Otherwise calculate from property object
-  if (!property || !('stock' in property)) return 'N/A';
-  
-  const percentage = calculateStockPercentage(property);
-  
-  if (percentage === 0) return 'Sold Out';
-  if (percentage <= 20) return 'Limited Units';
-  if (percentage <= 50) return 'Selling Fast';
-  return 'Available';
-};
-
-/**
- * Get status label for stock availability using percentage
- */
-export const getStockStatusLabelFromPercentage = (percentage: number): string => {
-  if (percentage === 0) return 'Sold Out';
-  if (percentage <= 20) return 'Limited Units';
-  if (percentage <= 50) return 'Selling Fast';
-  return 'Available';
-};
-
-/**
- * Get CSS class for stock status
- */
-export const getStockStatusClass = (property?: Property | number): string => {
-  // If property is a number, treat it as a percentage directly
-  if (typeof property === 'number') {
-    if (property === 0) return 'bg-red-100 text-red-800';
-    if (property <= 20) return 'bg-orange-100 text-orange-800';
-    if (property <= 50) return 'bg-yellow-100 text-yellow-800';
-    return 'bg-green-100 text-green-800';
-  }
-  
-  // Otherwise calculate from property object
-  if (!property || !('stock' in property)) return 'bg-gray-100 text-gray-800';
-  
-  const percentage = calculateStockPercentage(property);
-  
-  if (percentage === 0) return 'bg-red-100 text-red-800';
-  if (percentage <= 20) return 'bg-orange-100 text-orange-800';
-  if (percentage <= 50) return 'bg-yellow-100 text-yellow-800';
-  return 'bg-green-100 text-green-800';
-};
-
-/**
- * Map property data from API to front-end model
- */
-export const mapPropertyData = (apiData: any): Property => {
   return {
-    id: apiData.id,
-    title: apiData.title,
-    description: apiData.description,
-    price: apiData.price,
-    rentalRate: apiData.rental_rate,
+    id: propertyData.id,
+    title: propertyData.title,
+    description: propertyData.description,
+    price: propertyData.price,
+    rentalRate: propertyData.rental_rate,
     address: {
-      street: apiData.street || '',
-      city: apiData.city || '',
-      state: apiData.state || '',
-      zip: apiData.zip || '',
-      country: apiData.country || 'Malaysia',
+      street: propertyData.street,
+      city: propertyData.city,
+      state: propertyData.state,
+      zip: propertyData.zip,
+      country: propertyData.country,
     },
-    type: apiData.property_type_id,
-    bedrooms: apiData.bedrooms,
-    bathrooms: apiData.bathrooms,
-    area: apiData.built_up_area || apiData.floor_area || apiData.land_area,
-    status: apiData.status_id,
-    createdAt: apiData.created_at,
-    updatedAt: apiData.updated_at,
-    // Map other fields as needed
+    type: propertyData.property_types?.name?.toLowerCase() || 'residential',
+    bedrooms: propertyData.bedrooms,
+    bathrooms: propertyData.bathrooms,
+    area: propertyData.built_up_area,
+    status: propertyData.property_statuses?.name || 'available',
+    createdAt: propertyData.created_at,
+    updatedAt: propertyData.updated_at,
+    features: propertyData.features || [],
+    images: propertyData.property_images?.map((img: any) => img.storage_path) || [],
   };
+};
+
+export const getPropertyStatusColor = (status: string): string => {
+  switch (status.toLowerCase()) {
+    case 'available':
+      return 'bg-green-500';
+    case 'under offer':
+      return 'bg-amber-500';
+    case 'pending':
+      return 'bg-blue-500';
+    case 'sold':
+      return 'bg-red-500';
+    case 'rented':
+      return 'bg-purple-500';
+    default:
+      return 'bg-gray-500';
+  }
+};
+
+export const getPropertyTypeBadge = (type: string): { icon: string; color: string } => {
+  switch (type.toLowerCase()) {
+    case 'house':
+    case 'residential':
+      return {
+        icon: 'home',
+        color: 'bg-blue-100 text-blue-800',
+      };
+    case 'apartment':
+    case 'condo':
+      return {
+        icon: 'building',
+        color: 'bg-green-100 text-green-800',
+      };
+    case 'commercial':
+    case 'office':
+      return {
+        icon: 'briefcase',
+        color: 'bg-purple-100 text-purple-800',
+      };
+    case 'industrial':
+    case 'warehouse':
+      return {
+        icon: 'package',
+        color: 'bg-orange-100 text-orange-800',
+      };
+    case 'land':
+      return {
+        icon: 'map',
+        color: 'bg-amber-100 text-amber-800',
+      };
+    default:
+      return {
+        icon: 'home',
+        color: 'bg-gray-100 text-gray-800',
+      };
+  }
 };

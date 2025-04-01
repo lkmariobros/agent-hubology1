@@ -15,12 +15,12 @@ const PropertyForm = () => {
       title: '',
       description: '',
       price: 0,
-      type: 'residential',
+      propertyType: 'residential',
       area: 0,
       bedrooms: 0,
       bathrooms: 0,
       features: [],
-      status: 'Available', // Capitalized to match the enum type
+      status: 'Available',
       address: {
         street: '',
         city: '',
