@@ -1,9 +1,12 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/context/AuthContext';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const PropertyDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -22,14 +25,15 @@ const PropertyDetail = () => {
         
         const mockProperty = {
           id: id,
-          address: '123 Highland, Someplace CA',
-          description: 'A beautiful home with a view.',
-          price: '$1,200,000',
-          details: {
-            bedrooms: 4,
-            bathrooms: 3,
-            squareFeet: 2500
-          }
+          name: 'HHEHEHEH',
+          address: 'EF',
+          city: 'EFSFSE',
+          state: 'FSEF',
+          size: 'sqft',
+          status: 'Under Offer',
+          type: 'Commercial',
+          price: '$6,312',
+          description: 'Manage all details for this commercial.',
         };
         
         setProperty(mockProperty);
@@ -68,43 +72,152 @@ const PropertyDetail = () => {
   }
   
   return (
-    <div className="container mx-auto p-4">
-      <div className="mb-4">
-        <Link 
-          to="/properties" 
-          className="text-gray-400 hover:text-gray-300 flex items-center mb-6"
-        >
-          <ArrowLeft className="h-4 w-4 mr-1" />
-          Back to Properties
-        </Link>
-      </div>
-      
-      <div className="bg-[#1F232D] rounded-lg p-6 border border-gray-800">
-        <h1 className="text-2xl font-bold text-white mb-2">Property Details</h1>
-        
-        <h2 className="text-3xl font-bold text-white mb-2">{property.address}</h2>
-        <p className="text-gray-400 mb-6">{property.description}</p>
-        
-        <h3 className="text-xl font-semibold text-white mb-4">Price: {property.price}</h3>
-        
-        <div className="mt-6">
-          <h3 className="text-lg font-semibold text-white mb-2">Details:</h3>
-          <div className="grid grid-cols-3 gap-4">
-            <div className="bg-gray-800 rounded p-4">
-              <p className="text-gray-400">Bedrooms</p>
-              <p className="text-xl font-semibold text-white">{property.details.bedrooms}</p>
+    <div className="bg-[#121620] text-white">
+      {/* Header with breadcrumb and property title */}
+      <div className="mb-6">
+        <div className="mb-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold mb-1">{property.name}</h1>
+              <p className="text-gray-400">{property.description}</p>
             </div>
-            <div className="bg-gray-800 rounded p-4">
-              <p className="text-gray-400">Bathrooms</p>
-              <p className="text-xl font-semibold text-white">{property.details.bathrooms}</p>
-            </div>
-            <div className="bg-gray-800 rounded p-4">
-              <p className="text-gray-400">Square Feet</p>
-              <p className="text-xl font-semibold text-white">{property.details.squareFeet}</p>
+            <div className="flex gap-2">
+              <Button variant="outline">
+                <span>Edit</span>
+              </Button>
+              <Button variant="destructive">
+                <span>Delete</span>
+              </Button>
             </div>
           </div>
         </div>
-      </div>
+        
+        {/* Main content section */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Property image and thumbnails - Left side (2/3 width) */}
+          <div className="lg:col-span-2">
+            <div className="bg-[#1A1F2C] rounded-lg overflow-hidden">
+              <div className="aspect-[16/9] bg-[#1A1F2C] flex items-center justify-center border border-gray-700 rounded-lg overflow-hidden">
+                <p className="text-gray-400">No main image available</p>
+              </div>
+              <div className="grid grid-cols-4 gap-2 mt-2">
+                <div className="aspect-square bg-[#1A1F2C] border border-gray-700 rounded-md"></div>
+                <div className="aspect-square bg-[#1A1F2C] border border-gray-700 rounded-md"></div>
+                <div className="aspect-square bg-[#1A1F2C] border border-gray-700 rounded-md"></div>
+                <div className="aspect-square bg-[#1A1F2C] border border-gray-700 rounded-md"></div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Property details - Right side (1/3 width) */}
+          <div className="lg:col-span-1">
+            <div className="bg-[#1A1F2C] p-6 rounded-lg border border-gray-800">
+              <div className="flex items-center space-x-2 mb-4">
+                <Badge variant="secondary">Commercial</Badge>
+                <Badge>Sale</Badge>
+              </div>
+              
+              <h2 className="text-3xl font-bold mb-6">{property.price}</h2>
+              
+              <div className="space-y-4">
+                <div className="flex justify-between border-b border-gray-700 pb-3">
+                  <span className="text-gray-400">Property ID:</span>
+                  <span>{id}</span>
+                </div>
+                <div className="flex justify-between border-b border-gray-700 pb-3">
+                  <span className="text-gray-400">Address:</span>
+                  <span>{property.address}</span>
+                </div>
+                <div className="flex justify-between border-b border-gray-700 pb-3">
+                  <span className="text-gray-400">City:</span>
+                  <span>{property.city}</span>
+                </div>
+                <div className="flex justify-between border-b border-gray-700 pb-3">
+                  <span className="text-gray-400">State:</span>
+                  <span>{property.state}</span>
+                </div>
+                <div className="flex justify-between border-b border-gray-700 pb-3">
+                  <span className="text-gray-400">Size:</span>
+                  <span>{property.size}</span>
+                </div>
+                <div className="flex justify-between border-b border-gray-700 pb-3">
+                  <span className="text-gray-400">Status:</span>
+                  <span className="text-green-400">{property.status}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Tabs section */}
+        <div className="mt-6">
+          <Tabs defaultValue="details">
+            <TabsList className="bg-[#1A1F2C]">
+              <TabsTrigger value="details">Details</TabsTrigger>
+              <TabsTrigger value="owner">Owner</TabsTrigger>
+              <TabsTrigger value="transactions">Transactions</TabsTrigger>
+              <TabsTrigger value="documents">Documents</TabsTrigger>
+              <TabsTrigger value="history">History</TabsTrigger>
+            </TabsList>
+            
+            {/* Tab content sections */}
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Main content - left side (2 cols) */}
+              <div className="md:col-span-2">
+                {/* Property features */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  <Card className="bg-[#1A1F2C] border-gray-800">
+                    <div className="p-4">
+                      <h3 className="text-lg font-medium mb-4">Property Features</h3>
+                      <ul className="space-y-2">
+                        {["Feature 1", "Feature 2", "Feature 3"].map((feature, idx) => (
+                          <li key={idx} className="flex items-center">
+                            <CheckCircle2 className="w-4 h-4 text-green-500 mr-2" />
+                            {feature}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </Card>
+                  
+                  <Card className="bg-[#1A1F2C] border-gray-800">
+                    <div className="p-4">
+                      <h3 className="text-lg font-medium mb-4">Building Amenities</h3>
+                      <ul className="space-y-2">
+                        {["Amenity 1", "Amenity 2", "Amenity 3"].map((amenity, idx) => (
+                          <li key={idx} className="flex items-center">
+                            <CheckCircle2 className="w-4 h-4 text-green-500 mr-2" />
+                            {amenity}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </Card>
+                </div>
+              </div>
+              
+              {/* Team notes - right side (1 col) */}
+              <div className="md:col-span-1">
+                <Card className="bg-[#1A1F2C] border-gray-800 h-full">
+                  <div className="p-4">
+                    <h3 className="text-lg font-medium mb-4">Team Notes</h3>
+                    <div className="bg-[#161920] rounded-md p-3 mb-3">
+                      <div className="flex items-center mb-2">
+                        <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white mr-2">
+                          <span>JS</span>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium">John Smith</p>
+                          <p className="text-xs text-gray-400">commented on</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              </div>
+            </div>
+          </div>
+        </div>
     </div>
   );
 };

@@ -19,12 +19,13 @@
 
 /* Base theme variables for InnovaCraft Dark Theme */
 :root {
-  --sidebar-bg: #1F232D;
-  --content-bg: #161920;
-  --card-bg: #1E2128;
+  --sidebar-bg: #1A1F2C;
+  --content-bg: #121620;
+  --card-bg: #1A1F2C;
   --border-color: rgba(255, 255, 255, 0.06);
   --text-primary: #f8f9fa;
   --text-secondary: #a1a1aa;
+  --accent-color: #7e22ce;
 }
 
 /* App container */
@@ -38,7 +39,7 @@
 .sidebar,
 [data-expanded="true"].sidebar,
 [data-expanded="false"].sidebar {
-  background-color: var(--sidebar-bg);
+  background-color: var(--sidebar-bg) !important;
   border-right: 1px solid var(--border-color);
 }
 
@@ -47,7 +48,7 @@ main,
 .main-content,
 .content-area,
 .flex-1 {
-  background-color: var(--content-bg);
+  background-color: var(--content-bg) !important;
   min-height: 100vh;
 }
 
@@ -98,20 +99,20 @@ h1, h2, h3, h4, h5, h6, p, span {
   color: var(--text-secondary);
 }
 
-/* High specificity selectors for main content area - added for critical fix */
+/* High specificity selectors for main content area */
 .main-content,
 main,
 div[class*="content-area"],
 div[class*="dashboard"],
 body > div > div:not(.sidebar):not([class*="sidebar"]) {
-  background-color: #161920 !important; /* Using !important for critical fix */
+  background-color: #121620 !important;
 }
 
 /* Target specific sections with high specificity */
 .dashboard-container,
 div[class*="dashboard"],
 div[class*="content-section"] {
-  background-color: #161920 !important;
+  background-color: #121620 !important;
 }
 
 /* Ensure nested components inherit background unless specifically styled */
@@ -127,7 +128,7 @@ body [class*="main-content"],
 body > div > div > main,
 body > div[id="root"] > div > div:not([class*="sidebar"]):last-child,
 body > div[id="root"] > div:nth-child(1) > div:nth-child(2) {
-  background-color: #161920 !important;
+  background-color: #121620 !important;
 }
 
 /* Target specific pages by route */
@@ -139,7 +140,7 @@ body[data-route="/admin/properties"] main,
 body[data-route="/admin/transactions"] main,
 body[data-route="/admin/agents"] main,
 body[data-route="/admin/commission"] main {
-  background-color: #161920 !important;
+  background-color: #121620 !important;
 }
 
 /* Override any nested containers that might redefine background */
@@ -154,14 +155,14 @@ main,
 [data-page="dashboard"],
 [data-page="properties"],
 [data-page="transactions"] {
-  background-color: #161920 !important;
+  background-color: #121620 !important;
 }
 
 /* Target main content wrapper directly */
 .content-wrapper,
 .page-container,
 div[class*="layout-content"] {
-  background-color: #161920 !important;
+  background-color: #121620 !important;
 }
 
 /* Admin-specific portal styling fixes */
@@ -171,21 +172,30 @@ div[class*="layout-content"] {
 .AdminLayout-container div[class*="content-area"],
 div[id="root"] > div > .AdminLayout-container,
 div[id="root"] > .AdminLayout-container {
-  background-color: #161920 !important;
+  background-color: #121620 !important;
 }
 
 /* Admin sidebar fixes */
 .AdminLayout-container .sidebar,
 .AdminSidebar,
 div[class*="AdminSidebar"] {
-  background-color: #1F232D !important;
+  background-color: #1A1F2C !important;
   border-right: 1px solid var(--border-color);
 }
 
 /* Admin header fixes */
 .AdminLayout-container header {
-  background-color: #1F232D !important;
+  background-color: #1A1F2C !important;
   border-color: var(--border-color);
+}
+
+/* Purple accent styling */
+.bg-purple-600 {
+  background-color: var(--accent-color) !important;
+}
+
+.hover\:bg-purple-700:hover {
+  background-color: #6b21a8 !important;
 }
 
 /* Keep animation styles */
