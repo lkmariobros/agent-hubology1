@@ -18,6 +18,16 @@ export const transactionFormReducer = (
         isDirty: true
       };
       
+    case 'UPDATE_FORM_DATA':
+      return {
+        ...state,
+        formData: {
+          ...state.formData,
+          ...action.payload
+        },
+        isDirty: true
+      };
+      
     case 'UPDATE_TRANSACTION_TYPE':
       return {
         ...state,

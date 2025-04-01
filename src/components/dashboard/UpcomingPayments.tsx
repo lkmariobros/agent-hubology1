@@ -11,9 +11,21 @@ import { format, parseISO } from 'date-fns';
 // We'll implement this hook in the next step
 import { useUpcomingPayments } from '@/hooks/useUpcomingPayments';
 
-const UpcomingPayments: React.FC = () => {
+interface UpcomingPaymentsProps {
+  onViewAll?: () => void;
+}
+
+const UpcomingPayments: React.FC<UpcomingPaymentsProps> = ({ onViewAll }) => {
   const navigate = useNavigate();
   const { data: upcomingPayments, isLoading } = useUpcomingPayments();
+  
+  const handleViewAll = () => {
+    if (onViewAll) {
+      onViewAll();
+    } else {
+      navigate('/commissions/forecast');
+    }
+  };
   
   return (
     <Card>
@@ -25,7 +37,7 @@ const UpcomingPayments: React.FC = () => {
           variant="ghost" 
           size="sm" 
           className="gap-1 text-xs" 
-          onClick={() => navigate('/commissions/forecast')}
+          onClick={handleViewAll}
         >
           View all <ArrowRight className="h-3 w-3" />
         </Button>

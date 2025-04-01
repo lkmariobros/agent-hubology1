@@ -98,17 +98,22 @@ export interface TransactionFormState {
 
 export type TransactionFormAction =
   | { type: 'SET_FORM_DATA'; payload: Partial<TransactionFormData> }
+  | { type: 'UPDATE_FORM_DATA'; payload: Partial<TransactionFormData> }
+  | { type: 'UPDATE_TRANSACTION_TYPE'; payload: TransactionType }
   | { type: 'ADD_DOCUMENT'; payload: TransactionDocument }
+  | { type: 'REMOVE_DOCUMENT'; payload: number }
   | { type: 'UPDATE_DOCUMENT'; payload: TransactionDocument }
   | { type: 'DELETE_DOCUMENT'; payload: string }
   | { type: 'SET_ERROR'; payload: { field: string; message: string } }
   | { type: 'CLEAR_ERROR'; payload: string }
-  | { type: 'SET_CURRENT_STEP'; payload: number }
-  | { type: 'SET_IS_SUBMITTING'; payload: boolean }
-  | { type: 'SET_IS_DIRTY'; payload: boolean }
-  | { type: 'SET_LAST_SAVED'; payload: Date }
+  | { type: 'SET_ERRORS'; payload: Record<string, string> }
+  | { type: 'NEXT_STEP' }
+  | { type: 'PREV_STEP' }
+  | { type: 'GO_TO_STEP'; payload: number }
   | { type: 'RESET_FORM' }
-  | { type: 'SET_PAYMENT_SCHEDULE', payload: string };
+  | { type: 'FORM_SAVED'; payload: Date }
+  | { type: 'SUBMITTING'; payload: boolean }
+  | { type: 'SET_PAYMENT_SCHEDULE'; payload: string };
 
 export interface TransactionFormContextType {
   state: TransactionFormState;

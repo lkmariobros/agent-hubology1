@@ -17,6 +17,10 @@ const Dashboard: React.FC = () => {
     navigate('/opportunities');
   };
   
+  const handleViewAllPayments = () => {
+    navigate('/commissions/forecast');
+  };
+  
   return (
     <div className="p-6 space-y-6">
       <h1 className="text-3xl font-semibold">Dashboard</h1>
@@ -25,7 +29,7 @@ const Dashboard: React.FC = () => {
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <RecentTransactions />
-        <UpcomingPayments />
+        <UpcomingPayments onViewAll={handleViewAllPayments} />
       </div>
       
       <OpportunitiesBoard onViewAll={handleViewAllOpportunities} />
