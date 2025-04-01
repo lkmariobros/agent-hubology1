@@ -9,9 +9,9 @@ export function NavigationSidebar() {
   const location = useLocation();
 
   return (
-    <div className="flex flex-col h-full bg-secondary border-r border-muted/50">
+    <div className="flex flex-col h-full bg-[#1F232D]">
       <div className="px-4 py-6">
-        <span className="block text-sm font-semibold text-muted-foreground">
+        <span className="block text-sm font-semibold text-gray-400">
           Logged in as: {user?.email}
         </span>
       </div>
@@ -21,8 +21,8 @@ export function NavigationSidebar() {
             <NavLink
               to="/dashboard"
               className={({ isActive }) =>
-                `flex items-center px-4 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground ${
-                  isActive ? 'bg-accent text-accent-foreground' : 'text-muted-foreground'
+                `flex items-center px-4 py-2 rounded-md text-sm font-medium transition-colors hover:bg-purple-600/20 hover:text-white ${
+                  isActive ? 'bg-purple-600 text-white' : 'text-gray-300'
                 }`
               }
             >
@@ -34,8 +34,8 @@ export function NavigationSidebar() {
             <NavLink
               to="/properties"
               className={({ isActive }) =>
-                `flex items-center px-4 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground ${
-                  isActive ? 'bg-accent text-accent-foreground' : 'text-muted-foreground'
+                `flex items-center px-4 py-2 rounded-md text-sm font-medium transition-colors hover:bg-purple-600/20 hover:text-white ${
+                  isActive ? 'bg-purple-600 text-white' : 'text-gray-300'
                 }`
               }
             >
@@ -47,8 +47,8 @@ export function NavigationSidebar() {
             <NavLink
               to="/transactions"
               className={({ isActive }) =>
-                `flex items-center px-4 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground ${
-                  isActive ? 'bg-accent text-accent-foreground' : 'text-muted-foreground'
+                `flex items-center px-4 py-2 rounded-md text-sm font-medium transition-colors hover:bg-purple-600/20 hover:text-white ${
+                  isActive ? 'bg-purple-600 text-white' : 'text-gray-300'
                 }`
               }
             >
@@ -60,8 +60,8 @@ export function NavigationSidebar() {
             <NavLink
               to="/commission"
               className={({ isActive }) =>
-                `flex items-center px-4 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground ${
-                  isActive ? 'bg-accent text-accent-foreground' : 'text-muted-foreground'
+                `flex items-center px-4 py-2 rounded-md text-sm font-medium transition-colors hover:bg-purple-600/20 hover:text-white ${
+                  isActive ? 'bg-purple-600 text-white' : 'text-gray-300'
                 }`
               }
             >
@@ -73,8 +73,8 @@ export function NavigationSidebar() {
             <NavLink
               to="/schedules"
               className={({ isActive }) =>
-                `flex items-center px-4 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground ${
-                  isActive ? 'bg-accent text-accent-foreground' : 'text-muted-foreground'
+                `flex items-center px-4 py-2 rounded-md text-sm font-medium transition-colors hover:bg-purple-600/20 hover:text-white ${
+                  isActive ? 'bg-purple-600 text-white' : 'text-gray-300'
                 }`
               }
             >
@@ -87,8 +87,8 @@ export function NavigationSidebar() {
               <NavLink
                 to="/admin/commission-approval"
                 className={({ isActive }) =>
-                  `flex items-center px-4 py-2 rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground ${
-                    isActive ? 'bg-accent text-accent-foreground' : 'text-muted-foreground'
+                  `flex items-center px-4 py-2 rounded-md text-sm font-medium transition-colors hover:bg-purple-600/20 hover:text-white ${
+                    isActive ? 'bg-purple-600 text-white' : 'text-gray-300'
                   }`
                 }
               >
@@ -104,7 +104,7 @@ export function NavigationSidebar() {
           href="https://propify.webflow.io/"
           target="_blank"
           rel="noopener noreferrer"
-          className="group flex items-center rounded-md bg-accent text-accent-foreground text-sm font-medium hover:bg-accent-foreground hover:text-accent transition-colors"
+          className="group flex items-center rounded-md bg-purple-600 text-white text-sm font-medium hover:bg-purple-700 transition-colors"
         >
           <span className="w-full text-center py-2">
             Learn More
