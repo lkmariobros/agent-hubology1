@@ -1,90 +1,66 @@
 
-import { PaymentSchedule, ScheduleInstallment, CommissionInstallment } from '@/types/commission';
-import { addDays, format } from 'date-fns';
-
 /**
- * Generate commission installments based on a payment schedule
+ * Format currency values for display
+ * Used in commission-related components
  */
-export function generateInstallments(
-  transactionId: string,
-  agentId: string,
-  totalCommission: number,
-  paymentSchedule: PaymentSchedule,
-  transactionDate: Date
-): CommissionInstallment[] {
-  if (!paymentSchedule.installments || paymentSchedule.installments.length === 0) {
-    console.error('Payment schedule has no installments defined');
-    return [];
-  }
+export function formatCurrency(amount: number | null | undefined): string {
+  if (amount === null || amount === undefined) return '$0';
   
-  // Verify total percentage adds up to 100%
-  const totalPercentage = paymentSchedule.installments.reduce(
-    (sum, installment) => sum + installment.percentage, 
-    0
-  );
-  
-  if (Math.abs(totalPercentage - 100) > 0.01) {
-    console.warn(`Payment schedule percentages do not add up to 100%. Total: ${totalPercentage}%`);
-  }
-  
-  // Generate installments
-  return paymentSchedule.installments.map(installment => {
-    const amount = (totalCommission * installment.percentage) / 100;
-    const scheduledDate = addDays(transactionDate, installment.daysAfterTransaction);
-    
-    return {
-      id: '', // Will be assigned by the backend
-      transactionId,
-      installmentNumber: installment.installmentNumber,
-      agentId,
-      amount,
-      percentage: installment.percentage,
-      scheduledDate: format(scheduledDate, 'yyyy-MM-dd'),
-      status: 'Pending',
-    };
-  });
-}
-
-/**
- * Format currency for display
- */
-export function formatCurrency(amount: number): string {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
   }).format(amount);
 }
 
 /**
- * Calculate total amount from a list of installments
+ * Calculate the total of all installment percentages
  */
-export function calculateTotalAmount(installments: CommissionInstallment[]): number {
-  return installments.reduce((sum, installment) => sum + installment.amount, 0);
+export function calculateTotalPercentage(installments: { percentage: number }[]): number {
+  return installments.reduce((sum, installment) => sum + (installment.percentage || 0), 0);
 }
 
 /**
- * Group commission installments by month for forecasting
+ * Format a date for display
  */
-export function groupInstallmentsByMonth(installments: CommissionInstallment[]) {
-  const grouped = installments.reduce((acc, installment) => {
-    const month = installment.scheduledDate.substring(0, 7); // YYYY-MM format
-    
-    if (!acc[month]) {
-      acc[month] = {
-        month,
-        totalAmount: 0,
-        installments: []
-      };
-    }
-    
-    acc[month].installments.push(installment);
-    acc[month].totalAmount += installment.amount;
-    
-    return acc;
-  }, {} as Record<string, { month: string, totalAmount: number, installments: CommissionInstallment[] }>);
+export function formatScheduledDate(dateString: string): string {
+  if (!dateString) return 'N/A';
   
-  // Convert to array and sort by month
-  return Object.values(grouped).sort((a, b) => a.month.localeCompare(b.month));
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  });
+}
+
+/**
+ * Get appropriate CSS class for payment status
+ */
+export function getStatusClass(status: string): string {
+  switch (status) {
+    case 'Pending':
+      return 'text-yellow-600 bg-yellow-50 border-yellow-200';
+    case 'Processing':
+      return 'text-blue-600 bg-blue-50 border-blue-200';
+    case 'Paid':
+      return 'text-green-600 bg-green-50 border-green-200';
+    case 'Cancelled':
+      return 'text-red-600 bg-red-50 border-red-200';
+    default:
+      return 'text-gray-600 bg-gray-50 border-gray-200';
+  }
+}
+
+/**
+ * Determine if a payment is overdue
+ */
+export function isPaymentOverdue(scheduledDate: string): boolean {
+  if (!scheduledDate) return false;
+  
+  const today = new Date();
+  const paymentDate = new Date(scheduledDate);
+  
+  return paymentDate < today;
 }
