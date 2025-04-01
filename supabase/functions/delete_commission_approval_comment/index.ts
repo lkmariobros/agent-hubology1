@@ -16,20 +16,51 @@ serve(async (req) => {
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
     const { p_comment_id } = await req.json()
     
-    // Use the RPC function
-    const { data, error } = await supabase.rpc('delete_commission_approval_comment', {
-      p_comment_id
-    })
+    // Get user from auth context
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser()
+    
+    if (userError) throw userError
+    if (!user) throw new Error('Unauthorized')
+    
+    // Check if the comment belongs to the user or user is admin
+    const { data: comment, error: commentError } = await supabase
+      .from('approval_comments')
+      .select('created_by')
+      .eq('id', p_comment_id)
+      .single()
+    
+    if (commentError) throw commentError
+    if (!comment) throw new Error('Comment not found')
+    
+    // Only allow deletion if the user created the comment or is an admin
+    const { data: isAdmin } = await supabase.rpc('is_admin')
+    if (comment.created_by !== user.id && !isAdmin) {
+      throw new Error('You can only delete your own comments')
+    }
+    
+    // Delete the comment
+    const { error } = await supabase
+      .from('approval_comments')
+      .delete()
+      .eq('id', p_comment_id)
     
     if (error) throw error
     
     return new Response(
-      JSON.stringify(data),
+      JSON.stringify({
+        success: true,
+        message: 'Comment deleted successfully'
+      }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   } catch (error) {
+    console.error('Error deleting comment:', error)
+    
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ success: false, error: error.message }),
       { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }

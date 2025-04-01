@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
@@ -18,7 +17,7 @@ export interface ApprovalHistoryItem {
 export interface ApprovalComment {
   id: string;
   approval_id: string;
-  user_id: string;
+  created_by: string;
   user_name?: string;
   comment: string;
   created_at: string;

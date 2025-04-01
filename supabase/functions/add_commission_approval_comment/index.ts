@@ -14,23 +14,42 @@ serve(async (req) => {
 
   try {
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-    const { p_approval_id, p_content } = await req.json()
+    const { p_approval_id, p_comment } = await req.json()
     
-    // Use the RPC function
-    const { data, error } = await supabase.rpc('add_commission_approval_comment', {
-      p_approval_id,
-      p_content
-    })
+    // Get user from auth context
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser()
+    
+    if (userError) throw userError
+    if (!user) throw new Error('Unauthorized')
+    
+    // Insert the comment
+    const { data, error } = await supabase
+      .from('approval_comments')
+      .insert({
+        approval_id: p_approval_id,
+        created_by: user.id,
+        comment_text: p_comment
+      })
+      .select()
     
     if (error) throw error
     
     return new Response(
-      JSON.stringify(data),
+      JSON.stringify({
+        success: true,
+        comment_id: data[0].id,
+        message: 'Comment added successfully'
+      }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   } catch (error) {
+    console.error('Error adding comment:', error)
+    
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ success: false, error: error.message }),
       { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
