@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
@@ -11,14 +10,15 @@ export interface ApprovalHistoryItem {
   changed_by: string;
   changed_by_name?: string;
   created_at: string;
+  notes?: string; // Add notes property
 }
 
 export interface ApprovalComment {
   id: string;
   approval_id: string;
-  comment: string;
-  user_id: string;
-  user_name?: string;
+  comment_text: string; // This is the actual comment content
+  created_by: string;
+  created_by_name?: string; // Add this property
   created_at: string;
 }
 
@@ -47,6 +47,57 @@ export interface ApprovalCountResult {
 const useCommissionApproval = () => {
   const queryClient = useQueryClient();
 
+  // Get approval status counts
+  const useApprovalStatusCounts = () => {
+    return useQuery({
+      queryKey: ['approval-status-counts'],
+      queryFn: async () => {
+        try {
+          // Get counts for each status
+          const statusCounts: ApprovalCountResult = {
+            pending: 0,
+            underReview: 0,
+            approved: 0,
+            readyForPayment: 0,
+            paid: 0,
+            rejected: 0
+          };
+          
+          // Fetch all statuses in one go - fix the groupBy issue
+          const { data, error } = await supabase
+            .from('commission_approvals')
+            .select('status, count')
+            .select('status')
+            .eq('status', 'Pending')
+            .select('count(*)', { count: 'exact', alias: 'pending' });
+          
+          if (error) throw error;
+          
+          // Get counts individually since groupBy isn't available
+          const pendingCount = await supabase.from('commission_approvals').select('*', { count: 'exact' }).eq('status', 'Pending');
+          const underReviewCount = await supabase.from('commission_approvals').select('*', { count: 'exact' }).eq('status', 'Under Review');
+          const approvedCount = await supabase.from('commission_approvals').select('*', { count: 'exact' }).eq('status', 'Approved');
+          const readyForPaymentCount = await supabase.from('commission_approvals').select('*', { count: 'exact' }).eq('status', 'Ready for Payment');
+          const paidCount = await supabase.from('commission_approvals').select('*', { count: 'exact' }).eq('status', 'Paid');
+          const rejectedCount = await supabase.from('commission_approvals').select('*', { count: 'exact' }).eq('status', 'Rejected');
+          
+          statusCounts.pending = pendingCount.count || 0;
+          statusCounts.underReview = underReviewCount.count || 0;
+          statusCounts.approved = approvedCount.count || 0;
+          statusCounts.readyForPayment = readyForPaymentCount.count || 0;
+          statusCounts.paid = paidCount.count || 0;
+          statusCounts.rejected = rejectedCount.count || 0;
+          
+          return statusCounts;
+        } catch (error) {
+          console.error('Error fetching approval status counts:', error);
+          toast.error('Failed to load approval status counts');
+          throw error;
+        }
+      }
+    });
+  };
+  
   // Get a list of commission approvals with filtering
   const useCommissionApprovals = (status?: string, includeCount = false, sort = 'created_at', page = 1, pageSize = 10) => {
     return useQuery({
@@ -55,21 +106,33 @@ const useCommissionApproval = () => {
         try {
           // Build the query
           let query = supabase.from('commission_approvals')
-            .select(includeCount ? 'count, *' : '*')
+            .select('*')
             .order(sort, { ascending: false });
-          
+        
           if (status && status !== 'All') {
             query = query.eq('status', status);
           }
-          
+        
           // Add pagination
           query = query.range((page - 1) * pageSize, (page * pageSize) - 1);
-          
-          const { data, error, count } = await query;
-          
+        
+          const { data, error } = await query;
+        
           if (error) throw error;
-          
-          return includeCount ? { approvals: data || [], totalCount: count || 0 } : data || [];
+        
+          // Get total count in a separate query if needed
+          let count = 0;
+          if (includeCount) {
+            const countQuery = supabase.from('commission_approvals').select('*', { count: 'exact' });
+            if (status && status !== 'All') {
+              countQuery.eq('status', status);
+            }
+            const { count: totalCount, error: countError } = await countQuery;
+            if (countError) throw countError;
+            count = totalCount || 0;
+          }
+        
+          return includeCount ? { approvals: data || [], totalCount: count } : data || [];
         } catch (error) {
           console.error('Error fetching commission approvals:', error);
           toast.error('Failed to load commission approvals');
@@ -133,63 +196,7 @@ const useCommissionApproval = () => {
     });
   };
 
-  // Get approval status counts
-  const useApprovalStatusCounts = () => {
-    return useQuery({
-      queryKey: ['approval-status-counts'],
-      queryFn: async () => {
-        try {
-          // Get counts for each status
-          const statusCounts: ApprovalCountResult = {
-            pending: 0,
-            underReview: 0,
-            approved: 0,
-            readyForPayment: 0,
-            paid: 0,
-            rejected: 0
-          };
-          
-          // Fetch all statuses in one go
-          const { data, error } = await supabase
-            .from('commission_approvals')
-            .select('status, count')
-            .groupBy('status');
-          
-          if (error) throw error;
-          
-          // Map the results to the status counts
-          (data || []).forEach((item) => {
-            switch (item.status) {
-              case 'Pending':
-                statusCounts.pending = item.count;
-                break;
-              case 'Under Review':
-                statusCounts.underReview = item.count;
-                break;
-              case 'Approved':
-                statusCounts.approved = item.count;
-                break;
-              case 'Ready for Payment':
-                statusCounts.readyForPayment = item.count;
-                break;
-              case 'Paid':
-                statusCounts.paid = item.count;
-                break;
-              case 'Rejected':
-                statusCounts.rejected = item.count;
-                break;
-            }
-          });
-          
-          return statusCounts;
-        } catch (error) {
-          console.error('Error fetching approval status counts:', error);
-          toast.error('Failed to load approval status counts');
-          throw error;
-        }
-      }
-    });
-  };
+  
   
   // Get total pending commission amount
   const usePendingCommissionTotal = () => {

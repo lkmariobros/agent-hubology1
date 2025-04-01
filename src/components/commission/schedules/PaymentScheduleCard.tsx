@@ -1,16 +1,18 @@
+
 import React from 'react';
-// Update the import
 import { useAuth } from '@/context/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency } from '@/lib/utils';
 
+// Update the interface to include schedule property
 interface PaymentScheduleCardProps {
-  date: string;
-  amount: number;
-  status: 'pending' | 'paid' | 'failed';
+  date?: string;
+  amount?: number;
+  status?: 'pending' | 'paid' | 'failed';
+  schedule?: any; // Add schedule property
 }
 
-const PaymentScheduleCard: React.FC<PaymentScheduleCardProps> = ({ date, amount, status }) => {
+const PaymentScheduleCard: React.FC<PaymentScheduleCardProps> = ({ date, amount, status, schedule }) => {
   const { user } = useAuth();
   
   const statusColors = {
@@ -18,6 +20,11 @@ const PaymentScheduleCard: React.FC<PaymentScheduleCardProps> = ({ date, amount,
     paid: 'text-green-500',
     failed: 'text-red-500',
   };
+  
+  // Use schedule properties if provided, otherwise use direct props
+  const displayDate = schedule ? schedule.date : date;
+  const displayAmount = schedule ? schedule.amount : amount;
+  const displayStatus = schedule ? schedule.status.toLowerCase() : status;
   
   return (
     <Card>
@@ -27,13 +34,13 @@ const PaymentScheduleCard: React.FC<PaymentScheduleCardProps> = ({ date, amount,
       <CardContent>
         <div className="flex flex-col space-y-2">
           <p className="text-sm text-muted-foreground">
-            Date: {new Date(date).toLocaleDateString()}
+            Date: {new Date(displayDate).toLocaleDateString()}
           </p>
           <p className="text-lg font-semibold">
-            Amount: {formatCurrency(amount)}
+            Amount: {formatCurrency(displayAmount)}
           </p>
-          <p className={`text-sm ${statusColors[status]}`}>
-            Status: {status.toUpperCase()}
+          <p className={`text-sm ${statusColors[displayStatus]}`}>
+            Status: {displayStatus?.toUpperCase()}
           </p>
         </div>
       </CardContent>

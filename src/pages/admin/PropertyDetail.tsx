@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
@@ -31,7 +32,13 @@ const PropertyDetail = () => {
   const [isEditing, setIsEditing] = useState(false);
   
   const { data: property, isLoading, error } = useProperty(id);
-  const { data: transactions } = useTransactions({ propertyId: id });
+  
+  // Fix the useTransactions call
+  const transactionsHooks = useTransactions();
+  const { data: transactionsData } = transactionsHooks.useTransactionsQuery({ 
+    propertyId: id 
+  });
+  const transactions = transactionsData?.transactions || [];
   
   useEffect(() => {
     // Set page title
@@ -97,22 +104,22 @@ const PropertyDetail = () => {
               Back to Properties
             </Button>
             
-            <Badge variant={property.status === 'active' ? 'default' : 'secondary'}>
-              {property.status === 'active' ? 'Active' : 'Inactive'}
+            <Badge variant={property?.status === 'active' ? 'default' : 'secondary'}>
+              {property?.status === 'active' ? 'Active' : 'Inactive'}
             </Badge>
             
             <Badge variant="outline">
-              {property.type === 'residential' ? 'Residential' : 'Commercial'}
+              {property?.type === 'residential' ? 'Residential' : 'Commercial'}
             </Badge>
           </div>
           
-          <h1 className="text-2xl font-bold tracking-tight">{property.address}</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{property?.address}</h1>
           <p className="text-muted-foreground">
-            {property.city}, {property.state} {property.zip}
+            {property?.city}, {property?.state} {property?.zip}
           </p>
         </div>
         
-        {isAdmin && !isEditing && (
+        {isAdmin && !isEditing && property && (
           <Button onClick={handleEditToggle}>
             <Edit className="h-4 w-4 mr-2" />
             Edit Property

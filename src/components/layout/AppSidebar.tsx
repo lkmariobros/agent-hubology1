@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useAuth } from '@/context/AuthContext';
 
@@ -14,7 +15,8 @@ import { NavSystem } from './sidebar/NavSystem';
 import { AdminProfile } from './sidebar/AdminProfile';
 import { PortalSwitcher } from './PortalSwitcher';
 
-export function AdminSidebar() {
+// Rename the component to AppSidebar and export it
+export function AppSidebar() {
   const { isAdmin } = useAuth();
   
   if (!isAdmin) {
@@ -41,3 +43,5 @@ export function AdminSidebar() {
   );
 }
 
+// Add this export for backward compatibility
+export { AppSidebar as AdminSidebar };

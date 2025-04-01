@@ -1,105 +1,93 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { format, subMonths } from 'date-fns';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
-import { Skeleton } from '@/components/ui/skeleton';
 
-interface ForecastData {
-  month: string;
-  forecastedCommission: number;
-}
+import React, { useState, useMemo } from 'react';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from 'recharts';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { formatCurrency } from '@/lib/utils';
 
 interface CommissionForecastChartProps {
-  months?: number;
-  userId?: string;
+  historicalData: { month: string; amount: number }[];
+  projectedData: { month: string; amount: number }[];
 }
 
-const CommissionForecastChart: React.FC<CommissionForecastChartProps> = ({ 
-  months = 6,
-  userId
+const CommissionForecastChart: React.FC<CommissionForecastChartProps> = ({
+  historicalData,
+  projectedData,
 }) => {
-  const [forecastData, setForecastData] = useState<ForecastData[]>([]);
-  
-  const useForecast = (userId: string | undefined) => {
-    return useQuery({
-      queryKey: ['commission-forecast', userId, months],
-      queryFn: async () => {
-        if (!userId) return [];
-        
-        const endDate = new Date();
-        const startDate = subMonths(endDate, months - 1);
-        
-        const { data, error } = await supabase.functions.invoke('commission-forecast', {
-          body: {
-            user_id: userId,
-            start_date: format(startDate, 'yyyy-MM-dd'),
-            end_date: format(endDate, 'yyyy-MM-dd')
-          }
+  // Combine historical and projected data
+  const combinedData = useMemo(() => {
+    const combined = [...historicalData];
+    
+    // Add projected data with a different key
+    projectedData.forEach((item) => {
+      const existingIndex = combined.findIndex((c) => c.month === item.month);
+      if (existingIndex >= 0) {
+        combined[existingIndex].projected = item.amount;
+      } else {
+        combined.push({
+          month: item.month,
+          projected: item.amount,
         });
-        
-        if (error) {
-          console.error('Error fetching commission forecast:', error);
-          return [];
-        }
-        
-        return data as ForecastData[];
-      },
-      enabled: !!userId,
+      }
     });
+    
+    return combined;
+  }, [historicalData, projectedData]);
+  
+  // Format for tooltip
+  const formatTooltip = (value: number) => {
+    return formatCurrency(value);
   };
   
-  const { data: forecastData, isLoading } = useForecast(userId);
-
-  useEffect(() => {
-    if (forecastData) {
-      setForecastData(forecastData);
-    }
-  }, [forecastData]);
-
-  const formatTick = (value: string) => {
-    return format(new Date(value), 'MMM');
-  };
-
   return (
-    <Card>
+    <Card className="w-full">
       <CardHeader>
         <CardTitle>Commission Forecast</CardTitle>
       </CardHeader>
-      <CardContent className="pl-2">
-        {isLoading ? (
-          <Skeleton className="w-full h-[300px]" />
-        ) : (
-          <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={forecastData}>
-              <defs>
-                <linearGradient id="commissionGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8}/>
-                  <stop offset="95%" stopColor="#8884d8" stopOpacity={0}/>
-                </linearGradient>
-              </defs>
-              <XAxis 
-                dataKey="month" 
-                tickFormatter={formatTick}
-                stroke="#8884d8"
-              />
-              <YAxis 
-                stroke="#8884d8"
-                tickFormatter={(value) => `$${value}`}
-              />
-              <CartesianGrid strokeDasharray="3 3" />
-              <Tooltip formatter={(value) => [`$${value}`, 'Forecasted Commission']} />
-              <Area 
-                type="monotone" 
-                dataKey="forecastedCommission" 
-                stroke="#8884d8" 
-                fillOpacity={1} 
-                fill="url(#commissionGradient)" 
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        )}
+      <CardContent>
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart
+            data={combinedData}
+            margin={{
+              top: 5,
+              right: 30,
+              left: 20,
+              bottom: 5,
+            }}
+          >
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="month" />
+            <YAxis 
+              tickFormatter={formatTooltip}
+            />
+            <Tooltip formatter={(value: number) => formatCurrency(value)} />
+            <Legend />
+            <Line
+              type="monotone"
+              dataKey="amount"
+              stroke="#8884d8"
+              name="Actual"
+              activeDot={{ r: 8 }}
+              connectNulls
+            />
+            <Line
+              type="monotone"
+              dataKey="projected"
+              stroke="#82ca9d"
+              name="Projected"
+              strokeDasharray="5 5"
+              connectNulls
+            />
+          </LineChart>
+        </ResponsiveContainer>
       </CardContent>
     </Card>
   );
