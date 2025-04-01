@@ -3,6 +3,7 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import ApprovalDashboard from '@/components/admin/commission/ApprovalDashboard';
 import ApprovalDetail from '@/components/admin/commission/ApprovalDetail';
+import { Card, CardContent } from '@/components/ui/card';
 
 const CommissionApproval = () => {
   const { id } = useParams<{ id: string }>();

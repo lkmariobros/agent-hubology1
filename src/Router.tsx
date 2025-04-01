@@ -55,6 +55,9 @@ const router = createBrowserRouter([
           { path: 'commission/forecast', element: <CommissionForecastPage /> },
           { path: 'commissions', element: <CommissionApproval /> },
           { path: 'commissions/:id', element: <CommissionApproval /> },
+          // Add consistent routes for commissions with both plural and singular forms
+          { path: 'commission', element: <CommissionApproval /> },
+          { path: 'commission/:id', element: <CommissionApproval /> },
           { path: 'roles', element: <Roles /> },
         ],
       },
