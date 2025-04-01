@@ -18,7 +18,8 @@ const CommissionCalculation: React.FC = () => {
   const {
     state,
     updateFormData,
-    calculateCommission
+    calculateCommission,
+    selectPaymentSchedule
   } = useTransactionForm();
   
   const {
@@ -79,7 +80,7 @@ const CommissionCalculation: React.FC = () => {
   const agencyPortionPercentage = 100 - agentPortionPercentage;
   
   const handlePaymentScheduleChange = (scheduleId: string) => {
-    updateFormData({ paymentScheduleId: scheduleId });
+    selectPaymentSchedule(scheduleId);
   };
   
   return (

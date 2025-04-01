@@ -62,10 +62,10 @@ export function NavSystem() {
           <SidebarMenuItem>
             <SidebarMenuButton 
               asChild 
-              isActive={location.pathname.includes('/admin/commission-tiers')}
+              isActive={location.pathname.includes('/admin/commission/tiers')}
               tooltip="Commission Tiers"
             >
-              <NavLink to="/admin/commission-tiers">
+              <NavLink to="/admin/commission/tiers">
                 <ClipboardList className="h-4 w-4" />
                 <span>Commission Tiers</span>
               </NavLink>
