@@ -14,10 +14,28 @@ const ForecastSection: React.FC<ForecastSectionProps> = ({
 }) => {
   const { user } = useAuth();
   const userId = agentId || user?.id;
+  
+  // Sample data - in a real app, this would come from an API
+  const historicalData = [
+    { month: 'Jan', amount: 5000 },
+    { month: 'Feb', amount: 7200 },
+    { month: 'Mar', amount: 6800 },
+    { month: 'Apr', amount: 9500 }
+  ];
+  
+  const projectedData = [
+    { month: 'Apr', amount: 9500 },
+    { month: 'May', amount: 11000 },
+    { month: 'Jun', amount: 12500 },
+    { month: 'Jul', amount: 14000 }
+  ];
 
   return (
     <div className="space-y-6">
-      <CommissionForecastChart months={months} userId={userId} />
+      <CommissionForecastChart 
+        historicalData={historicalData}
+        projectedData={projectedData}
+      />
     </div>
   );
 };

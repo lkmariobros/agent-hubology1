@@ -35,7 +35,7 @@ const ApprovalHistory: React.FC<ApprovalHistoryProps> = ({ history }) => {
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <h3 className="font-medium">
-                    Status changed from <span className="font-semibold">{item.old_status}</span> to <span className="font-semibold">{item.new_status}</span>
+                    Status changed from <span className="font-semibold">{item.old_status || item.previous_status}</span> to <span className="font-semibold">{item.new_status}</span>
                   </h3>
                 </div>
                 <p className="text-sm text-muted-foreground">

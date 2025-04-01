@@ -32,13 +32,14 @@ const ApprovalDashboard = () => {
   const { data: approvalsData, isLoading: isLoadingApprovals } = commissionApprovalHooks.useCommissionApprovals(
     activeTab !== 'All' ? activeTab : undefined,
     true,
-    undefined,
+    'created_at',
     page,
     pageSize
   );
   
-  const approvals = approvalsData?.approvals || [];
-  const totalCount = approvalsData?.totalCount || 0;
+  // Handle possible response shapes
+  const approvals = Array.isArray(approvalsData) ? approvalsData : approvalsData?.approvals || [];
+  const totalCount = Array.isArray(approvalsData) ? approvals.length : approvalsData?.totalCount || 0;
   const totalPages = Math.ceil(totalCount / pageSize);
   
   // Handle tab change

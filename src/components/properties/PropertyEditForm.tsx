@@ -1,21 +1,27 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
+import { Property } from '@/hooks/useProperty';
 
 interface PropertyEditFormProps {
-  property: any;
+  property: Property;
   onComplete: () => void;
   onCancel: () => void;
 }
 
-const PropertyEditForm: React.FC<PropertyEditFormProps> = ({ property, onComplete, onCancel }) => {
+const PropertyEditForm: React.FC<PropertyEditFormProps> = ({ 
+  property, 
+  onComplete, 
+  onCancel 
+}) => {
   return (
-    <div>
-      <p>Edit Form for Property: {property.id}</p>
-      <p>This is a stub component that will allow editing of property details.</p>
-      <div className="flex gap-2 mt-4">
-        <Button onClick={onComplete}>Save</Button>
+    <div className="space-y-4">
+      <p>Property Edit Form (Stub Component)</p>
+      <p>This is where you would edit the property with ID: {property.id}</p>
+      
+      <div className="flex justify-end space-x-2 pt-4">
         <Button variant="outline" onClick={onCancel}>Cancel</Button>
+        <Button onClick={onComplete}>Save Changes</Button>
       </div>
     </div>
   );

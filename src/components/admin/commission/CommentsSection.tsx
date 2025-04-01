@@ -112,7 +112,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ approvalId }) => {
                         <h3 className="font-medium">{item.user_name || 'Unknown User'}</h3>
                         <span className="text-xs text-muted-foreground">{formatDate(item.created_at)}</span>
                       </div>
-                      <p className="mt-2">{item.comment}</p>
+                      <p className="mt-2">{item.comment_text}</p>
                     </div>
                   </div>
                   

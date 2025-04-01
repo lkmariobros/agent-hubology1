@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import {
   LineChart,
   Line,
@@ -30,10 +30,15 @@ const CommissionForecastChart: React.FC<CommissionForecastChartProps> = ({
     projectedData.forEach((item) => {
       const existingIndex = combined.findIndex((c) => c.month === item.month);
       if (existingIndex >= 0) {
-        combined[existingIndex].projected = item.amount;
+        // Add projected field to existing data point
+        combined[existingIndex] = {
+          ...combined[existingIndex],
+          projected: item.amount
+        };
       } else {
         combined.push({
           month: item.month,
+          amount: undefined, // Use undefined for months without historical data
           projected: item.amount,
         });
       }
@@ -68,7 +73,7 @@ const CommissionForecastChart: React.FC<CommissionForecastChartProps> = ({
             <YAxis 
               tickFormatter={formatTooltip}
             />
-            <Tooltip formatter={(value: number) => formatCurrency(value)} />
+            <Tooltip formatter={formatTooltip} />
             <Legend />
             <Line
               type="monotone"

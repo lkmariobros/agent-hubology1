@@ -10,16 +10,18 @@ export interface ApprovalHistoryItem {
   changed_by: string;
   changed_by_name?: string;
   created_at: string;
-  notes?: string; // Add notes property
+  notes?: string;
+  previous_status: string; // Add this field
 }
 
 export interface ApprovalComment {
   id: string;
   approval_id: string;
-  comment_text: string; // This is the actual comment content
-  created_by: string;
-  created_by_name?: string; // Add this property
+  comment_text: string;
+  user_id: string; // Add this field
+  user_name?: string; // Add this field
   created_at: string;
+  comment: string; // Add this alias field for backward compatibility
 }
 
 export interface CommissionApproval {
@@ -67,9 +69,7 @@ const useCommissionApproval = () => {
           const { data, error } = await supabase
             .from('commission_approvals')
             .select('status, count')
-            .select('status')
-            .eq('status', 'Pending')
-            .select('count(*)', { count: 'exact', alias: 'pending' });
+            .select('status');
           
           if (error) throw error;
           
@@ -254,7 +254,13 @@ const useCommissionApproval = () => {
           
           if (error) throw error;
           
-          return data as ApprovalComment[];
+          // Map data to include comment alias for backward compatibility
+          return (data || []).map(comment => ({
+            ...comment,
+            comment: comment.comment_text,
+            user_name: comment.created_by_name || 'Unknown User',
+            user_id: comment.created_by
+          })) as ApprovalComment[];
         } catch (error) {
           console.error('Error fetching approval comments:', error);
           toast.error('Failed to load comments');
