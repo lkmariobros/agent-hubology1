@@ -46,11 +46,19 @@ export interface CommissionInstallment {
   amount: number;
   percentage: number;
   scheduledDate: string;
-  status: 'Pending' | 'Processing' | 'Paid' | 'Cancelled';
+  status: 'Pending' | 'Processing' | 'Paid' | 'Cancelled' | 'Projected';
   actualPaymentDate?: string;
   notes?: string;
   createdAt?: string;
   updatedAt?: string;
+  // These are the snake_case versions for compatibility
+  transaction_id?: string;
+  installment_number?: number;
+  agent_id?: string;
+  scheduled_date?: string;
+  actual_payment_date?: string;
+  created_at?: string;
+  updated_at?: string;
   // Include transaction data in the response
   transaction?: {
     property?: {

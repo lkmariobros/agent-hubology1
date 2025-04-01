@@ -165,20 +165,20 @@ const CommissionForecast: React.FC = () => {
                       {monthData.installments.map((installment) => (
                         <tr key={installment.id} className="border-b hover:bg-muted/50">
                           <td className="px-4 py-2">
-                            {new Date(installment.scheduled_date).toLocaleDateString()}
+                            {new Date(installment.scheduledDate || installment.scheduled_date).toLocaleDateString()}
                           </td>
                           <td className="px-4 py-2">
-                            {installment.status === 'Projected' ? 'Forecast' : 'Confirmed'}
+                            {installment.status === "Projected" ? 'Forecast' : 'Confirmed'}
                           </td>
                           <td className="px-4 py-2">
-                            {installment.installment_number}
+                            {installment.installmentNumber || installment.installment_number}
                           </td>
                           <td className="px-4 py-2 text-right font-medium">
                             {formatCurrency(installment.amount)}
                           </td>
                           <td className="px-4 py-2">
                             <Badge 
-                              variant={installment.status === 'Projected' ? 'secondary' : 'default'}
+                              variant={installment.status === "Projected" ? 'secondary' : 'default'}
                             >
                               {installment.status}
                             </Badge>

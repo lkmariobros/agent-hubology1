@@ -2,9 +2,9 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 
-const AdminLayout = () => {
+const AppLayout: React.FC = () => {
   return (
-    <div className="admin-layout">
+    <div className="app-layout">
       <main>
         <Outlet />
       </main>
@@ -12,4 +12,4 @@ const AdminLayout = () => {
   );
 };
 
-export default AdminLayout;
+export default AppLayout;

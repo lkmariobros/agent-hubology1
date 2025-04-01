@@ -115,12 +115,28 @@ export function useForecastCalculation(agentId?: string) {
       if (projectedError) throw projectedError;
       
       // Combine and group by month
-      const allInstallments = [...(actualInstallments || []), ...(projectedInstallments || [])];
+      const allInstallments = [
+        ...(actualInstallments || []).map(item => ({
+          ...item,
+          // Add camelCase versions of snake_case properties
+          scheduledDate: item.scheduled_date,
+          installmentNumber: item.installment_number,
+          actualPaymentDate: item.actual_payment_date
+        })), 
+        ...(projectedInstallments || []).map(item => ({
+          ...item,
+          // Add camelCase versions of snake_case properties
+          scheduledDate: item.scheduled_date,
+          installmentNumber: item.installment_number,
+          actualPaymentDate: item.actual_payment_date
+        }))
+      ];
+      
       const groupedByMonth: { [key: string]: CommissionForecast } = {};
       
       allInstallments.forEach(installment => {
         // Extract month from scheduled_date (YYYY-MM)
-        const dateObj = new Date(installment.scheduled_date);
+        const dateObj = new Date(installment.scheduled_date || installment.scheduledDate);
         const monthKey = dateObj.toLocaleString('default', { month: 'long', year: 'numeric' });
         
         if (!groupedByMonth[monthKey]) {
@@ -137,8 +153,8 @@ export function useForecastCalculation(agentId?: string) {
       
       // Convert to array and sort by date
       return Object.values(groupedByMonth).sort((a, b) => {
-        const dateA = new Date(a.installments[0].scheduled_date);
-        const dateB = new Date(b.installments[0].scheduled_date);
+        const dateA = new Date(a.installments[0].scheduledDate || a.installments[0].scheduled_date);
+        const dateB = new Date(b.installments[0].scheduledDate || b.installments[0].scheduled_date);
         return dateA.getTime() - dateB.getTime();
       });
     },
