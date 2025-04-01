@@ -70,7 +70,7 @@ export function NavAdmin() {
           <SidebarMenuItem>
             <SidebarMenuButton 
               asChild 
-              isActive={location.pathname.includes('/admin/commission') || location.pathname.includes('/admin/commissions')}
+              isActive={location.pathname.includes('/admin/commissions')}
               tooltip="Commission"
             >
               <NavLink to="/admin/commissions">
