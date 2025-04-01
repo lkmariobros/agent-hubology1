@@ -23,7 +23,7 @@
     --muted: 220 13% 18%; /* #232731 */
     --muted-foreground: 217 10% 65%; /* #a1a1aa */
     
-    --accent: 264 70% 50%; /* Purple accent - #7e22ce */
+    --accent: 264 70% 50%; /* Keep original accent */
     --accent-foreground: 210 5% 98%; /* #f8f9fa */
     
     --destructive: 0 62.8% 30.6%; /* Keep original destructive */
@@ -35,9 +35,9 @@
     
     --radius: 0.5rem;
 
-    --sidebar-background: 222 21% 16%; /* #1A1F2C */
+    --sidebar-background: 215 15% 15%; /* #1F232D */
     --sidebar-foreground: 210 5% 98%; /* #f8f9fa */
-    --sidebar-primary: 264 70% 50%; /* Purple sidebar primary */
+    --sidebar-primary: 264 70% 50%; /* Keep original sidebar primary */
     --sidebar-primary-foreground: 0 0% 100%; /* Keep white */
     --sidebar-accent: 220 13% 18%; /* #232731 */
     --sidebar-accent-foreground: 210 5% 98%; /* #f8f9fa */
@@ -50,6 +50,7 @@
     height: 100%;
     margin: 0;
     padding: 0;
+    /* Remove overflow: hidden to allow scrolling */
   }
   
   * {
@@ -162,21 +163,4 @@
   .content-container {
     @apply min-h-[calc(100vh-6rem-3.5rem)] rounded-xl;
   }
-}
-
-/* Custom styles to ensure sidebar and main content have the correct colors */
-.AppSidebar {
-  background-color: #1A1F2C !important;
-  border-right: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.main-content, 
-.content-area, 
-.dashboard-container {
-  background-color: #121620 !important;
-}
-
-/* Ensure active nav links have the purple background */
-.NavLink-active {
-  background-color: #7e22ce !important;
 }

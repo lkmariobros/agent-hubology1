@@ -8,7 +8,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Building, Shield, ChevronsUpDown } from 'lucide-react';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 import { UserRole } from '@/types/auth';
 import { toast } from 'sonner';
 
@@ -58,12 +58,17 @@ export function PortalSwitcher({ showLabel = true, className = "" }: PortalSwitc
     // First switch the role
     switchRole(role);
     
-    // Navigate using window.location instead of router components
-    if (role === 'admin') {
-      window.location.href = '/admin';
-    } else {
-      window.location.href = '/dashboard';
-    }
+    // Add a slight delay to allow the role switch to complete
+    setTimeout(() => {
+      // Hard redirect to the appropriate portal
+      if (role === 'admin') {
+        console.log('PortalSwitcher: Hard reload to /admin after role switch');
+        window.location.href = '/admin';
+      } else {
+        console.log('PortalSwitcher: Hard reload to /dashboard after role switch');
+        window.location.href = '/dashboard';
+      }
+    }, 100);
   };
 
   return (

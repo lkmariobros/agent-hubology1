@@ -1,224 +1,263 @@
-
-import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
-import { ArrowLeft, CheckCircle2 } from 'lucide-react';
-import { Card } from '@/components/ui/card';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useProperty } from '@/hooks/useProperties';
+import useAuth from '@/hooks/useAuth';
+import { toast } from 'sonner';
+import { getMockDataMode } from '@/config';
+import { normalizeUuid, isValidUuid, createMockUuid } from '@/utils/uuidUtils';
+import { dbLogger } from '@/utils/dbLogger';
+import PropertyHeader from '@/components/property/PropertyHeader';
+import PropertySummaryCard from '@/components/property/PropertySummaryCard';
+import PropertyTabsSection from '@/components/property/PropertyTabsSection';
+import PropertyErrorState from '@/components/property/PropertyErrorState';
+import PropertyLoadingSkeleton from '@/components/property/PropertyLoadingSkeleton';
+import { TeamNote } from '@/components/property/TeamNotes';
+import LoadingIndicator from '@/components/ui/loading-indicator';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card } from '@/components/ui/card';
+
+// Mock data for team notes
+const mockNotes: TeamNote[] = [{
+  id: 1,
+  author: {
+    name: "John Smith",
+    initials: "JS",
+    avatarColor: "bg-blue-500"
+  },
+  date: "2 hours ago",
+  content: "Just showed this property to the Johnsons. They're very interested and might make an offer soon."
+}, {
+  id: 2,
+  author: {
+    name: "Sarah Lee",
+    initials: "SL",
+    avatarColor: "bg-green-500"
+  },
+  date: "Yesterday",
+  content: "Owner mentioned they might be willing to negotiate on the price. Starting point is firm though."
+}];
 
 const PropertyDetail = () => {
+  console.log('PropertyDetail: Component rendering');
   const { id } = useParams<{ id: string }>();
+  const { isAdmin, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
+  const normalizedId = id ? normalizeUuid(id) : null;
+
+  console.log('PropertyDetail: ID param =', id, 'normalized =', normalizedId);
+  console.log('PropertyDetail: Auth state =', { isAdmin, authLoading });
+
+  // Check whether to use mock data based on config and localStorage
+  const useMockData = getMockDataMode();
+  console.log('PropertyDetail: Using mock data =', useMockData);
+  
+  // Only enable the query if we're not using mock data and we have a valid UUID
+  const isValidPropertyId = normalizedId ? isValidUuid(normalizedId) : false;
+  
+  const { data: propertyResponse, isLoading, error, refetch } = useProperty(normalizedId || '', {
+    enabled: !useMockData && isValidPropertyId && !!normalizedId
+  });
+  
+  const [notes, setNotes] = useState<TeamNote[]>(mockNotes);
   const [property, setProperty] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [isLocalLoading, setIsLocalLoading] = useState(true);
   
   useEffect(() => {
-    const fetchProperty = async () => {
-      setLoading(true);
-      setError(null);
-      
-      try {
-        // Simulate fetching property data from an API
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        const mockProperty = {
-          id: id,
-          name: 'HHEHEHEH',
-          address: 'EF',
-          city: 'EFSFSE',
-          state: 'FSEF',
-          size: 'sqft',
-          status: 'Under Offer',
-          type: 'Commercial',
-          price: '$6,312',
-          description: 'Manage all details for this commercial.',
-        };
-        
-        setProperty(mockProperty);
-      } catch (e: any) {
-        setError(e.message || 'Failed to load property');
-      } finally {
-        setLoading(false);
-      }
-    };
+    console.log('PropertyDetail: useEffect running with propertyResponse =', propertyResponse);
     
-    fetchProperty();
-  }, [id]);
-  
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <p className="text-lg text-gray-500">Loading property details...</p>
-      </div>
-    );
+    dbLogger.log(`Property detail loaded for ID: ${normalizedId}`, { id: normalizedId, useMockData }, {
+      table: 'enhanced_properties',
+      operation: 'select'
+    });
+
+    // In development mock data mode, use mock data
+    if (useMockData || (import.meta.env.MODE === 'development' && (!isValidPropertyId || !normalizedId))) {
+      dbLogger.log(`Using mock data for property ID: ${normalizedId || 'unknown'}`);
+      
+      // Generate a consistent mock ID based on the provided ID or create a new one
+      const mockId = normalizedId || createMockUuid(normalizedId);
+      
+      // Load mock data based on the ID
+      const mockProperty = {
+        id: mockId,
+        title: `Sample Property ${id || ''}`,
+        description: 'This is a sample property description used for development.',
+        price: 750000,
+        street: '123 Main Street',
+        city: 'San Francisco',
+        state: 'CA',
+        country: 'USA',
+        zip: '94102',
+        bedrooms: 3,
+        bathrooms: 2,
+        built_up_area: 1500,
+        land_area: 2000,
+        featured: true,
+        agent_notes: 'Owner is highly motivated to sell.',
+        created_at: new Date().toISOString(),
+        property_types: {
+          name: 'Residential'
+        },
+        transaction_types: {
+          name: 'For Sale'
+        },
+        property_statuses: {
+          name: 'Active'
+        },
+        property_images: [{
+          id: 1,
+          storage_path: 'https://picsum.photos/id/1067/800/600',
+          is_cover: true
+        }, {
+          id: 2,
+          storage_path: 'https://picsum.photos/id/1068/800/600'
+        }, {
+          id: 3,
+          storage_path: 'https://picsum.photos/id/1069/800/600'
+        }, {
+          id: 4,
+          storage_path: 'https://picsum.photos/id/1070/800/600'
+        }, {
+          id: 5,
+          storage_path: 'https://picsum.photos/id/1071/800/600'
+        }]
+      };
+      setProperty(mockProperty);
+      console.log('PropertyDetail: Mock property set', mockProperty);
+    } else if (propertyResponse?.data) {
+      dbLogger.success('Property data loaded from Supabase', propertyResponse.data, 'enhanced_properties', 'select', false);
+      setProperty(propertyResponse.data);
+      console.log('PropertyDetail: Real property data set', propertyResponse.data);
+    }
+
+    // Set local loading state to give the app time to process mock data
+    const timer = setTimeout(() => {
+      setIsLocalLoading(false);
+      console.log('PropertyDetail: Local loading complete');
+    }, 800);
+
+    return () => clearTimeout(timer);
+  }, [normalizedId, propertyResponse, useMockData, id, isValidPropertyId]);
+
+  const handleAddNote = (note: Omit<TeamNote, 'id' | 'date'>) => {
+    // In a real app, you would add the note to Supabase here
+    const newNote: TeamNote = {
+      id: notes.length + 1,
+      author: note.author,
+      content: note.content,
+      date: 'Just now'
+    };
+    setNotes([newNote, ...notes]);
+    toast.success('Note added successfully');
+  };
+
+  const handleEditProperty = () => {
+    navigate(`/properties/edit/${id}`);
+  };
+
+  const handleDeleteProperty = () => {
+    // Implement delete functionality
+    toast.error('Delete functionality not implemented yet');
+  };
+
+  const handleRetry = () => {
+    setIsLocalLoading(true);
+    
+    if (useMockData) {
+      // Re-trigger the mock data effect by forcing a state update
+      setProperty(null);
+      setTimeout(() => setIsLocalLoading(false), 800);
+    } else {
+      // Real data - use the refetch function
+      refetch().finally(() => {
+        setTimeout(() => setIsLocalLoading(false), 300);
+      });
+    }
+    
+    toast.info('Retrying...');
+  };
+
+  // If auth is still loading, show a minimal loading indicator
+  if (authLoading) {
+    console.log('PropertyDetail: Auth is still loading');
+    return <LoadingIndicator fullScreen size="lg" text="Verifying authentication..." />;
   }
-  
-  if (error) {
-    return (
-      <div className="p-4 bg-red-100 border border-red-200 rounded-md">
-        <p className="text-red-600">Error: {error}</p>
-      </div>
-    );
+
+  // Show skeleton during loading
+  if (isLoading || isLocalLoading) {
+    console.log('PropertyDetail: Showing loading skeleton');
+    return <PropertyLoadingSkeleton />;
   }
-  
+
+  // Handle error states more gracefully
+  if ((error || !propertyResponse?.data) && !useMockData && !import.meta.env.DEV) {
+    dbLogger.error('Error loading property', error?.message || 'Property not found', 'enhanced_properties', 'select');
+    console.error('Error loading property:', error?.message || 'Property not found', propertyResponse);
+    
+    return <PropertyErrorState 
+      title="Error Loading Property" 
+      message={error?.message || 'The property data could not be loaded. Please try again.'}
+      errorCode={error && 'code' in error ? (error as any).code : 404}
+      onRetry={handleRetry}
+    />;
+  }
+
+  // Handle missing property data
   if (!property) {
-    return (
-      <div className="p-4 bg-yellow-100 border border-yellow-200 rounded-md">
-        <p className="text-yellow-600">Property not found.</p>
-      </div>
-    );
+    console.log('PropertyDetail: Property is null, showing error state');
+    return <PropertyErrorState 
+      title="Property Not Found" 
+      message="The requested property could not be found or may have been removed."
+      errorCode={404}
+      onRetry={handleRetry}
+    />;
   }
-  
+
+  // Log successful property data
+  dbLogger.log('Property data processed', property, {
+    table: 'enhanced_properties',
+    operation: 'select',
+    showData: false
+  });
+
+  console.log('PropertyDetail: Rendering property', property);
+
+  // Extract property type from property_types relation
+  const propertyType = property.property_types?.name || 'Property';
+
+  // Create an array of image URLs from property_images
+  const propertyImages = property.property_images ? property.property_images.map((img: any) => img.storage_path).filter(Boolean) : [];
+
+  // Mock owner data - in a real app this would come from the API
+  const owner = {
+    name: "Michael Roberts",
+    email: "michael.roberts@example.com",
+    phone: "+1 (555) 123-4567",
+    company: "Roberts Real Estate Holdings"
+  };
+
   return (
-    <div className="bg-[#121620] text-white">
-      {/* Header with breadcrumb and property title */}
-      <div className="mb-6">
-        <div className="mb-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold mb-1">{property.name}</h1>
-              <p className="text-gray-400">{property.description}</p>
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline">
-                <span>Edit</span>
-              </Button>
-              <Button variant="destructive">
-                <span>Delete</span>
-              </Button>
-            </div>
-          </div>
-        </div>
-        
-        {/* Main content section */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Property image and thumbnails - Left side (2/3 width) */}
-          <div className="lg:col-span-2">
-            <div className="bg-[#1A1F2C] rounded-lg overflow-hidden">
-              <div className="aspect-[16/9] bg-[#1A1F2C] flex items-center justify-center border border-gray-700 rounded-lg overflow-hidden">
-                <p className="text-gray-400">No main image available</p>
-              </div>
-              <div className="grid grid-cols-4 gap-2 mt-2">
-                <div className="aspect-square bg-[#1A1F2C] border border-gray-700 rounded-md"></div>
-                <div className="aspect-square bg-[#1A1F2C] border border-gray-700 rounded-md"></div>
-                <div className="aspect-square bg-[#1A1F2C] border border-gray-700 rounded-md"></div>
-                <div className="aspect-square bg-[#1A1F2C] border border-gray-700 rounded-md"></div>
-              </div>
-            </div>
-          </div>
-          
-          {/* Property details - Right side (1/3 width) */}
-          <div className="lg:col-span-1">
-            <div className="bg-[#1A1F2C] p-6 rounded-lg border border-gray-800">
-              <div className="flex items-center space-x-2 mb-4">
-                <Badge variant="secondary">Commercial</Badge>
-                <Badge>Sale</Badge>
-              </div>
-              
-              <h2 className="text-3xl font-bold mb-6">{property.price}</h2>
-              
-              <div className="space-y-4">
-                <div className="flex justify-between border-b border-gray-700 pb-3">
-                  <span className="text-gray-400">Property ID:</span>
-                  <span>{id}</span>
-                </div>
-                <div className="flex justify-between border-b border-gray-700 pb-3">
-                  <span className="text-gray-400">Address:</span>
-                  <span>{property.address}</span>
-                </div>
-                <div className="flex justify-between border-b border-gray-700 pb-3">
-                  <span className="text-gray-400">City:</span>
-                  <span>{property.city}</span>
-                </div>
-                <div className="flex justify-between border-b border-gray-700 pb-3">
-                  <span className="text-gray-400">State:</span>
-                  <span>{property.state}</span>
-                </div>
-                <div className="flex justify-between border-b border-gray-700 pb-3">
-                  <span className="text-gray-400">Size:</span>
-                  <span>{property.size}</span>
-                </div>
-                <div className="flex justify-between border-b border-gray-700 pb-3">
-                  <span className="text-gray-400">Status:</span>
-                  <span className="text-green-400">{property.status}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        {/* Tabs section */}
-        <div className="mt-6">
-          <Tabs defaultValue="details">
-            <TabsList className="bg-[#1A1F2C]">
-              <TabsTrigger value="details">Details</TabsTrigger>
-              <TabsTrigger value="owner">Owner</TabsTrigger>
-              <TabsTrigger value="transactions">Transactions</TabsTrigger>
-              <TabsTrigger value="documents">Documents</TabsTrigger>
-              <TabsTrigger value="history">History</TabsTrigger>
-            </TabsList>
-            
-            {/* Tab content sections */}
-            <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Main content - left side (2 cols) */}
-              <div className="md:col-span-2">
-                {/* Property features */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                  <Card className="bg-[#1A1F2C] border-gray-800">
-                    <div className="p-4">
-                      <h3 className="text-lg font-medium mb-4">Property Features</h3>
-                      <ul className="space-y-2">
-                        {["Feature 1", "Feature 2", "Feature 3"].map((feature, idx) => (
-                          <li key={idx} className="flex items-center">
-                            <CheckCircle2 className="w-4 h-4 text-green-500 mr-2" />
-                            {feature}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </Card>
-                  
-                  <Card className="bg-[#1A1F2C] border-gray-800">
-                    <div className="p-4">
-                      <h3 className="text-lg font-medium mb-4">Building Amenities</h3>
-                      <ul className="space-y-2">
-                        {["Amenity 1", "Amenity 2", "Amenity 3"].map((amenity, idx) => (
-                          <li key={idx} className="flex items-center">
-                            <CheckCircle2 className="w-4 h-4 text-green-500 mr-2" />
-                            {amenity}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </Card>
-                </div>
-              </div>
-              
-              {/* Team notes - right side (1 col) */}
-              <div className="md:col-span-1">
-                <Card className="bg-[#1A1F2C] border-gray-800 h-full">
-                  <div className="p-4">
-                    <h3 className="text-lg font-medium mb-4">Team Notes</h3>
-                    <div className="bg-[#161920] rounded-md p-3 mb-3">
-                      <div className="flex items-center mb-2">
-                        <div className="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center text-white mr-2">
-                          <span>JS</span>
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium">John Smith</p>
-                          <p className="text-xs text-gray-400">commented on</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-              </div>
-            </div>
-          </Tabs>
-        </div>
-      </div>
+    <div className="p-6">
+      <PropertyHeader 
+        title={property.title}
+        isAdmin={isAdmin}
+        propertyType={propertyType}
+        onEdit={handleEditProperty}
+        onDelete={handleDeleteProperty}
+      />
+      
+      <PropertySummaryCard 
+        property={property}
+        propertyImages={propertyImages}
+        propertyType={propertyType}
+      />
+      
+      <PropertyTabsSection 
+        property={property}
+        owner={owner}
+        notes={notes}
+        onAddNote={handleAddNote}
+      />
     </div>
   );
 };

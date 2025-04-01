@@ -1,7 +1,8 @@
+
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthForm from '../components/AuthForm';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 import LoadingIndicator from '@/components/ui/loading-indicator';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';

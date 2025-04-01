@@ -9,7 +9,6 @@ import TeamContent from '@/components/commission/TeamContent';
 import { useCommissionTiers, useAgentHierarchy } from '@/hooks/useCommission';
 import { AgentWithHierarchy, CommissionHistory, CommissionTier } from '@/types';
 import SendTestNotification from '@/components/commission/SendTestNotification';
-import ForecastSection from '@/components/commission/ForecastSection';
 
 // Sample commission tiers for fallback when API fails
 const fallbackTiers: CommissionTier[] = [{
@@ -183,9 +182,8 @@ const Commission = () => {
       <CommissionHeader />
       
       <Tabs value={currentTab} onValueChange={setCurrentTab}>
-        <TabsList className="grid grid-cols-3 w-full sm:w-auto">
+        <TabsList className="grid grid-cols-2 w-full sm:w-auto">
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-          <TabsTrigger value="forecast">Forecast</TabsTrigger>
           <TabsTrigger value="team">Team Hierarchy</TabsTrigger>
         </TabsList>
         
@@ -198,10 +196,6 @@ const Commission = () => {
           />
           
           {showTestTools && <SendTestNotification />}
-        </TabsContent>
-        
-        <TabsContent value="forecast" className="space-y-6">
-          <ForecastSection />
         </TabsContent>
         
         <TabsContent value="team" className="space-y-6">

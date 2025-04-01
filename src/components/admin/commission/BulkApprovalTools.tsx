@@ -26,8 +26,8 @@ import { Textarea } from '@/components/ui/textarea';
 
 const BulkApprovalTools = () => {
   const navigate = useNavigate();
-  const commissionApprovalHooks = useCommissionApproval();
-  const updateStatusMutation = commissionApprovalHooks.useUpdateApprovalStatusMutation();
+  const { useUpdateApprovalStatusMutation, useCommissionApprovals } = useCommissionApproval;
+  const updateStatusMutation = useUpdateApprovalStatusMutation();
   
   // Initialize state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -39,17 +39,16 @@ const BulkApprovalTools = () => {
   const pageSize = 10;
   
   // Get approval data
-  const { data: approvalsData, isLoading } = commissionApprovalHooks.useCommissionApprovals(
+  const { data: approvalsData, isLoading } = useCommissionApprovals(
     activeStatus,
     true,
-    'created_at',
+    undefined,
     page,
     pageSize
   );
   
-  // Handle possible response shapes
-  const approvals = Array.isArray(approvalsData) ? approvalsData : approvalsData?.approvals || [];
-  const totalCount = Array.isArray(approvalsData) ? approvals.length : approvalsData?.totalCount || 0;
+  const approvals = approvalsData?.approvals || [];
+  const totalCount = approvalsData?.totalCount || 0;
   const totalPages = Math.ceil(totalCount / pageSize);
   
   // Handle checkbox selection

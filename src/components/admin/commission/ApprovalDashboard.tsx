@@ -9,7 +9,7 @@ import useCommissionApproval, {
   ApprovalCountResult,
   CommissionApproval
 } from '@/hooks/useCommissionApproval';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency } from '@/utils/propertyUtils';
 import { Link } from 'react-router-dom';
 import TestEdgeFunctionButton from './TestEdgeFunctionButton';
 
@@ -20,26 +20,24 @@ interface DashboardSummary {
 }
 
 const ApprovalDashboard = () => {
-  // Get the hooks from useCommissionApproval
-  const commissionApprovalHooks = useCommissionApproval();
-  const { data: statusCounts, isLoading: isLoadingCounts } = commissionApprovalHooks.useApprovalStatusCounts();
-  const { data: pendingTotal, isLoading: isLoadingPending } = commissionApprovalHooks.usePendingCommissionTotal();
-  const { data: approvedTotal, isLoading: isLoadingApproved } = commissionApprovalHooks.useApprovedCommissionTotal();
+  const { useApprovalStatusCounts, usePendingCommissionTotal, useApprovedCommissionTotal, useCommissionApprovals } = useCommissionApproval;
+  const { data: statusCounts, isLoading: isLoadingCounts } = useApprovalStatusCounts();
+  const { data: pendingTotal, isLoading: isLoadingPending } = usePendingCommissionTotal();
+  const { data: approvedTotal, isLoading: isLoadingApproved } = useApprovedCommissionTotal();
   const [activeTab, setActiveTab] = React.useState<string>('Pending');
   const [page, setPage] = React.useState(1);
   const pageSize = 5;
   
-  const { data: approvalsData, isLoading: isLoadingApprovals } = commissionApprovalHooks.useCommissionApprovals(
+  const { data: approvalsData, isLoading: isLoadingApprovals } = useCommissionApprovals(
     activeTab !== 'All' ? activeTab : undefined,
     true,
-    'created_at',
+    undefined,
     page,
     pageSize
   );
   
-  // Handle possible response shapes
-  const approvals = Array.isArray(approvalsData) ? approvalsData : approvalsData?.approvals || [];
-  const totalCount = Array.isArray(approvalsData) ? approvals.length : approvalsData?.totalCount || 0;
+  const approvals = approvalsData?.approvals || [];
+  const totalCount = approvalsData?.totalCount || 0;
   const totalPages = Math.ceil(totalCount / pageSize);
   
   // Handle tab change

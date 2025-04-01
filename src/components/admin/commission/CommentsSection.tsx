@@ -8,20 +8,20 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import useCommissionApproval, {
   ApprovalComment
 } from '@/hooks/useCommissionApproval';
-import { useAuth } from '@/context/AuthContext';
+import useAuth from '@/hooks/useAuth';
 
 interface CommentsSectionProps {
   approvalId: string;
 }
 
 const CommentsSection: React.FC<CommentsSectionProps> = ({ approvalId }) => {
-  const commissionApprovalHooks = useCommissionApproval();
+  const { useApprovalComments, useAddApprovalCommentMutation, useDeleteApprovalCommentMutation } = useCommissionApproval;
   const [comment, setComment] = useState('');
   const { user } = useAuth();
   
-  const { data: comments = [], isLoading } = commissionApprovalHooks.useApprovalComments(approvalId);
-  const addCommentMutation = commissionApprovalHooks.useAddApprovalCommentMutation();
-  const deleteCommentMutation = commissionApprovalHooks.useDeleteApprovalCommentMutation();
+  const { data: comments = [], isLoading } = useApprovalComments(approvalId);
+  const addCommentMutation = useAddApprovalCommentMutation();
+  const deleteCommentMutation = useDeleteApprovalCommentMutation();
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -112,7 +112,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ approvalId }) => {
                         <h3 className="font-medium">{item.user_name || 'Unknown User'}</h3>
                         <span className="text-xs text-muted-foreground">{formatDate(item.created_at)}</span>
                       </div>
-                      <p className="mt-2">{item.comment_text}</p>
+                      <p className="mt-2">{item.comment}</p>
                     </div>
                   </div>
                   

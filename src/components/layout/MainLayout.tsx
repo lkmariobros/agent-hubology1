@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
@@ -7,7 +6,6 @@ import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
 import { Button } from '@/components/ui/button';
 import NavUtilities from './sidebar/NavUtilities';
 import PageBreadcrumb from './PageBreadcrumb';
-
 interface MainLayoutProps {
   children?: React.ReactNode;
 }
@@ -18,12 +16,11 @@ const Header = () => {
     open,
     toggleSidebar
   } = useSidebar();
-  return (
-    <div className="bg-[#121620]">
+  return <div>
       {/* Breadcrumb and Navigation Section */}
       <div className="flex items-center justify-between px-6 py-2">
         <div className="flex items-center">
-          <Button variant="ghost" size="icon" onClick={toggleSidebar} className="h-8 w-8 mr-2 z-20 text-gray-400 hover:text-white hover:bg-gray-800" aria-label={open ? "Collapse sidebar" : "Expand sidebar"}>
+          <Button variant="ghost" size="icon" onClick={toggleSidebar} className="h-8 w-8 mr-2 z-20" aria-label={open ? "Collapse sidebar" : "Expand sidebar"}>
             {open ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeftOpen className="h-4 w-4" />}
           </Button>
           <PageBreadcrumb />
@@ -34,9 +31,8 @@ const Header = () => {
       </div>
       
       {/* Divider */}
-      <div className="border-b border-gray-800"></div>
-    </div>
-  );
+      <div className="border-b border-border"></div>
+    </div>;
 };
 
 const MainLayout: React.FC<MainLayoutProps> = ({
@@ -66,7 +62,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
 
   // Set up effect to save sidebar state changes
   React.useEffect(() => {
-    const handleStorageChange = (e: StorageEvent) => {
+    const handleStorageChange = e => {
       if (e.key === "sidebar:state") {
         // This ensures our UI stays in sync with other tabs
         console.log("Sidebar state changed:", e.newValue);
@@ -76,9 +72,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
   
-  return (
-    <SidebarProvider defaultOpen={savedState}>
-      <div className="flex min-h-screen w-full bg-[#121620] app-container">
+  return <SidebarProvider defaultOpen={savedState}>
+      <div className="flex min-h-screen w-full bg-background app-container">
         <AppSidebar />
         <div className="flex-1 overflow-auto main-content content-area dashboard-container">
           <Header />
@@ -87,7 +82,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           </div>
         </div>
       </div>
-    </SidebarProvider>
-  );
+    </SidebarProvider>;
 };
 export default MainLayout;

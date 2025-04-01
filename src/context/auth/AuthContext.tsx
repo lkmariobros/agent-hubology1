@@ -1,12 +1,14 @@
 
-import { createContext, useContext } from 'react';
+import React, { createContext, useContext } from 'react';
 import { AuthContextType } from '@/types/auth';
 
-// Create context with undefined default value
-export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+// Create context with default values (undefined for type safety)
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Hook for consuming the context
-export function useAuthContext(): AuthContextType {
+/**
+ * Custom hook to use the auth context
+ */
+export const useAuthContext = (): AuthContextType => {
   const context = useContext(AuthContext);
   
   if (context === undefined) {
@@ -14,4 +16,6 @@ export function useAuthContext(): AuthContextType {
   }
   
   return context;
-}
+};
+
+export { AuthContext };

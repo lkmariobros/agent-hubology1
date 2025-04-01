@@ -1,7 +1,6 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext'; // Use from context directly
+import { useAuth } from '@/context/AuthContext';
 
 interface SidebarProfileProps {
   collapsed?: boolean;

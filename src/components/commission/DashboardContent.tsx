@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import CommissionBreakdown from './CommissionBreakdown';
 import CommissionHistory from './CommissionHistory';
 import CommissionTiers from './CommissionTiers';
-import { useAuth } from '@/context/AuthContext';
+import useAuth from '@/hooks/useAuth';
 import { AgentWithHierarchy, CommissionHistory as CommissionHistoryType, CommissionTier } from '@/types';
 
 interface DashboardContentProps {
