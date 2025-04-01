@@ -1,7 +1,7 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
+import { CommissionInstallment } from '@/types/commission';
 
 // Type definitions
 export interface ApprovalHistoryItem {
@@ -43,6 +43,12 @@ export interface CommissionApproval {
     installments_generated?: boolean;
     property_id?: string;
   };
+}
+
+export interface ApprovalDetailResponse {
+  approval: CommissionApproval;
+  history: ApprovalHistoryItem[];
+  installments?: CommissionInstallment[];
 }
 
 export interface ApprovalCountResult {
@@ -184,7 +190,7 @@ const useCommissionApproval = {
       enabled: !!approvalId,
       queryFn: async () => {
         const [detailResponse, historyResponse] = await Promise.all([
-          supabase.functions.invoke<{ approval: CommissionApproval }>('get_commission_approval_detail', {
+          supabase.functions.invoke<{ approval: CommissionApproval; installments?: CommissionInstallment[] }>('get_commission_approval_detail', {
             body: { p_approval_id: approvalId }
           }),
           supabase.functions.invoke<ApprovalHistoryItem[]>('get_commission_approval_history', {
@@ -197,8 +203,9 @@ const useCommissionApproval = {
         
         return {
           approval: detailResponse.data?.approval,
-          history: historyResponse.data || []
-        };
+          history: historyResponse.data || [],
+          installments: detailResponse.data?.installments
+        } as ApprovalDetailResponse;
       },
       staleTime: 60 * 1000 // 1 minute
     });

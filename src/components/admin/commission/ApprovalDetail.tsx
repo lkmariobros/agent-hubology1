@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { formatCurrency } from '@/utils/formattingUtils';
-import useCommissionApproval from '@/hooks/useCommissionApproval';
+import useCommissionApproval, { ApprovalDetailResponse } from '@/hooks/useCommissionApproval';
 import { useAuth } from '@/hooks/useAuth';
 import ApprovalHistory from '@/components/commission/ApprovalHistory';
 import ApprovalStatus from '@/components/commission/ApprovalStatus';
@@ -214,13 +214,13 @@ const ApprovalDetail: React.FC<ApprovalDetailProps> = ({ id }) => {
                       </tr>
                     </thead>
                     <tbody>
-                      {data.installments.map((installment: any) => (
+                      {data.installments.map((installment) => (
                         <tr key={installment.id} className="border-b">
-                          <td className="py-2">{installment.installment_number}</td>
+                          <td className="py-2">{installment.installmentNumber}</td>
                           <td className="py-2">{formatCurrency(installment.amount)}</td>
                           <td className="py-2">{installment.percentage}%</td>
                           <td className="py-2">
-                            {new Date(installment.scheduled_date).toLocaleDateString()}
+                            {new Date(installment.scheduledDate).toLocaleDateString()}
                           </td>
                           <td className="py-2">{installment.status}</td>
                         </tr>
