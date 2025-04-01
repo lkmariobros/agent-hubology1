@@ -1,3 +1,4 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
@@ -37,6 +38,10 @@ export interface CommissionApproval {
   transaction?: {
     commission_amount: number;
     transaction_date: string;
+    transaction_value?: number;
+    commission_rate?: number;
+    installments_generated?: boolean;
+    property_id?: string;
   };
 }
 

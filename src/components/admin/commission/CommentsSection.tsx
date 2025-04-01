@@ -116,7 +116,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ approvalId }) => {
                     </div>
                   </div>
                   
-                  {user?.id === item.user_id && (
+                  {user?.id === item.created_by && (
                     <Button
                       variant="ghost"
                       size="sm"

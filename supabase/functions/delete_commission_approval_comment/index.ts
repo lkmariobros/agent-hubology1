@@ -25,7 +25,7 @@ serve(async (req) => {
     if (userError) throw userError
     if (!user) throw new Error('Unauthorized')
     
-    // Check if the comment belongs to the user or user is admin
+    // Verify the user owns this comment
     const { data: comment, error: commentError } = await supabase
       .from('approval_comments')
       .select('created_by')
@@ -33,12 +33,23 @@ serve(async (req) => {
       .single()
     
     if (commentError) throw commentError
-    if (!comment) throw new Error('Comment not found')
     
-    // Only allow deletion if the user created the comment or is an admin
-    const { data: isAdmin } = await supabase.rpc('is_admin')
-    if (comment.created_by !== user.id && !isAdmin) {
-      throw new Error('You can only delete your own comments')
+    // Check if the user is the comment owner or an admin
+    const isAuthorized = comment.created_by === user.id
+    
+    if (!isAuthorized) {
+      // Check if user is an admin (tier 5+)
+      const { data: profile, error: profileError } = await supabase
+        .from('agent_profiles')
+        .select('tier')
+        .eq('id', user.id)
+        .single()
+      
+      if (profileError) throw profileError
+      
+      if (profile.tier < 5) {
+        throw new Error('You are not authorized to delete this comment')
+      }
     }
     
     // Delete the comment

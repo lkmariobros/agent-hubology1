@@ -5,14 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, Loader2 } from 'lucide-react';
-import { formatCurrency } from '@/lib/formatters';
+import { formatCurrency } from '@/utils/formattingUtils';
 import useCommissionApproval from '@/hooks/useCommissionApproval';
 import { useAuth } from '@/hooks/useAuth';
-import ApprovalWorkflow from '@/components/commission/ApprovalWorkflow';
-import ApprovalActions from '@/components/commission/ApprovalActions';
 import ApprovalHistory from '@/components/commission/ApprovalHistory';
 import ApprovalStatus from '@/components/commission/ApprovalStatus';
-import ApprovalComments from './ApprovalComments';
+import ApprovalWorkflow from '@/components/admin/commission/ApprovalWorkflow';
+import ApprovalActions from '@/components/commission/ApprovalActions';
+import CommentsSection from './CommentsSection';
 
 interface ApprovalDetailProps {
   id: string;
@@ -131,14 +131,18 @@ const ApprovalDetail: React.FC<ApprovalDetailProps> = ({ id }) => {
                 <p className="text-sm font-medium">Transaction Date</p>
                 <p>{new Date(approval.transaction.transaction_date).toLocaleDateString()}</p>
               </div>
-              <div>
-                <p className="text-sm font-medium">Transaction Value</p>
-                <p className="font-medium">{formatCurrency(approval.transaction.transaction_value)}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium">Commission Rate</p>
-                <p>{approval.transaction.commission_rate}%</p>
-              </div>
+              {approval.transaction.transaction_value && (
+                <div>
+                  <p className="text-sm font-medium">Transaction Value</p>
+                  <p className="font-medium">{formatCurrency(approval.transaction.transaction_value)}</p>
+                </div>
+              )}
+              {approval.transaction.commission_rate && (
+                <div>
+                  <p className="text-sm font-medium">Commission Rate</p>
+                  <p>{approval.transaction.commission_rate}%</p>
+                </div>
+              )}
               <div>
                 <p className="text-sm font-medium">Commission Amount</p>
                 <p className="font-bold">{formatCurrency(approval.transaction.commission_amount)}</p>
@@ -196,7 +200,7 @@ const ApprovalDetail: React.FC<ApprovalDetailProps> = ({ id }) => {
           </CardHeader>
           <CardContent>
             <TabsContent value="overview" className="m-0">
-              {approval.transaction.installments_generated ? (
+              {approval.transaction.installments_generated && data.installments && data.installments.length > 0 ? (
                 <div className="space-y-4">
                   <h3 className="font-medium">Payment Installments</h3>
                   <table className="w-full text-sm">
@@ -210,25 +214,17 @@ const ApprovalDetail: React.FC<ApprovalDetailProps> = ({ id }) => {
                       </tr>
                     </thead>
                     <tbody>
-                      {(Array.isArray(approval.installments) && approval.installments.length > 0) ? (
-                        approval.installments.map((installment: any) => (
-                          <tr key={installment.id} className="border-b">
-                            <td className="py-2">{installment.installment_number}</td>
-                            <td className="py-2">{formatCurrency(installment.amount)}</td>
-                            <td className="py-2">{installment.percentage}%</td>
-                            <td className="py-2">
-                              {new Date(installment.scheduled_date).toLocaleDateString()}
-                            </td>
-                            <td className="py-2">{installment.status}</td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan={5} className="text-center py-4 text-muted-foreground">
-                            Installment data is loading or not available
+                      {data.installments.map((installment: any) => (
+                        <tr key={installment.id} className="border-b">
+                          <td className="py-2">{installment.installment_number}</td>
+                          <td className="py-2">{formatCurrency(installment.amount)}</td>
+                          <td className="py-2">{installment.percentage}%</td>
+                          <td className="py-2">
+                            {new Date(installment.scheduled_date).toLocaleDateString()}
                           </td>
+                          <td className="py-2">{installment.status}</td>
                         </tr>
-                      )}
+                      ))}
                     </tbody>
                   </table>
                 </div>
@@ -250,13 +246,8 @@ const ApprovalDetail: React.FC<ApprovalDetailProps> = ({ id }) => {
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2">
-          <ApprovalComments 
+          <CommentsSection 
             approvalId={id}
-            comments={comments}
-            isLoading={isLoadingComments}
-            onAddComment={handleAddComment}
-            onDeleteComment={handleDeleteComment}
-            currentUserId={user?.id}
           />
         </div>
       </div>
