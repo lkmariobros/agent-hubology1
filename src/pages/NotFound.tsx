@@ -6,14 +6,17 @@ import { AlertCircle } from 'lucide-react';
 const NotFound = () => {
   const location = useLocation();
   const isAdminRoute = location.pathname.includes('/admin');
+  const pathParts = location.pathname.split('/');
   
-  // Debug info - only show in development
+  // Extract more detailed debug info
   const debugInfo = import.meta.env.DEV ? (
     <div className="mt-4 p-4 border border-dashed border-slate-300 dark:border-slate-700 text-left rounded bg-slate-50 dark:bg-slate-900">
       <p className="text-sm font-mono mb-2">Debug information:</p>
       <ul className="text-xs text-muted-foreground font-mono">
         <li>Requested path: <span className="font-bold">{location.pathname}</span></li>
         <li>Portal: <span className="font-bold">{isAdminRoute ? 'Admin' : 'Agent'}</span></li>
+        <li>Path segments: <span className="font-bold">{pathParts.filter(Boolean).join(' → ')}</span></li>
+        <li>Query parameters: <span className="font-bold">{location.search || 'None'}</span></li>
       </ul>
     </div>
   ) : null;
@@ -37,10 +40,10 @@ const NotFound = () => {
           Return to {isAdminRoute ? "Admin Dashboard" : "Dashboard"}
         </Link>
         <Link 
-          to="/"
+          to={isAdminRoute ? "/" : "/admin"}
           className="px-4 py-2 rounded-md bg-secondary text-secondary-foreground hover:bg-secondary/90 text-center"
         >
-          Switch to Agent Portal
+          Switch to {isAdminRoute ? "Agent Portal" : "Admin Portal"}
         </Link>
       </div>
     </div>
