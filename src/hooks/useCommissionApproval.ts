@@ -18,10 +18,12 @@ export interface ApprovalComment {
   id: string;
   approval_id: string;
   comment_text: string;
-  user_id: string; // Add this field
-  user_name?: string; // Add this field
+  created_by: string; // Add this field
+  created_by_name?: string; // Add this field
   created_at: string;
   comment: string; // Add this alias field for backward compatibility
+  user_id?: string; // Add this field
+  user_name?: string; // Add this field
 }
 
 export interface CommissionApproval {

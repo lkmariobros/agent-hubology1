@@ -45,7 +45,7 @@ const ApprovalComments: React.FC<ApprovalCommentsProps> = ({
           comments.map(comment => (
             <div key={comment.id} className="bg-muted p-3 rounded-md">
               <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                <span>{comment.created_by_name || comment.created_by || 'User'}</span>
+                <span>{comment.created_by_name || comment.user_name || 'User'}</span>
                 <span>{new Date(comment.created_at).toLocaleString()}</span>
               </div>
               <p className="text-sm">{comment.comment_text}</p>
