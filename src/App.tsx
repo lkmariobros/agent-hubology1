@@ -38,6 +38,7 @@ import Opportunities from './pages/Opportunities';
 import Reports from './pages/Reports';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import Team from './pages/Team';
+import CommissionForecastPage from './pages/admin/CommissionForecast';
 
 // Leaderboard Pages
 import Leaderboard from './pages/leaderboard/Leaderboard';
