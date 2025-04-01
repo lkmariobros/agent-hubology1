@@ -19,6 +19,11 @@ const initialState: AuthState = {
  * Hook for managing authentication state
  */
 export function useAuthState() {
+  // Make sure we're in a React component environment
+  if (typeof useState !== 'function') {
+    throw new Error('useAuthState must be used within a React component or custom hook');
+  }
+  
   const [state, setState] = useState<AuthState>(initialState);
   
   const updateState = useCallback((newState: Partial<AuthState>) => {
