@@ -78,6 +78,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
       <div className="flex min-h-screen w-full">
         <AppSidebar />
         <main className="flex-1 overflow-x-hidden bg-[#161920]">
+          <Header />
           <div className="px-[44px] py-[36px]">
             {children || <Outlet />}
           </div>
