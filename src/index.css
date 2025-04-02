@@ -86,12 +86,73 @@
     @apply flex justify-between items-center;
   }
   
-  .page-title {
-    @apply text-xl font-semibold tracking-tight;
+  /* Standardized card title system */
+  .card-title-lg {
+    @apply text-title-lg font-semibold tracking-tight;
   }
   
-  .page-subtitle {
-    @apply text-sm text-muted-foreground mt-1;
+  .card-title-md {
+    @apply text-title-md font-semibold tracking-tight;
+  }
+  
+  .card-title-sm {
+    @apply text-title-sm font-semibold tracking-tight;
+  }
+  
+  /* Standardized content section layout */
+  .content-section {
+    @apply grid gap-6 w-full;
+  }
+  
+  .content-section-cols-1 {
+    @apply grid-cols-1;
+  }
+  
+  .content-section-cols-2 {
+    @apply grid-cols-1 md:grid-cols-2;
+  }
+  
+  .content-section-cols-3 {
+    @apply grid-cols-1 md:grid-cols-2 lg:grid-cols-3;
+  }
+  
+  .content-section-cols-4 {
+    @apply grid-cols-1 md:grid-cols-2 lg:grid-cols-4;
+  }
+  
+  /* Standardized card content padding */
+  .card-padding {
+    @apply p-5;
+  }
+  
+  .card-padding-x {
+    @apply px-5;
+  }
+  
+  .card-padding-y {
+    @apply py-5;
+  }
+  
+  /* Card header and content spacing */
+  .card-header {
+    @apply flex flex-col space-y-1.5 p-5 pb-0;
+  }
+  
+  .card-content {
+    @apply p-5;
+  }
+  
+  .card-footer {
+    @apply flex items-center p-5 pt-0;
+  }
+  
+  /* Standardized sizing for viewport-aware containers */
+  .viewport-container {
+    @apply h-[calc(100vh-6rem)] overflow-y-auto;
+  }
+  
+  .viewport-container-with-header {
+    @apply h-[calc(100vh-10rem)] overflow-y-auto;
   }
   
   /* Fix the glass-card class by using direct background-color instead of bg-card */
@@ -162,5 +223,29 @@
   /* Ensure consistent borders for all content sections */
   .content-container {
     @apply min-h-[calc(100vh-6rem-3.5rem)] rounded-xl;
+  }
+  
+  /* Responsive margin and padding utilities */
+  .responsive-p {
+    @apply p-4 sm:p-5 lg:p-6;
+  }
+  
+  .responsive-px {
+    @apply px-4 sm:px-5 lg:px-6;
+  }
+  
+  .responsive-py {
+    @apply py-4 sm:py-5 lg:py-6;
+  }
+  
+  /* Card spacing utilities */
+  .card-spacing {
+    @apply space-y-4;
+  }
+  
+  /* Grid layout utilities */
+  .auto-grid {
+    @apply grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   }
 }

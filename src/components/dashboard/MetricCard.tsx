@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { TrendingDown, TrendingUp } from "lucide-react";
 import { DashboardMetric } from '@/types';
 import { cn } from '@/lib/utils';
@@ -16,15 +16,15 @@ const MetricCard = ({ metric, className }: MetricCardProps) => {
   
   return (
     <Card className={cn("glass-card overflow-hidden", className)}>
-      <CardContent className="p-5 space-y-4">
+      <CardContent className="card-content space-y-4">
         <div className="flex justify-between items-start">
           <div className="space-y-2">
             <p className="text-sm font-medium text-muted-foreground">
               {metric.label}
             </p>
-            <h3 className="text-2xl font-bold text-gradient">
+            <CardTitle size="md" className="text-gradient">
               {metric.value}
-            </h3>
+            </CardTitle>
           </div>
           {metric.icon && (
             <div className="rounded-full p-2 bg-white/5 flex items-center justify-center">

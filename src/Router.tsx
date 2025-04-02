@@ -26,6 +26,10 @@ import ForgotPassword from './pages/auth/ForgotPassword';
 import ResetPassword from './pages/auth/ResetPassword';
 import NotFound from './pages/NotFound';
 import CommissionForecastPage from './pages/admin/CommissionForecast';
+import ReportOverview from './pages/admin/reports/Overview';
+import ReportPerformance from './pages/admin/reports/Performance';
+import ReportSales from './pages/admin/reports/Sales';
+import ReportCustom from './pages/admin/reports/Custom';
 
 const router = createBrowserRouter([
   {
@@ -57,6 +61,10 @@ const router = createBrowserRouter([
           { path: 'commissions', element: <CommissionApproval /> },
           { path: 'commissions/:id', element: <CommissionApproval /> },
           { path: 'roles', element: <Roles /> },
+          { path: 'reports/overview', element: <ReportOverview /> },
+          { path: 'reports/performance', element: <ReportPerformance /> },
+          { path: 'reports/sales', element: <ReportSales /> },
+          { path: 'reports/custom', element: <ReportCustom /> },
           { path: 'settings', element: <AdminDashboard /> }, // Placeholder
           { path: 'system-logs', element: <AdminDashboard /> }, // Placeholder
           { path: 'database', element: <AdminDashboard /> }, // Placeholder

@@ -42,8 +42,8 @@ const RecentTransactions = ({ transactions: propTransactions, isLoading: propIsL
 
   return (
     <Card className="glass-card">
-      <CardHeader className="px-6 pt-6 pb-4 flex flex-row items-center justify-between">
-        <CardTitle className="text-lg font-semibold">Recent Transactions</CardTitle>
+      <CardHeader className="card-padding-x pt-6 pb-4 flex flex-row items-center justify-between">
+        <CardTitle size="md">Recent Transactions</CardTitle>
         <Button 
           variant="ghost" 
           size="sm" 
@@ -53,8 +53,8 @@ const RecentTransactions = ({ transactions: propTransactions, isLoading: propIsL
           View all <ArrowRight className="ml-1 h-4 w-4" />
         </Button>
       </CardHeader>
-      <CardContent className="px-6 pb-6">
-        <div className="space-y-4">
+      <CardContent className="card-padding-x pb-6">
+        <div className="card-spacing">
           {isLoading ? (
             // Loading skeletons
             Array(3).fill(0).map((_, index) => (

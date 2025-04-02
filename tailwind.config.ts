@@ -87,6 +87,17 @@ export default {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      fontSize: {
+        // Card title standardization
+        'title-lg': ['1.5rem', { lineHeight: '2rem', fontWeight: '600', letterSpacing: '-0.025em' }],
+        'title-md': ['1.25rem', { lineHeight: '1.75rem', fontWeight: '600', letterSpacing: '-0.025em' }],
+        'title-sm': ['1rem', { lineHeight: '1.5rem', fontWeight: '600', letterSpacing: '-0.0125em' }],
+      },
+      spacing: {
+        'content-padding': '1.5rem',
+        'card-gap': '1.5rem',
+        'section-gap': '2rem',
+      },
       keyframes: {
         "accordion-down": {
           from: { height: "0" },

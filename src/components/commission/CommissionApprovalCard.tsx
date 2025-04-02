@@ -39,7 +39,7 @@ const CommissionApprovalCard: React.FC<CommissionApprovalCardProps> = ({
       <CardHeader className="pb-3">
         <div className="flex justify-between items-start">
           <div>
-            <CardTitle className="text-lg font-medium">
+            <CardTitle size="sm">
               {approvalData.propertyTitle || `Transaction #${approvalData.transactionId.substring(0, 8)}`}
             </CardTitle>
             <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
@@ -56,7 +56,7 @@ const CommissionApprovalCard: React.FC<CommissionApprovalCardProps> = ({
       </CardHeader>
       
       <CardContent>
-        <div className="space-y-4">
+        <div className="card-spacing">
           <div className="flex justify-between items-center">
             <div className="text-sm text-muted-foreground">Commission Amount:</div>
             <div className="font-semibold text-lg">{formatCurrency(approvalData.commissionAmount)}</div>
@@ -77,7 +77,7 @@ const CommissionApprovalCard: React.FC<CommissionApprovalCardProps> = ({
       </CardContent>
       
       {showActions && (
-        <CardFooter className="pt-0">
+        <CardFooter>
           <Button 
             variant="outline" 
             onClick={handleViewDetails} 
