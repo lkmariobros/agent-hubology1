@@ -1032,6 +1032,29 @@ export type Database = {
           scheduled_count: number
         }[]
       }
+      get_agent_profile_by_id: {
+        Args: {
+          user_id: string
+        }
+        Returns: {
+          agency_id: string
+          avatar_url: string | null
+          commission_percentage: number
+          email: string | null
+          full_name: string | null
+          id: string
+          join_date: string
+          license_number: string | null
+          phone: string | null
+          specializations: string[] | null
+          tier: number
+          tier_name: string
+          total_sales: number | null
+          total_transactions: number | null
+          updated_at: string
+          upline_id: string | null
+        }[]
+      }
       get_commission_approval_detail: {
         Args: {
           p_approval_id: string

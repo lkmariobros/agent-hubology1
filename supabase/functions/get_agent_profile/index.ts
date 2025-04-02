@@ -2,7 +2,18 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
+// Define CORS headers for browser compatibility
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
 serve(async (req) => {
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
   // Create a Supabase client with the Auth context of the logged in user
   const supabaseClient = createClient(
     Deno.env.get('SUPABASE_URL') ?? '',
@@ -15,16 +26,14 @@ serve(async (req) => {
   if (!user) {
     return new Response(
       JSON.stringify({ error: 'Not authenticated' }),
-      { headers: { 'Content-Type': 'application/json' }, status: 401 }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
     )
   }
 
   try {
-    // Execute SQL directly to avoid RLS recursion
+    // Use the security definer function to avoid RLS recursion
     const { data, error } = await supabaseClient
-      .from('agent_profiles')
-      .select('*')
-      .eq('id', user.id)
+      .rpc('get_agent_profile_by_id', { user_id: user.id })
       .single();
     
     // Special handling for admin
@@ -37,26 +46,34 @@ serve(async (req) => {
       }
       // If no profile, create one with admin tier
       else {
-        data = {
+        const fallbackData = {
           id: user.id,
           email: user.email,
           full_name: user.user_metadata?.full_name || user.email.split('@')[0],
           tier: 5,
           tier_name: 'Administrator'
         };
+        return new Response(
+          JSON.stringify({ data: fallbackData }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
       }
     }
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error fetching profile:', error);
+      throw error;
+    }
 
     return new Response(
       JSON.stringify({ data }),
-      { headers: { 'Content-Type': 'application/json' } }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   } catch (error) {
+    console.error('Error in edge function:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
-      { headers: { 'Content-Type': 'application/json' }, status: 400 }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
     )
   }
 })

@@ -45,6 +45,18 @@ export const roleService = {
 
   async createRole(role: Partial<Role>): Promise<Role | null> {
     try {
+      // First check if a role with this name already exists
+      const { data: existingRole } = await supabase
+        .from('roles')
+        .select('id, name')
+        .eq('name', role.name)
+        .maybeSingle();
+      
+      if (existingRole) {
+        toast.error(`A role with name "${role.name}" already exists`);
+        return null;
+      }
+      
       const { data, error } = await supabase
         .from('roles')
         .insert({
