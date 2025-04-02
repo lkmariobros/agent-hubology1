@@ -15,8 +15,8 @@ export function NavReports() {
   const location = useLocation();
   
   return (
-    <SidebarGroup>
-      <SidebarGroupLabel>Reports</SidebarGroupLabel>
+    <SidebarGroup className="mt-4">
+      <SidebarGroupLabel className="text-[13px] text-white/50 px-4 uppercase font-medium">Reports</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -25,7 +25,7 @@ export function NavReports() {
               isActive={location.pathname.includes('/admin/reports/overview')}
               tooltip="Overview"
             >
-              <NavLink to="/admin/reports/overview">
+              <NavLink to="/admin/reports/overview" className="pl-4">
                 <LayoutDashboard className="h-4 w-4" />
                 <span>Overview</span>
               </NavLink>
@@ -37,7 +37,7 @@ export function NavReports() {
               isActive={location.pathname.includes('/admin/reports/performance')}
               tooltip="Performance"
             >
-              <NavLink to="/admin/reports/performance">
+              <NavLink to="/admin/reports/performance" className="pl-4">
                 <TrendingUp className="h-4 w-4" />
                 <span>Performance</span>
               </NavLink>
@@ -49,7 +49,7 @@ export function NavReports() {
               isActive={location.pathname.includes('/admin/reports/sales')}
               tooltip="Sales Analytics"
             >
-              <NavLink to="/admin/reports/sales">
+              <NavLink to="/admin/reports/sales" className="pl-4">
                 <BarChartBig className="h-4 w-4" />
                 <span>Sales Analytics</span>
               </NavLink>
@@ -61,17 +61,12 @@ export function NavReports() {
               isActive={location.pathname.includes('/admin/reports/custom')}
               tooltip="Custom Reports"
             >
-              <NavLink to="/admin/reports/custom">
+              <NavLink to="/admin/reports/custom" className="pl-4">
                 <LineChart className="h-4 w-4" />
                 <span>Custom Reports</span>
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
-          
-          {/* Add separator at the bottom of this section to match the screenshot */}
-          <div className="px-3 py-3">
-            <div className="h-[1px] rounded-full bg-white/5"></div>
-          </div>
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>

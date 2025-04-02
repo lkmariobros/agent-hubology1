@@ -35,7 +35,7 @@
     
     --radius: 0.5rem;
 
-    --sidebar-background: 215 15% 15%; /* #1F232D */
+    --sidebar-background: 220 21% 14%; /* #1A1F2C - updated to match the image */
     --sidebar-foreground: 210 5% 98%; /* #f8f9fa */
     --sidebar-primary: 264 70% 50%; /* Keep original sidebar primary */
     --sidebar-primary-foreground: 0 0% 100%; /* Keep white */

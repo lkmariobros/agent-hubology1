@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Users, ListChecks, Building, Briefcase, Database, Calendar, BarChart3 } from 'lucide-react';
+import { Users, ListChecks, Building, Briefcase, Database } from 'lucide-react';
 import { 
   SidebarGroup, 
   SidebarGroupLabel, 
@@ -16,7 +16,7 @@ export function NavAdmin() {
   
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Administration</SidebarGroupLabel>
+      <SidebarGroupLabel className="text-[13px] text-white/50 px-4 uppercase font-medium">Administration</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -25,7 +25,7 @@ export function NavAdmin() {
               isActive={location.pathname === '/admin' || location.pathname === '/admin/dashboard'}
               tooltip="Dashboard"
             >
-              <NavLink to="/admin" end>
+              <NavLink to="/admin" end className="pl-4">
                 <Database className="h-4 w-4" />
                 <span>Dashboard</span>
               </NavLink>
@@ -37,7 +37,7 @@ export function NavAdmin() {
               isActive={location.pathname.includes('/admin/agents')}
               tooltip="Agents"
             >
-              <NavLink to="/admin/agents">
+              <NavLink to="/admin/agents" className="pl-4">
                 <Users className="h-4 w-4" />
                 <span>Agents</span>
               </NavLink>
@@ -49,7 +49,7 @@ export function NavAdmin() {
               isActive={location.pathname.includes('/admin/properties')}
               tooltip="Properties"
             >
-              <NavLink to="/admin/properties">
+              <NavLink to="/admin/properties" className="pl-4">
                 <Building className="h-4 w-4" />
                 <span>Properties</span>
               </NavLink>
@@ -61,7 +61,7 @@ export function NavAdmin() {
               isActive={location.pathname.includes('/admin/transactions')}
               tooltip="Transactions"
             >
-              <NavLink to="/admin/transactions">
+              <NavLink to="/admin/transactions" className="pl-4">
                 <Briefcase className="h-4 w-4" />
                 <span>Transactions</span>
               </NavLink>
@@ -73,17 +73,12 @@ export function NavAdmin() {
               isActive={location.pathname.includes('/admin/commissions')}
               tooltip="Commission"
             >
-              <NavLink to="/admin/commissions">
+              <NavLink to="/admin/commissions" className="pl-4">
                 <ListChecks className="h-4 w-4" />
                 <span>Commission</span>
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
-          
-          {/* Add separator at the bottom of this section to match the screenshot */}
-          <div className="px-3 py-3">
-            <div className="h-[1px] rounded-full bg-white/5"></div>
-          </div>
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>

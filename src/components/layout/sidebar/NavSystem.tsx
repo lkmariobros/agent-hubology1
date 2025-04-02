@@ -13,17 +13,15 @@ import {
   SidebarGroupContent, 
   SidebarMenu, 
   SidebarMenuItem, 
-  SidebarMenuButton,
-  SidebarSeparator
+  SidebarMenuButton
 } from '@/components/ui/sidebar';
-import { Separator } from "@/components/ui/separator";
 
 export function NavSystem() {
   const location = useLocation();
   
   return (
-    <SidebarGroup>
-      <SidebarGroupLabel>System</SidebarGroupLabel>
+    <SidebarGroup className="mt-4">
+      <SidebarGroupLabel className="text-[13px] text-white/50 px-4 uppercase font-medium">System</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -32,7 +30,7 @@ export function NavSystem() {
               isActive={location.pathname.includes('/admin/settings')}
               tooltip="Settings"
             >
-              <NavLink to="/admin/settings">
+              <NavLink to="/admin/settings" className="pl-4">
                 <Settings className="h-4 w-4" />
                 <span>Settings</span>
               </NavLink>
@@ -44,7 +42,7 @@ export function NavSystem() {
               isActive={location.pathname.includes('/admin/commission/settings')}
               tooltip="Commission Settings"
             >
-              <NavLink to="/admin/commission/settings">
+              <NavLink to="/admin/commission/settings" className="pl-4">
                 <DollarSign className="h-4 w-4" />
                 <span>Commission Settings</span>
               </NavLink>
@@ -56,7 +54,7 @@ export function NavSystem() {
               isActive={location.pathname.includes('/admin/commission/schedules')}
               tooltip="Payment Schedules"
             >
-              <NavLink to="/admin/commission/schedules">
+              <NavLink to="/admin/commission/schedules" className="pl-4">
                 <Calendar className="h-4 w-4" />
                 <span>Payment Schedules</span>
               </NavLink>
@@ -68,17 +66,12 @@ export function NavSystem() {
               isActive={location.pathname.includes('/admin/commission/forecast')}
               tooltip="Forecast"
             >
-              <NavLink to="/admin/commission/forecast">
+              <NavLink to="/admin/commission/forecast" className="pl-4">
                 <BarChart3 className="h-4 w-4" />
                 <span>Forecast</span>
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
-
-          {/* Better styled separator to match the screenshot */}
-          <div className="px-3 py-3">
-            <div className="h-[1px] rounded-full bg-white/5"></div>
-          </div>
 
           <SidebarMenuItem>
             <SidebarMenuButton 
@@ -86,7 +79,7 @@ export function NavSystem() {
               isActive={location.pathname === '/admin/roles'}
               tooltip="Roles & Permissions"
             >
-              <NavLink to="/admin/roles">
+              <NavLink to="/admin/roles" className="pl-4">
                 <Shield className="h-4 w-4" />
                 <span>Roles & Permissions</span>
               </NavLink>
@@ -98,17 +91,12 @@ export function NavSystem() {
               isActive={location.pathname.includes('/admin/commission/tiers')}
               tooltip="Commission Tiers"
             >
-              <NavLink to="/admin/commission/tiers">
+              <NavLink to="/admin/commission/tiers" className="pl-4">
                 <ClipboardList className="h-4 w-4" />
                 <span>Commission Tiers</span>
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
-
-          {/* Another better styled separator to match the screenshot */}
-          <div className="px-3 py-3">
-            <div className="h-[1px] rounded-full bg-white/5"></div>
-          </div>
 
           <SidebarMenuItem>
             <SidebarMenuButton 
@@ -116,7 +104,7 @@ export function NavSystem() {
               isActive={location.pathname.includes('/admin/system-logs')}
               tooltip="System Logs"
             >
-              <NavLink to="/admin/system-logs">
+              <NavLink to="/admin/system-logs" className="pl-4">
                 <FileText className="h-4 w-4" />
                 <span>System Logs</span>
               </NavLink>
@@ -128,7 +116,7 @@ export function NavSystem() {
               isActive={location.pathname.includes('/admin/database')}
               tooltip="Database"
             >
-              <NavLink to="/admin/database">
+              <NavLink to="/admin/database" className="pl-4">
                 <Database className="h-4 w-4" />
                 <span>Database</span>
               </NavLink>
