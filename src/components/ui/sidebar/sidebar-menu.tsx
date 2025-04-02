@@ -110,7 +110,7 @@ export const SidebarMenuButton = React.forwardRef<
         <TooltipContent
           side="right"
           align="center"
-          hidden={state !== "collapsed" || isMobile}
+          hidden={state !== "icon" || isMobile}
           {...tooltip}
         />
       </Tooltip>
@@ -170,4 +170,3 @@ export const SidebarMenuBadge = React.forwardRef<
   />
 ))
 SidebarMenuBadge.displayName = "SidebarMenuBadge"
-

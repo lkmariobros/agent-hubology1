@@ -30,7 +30,7 @@ export const Sidebar = React.forwardRef<
     },
     ref
   ) => {
-    const { state, isMobile, openMobile, setOpenMobile } = useSidebar()
+    const { state, isMobile } = useSidebar()
 
     if (collapsible === "none") {
       return (
@@ -49,7 +49,7 @@ export const Sidebar = React.forwardRef<
 
     if (isMobile) {
       return (
-        <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
+        <Sheet defaultOpen={state !== "collapsed"} modal={true}>
           <SheetContent
             data-sidebar="sidebar"
             data-mobile="true"
@@ -196,4 +196,3 @@ export const SidebarInset = React.forwardRef<
   )
 })
 SidebarInset.displayName = "SidebarInset"
-
