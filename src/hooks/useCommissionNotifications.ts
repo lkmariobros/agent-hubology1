@@ -1,11 +1,9 @@
-
-import { useToast } from "@/hooks/use-toast";
+import { toast } from '@/components/ui/use-toast';
 import { useSendNotification } from "@/hooks/useSendNotification";
 import { formatCurrency } from "@/utils/propertyUtils";
 import { NotificationType } from "@/types/notification";
 
 export function useCommissionNotifications() {
-  const { toast } = useToast();
   const { mutateAsync: sendNotification } = useSendNotification();
   
   /**
@@ -66,9 +64,8 @@ export function useCommissionNotifications() {
         }
       });
       
-      // Show a local toast too
-      toast({
-        title,
+      // Show a local toast using Sonner
+      toast(title, {
         description: message,
         variant: status.toLowerCase() === 'rejected' ? 'destructive' : 'default'
       });
@@ -76,8 +73,7 @@ export function useCommissionNotifications() {
       return true;
     } catch (error) {
       console.error('Failed to create approval status notification:', error);
-      toast({
-        title: 'Notification Failed',
+      toast('Notification Failed', {
         description: 'Could not send approval status notification',
         variant: 'destructive'
       });
@@ -100,16 +96,14 @@ export function useCommissionNotifications() {
         }
       });
       
-      toast({
-        title: 'Tier Progress Update',
+      toast('Tier Progress Update', {
         description: `You are ${progress}% towards your next commission tier.`
       });
       
       return true;
     } catch (error) {
       console.error('Failed to create tier progress notification:', error);
-      toast({
-        title: 'Notification Failed',
+      toast('Notification Failed', {
         description: 'Could not send tier progress notification',
         variant: 'destructive'
       });
@@ -132,16 +126,14 @@ export function useCommissionNotifications() {
         }
       });
       
-      toast({
-        title: 'New Tier Achieved!',
+      toast('New Tier Achieved!', {
         description: `Congratulations! You've reached the ${tier} tier.`
       });
       
       return true;
     } catch (error) {
       console.error('Failed to create tier achieved notification:', error);
-      toast({
-        title: 'Notification Failed',
+      toast('Notification Failed', {
         description: 'Could not send tier achievement notification',
         variant: 'destructive'
       });
@@ -164,16 +156,14 @@ export function useCommissionNotifications() {
         }
       });
       
-      toast({
-        title: 'Commission Milestone Reached!',
+      toast('Commission Milestone Reached!', {
         description: `You've reached ${formatCurrency(milestone)} in commissions this year!`
       });
       
       return true;
     } catch (error) {
       console.error('Failed to create commission milestone notification:', error);
-      toast({
-        title: 'Notification Failed',
+      toast('Notification Failed', {
         description: 'Could not send commission milestone notification',
         variant: 'destructive'
       });
@@ -230,8 +220,7 @@ export function useCommissionNotifications() {
         }
       });
       
-      toast({
-        title,
+      toast(title, {
         description: message,
         variant: status.toLowerCase() === 'cancelled' ? 'destructive' : 'default'
       });
@@ -239,8 +228,7 @@ export function useCommissionNotifications() {
       return true;
     } catch (error) {
       console.error('Failed to create transaction status notification:', error);
-      toast({
-        title: 'Notification Failed',
+      toast('Notification Failed', {
         description: 'Could not send transaction status notification',
         variant: 'destructive'
       });

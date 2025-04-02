@@ -2,7 +2,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Toaster } from 'sonner';
+import { Toaster } from '@/components/ui/sonner';
 import { AuthProvider } from './context/auth';
 import { NotificationProvider } from './context/NotificationContext';
 
@@ -153,7 +153,7 @@ function App() {
                 {/* Fallback */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
-              <Toaster position="top-right" richColors />
+              {/* Removed duplicate Toaster from here as it's now in main.tsx */}
             </NotificationProvider>
           </AuthProvider>
         </Router>

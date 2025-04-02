@@ -22,9 +22,13 @@ const Toaster = ({ ...props }: ToasterProps) => {
             "group-[.toast]:bg-muted group-[.toast]:text-muted-foreground",
         },
       }}
-      // Disable any branding
+      // Disable any branding or automatic toasts
       richColors
       closeButton
+      expand={false}
+      position="top-right"
+      hotkey={["altKey", "KeyT"]}
+      visibleToasts={3}
       {...props}
     />
   )

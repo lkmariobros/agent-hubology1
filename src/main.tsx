@@ -20,7 +20,13 @@ if (!rootElement) {
   root.render(
     <>
       <App />
-      <Toaster />
+      <Toaster 
+        expand={false} 
+        visibleToasts={3} 
+        closeButton={true}
+        richColors={true}
+        position="top-right"
+      />
     </>
   );
 }
