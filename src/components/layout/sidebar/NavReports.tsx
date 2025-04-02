@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { BarChartBig, TrendingUp, LayoutDashboard, LineChart } from 'lucide-react';
+import { LayoutDashboard, TrendingUp, BarChart, LineChart } from 'lucide-react';
 import { 
   SidebarGroup, 
   SidebarGroupLabel, 
@@ -57,7 +57,7 @@ export function NavReports() {
               tooltip="Sales Analytics"
             >
               <NavLink to="/admin/reports/sales" className={collapsed ? "justify-center" : "pl-4"}>
-                <BarChartBig className="h-4 w-4" />
+                <BarChart className="h-4 w-4" />
                 {!collapsed && <span>Sales Analytics</span>}
               </NavLink>
             </SidebarMenuButton>

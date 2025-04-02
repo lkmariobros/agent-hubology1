@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Users, ListChecks, Building, Briefcase, Database } from 'lucide-react';
+import { LayoutDashboard, Users, Building, Briefcase, ListChecks } from 'lucide-react';
 import { 
   SidebarGroup, 
   SidebarGroupLabel, 
@@ -33,7 +33,7 @@ export function NavAdmin() {
               tooltip="Dashboard"
             >
               <NavLink to="/admin" end className={collapsed ? "justify-center" : "pl-4"}>
-                <Database className="h-4 w-4" />
+                <LayoutDashboard className="h-4 w-4" />
                 {!collapsed && <span>Dashboard</span>}
               </NavLink>
             </SidebarMenuButton>

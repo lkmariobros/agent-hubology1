@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Settings, Database, ShieldAlert } from 'lucide-react';
+import { Settings, Database, FileText } from 'lucide-react';
 import { 
   SidebarGroup, 
   SidebarGroupLabel, 
@@ -53,11 +53,11 @@ export function NavSystem() {
           <SidebarMenuItem>
             <SidebarMenuButton 
               asChild 
-              isActive={location.pathname.includes('/admin/logs')}
+              isActive={location.pathname.includes('/admin/system-logs')}
               tooltip="System Logs"
             >
-              <NavLink to="/admin/logs" className={collapsed ? "justify-center" : "pl-4"}>
-                <ShieldAlert className="h-4 w-4" />
+              <NavLink to="/admin/system-logs" className={collapsed ? "justify-center" : "pl-4"}>
+                <FileText className="h-4 w-4" />
                 {!collapsed && <span>System Logs</span>}
               </NavLink>
             </SidebarMenuButton>
