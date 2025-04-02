@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
@@ -6,6 +7,7 @@ import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
 import { Button } from '@/components/ui/button';
 import NavUtilities from './sidebar/NavUtilities';
 import PageBreadcrumb from './PageBreadcrumb';
+
 interface MainLayoutProps {
   children?: React.ReactNode;
 }
@@ -73,14 +75,13 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   }, []);
   
   return <SidebarProvider defaultOpen={savedState}>
-      <div className="flex min-h-screen w-full bg-background app-container">
+      <div className="flex min-h-screen w-full">
         <AppSidebar />
-        <div className="flex-1 overflow-auto main-content content-area dashboard-container">
-          <Header />
-          <div className="p-6 content-area">
+        <main className="flex-1 overflow-x-hidden bg-[#161920]">
+          <div className="px-[44px] py-[36px]">
             {children || <Outlet />}
           </div>
-        </div>
+        </main>
       </div>
     </SidebarProvider>;
 };

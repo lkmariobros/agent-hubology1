@@ -1,6 +1,9 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
+import { ChevronRight } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface SidebarProfileProps {
   collapsed?: boolean;
@@ -31,20 +34,22 @@ export function SidebarProfile({ collapsed }: SidebarProfileProps) {
   return (
     <Link 
       to="/profile" 
-      className="flex items-center gap-3 p-2 rounded-md hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+      className="flex items-center w-full rounded-lg p-2 text-left bg-transparent hover:bg-secondary/50 transition-colors"
     >
-      <div className="flex items-center justify-center h-8 w-8 rounded-full bg-muted text-foreground">
-        <span className="font-medium text-sm">
-          {getInitials()}
-        </span>
-      </div>
+      <Avatar className="h-7 w-7">
+        <AvatarImage src={`https://i.pravatar.cc/300?u=${user.id}`} alt={displayName} />
+        <AvatarFallback>{getInitials()}</AvatarFallback>
+      </Avatar>
       
-      {!collapsed && (
-        <div className="flex flex-col overflow-hidden">
-          <span className="font-medium">{displayName}</span>
-          <span className="text-xs text-muted-foreground truncate">{roleDisplay}</span>
-        </div>
-      )}
+      <div className="ml-2 flex-1 min-w-0">
+        <p className="text-sm font-medium text-sidebar-foreground truncate">
+          {displayName}
+        </p>
+        <p className="text-xs text-sidebar-foreground/60 truncate">
+          {roleDisplay}
+        </p>
+      </div>
+      <ChevronRight className="ml-auto h-4 w-4 opacity-50" />
     </Link>
   );
 }
