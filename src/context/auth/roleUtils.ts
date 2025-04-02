@@ -64,8 +64,9 @@ export const roleUtils = {
   
   /**
    * Check if user has a specific role
+   * Returns Promise<boolean> if database check is needed, or boolean for immediate results
    */
-  hasRole: async (roles: UserRole[], role: UserRole): Promise<boolean> => {
+  hasRole: (roles: UserRole[], role: UserRole): boolean | Promise<boolean> => {
     // Special case for admin role and josephkwantum@gmail.com
     if (role === 'admin' && document.cookie.includes('userEmail=josephkwantum%40gmail.com')) {
       console.log('Special admin access granted via email check in hasRole');
@@ -76,28 +77,31 @@ export const roleUtils = {
     console.log(`Checking if user has role ${role} in memory:`, hasRoleInMemory);
     
     // For critical checks, also verify against the database
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data, error } = await supabase.rpc('has_role', {
-          p_user_id: user.id,
-          p_role_name: role
-        });
-        
-        if (error) {
-          console.error('Error checking role in database:', error);
-          // Fall back to memory check
-          return hasRoleInMemory;
+    return new Promise(async (resolve) => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data, error } = await supabase.rpc('has_role', {
+            p_user_id: user.id,
+            p_role_name: role
+          });
+          
+          if (error) {
+            console.error('Error checking role in database:', error);
+            // Fall back to memory check
+            return resolve(hasRoleInMemory);
+          }
+          
+          console.log(`Database check for role ${role}:`, data);
+          return resolve(data === true);
         }
-        
-        console.log(`Database check for role ${role}:`, data);
-        return data === true;
+      } catch (err) {
+        console.error('Error checking role in database:', err);
+        return resolve(hasRoleInMemory);
       }
-    } catch (err) {
-      console.error('Error checking role in database:', err);
-    }
-    
-    return hasRoleInMemory;
+      
+      return resolve(hasRoleInMemory);
+    });
   },
 
   /**

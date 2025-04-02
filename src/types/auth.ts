@@ -33,5 +33,5 @@ export interface AuthContextType {
   
   // Role management
   switchRole: (role: UserRole) => void;
-  hasRole: (role: UserRole) => boolean;
+  hasRole: (role: UserRole) => boolean | Promise<boolean>;
 }
