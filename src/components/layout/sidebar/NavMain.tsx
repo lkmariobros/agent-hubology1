@@ -15,7 +15,6 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  useSidebar
 } from "@/components/ui/sidebar";
 
 // Main navigation data
@@ -54,7 +53,6 @@ interface NavMainProps {
 export function NavMain({ collapsed }: NavMainProps) {
   const location = useLocation();
   const currentPath = location.pathname;
-  const { isExpanded, isIconOnly } = useSidebar();
   
   return (
     <SidebarGroup>
@@ -72,10 +70,11 @@ export function NavMain({ collapsed }: NavMainProps) {
                   asChild 
                   isActive={isActive}
                   tooltip={item.label}
+                  size="default"
                 >
-                  <Link to={item.href} className={!isExpanded ? "justify-center" : ""}>
+                  <Link to={item.href} className={collapsed ? "justify-center" : ""}>
                     <item.icon />
-                    {isExpanded && <span>{item.label}</span>}
+                    {!collapsed && <span>{item.label}</span>}
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

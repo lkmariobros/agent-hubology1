@@ -1,123 +1,96 @@
 
 import * as React from "react"
-import { ChevronRight } from "lucide-react"
-
+import { Slot } from "@radix-ui/react-slot"
+import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
-import { useSidebar } from "./sidebar-context"
 
-interface SidebarMenuSkeletonProps {
-  className?: string
-}
-
-const SidebarMenuSkeleton = React.forwardRef<
+export const SidebarMenuSkeleton = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & SidebarMenuSkeletonProps
->(({ className, ...props }, ref) => {
-  const { isIconOnly } = useSidebar()
-  
+  React.ComponentProps<"div"> & {
+    showIcon?: boolean
+  }
+>(({ className, showIcon = false, ...props }, ref) => {
+  // Random width between 50 to 90%.
+  const width = React.useMemo(() => {
+    return `${Math.floor(Math.random() * 40) + 50}%`
+  }, [])
+
   return (
     <div
       ref={ref}
-      className={cn(
-        "flex animate-pulse items-center gap-2 rounded-md px-3 py-2",
-        isIconOnly && "justify-center px-2",
-        className
-      )}
+      data-sidebar="menu-skeleton"
+      className={cn("rounded-md h-8 flex gap-2 px-2 items-center", className)}
       {...props}
     >
-      <div className="h-5 w-5 rounded-full bg-sidebar-accent/30" />
-      {!isIconOnly && <div className="h-4 w-[80%] rounded bg-sidebar-accent/30" />}
+      {showIcon && (
+        <Skeleton
+          className="size-4 rounded-md"
+          data-sidebar="menu-skeleton-icon"
+        />
+      )}
+      <Skeleton
+        className="h-4 flex-1 max-w-[--skeleton-width]"
+        data-sidebar="menu-skeleton-text"
+        style={
+          {
+            "--skeleton-width": width,
+          } as React.CSSProperties
+        }
+      />
     </div>
   )
 })
 SidebarMenuSkeleton.displayName = "SidebarMenuSkeleton"
 
-interface SidebarMenuSubProps {
-  children?: React.ReactNode
-  className?: string
-}
-
-const SidebarMenuSub = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & SidebarMenuSubProps
->(({ children, className, ...props }, ref) => {
-  return (
-    <div
-      ref={ref}
-      data-state="true"
-      className={cn(
-        "mt-1 ml-4 space-y-1 rounded-md border-l border-sidebar-accent/50 pl-2",
-        className
-      )}
-      {...props}
-    >
-      {children}
-    </div>
-  )
-})
+export const SidebarMenuSub = React.forwardRef<
+  HTMLUListElement,
+  React.ComponentProps<"ul">
+>(({ className, ...props }, ref) => (
+  <ul
+    ref={ref}
+    data-sidebar="menu-sub"
+    className={cn(
+      "mx-3.5 flex min-w-0 translate-x-px flex-col gap-1 border-l border-sidebar-border px-2.5 py-0.5",
+      "group-data-[collapsible=icon]:hidden",
+      className
+    )}
+    {...props}
+  />
+))
 SidebarMenuSub.displayName = "SidebarMenuSub"
 
-interface SidebarMenuSubItemProps {
-  children?: React.ReactNode
-  className?: string
-}
-
-const SidebarMenuSubItem = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & SidebarMenuSubItemProps
->(({ children, className, ...props }, ref) => {
-  return (
-    <div
-      ref={ref}
-      className={cn("relative", className)}
-      {...props}
-    >
-      {children}
-    </div>
-  )
-})
+export const SidebarMenuSubItem = React.forwardRef<
+  HTMLLIElement,
+  React.ComponentProps<"li">
+>(({ ...props }, ref) => <li ref={ref} {...props} />)
 SidebarMenuSubItem.displayName = "SidebarMenuSubItem"
 
-interface SidebarMenuSubButtonProps {
-  children?: React.ReactNode
-  isActive?: boolean
-  className?: string
-  asChild?: boolean
-}
-
-const SidebarMenuSubButton = React.forwardRef<
-  HTMLButtonElement,
-  React.ButtonHTMLAttributes<HTMLElement> & SidebarMenuSubButtonProps
->(({ children, isActive, className, asChild = false, ...props }, ref) => {
-  const { isCollapsed, isIconOnly } = useSidebar()
-  
-  // If the sidebar is completely collapsed, don't render
-  if (isCollapsed || isIconOnly) {
-    return null
+export const SidebarMenuSubButton = React.forwardRef<
+  HTMLAnchorElement,
+  React.ComponentProps<"a"> & {
+    asChild?: boolean
+    size?: "sm" | "md"
+    isActive?: boolean
   }
-  
-  const Comp = asChild ? "span" : "button"
+>(({ asChild = false, size = "md", isActive, className, ...props }, ref) => {
+  const Comp = asChild ? Slot : "a"
+
   return (
     <Comp
       ref={ref}
-      data-active={isActive ? "true" : "false"}
+      data-sidebar="menu-sub-button"
+      data-size={size}
+      data-active={isActive}
       className={cn(
-        "inline-flex w-full items-center gap-2 whitespace-nowrap rounded-md px-3 py-1.5 text-[13px] hover:bg-sidebar-accent hover:text-sidebar-foreground hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
-        isActive ? "bg-sidebar-accent/30 text-sidebar-foreground" : "text-sidebar-foreground/70",
+        "flex h-7 min-w-0 -translate-x-px items-center gap-2 overflow-hidden rounded-md px-2 text-sidebar-foreground outline-none ring-sidebar-ring hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 [&>svg]:text-sidebar-accent-foreground",
+        "data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground",
+        size === "sm" && "text-xs",
+        size === "md" && "text-sm",
+        "group-data-[collapsible=icon]:hidden",
         className
       )}
       {...props}
-    >
-      <ChevronRight className="h-3 w-3 shrink-0" />
-      {children}
-    </Comp>
+    />
   )
 })
 SidebarMenuSubButton.displayName = "SidebarMenuSubButton"
-
-export {
-  SidebarMenuSkeleton,
-  SidebarMenuSub,
-  SidebarMenuSubItem,
-  SidebarMenuSubButton,
-}

@@ -9,7 +9,6 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  useSidebar
 } from "@/components/ui/sidebar";
 
 interface NavPreferencesProps {
@@ -19,7 +18,6 @@ interface NavPreferencesProps {
 export function NavPreferences({ collapsed }: NavPreferencesProps) {
   const location = useLocation();
   const currentPath = location.pathname;
-  const { isExpanded, isIconOnly } = useSidebar();
   
   return (
     <SidebarGroup>
@@ -32,9 +30,9 @@ export function NavPreferences({ collapsed }: NavPreferencesProps) {
               isActive={currentPath === '/settings'}
               tooltip="Settings"
             >
-              <Link to="/settings" className={!isExpanded ? "justify-center" : ""}>
+              <Link to="/settings" className={collapsed ? "justify-center" : ""}>
                 <Settings />
-                {isExpanded && <span>Settings</span>}
+                {!collapsed && <span>Settings</span>}
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

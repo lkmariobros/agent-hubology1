@@ -8,14 +8,11 @@ import {
   SidebarGroupContent, 
   SidebarMenu, 
   SidebarMenuItem, 
-  SidebarMenuButton,
-  useSidebar
+  SidebarMenuButton 
 } from '@/components/ui/sidebar';
 
 export function NavAdmin() {
   const location = useLocation();
-  const { pathname } = location;
-  const { isExpanded, isIconOnly } = useSidebar();
   
   return (
     <SidebarGroup>
@@ -25,60 +22,60 @@ export function NavAdmin() {
           <SidebarMenuItem>
             <SidebarMenuButton 
               asChild 
-              isActive={pathname === '/admin' || pathname === '/admin/dashboard'}
+              isActive={location.pathname === '/admin' || location.pathname === '/admin/dashboard'}
               tooltip="Dashboard"
             >
-              <NavLink to="/admin" end className={!isExpanded ? "justify-center" : "pl-4"}>
+              <NavLink to="/admin" end className="pl-4">
                 <Database className="h-4 w-4" />
-                {isExpanded && <span>Dashboard</span>}
+                <span>Dashboard</span>
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton 
               asChild 
-              isActive={pathname.includes('/admin/agents')}
+              isActive={location.pathname.includes('/admin/agents')}
               tooltip="Agents"
             >
-              <NavLink to="/admin/agents" className={!isExpanded ? "justify-center" : "pl-4"}>
+              <NavLink to="/admin/agents" className="pl-4">
                 <Users className="h-4 w-4" />
-                {isExpanded && <span>Agents</span>}
+                <span>Agents</span>
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton 
               asChild 
-              isActive={pathname.includes('/admin/properties')}
+              isActive={location.pathname.includes('/admin/properties')}
               tooltip="Properties"
             >
-              <NavLink to="/admin/properties" className={!isExpanded ? "justify-center" : "pl-4"}>
+              <NavLink to="/admin/properties" className="pl-4">
                 <Building className="h-4 w-4" />
-                {isExpanded && <span>Properties</span>}
+                <span>Properties</span>
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton 
               asChild 
-              isActive={pathname.includes('/admin/transactions')}
+              isActive={location.pathname.includes('/admin/transactions')}
               tooltip="Transactions"
             >
-              <NavLink to="/admin/transactions" className={!isExpanded ? "justify-center" : "pl-4"}>
+              <NavLink to="/admin/transactions" className="pl-4">
                 <Briefcase className="h-4 w-4" />
-                {isExpanded && <span>Transactions</span>}
+                <span>Transactions</span>
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton 
               asChild 
-              isActive={pathname.includes('/admin/commissions')}
+              isActive={location.pathname.includes('/admin/commissions')}
               tooltip="Commission"
             >
-              <NavLink to="/admin/commissions" className={!isExpanded ? "justify-center" : "pl-4"}>
+              <NavLink to="/admin/commissions" className="pl-4">
                 <ListChecks className="h-4 w-4" />
-                {isExpanded && <span>Commission</span>}
+                <span>Commission</span>
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>

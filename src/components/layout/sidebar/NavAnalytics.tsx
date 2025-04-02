@@ -14,9 +14,8 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarMenuSub,
-  SidebarMenuSubItem,
   SidebarMenuSubButton,
-  useSidebar
+  SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 
 interface NavAnalyticsProps {
@@ -26,7 +25,6 @@ interface NavAnalyticsProps {
 export function NavAnalytics({ collapsed }: NavAnalyticsProps) {
   const location = useLocation();
   const currentPath = location.pathname;
-  const { isExpanded, isIconOnly } = useSidebar();
   
   const isLeaderboardPage = currentPath.startsWith('/leaderboard');
   const isReportsPage = currentPath.startsWith('/reports');
@@ -42,12 +40,12 @@ export function NavAnalytics({ collapsed }: NavAnalyticsProps) {
               isActive={isLeaderboardPage}
               tooltip="Leaderboard"
             >
-              <Link to="/leaderboard" className={!isExpanded ? "justify-center" : ""}>
+              <Link to="/leaderboard" className={collapsed ? "justify-center" : ""}>
                 <Trophy />
-                {isExpanded && <span>Leaderboard</span>}
+                {!collapsed && <span>Leaderboard</span>}
               </Link>
             </SidebarMenuButton>
-            {isExpanded && isLeaderboardPage && (
+            {!collapsed && isLeaderboardPage && (
               <SidebarMenuSub>
                 <SidebarMenuSubItem>
                   <SidebarMenuSubButton
@@ -75,9 +73,9 @@ export function NavAnalytics({ collapsed }: NavAnalyticsProps) {
               isActive={isReportsPage}
               tooltip="Reports"
             >
-              <Link to="/reports" className={!isExpanded ? "justify-center" : ""}>
+              <Link to="/reports" className={collapsed ? "justify-center" : ""}>
                 <BarChart />
-                {isExpanded && <span>Reports</span>}
+                {!collapsed && <span>Reports</span>}
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

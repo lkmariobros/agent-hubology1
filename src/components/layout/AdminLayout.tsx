@@ -1,7 +1,7 @@
 
 import React, { useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
-import { PanelLeftClose, PanelLeftOpen, PanelLeft } from 'lucide-react';
+import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { AdminSidebar } from './AdminSidebar';
 import { SidebarProvider, useSidebar } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
@@ -11,27 +11,15 @@ import PageBreadcrumb from './PageBreadcrumb';
 // Create a header component that has access to the sidebar context
 const Header = () => {
   const {
-    toggleSidebar,
-    state
+    open,
+    toggleSidebar
   } = useSidebar();
-  
-  // Select the appropriate icon based on sidebar state
-  const SidebarIcon = state === "collapsed" ? PanelLeft : 
-                     state === "icon" ? PanelLeftClose : 
-                     PanelLeftOpen;
-                     
   return <div className="sticky top-0 z-10 bg-[#161920]">
       {/* Breadcrumb and Navigation Section */}
       <div className="flex items-center justify-between px-6 py-3">
         <div className="flex items-center space-x-2">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={toggleSidebar} 
-            className="h-8 w-8 mr-1" 
-            aria-label="Toggle sidebar"
-          >
-            <SidebarIcon className="h-4 w-4" />
+          <Button variant="ghost" size="icon" onClick={toggleSidebar} className="h-8 w-8 mr-1" aria-label={open ? "Collapse sidebar" : "Expand sidebar"}>
+            {open ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeftOpen className="h-4 w-4" />}
           </Button>
           <PageBreadcrumb />
         </div>
@@ -46,16 +34,8 @@ const Header = () => {
 };
 
 const AdminLayout = () => {
-  // Check for any saved sidebar state in localStorage
-  const getSavedState = () => {
-    const state = localStorage.getItem("admin-sidebar:state");
-    if (state === "icon" || state === "collapsed") {
-      return state;
-    }
-    return "expanded"; // default
-  };
-  
-  const savedState = getSavedState();
+  // Load saved sidebar state from localStorage if available
+  const savedState = localStorage.getItem("admin-sidebar:state") === "false" ? false : true;
   const location = useLocation();
 
   // Add data-route attribute to body
@@ -88,7 +68,7 @@ const AdminLayout = () => {
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
-  return <SidebarProvider defaultState={savedState}>
+  return <SidebarProvider defaultOpen={savedState}>
       <div className="flex min-h-screen w-full">
         <AdminSidebar />
         <main className="flex-1 overflow-x-hidden bg-[#161920]">
