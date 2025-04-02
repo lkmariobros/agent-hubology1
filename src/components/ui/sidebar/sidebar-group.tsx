@@ -46,11 +46,11 @@ const SidebarGroupLabel = React.forwardRef<
     { children, className, collapsible, defaultOpen = true, ...props },
     ref
   ) => {
-    const { open: sidebarOpen } = useSidebar()
+    const { isExpanded } = useSidebar()
     const [open, setOpen] = React.useState(defaultOpen)
 
     // When sidebar is collapsed, don't show labels
-    if (!sidebarOpen) {
+    if (!isExpanded) {
       return null
     }
     
@@ -90,10 +90,10 @@ const SidebarGroupAction = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & SidebarGroupActionProps
 >(({ children, className, ...props }, ref) => {
-  const { open } = useSidebar()
+  const { isExpanded } = useSidebar()
   
   // Don't show actions when sidebar is collapsed
-  if (!open) {
+  if (!isExpanded) {
     return null
   }
   

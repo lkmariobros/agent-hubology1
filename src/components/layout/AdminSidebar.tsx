@@ -20,7 +20,7 @@ import { PortalSwitcher } from './PortalSwitcher';
 
 export function AdminSidebar() {
   const { isAdmin } = useAuth();
-  const { open } = useSidebar();
+  const { isExpanded } = useSidebar();
   
   if (!isAdmin) {
     return null; // Hide sidebar completely if not admin
@@ -32,18 +32,18 @@ export function AdminSidebar() {
         className="border-none bg-[#1A1F2C]" 
         collapsible="icon" // Use icon mode for collapsible
       >
-        <SidebarHeader className={`border-none ${open ? 'px-5' : 'px-0'} py-4`}>
+        <SidebarHeader className={`border-none ${isExpanded ? 'px-5' : 'px-0'} py-4`}>
           {/* Use the consistent PortalSwitcher component */}
-          <PortalSwitcher showLabel={open} className={open ? "w-full" : "w-auto"} />
+          <PortalSwitcher showLabel={isExpanded} className={isExpanded ? "w-full" : "w-auto"} />
         </SidebarHeader>
         
-        <SidebarContent className={`${open ? 'px-3' : 'px-1'} py-2 overflow-y-visible`}>
+        <SidebarContent className={`${isExpanded ? 'px-3' : 'px-1'} py-2 overflow-y-visible`}>
           <NavAdmin />
           <NavReports />
           <NavSystem />
         </SidebarContent>
         
-        <SidebarFooter className={`border-t border-white/5 ${open ? 'px-5' : 'px-2'} py-3`}>
+        <SidebarFooter className={`border-t border-white/5 ${isExpanded ? 'px-5' : 'px-2'} py-3`}>
           <AdminProfile />
         </SidebarFooter>
       </Sidebar>

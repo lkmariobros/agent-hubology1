@@ -16,10 +16,10 @@ const SidebarInput = React.forwardRef<
   HTMLInputElement,
   React.InputHTMLAttributes<HTMLInputElement> & SidebarInputProps
 >(({ className, ...props }, ref) => {
-  const { open } = useSidebar()
+  const { isExpanded } = useSidebar()
   
   // Don't show input when sidebar is collapsed
-  if (!open) {
+  if (!isExpanded) {
     return null
   }
   
@@ -49,15 +49,15 @@ const SidebarHeader = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & SidebarHeaderProps
 >(({ children, className, ...props }, ref) => {
-  const { open } = useSidebar()
+  const { isExpanded } = useSidebar()
   
   return (
     <div
       ref={ref}
-      data-state={open ? "expanded" : "collapsed"}
+      data-state={isExpanded ? "expanded" : "collapsed"}
       className={cn(
         "flex h-14 items-center gap-2 border-b border-sidebar-border py-4",
-        !open && "justify-center h-14 px-0", // Center when collapsed
+        !isExpanded && "justify-center h-14 px-0", // Center when collapsed
         className
       )}
       {...props}
@@ -77,15 +77,15 @@ const SidebarFooter = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & SidebarFooterProps
 >(({ children, className, ...props }, ref) => {
-  const { open } = useSidebar()
+  const { isExpanded } = useSidebar()
   
   return (
     <div
       ref={ref}
-      data-state={open ? "expanded" : "collapsed"}
+      data-state={isExpanded ? "expanded" : "collapsed"}
       className={cn(
         "shrink-0 border-t border-sidebar-border/20",
-        !open && "flex justify-center", // Center when collapsed
+        !isExpanded && "flex justify-center", // Center when collapsed
         className
       )}
       {...props}
@@ -105,13 +105,13 @@ const SidebarContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & SidebarContentProps
 >(({ children, className, ...props }, ref) => {
-  const { open } = useSidebar()
+  const { isExpanded } = useSidebar()
   
   return (
     <div
       ref={ref}
-      data-state={open ? "expanded" : "collapsed"}
-      className={cn("flex-1 overflow-auto", !open && "px-0", className)}
+      data-state={isExpanded ? "expanded" : "collapsed"}
+      className={cn("flex-1 overflow-auto", !isExpanded && "px-0", className)}
       {...props}
     >
       {children}

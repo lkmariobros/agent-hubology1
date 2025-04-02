@@ -20,7 +20,7 @@ import { PortalSwitcher } from './PortalSwitcher';
 
 export function AppSidebar() {
   const { isAdmin } = useAuth();
-  const { open } = useSidebar();
+  const { isExpanded } = useSidebar();
   
   return (
     <>
@@ -28,17 +28,17 @@ export function AppSidebar() {
         className="border-none bg-[#1A1F2C]"
         collapsible="icon" // Use icon mode for collapsible
       >
-        <SidebarHeader className={`border-none ${open ? 'px-5' : 'px-0'} py-4`}>
-          <PortalSwitcher showLabel={open} className={open ? "w-full" : "w-auto"} />
+        <SidebarHeader className={`border-none ${isExpanded ? 'px-5' : 'px-0'} py-4`}>
+          <PortalSwitcher showLabel={isExpanded} className={isExpanded ? "w-full" : "w-auto"} />
         </SidebarHeader>
         
-        <SidebarContent className={`${open ? 'px-3' : 'px-1'} py-2`}>
+        <SidebarContent className={`${isExpanded ? 'px-3' : 'px-1'} py-2`}>
           <NavMain />
           <NavAnalytics />
           <NavPreferences />
         </SidebarContent>
         
-        <SidebarFooter className={`border-t border-white/5 ${open ? 'px-5' : 'px-2'} py-3`}>
+        <SidebarFooter className={`border-t border-white/5 ${isExpanded ? 'px-5' : 'px-2'} py-3`}>
           <SidebarProfile />
         </SidebarFooter>
       </Sidebar>

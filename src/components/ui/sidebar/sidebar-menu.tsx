@@ -140,24 +140,26 @@ interface SidebarMenuBadgeProps {
   className?: string
 }
 
-const SidebarMenuBadge = React.forwardRef<HTMLDivElement, SidebarMenuBadgeProps>(
-  ({ className, ...props }, ref) => {
-    const { isIconOnly } = useSidebar()
-    
-    // Don't render badge in icon-only mode
-    if (isIconOnly) {
-      return null
-    }
-    
-    return (
-      <Badge
-        variant="outline"
-        className={cn("ml-auto px-1.5 py-0", className)}
-        {...props}
-      />
-    )
+const SidebarMenuBadge = React.forwardRef<
+  HTMLDivElement, 
+  React.ComponentProps<typeof Badge> & SidebarMenuBadgeProps
+>(({ className, ...props }, ref) => {
+  const { isIconOnly } = useSidebar()
+  
+  // Don't render badge in icon-only mode
+  if (isIconOnly) {
+    return null
   }
-)
+  
+  return (
+    <Badge
+      ref={ref}
+      variant="outline"
+      className={cn("ml-auto px-1.5 py-0", className)}
+      {...props}
+    />
+  )
+})
 SidebarMenuBadge.displayName = "SidebarMenuBadge"
 
 export {
