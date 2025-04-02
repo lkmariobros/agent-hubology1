@@ -1,7 +1,10 @@
 
 import { supabase } from '@/lib/supabase';
-import { Role, Permission, PermissionCategory } from '@/types/role';
+import { Role, Permission } from '@/types/role';
 import { toast } from 'sonner';
+import { assignPermissionsToRole, checkRoleNameExists, clearRolePermissions, formatRoleData } from '@/utils/roleUtils';
+import permissionService from './permissionService';
+import userRoleService from './userRoleService';
 
 export const roleService = {
   async getRoles(): Promise<Role[]> {
@@ -15,7 +18,7 @@ export const roleService = {
         `);
 
       if (error) throw error;
-      return data as Role[] || [];
+      return formatRoleData(data) as Role[];
     } catch (error: any) {
       console.error('Error fetching roles:', error);
       toast.error('Failed to load roles');
@@ -52,84 +55,17 @@ export const roleService = {
     }
   },
 
-  async getPermissions(): Promise<Permission[]> {
-    try {
-      const { data, error } = await supabase
-        .from('permissions')
-        .select('*')
-        .order('name');
-
-      if (error) throw error;
-      return data as Permission[] || [];
-    } catch (error: any) {
-      console.error('Error fetching permissions:', error);
-      toast.error('Failed to load permissions');
-      return [];
-    }
-  },
-  
-  async getPermissionsByCategories(): Promise<PermissionCategory[]> {
-    try {
-      const { data, error } = await supabase
-        .from('permissions')
-        .select('*')
-        .order('category')
-        .order('name');
-
-      if (error) throw error;
-      
-      // Group permissions by category
-      const categories: Record<string, Permission[]> = {};
-      (data || []).forEach((permission: Permission) => {
-        const category = permission.category || 'General';
-        if (!categories[category]) {
-          categories[category] = [];
-        }
-        categories[category].push(permission);
-      });
-      
-      // Transform into PermissionCategory array
-      return Object.entries(categories).map(([name, permissions]) => ({
-        name,
-        permissions
-      }));
-    } catch (error: any) {
-      console.error('Error fetching permissions by categories:', error);
-      toast.error('Failed to load permissions');
-      return [];
-    }
-  },
-
-  async getRolePermissions(roleId: string): Promise<Permission[]> {
-    try {
-      const { data, error } = await supabase
-        .from('role_permissions')
-        .select(`
-          permissions:permission_id(*)
-        `)
-        .eq('role_id', roleId);
-
-      if (error) throw error;
-      
-      // Transform the nested permissions array
-      return (data || []).map((rp: any) => rp.permissions);
-    } catch (error: any) {
-      console.error(`Error fetching permissions for role ${roleId}:`, error);
-      toast.error('Failed to load role permissions');
-      return [];
-    }
-  },
+  // Reexport permission methods for convenience
+  getPermissions: permissionService.getPermissions,
+  getPermissionsByCategories: permissionService.getPermissionsByCategories,
+  getRolePermissions: permissionService.getRolePermissions,
 
   async createRole(role: Partial<Role>): Promise<Role | null> {
     try {
-      // First check if a role with this name already exists
-      const { data: existingRole } = await supabase
-        .from('roles')
-        .select('id, name')
-        .eq('name', role.name)
-        .maybeSingle();
+      // Check if a role with this name already exists
+      const roleExists = await checkRoleNameExists(role.name as string);
       
-      if (existingRole) {
+      if (roleExists) {
         toast.error(`A role with name "${role.name}" already exists`);
         return null;
       }
@@ -147,7 +83,7 @@ export const roleService = {
       
       // If permissions are provided, assign them to the role
       if (role.permissions && role.permissions.length > 0) {
-        await this.assignPermissionsToRole(data.id, role.permissions);
+        await assignPermissionsToRole(data.id, role.permissions);
       }
       
       toast.success(`Role "${role.name}" created successfully`);
@@ -177,13 +113,10 @@ export const roleService = {
       // If permissions are provided, update them
       if (updates.permissions) {
         // First, remove all existing permissions for this role
-        await supabase
-          .from('role_permissions')
-          .delete()
-          .eq('role_id', id);
+        await clearRolePermissions(id);
         
         // Then, assign the new permissions
-        await this.assignPermissionsToRole(id, updates.permissions);
+        await assignPermissionsToRole(id, updates.permissions);
       }
       
       toast.success(`Role "${updates.name}" updated successfully`);
@@ -192,32 +125,6 @@ export const roleService = {
       console.error(`Error updating role ${id}:`, error);
       toast.error(error.message || 'Failed to update role');
       return null;
-    }
-  },
-
-  async assignPermissionsToRole(roleId: string, permissions: Permission[]): Promise<boolean> {
-    try {
-      // Filter out permissions that don't have IDs
-      const validPermissions = permissions.filter(p => p.id && p.selected);
-      
-      if (validPermissions.length === 0) return true;
-      
-      // Create the role-permission relationships
-      const rolePermissions = validPermissions.map(permission => ({
-        role_id: roleId,
-        permission_id: permission.id
-      }));
-      
-      const { error } = await supabase
-        .from('role_permissions')
-        .insert(rolePermissions);
-
-      if (error) throw error;
-      return true;
-    } catch (error: any) {
-      console.error('Error assigning permissions to role:', error);
-      toast.error('Failed to assign permissions to role');
-      return false;
     }
   },
 
@@ -238,60 +145,10 @@ export const roleService = {
     }
   },
   
-  async getUsersWithRole(roleId: string): Promise<any[]> {
-    try {
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select(`
-          user_id,
-          roles!inner(id, name),
-          agent_profiles!user_id(full_name, email, avatar_url)
-        `)
-        .eq('role_id', roleId);
-
-      if (error) throw error;
-      return data || [];
-    } catch (error: any) {
-      console.error(`Error fetching users with role ${roleId}:`, error);
-      toast.error('Failed to load users assigned to this role');
-      return [];
-    }
-  },
-  
-  async assignRoleToUser(userId: string, roleId: string): Promise<boolean> {
-    try {
-      const { error } = await supabase
-        .from('user_roles')
-        .insert({
-          user_id: userId,
-          role_id: roleId
-        });
-
-      if (error) throw error;
-      toast.success('Role assigned successfully');
-      return true;
-    } catch (error: any) {
-      console.error('Error assigning role:', error);
-      toast.error(error.message || 'Failed to assign role');
-      return false;
-    }
-  },
-  
-  async removeRoleFromUser(userId: string, roleId: string): Promise<boolean> {
-    try {
-      const { error } = await supabase
-        .from('user_roles')
-        .delete()
-        .eq('user_id', userId)
-        .eq('role_id', roleId);
-
-      if (error) throw error;
-      toast.success('Role removed successfully');
-      return true;
-    } catch (error: any) {
-      console.error('Error removing role from user:', error);
-      toast.error(error.message || 'Failed to remove role');
-      return false;
-    }
-  }
+  // Re-export user role methods for convenience
+  getUsersWithRole: userRoleService.getUsersWithRole,
+  assignRoleToUser: userRoleService.assignRoleToUser,
+  removeRoleFromUser: userRoleService.removeRoleFromUser
 };
+
+export default roleService;
