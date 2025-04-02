@@ -7,7 +7,7 @@ import { NavLink } from 'react-router-dom';
 import CutoffDateSettings from './CutoffDateSettings';
 import TestEdgeFunctionButton from './TestEdgeFunctionButton';
 
-export function CommissionSettings() {
+export function CommissionSettingsComponent() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-start">
@@ -94,4 +94,4 @@ export function CommissionSettings() {
   );
 }
 
-export default CommissionSettings;
+export default CommissionSettingsComponent;

@@ -1,9 +1,9 @@
 
 import React from 'react';
-import { CommissionSettings } from '@/components/admin/commission/CommissionSettings';
+import { CommissionSettingsComponent } from '@/components/admin/commission/CommissionSettings';
 
 const CommissionSettingsPage = () => {
-  return <CommissionSettings />;
+  return <CommissionSettingsComponent />;
 };
 
 export default CommissionSettingsPage;
