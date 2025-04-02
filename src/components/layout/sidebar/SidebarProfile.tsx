@@ -4,16 +4,12 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { ChevronRight } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useSidebar } from '@/components/ui/sidebar';
 
-interface SidebarProfileProps {
-  collapsed?: boolean;
-}
-
-/**
- * Displays user profile in the sidebar with role information
- */
-export function SidebarProfile({ collapsed }: SidebarProfileProps) {
+export function SidebarProfile() {
   const { user } = useAuth();
+  const { state } = useSidebar();
+  const collapsed = state === "icon";
   
   if (!user) return null;
   
@@ -30,6 +26,20 @@ export function SidebarProfile({ collapsed }: SidebarProfileProps) {
   
   // Display the active role
   const roleDisplay = user.activeRole;
+  
+  if (collapsed) {
+    return (
+      <Link 
+        to="/profile" 
+        className="flex items-center justify-center"
+      >
+        <Avatar className="h-7 w-7">
+          <AvatarImage src={`https://i.pravatar.cc/300?u=${user.id}`} alt={displayName} />
+          <AvatarFallback>{getInitials()}</AvatarFallback>
+        </Avatar>
+      </Link>
+    );
+  }
   
   return (
     <Link 

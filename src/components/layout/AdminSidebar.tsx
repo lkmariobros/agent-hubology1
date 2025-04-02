@@ -30,19 +30,19 @@ export function AdminSidebar() {
   return (
     <>
       <Sidebar className="border-none bg-[#1A1F2C]">
-        <SidebarHeader className="border-none px-5 py-4">
+        <SidebarHeader className={`border-none ${collapsed ? 'px-0 flex justify-center' : 'px-5'} py-4`}>
           {/* Use the consistent PortalSwitcher component */}
-          <PortalSwitcher showLabel={!collapsed} className="w-full" />
+          <PortalSwitcher showLabel={!collapsed} className={collapsed ? "flex justify-center" : "w-full"} />
         </SidebarHeader>
         
-        <SidebarContent className="px-3 py-2 overflow-y-visible">
-          <NavAdmin collapsed={collapsed} />
-          <NavReports collapsed={collapsed} />
-          <NavSystem collapsed={collapsed} />
+        <SidebarContent className={`${collapsed ? 'px-0 flex flex-col items-center' : 'px-3'} py-4 overflow-y-visible space-y-6`}>
+          <NavAdmin />
+          <NavReports />
+          <NavSystem />
         </SidebarContent>
         
-        <SidebarFooter className="border-t border-white/5 px-5 py-3">
-          <AdminProfile collapsed={collapsed} />
+        <SidebarFooter className={`border-t border-white/5 ${collapsed ? 'px-0 flex justify-center' : 'px-5'} py-3`}>
+          <AdminProfile />
         </SidebarFooter>
       </Sidebar>
       <SidebarRail />

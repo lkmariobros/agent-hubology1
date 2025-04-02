@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { PanelLeftClose, PanelLeftOpen, ChevronLeft } from 'lucide-react';
 import { AdminSidebar } from './AdminSidebar';
-import { SidebarProvider, useSidebar, SidebarState } from '@/components/ui/sidebar';
+import { SidebarProvider, useSidebar } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import NavUtilities from './sidebar/NavUtilities';
 import PageBreadcrumb from './PageBreadcrumb';
@@ -48,8 +48,8 @@ const Header = () => {
 const AdminLayout = () => {
   // Load saved sidebar state from localStorage if available
   const savedStateStr = localStorage.getItem("admin-sidebar:state");
-  const savedState: SidebarState = savedStateStr === "icon" ? "icon" : 
-                    savedStateStr === "collapsed" ? "collapsed" : "expanded";
+  const savedState = savedStateStr === "icon" ? "icon" : 
+                     savedStateStr === "collapsed" ? "collapsed" : "expanded";
   const location = useLocation();
 
   // Add data-route attribute to body
@@ -71,7 +71,7 @@ const AdminLayout = () => {
   }, [location.pathname]);
 
   // Set up effect to save sidebar state changes
-  const handleStateChange = (newState: SidebarState) => {
+  const handleStateChange = (newState: "expanded" | "collapsed" | "icon") => {
     localStorage.setItem("admin-sidebar:state", newState);
   };
 

@@ -9,19 +9,18 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
+  useSidebar
 } from "@/components/ui/sidebar";
 
-interface NavPreferencesProps {
-  collapsed?: boolean;
-}
-
-export function NavPreferences({ collapsed }: NavPreferencesProps) {
+export function NavPreferences() {
   const location = useLocation();
+  const { state } = useSidebar();
+  const collapsed = state === "icon";
   const currentPath = location.pathname;
   
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Preferences</SidebarGroupLabel>
+      {!collapsed && <SidebarGroupLabel>Preferences</SidebarGroupLabel>}
       <SidebarGroupContent>
         <SidebarMenu>
           <SidebarMenuItem>

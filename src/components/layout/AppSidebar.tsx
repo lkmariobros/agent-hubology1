@@ -26,18 +26,18 @@ export function AppSidebar() {
   return (
     <>
       <Sidebar className="border-none bg-[#1A1F2C]">
-        <SidebarHeader className="border-none px-5 py-4">
-          <PortalSwitcher showLabel={!collapsed} className="w-full" />
+        <SidebarHeader className={`border-none ${collapsed ? 'px-0 flex justify-center' : 'px-5'} py-4`}>
+          <PortalSwitcher showLabel={!collapsed} className={collapsed ? "flex justify-center" : "w-full"} />
         </SidebarHeader>
         
-        <SidebarContent className="px-3 py-2">
-          <NavMain collapsed={collapsed} />
-          <NavAnalytics collapsed={collapsed} />
-          <NavPreferences collapsed={collapsed} />
+        <SidebarContent className={`${collapsed ? 'px-0 flex flex-col items-center' : 'px-3'} py-4 overflow-y-visible space-y-6`}>
+          <NavMain />
+          <NavAnalytics />
+          <NavPreferences />
         </SidebarContent>
         
-        <SidebarFooter className="border-t border-white/5 px-5 py-3">
-          <SidebarProfile collapsed={collapsed} />
+        <SidebarFooter className={`border-t border-white/5 ${collapsed ? 'px-0 flex justify-center' : 'px-5'} py-3`}>
+          <SidebarProfile />
         </SidebarFooter>
       </Sidebar>
       <SidebarRail />

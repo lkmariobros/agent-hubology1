@@ -8,15 +8,22 @@ import {
   SidebarGroupContent, 
   SidebarMenu, 
   SidebarMenuItem, 
-  SidebarMenuButton 
+  SidebarMenuButton,
+  useSidebar
 } from '@/components/ui/sidebar';
 
 export function NavAdmin() {
   const location = useLocation();
+  const { state } = useSidebar();
+  const collapsed = state === "icon";
   
   return (
     <SidebarGroup>
-      <SidebarGroupLabel className="text-[13px] text-white/50 px-4 uppercase font-medium">Administration</SidebarGroupLabel>
+      {!collapsed && (
+        <SidebarGroupLabel className="text-[13px] text-white/50 px-4 uppercase font-medium">
+          Administration
+        </SidebarGroupLabel>
+      )}
       <SidebarGroupContent>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -25,9 +32,9 @@ export function NavAdmin() {
               isActive={location.pathname === '/admin' || location.pathname === '/admin/dashboard'}
               tooltip="Dashboard"
             >
-              <NavLink to="/admin" end className="pl-4">
+              <NavLink to="/admin" end className={collapsed ? "justify-center" : "pl-4"}>
                 <Database className="h-4 w-4" />
-                <span>Dashboard</span>
+                {!collapsed && <span>Dashboard</span>}
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -37,9 +44,9 @@ export function NavAdmin() {
               isActive={location.pathname.includes('/admin/agents')}
               tooltip="Agents"
             >
-              <NavLink to="/admin/agents" className="pl-4">
+              <NavLink to="/admin/agents" className={collapsed ? "justify-center" : "pl-4"}>
                 <Users className="h-4 w-4" />
-                <span>Agents</span>
+                {!collapsed && <span>Agents</span>}
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -49,9 +56,9 @@ export function NavAdmin() {
               isActive={location.pathname.includes('/admin/properties')}
               tooltip="Properties"
             >
-              <NavLink to="/admin/properties" className="pl-4">
+              <NavLink to="/admin/properties" className={collapsed ? "justify-center" : "pl-4"}>
                 <Building className="h-4 w-4" />
-                <span>Properties</span>
+                {!collapsed && <span>Properties</span>}
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -61,9 +68,9 @@ export function NavAdmin() {
               isActive={location.pathname.includes('/admin/transactions')}
               tooltip="Transactions"
             >
-              <NavLink to="/admin/transactions" className="pl-4">
+              <NavLink to="/admin/transactions" className={collapsed ? "justify-center" : "pl-4"}>
                 <Briefcase className="h-4 w-4" />
-                <span>Transactions</span>
+                {!collapsed && <span>Transactions</span>}
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -73,9 +80,9 @@ export function NavAdmin() {
               isActive={location.pathname.includes('/admin/commissions')}
               tooltip="Commission"
             >
-              <NavLink to="/admin/commissions" className="pl-4">
+              <NavLink to="/admin/commissions" className={collapsed ? "justify-center" : "pl-4"}>
                 <ListChecks className="h-4 w-4" />
-                <span>Commission</span>
+                {!collapsed && <span>Commission</span>}
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>

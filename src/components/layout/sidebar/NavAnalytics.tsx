@@ -16,14 +16,13 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
+  useSidebar
 } from "@/components/ui/sidebar";
 
-interface NavAnalyticsProps {
-  collapsed?: boolean;
-}
-
-export function NavAnalytics({ collapsed }: NavAnalyticsProps) {
+export function NavAnalytics() {
   const location = useLocation();
+  const { state } = useSidebar();
+  const collapsed = state === "icon";
   const currentPath = location.pathname;
   
   const isLeaderboardPage = currentPath.startsWith('/leaderboard');
@@ -31,7 +30,7 @@ export function NavAnalytics({ collapsed }: NavAnalyticsProps) {
   
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Analytics</SidebarGroupLabel>
+      {!collapsed && <SidebarGroupLabel>Analytics</SidebarGroupLabel>}
       <SidebarGroupContent>
         <SidebarMenu>
           <SidebarMenuItem>

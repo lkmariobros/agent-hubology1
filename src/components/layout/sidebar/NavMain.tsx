@@ -10,11 +10,12 @@ import {
 } from 'lucide-react';
 import {
   SidebarGroup,
-  SidebarGroupContent,
   SidebarGroupLabel,
+  SidebarGroupContent,
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
+  useSidebar
 } from "@/components/ui/sidebar";
 
 // Main navigation data
@@ -46,17 +47,15 @@ const mainNavItems = [
   },
 ];
 
-interface NavMainProps {
-  collapsed?: boolean;
-}
-
-export function NavMain({ collapsed }: NavMainProps) {
+export function NavMain() {
   const location = useLocation();
+  const { state } = useSidebar();
+  const collapsed = state === "icon";
   const currentPath = location.pathname;
   
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Main</SidebarGroupLabel>
+      {!collapsed && <SidebarGroupLabel>Main</SidebarGroupLabel>}
       <SidebarGroupContent>
         <SidebarMenu>
           {mainNavItems.map((item) => {
