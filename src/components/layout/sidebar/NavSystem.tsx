@@ -38,7 +38,7 @@ export function NavSystem() {
           <SidebarMenuItem>
             <SidebarMenuButton 
               asChild 
-              isActive={location.pathname.includes('/admin/settings')}
+              isActive={location.pathname === '/admin/settings'}
               tooltip="Settings"
             >
               <NavLink to="/admin/settings" className={collapsed ? "justify-center" : "pl-4"}>
@@ -51,7 +51,7 @@ export function NavSystem() {
           <SidebarMenuItem>
             <SidebarMenuButton 
               asChild 
-              isActive={location.pathname.includes('/admin/commission/settings')}
+              isActive={location.pathname === '/admin/commission/settings'}
               tooltip="Commission Settings"
             >
               <NavLink to="/admin/commission/settings" className={collapsed ? "justify-center" : "pl-4"}>
@@ -64,7 +64,7 @@ export function NavSystem() {
           <SidebarMenuItem>
             <SidebarMenuButton 
               asChild 
-              isActive={location.pathname.includes('/admin/commission/schedules')}
+              isActive={location.pathname === '/admin/commission/schedules'}
               tooltip="Payment Schedules"
             >
               <NavLink to="/admin/commission/schedules" className={collapsed ? "justify-center" : "pl-4"}>
@@ -77,7 +77,7 @@ export function NavSystem() {
           <SidebarMenuItem>
             <SidebarMenuButton 
               asChild 
-              isActive={location.pathname.includes('/admin/commission/forecast')}
+              isActive={location.pathname === '/admin/commission/forecast'}
               tooltip="Forecast"
             >
               <NavLink to="/admin/commission/forecast" className={collapsed ? "justify-center" : "pl-4"}>
@@ -90,7 +90,7 @@ export function NavSystem() {
           <SidebarMenuItem>
             <SidebarMenuButton 
               asChild 
-              isActive={location.pathname.includes('/admin/roles')}
+              isActive={location.pathname === '/admin/roles'}
               tooltip="Roles & Permissions"
             >
               <NavLink to="/admin/roles" className={collapsed ? "justify-center" : "pl-4"}>
@@ -103,7 +103,7 @@ export function NavSystem() {
           <SidebarMenuItem>
             <SidebarMenuButton 
               asChild 
-              isActive={location.pathname.includes('/admin/commission/tiers')}
+              isActive={location.pathname === '/admin/commission/tiers'}
               tooltip="Commission Tiers"
             >
               <NavLink to="/admin/commission/tiers" className={collapsed ? "justify-center" : "pl-4"}>
@@ -116,7 +116,7 @@ export function NavSystem() {
           <SidebarMenuItem>
             <SidebarMenuButton 
               asChild 
-              isActive={location.pathname.includes('/admin/system-logs')}
+              isActive={location.pathname === '/admin/system-logs'}
               tooltip="System Logs"
             >
               <NavLink to="/admin/system-logs" className={collapsed ? "justify-center" : "pl-4"}>
@@ -129,7 +129,7 @@ export function NavSystem() {
           <SidebarMenuItem>
             <SidebarMenuButton 
               asChild 
-              isActive={location.pathname.includes('/admin/database')}
+              isActive={location.pathname === '/admin/database'}
               tooltip="Database"
             >
               <NavLink to="/admin/database" className={collapsed ? "justify-center" : "pl-4"}>

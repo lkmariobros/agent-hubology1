@@ -123,7 +123,7 @@ function App() {
                   <Route path="commission/approvals/:id" element={<AdminCommissionApproval />} />
                   <Route path="commissions" element={<AdminCommissionApproval />} />
                   <Route path="commissions/:id" element={<AdminCommissionApproval />} />
-                  <Route path="commission/settings" element={<AdminSettings />} />
+                  <Route path="commission/settings" element={<CommissionSettings />} />
                   <Route path="commission/tiers" element={<CommissionTiers />} />
                   <Route path="commission/schedules" element={<PaymentSchedulesAdmin />} />
                   <Route path="commission/forecast" element={<CommissionForecastPage />} />

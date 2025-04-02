@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, Building, Briefcase, ListChecks, CircleDollarSign } from 'lucide-react';
+import { LayoutDashboard, Users, Building, Briefcase, ListChecks, CircleDollarSign, Settings } from 'lucide-react';
 import { 
   SidebarGroup, 
   SidebarGroupLabel, 
