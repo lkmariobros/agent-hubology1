@@ -9,7 +9,7 @@ import { useSidebar } from '@/components/ui/sidebar';
 export function SidebarProfile() {
   const { user } = useAuth();
   const { state } = useSidebar();
-  const collapsed = state === "icon";
+  const collapsed = state === "collapsed";
   
   if (!user) return null;
   

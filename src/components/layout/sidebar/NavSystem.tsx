@@ -15,7 +15,7 @@ import {
 export function NavSystem() {
   const location = useLocation();
   const { state } = useSidebar();
-  const collapsed = state === "icon";
+  const collapsed = state === "collapsed";
   
   return (
     <SidebarGroup className={collapsed ? "" : "mt-4"}>

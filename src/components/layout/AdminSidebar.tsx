@@ -21,7 +21,7 @@ import { PortalSwitcher } from './PortalSwitcher';
 export function AdminSidebar() {
   const { isAdmin } = useAuth();
   const { state } = useSidebar();
-  const collapsed = state === "icon";
+  const collapsed = state === "collapsed";
   
   if (!isAdmin) {
     return null; // Hide sidebar completely if not admin

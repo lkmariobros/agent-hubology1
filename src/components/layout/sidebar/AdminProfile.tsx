@@ -9,7 +9,7 @@ import { useSidebar } from '@/components/ui/sidebar';
 export function AdminProfile() {
   const { user } = useAuth();
   const { state } = useSidebar();
-  const collapsed = state === "icon";
+  const collapsed = state === "collapsed";
   
   if (!user) return null;
   
@@ -33,8 +33,7 @@ export function AdminProfile() {
         to="/admin/profile" 
         className="flex items-center justify-center"
       >
-        <Avatar className="h-7 w-7"><AvatarImage src={`https://i.pravatar.cc/300?u=${user.id}`} alt={displayName} />
-          <AvatarFallback>{getInitials()}</AvatarFallback>
+        <Avatar className="h-7 w-7"><AvatarImage src={`https://i.pravatar.cc/300?u=${user.id}`} alt={displayName} /><AvatarFallback>{getInitials()}</AvatarFallback>
         </Avatar>
       </Link>
     );

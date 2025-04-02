@@ -9,7 +9,7 @@ export const SIDEBAR_WIDTH = "16rem"
 export const SIDEBAR_WIDTH_MOBILE = "18rem"
 export const SIDEBAR_WIDTH_ICON = "3rem"
 
-export type SidebarState = "expanded" | "collapsed" | "icon"
+export type SidebarState = "expanded" | "collapsed"
 
 type SidebarContext = {
   state: SidebarState
@@ -54,17 +54,10 @@ export const SidebarProvider = React.forwardRef<
     const isMobile = useIsMobile()
     const [state, setState] = React.useState<SidebarState>(defaultState)
 
-    // Helper to toggle the sidebar between the three states
+    // Helper to toggle the sidebar between the two states
     const toggleSidebar = React.useCallback(() => {
       setState((prevState) => {
-        let newState: SidebarState;
-        if (prevState === "expanded") {
-          newState = "icon";
-        } else if (prevState === "icon") {
-          newState = "collapsed";
-        } else {
-          newState = "expanded";
-        }
+        const newState = prevState === "expanded" ? "collapsed" : "expanded";
         
         if (onStateChange) {
           onStateChange(newState);

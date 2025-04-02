@@ -1,7 +1,7 @@
 
 import React, { useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
-import { PanelLeftClose, PanelLeftOpen, ChevronLeft } from 'lucide-react';
+import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { AppSidebar } from './AppSidebar';
 import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
 import { Button } from '@/components/ui/button';
@@ -30,8 +30,6 @@ const Header = () => {
           >
             {state === "expanded" ? (
               <PanelLeftClose className="h-4 w-4" />
-            ) : state === "icon" ? (
-              <ChevronLeft className="h-4 w-4" />
             ) : (
               <PanelLeftOpen className="h-4 w-4" />
             )}
@@ -54,8 +52,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
 }) => {
   // Load saved sidebar state from localStorage if available
   const savedStateStr = localStorage.getItem("sidebar:state");
-  const savedState = savedStateStr === "icon" ? "icon" : 
-                     savedStateStr === "collapsed" ? "collapsed" : "expanded";
+  const savedState = savedStateStr === "collapsed" ? "collapsed" : "expanded";
   const location = useLocation();
 
   // Add data-route attribute to body
@@ -77,7 +74,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   }, [location.pathname]);
 
   // Set up effect to save sidebar state changes
-  const handleStateChange = (newState: "expanded" | "collapsed" | "icon") => {
+  const handleStateChange = (newState: "expanded" | "collapsed") => {
     localStorage.setItem("sidebar:state", newState);
   };
   

@@ -21,7 +21,7 @@ import { PortalSwitcher } from './PortalSwitcher';
 export function AppSidebar() {
   const { isAdmin } = useAuth();
   const { state } = useSidebar();
-  const collapsed = state === "icon";
+  const collapsed = state === "collapsed";
   
   return (
     <>
