@@ -13,8 +13,10 @@ import {
   SidebarGroupContent, 
   SidebarMenu, 
   SidebarMenuItem, 
-  SidebarMenuButton 
+  SidebarMenuButton,
+  SidebarSeparator
 } from '@/components/ui/sidebar';
+import { Separator } from "@/components/ui/separator";
 
 export function NavSystem() {
   const location = useLocation();
@@ -72,6 +74,12 @@ export function NavSystem() {
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
+
+          {/* Custom styled separator with rounded appearance */}
+          <div className="px-2 py-1">
+            <div className="h-[2px] rounded-full bg-sidebar-border/20"></div>
+          </div>
+
           <SidebarMenuItem>
             <SidebarMenuButton 
               asChild 
@@ -96,6 +104,12 @@ export function NavSystem() {
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
+
+          {/* Another custom styled separator */}
+          <div className="px-2 py-1">
+            <div className="h-[2px] rounded-full bg-sidebar-border/20"></div>
+          </div>
+
           <SidebarMenuItem>
             <SidebarMenuButton 
               asChild 
