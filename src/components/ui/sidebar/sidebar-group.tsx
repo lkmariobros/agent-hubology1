@@ -1,76 +1,143 @@
 
 import * as React from "react"
-import { Slot } from "@radix-ui/react-slot"
-import { cn } from "@/lib/utils"
+import { ChevronDown, ChevronRight } from "lucide-react"
 
-export const SidebarGroup = React.forwardRef<
+import { cn } from "@/lib/utils"
+import { useSidebar } from "./sidebar-context"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+
+interface SidebarGroupProps {
+  children?: React.ReactNode
+  className?: string
+}
+
+const SidebarGroup = React.forwardRef<
   HTMLDivElement,
-  React.ComponentProps<"div">
->(({ className, ...props }, ref) => {
+  React.HTMLAttributes<HTMLDivElement> & SidebarGroupProps
+>(({ children, className, ...props }, ref) => {
   return (
     <div
       ref={ref}
-      data-sidebar="group"
-      className={cn("relative flex w-full min-w-0 flex-col p-2", className)}
+      className={cn("mb-2 px-2 last:mb-0", className)}
       {...props}
-    />
+    >
+      {children}
+    </div>
   )
 })
 SidebarGroup.displayName = "SidebarGroup"
 
-export const SidebarGroupLabel = React.forwardRef<
-  HTMLDivElement,
-  React.ComponentProps<"div"> & { asChild?: boolean }
->(({ className, asChild = false, ...props }, ref) => {
-  const Comp = asChild ? Slot : "div"
+interface SidebarGroupLabelProps {
+  children?: React.ReactNode
+  className?: string
+  collapsible?: boolean
+  defaultOpen?: boolean
+}
 
-  return (
-    <Comp
-      ref={ref}
-      data-sidebar="group-label"
-      className={cn(
-        "duration-200 flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-medium text-sidebar-foreground/70 outline-none ring-sidebar-ring transition-[margin,opa] ease-linear focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0",
-        "group-data-[collapsible=icon]:-mt-8 group-data-[collapsible=icon]:opacity-0",
-        className
-      )}
-      {...props}
-    />
-  )
-})
+const SidebarGroupLabel = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement> & SidebarGroupLabelProps
+>(
+  (
+    { children, className, collapsible, defaultOpen = true, ...props },
+    ref
+  ) => {
+    const { open: sidebarOpen } = useSidebar()
+    const [open, setOpen] = React.useState(defaultOpen)
+
+    // When sidebar is collapsed, don't show labels
+    if (!sidebarOpen) {
+      return null
+    }
+    
+    return (
+      <div
+        ref={ref}
+        data-state={open ? "open" : "closed"}
+        className={cn(
+          "flex select-none items-center justify-between py-1 text-xs font-medium text-sidebar-foreground/70",
+          className
+        )}
+        {...props}
+      >
+        <span>{children}</span>
+        {collapsible && (
+          <button onClick={() => setOpen(!open)} className="h-4 w-4">
+            {open ? (
+              <ChevronDown className="h-3.5 w-3.5" />
+            ) : (
+              <ChevronRight className="h-3.5 w-3.5" />
+            )}
+            <span className="sr-only">Toggle</span>
+          </button>
+        )}
+      </div>
+    )
+  }
+)
 SidebarGroupLabel.displayName = "SidebarGroupLabel"
 
-export const SidebarGroupAction = React.forwardRef<
-  HTMLButtonElement,
-  React.ComponentProps<"button"> & { asChild?: boolean }
->(({ className, asChild = false, ...props }, ref) => {
-  const Comp = asChild ? Slot : "button"
+interface SidebarGroupActionProps {
+  children?: React.ReactNode
+  className?: string
+}
 
+const SidebarGroupAction = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement> & SidebarGroupActionProps
+>(({ children, className, ...props }, ref) => {
+  const { open } = useSidebar()
+  
+  // Don't show actions when sidebar is collapsed
+  if (!open) {
+    return null
+  }
+  
   return (
-    <Comp
+    <div
       ref={ref}
-      data-sidebar="group-action"
-      className={cn(
-        "absolute right-3 top-3.5 flex aspect-square w-5 items-center justify-center rounded-md p-0 text-sidebar-foreground outline-none ring-sidebar-ring transition-transform hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 [&>svg]:size-4 [&>svg]:shrink-0",
-        // Increases the hit area of the button on mobile.
-        "after:absolute after:-inset-2 after:md:hidden",
-        "group-data-[collapsible=icon]:hidden",
-        className
-      )}
+      className={cn("inline-flex items-center justify-center", className)}
       {...props}
-    />
+    >
+      {children}
+    </div>
   )
 })
 SidebarGroupAction.displayName = "SidebarGroupAction"
 
-export const SidebarGroupContent = React.forwardRef<
+interface SidebarGroupContentProps {
+  children?: React.ReactNode
+  className?: string
+  collapsible?: boolean
+}
+
+const SidebarGroupContent = React.forwardRef<
   HTMLDivElement,
-  React.ComponentProps<"div">
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    data-sidebar="group-content"
-    className={cn("w-full text-sm", className)}
-    {...props}
-  />
-))
+  React.HTMLAttributes<HTMLDivElement> & SidebarGroupContentProps
+>(({ children, className, collapsible, ...props }, ref) => {
+  return (
+    <div
+      ref={ref}
+      className={cn(
+        collapsible &&
+          "data-[state=closed]:hidden data-[state=open]:animate-accordion-down",
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </div>
+  )
+})
 SidebarGroupContent.displayName = "SidebarGroupContent"
+
+export {
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarGroupAction,
+  SidebarGroupContent,
+}

@@ -9,6 +9,7 @@ import {
   SidebarHeader,
   SidebarRail,
   SidebarTrigger,
+  useSidebar,
 } from "@/components/ui/sidebar";
 
 import { NavMain } from './sidebar/NavMain';
@@ -19,21 +20,25 @@ import { PortalSwitcher } from './PortalSwitcher';
 
 export function AppSidebar() {
   const { isAdmin } = useAuth();
+  const { open } = useSidebar();
   
   return (
     <>
-      <Sidebar className="border-none bg-[#1A1F2C]">
-        <SidebarHeader className="border-none px-5 py-4">
-          <PortalSwitcher showLabel={true} className="w-full" />
+      <Sidebar 
+        className="border-none bg-[#1A1F2C]"
+        collapsible="icon" // Use icon mode for collapsible
+      >
+        <SidebarHeader className={`border-none ${open ? 'px-5' : 'px-0'} py-4`}>
+          <PortalSwitcher showLabel={open} className={open ? "w-full" : "w-auto"} />
         </SidebarHeader>
         
-        <SidebarContent className="px-3 py-2">
+        <SidebarContent className={`${open ? 'px-3' : 'px-1'} py-2`}>
           <NavMain />
           <NavAnalytics />
           <NavPreferences />
         </SidebarContent>
         
-        <SidebarFooter className="border-t border-white/5 px-5 py-3">
+        <SidebarFooter className={`border-t border-white/5 ${open ? 'px-5' : 'px-2'} py-3`}>
           <SidebarProfile />
         </SidebarFooter>
       </Sidebar>
