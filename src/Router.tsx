@@ -49,16 +49,17 @@ const router = createBrowserRouter([
           { path: 'dashboard', element: <AdminDashboard /> },
           { path: 'agents', element: <AdminAgents /> },
           { path: 'properties', element: <AdminProperties /> },
+          { path: 'transactions', element: <AdminDashboard /> }, // Placeholder for now
           { path: 'commission/tiers', element: <CommissionTiers /> },
           { path: 'commission/schedules', element: <PaymentSchedulesAdmin /> },
           { path: 'commission/settings', element: <CommissionSettings /> },
           { path: 'commission/forecast', element: <CommissionForecastPage /> },
           { path: 'commissions', element: <CommissionApproval /> },
           { path: 'commissions/:id', element: <CommissionApproval /> },
-          // Add consistent routes for commissions with both plural and singular forms
-          { path: 'commission', element: <CommissionApproval /> },
-          { path: 'commission/:id', element: <CommissionApproval /> },
           { path: 'roles', element: <Roles /> },
+          { path: 'settings', element: <AdminDashboard /> }, // Placeholder
+          { path: 'system-logs', element: <AdminDashboard /> }, // Placeholder
+          { path: 'database', element: <AdminDashboard /> }, // Placeholder
         ],
       },
     ],

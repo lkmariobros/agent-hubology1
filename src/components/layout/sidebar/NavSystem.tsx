@@ -1,7 +1,16 @@
 
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { Settings, Database, FileText } from 'lucide-react';
+import { 
+  Settings, 
+  Database, 
+  FileText, 
+  CircleDollarSign, 
+  CalendarClock, 
+  LineChart, 
+  ShieldCheck, 
+  BarChart4 
+} from 'lucide-react';
 import { 
   SidebarGroup, 
   SidebarGroupLabel, 
@@ -38,18 +47,72 @@ export function NavSystem() {
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
+          
           <SidebarMenuItem>
             <SidebarMenuButton 
               asChild 
-              isActive={location.pathname.includes('/admin/database')}
-              tooltip="Database"
+              isActive={location.pathname.includes('/admin/commission/settings')}
+              tooltip="Commission Settings"
             >
-              <NavLink to="/admin/database" className={collapsed ? "justify-center" : "pl-4"}>
-                <Database className="h-4 w-4" />
-                {!collapsed && <span>Database</span>}
+              <NavLink to="/admin/commission/settings" className={collapsed ? "justify-center" : "pl-4"}>
+                <CircleDollarSign className="h-4 w-4" />
+                {!collapsed && <span>Commission Settings</span>}
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
+          
+          <SidebarMenuItem>
+            <SidebarMenuButton 
+              asChild 
+              isActive={location.pathname.includes('/admin/commission/schedules')}
+              tooltip="Payment Schedules"
+            >
+              <NavLink to="/admin/commission/schedules" className={collapsed ? "justify-center" : "pl-4"}>
+                <CalendarClock className="h-4 w-4" />
+                {!collapsed && <span>Payment Schedules</span>}
+              </NavLink>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          
+          <SidebarMenuItem>
+            <SidebarMenuButton 
+              asChild 
+              isActive={location.pathname.includes('/admin/commission/forecast')}
+              tooltip="Forecast"
+            >
+              <NavLink to="/admin/commission/forecast" className={collapsed ? "justify-center" : "pl-4"}>
+                <LineChart className="h-4 w-4" />
+                {!collapsed && <span>Forecast</span>}
+              </NavLink>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          
+          <SidebarMenuItem>
+            <SidebarMenuButton 
+              asChild 
+              isActive={location.pathname.includes('/admin/roles')}
+              tooltip="Roles & Permissions"
+            >
+              <NavLink to="/admin/roles" className={collapsed ? "justify-center" : "pl-4"}>
+                <ShieldCheck className="h-4 w-4" />
+                {!collapsed && <span>Roles & Permissions</span>}
+              </NavLink>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          
+          <SidebarMenuItem>
+            <SidebarMenuButton 
+              asChild 
+              isActive={location.pathname.includes('/admin/commission/tiers')}
+              tooltip="Commission Tiers"
+            >
+              <NavLink to="/admin/commission/tiers" className={collapsed ? "justify-center" : "pl-4"}>
+                <BarChart4 className="h-4 w-4" />
+                {!collapsed && <span>Commission Tiers</span>}
+              </NavLink>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          
           <SidebarMenuItem>
             <SidebarMenuButton 
               asChild 
@@ -59,6 +122,19 @@ export function NavSystem() {
               <NavLink to="/admin/system-logs" className={collapsed ? "justify-center" : "pl-4"}>
                 <FileText className="h-4 w-4" />
                 {!collapsed && <span>System Logs</span>}
+              </NavLink>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          
+          <SidebarMenuItem>
+            <SidebarMenuButton 
+              asChild 
+              isActive={location.pathname.includes('/admin/database')}
+              tooltip="Database"
+            >
+              <NavLink to="/admin/database" className={collapsed ? "justify-center" : "pl-4"}>
+                <Database className="h-4 w-4" />
+                {!collapsed && <span>Database</span>}
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
