@@ -1,12 +1,11 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import useAuth from "@/hooks/useAuth";
 import { useCommissionNotifications } from '@/hooks/useCommissionNotifications';
 
 const SendTestNotification: React.FC = () => {
-  const { toast } = useToast();
   const { user } = useAuth();
   const {
     createApprovalStatusNotification,
@@ -18,10 +17,8 @@ const SendTestNotification: React.FC = () => {
   
   const sendApprovalNotification = () => {
     if (!user?.id) {
-      toast({
-        title: "Error",
-        description: "User not logged in",
-        variant: "destructive"
+      toast.error("Error", {
+        description: "User not logged in"
       });
       return;
     }
@@ -35,10 +32,8 @@ const SendTestNotification: React.FC = () => {
   
   const sendTierProgressNotification = () => {
     if (!user?.id) {
-      toast({
-        title: "Error",
-        description: "User not logged in",
-        variant: "destructive"
+      toast.error("Error", {
+        description: "User not logged in"
       });
       return;
     }
@@ -49,10 +44,8 @@ const SendTestNotification: React.FC = () => {
   
   const sendTierAchievedNotification = () => {
     if (!user?.id) {
-      toast({
-        title: "Error",
-        description: "User not logged in",
-        variant: "destructive"
+      toast.error("Error", {
+        description: "User not logged in"
       });
       return;
     }
@@ -65,10 +58,8 @@ const SendTestNotification: React.FC = () => {
   
   const sendMilestoneNotification = () => {
     if (!user?.id) {
-      toast({
-        title: "Error",
-        description: "User not logged in",
-        variant: "destructive"
+      toast.error("Error", {
+        description: "User not logged in"
       });
       return;
     }
@@ -81,10 +72,8 @@ const SendTestNotification: React.FC = () => {
   
   const sendTransactionStatusNotification = () => {
     if (!user?.id) {
-      toast({
-        title: "Error",
-        description: "User not logged in",
-        variant: "destructive"
+      toast.error("Error", {
+        description: "User not logged in"
       });
       return;
     }
