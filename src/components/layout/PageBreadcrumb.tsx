@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
@@ -31,46 +30,92 @@ const PageBreadcrumb = () => {
   // Build breadcrumb items based on current path
   const breadcrumbItems: Array<{path: string, label: string, isHome?: boolean}> = [];
   
-  // Add home item
-  breadcrumbItems.push({
-    path: '/dashboard',
-    label: 'Home',
-    isHome: true
-  });
+  // Check if we're in the admin section
+  const isAdminRoute = pathSegments.includes('admin');
   
-  // Add additional segments
-  let currentPath = '';
-  pathSegments.forEach((segment, index) => {
-    // Skip the first dashboard segment since it's represented by the home icon
-    if (index === 0 && segment === 'dashboard') return;
+  if (isAdminRoute) {
+    // For admin routes, start with Admin instead of Home
+    breadcrumbItems.push({
+      path: '/admin',
+      label: 'Admin'
+    });
     
-    currentPath += `/${segment}`;
+    // Add additional segments after admin
+    let currentPath = '/admin';
+    const adminIndex = pathSegments.indexOf('admin');
     
-    // Check if it's a numeric ID (like in property/1)
-    const isNumericId = !isNaN(Number(segment));
-    
-    if (isNumericId && index > 0) {
-      // If it's an ID, use the previous segment's type
-      const entityType = pathSegments[index - 1];
-      // Remove trailing 's' if it exists (e.g., properties -> property)
-      const singularType = entityType.endsWith('s') ? entityType.slice(0, -1) : entityType;
+    // Add segments after admin
+    for (let i = adminIndex + 1; i < pathSegments.length; i++) {
+      const segment = pathSegments[i];
+      currentPath += `/${segment}`;
       
-      breadcrumbItems.push({
-        path: currentPath,
-        label: `${singularType.charAt(0).toUpperCase() + singularType.slice(1)} ${segment}`
-      });
-    } else {
-      // Regular path segment
-      const config = routeConfigs[segment] || { 
-        label: segment.charAt(0).toUpperCase() + segment.slice(1)
-      };
+      // Check if it's a numeric ID
+      const isNumericId = !isNaN(Number(segment));
       
-      breadcrumbItems.push({
-        path: currentPath,
-        label: config.label
-      });
+      if (isNumericId && i > 0) {
+        // If it's an ID, use the previous segment's type
+        const entityType = pathSegments[i - 1];
+        // Remove trailing 's' if it exists (e.g., properties -> property)
+        const singularType = entityType.endsWith('s') ? entityType.slice(0, -1) : entityType;
+        
+        breadcrumbItems.push({
+          path: currentPath,
+          label: `${singularType.charAt(0).toUpperCase() + singularType.slice(1)} ${segment}`
+        });
+      } else {
+        // Regular path segment
+        const config = routeConfigs[segment] || { 
+          label: segment.charAt(0).toUpperCase() + segment.slice(1)
+        };
+        
+        breadcrumbItems.push({
+          path: currentPath,
+          label: config.label
+        });
+      }
     }
-  });
+  } else {
+    // Non-admin routes keep the home icon
+    breadcrumbItems.push({
+      path: '/dashboard',
+      label: 'Home',
+      isHome: true
+    });
+    
+    // Add additional segments for non-admin routes
+    let currentPath = '';
+    pathSegments.forEach((segment, index) => {
+      // Skip the first dashboard segment since it's represented by the home icon
+      if (index === 0 && segment === 'dashboard') return;
+      
+      currentPath += `/${segment}`;
+      
+      // Check if it's a numeric ID (like in property/1)
+      const isNumericId = !isNaN(Number(segment));
+      
+      if (isNumericId && index > 0) {
+        // If it's an ID, use the previous segment's type
+        const entityType = pathSegments[index - 1];
+        // Remove trailing 's' if it exists (e.g., properties -> property)
+        const singularType = entityType.endsWith('s') ? entityType.slice(0, -1) : entityType;
+        
+        breadcrumbItems.push({
+          path: currentPath,
+          label: `${singularType.charAt(0).toUpperCase() + singularType.slice(1)} ${segment}`
+        });
+      } else {
+        // Regular path segment
+        const config = routeConfigs[segment] || { 
+          label: segment.charAt(0).toUpperCase() + segment.slice(1)
+        };
+        
+        breadcrumbItems.push({
+          path: currentPath,
+          label: config.label
+        });
+      }
+    });
+  }
 
   return (
     <Breadcrumb>
