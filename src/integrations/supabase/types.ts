@@ -559,6 +559,27 @@ export type Database = {
         }
         Relationships: []
       }
+      permissions: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       property_documents: {
         Row: {
           created_at: string | null
@@ -771,6 +792,66 @@ export type Database = {
         }
         Relationships: []
       }
+      role_permissions: {
+        Row: {
+          created_at: string | null
+          id: string
+          permission_id: string
+          role_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          permission_id: string
+          role_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          permission_id?: string
+          role_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_permissions_permission_id_fkey"
+            columns: ["permission_id"]
+            isOneToOne: false
+            referencedRelation: "permissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_permissions_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      roles: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       schedule_installments: {
         Row: {
           created_at: string | null
@@ -889,11 +970,47 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      assign_role_to_user: {
+        Args: {
+          p_user_id: string
+          p_role_name: string
+        }
+        Returns: boolean
+      }
       binary_quantize:
         | {
             Args: {
@@ -927,6 +1044,15 @@ export type Database = {
         }
         Returns: Json[]
       }
+      get_user_roles: {
+        Args: {
+          p_user_id: string
+        }
+        Returns: {
+          role_name: string
+          role_id: string
+        }[]
+      }
       halfvec_avg: {
         Args: {
           "": number[]
@@ -950,6 +1076,13 @@ export type Database = {
           "": unknown[]
         }
         Returns: number
+      }
+      has_role: {
+        Args: {
+          p_user_id: string
+          p_role_name: string
+        }
+        Returns: boolean
       }
       hnsw_bit_support: {
         Args: {
