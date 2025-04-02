@@ -8,7 +8,8 @@ import { useForm } from 'react-hook-form';
 import { Role, Permission, PermissionCategory } from '@/types/role';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PermissionSelector } from './PermissionSelector';
-import { roleService } from '@/services/roleService';
+import { useRoles } from '@/hooks/useRoles';
+import LoadingIndicator from '@/components/ui/loading-indicator';
 
 interface RoleFormValues {
   name: string;
@@ -39,41 +40,41 @@ export function RoleDialog({
     }
   });
   
-  const [permissionCategories, setPermissionCategories] = useState<PermissionCategory[]>([]);
+  const { 
+    permissionCategories, 
+    isLoadingCategories,
+    loadRolePermissions
+  } = useRoles();
+  
   const [selectedPermissions, setSelectedPermissions] = useState<Permission[]>([]);
   const [activeTab, setActiveTab] = useState("basic");
   const [loading, setLoading] = useState(false);
   
-  // Fetch permissions when dialog opens
+  // Reset form when dialog opens or role changes
   useEffect(() => {
     if (open) {
-      loadPermissions();
-      
       reset({
         name: role?.name || '',
         description: role?.description || ''
       });
-    }
-  }, [open, role, reset]);
-  
-  // Load permissions and categories
-  const loadPermissions = async () => {
-    setLoading(true);
-    try {
-      const categories = await roleService.getPermissionsByCategories();
-      setPermissionCategories(categories);
       
-      // If editing an existing role, fetch its permissions
+      // Load role permissions if editing
       if (role?.id) {
-        const roleDetail = await roleService.getRole(role.id);
-        if (roleDetail && roleDetail.permissions) {
-          setSelectedPermissions(roleDetail.permissions.map(p => ({ ...p, selected: true })));
-        }
+        loadRolePermissionsForRole(role.id);
       } else {
         setSelectedPermissions([]);
       }
+    }
+  }, [open, role, reset]);
+  
+  // Load permissions for a specific role
+  const loadRolePermissionsForRole = async (roleId: string) => {
+    try {
+      setLoading(true);
+      const permissions = await loadRolePermissions(roleId);
+      setSelectedPermissions(permissions.map(p => ({ ...p, selected: true })));
     } catch (error) {
-      console.error('Error loading permissions:', error);
+      console.error('Error loading role permissions:', error);
     } finally {
       setLoading(false);
     }
@@ -81,7 +82,7 @@ export function RoleDialog({
   
   // Handle permission selection changes
   const handlePermissionChange = (permissions: Permission[]) => {
-    setSelectedPermissions(permissions.filter(p => p.selected));
+    setSelectedPermissions(permissions);
   };
   
   // Handle form submission
@@ -91,6 +92,8 @@ export function RoleDialog({
       permissions: selectedPermissions
     });
   };
+  
+  const isLoadingData = isLoadingCategories || loading;
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
@@ -138,8 +141,10 @@ export function RoleDialog({
             </TabsContent>
             
             <TabsContent value="permissions" className="space-y-4 pt-4">
-              {loading ? (
-                <div className="text-center py-4">Loading permissions...</div>
+              {isLoadingData ? (
+                <div className="flex justify-center py-8">
+                  <LoadingIndicator text="Loading permissions..." />
+                </div>
               ) : (
                 <PermissionSelector
                   permissionCategories={permissionCategories}
@@ -151,10 +156,10 @@ export function RoleDialog({
           </Tabs>
 
           <div className="flex justify-end space-x-2 pt-4">
-            <Button variant="outline" type="button" onClick={onClose} disabled={isSubmitting}>
+            <Button variant="outline" type="button" onClick={onClose} disabled={isSubmitting || isLoadingData}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button type="submit" disabled={isSubmitting || isLoadingData}>
               {isSubmitting ? 'Saving...' : role ? 'Update Role' : 'Create Role'}
             </Button>
           </div>

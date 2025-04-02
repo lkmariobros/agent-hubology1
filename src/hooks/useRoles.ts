@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { roleService } from '@/services/roleService';
 import { Role, Permission, PermissionCategory } from '@/types/role';
+import { toast } from 'sonner';
 
 export function useRoles() {
   const queryClient = useQueryClient();
@@ -21,21 +22,23 @@ export function useRoles() {
   // Fetch permissions
   const {
     data: permissions = [],
-    isLoading: isLoadingPermissions
+    isLoading: isLoadingPermissions,
+    refetch: refetchPermissions
   } = useQuery({
     queryKey: ['permissions'],
     queryFn: roleService.getPermissions,
-    enabled: false // Only load when needed
+    enabled: true // Always load permissions
   });
 
   // Fetch permission categories
   const {
     data: permissionCategories = [],
-    isLoading: isLoadingCategories
+    isLoading: isLoadingCategories,
+    refetch: refetchPermissionCategories
   } = useQuery({
     queryKey: ['permissionCategories'],
     queryFn: roleService.getPermissionsByCategories,
-    enabled: false // Only load when needed
+    enabled: true // Always load permission categories
   });
 
   // Create a new role
@@ -43,6 +46,10 @@ export function useRoles() {
     mutationFn: roleService.createRole,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['roles'] });
+      toast.success("Role created successfully");
+    },
+    onError: (error: any) => {
+      toast.error(`Failed to create role: ${error.message || "Unknown error"}`);
     }
   });
 
@@ -52,6 +59,10 @@ export function useRoles() {
       roleService.updateRole(id, updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['roles'] });
+      toast.success("Role updated successfully");
+    },
+    onError: (error: any) => {
+      toast.error(`Failed to update role: ${error.message || "Unknown error"}`);
     }
   });
 
@@ -60,6 +71,10 @@ export function useRoles() {
     mutationFn: roleService.deleteRole,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['roles'] });
+      toast.success("Role deleted successfully");
+    },
+    onError: (error: any) => {
+      toast.error(`Failed to delete role: ${error.message || "Unknown error"}`);
     }
   });
 
@@ -80,7 +95,14 @@ export function useRoles() {
 
   // Load permissions for a role
   const loadRolePermissions = useCallback(async (roleId: string) => {
-    return roleService.getRolePermissions(roleId);
+    try {
+      const rolePermissions = await roleService.getRolePermissions(roleId);
+      return rolePermissions;
+    } catch (error) {
+      console.error('Error loading role permissions:', error);
+      toast.error("Failed to load role permissions");
+      return [];
+    }
   }, []);
 
   return {
@@ -93,6 +115,8 @@ export function useRoles() {
     isLoadingPermissions,
     isLoadingCategories,
     loadRolePermissions,
+    refetchPermissions,
+    refetchPermissionCategories,
     createRole,
     updateRole,
     deleteRole,

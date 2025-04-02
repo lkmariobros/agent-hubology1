@@ -1,39 +1,43 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Permission, PermissionCategory } from '@/types/role';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import LoadingIndicator from '@/components/ui/loading-indicator';
 
 interface PermissionSelectorProps {
   permissionCategories: PermissionCategory[];
   selectedPermissions: Permission[];
   onPermissionChange: (updatedPermissions: Permission[]) => void;
+  isLoading?: boolean;
 }
 
 export function PermissionSelector({ 
   permissionCategories, 
   selectedPermissions, 
-  onPermissionChange 
+  onPermissionChange,
+  isLoading = false
 }: PermissionSelectorProps) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [preparedCategories, setPreparedCategories] = useState<PermissionCategory[]>([]);
   
   // Prepare permissions with selection state
-  const preparePermissions = () => {
-    const preparedCategories = JSON.parse(JSON.stringify(permissionCategories)) as PermissionCategory[];
-    
-    // Mark permissions as selected based on selectedPermissions
-    preparedCategories.forEach(category => {
-      category.permissions.forEach(permission => {
-        permission.selected = selectedPermissions.some(p => p.id === permission.id);
+  useEffect(() => {
+    if (permissionCategories.length > 0) {
+      const prepared = JSON.parse(JSON.stringify(permissionCategories)) as PermissionCategory[];
+      
+      // Mark permissions as selected based on selectedPermissions
+      prepared.forEach(category => {
+        category.permissions.forEach(permission => {
+          permission.selected = selectedPermissions.some(p => p.id === permission.id);
+        });
       });
-    });
-    
-    return preparedCategories;
-  };
-  
-  const [preparedCategories, setPreparedCategories] = useState<PermissionCategory[]>(preparePermissions());
+      
+      setPreparedCategories(prepared);
+    }
+  }, [permissionCategories, selectedPermissions]);
   
   // Filter permissions based on search term
   const filteredCategories = preparedCategories
@@ -59,10 +63,22 @@ export function PermissionSelector({
     
     setPreparedCategories(updatedCategories);
     
-    // Collect all permissions from all categories
-    const allPermissions = updatedCategories.flatMap(c => c.permissions);
-    onPermissionChange(allPermissions);
+    // Collect all selected permissions from all categories
+    const allSelectedPermissions = updatedCategories
+      .flatMap(c => c.permissions)
+      .filter(p => p.selected);
+      
+    onPermissionChange(allSelectedPermissions);
   };
+  
+  if (isLoading) {
+    return <LoadingIndicator size="md" text="Loading permissions..." />;
+  }
+  
+  const selectedCount = preparedCategories
+    .flatMap(c => c.permissions)
+    .filter(p => p.selected)
+    .length;
   
   return (
     <div className="space-y-4">
@@ -76,10 +92,10 @@ export function PermissionSelector({
         />
       </div>
       
-      <div className="border rounded-md max-h-60 overflow-y-auto">
+      <div className="border rounded-md max-h-[300px] overflow-y-auto">
         {filteredCategories.length === 0 ? (
           <div className="p-4 text-center text-muted-foreground">
-            No permissions found matching "{searchTerm}"
+            {searchTerm ? `No permissions found matching "${searchTerm}"` : 'No permissions available'}
           </div>
         ) : (
           <Accordion type="multiple" className="w-full">
@@ -95,7 +111,7 @@ export function PermissionSelector({
                         <Checkbox 
                           id={permission.id} 
                           checked={permission.selected}
-                          onCheckedChange={(checked) => handlePermissionChange(permission.id, checked as boolean)}
+                          onCheckedChange={(checked) => handlePermissionChange(permission.id, checked === true)}
                         />
                         <div className="grid gap-1">
                           <label
@@ -121,7 +137,7 @@ export function PermissionSelector({
       </div>
       
       <div className="pt-2 text-xs text-muted-foreground">
-        {selectedPermissions.filter(p => p.selected).length} permissions selected
+        {selectedCount} permissions selected
       </div>
     </div>
   );
