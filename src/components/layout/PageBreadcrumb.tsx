@@ -9,46 +9,42 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Home, Building, Users, FileText, Wallet, PieChart, Settings } from 'lucide-react';
-
-interface BreadcrumbItem {
-  path: string;
-  label: string;
-  icon: React.ReactNode;
-}
+import { Home } from 'lucide-react';
 
 const PageBreadcrumb = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const pathSegments = location.pathname.split('/').filter(segment => segment);
   
-  // Define routes and their configs
-  const routeConfigs: Record<string, { label: string, icon: React.ReactNode }> = {
-    'dashboard': { label: 'Dashboard', icon: <Home size={16} className="mr-1" /> },
-    'properties': { label: 'Properties', icon: <Building size={16} className="mr-1" /> },
-    'agents': { label: 'Agents', icon: <Users size={16} className="mr-1" /> },
-    'transactions': { label: 'Transactions', icon: <FileText size={16} className="mr-1" /> },
-    'commission': { label: 'Commission', icon: <Wallet size={16} className="mr-1" /> },
-    'reports': { label: 'Reports', icon: <PieChart size={16} className="mr-1" /> },
-    'settings': { label: 'Settings', icon: <Settings size={16} className="mr-1" /> },
-    'admin': { label: 'Admin', icon: <Settings size={16} className="mr-1" /> },
+  // Define routes and their labels
+  const routeConfigs: Record<string, { label: string }> = {
+    'dashboard': { label: 'Dashboard' },
+    'properties': { label: 'Properties' },
+    'agents': { label: 'Agents' },
+    'transactions': { label: 'Transactions' },
+    'commission': { label: 'Commission' },
+    'reports': { label: 'Reports' },
+    'settings': { label: 'Settings' },
+    'admin': { label: 'Admin' },
   };
   
   // Build breadcrumb items based on current path
-  const breadcrumbItems: BreadcrumbItem[] = [{
+  const breadcrumbItems: Array<{path: string, label: string, isHome?: boolean}> = [];
+  
+  // Add home item
+  breadcrumbItems.push({
     path: '/dashboard',
-    label: 'Dashboard',
-    icon: <Home size={16} className="mr-1" />
-  }];
+    label: 'Home',
+    isHome: true
+  });
   
   // Add additional segments
   let currentPath = '';
   pathSegments.forEach((segment, index) => {
-    // Skip the first dashboard segment since it's always included
+    // Skip the first dashboard segment since it's represented by the home icon
     if (index === 0 && segment === 'dashboard') return;
     
     currentPath += `/${segment}`;
-    const isLast = index === pathSegments.length - 1;
     
     // Check if it's a numeric ID (like in property/1)
     const isNumericId = !isNaN(Number(segment));
@@ -61,20 +57,17 @@ const PageBreadcrumb = () => {
       
       breadcrumbItems.push({
         path: currentPath,
-        label: `${singularType.charAt(0).toUpperCase() + singularType.slice(1)} ${segment}`,
-        icon: routeConfigs[entityType]?.icon || <Building size={16} className="mr-1" />
+        label: `${singularType.charAt(0).toUpperCase() + singularType.slice(1)} ${segment}`
       });
     } else {
       // Regular path segment
       const config = routeConfigs[segment] || { 
-        label: segment.charAt(0).toUpperCase() + segment.slice(1), 
-        icon: <Building size={16} className="mr-1" /> 
+        label: segment.charAt(0).toUpperCase() + segment.slice(1)
       };
       
       breadcrumbItems.push({
         path: currentPath,
-        label: config.label,
-        icon: config.icon
+        label: config.label
       });
     }
   });
@@ -86,21 +79,25 @@ const PageBreadcrumb = () => {
           <React.Fragment key={item.path}>
             <BreadcrumbItem>
               {index === breadcrumbItems.length - 1 ? (
-                <BreadcrumbPage className="flex items-center">
-                  {item.icon}
-                  {item.label}
+                <BreadcrumbPage>
+                  {item.isHome ? (
+                    <span className="sr-only">Home</span>
+                  ) : item.label}
                 </BreadcrumbPage>
               ) : (
                 <BreadcrumbLink 
                   href={item.path}
-                  className="flex items-center" 
                   onClick={(e) => {
                     e.preventDefault();
                     navigate(item.path);
                   }}
                 >
-                  {item.icon}
-                  {item.label}
+                  {item.isHome ? (
+                    <>
+                      <Home size={16} aria-hidden="true" />
+                      <span className="sr-only">Home</span>
+                    </>
+                  ) : item.label}
                 </BreadcrumbLink>
               )}
             </BreadcrumbItem>

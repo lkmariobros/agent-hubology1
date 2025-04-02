@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
@@ -18,11 +17,11 @@ const Header = () => {
     open,
     toggleSidebar
   } = useSidebar();
-  return <div>
+  return <div className="sticky top-0 z-10 bg-[#161920]">
       {/* Breadcrumb and Navigation Section */}
-      <div className="flex items-center justify-between px-6 py-2">
-        <div className="flex items-center">
-          <Button variant="ghost" size="icon" onClick={toggleSidebar} className="h-8 w-8 mr-2 z-20" aria-label={open ? "Collapse sidebar" : "Expand sidebar"}>
+      <div className="flex items-center justify-between px-6 py-3">
+        <div className="flex items-center space-x-2">
+          <Button variant="ghost" size="icon" onClick={toggleSidebar} className="h-8 w-8 mr-1" aria-label={open ? "Collapse sidebar" : "Expand sidebar"}>
             {open ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeftOpen className="h-4 w-4" />}
           </Button>
           <PageBreadcrumb />
