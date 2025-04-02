@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 import { initSentry } from './lib/sentry';
+import { Toaster } from './components/ui/sonner';
 
 // Get root element - do this before Sentry initialization
 const rootElement = document.getElementById("root");
@@ -16,5 +17,10 @@ if (!rootElement) {
   
   // Create and render React root
   const root = createRoot(rootElement);
-  root.render(<App />);
+  root.render(
+    <>
+      <App />
+      <Toaster />
+    </>
+  );
 }
