@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, Building, Briefcase, ListChecks } from 'lucide-react';
+import { LayoutDashboard, Users, Building, Briefcase, ListChecks, CircleDollarSign } from 'lucide-react';
 import { 
   SidebarGroup, 
   SidebarGroupLabel, 
@@ -78,11 +78,11 @@ export function NavAdmin() {
             <SidebarMenuButton 
               asChild 
               isActive={location.pathname.includes('/admin/commissions')}
-              tooltip="Commission"
+              tooltip="Commission Approvals"
             >
               <NavLink to="/admin/commissions" className={collapsed ? "justify-center" : "pl-4"}>
                 <ListChecks className="h-4 w-4" />
-                {!collapsed && <span>Commission</span>}
+                {!collapsed && <span>Commission Approvals</span>}
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
