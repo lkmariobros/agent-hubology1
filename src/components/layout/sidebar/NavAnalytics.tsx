@@ -22,7 +22,7 @@ import {
 export function NavAnalytics() {
   const location = useLocation();
   const { state } = useSidebar();
-  const collapsed = state === "icon";
+  const collapsed = state === "collapsed";
   const currentPath = location.pathname;
   
   const isLeaderboardPage = currentPath.startsWith('/leaderboard');

@@ -15,7 +15,7 @@ import {
 export function NavAdmin() {
   const location = useLocation();
   const { state } = useSidebar();
-  const collapsed = state === "icon";
+  const collapsed = state === "collapsed";
   
   return (
     <SidebarGroup>
