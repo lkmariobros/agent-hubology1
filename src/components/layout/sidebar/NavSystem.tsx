@@ -75,9 +75,9 @@ export function NavSystem() {
             </SidebarMenuButton>
           </SidebarMenuItem>
 
-          {/* Custom styled separator with rounded appearance */}
-          <div className="px-2 py-1">
-            <div className="h-[2px] rounded-full bg-sidebar-border/20"></div>
+          {/* Better styled separator to match the screenshot */}
+          <div className="px-3 py-3">
+            <div className="h-[1px] rounded-full bg-white/5"></div>
           </div>
 
           <SidebarMenuItem>
@@ -105,9 +105,9 @@ export function NavSystem() {
             </SidebarMenuButton>
           </SidebarMenuItem>
 
-          {/* Another custom styled separator */}
-          <div className="px-2 py-1">
-            <div className="h-[2px] rounded-full bg-sidebar-border/20"></div>
+          {/* Another better styled separator to match the screenshot */}
+          <div className="px-3 py-3">
+            <div className="h-[1px] rounded-full bg-white/5"></div>
           </div>
 
           <SidebarMenuItem>

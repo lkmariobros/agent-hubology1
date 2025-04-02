@@ -79,6 +79,11 @@ export function NavAdmin() {
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
+          
+          {/* Add separator at the bottom of this section to match the screenshot */}
+          <div className="px-3 py-3">
+            <div className="h-[1px] rounded-full bg-white/5"></div>
+          </div>
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>

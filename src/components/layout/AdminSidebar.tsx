@@ -26,19 +26,19 @@ export function AdminSidebar() {
 
   return (
     <>
-      <Sidebar className="border-none bg-[#1F232D] AdminSidebar">
-        <SidebarHeader>
+      <Sidebar className="border-none bg-[#1F232D]">
+        <SidebarHeader className="border-b border-white/5">
           {/* Use the consistent PortalSwitcher component */}
-          <PortalSwitcher showLabel={true} className="px-2 py-3 w-full" />
+          <PortalSwitcher showLabel={true} className="px-3 py-4 w-full" />
         </SidebarHeader>
         
-        <SidebarContent>
+        <SidebarContent className="py-4">
           <NavAdmin />
           <NavReports />
           <NavSystem />
         </SidebarContent>
         
-        <SidebarFooter>
+        <SidebarFooter className="border-t border-white/5 py-3">
           <AdminProfile />
         </SidebarFooter>
       </Sidebar>
