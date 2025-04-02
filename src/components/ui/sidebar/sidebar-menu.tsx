@@ -1,15 +1,15 @@
 
 import * as React from "react"
-import { ChevronRight } from "lucide-react"
+import { MoreHorizontal } from "lucide-react"
 
 import { cn } from "@/lib/utils"
-import { Badge } from "@/components/ui/badge"
+import { useSidebar } from "./sidebar-context"
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { useSidebar } from "./sidebar-context"
+import { Badge } from "@/components/ui/badge"
 
 interface SidebarMenuProps {
   children?: React.ReactNode
@@ -23,10 +23,7 @@ const SidebarMenu = React.forwardRef<
   return (
     <ul
       ref={ref}
-      className={cn(
-        "flex flex-col gap-1 data-[state=collapsed]:items-center",
-        className
-      )}
+      className={cn("space-y-1 px-2", className)}
       {...props}
     >
       {children}
@@ -38,25 +35,16 @@ SidebarMenu.displayName = "SidebarMenu"
 interface SidebarMenuItemProps {
   children?: React.ReactNode
   className?: string
-  active?: boolean
 }
 
 const SidebarMenuItem = React.forwardRef<
   HTMLLIElement,
   React.HTMLAttributes<HTMLLIElement> & SidebarMenuItemProps
->(({ children, className, active, ...props }, ref) => {
-  const { open } = useSidebar()
-  
+>(({ children, className, ...props }, ref) => {
   return (
     <li
       ref={ref}
-      data-active={active}
-      className={cn(
-        "flex items-center",
-        active ? "font-medium" : "font-normal",
-        !open && "justify-center", // Center icons when collapsed
-        className
-      )}
+      className={cn("relative", className)}
       {...props}
     >
       {children}
@@ -65,130 +53,84 @@ const SidebarMenuItem = React.forwardRef<
 })
 SidebarMenuItem.displayName = "SidebarMenuItem"
 
-interface SidebarMenuButtonProps {
+export interface SidebarMenuButtonProps {
   children?: React.ReactNode
+  tooltip?: React.ReactNode
+  isActive?: boolean
   className?: string
-  variant?: "default" | "outline" | "ghost"
   asChild?: boolean
-  tooltip?: string
-  isActive?: boolean // Add the isActive prop to the interface
-  size?: string
 }
 
 const SidebarMenuButton = React.forwardRef<
   HTMLButtonElement,
   React.ButtonHTMLAttributes<HTMLElement> & SidebarMenuButtonProps
->(
-  (
-    { asChild = false, className, variant = "default", children, tooltip, isActive, ...props },
-    ref
-  ) => {
-    const { open } = useSidebar()
-    const Comp = asChild ? React.Fragment : "button"
-    const childProps = asChild ? {} : { ref, ...props }
-
-    // Get the child element if it's a React element
-    const childElement = React.isValidElement(children) ? children : null;
-    
-    // Extract icon and text from children
-    let icon: React.ReactNode = null;
-    let text: React.ReactNode = null;
-    
-    // If asChild is true and there's a valid child element
-    if (asChild && childElement) {
-      const childrenOfChild = React.Children.toArray(childElement.props.children);
-      // Assume the first child is the icon
-      if (childrenOfChild.length > 0) {
-        icon = childrenOfChild[0];
-        if (childrenOfChild.length > 1) {
-          text = childrenOfChild.slice(1);
-        }
-      }
-    } else {
-      // For non-asChild usage, assume the first child is the icon and the rest is text
-      const childArray = React.Children.toArray(children);
-      if (childArray.length > 0) {
-        icon = childArray[0];
-        if (childArray.length > 1) {
-          text = childArray.slice(1);
-        }
-      }
-    }
-
-    const Content = (
-      <Comp
-        className={cn(
-          "flex w-full cursor-pointer select-none items-center gap-2 rounded-md px-2 py-1.5 outline-none focus-visible:ring-1 focus-visible:ring-ring",
-          "data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground",
-          "hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground",
-          "focus-visible:bg-sidebar-accent/50 focus-visible:text-sidebar-accent-foreground",
-          "group dark:focus-visible:text-accent",
-          variant === "outline" && "border border-sidebar-border",
-          variant === "ghost" && "hover:bg-transparent hover:underline",
-          !open && "justify-center px-0", // Center and remove padding when collapsed
-          className
-        )}
-        data-active={isActive}
-        {...childProps}
-      >
-        {asChild ? (
-          children
-        ) : (
-          <>
-            {icon}
-            {open && text}
-          </>
-        )}
-      </Comp>
-    );
-
-    // If sidebar is collapsed and tooltip is provided, wrap with tooltip
-    if (!open && tooltip) {
-      return (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            {Content}
-          </TooltipTrigger>
-          <TooltipContent side="right" className="ml-1">
-            {tooltip || (text && String(text))}
-          </TooltipContent>
-        </Tooltip>
-      );
-    }
-
-    return Content;
+>(({ children, tooltip, isActive, className, asChild = false, ...props }, ref) => {
+  const { isCollapsed, isIconOnly } = useSidebar()
+  
+  // If the sidebar is completely collapsed, don't render
+  if (isCollapsed) {
+    return null
   }
-);
-SidebarMenuButton.displayName = "SidebarMenuButton";
-
-
-interface SidebarMenuActionProps {
-  children?: React.ReactNode
-  className?: string
-  small?: boolean
-}
-
-const SidebarMenuAction = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & SidebarMenuActionProps
->(({ children, className, small, ...props }, ref) => {
-  const { open } = useSidebar()
   
-  // Don't render actions when sidebar is collapsed
-  if (!open) return null
-  
-  return (
-    <div
+  const Comp = asChild ? "span" : "button"
+  const content = (
+    <Comp
       ref={ref}
+      data-active={isActive ? "true" : "false"}
       className={cn(
-        "flex items-center gap-2",
-        small ? "text-xs" : "text-sm",
+        "inline-flex w-full items-center gap-2 whitespace-nowrap rounded-md px-3 py-2 text-sm hover:bg-sidebar-accent hover:text-sidebar-foreground hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+        isActive ? "bg-sidebar-accent/30 text-sidebar-foreground" : "text-sidebar-foreground/70",
+        isIconOnly && "justify-center px-2",
         className
       )}
       {...props}
     >
       {children}
-    </div>
+    </Comp>
+  )
+  
+  // When in icon-only mode with a tooltip, wrap in tooltip component
+  if (isIconOnly && tooltip) {
+    return (
+      <Tooltip delayDuration={0}>
+        <TooltipTrigger asChild>{content}</TooltipTrigger>
+        <TooltipContent side="right">{tooltip}</TooltipContent>
+      </Tooltip>
+    )
+  }
+  
+  return content
+})
+SidebarMenuButton.displayName = "SidebarMenuButton"
+
+interface SidebarMenuActionProps {
+  children?: React.ReactNode
+  className?: string
+  asChild?: boolean
+}
+
+const SidebarMenuAction = React.forwardRef<
+  HTMLButtonElement,
+  React.ButtonHTMLAttributes<HTMLButtonElement> & SidebarMenuActionProps
+>(({ children, className, asChild = false, ...props }, ref) => {
+  const { isIconOnly } = useSidebar()
+  
+  // Don't render actions in icon-only mode
+  if (isIconOnly) {
+    return null
+  }
+  
+  return (
+    <button
+      ref={ref}
+      className={cn(
+        "absolute right-2 top-2 cursor-pointer rounded-full p-1 opacity-0 hover:opacity-100",
+        className
+      )}
+      {...props}
+    >
+      {children || <MoreHorizontal className="h-4 w-4" />}
+    </button>
   )
 })
 SidebarMenuAction.displayName = "SidebarMenuAction"
@@ -196,30 +138,26 @@ SidebarMenuAction.displayName = "SidebarMenuAction"
 interface SidebarMenuBadgeProps {
   children?: React.ReactNode
   className?: string
-  compact?: boolean
 }
 
-const SidebarMenuBadge = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & SidebarMenuBadgeProps
->(({ children, className, compact, ...props }, ref) => {
-  const { open } = useSidebar()
-  
-  // Use the Badge component properly with ref forwarding
-  return (
-    <Badge
-      variant="outline"
-      className={cn(
-        "ml-auto bg-sidebar-accent/20 border-sidebar-accent/20 text-sidebar-accent-foreground",
-        !open || compact ? "h-5 w-5 p-0 text-xs" : "h-5 px-1.5 py-0 text-xs",
-        className
-      )}
-      {...props}
-    >
-      {children}
-    </Badge>
-  )
-})
+const SidebarMenuBadge = React.forwardRef<HTMLDivElement, SidebarMenuBadgeProps>(
+  ({ className, ...props }, ref) => {
+    const { isIconOnly } = useSidebar()
+    
+    // Don't render badge in icon-only mode
+    if (isIconOnly) {
+      return null
+    }
+    
+    return (
+      <Badge
+        variant="outline"
+        className={cn("ml-auto px-1.5 py-0", className)}
+        {...props}
+      />
+    )
+  }
+)
 SidebarMenuBadge.displayName = "SidebarMenuBadge"
 
 export {

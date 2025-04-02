@@ -15,7 +15,7 @@ import {
 export function NavReports() {
   const location = useLocation();
   const { pathname } = location;
-  const { open } = useSidebar();
+  const { isExpanded, isIconOnly } = useSidebar();
   
   return (
     <SidebarGroup className="mt-4">
@@ -28,9 +28,9 @@ export function NavReports() {
               isActive={pathname.includes('/admin/reports/overview')}
               tooltip="Overview"
             >
-              <NavLink to="/admin/reports/overview" className={!open ? "justify-center" : "pl-4"}>
+              <NavLink to="/admin/reports/overview" className={!isExpanded ? "justify-center" : "pl-4"}>
                 <LayoutDashboard className="h-4 w-4" />
-                <span>Overview</span>
+                {isExpanded && <span>Overview</span>}
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -40,9 +40,9 @@ export function NavReports() {
               isActive={pathname.includes('/admin/reports/performance')}
               tooltip="Performance"
             >
-              <NavLink to="/admin/reports/performance" className={!open ? "justify-center" : "pl-4"}>
+              <NavLink to="/admin/reports/performance" className={!isExpanded ? "justify-center" : "pl-4"}>
                 <TrendingUp className="h-4 w-4" />
-                <span>Performance</span>
+                {isExpanded && <span>Performance</span>}
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -52,9 +52,9 @@ export function NavReports() {
               isActive={pathname.includes('/admin/reports/sales')}
               tooltip="Sales Analytics"
             >
-              <NavLink to="/admin/reports/sales" className={!open ? "justify-center" : "pl-4"}>
+              <NavLink to="/admin/reports/sales" className={!isExpanded ? "justify-center" : "pl-4"}>
                 <BarChartBig className="h-4 w-4" />
-                <span>Sales Analytics</span>
+                {isExpanded && <span>Sales Analytics</span>}
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -64,9 +64,9 @@ export function NavReports() {
               isActive={pathname.includes('/admin/reports/custom')}
               tooltip="Custom Reports"
             >
-              <NavLink to="/admin/reports/custom" className={!open ? "justify-center" : "pl-4"}>
+              <NavLink to="/admin/reports/custom" className={!isExpanded ? "justify-center" : "pl-4"}>
                 <LineChart className="h-4 w-4" />
-                <span>Custom Reports</span>
+                {isExpanded && <span>Custom Reports</span>}
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>

@@ -8,13 +8,14 @@ import {
   SidebarGroupContent, 
   SidebarMenu, 
   SidebarMenuItem, 
-  SidebarMenuButton 
+  SidebarMenuButton,
+  useSidebar
 } from '@/components/ui/sidebar';
 
 export function NavAdmin() {
   const location = useLocation();
   const { pathname } = location;
-  const { open } = useSidebar();
+  const { isExpanded, isIconOnly } = useSidebar();
   
   return (
     <SidebarGroup>
@@ -27,9 +28,9 @@ export function NavAdmin() {
               isActive={pathname === '/admin' || pathname === '/admin/dashboard'}
               tooltip="Dashboard"
             >
-              <NavLink to="/admin" end className={!open ? "justify-center" : "pl-4"}>
+              <NavLink to="/admin" end className={!isExpanded ? "justify-center" : "pl-4"}>
                 <Database className="h-4 w-4" />
-                <span>Dashboard</span>
+                {isExpanded && <span>Dashboard</span>}
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -39,9 +40,9 @@ export function NavAdmin() {
               isActive={pathname.includes('/admin/agents')}
               tooltip="Agents"
             >
-              <NavLink to="/admin/agents" className={!open ? "justify-center" : "pl-4"}>
+              <NavLink to="/admin/agents" className={!isExpanded ? "justify-center" : "pl-4"}>
                 <Users className="h-4 w-4" />
-                <span>Agents</span>
+                {isExpanded && <span>Agents</span>}
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -51,9 +52,9 @@ export function NavAdmin() {
               isActive={pathname.includes('/admin/properties')}
               tooltip="Properties"
             >
-              <NavLink to="/admin/properties" className={!open ? "justify-center" : "pl-4"}>
+              <NavLink to="/admin/properties" className={!isExpanded ? "justify-center" : "pl-4"}>
                 <Building className="h-4 w-4" />
-                <span>Properties</span>
+                {isExpanded && <span>Properties</span>}
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -63,9 +64,9 @@ export function NavAdmin() {
               isActive={pathname.includes('/admin/transactions')}
               tooltip="Transactions"
             >
-              <NavLink to="/admin/transactions" className={!open ? "justify-center" : "pl-4"}>
+              <NavLink to="/admin/transactions" className={!isExpanded ? "justify-center" : "pl-4"}>
                 <Briefcase className="h-4 w-4" />
-                <span>Transactions</span>
+                {isExpanded && <span>Transactions</span>}
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -75,9 +76,9 @@ export function NavAdmin() {
               isActive={pathname.includes('/admin/commissions')}
               tooltip="Commission"
             >
-              <NavLink to="/admin/commissions" className={!open ? "justify-center" : "pl-4"}>
+              <NavLink to="/admin/commissions" className={!isExpanded ? "justify-center" : "pl-4"}>
                 <ListChecks className="h-4 w-4" />
-                <span>Commission</span>
+                {isExpanded && <span>Commission</span>}
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -86,6 +87,3 @@ export function NavAdmin() {
     </SidebarGroup>
   );
 }
-
-// Import the useSidebar hook
-import { useSidebar } from "@/components/ui/sidebar";

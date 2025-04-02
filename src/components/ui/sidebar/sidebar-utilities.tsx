@@ -3,7 +3,6 @@ import * as React from "react"
 import { ChevronRight } from "lucide-react"
 
 import { cn } from "@/lib/utils"
-import { Skeleton } from "@/components/ui/skeleton"
 import { useSidebar } from "./sidebar-context"
 
 interface SidebarMenuSkeletonProps {
@@ -14,20 +13,20 @@ const SidebarMenuSkeleton = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & SidebarMenuSkeletonProps
 >(({ className, ...props }, ref) => {
-  const { open } = useSidebar()
-  
-  if (!open) {
-    return (
-      <div className={cn("flex items-center gap-2", className)} ref={ref} {...props}>
-        <Skeleton className="h-9 w-9 rounded-md" />
-      </div>
-    )
-  }
+  const { isIconOnly } = useSidebar()
   
   return (
-    <div className={cn("flex items-center gap-2", className)} ref={ref} {...props}>
-      <Skeleton className="h-9 w-9 rounded-md" />
-      <Skeleton className="h-5 w-24" />
+    <div
+      ref={ref}
+      className={cn(
+        "flex animate-pulse items-center gap-2 rounded-md px-3 py-2",
+        isIconOnly && "justify-center px-2",
+        className
+      )}
+      {...props}
+    >
+      <div className="h-5 w-5 rounded-full bg-sidebar-accent/30" />
+      {!isIconOnly && <div className="h-4 w-[80%] rounded bg-sidebar-accent/30" />}
     </div>
   )
 })
@@ -45,7 +44,11 @@ const SidebarMenuSub = React.forwardRef<
   return (
     <div
       ref={ref}
-      className={cn("pl-8 flex flex-col gap-1 mt-1", className)}
+      data-state="true"
+      className={cn(
+        "mt-1 ml-4 space-y-1 rounded-md border-l border-sidebar-accent/50 pl-2",
+        className
+      )}
       {...props}
     >
       {children}
@@ -60,53 +63,53 @@ interface SidebarMenuSubItemProps {
 }
 
 const SidebarMenuSubItem = React.forwardRef<
-  HTMLLIElement,
-  React.HTMLAttributes<HTMLLIElement> & SidebarMenuSubItemProps
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement> & SidebarMenuSubItemProps
 >(({ children, className, ...props }, ref) => {
   return (
-    <li
+    <div
       ref={ref}
-      className={cn("list-none flex items-center", className)}
+      className={cn("relative", className)}
       {...props}
     >
       {children}
-    </li>
+    </div>
   )
 })
 SidebarMenuSubItem.displayName = "SidebarMenuSubItem"
 
 interface SidebarMenuSubButtonProps {
   children?: React.ReactNode
+  isActive?: boolean
   className?: string
   asChild?: boolean
-  isActive?: boolean
 }
 
 const SidebarMenuSubButton = React.forwardRef<
   HTMLButtonElement,
-  React.ButtonHTMLAttributes<HTMLButtonElement> & SidebarMenuSubButtonProps
->(({ asChild = false, children, className, isActive, ...props }, ref) => {
-  const Comp = asChild ? React.Fragment : "button"
-  const childProps = asChild ? {} : { ref, ...props }
-
+  React.ButtonHTMLAttributes<HTMLElement> & SidebarMenuSubButtonProps
+>(({ children, isActive, className, asChild = false, ...props }, ref) => {
+  const { isCollapsed, isIconOnly } = useSidebar()
+  
+  // If the sidebar is completely collapsed, don't render
+  if (isCollapsed || isIconOnly) {
+    return null
+  }
+  
+  const Comp = asChild ? "span" : "button"
   return (
     <Comp
+      ref={ref}
+      data-active={isActive ? "true" : "false"}
       className={cn(
-        "flex w-full items-center gap-2 rounded-sm py-1.5 text-sm text-sidebar-foreground/70 hover:text-sidebar-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-        isActive && "font-medium text-sidebar-foreground",
+        "inline-flex w-full items-center gap-2 whitespace-nowrap rounded-md px-3 py-1.5 text-[13px] hover:bg-sidebar-accent hover:text-sidebar-foreground hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+        isActive ? "bg-sidebar-accent/30 text-sidebar-foreground" : "text-sidebar-foreground/70",
         className
       )}
-      data-active={isActive}
-      {...childProps}
+      {...props}
     >
-      {asChild ? (
-        children
-      ) : (
-        <>
-          <div className="h-1 w-1 rounded-full bg-current opacity-60" />
-          <span>{children}</span>
-        </>
-      )}
+      <ChevronRight className="h-3 w-3 shrink-0" />
+      {children}
     </Comp>
   )
 })

@@ -54,7 +54,7 @@ interface NavMainProps {
 export function NavMain({ collapsed }: NavMainProps) {
   const location = useLocation();
   const currentPath = location.pathname;
-  const { open } = useSidebar();
+  const { isExpanded, isIconOnly } = useSidebar();
   
   return (
     <SidebarGroup>
@@ -73,9 +73,9 @@ export function NavMain({ collapsed }: NavMainProps) {
                   isActive={isActive}
                   tooltip={item.label}
                 >
-                  <Link to={item.href} className={!open ? "justify-center" : ""}>
+                  <Link to={item.href} className={!isExpanded ? "justify-center" : ""}>
                     <item.icon />
-                    {open && <span>{item.label}</span>}
+                    {isExpanded && <span>{item.label}</span>}
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

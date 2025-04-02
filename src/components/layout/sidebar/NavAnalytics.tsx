@@ -26,7 +26,7 @@ interface NavAnalyticsProps {
 export function NavAnalytics({ collapsed }: NavAnalyticsProps) {
   const location = useLocation();
   const currentPath = location.pathname;
-  const { open } = useSidebar();
+  const { isExpanded, isIconOnly } = useSidebar();
   
   const isLeaderboardPage = currentPath.startsWith('/leaderboard');
   const isReportsPage = currentPath.startsWith('/reports');
@@ -42,12 +42,12 @@ export function NavAnalytics({ collapsed }: NavAnalyticsProps) {
               isActive={isLeaderboardPage}
               tooltip="Leaderboard"
             >
-              <Link to="/leaderboard" className={!open ? "justify-center" : ""}>
+              <Link to="/leaderboard" className={!isExpanded ? "justify-center" : ""}>
                 <Trophy />
-                {open && <span>Leaderboard</span>}
+                {isExpanded && <span>Leaderboard</span>}
               </Link>
             </SidebarMenuButton>
-            {open && isLeaderboardPage && (
+            {isExpanded && isLeaderboardPage && (
               <SidebarMenuSub>
                 <SidebarMenuSubItem>
                   <SidebarMenuSubButton
@@ -75,9 +75,9 @@ export function NavAnalytics({ collapsed }: NavAnalyticsProps) {
               isActive={isReportsPage}
               tooltip="Reports"
             >
-              <Link to="/reports" className={!open ? "justify-center" : ""}>
+              <Link to="/reports" className={!isExpanded ? "justify-center" : ""}>
                 <BarChart />
-                {open && <span>Reports</span>}
+                {isExpanded && <span>Reports</span>}
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

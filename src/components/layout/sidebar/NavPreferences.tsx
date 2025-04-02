@@ -19,7 +19,7 @@ interface NavPreferencesProps {
 export function NavPreferences({ collapsed }: NavPreferencesProps) {
   const location = useLocation();
   const currentPath = location.pathname;
-  const { open } = useSidebar();
+  const { isExpanded, isIconOnly } = useSidebar();
   
   return (
     <SidebarGroup>
@@ -32,9 +32,9 @@ export function NavPreferences({ collapsed }: NavPreferencesProps) {
               isActive={currentPath === '/settings'}
               tooltip="Settings"
             >
-              <Link to="/settings" className={!open ? "justify-center" : ""}>
+              <Link to="/settings" className={!isExpanded ? "justify-center" : ""}>
                 <Settings />
-                {open && <span>Settings</span>}
+                {isExpanded && <span>Settings</span>}
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
