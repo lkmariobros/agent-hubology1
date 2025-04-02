@@ -49,6 +49,7 @@ import SalesLeaderboard from './pages/leaderboard/Sales';
 import AdminSettings from './pages/admin/Settings';
 import Roles from './pages/admin/Roles';
 import CommissionTiers from './pages/admin/CommissionTiers';
+import CommissionSettings from './pages/admin/CommissionSettings';
 import PaymentSchedulesAdmin from './pages/admin/PaymentSchedulesAdmin';
 import SystemLogs from './pages/admin/SystemLogs';
 import Database from './pages/admin/Database';
