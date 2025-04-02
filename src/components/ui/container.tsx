@@ -23,8 +23,8 @@ const Container: React.FC<ContainerProps> = ({
   };
   
   const heightClass = withHeader 
-    ? "viewport-container-with-header" 
-    : "viewport-container";
+    ? "min-h-[calc(100vh-64px)]" // Adjust based on your header height
+    : "min-h-screen";
   
   return (
     <div 

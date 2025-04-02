@@ -15,19 +15,19 @@ const MetricCard = ({ metric, className }: MetricCardProps) => {
   const trend = metric.trend || (metric.change ? (metric.change > 0 ? 'up' : 'down') : 'neutral');
   
   return (
-    <Card className={cn("glass-card overflow-hidden", className)}>
-      <CardContent className="card-content space-y-4">
+    <Card className={cn("overflow-hidden", className)}>
+      <CardContent className="p-4 space-y-4">
         <div className="flex justify-between items-start">
           <div className="space-y-2">
             <p className="text-sm font-medium text-muted-foreground">
               {metric.label}
             </p>
-            <CardTitle size="md" className="text-gradient">
+            <CardTitle size="md">
               {metric.value}
             </CardTitle>
           </div>
           {metric.icon && (
-            <div className="rounded-full p-2 bg-white/5 flex items-center justify-center">
+            <div className="rounded-full p-2 bg-primary/10 flex items-center justify-center">
               {metric.icon}
             </div>
           )}

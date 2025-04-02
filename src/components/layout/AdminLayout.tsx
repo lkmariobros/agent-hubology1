@@ -7,6 +7,7 @@ import { SidebarProvider, useSidebar } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import NavUtilities from './sidebar/NavUtilities';
 import PageBreadcrumb from './PageBreadcrumb';
+import Container from '../ui/container';
 
 // Create a header component that has access to the sidebar context
 const Header = () => {
@@ -78,9 +79,9 @@ const AdminLayout = () => {
         <AdminSidebar />
         <main className="flex-1 overflow-x-hidden bg-[#161920]">
           <Header />
-          <div className="px-[44px] py-[36px]">
+          <Container className="py-6">
             <Outlet />
-          </div>
+          </Container>
         </main>
       </div>
     </SidebarProvider>

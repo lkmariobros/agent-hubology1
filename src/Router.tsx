@@ -7,7 +7,7 @@ import PropertyList from './pages/PropertyList';
 import PropertyDetail from './pages/PropertyDetail';
 import Team from './pages/Team';
 import Commission from './pages/Commission';
-import AdminDashboard from './pages/admin/Dashboard';
+import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminAgents from './pages/admin/Agents';
 import AdminProperties from './pages/admin/Properties';
 import CommissionTiers from './pages/admin/CommissionTiers';

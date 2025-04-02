@@ -56,7 +56,7 @@ const CommissionApprovalCard: React.FC<CommissionApprovalCardProps> = ({
       </CardHeader>
       
       <CardContent>
-        <div className="card-spacing">
+        <div className="space-y-3">
           <div className="flex justify-between items-center">
             <div className="text-sm text-muted-foreground">Commission Amount:</div>
             <div className="font-semibold text-lg">{formatCurrency(approvalData.commissionAmount)}</div>
