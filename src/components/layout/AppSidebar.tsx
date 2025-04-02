@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useSidebar } from '@/components/ui/sidebar';
 
 import {
   Sidebar,
@@ -19,22 +20,24 @@ import { PortalSwitcher } from './PortalSwitcher';
 
 export function AppSidebar() {
   const { isAdmin } = useAuth();
+  const { state } = useSidebar();
+  const collapsed = state === "icon";
   
   return (
     <>
       <Sidebar className="border-none bg-[#1A1F2C]">
         <SidebarHeader className="border-none px-5 py-4">
-          <PortalSwitcher showLabel={true} className="w-full" />
+          <PortalSwitcher showLabel={!collapsed} className="w-full" />
         </SidebarHeader>
         
         <SidebarContent className="px-3 py-2">
-          <NavMain />
-          <NavAnalytics />
-          <NavPreferences />
+          <NavMain collapsed={collapsed} />
+          <NavAnalytics collapsed={collapsed} />
+          <NavPreferences collapsed={collapsed} />
         </SidebarContent>
         
         <SidebarFooter className="border-t border-white/5 px-5 py-3">
-          <SidebarProfile />
+          <SidebarProfile collapsed={collapsed} />
         </SidebarFooter>
       </Sidebar>
       <SidebarRail />

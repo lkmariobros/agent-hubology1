@@ -1,6 +1,7 @@
+
 import React, { useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
-import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { PanelLeftClose, PanelLeftOpen, ChevronLeft } from 'lucide-react';
 import { AppSidebar } from './AppSidebar';
 import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
 import { Button } from '@/components/ui/button';
@@ -13,16 +14,27 @@ interface MainLayoutProps {
 
 // Create a header component that has access to the sidebar context
 const Header = () => {
-  const {
-    open,
-    toggleSidebar
-  } = useSidebar();
-  return <div className="sticky top-0 z-10 bg-[#161920]">
+  const { state, toggleSidebar } = useSidebar();
+  
+  return (
+    <div className="sticky top-0 z-10 bg-[#161920]">
       {/* Breadcrumb and Navigation Section */}
       <div className="flex items-center justify-between px-6 py-3">
         <div className="flex items-center space-x-2">
-          <Button variant="ghost" size="icon" onClick={toggleSidebar} className="h-8 w-8 mr-1" aria-label={open ? "Collapse sidebar" : "Expand sidebar"}>
-            {open ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeftOpen className="h-4 w-4" />}
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={toggleSidebar} 
+            className="h-8 w-8 mr-1" 
+            aria-label="Toggle sidebar"
+          >
+            {state === "expanded" ? (
+              <PanelLeftClose className="h-4 w-4" />
+            ) : state === "icon" ? (
+              <ChevronLeft className="h-4 w-4" />
+            ) : (
+              <PanelLeftOpen className="h-4 w-4" />
+            )}
           </Button>
           <PageBreadcrumb />
         </div>
@@ -33,14 +45,17 @@ const Header = () => {
       
       {/* Divider */}
       <div className="border-b border-border"></div>
-    </div>;
+    </div>
+  );
 };
 
 const MainLayout: React.FC<MainLayoutProps> = ({
   children
 }) => {
   // Load saved sidebar state from localStorage if available
-  const savedState = localStorage.getItem("sidebar:state") === "false" ? false : true;
+  const savedStateStr = localStorage.getItem("sidebar:state");
+  const savedState = savedStateStr === "icon" ? "icon" : 
+                    savedStateStr === "collapsed" ? "collapsed" : "expanded";
   const location = useLocation();
 
   // Add data-route attribute to body
@@ -62,18 +77,12 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   }, [location.pathname]);
 
   // Set up effect to save sidebar state changes
-  React.useEffect(() => {
-    const handleStorageChange = e => {
-      if (e.key === "sidebar:state") {
-        // This ensures our UI stays in sync with other tabs
-        console.log("Sidebar state changed:", e.newValue);
-      }
-    };
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
+  const handleStateChange = (newState) => {
+    localStorage.setItem("sidebar:state", newState);
+  };
   
-  return <SidebarProvider defaultOpen={savedState}>
+  return (
+    <SidebarProvider defaultState={savedState} onStateChange={handleStateChange}>
       <div className="flex min-h-screen w-full">
         <AppSidebar />
         <main className="flex-1 overflow-x-hidden bg-[#161920]">
@@ -83,6 +92,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           </div>
         </main>
       </div>
-    </SidebarProvider>;
+    </SidebarProvider>
+  );
 };
+
 export default MainLayout;

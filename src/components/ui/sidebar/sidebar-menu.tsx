@@ -58,13 +58,15 @@ const sidebarMenuButtonVariants = cva(
   }
 )
 
+export interface SidebarMenuButtonProps extends VariantProps<typeof sidebarMenuButtonVariants> {
+  asChild?: boolean;
+  isActive?: boolean;
+  tooltip?: string | React.ComponentProps<typeof TooltipContent>;
+}
+
 export const SidebarMenuButton = React.forwardRef<
   HTMLButtonElement,
-  React.ComponentProps<"button"> & {
-    asChild?: boolean
-    isActive?: boolean
-    tooltip?: string | React.ComponentProps<typeof TooltipContent>
-  } & VariantProps<typeof sidebarMenuButtonVariants>
+  React.ComponentProps<"button"> & SidebarMenuButtonProps
 >(
   (
     {
@@ -79,7 +81,7 @@ export const SidebarMenuButton = React.forwardRef<
     ref
   ) => {
     const Comp = asChild ? Slot : "button"
-    const { isMobile, state } = useSidebar()
+    const { state, isMobile } = useSidebar()
 
     const button = (
       <Comp
@@ -168,3 +170,4 @@ export const SidebarMenuBadge = React.forwardRef<
   />
 ))
 SidebarMenuBadge.displayName = "SidebarMenuBadge"
+
