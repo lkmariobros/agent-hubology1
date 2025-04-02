@@ -13,6 +13,8 @@ import {
 
 export function NavAdmin() {
   const location = useLocation();
+  const { pathname } = location;
+  const { open } = useSidebar();
   
   return (
     <SidebarGroup>
@@ -22,10 +24,10 @@ export function NavAdmin() {
           <SidebarMenuItem>
             <SidebarMenuButton 
               asChild 
-              isActive={location.pathname === '/admin' || location.pathname === '/admin/dashboard'}
+              isActive={pathname === '/admin' || pathname === '/admin/dashboard'}
               tooltip="Dashboard"
             >
-              <NavLink to="/admin" end className="pl-4">
+              <NavLink to="/admin" end className={!open ? "justify-center" : "pl-4"}>
                 <Database className="h-4 w-4" />
                 <span>Dashboard</span>
               </NavLink>
@@ -34,10 +36,10 @@ export function NavAdmin() {
           <SidebarMenuItem>
             <SidebarMenuButton 
               asChild 
-              isActive={location.pathname.includes('/admin/agents')}
+              isActive={pathname.includes('/admin/agents')}
               tooltip="Agents"
             >
-              <NavLink to="/admin/agents" className="pl-4">
+              <NavLink to="/admin/agents" className={!open ? "justify-center" : "pl-4"}>
                 <Users className="h-4 w-4" />
                 <span>Agents</span>
               </NavLink>
@@ -46,10 +48,10 @@ export function NavAdmin() {
           <SidebarMenuItem>
             <SidebarMenuButton 
               asChild 
-              isActive={location.pathname.includes('/admin/properties')}
+              isActive={pathname.includes('/admin/properties')}
               tooltip="Properties"
             >
-              <NavLink to="/admin/properties" className="pl-4">
+              <NavLink to="/admin/properties" className={!open ? "justify-center" : "pl-4"}>
                 <Building className="h-4 w-4" />
                 <span>Properties</span>
               </NavLink>
@@ -58,10 +60,10 @@ export function NavAdmin() {
           <SidebarMenuItem>
             <SidebarMenuButton 
               asChild 
-              isActive={location.pathname.includes('/admin/transactions')}
+              isActive={pathname.includes('/admin/transactions')}
               tooltip="Transactions"
             >
-              <NavLink to="/admin/transactions" className="pl-4">
+              <NavLink to="/admin/transactions" className={!open ? "justify-center" : "pl-4"}>
                 <Briefcase className="h-4 w-4" />
                 <span>Transactions</span>
               </NavLink>
@@ -70,10 +72,10 @@ export function NavAdmin() {
           <SidebarMenuItem>
             <SidebarMenuButton 
               asChild 
-              isActive={location.pathname.includes('/admin/commissions')}
+              isActive={pathname.includes('/admin/commissions')}
               tooltip="Commission"
             >
-              <NavLink to="/admin/commissions" className="pl-4">
+              <NavLink to="/admin/commissions" className={!open ? "justify-center" : "pl-4"}>
                 <ListChecks className="h-4 w-4" />
                 <span>Commission</span>
               </NavLink>
@@ -84,3 +86,6 @@ export function NavAdmin() {
     </SidebarGroup>
   );
 }
+
+// Import the useSidebar hook
+import { useSidebar } from "@/components/ui/sidebar";

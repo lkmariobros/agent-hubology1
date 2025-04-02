@@ -71,6 +71,8 @@ interface SidebarMenuButtonProps {
   variant?: "default" | "outline" | "ghost"
   asChild?: boolean
   tooltip?: string
+  isActive?: boolean // Add the isActive prop to the interface
+  size?: string
 }
 
 const SidebarMenuButton = React.forwardRef<
@@ -78,7 +80,7 @@ const SidebarMenuButton = React.forwardRef<
   React.ButtonHTMLAttributes<HTMLElement> & SidebarMenuButtonProps
 >(
   (
-    { asChild = false, className, variant = "default", children, tooltip, ...props },
+    { asChild = false, className, variant = "default", children, tooltip, isActive, ...props },
     ref
   ) => {
     const { open } = useSidebar()
@@ -126,6 +128,7 @@ const SidebarMenuButton = React.forwardRef<
           !open && "justify-center px-0", // Center and remove padding when collapsed
           className
         )}
+        data-active={isActive}
         {...childProps}
       >
         {asChild ? (
@@ -202,10 +205,9 @@ const SidebarMenuBadge = React.forwardRef<
 >(({ children, className, compact, ...props }, ref) => {
   const { open } = useSidebar()
   
-  // Render compact version when sidebar is collapsed
+  // Use the Badge component properly with ref forwarding
   return (
     <Badge
-      ref={ref}
       variant="outline"
       className={cn(
         "ml-auto bg-sidebar-accent/20 border-sidebar-accent/20 text-sidebar-accent-foreground",
