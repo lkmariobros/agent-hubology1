@@ -6,6 +6,7 @@ export interface Role {
   created_at?: string;
   updated_at?: string;
   users_count?: number;
+  permissions?: Permission[];
 }
 
 export interface RolePermission {
@@ -20,6 +21,8 @@ export interface Permission {
   name: string;
   description: string | null;
   created_at?: string;
+  category?: string;
+  selected?: boolean; // Used for UI selection state
 }
 
 export interface UserRole {
@@ -27,4 +30,9 @@ export interface UserRole {
   user_id: string;
   role_id: string;
   created_at?: string;
+}
+
+export interface PermissionCategory {
+  name: string;
+  permissions: Permission[];
 }

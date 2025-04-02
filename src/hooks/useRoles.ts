@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { roleService } from '@/services/roleService';
-import { Role } from '@/types/role';
+import { Role, Permission, PermissionCategory } from '@/types/role';
 
 export function useRoles() {
   const queryClient = useQueryClient();
@@ -16,6 +16,26 @@ export function useRoles() {
   } = useQuery({
     queryKey: ['roles'],
     queryFn: roleService.getRoles
+  });
+
+  // Fetch permissions
+  const {
+    data: permissions = [],
+    isLoading: isLoadingPermissions
+  } = useQuery({
+    queryKey: ['permissions'],
+    queryFn: roleService.getPermissions,
+    enabled: false // Only load when needed
+  });
+
+  // Fetch permission categories
+  const {
+    data: permissionCategories = [],
+    isLoading: isLoadingCategories
+  } = useQuery({
+    queryKey: ['permissionCategories'],
+    queryFn: roleService.getPermissionsByCategories,
+    enabled: false // Only load when needed
   });
 
   // Create a new role
@@ -58,11 +78,21 @@ export function useRoles() {
     return deleteMutation.mutateAsync(id);
   }, [deleteMutation]);
 
+  // Load permissions for a role
+  const loadRolePermissions = useCallback(async (roleId: string) => {
+    return roleService.getRolePermissions(roleId);
+  }, []);
+
   return {
     roles,
     isLoading,
     error,
     refetch,
+    permissions,
+    permissionCategories,
+    isLoadingPermissions,
+    isLoadingCategories,
+    loadRolePermissions,
     createRole,
     updateRole,
     deleteRole,
