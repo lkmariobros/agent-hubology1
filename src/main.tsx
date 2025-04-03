@@ -5,18 +5,16 @@ import App from './App.tsx'
 import './index.css'
 import { ClerkProvider } from '@clerk/clerk-react'
 import { Toaster } from './components/ui/sonner'
+import { CLERK_PUBLISHABLE_KEY } from './config/clerk'
 
-// Import your Publishable Key
-const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || 
-  "pk_test_cG9zaXRpdmUtYmxvd2Zpc2gtNjAuY2xlcmsuYWNjb3VudHMuZGV2JA"
-
-if (!PUBLISHABLE_KEY) {
+// Use the key from the config file
+if (!CLERK_PUBLISHABLE_KEY) {
   throw new Error("Missing Publishable Key")
 }
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
+    <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY}>
       <App />
       <Toaster />
     </ClerkProvider>

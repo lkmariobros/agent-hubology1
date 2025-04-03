@@ -8,7 +8,7 @@ export function useAuth() {
   
   // Create an enhanced auth object that has all the Clerk auth methods
   // plus additional methods needed by our application
-  const hasRole = (roleName: string) => {
+  const hasRole = (roleName: UserRole | string) => {
     // Check the user's public metadata for roles
     if (user?.publicMetadata?.roles) {
       const roles = user.publicMetadata.roles as string[];
@@ -36,9 +36,7 @@ export function useAuth() {
     has: (params: { role: string }) => {
       return hasRole(params.role);
     },
-    hasRole: (role: UserRole) => {
-      return hasRole(role);
-    },
+    hasRole,
     // Additional properties our app expects
     isAdmin: hasRole('admin'),
     isAuthenticated: !!clerkAuth.userId,

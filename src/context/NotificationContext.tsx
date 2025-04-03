@@ -1,6 +1,6 @@
 
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
-import { useAuthContext } from '@/context/AuthContext';
+import { useAuth } from '@/hooks/useAuth'; // Update to use the correct auth hook
 import { Notification } from '@/types/notification';
 import { useNotificationActions } from '@/hooks/useNotificationActions';
 import { useNotificationSubscription } from '@/hooks/useNotificationSubscription';
@@ -22,7 +22,7 @@ const NotificationContext = createContext<NotificationContextType | undefined>(u
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const { user } = useAuthContext();
+  const { user } = useAuth(); // Use the correct auth hook
   const userId = user?.id || null;
   
   const { 
