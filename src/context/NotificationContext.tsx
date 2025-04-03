@@ -1,6 +1,6 @@
 
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
-import { useAuth } from '@/hooks/useAuth'; // Update to use the correct auth hook
+import { useAuth } from '@/hooks/useAuth'; // Ensure we're using the correct hook
 import { Notification } from '@/types/notification';
 import { useNotificationActions } from '@/hooks/useNotificationActions';
 import { useNotificationSubscription } from '@/hooks/useNotificationSubscription';
@@ -22,7 +22,7 @@ const NotificationContext = createContext<NotificationContextType | undefined>(u
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const { user } = useAuth(); // Use the correct auth hook
+  const { user } = useAuth(); // Use the unified auth hook
   const userId = user?.id || null;
   
   const { 
@@ -52,7 +52,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   // Use subscription hook for real-time notifications
   useNotificationSubscription(userId, addNotification);
 
-  // Initialize notifications - FIX: Add proper dependency array and avoid unnecessary fetches
+  // Initialize notifications
   useEffect(() => {
     // Only fetch notifications if we have a userId and aren't already loading
     if (!userId) {
