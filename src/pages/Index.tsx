@@ -1,18 +1,15 @@
-
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthForm from '../components/AuthForm';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/providers/ClerkAuthProvider';
 import LoadingIndicator from '@/components/ui/loading-indicator';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { AUTH_SETTINGS } from '@/config/supabase';
+import { CLERK_AUTH_SETTINGS } from '@/config/clerk';
 
 const Index = () => {
-  const { isAuthenticated, loading, session, error } = useAuth();
-  const navigate = useNavigate();
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [initialCheckDone, setInitialCheckDone] = useState(false);
   const [timeoutCount, setTimeoutCount] = useState(0);
@@ -57,7 +54,7 @@ const Index = () => {
           setTimeoutCount(prev => prev + 1);
           toast.error('Authentication check timed out. Please try refreshing.');
         }
-      }, AUTH_SETTINGS.AUTH_TIMEOUT);
+      }, CLERK_AUTH_SETTINGS.AUTH_TIMEOUT);
     }
     
     // Clear timeout when loading completes
@@ -69,7 +66,7 @@ const Index = () => {
     // Only redirect after the initial auth check is complete
     if (!loading && isAuthenticated && !isRedirecting) {
       setIsRedirecting(true);
-      navigate(AUTH_SETTINGS.REDIRECT_PATHS.AFTER_LOGIN);
+      navigate(CLERK_AUTH_SETTINGS.REDIRECT_PATHS.AFTER_LOGIN);
     }
     
     // Mark initial check as done when loading is complete

@@ -19,7 +19,7 @@ import Roles from './pages/admin/Roles';
 import NewTransaction from './pages/NewTransaction';
 import TransactionList from './pages/TransactionList';
 import TransactionDetail from './pages/TransactionDetail';
-import { AuthProvider } from './providers/AuthProvider';
+import { ClerkAuthProvider } from './providers/ClerkAuthProvider';
 import Login from './pages/auth/Login';
 import Signup from './pages/auth/Signup';
 import ForgotPassword from './pages/auth/ForgotPassword';
@@ -34,7 +34,7 @@ import Index from './pages/Index';
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <AuthProvider><ProtectedRoute><AppLayout /></ProtectedRoute></AuthProvider>,
+    element: <ClerkAuthProvider><ProtectedRoute><AppLayout /></ProtectedRoute></ClerkAuthProvider>,
     children: [
       { index: true, element: <Dashboard /> },
       { path: 'properties', element: <PropertyList /> },
@@ -76,7 +76,7 @@ const router = createBrowserRouter([
   { path: '/signup', element: <Signup /> },
   { path: '/forgot-password', element: <ForgotPassword /> },
   { path: '/reset-password', element: <ResetPassword /> },
-  { path: '/index', element: <AuthProvider><Index /></AuthProvider> },
+  { path: '/index', element: <ClerkAuthProvider><Index /></ClerkAuthProvider> },
   { path: '*', element: <NotFound /> },
 ]);
 

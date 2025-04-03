@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from '@/components/ui/button';
 import { Building, Shield, ChevronDown } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/providers/ClerkAuthProvider';
 import { UserRole } from '@/types/auth';
 import { toast } from 'sonner';
 
