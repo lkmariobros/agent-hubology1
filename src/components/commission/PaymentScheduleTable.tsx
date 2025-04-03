@@ -1,22 +1,30 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { PaymentSchedule } from '@/types/commission';
 import InstallmentsList from './InstallmentsList';
 import { AlertTriangle } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface PaymentScheduleTableProps {
   schedule: PaymentSchedule;
   isLoading?: boolean;
   error?: Error | null;
+  showAmountColumn?: boolean;
+  commissionAmount?: number;
 }
 
 const PaymentScheduleTable: React.FC<PaymentScheduleTableProps> = ({ 
   schedule, 
   isLoading = false,
-  error = null
+  error = null,
+  showAmountColumn = false,
+  commissionAmount = 0
 }) => {
+  // Use current date as base date for estimation
+  const [baseDate] = useState<Date>(new Date());
+
   if (isLoading) {
     return (
       <div>
@@ -43,18 +51,30 @@ const PaymentScheduleTable: React.FC<PaymentScheduleTableProps> = ({
   }
   
   return (
-    <div>
-      <div className="flex items-center mb-2">
-        <h3 className="font-medium">{schedule.name}</h3>
-        {schedule.isDefault && <Badge className="ml-2">Default</Badge>}
-      </div>
-      {schedule.description && <p className="text-sm text-muted-foreground mb-4">{schedule.description}</p>}
+    <Card>
+      <CardHeader className="pb-2">
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center">
+            <span>{schedule.name}</span>
+            {schedule.isDefault && <Badge className="ml-2">Default</Badge>}
+          </CardTitle>
+        </div>
+        {schedule.description && (
+          <p className="text-sm text-muted-foreground">{schedule.description}</p>
+        )}
+      </CardHeader>
       
-      <InstallmentsList 
-        installments={schedule.installments || []} 
-        emptyMessage="No installments defined for this schedule"
-      />
-    </div>
+      <CardContent>
+        <InstallmentsList 
+          installments={schedule.installments || []} 
+          emptyMessage="No installments defined for this schedule"
+          isLoading={isLoading}
+          baseDate={baseDate}
+          showAmountColumn={showAmountColumn}
+          commissionAmount={commissionAmount}
+        />
+      </CardContent>
+    </Card>
   );
 };
 
