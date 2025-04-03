@@ -7,7 +7,6 @@ import { Label } from '@/components/ui/label';
 import { Separator } from "@/components/ui/separator";
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
-import { useSignIn, useSignUp } from '@clerk/clerk-react';
 
 const AuthForm = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -15,8 +14,7 @@ const AuthForm = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   
-  const { signIn } = useSignIn();
-  const { signUp } = useSignUp();
+  const { signIn, signUp } = useAuth();
   
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,15 +28,8 @@ const AuthForm = () => {
       setLoading(true);
       console.log('[AuthForm] Attempting sign in with:', email);
       
-      if (signIn) {
-        // Use Clerk's signIn
-        await signIn.create({
-          identifier: email,
-          password,
-        });
-      } else {
-        toast.error('Sign-in service unavailable');
-      }
+      // Use our custom signIn instead of Clerk's signIn
+      await signIn(email, password);
       
       console.log('[AuthForm] Sign in request completed');
     } catch (error: any) {
@@ -60,18 +51,8 @@ const AuthForm = () => {
     try {
       setLoading(true);
       
-      if (signUp) {
-        // Use Clerk's signUp
-        await signUp.create({
-          emailAddress: email,
-          password,
-        });
-        
-        // Start email verification if required by Clerk
-        await signUp.prepareEmailAddressVerification();
-      } else {
-        toast.error('Sign-up service unavailable');
-      }
+      // Use our custom signUp
+      await signUp(email, password);
       
       toast.success('Account created! Check your email for verification.');
       setIsLogin(true); // Switch to login view
@@ -106,19 +87,32 @@ const AuthForm = () => {
     try {
       setLoading(true);
       console.log('[AuthForm] Attempting demo login');
-      setEmail('josephkwantum@gmail.com');
-      setPassword('password123');
+      setEmail('demo@example.com');
+      setPassword('demo1234');
       
-      if (signIn) {
-        // Use Clerk's signIn for the demo account
-        await signIn.create({
-          identifier: 'josephkwantum@gmail.com',
-          password: 'password123',
-        });
-      }
+      // Use our custom signIn for the demo account
+      await signIn('demo@example.com', 'demo1234');
     } catch (error: any) {
       console.error('[AuthForm] Demo login error:', error);
       toast.error(`Demo login failed: ${error.message || 'Unknown error'}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Added function to handle the special admin login
+  const handleAdminLogin = async () => {
+    try {
+      setLoading(true);
+      console.log('[AuthForm] Attempting admin login');
+      setEmail('josephkwantum@gmail.com');
+      setPassword('Demo1234!');
+      
+      // Use our custom signIn for the admin account
+      await signIn('josephkwantum@gmail.com', 'Demo1234!');
+    } catch (error: any) {
+      console.error('[AuthForm] Admin login error:', error);
+      toast.error(`Admin login failed: ${error.message || 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
@@ -210,16 +204,28 @@ const AuthForm = () => {
         {isLogin ? 'Create an account' : 'Sign in'}
       </Button>
       
-      {/* Demo login button for testing */}
-      <Button
-        type="button"
-        variant="ghost"
-        className="w-full mt-4 text-gray-400 hover:text-white text-sm"
-        onClick={handleDemoLogin}
-        disabled={loading}
-      >
-        Demo Login (josephkwantum@gmail.com)
-      </Button>
+      {/* Demo buttons for testing */}
+      <div className="flex flex-col space-y-2 mt-4">
+        <Button
+          type="button"
+          variant="ghost"
+          className="text-gray-400 hover:text-white text-sm"
+          onClick={handleDemoLogin}
+          disabled={loading}
+        >
+          Demo Login (demo@example.com)
+        </Button>
+        
+        <Button
+          type="button"
+          variant="ghost"
+          className="text-gray-400 hover:text-white text-sm"
+          onClick={handleAdminLogin}
+          disabled={loading}
+        >
+          Admin Login (josephkwantum@gmail.com)
+        </Button>
+      </div>
     </div>
   );
 };
