@@ -6,9 +6,6 @@ import { useAuthTimeout } from './useAuthTimeout';
 import { handleAuthStateChange } from './useAuthStateChange';
 import { initializeFromSession } from './useSessionInitializer';
 
-/**
- * Hook to handle authentication initialization and state change subscription
- */
 export function useAuthInitialization() {
   const {
     state,
@@ -28,12 +25,12 @@ export function useAuthInitialization() {
     setIsInitialized
   );
 
+  // Set up auth state change listener
   useEffect(() => {
     console.log('[AuthProvider] Setting up auth listener');
     
-    // Set up auth state change listener first to avoid missing events
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         handleAuthStateChange(
           event,
           session,
@@ -46,8 +43,8 @@ export function useAuthInitialization() {
         );
       }
     );
-    
-    // Then get the current session to initialize the auth state
+
+    // Initialize session
     initializeFromSession(
       updateSessionState,
       setLoading,
@@ -56,12 +53,11 @@ export function useAuthInitialization() {
       setIsInitialized
     );
     
-    // Cleanup subscription on unmount
     return () => {
       console.log('[AuthProvider] Cleaning up auth subscription');
       subscription.unsubscribe();
     };
-  }, []);
+  }, []); // Only run on mount
   
   return {
     state,
