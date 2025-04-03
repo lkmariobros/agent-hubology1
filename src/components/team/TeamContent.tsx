@@ -1,12 +1,12 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { AgentWithHierarchy } from '@/types';
 import AgentHierarchyChart from './AgentHierarchyChart';
 import AgentDetails from './AgentDetails';
 import TeamMetrics from './TeamMetrics';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useTeamManagement } from '@/hooks/useTeamManagement';
+import InvitationsManagement from './InvitationsManagement';
 
 interface TeamContentProps {
   agentHierarchy: AgentWithHierarchy;
@@ -41,6 +41,7 @@ const TeamContent: React.FC<TeamContentProps> = ({
             <TabsList className="mb-6">
               <TabsTrigger value="hierarchy">Team Structure</TabsTrigger>
               <TabsTrigger value="performance">Performance</TabsTrigger>
+              <TabsTrigger value="invitations">Invitations</TabsTrigger>
             </TabsList>
             
             <TabsContent value="hierarchy" className="space-y-6">
@@ -62,6 +63,13 @@ const TeamContent: React.FC<TeamContentProps> = ({
                 teamMetrics={teamMetrics} 
                 selectedAgent={selectedAgent}
                 isLoading={isLoadingMetrics} 
+              />
+            </TabsContent>
+            
+            <TabsContent value="invitations">
+              <InvitationsManagement 
+                agentId={agentHierarchy.id}
+                isAdmin={isAdmin}
               />
             </TabsContent>
           </Tabs>
