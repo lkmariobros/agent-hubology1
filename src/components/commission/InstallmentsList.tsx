@@ -12,13 +12,25 @@ import { ScheduleInstallment } from '@/types/commission';
 
 interface InstallmentsListProps {
   installments: ScheduleInstallment[];
+  emptyMessage?: string;
 }
 
-const InstallmentsList: React.FC<InstallmentsListProps> = ({ installments }) => {
+const InstallmentsList: React.FC<InstallmentsListProps> = ({ 
+  installments,
+  emptyMessage = "No installments found" 
+}) => {
   // Sort installments by number
   const sortedInstallments = [...installments].sort(
     (a, b) => a.installmentNumber - b.installmentNumber
   );
+  
+  if (installments.length === 0) {
+    return (
+      <div className="text-center py-6 border rounded-md bg-muted/10">
+        <p className="text-muted-foreground">{emptyMessage}</p>
+      </div>
+    );
+  }
   
   return (
     <Table>
