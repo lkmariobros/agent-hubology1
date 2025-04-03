@@ -47,6 +47,7 @@ export async function initializeFromSession(
         // Get preferred active role (admin takes precedence)
         const finalActiveRole = getPreferredActiveRole(finalRoles, activeRole);
         
+        // Update session state
         updateSessionState(
           session,
           {
@@ -76,7 +77,7 @@ export async function initializeFromSession(
           {
             id: session.user.id,
             email: session.user.email || '',
-            name: session.user.email?.split('@')[0] || '',
+            name: session.user.email?.split('@')[0] || 'User',
             roles: finalRoles,
             activeRole: finalActiveRole
           },

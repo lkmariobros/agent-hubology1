@@ -18,7 +18,7 @@ export function useAuthTimeout(
       console.log('[AuthProvider] Setting up auth timeout');
       timeoutRef.current = window.setTimeout(() => {
         console.warn(`[AuthProvider] Auth initialization timed out after ${AUTH_CONFIG.INITIALIZATION_TIMEOUT/1000} seconds`);
-        setError(new Error('Authentication verification timed out'));
+        setError(new Error('Authentication verification timed out. Please refresh and try again.'));
         setLoading(false);
         setIsInitialized(true);
         toast.error('Authentication verification timed out. Please refresh the page.');

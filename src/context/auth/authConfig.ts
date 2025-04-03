@@ -10,10 +10,10 @@ export const AUTH_CONFIG = {
   DEFAULT_ROLES: ['agent', 'viewer'],
   
   // How long to wait for auth initialization before timing out (in milliseconds)
-  INITIALIZATION_TIMEOUT: 10000, // 10 seconds
+  INITIALIZATION_TIMEOUT: 15000, // 15 seconds (increased from 10 seconds)
   
   // How long to wait for auth checks in route components before timing out
-  ROUTE_AUTH_TIMEOUT: 8000, // 8 seconds
+  ROUTE_AUTH_TIMEOUT: 10000, // 10 seconds (increased from 8 seconds)
   
   // Cookie name for storing email (for role utils)
   EMAIL_COOKIE_NAME: 'pa_user_email',
@@ -22,5 +22,12 @@ export const AUTH_CONFIG = {
   ADMIN_EMAILS: [
     'josephkwantum@gmail.com',
     'admin@example.com'
-  ]
+  ],
+  
+  // Debug mode - set to true in development
+  DEBUG: import.meta.env.DEV,
+  
+  // Retry settings
+  MAX_PROFILE_RETRIES: 2,
+  RETRY_DELAY: 1000 // 1 second
 };

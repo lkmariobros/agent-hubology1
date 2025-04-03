@@ -27,44 +27,5 @@ export function useAuth(): AuthContextType {
   return auth;
 }
 
-// The standalone useAuth hook for Clerk
-export function useClerkAuth() {
-  const clerkAuth = useAuthContext();
-  const { user } = clerkAuth;
-  
-  // Create an enhanced auth object that has all the Clerk auth methods
-  // plus additional methods needed by our application
-  const hasRole = (roleName: string) => {
-    // Special case for admin email using the utility function
-    if (roleName === 'admin' && user?.email && isSpecialAdminEmail(user.email)) {
-      return true;
-    }
-    
-    // Check the user's roles
-    if (user?.roles) {
-      return Array.isArray(user.roles) && user.roles.includes(roleName);
-    }
-    
-    return false;
-  };
-  
-  return {
-    ...clerkAuth,
-    // Implement the has method that's expected by the components
-    has: (params: { role: string }) => {
-      return hasRole(params.role);
-    },
-    hasRole,
-    // Additional properties our app expects
-    isAdmin: hasRole('admin'),
-    isAuthenticated: !!clerkAuth.session,
-    loading: clerkAuth.loading,
-    error: clerkAuth.error,
-  };
-}
-
-// Export the type for use in components
-export type { AuthContextType };
-
 // Export the hook as default for backwards compatibility
 export default useAuth;

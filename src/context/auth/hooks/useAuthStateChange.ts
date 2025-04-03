@@ -54,8 +54,8 @@ export async function handleAuthStateChange(
       document.cookie = `${AUTH_CONFIG.EMAIL_COOKIE_NAME}=${encodeURIComponent(session.user.email)}; path=/;`;
     }
     
-    // Use setTimeout to avoid potential deadlocks with Supabase client
-    setTimeout(async () => {
+    // CRITICAL: Use setTimeout to avoid potential deadlocks with Supabase client
+    const timeoutId = setTimeout(async () => {
       try {
         console.log('[AuthProvider] Processing sign-in event');
         
@@ -68,6 +68,7 @@ export async function handleAuthStateChange(
         // Get preferred active role (admin takes precedence)
         const finalActiveRole = getPreferredActiveRole(finalRoles, activeRole);
         
+        // Update session state
         updateSessionState(
           session,
           {
@@ -82,6 +83,8 @@ export async function handleAuthStateChange(
         
         console.log('[AuthProvider] Auth state updated after sign-in');
         setIsInitialized(true);
+        
+        // Clear timeout
         if (timeoutRef.current) {
           clearTimeout(timeoutRef.current);
           timeoutRef.current = undefined;
@@ -89,14 +92,44 @@ export async function handleAuthStateChange(
         setLoading(false);
       } catch (error) {
         console.error('[AuthProvider] Error processing auth state change:', error);
+        
+        // Even on error, we need to provide a basic session state
+        // This ensures the UI can still function even if profile fetching fails
+        if (session) {
+          const basicRoles = ['agent'];
+          const finalRoles = ensureAdminRoleForSpecialEmail(basicRoles, session.user.email);
+          const finalActiveRole = getPreferredActiveRole(finalRoles);
+          
+          updateSessionState(
+            session,
+            {
+              id: session.user.id,
+              email: session.user.email || '',
+              name: session.user.email?.split('@')[0] || '',
+              roles: finalRoles,
+              activeRole: finalActiveRole
+            },
+            null,
+            finalRoles,
+            finalActiveRole
+          );
+        }
+        
         setError(error instanceof Error ? error : new Error('Unknown error occurred'));
         setLoading(false);
         setIsInitialized(true);
+        
         if (timeoutRef.current) {
           clearTimeout(timeoutRef.current);
           timeoutRef.current = undefined;
         }
       }
     }, 0);
+    
+    // Store the timeout ID in case we need to clear it
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    timeoutRef.current = timeoutId;
   }
 }

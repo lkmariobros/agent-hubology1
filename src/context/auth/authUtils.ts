@@ -77,6 +77,9 @@ export const createUserProfile = async (user: User): Promise<UserProfile> => {
 
 /**
  * Fetches user profile and roles
+ * 
+ * IMPORTANT: This function is restructured to prevent RLS recursion
+ * by first getting roles directly and only getting profile as needed
  */
 export const fetchProfileAndRoles = async (userId: string, userEmail: string | undefined) => {
   try {
@@ -86,6 +89,7 @@ export const fetchProfileAndRoles = async (userId: string, userEmail: string | u
     // and not trying to get the profile details until we have to
     let finalRoles: UserRole[] = [...AUTH_CONFIG.DEFAULT_ROLES] as UserRole[];
     let profileData = null;
+    let userName = userEmail?.split('@')[0] || '';
     
     // First try to get the roles directly - this avoids potential recursion issues
     try {
@@ -103,33 +107,41 @@ export const fetchProfileAndRoles = async (userId: string, userEmail: string | u
         }
         
         console.log('Retrieved roles from database:', finalRoles);
+      } else {
+        console.log('No roles from database, using default roles');
       }
     } catch (rolesError) {
       console.warn('Error getting user roles, using defaults:', rolesError);
     }
     
     // As a LAST resort, attempt to get the profile data - but this is optional!
-    if (finalRoles.length <= AUTH_CONFIG.DEFAULT_ROLES.length) {
-      try {
-        const { data, error } = await supabase
-          .from('agent_profiles')
-          .select('full_name, tier')
-          .eq('id', userId)
-          .maybeSingle();
-          
-        if (!error && data) {
-          profileData = data;
-          
-          // Determine additional roles based on tier if we didn't get them earlier
-          const tier = data.tier || 1;
+    try {
+      // Use maybeSingle to prevent errors if no profile exists
+      const { data, error } = await supabase
+        .from('agent_profiles')
+        .select('full_name, tier')
+        .eq('id', userId)
+        .maybeSingle();
+        
+      if (!error && data) {
+        profileData = data;
+        if (data.full_name) {
+          userName = data.full_name;
+        }
+        
+        // Determine additional roles based on tier if we didn't get them earlier
+        const tier = data.tier || 1;
+        if (finalRoles.length <= AUTH_CONFIG.DEFAULT_ROLES.length) {
           if (tier >= 5) finalRoles.push('admin');
           if (tier >= 4) finalRoles.push('team_leader');
           if (tier >= 3) finalRoles.push('manager');
           if (tier >= 2) finalRoles.push('finance');
         }
-      } catch (err) {
-        console.warn('Could not get profile data, using email-based profile only');
+      } else {
+        console.log('No profile data found, using email-based profile only');
       }
+    } catch (err) {
+      console.warn('Could not get profile data, using email-based profile only', err);
     }
     
     // Ensure admin role for special admin email
@@ -141,7 +153,7 @@ export const fetchProfileAndRoles = async (userId: string, userEmail: string | u
     const userProfile = {
       id: userId,
       email: userEmail || '',
-      name: profileData?.full_name || userEmail?.split('@')[0] || '',
+      name: userName,
       roles: finalRoles,
       activeRole: finalActiveRole as UserRole,
     };
