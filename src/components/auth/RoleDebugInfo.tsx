@@ -32,22 +32,34 @@ const RoleDebugInfo: React.FC = () => {
     }
   };
 
-  // Handle Clerk user format or our own UserProfile format
+  // Safely get user email from different possible structures
   const getUserEmail = () => {
-    if (user.primaryEmailAddress && 'emailAddress' in user.primaryEmailAddress) {
+    // Type guard to check if property exists and has expected structure
+    if ('primaryEmailAddress' in user && 
+        user.primaryEmailAddress && 
+        typeof user.primaryEmailAddress === 'object' && 
+        'emailAddress' in user.primaryEmailAddress) {
       return user.primaryEmailAddress.emailAddress;
     }
     return user.email || 'No email';
   };
 
-  // Safely access metadata from Clerk user or our own UserProfile
+  // Safely get user roles from different possible structures
   const getRoles = () => {
-    if (user.publicMetadata && user.publicMetadata.roles) {
-      return Array.isArray(user.publicMetadata.roles) 
-        ? user.publicMetadata.roles.join(', ')
-        : user.publicMetadata.roles;
+    // Type guard to check if publicMetadata exists
+    if ('publicMetadata' in user && user.publicMetadata) {
+      if ('roles' in user.publicMetadata) {
+        const roles = user.publicMetadata.roles;
+        if (Array.isArray(roles)) {
+          return roles.join(', ');
+        } else if (typeof roles === 'string') {
+          return roles;
+        }
+      }
     }
-    return (user.roles || []).join(', ');
+    
+    // Fall back to roles array if available
+    return Array.isArray(user.roles) ? user.roles.join(', ') : '';
   };
 
   return (
