@@ -23,7 +23,8 @@ export const ensureAdminRoleForSpecialEmail = (
   roles: string[] | UserRole[], 
   email: string | null | undefined
 ): UserRole[] => {
-  const typedRoles = roles as UserRole[];
+  // Ensure we're working with UserRole[] by casting
+  const typedRoles = roles.map(role => role as UserRole);
   
   if (!isSpecialAdminEmail(email)) return typedRoles;
   
@@ -42,7 +43,8 @@ export const getPreferredActiveRole = (
   roles: string[] | UserRole[], 
   currentActiveRole?: string
 ): UserRole => {
-  const typedRoles = roles as UserRole[];
+  // Ensure we're working with UserRole[] by casting
+  const typedRoles = roles.map(role => role as UserRole);
   
   // If roles include admin and current role is not admin, prefer admin
   if (typedRoles.includes('admin')) {

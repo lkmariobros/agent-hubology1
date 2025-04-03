@@ -13,7 +13,7 @@ import { AUTH_CONFIG } from '@/context/auth/authConfig';
 const Index = () => {
   const navigate = useNavigate();
   const auth = useAuth();
-  const { userId, user, isAdmin } = auth;
+  const { user, isAdmin } = auth;
   const isLoaded = auth.loading === false; // Derive from loading state
   const isSignedIn = auth.isAuthenticated; // Use isAuthenticated instead
   const { session } = useClerk();

@@ -21,7 +21,7 @@ export interface UserProfile {
 export interface AuthContextType {
   isAuthenticated: boolean;
   isAdmin: boolean;
-  userId: string | null;
+  userId?: string | null;
   user: UserProfile | null;
   loading: boolean;
   error: Error | null;
