@@ -34,26 +34,26 @@ const RoleDebugInfo: React.FC = () => {
 
   // Safely get user email from different possible structures
   const getUserEmail = () => {
-    // Type guard to check if property exists and has expected structure
+    // Check if primaryEmailAddress exists and has the expected structure
     if ('primaryEmailAddress' in user && 
         user.primaryEmailAddress && 
         typeof user.primaryEmailAddress === 'object' && 
-        'emailAddress' in user.primaryEmailAddress) {
-      return user.primaryEmailAddress.emailAddress;
+        'emailAddress' in (user.primaryEmailAddress as {emailAddress: string})) {
+      return (user.primaryEmailAddress as {emailAddress: string}).emailAddress;
     }
     return user.email || 'No email';
   };
 
   // Safely get user roles from different possible structures
   const getRoles = () => {
-    // Type guard to check if publicMetadata exists
+    // Check if publicMetadata exists
     if ('publicMetadata' in user && user.publicMetadata) {
-      if ('roles' in user.publicMetadata) {
-        const roles = user.publicMetadata.roles;
-        if (Array.isArray(roles)) {
-          return roles.join(', ');
-        } else if (typeof roles === 'string') {
-          return roles;
+      const metadata = user.publicMetadata as {roles?: string[] | string};
+      if (metadata.roles) {
+        if (Array.isArray(metadata.roles)) {
+          return metadata.roles.join(', ');
+        } else if (typeof metadata.roles === 'string') {
+          return metadata.roles;
         }
       }
     }
