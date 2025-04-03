@@ -1,10 +1,9 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthForm from '../components/AuthForm';
 import { useClerk } from '@clerk/clerk-react';
 import { useAuth } from '@/hooks/useAuth';
 import LoadingIndicator from '@/components/ui/loading-indicator';
-import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
@@ -13,28 +12,25 @@ import { AUTH_CONFIG } from '@/context/auth/authConfig';
 const Index = () => {
   const navigate = useNavigate();
   const auth = useAuth();
-  const { user, isAdmin } = auth;
-  const isLoaded = auth.loading === false; // Derive from loading state
-  const isSignedIn = auth.isAuthenticated; // Use isAuthenticated instead
-  const { session } = useClerk();
+  const { isSignedIn, isLoaded } = useClerk();
+  const { isAdmin, user } = auth;
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [initialCheckDone, setInitialCheckDone] = useState(false);
   const [timeoutCount, setTimeoutCount] = useState(0);
   const [error, setError] = useState<Error | null>(null);
   
   // Track mount state to prevent state updates after unmount
-  const isMounted = useRef(true);
+  const isMounted = React.useRef(true);
   
   // Use a timeout to prevent getting stuck in loading state
-  const timeoutRef = useRef<number | null>(null);
+  const timeoutRef = React.useRef<number | null>(null);
   
   // Monitor for auth state in development
   const logAuthState = () => {
     if (import.meta.env.DEV) {
       console.log('[IndexPage] Auth state:', { 
         isSignedIn, 
-        isLoaded, 
-        sessionExists: !!session,
+        isLoaded,
         initialCheckDone,
         error: error?.message
       });
@@ -63,9 +59,9 @@ const Index = () => {
           console.warn('[IndexPage] Auth check timed out, forcing initialCheckDone');
           setInitialCheckDone(true);
           setTimeoutCount(prev => prev + 1);
-          toast.error('Authentication check timed out. Please try refreshing.');
+          setError(new Error('Authentication check timed out. Please try refreshing.'));
         }
-      }, AUTH_CONFIG.ROUTE_AUTH_TIMEOUT);
+      }, AUTH_CONFIG.ROUTE_AUTH_TIMEOUT || 10000);
     }
     
     // Clear timeout when loading completes
@@ -79,7 +75,7 @@ const Index = () => {
       setIsRedirecting(true);
       
       // If admin, redirect to admin dashboard
-      if (auth.isAdmin) {
+      if (isAdmin) {
         navigate('/admin');
       } else {
         // Otherwise redirect to agent dashboard
@@ -91,7 +87,7 @@ const Index = () => {
     if (isLoaded && !initialCheckDone) {
       setInitialCheckDone(true);
     }
-  }, [isSignedIn, isLoaded, navigate, initialCheckDone, session, auth.isAdmin]);
+  }, [isSignedIn, isLoaded, navigate, initialCheckDone, isAdmin]);
 
   const handleRetry = () => {
     window.location.reload();

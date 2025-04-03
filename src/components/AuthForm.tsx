@@ -28,13 +28,13 @@ const AuthForm = () => {
       setLoading(true);
       console.log('[AuthForm] Attempting sign in with:', email);
       
-      // Use our custom signIn instead of Clerk's signIn
+      // Use Clerk authentication
       await signIn(email, password);
       
       console.log('[AuthForm] Sign in request completed');
     } catch (error: any) {
       console.error('[AuthForm] Login error:', error);
-      toast.error(`Sign in failed: ${error.message || 'Unknown error'}`);
+      // Error is already handled in the provider
     } finally {
       setLoading(false);
     }
@@ -51,14 +51,13 @@ const AuthForm = () => {
     try {
       setLoading(true);
       
-      // Use our custom signUp
+      // Use Clerk authentication
       await signUp(email, password);
       
-      toast.success('Account created! Check your email for verification.');
       setIsLogin(true); // Switch to login view
     } catch (error: any) {
       console.error('[AuthForm] Registration error:', error);
-      toast.error(`Sign up failed: ${error.message || 'Unknown error'}`);
+      // Error is already handled in the provider
     } finally {
       setLoading(false);
     }
@@ -72,47 +71,11 @@ const AuthForm = () => {
     
     try {
       setLoading(true);
-      // This would need to be implemented with Clerk's password reset functionality
-      toast.success('Password reset instructions sent to your email');
+      // Use our resetPassword that now uses Clerk's functionality
+      await useAuth().resetPassword(email);
     } catch (error: any) {
       console.error('[AuthForm] Reset password error:', error);
-      toast.error(`Reset failed: ${error.message || 'Unknown error'}`);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Create a test user option for quick access
-  const handleDemoLogin = async () => {
-    try {
-      setLoading(true);
-      console.log('[AuthForm] Attempting demo login');
-      setEmail('demo@example.com');
-      setPassword('demo1234');
-      
-      // Use our custom signIn for the demo account
-      await signIn('demo@example.com', 'demo1234');
-    } catch (error: any) {
-      console.error('[AuthForm] Demo login error:', error);
-      toast.error(`Demo login failed: ${error.message || 'Unknown error'}`);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Added function to handle the special admin login
-  const handleAdminLogin = async () => {
-    try {
-      setLoading(true);
-      console.log('[AuthForm] Attempting admin login');
-      setEmail('josephkwantum@gmail.com');
-      setPassword('Demo1234!');
-      
-      // Use our custom signIn for the admin account
-      await signIn('josephkwantum@gmail.com', 'Demo1234!');
-    } catch (error: any) {
-      console.error('[AuthForm] Admin login error:', error);
-      toast.error(`Admin login failed: ${error.message || 'Unknown error'}`);
+      // Error is already handled in the provider
     } finally {
       setLoading(false);
     }
@@ -203,35 +166,6 @@ const AuthForm = () => {
       >
         {isLogin ? 'Create an account' : 'Sign in'}
       </Button>
-      
-      {/* Demo buttons for testing */}
-      <div className="flex flex-col space-y-2 mt-6">
-        <h3 className="text-center text-gray-400 text-sm font-semibold">Quick Access (Demo)</h3>
-        <Button
-          type="button"
-          variant="secondary"
-          className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white"
-          onClick={handleDemoLogin}
-          disabled={loading}
-        >
-          Demo Login (Regular User)
-        </Button>
-        
-        <Button
-          type="button"
-          variant="secondary"
-          className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white"
-          onClick={handleAdminLogin}
-          disabled={loading}
-        >
-          Admin Login
-        </Button>
-        
-        <p className="text-xs text-center text-gray-500 mt-2">
-          Demo: demo@example.com / demo1234<br/>
-          Admin: josephkwantum@gmail.com / Demo1234!
-        </p>
-      </div>
     </div>
   );
 };

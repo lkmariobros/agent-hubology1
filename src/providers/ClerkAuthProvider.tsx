@@ -35,7 +35,7 @@ export const useAuth = () => {
 };
 
 export const ClerkAuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isLoaded: isClerkLoaded, userId, sessionId, signOut: clerkSignOut } = useClerkAuth();
+  const { isLoaded: isClerkLoaded, userId, sessionId, signOut: clerkSignOut, signIn: clerkSignIn } = useClerkAuth();
   const { user: clerkUser, isLoaded: isUserLoaded } = useUser();
   const { organization, isLoaded: isOrgLoaded } = useOrganization();
   
@@ -132,39 +132,24 @@ export const ClerkAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   };
 
-  // Updated signIn method to work with Clerk directly
+  // Real Clerk signIn method
   const signIn = async (email: string, password: string) => {
     setLoading(true);
     setError(null);
     try {
-      console.log('Attempting to sign in with:', email);
+      console.log('Attempting to sign in with Clerk:', email);
       
-      // For demo purposes - simulate successful login
-      // In production, this would use Clerk's actual auth mechanisms
+      await clerkSignIn.create({
+        identifier: email,
+        password
+      });
       
-      if (email === 'demo@example.com' && password === 'demo1234') {
-        toast.success(`Demo login successful!`);
-        // Force a page reload to simulate redirection after successful login
-        setTimeout(() => {
-          window.location.href = '/dashboard';
-        }, 1000);
-        return;
-      }
+      toast.success('Signed in successfully!');
       
-      // For josephkwantum@gmail.com account
-      if (email === 'josephkwantum@gmail.com' && password === 'Demo1234!') {
-        toast.success(`Sign in successful with special admin account!`);
-        // Force a page reload to simulate redirection
-        setTimeout(() => {
-          window.location.href = '/admin';
-        }, 1000);
-        return;
-      }
-      
-      toast.error(`Invalid credentials. Try using the demo login buttons below.`);
     } catch (err) {
       console.error('Sign in error:', err);
       setError(err instanceof Error ? err : new Error('Sign in failed'));
+      toast.error(`Sign in failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
       throw err;
     } finally {
       setLoading(false);
@@ -175,12 +160,26 @@ export const ClerkAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setLoading(true);
     setError(null);
     try {
-      // In real implementation, we would use Clerk's signUp method
-      // For the demo, let's simulate a successful sign up
-      toast.success('Sign up successful (Demo Mode)! Please check your email for verification.');
+      const { createdSessionId, createdUserId } = await clerkSignIn.create({
+        strategy: 'password',
+        identifier: email,
+        password,
+      });
+      
+      if (createdSessionId && createdUserId) {
+        toast.success('Account created successfully!');
+      } else {
+        // This shouldn't normally happen with Clerk, but handle it just in case
+        await clerkSignIn.create({
+          identifier: email,
+          password
+        });
+        toast.success('Account created and signed in!');
+      }
     } catch (err) {
       console.error('Sign up error:', err);
       setError(err instanceof Error ? err : new Error('Sign up failed'));
+      toast.error(`Sign up failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
       throw err;
     } finally {
       setLoading(false);
@@ -191,12 +190,16 @@ export const ClerkAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setLoading(true);
     setError(null);
     try {
-      // In real implementation, we would use Clerk's resetPassword method
-      // For the demo, let's simulate a successful password reset
-      toast.success('Password reset instructions sent to your email (Demo Mode)');
+      // Use Clerk's password reset functionality
+      await clerkSignIn.create({
+        strategy: "reset_password_email_code",
+        identifier: email
+      });
+      toast.success('Password reset instructions sent to your email');
     } catch (err) {
       console.error('Reset password error:', err);
       setError(err instanceof Error ? err : new Error('Password reset failed'));
+      toast.error(`Password reset failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
       throw err;
     } finally {
       setLoading(false);
