@@ -1,9 +1,9 @@
 
-import { useAuth as useAuthContext } from "@/context/auth/AuthProvider";
+import { useAuth as useClerkAuth } from "../providers/ClerkAuthProvider";
 import { UserRole } from "@/types/auth";
 
 export function useAuth() {
-  const auth = useAuthContext();
+  const auth = useClerkAuth();
   
   // Enhanced auth interface to maintain compatibility with previous code
   return {

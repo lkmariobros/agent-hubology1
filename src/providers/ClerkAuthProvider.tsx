@@ -50,7 +50,7 @@ export const ClerkAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const isAdmin = clerkUser?.publicMetadata?.isAdmin === true || 
     // Check if organization has roles and if user has admin role in the organization
     // Use optional chaining for organization.membership
-    (organization && organization.membership?.role === 'admin') ||
+    (organization?.membership?.role === 'admin') ||
     clerkUser?.emailAddresses.some(email => 
       email.emailAddress === 'josephkwantum@gmail.com'
     );
