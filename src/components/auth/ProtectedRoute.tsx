@@ -1,4 +1,3 @@
-
 import React, { ReactNode, useEffect, useState, useRef } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -30,7 +29,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const { isLoaded, userId, isSignedIn } = auth;
   const location = useLocation();
   const isAuthenticated = isSignedIn;
-  const isAdmin = auth.has({ role: "admin" });
+  
+  // Use the has method from our enhanced auth hook
+  const isAdmin = auth.isAdmin;
   
   useEffect(() => {
     console.log("[ProtectedRoute] Is authenticated:", isAuthenticated);
@@ -114,7 +115,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   // Special case for special admin email
-  const isSpecialAdminUser = false; // This would come from the user's email in a real implementation
+  const isSpecialAdminUser = auth.user?.emailAddresses?.some(
+    email => email.emailAddress === 'josephkwantum@gmail.com'
+  ) || false;
 
   // Check for admin requirement, but make exception for special admin user
   if (requireAdmin && !isAdmin && !isSpecialAdminUser) {
@@ -127,7 +130,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   if (requireRoles.length > 0) {
     let hasRequiredRole = false;
     for (const role of requireRoles) {
-      if (auth.has({ role })) {
+      if (auth.hasRole(role)) {
         hasRequiredRole = true;
         break;
       }

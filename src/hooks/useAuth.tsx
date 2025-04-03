@@ -8,17 +8,39 @@ export function useAuth() {
   
   // Create an enhanced auth object that has all the Clerk auth methods
   // plus additional methods needed by our application
+  const hasRole = (roleName: string) => {
+    // Check the user's public metadata for roles
+    if (user?.publicMetadata?.roles) {
+      const roles = user.publicMetadata.roles as string[];
+      return Array.isArray(roles) && roles.includes(roleName);
+    }
+    
+    // Check if there's an organization role that matches
+    if (clerkAuth.orgRole) {
+      return clerkAuth.orgRole === roleName;
+    }
+    
+    // Special case for admin email
+    if (roleName === 'admin' && user?.emailAddresses) {
+      return user.emailAddresses.some(
+        email => email.emailAddress === 'josephkwantum@gmail.com'
+      );
+    }
+    
+    return false;
+  };
+  
   return {
     ...clerkAuth,
-    isAdmin: clerkAuth.has?.({ role: 'admin' }) || false,
-    // Ensure has method exists and works correctly
-    has: (role: { role: string }) => {
-      return clerkAuth.has?.(role) || false;
+    // Implement the has method that's expected by the components
+    has: (params: { role: string }) => {
+      return hasRole(params.role);
     },
     hasRole: (role: UserRole) => {
-      return clerkAuth.has?.({ role }) || false;
+      return hasRole(role);
     },
     // Additional properties our app expects
+    isAdmin: hasRole('admin'),
     isAuthenticated: !!clerkAuth.userId,
     user: user || null,
   };

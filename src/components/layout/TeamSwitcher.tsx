@@ -23,7 +23,7 @@ export function TeamSwitcher() {
   const { userId } = auth;
   const { user } = useUser();
   const [activeRole, setActiveRole] = React.useState<UserRole>('agent');
-  const isAdmin = auth.has({ role: "admin" });
+  const isAdmin = auth.isAdmin;
   
   if (!userId || !user) return null;
   
