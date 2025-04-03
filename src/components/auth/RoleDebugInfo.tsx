@@ -34,7 +34,7 @@ const RoleDebugInfo: React.FC = () => {
 
   // Handle Clerk user format or our own UserProfile format
   const getUserEmail = () => {
-    if (user.primaryEmailAddress?.emailAddress) {
+    if (user.primaryEmailAddress && 'emailAddress' in user.primaryEmailAddress) {
       return user.primaryEmailAddress.emailAddress;
     }
     return user.email || 'No email';
@@ -42,8 +42,10 @@ const RoleDebugInfo: React.FC = () => {
 
   // Safely access metadata from Clerk user or our own UserProfile
   const getRoles = () => {
-    if (user.publicMetadata?.roles) {
-      return (user.publicMetadata.roles as string[]).join(', ');
+    if (user.publicMetadata && user.publicMetadata.roles) {
+      return Array.isArray(user.publicMetadata.roles) 
+        ? user.publicMetadata.roles.join(', ')
+        : user.publicMetadata.roles;
     }
     return (user.roles || []).join(', ');
   };
