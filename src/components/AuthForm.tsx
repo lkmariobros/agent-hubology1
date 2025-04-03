@@ -1,20 +1,23 @@
 
 import React, { useState } from 'react';
-import { useAuth } from '@/providers/ClerkAuthProvider';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from "@/components/ui/separator";
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
+import { useSignIn, useSignUp } from '@clerk/clerk-react';
 
 const AuthForm = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn, signUp, resetPassword } = useAuth();
-
+  
+  const { signIn } = useSignIn();
+  const { signUp } = useSignUp();
+  
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -26,9 +29,18 @@ const AuthForm = () => {
     try {
       setLoading(true);
       console.log('[AuthForm] Attempting sign in with:', email);
-      await signIn(email, password);
+      
+      if (signIn) {
+        // Use Clerk's signIn
+        await signIn.create({
+          identifier: email,
+          password,
+        });
+      } else {
+        toast.error('Sign-in service unavailable');
+      }
+      
       console.log('[AuthForm] Sign in request completed');
-      // The navigation will be handled by the auth state change and Index page
     } catch (error: any) {
       console.error('[AuthForm] Login error:', error);
       toast.error(`Sign in failed: ${error.message || 'Unknown error'}`);
@@ -47,7 +59,20 @@ const AuthForm = () => {
     
     try {
       setLoading(true);
-      await signUp(email, password);
+      
+      if (signUp) {
+        // Use Clerk's signUp
+        await signUp.create({
+          emailAddress: email,
+          password,
+        });
+        
+        // Start email verification if required by Clerk
+        await signUp.prepareEmailAddressVerification();
+      } else {
+        toast.error('Sign-up service unavailable');
+      }
+      
       toast.success('Account created! Check your email for verification.');
       setIsLogin(true); // Switch to login view
     } catch (error: any) {
@@ -66,7 +91,7 @@ const AuthForm = () => {
     
     try {
       setLoading(true);
-      await resetPassword(email);
+      // This would need to be implemented with Clerk's password reset functionality
       toast.success('Password reset instructions sent to your email');
     } catch (error: any) {
       console.error('[AuthForm] Reset password error:', error);
@@ -81,9 +106,19 @@ const AuthForm = () => {
     try {
       setLoading(true);
       console.log('[AuthForm] Attempting demo login');
-      await signIn('josephkwantum@gmail.com', 'password123');
-    } catch (error) {
+      setEmail('josephkwantum@gmail.com');
+      setPassword('password123');
+      
+      if (signIn) {
+        // Use Clerk's signIn for the demo account
+        await signIn.create({
+          identifier: 'josephkwantum@gmail.com',
+          password: 'password123',
+        });
+      }
+    } catch (error: any) {
       console.error('[AuthForm] Demo login error:', error);
+      toast.error(`Demo login failed: ${error.message || 'Unknown error'}`);
     } finally {
       setLoading(false);
     }

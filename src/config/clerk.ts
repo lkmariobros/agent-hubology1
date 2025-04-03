@@ -19,7 +19,7 @@ export const CLERK_ROLE_MAPPING = {
 // Authentication settings
 export const CLERK_AUTH_SETTINGS = {
   // How long to wait for auth initialization before timing out (in milliseconds)
-  AUTH_TIMEOUT: 30000,
+  AUTH_TIMEOUT: 10000, // Reduced from 30s to 10s for faster feedback
   
   // Redirect paths for authentication flows
   REDIRECT_PATHS: {

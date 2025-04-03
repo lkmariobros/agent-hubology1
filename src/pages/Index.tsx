@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthForm from '../components/AuthForm';
@@ -41,6 +40,9 @@ const Index = () => {
   };
   
   useEffect(() => {
+    // Log initial state
+    logAuthState();
+    
     // Set up cleanup function
     return () => {
       isMounted.current = false;
@@ -70,17 +72,24 @@ const Index = () => {
       timeoutRef.current = null;
     }
     
-    // Only redirect after the initial auth check is complete
+    // Determine where to redirect based on the user's role
     if (isLoaded && isSignedIn && !isRedirecting) {
       setIsRedirecting(true);
-      navigate(CLERK_AUTH_SETTINGS.REDIRECT_PATHS.AFTER_LOGIN);
+      
+      // If admin, redirect to admin dashboard
+      if (auth.isAdmin) {
+        navigate('/admin');
+      } else {
+        // Otherwise redirect to agent dashboard
+        navigate('/dashboard');
+      }
     }
     
     // Mark initial check as done when loading is complete
     if (isLoaded && !initialCheckDone) {
       setInitialCheckDone(true);
     }
-  }, [isSignedIn, isLoaded, navigate, initialCheckDone, session]);
+  }, [isSignedIn, isLoaded, navigate, initialCheckDone, session, auth.isAdmin]);
 
   const handleRetry = () => {
     window.location.reload();
