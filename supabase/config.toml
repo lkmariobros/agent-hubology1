@@ -2,9 +2,6 @@
 # Updated Supabase configuration file
 project_id = "synabhmsxsvsxkyzhfss"
 
-[functions.clerk-admin]
-verify_jwt = true
-
 [api]
 port = 54321
 schemas = ["public", "storage", "graphql_public"]
