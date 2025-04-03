@@ -27,6 +27,50 @@ export type Database = {
         }
         Relationships: []
       }
+      agent_invitations: {
+        Row: {
+          created_at: string
+          email: string
+          expires_at: string
+          first_name: string
+          id: string
+          invitation_code: string
+          last_name: string
+          status: string
+          upline_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          expires_at?: string
+          first_name: string
+          id?: string
+          invitation_code: string
+          last_name: string
+          status?: string
+          upline_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          expires_at?: string
+          first_name?: string
+          id?: string
+          invitation_code?: string
+          last_name?: string
+          status?: string
+          upline_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_invitations_upline_id_fkey"
+            columns: ["upline_id"]
+            isOneToOne: false
+            referencedRelation: "agent_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agent_profiles: {
         Row: {
           agency_id: string
@@ -1004,6 +1048,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_invitation: {
+        Args: {
+          p_invitation_code: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
       assign_role_to_user: {
         Args: {
           p_user_id: string
@@ -1031,6 +1082,10 @@ export type Database = {
           total_amount: number
           scheduled_count: number
         }[]
+      }
+      expire_old_invitations: {
+        Args: Record<PropertyKey, never>
+        Returns: number
       }
       get_agent_profile_by_id: {
         Args: {
@@ -1066,6 +1121,12 @@ export type Database = {
           p_approval_id: string
         }
         Returns: Json[]
+      }
+      get_team_performance_metrics: {
+        Args: {
+          p_agent_id: string
+        }
+        Returns: Json
       }
       get_user_roles: {
         Args: {
@@ -1204,6 +1265,12 @@ export type Database = {
           similarity: number
         }[]
       }
+      resend_agent_invitation: {
+        Args: {
+          p_invitation_id: string
+        }
+        Returns: Json
+      }
       sparsevec_out: {
         Args: {
           "": unknown
@@ -1272,6 +1339,12 @@ export type Database = {
           "": unknown[]
         }
         Returns: number
+      }
+      verify_invitation_code: {
+        Args: {
+          p_invitation_code: string
+        }
+        Returns: Json
       }
     }
     Enums: {

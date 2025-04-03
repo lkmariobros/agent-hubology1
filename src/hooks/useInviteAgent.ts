@@ -1,5 +1,6 @@
 
 import { useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -12,11 +13,10 @@ interface InvitationData {
 
 export function useInviteAgent() {
   const [isLoading, setIsLoading] = useState(false);
+  const queryClient = useQueryClient();
 
-  const sendInvitation = async (invitationData: InvitationData) => {
-    setIsLoading(true);
-    
-    try {
+  const sendInvitationMutation = useMutation({
+    mutationFn: async (invitationData: InvitationData) => {
       // Generate a unique invitation code
       const invitationCode = uuidv4().substring(0, 8).toUpperCase();
       
@@ -53,8 +53,25 @@ export function useInviteAgent() {
       }
       
       return data;
-    } catch (error) {
+    },
+    onSuccess: (_, variables) => {
+      // Invalidate the invitations query when an invitation is sent
+      if (variables.uplineId) {
+        queryClient.invalidateQueries({ queryKey: ['invitations', variables.uplineId] });
+      }
+    },
+    onError: (error) => {
       console.error('Error in sendInvitation:', error);
+      // Error is thrown to the component for handling
+    }
+  });
+  
+  const sendInvitation = async (invitationData: InvitationData) => {
+    setIsLoading(true);
+    try {
+      await sendInvitationMutation.mutateAsync(invitationData);
+      return true;
+    } catch (error) {
       throw error;
     } finally {
       setIsLoading(false);
