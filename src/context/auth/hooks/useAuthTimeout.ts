@@ -11,28 +11,33 @@ export function useAuthTimeout(
 ) {
   const timeoutRef = useRef<number | undefined>();
 
+  // Set up initial timeout
   useEffect(() => {
-    // Always create the timeout when the hook is mounted
-    timeoutRef.current = window.setTimeout(() => {
-      console.warn(`[AuthProvider] Auth initialization timed out after ${AUTH_CONFIG.INITIALIZATION_TIMEOUT/1000} seconds`);
-      setError(new Error('Authentication verification timed out'));
-      setLoading(false);
-      setIsInitialized(true);
-      toast.error('Authentication verification timed out. Please refresh the page.');
-    }, AUTH_CONFIG.INITIALIZATION_TIMEOUT);
+    // Create timeout only when not initialized
+    if (!isInitialized && !timeoutRef.current) {
+      console.log('[AuthProvider] Setting up auth timeout');
+      timeoutRef.current = window.setTimeout(() => {
+        console.warn(`[AuthProvider] Auth initialization timed out after ${AUTH_CONFIG.INITIALIZATION_TIMEOUT/1000} seconds`);
+        setError(new Error('Authentication verification timed out'));
+        setLoading(false);
+        setIsInitialized(true);
+        toast.error('Authentication verification timed out. Please refresh the page.');
+      }, AUTH_CONFIG.INITIALIZATION_TIMEOUT);
+    }
 
-    // Clean up timeout on unmount or when initialized
+    // Clean up timeout on unmount
     return () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
         timeoutRef.current = undefined;
       }
     };
-  }, []); // Only run on mount
+  }, [isInitialized, setError, setLoading, setIsInitialized]);
 
-  // If initialized, clear the timeout
+  // Separate effect to clear timeout when initialized
   useEffect(() => {
     if (isInitialized && timeoutRef.current) {
+      console.log('[AuthProvider] Auth initialized, clearing timeout');
       clearTimeout(timeoutRef.current);
       timeoutRef.current = undefined;
     }

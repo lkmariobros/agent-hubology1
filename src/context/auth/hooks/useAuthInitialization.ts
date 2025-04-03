@@ -15,9 +15,10 @@ export function useAuthInitialization() {
     updateSessionState,
   } = useAuthState();
   
+  // Track initialization state
   const [isInitialized, setIsInitialized] = useState(false);
   
-  // Setup timeout handling
+  // Setup timeout handling - must be called consistently
   const timeoutRef = useAuthTimeout(
     isInitialized,
     setError,
@@ -29,8 +30,10 @@ export function useAuthInitialization() {
   useEffect(() => {
     console.log('[AuthProvider] Setting up auth listener');
     
+    // Important: Set up auth listener first before checking session
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        // Don't use async callback directly - handle with setTimeout
         handleAuthStateChange(
           event,
           session,
@@ -44,20 +47,22 @@ export function useAuthInitialization() {
       }
     );
 
-    // Initialize session
-    initializeFromSession(
-      updateSessionState,
-      setLoading,
-      setError,
-      resetState,
-      setIsInitialized
-    );
+    // Then initialize from current session
+    setTimeout(() => {
+      initializeFromSession(
+        updateSessionState,
+        setLoading,
+        setError,
+        resetState,
+        setIsInitialized
+      );
+    }, 0);
     
     return () => {
       console.log('[AuthProvider] Cleaning up auth subscription');
       subscription.unsubscribe();
     };
-  }, []); // Only run on mount
+  }, []);
   
   return {
     state,
