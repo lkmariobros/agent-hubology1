@@ -11,6 +11,7 @@ import { Building, Shield, ChevronsUpDown } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { UserRole } from '@/types/auth';
 import { toast } from 'sonner';
+import { isSpecialAdminEmail } from '@/context/auth/adminUtils';
 
 interface PortalSwitcherProps {
   showLabel?: boolean;
@@ -25,8 +26,8 @@ export function PortalSwitcher({ showLabel = true, className = "" }: PortalSwitc
   const isAdminActive = activeRole === 'admin';
   const [hasAdminRole, setHasAdminRole] = useState(false);
   
-  // Check for special admin user (josephkwantum@gmail.com)
-  const isSpecialAdminUser = user?.email === 'josephkwantum@gmail.com';
+  // Check for special admin user
+  const isSpecialAdminUser = user?.email ? isSpecialAdminEmail(user.email) : false;
   
   useEffect(() => {
     // Force recheck for admin role

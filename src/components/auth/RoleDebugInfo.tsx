@@ -5,6 +5,7 @@ import { roleUtils } from '@/context/auth/roleUtils';
 import { ChevronDown, ChevronUp, Shield, RefreshCw } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
+import { isSpecialAdminEmail } from '@/context/auth/adminUtils';
 
 const RoleDebugInfo: React.FC = () => {
   const { user, roles, profile, isAdmin, activeRole } = useAuth();
@@ -14,7 +15,7 @@ const RoleDebugInfo: React.FC = () => {
 
   // Check for admin override on mount and when user changes
   useEffect(() => {
-    if (user && user.email === 'josephkwantum@gmail.com') {
+    if (user && user.email && isSpecialAdminEmail(user.email)) {
       setForceAdminEnabled(true);
     }
   }, [user]);
@@ -51,7 +52,7 @@ const RoleDebugInfo: React.FC = () => {
     }
   };
 
-  const showAdminOverrideMessage = user.email === 'josephkwantum@gmail.com' && !isAdmin;
+  const showAdminOverrideMessage = user.email && isSpecialAdminEmail(user.email) && !isAdmin;
 
   return (
     <div className="relative inline-block">

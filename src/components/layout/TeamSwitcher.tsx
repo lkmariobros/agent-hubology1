@@ -13,6 +13,7 @@ import { useUser } from '@clerk/clerk-react';
 import { useAuth } from '@/hooks/useAuth';
 import { UserRole } from '@/types/auth';
 import { toast } from 'sonner';
+import { isSpecialAdminEmail } from '@/context/auth/adminUtils';
 
 /**
  * Component that allows users to switch between different roles/portals
@@ -32,8 +33,12 @@ export function TeamSwitcher() {
     { role: 'agent', label: 'Agent Portal', icon: <Building className="h-4 w-4 mr-2" /> },
   ];
   
+  // Check if user is special admin
+  const isSpecialEmail = user.primaryEmailAddress?.emailAddress 
+    ? isSpecialAdminEmail(user.primaryEmailAddress.emailAddress)
+    : false;
+    
   // Always add admin option for the special email
-  const isSpecialEmail = user.primaryEmailAddress?.emailAddress === 'josephkwantum@gmail.com';
   if (isAdmin || isSpecialEmail) {
     availableRoles.push({ 
       role: 'admin', 

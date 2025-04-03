@@ -6,6 +6,8 @@ import LoadingIndicator from '../ui/loading-indicator';
 import { UserRole } from '@/types/auth';
 import { toast } from 'sonner';
 import { Button } from '../ui/button';
+import { AUTH_CONFIG } from '@/context/auth/authConfig';
+import { isSpecialAdminEmail } from '@/context/auth/adminUtils';
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -38,13 +40,13 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       location: location.pathname
     });
     
-    // Set timeout to detect prolonged loading states - shorter timeout (10s)
+    // Set timeout to detect prolonged loading states
     const timeoutId = setTimeout(() => {
       if (!isLoaded) {
         console.warn('[ProtectedRoute] Auth verification timed out');
         setTimeoutOccurred(true);
       }
-    }, 10000);
+    }, AUTH_CONFIG.ROUTE_AUTH_TIMEOUT);
     
     return () => clearTimeout(timeoutId);
   }, [isLoaded, isAuthenticated, isAdmin, requireAdmin, location.pathname]);
@@ -98,13 +100,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to={redirectTo} state={{ from: location }} replace />;
   }
 
-  // Special case for special admin email
-  const isSpecialAdminUser = auth.user?.emailAddresses?.some(
-    email => email.emailAddress === 'josephkwantum@gmail.com'
-  ) || false;
+  // Check if user is special admin
+  const isSpecialAdmin = auth.user?.email ? isSpecialAdminEmail(auth.user.email) : false;
 
   // Check for admin requirement, but make exception for special admin user
-  if (requireAdmin && !isAdmin && !isSpecialAdminUser) {
+  if (requireAdmin && !isAdmin && !isSpecialAdmin) {
     console.log('[ProtectedRoute] Admin access required but user is not admin, redirecting to dashboard');
     toast.error("You need admin privileges to access this page");
     return <Navigate to="/dashboard" replace />;
@@ -120,7 +120,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       }
     }
     
-    if (!hasRequiredRole && !isSpecialAdminUser) {
+    if (!hasRequiredRole && !isSpecialAdmin) {
       console.log('[ProtectedRoute] Required roles not found:', requireRoles);
       toast.error(`You need ${requireRoles.join(' or ')} privileges to access this page`);
       return <Navigate to="/dashboard" replace />;

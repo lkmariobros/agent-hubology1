@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthForm from '../components/AuthForm';
@@ -8,7 +9,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { CLERK_AUTH_SETTINGS } from '@/config/clerk';
+import { AUTH_CONFIG } from '@/context/auth/authConfig';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -63,7 +64,7 @@ const Index = () => {
           setTimeoutCount(prev => prev + 1);
           toast.error('Authentication check timed out. Please try refreshing.');
         }
-      }, CLERK_AUTH_SETTINGS.AUTH_TIMEOUT);
+      }, AUTH_CONFIG.ROUTE_AUTH_TIMEOUT);
     }
     
     // Clear timeout when loading completes

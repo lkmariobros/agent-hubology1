@@ -4,6 +4,8 @@ import { supabase } from '@/lib/supabase';
 import { fetchProfileAndRoles } from '../authUtils';
 import { useAuthState } from '../useAuthState';
 import { toast } from 'sonner';
+import { AUTH_CONFIG } from '../authConfig';
+import { isSpecialAdminEmail, ensureAdminRoleForSpecialEmail, getPreferredActiveRole } from '../adminUtils';
 
 /**
  * Hook to handle authentication initialization and state change subscription
@@ -41,7 +43,7 @@ export function useAuthInitialization() {
           setLoading(false);
           
           // Clear email cookie on signout
-          document.cookie = "userEmail=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+          document.cookie = `${AUTH_CONFIG.EMAIL_COOKIE_NAME}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
           return;
         }
         
@@ -52,7 +54,7 @@ export function useAuthInitialization() {
           
           // Set email in cookie for roleUtils to use
           if (session.user?.email) {
-            document.cookie = `userEmail=${encodeURIComponent(session.user.email)}; path=/;`;
+            document.cookie = `${AUTH_CONFIG.EMAIL_COOKIE_NAME}=${encodeURIComponent(session.user.email)}; path=/;`;
           }
           
           // Use setTimeout to avoid potential deadlocks with Supabase client
@@ -63,17 +65,11 @@ export function useAuthInitialization() {
               const { profile, userProfile, roles, activeRole } = 
                 await fetchProfileAndRoles(session.user.id, session.user.email);
               
-              // Special handling for josephkwantum@gmail.com
-              let finalRoles = [...roles];
-              let finalActiveRole = activeRole;
+              // Ensure admin role for special admin email
+              const finalRoles = ensureAdminRoleForSpecialEmail(roles, session.user.email);
               
-              if (session.user.email === 'josephkwantum@gmail.com') {
-                console.log('[AuthProvider] Admin email detected, forcing admin role');
-                if (!finalRoles.includes('admin')) {
-                  finalRoles.push('admin');
-                }
-                finalActiveRole = 'admin';
-              }
+              // Get preferred active role (admin takes precedence)
+              const finalActiveRole = getPreferredActiveRole(finalRoles, activeRole);
               
               updateSessionState(
                 session,
@@ -122,24 +118,18 @@ export function useAuthInitialization() {
           
           // Set email in cookie for roleUtils to use
           if (session.user?.email) {
-            document.cookie = `userEmail=${encodeURIComponent(session.user.email)}; path=/;`;
+            document.cookie = `${AUTH_CONFIG.EMAIL_COOKIE_NAME}=${encodeURIComponent(session.user.email)}; path=/;`;
           }
           
           try {
             const { profile, userProfile, roles, activeRole } = 
               await fetchProfileAndRoles(session.user.id, session.user.email);
             
-            // Special handling for josephkwantum@gmail.com
-            let finalRoles = [...roles];
-            let finalActiveRole = activeRole;
+            // Ensure admin role for special admin email
+            const finalRoles = ensureAdminRoleForSpecialEmail(roles, session.user.email);
             
-            if (session.user.email === 'josephkwantum@gmail.com') {
-              console.log('[AuthProvider] Admin email detected, forcing admin role');
-              if (!finalRoles.includes('admin')) {
-                finalRoles.push('admin');
-              }
-              finalActiveRole = 'admin';
-            }
+            // Get preferred active role (admin takes precedence)
+            const finalActiveRole = getPreferredActiveRole(finalRoles, activeRole);
             
             updateSessionState(
               session,
@@ -169,7 +159,7 @@ export function useAuthInitialization() {
           setLoading(false);
           
           // Clear email cookie when no session
-          document.cookie = "userEmail=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+          document.cookie = `${AUTH_CONFIG.EMAIL_COOKIE_NAME}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
         }
       } catch (error) {
         console.error('[AuthProvider] Error during auth initialization:', error);
@@ -181,16 +171,16 @@ export function useAuthInitialization() {
     
     initializeAuth();
     
-    // Set a timeout to avoid infinite loading - increased to 30s
+    // Set a timeout to avoid infinite loading
     authTimeout = window.setTimeout(() => {
       if (!isInitialized) {
-        console.warn('[AuthProvider] Auth initialization timed out after 30 seconds');
+        console.warn(`[AuthProvider] Auth initialization timed out after ${AUTH_CONFIG.INITIALIZATION_TIMEOUT/1000} seconds`);
         setError(new Error('Authentication verification timed out'));
         setLoading(false);
         setIsInitialized(true);
         toast.error('Authentication verification timed out. Please refresh the page.');
       }
-    }, 30000); 
+    }, AUTH_CONFIG.INITIALIZATION_TIMEOUT);
     
     // Cleanup subscription and timeout on unmount
     return () => {

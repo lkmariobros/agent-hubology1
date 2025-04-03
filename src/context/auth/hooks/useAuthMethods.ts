@@ -1,10 +1,10 @@
 
-import { useState } from 'react';
 import { authService } from '../authService';
 import { roleUtils } from '../roleUtils';
 import { UserRole } from '@/types/auth';
 import { toast } from 'sonner';
 import { AuthState } from '../types';
+import { isSpecialAdminEmail } from '../adminUtils';
 
 /**
  * Hook providing authentication methods
@@ -94,7 +94,7 @@ export function useAuthMethods(
   
   const hasRole = (role: UserRole) => {
     // Special case for admin email
-    if (role === 'admin' && state.user?.email === 'josephkwantum@gmail.com') {
+    if (role === 'admin' && state.user?.email && isSpecialAdminEmail(state.user.email)) {
       return true;
     }
     return roleUtils.hasRole(state.roles, role);

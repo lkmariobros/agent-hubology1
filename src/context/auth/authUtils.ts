@@ -3,6 +3,8 @@ import { User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { UserProfile, UserRole } from '@/types/auth';
 import { castParam, safelyExtractProperty } from '@/utils/supabaseHelpers';
+import { ensureAdminRoleForSpecialEmail, getPreferredActiveRole, isSpecialAdminEmail } from './adminUtils';
+import { AUTH_CONFIG } from './authConfig';
 
 /**
  * Creates a user profile from Supabase user data and roles
@@ -24,7 +26,7 @@ export const createUserProfile = async (user: User): Promise<UserProfile> => {
       .maybeSingle();
       
     // Determine roles based on tier
-    roles = ['agent', 'viewer']; // Everyone has basic roles
+    roles = [...AUTH_CONFIG.DEFAULT_ROLES]; // Everyone has basic roles
     
     if (profileData) {
       const tier = safelyExtractProperty(profileData, 'tier', 1);
@@ -40,39 +42,36 @@ export const createUserProfile = async (user: User): Promise<UserProfile> => {
     roles = userRoles.map(r => r.role_name as UserRole);
     
     // Ensure every user has at least basic roles
-    if (!roles.includes('viewer')) roles.push('viewer');
-    if (!roles.includes('agent')) roles.push('agent');
-  }
-  
-  // Hard-coded admin for specific email
-  if (user.email === 'josephkwantum@gmail.com') {
-    console.log('Granting admin access to:', user.email);
-    if (!roles.includes('admin')) {
-      roles.push('admin');
+    for (const baseRole of AUTH_CONFIG.DEFAULT_ROLES) {
+      if (!roles.includes(baseRole as UserRole)) {
+        roles.push(baseRole as UserRole);
+      }
     }
   }
   
+  // Ensure admin role for special admin email
+  roles = ensureAdminRoleForSpecialEmail(roles, user.email);
+  
   // Default to agent role if no roles returned
   if (!roles || !roles.length) {
-    const defaultRoles: UserRole[] = ['agent'];
     return {
       id: user.id,
       email: user.email || '',
       name: user.email?.split('@')[0] || '',
-      roles: defaultRoles,
-      activeRole: defaultRoles[0],
+      roles: [AUTH_CONFIG.DEFAULT_ROLE as UserRole],
+      activeRole: AUTH_CONFIG.DEFAULT_ROLE as UserRole,
     };
   }
   
-  // Set active role (prefer admin if available, otherwise first role)
-  const activeRole = roles.includes('admin') ? 'admin' : roles[0];
+  // Set active role with admin taking precedence
+  const activeRole = getPreferredActiveRole(roles);
   
   return {
     id: user.id,
     email: user.email || '',
     name: user.email?.split('@')[0] || '',
-    roles,
-    activeRole,
+    roles: roles as UserRole[],
+    activeRole: activeRole as UserRole,
   };
 };
 
@@ -115,15 +114,18 @@ export const fetchProfileAndRoles = async (userId: string, userEmail: string | u
     }
     
     // Determine roles based on what we have
-    let roles: UserRole[] = ['agent', 'viewer']; // Everyone has basic roles
+    let roles: UserRole[] = [...AUTH_CONFIG.DEFAULT_ROLES] as UserRole[]; // Everyone has basic roles
     
     if (!rolesError && dbRoles && dbRoles.length > 0) {
       // Use roles from database
       roles = dbRoles.map(r => r.role_name as UserRole);
       
       // Ensure basic roles
-      if (!roles.includes('viewer')) roles.push('viewer');
-      if (!roles.includes('agent')) roles.push('agent');
+      for (const baseRole of AUTH_CONFIG.DEFAULT_ROLES) {
+        if (!roles.includes(baseRole as UserRole)) {
+          roles.push(baseRole as UserRole);
+        }
+      }
       
       console.log('Retrieved roles from database:', roles);
     } else if (finalProfileData) {
@@ -140,22 +142,18 @@ export const fetchProfileAndRoles = async (userId: string, userEmail: string | u
       console.log('Determined roles from tier:', roles);
     }
     
-    // Hard-coded admin for specific email
-    if (userEmail === 'josephkwantum@gmail.com') {
-      console.log('Granting admin access to:', userEmail);
-      if (!roles.includes('admin')) {
-        roles.push('admin');
-      }
-    }
+    // Ensure admin role for special admin email
+    roles = ensureAdminRoleForSpecialEmail(roles, userEmail);
     
-    const activeRole = roles.includes('admin') ? 'admin' : roles[0];
+    // Set active role with admin taking precedence
+    const activeRole = getPreferredActiveRole(roles);
     
     const userProfile = {
       id: userId,
       email: userEmail || '',
       name: safelyExtractProperty(finalProfileData, 'full_name', userEmail?.split('@')[0] || ''),
       roles: roles,
-      activeRole: activeRole,
+      activeRole: activeRole as UserRole,
     };
     
     console.log('User profile created:', userProfile);
@@ -169,13 +167,11 @@ export const fetchProfileAndRoles = async (userId: string, userEmail: string | u
   } catch (err) {
     console.error('Error fetching user profile or roles', { userId, error: err });
     // Still return a basic profile even if there's an error
-    const defaultRoles: UserRole[] = ['agent'];
+    const defaultRoles: UserRole[] = [AUTH_CONFIG.DEFAULT_ROLE as UserRole];
     
-    // Hard-coded admin for specific email even in error case
-    if (userEmail === 'josephkwantum@gmail.com') {
-      console.log('Granting admin access to:', userEmail, '(in error handler)');
-      defaultRoles.push('admin');
-    }
+    // Ensure admin role for special admin email
+    const finalRoles = ensureAdminRoleForSpecialEmail(defaultRoles, userEmail);
+    const finalActiveRole = getPreferredActiveRole(finalRoles);
     
     return {
       profile: null,
@@ -183,11 +179,11 @@ export const fetchProfileAndRoles = async (userId: string, userEmail: string | u
         id: userId,
         email: userEmail || '',
         name: userEmail?.split('@')[0] || '',
-        roles: defaultRoles,
-        activeRole: defaultRoles.includes('admin') ? 'admin' : defaultRoles[0],
+        roles: finalRoles as UserRole[],
+        activeRole: finalActiveRole as UserRole,
       },
-      roles: defaultRoles,
-      activeRole: defaultRoles.includes('admin') ? 'admin' : defaultRoles[0]
+      roles: finalRoles as UserRole[],
+      activeRole: finalActiveRole as UserRole
     };
   }
 };
