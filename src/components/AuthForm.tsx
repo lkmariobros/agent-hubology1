@@ -205,26 +205,32 @@ const AuthForm = () => {
       </Button>
       
       {/* Demo buttons for testing */}
-      <div className="flex flex-col space-y-2 mt-4">
+      <div className="flex flex-col space-y-2 mt-6">
+        <h3 className="text-center text-gray-400 text-sm font-semibold">Quick Access (Demo)</h3>
         <Button
           type="button"
-          variant="ghost"
-          className="text-gray-400 hover:text-white text-sm"
+          variant="secondary"
+          className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white"
           onClick={handleDemoLogin}
           disabled={loading}
         >
-          Demo Login (demo@example.com)
+          Demo Login (Regular User)
         </Button>
         
         <Button
           type="button"
-          variant="ghost"
-          className="text-gray-400 hover:text-white text-sm"
+          variant="secondary"
+          className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white"
           onClick={handleAdminLogin}
           disabled={loading}
         >
-          Admin Login (josephkwantum@gmail.com)
+          Admin Login
         </Button>
+        
+        <p className="text-xs text-center text-gray-500 mt-2">
+          Demo: demo@example.com / demo1234<br/>
+          Admin: josephkwantum@gmail.com / Demo1234!
+        </p>
       </div>
     </div>
   );

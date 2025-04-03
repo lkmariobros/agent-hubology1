@@ -48,8 +48,8 @@ export const ClerkAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   // Determine if user is an admin based on Clerk roles
   const isAdmin = clerkUser?.publicMetadata?.isAdmin === true || 
-    // Check if organization has roles and if user has admin role in the organization
-    // Fix: Use optional chaining for organization membership property
+    // Fix: Organization might not have membership property in the type definition
+    // Use optional chaining to access potentially undefined properties safely
     (organization?.membership?.role === 'admin') ||
     clerkUser?.emailAddresses.some(email => 
       email.emailAddress === 'josephkwantum@gmail.com'
@@ -137,6 +137,8 @@ export const ClerkAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setLoading(true);
     setError(null);
     try {
+      console.log('Attempting to sign in with:', email);
+      
       // For demo purposes - simulate successful login
       // In production, this would use Clerk's actual auth mechanisms
       
@@ -159,7 +161,7 @@ export const ClerkAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         return;
       }
       
-      toast.success(`Sign in attempt processed. Check your credentials if you're not redirected.`);
+      toast.error(`Invalid credentials. Try using the demo login buttons below.`);
     } catch (err) {
       console.error('Sign in error:', err);
       setError(err instanceof Error ? err : new Error('Sign in failed'));
