@@ -28,11 +28,12 @@ import NotFound from './pages/NotFound';
 import CommissionForecastPage from './pages/admin/CommissionForecast';
 import Reports from './pages/Reports'; // Using the existing Reports page for all report routes
 import AdminSettings from './pages/admin/Settings';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <AppLayout />,
+    element: <AuthProvider><AppLayout /></AuthProvider>,
     children: [
       { index: true, element: <Dashboard /> },
       { path: 'properties', element: <PropertyList /> },
@@ -78,9 +79,5 @@ const router = createBrowserRouter([
 ]);
 
 export default function Router() {
-  return (
-    <AuthProvider>
-      <RouterProvider router={router} />
-    </AuthProvider>
-  );
+  return <RouterProvider router={router} />;
 }

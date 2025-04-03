@@ -147,11 +147,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to="/dashboard" replace />;
   }
   
-  // Check if we're trying to access admin routes with agent role (except for special admin user)
+  // Critical fix: Check if we're trying to access admin routes with agent role but redirect to admin dashboard instead
   if (location.pathname.startsWith('/admin') && activeRole !== 'admin' && !isSpecialAdminUser) {
     console.log('[ProtectedRoute] Trying to access admin route with non-admin role, redirecting to admin portal switcher');
     toast.error("Please switch to admin role to access this section");
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/admin" replace />;
   }
   
   // Check if we're trying to access agent routes with admin role (except for special admin user)

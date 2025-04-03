@@ -5,15 +5,19 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Shield } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Navigate } from 'react-router-dom';
+import LoadingIndicator from '@/components/ui/loading-indicator';
 
 const PaymentSchedulesAdmin = () => {
-  const { user } = useAuth();
+  const { isAdmin, loading } = useAuth();
   
-  // Check if user is admin (tier >= 4 for now, should be using proper role system)
-  const isAdmin = user?.tier >= 4;
+  // Show loading indicator while checking authentication
+  if (loading) {
+    return <LoadingIndicator size="lg" text="Verifying authentication..." />;
+  }
   
+  // If user is not admin, redirect to admin dashboard instead of agent dashboard
   if (!isAdmin) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/admin" replace />;
   }
   
   return (
@@ -24,7 +28,7 @@ const PaymentSchedulesAdmin = () => {
         <Shield className="h-4 w-4" />
         <AlertTitle>Access Control Information</AlertTitle>
         <AlertDescription>
-          This page is protected by Row Level Security. Only users with admin privileges (tier 4+) can modify payment schedules.
+          This page is protected by Row Level Security. Only users with admin privileges can modify payment schedules.
         </AlertDescription>
       </Alert>
       
