@@ -1,40 +1,35 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthForm from '../components/AuthForm';
-import useAuth from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/useAuth';
 import LoadingIndicator from '@/components/ui/loading-indicator';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { AUTH_CONFIG } from '@/context/auth/authConfig';
-import { useClerk } from '@clerk/clerk-react';
+import { AUTH_SETTINGS } from '@/config/supabase';
 
 const Index = () => {
+  const { isAuthenticated, loading, session, error } = useAuth();
   const navigate = useNavigate();
-  const auth = useAuth();
-  const clerk = useClerk();
-  // Access loaded state correctly
-  const isLoaded = clerk.loaded;
-  const isSignedIn = !!clerk.user;
-  const { isAdmin, user } = auth;
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [initialCheckDone, setInitialCheckDone] = useState(false);
   const [timeoutCount, setTimeoutCount] = useState(0);
-  const [error, setError] = useState<Error | null>(null);
   
   // Track mount state to prevent state updates after unmount
-  const isMounted = React.useRef(true);
+  const isMounted = useRef(true);
   
   // Use a timeout to prevent getting stuck in loading state
-  const timeoutRef = React.useRef<number | null>(null);
+  const timeoutRef = useRef<number | null>(null);
   
   // Monitor for auth state in development
   const logAuthState = () => {
     if (import.meta.env.DEV) {
       console.log('[IndexPage] Auth state:', { 
-        isSignedIn, 
-        isLoaded,
+        isAuthenticated, 
+        loading, 
+        sessionExists: !!session,
         initialCheckDone,
         error: error?.message
       });
@@ -42,9 +37,6 @@ const Index = () => {
   };
   
   useEffect(() => {
-    // Log initial state
-    logAuthState();
-    
     // Set up cleanup function
     return () => {
       isMounted.current = false;
@@ -57,41 +49,34 @@ const Index = () => {
     logAuthState();
     
     // Set a timeout to avoid infinite loading state
-    if (!isLoaded && !timeoutRef.current) {
+    if (loading && !timeoutRef.current) {
       timeoutRef.current = window.setTimeout(() => {
-        if (isMounted.current && !isLoaded) {
+        if (isMounted.current && loading) {
           console.warn('[IndexPage] Auth check timed out, forcing initialCheckDone');
           setInitialCheckDone(true);
           setTimeoutCount(prev => prev + 1);
-          setError(new Error('Authentication check timed out. Please try refreshing.'));
+          toast.error('Authentication check timed out. Please try refreshing.');
         }
-      }, AUTH_CONFIG.ROUTE_AUTH_TIMEOUT || 10000);
+      }, AUTH_SETTINGS.AUTH_TIMEOUT);
     }
     
     // Clear timeout when loading completes
-    if (isLoaded && timeoutRef.current) {
+    if (!loading && timeoutRef.current) {
       window.clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
     }
     
-    // Determine where to redirect based on the user's role
-    if (isLoaded && isSignedIn && !isRedirecting) {
+    // Only redirect after the initial auth check is complete
+    if (!loading && isAuthenticated && !isRedirecting) {
       setIsRedirecting(true);
-      
-      // If admin, redirect to admin dashboard
-      if (isAdmin) {
-        navigate('/admin');
-      } else {
-        // Otherwise redirect to agent dashboard
-        navigate('/dashboard');
-      }
+      navigate(AUTH_SETTINGS.REDIRECT_PATHS.AFTER_LOGIN);
     }
     
     // Mark initial check as done when loading is complete
-    if (isLoaded && !initialCheckDone) {
+    if (!loading && !initialCheckDone) {
       setInitialCheckDone(true);
     }
-  }, [isSignedIn, isLoaded, navigate, initialCheckDone, isAdmin]);
+  }, [isAuthenticated, loading, navigate, initialCheckDone, session, error]);
 
   const handleRetry = () => {
     window.location.reload();
@@ -140,7 +125,7 @@ const Index = () => {
   }
 
   // Show loading indicator while checking authentication or redirecting
-  if (!isLoaded || isRedirecting) {
+  if (loading || isRedirecting) {
     return (
       <div 
         className="min-h-screen flex flex-col items-center justify-center bg-black"
@@ -153,7 +138,7 @@ const Index = () => {
           size="lg"
           className="text-white"
         />
-        {!isLoaded && timeoutCount > 0 && (
+        {loading && timeoutCount > 0 && (
           <Button
             variant="link"
             onClick={handleRetry}

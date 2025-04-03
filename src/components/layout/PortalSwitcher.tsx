@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,11 +21,21 @@ interface PortalSwitcherProps {
  * Component that allows users with multiple roles to switch between portals
  */
 export function PortalSwitcher({ showLabel = true, className = "" }: PortalSwitcherProps) {
-  const { isAdmin } = useAuth();
-  const [activeRole, setActiveRole] = useState<UserRole>(isAdmin ? 'admin' : 'agent');
+  const { isAdmin, activeRole, switchRole, roles, user } = useAuth();
+  const isAdminActive = activeRole === 'admin';
+  const [hasAdminRole, setHasAdminRole] = useState(false);
   
-  // For non-admin users, just show the logo without dropdown functionality
-  if (!isAdmin) {
+  // Check for special admin user (josephkwantum@gmail.com)
+  const isSpecialAdminUser = user?.email === 'josephkwantum@gmail.com';
+  
+  useEffect(() => {
+    // Force recheck for admin role
+    setHasAdminRole(roles.includes('admin'));
+    console.log('PortalSwitcher: roles updated', roles, 'isAdmin:', isAdmin, 'hasAdmin:', roles.includes('admin'));
+  }, [roles, isAdmin]);
+  
+  // For non-admin users who aren't the special admin user, just show the logo without dropdown functionality
+  if (!isAdmin && !hasAdminRole && !isSpecialAdminUser) {
     return (
       <div className={`flex items-center px-2 py-2 ${className}`}>
         <div className="flex items-center gap-2">
@@ -40,13 +50,13 @@ export function PortalSwitcher({ showLabel = true, className = "" }: PortalSwitc
     );
   }
 
-  // For admin users, show the dropdown with portal switching options
+  // For admin users or special admin user, show the dropdown with portal switching options
   const handleSwitchRole = (role: UserRole) => {
     // Show toast notification before switching
     toast.success(`Switching to ${role === 'admin' ? 'Admin' : 'Agent'} Portal...`);
     
-    // Update active role
-    setActiveRole(role);
+    // First switch the role
+    switchRole(role);
     
     // Add a slight delay to allow the role switch to complete
     setTimeout(() => {
@@ -83,7 +93,7 @@ export function PortalSwitcher({ showLabel = true, className = "" }: PortalSwitc
       <DropdownMenuContent align="start" className="w-[220px] bg-gray-900/95 text-white border-gray-700">
         <DropdownMenuItem 
           onClick={() => handleSwitchRole('agent')}
-          className={`flex items-center cursor-pointer hover:bg-gray-800 ${activeRole !== 'admin' ? 'bg-gray-800/50' : ''}`}
+          className={`flex items-center cursor-pointer hover:bg-gray-800 ${!isAdminActive ? 'bg-gray-800/50' : ''}`}
         >
           <Building className="h-4 w-4 mr-2" />
           <span>Agent Portal</span>
@@ -93,7 +103,7 @@ export function PortalSwitcher({ showLabel = true, className = "" }: PortalSwitc
         
         <DropdownMenuItem 
           onClick={() => handleSwitchRole('admin')}
-          className={`flex items-center cursor-pointer hover:bg-gray-800 ${activeRole === 'admin' ? 'bg-gray-800/50' : ''}`}
+          className={`flex items-center cursor-pointer hover:bg-gray-800 ${isAdminActive ? 'bg-gray-800/50' : ''}`}
         >
           <Shield className="h-4 w-4 mr-2" />
           <span>Admin Portal</span>

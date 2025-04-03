@@ -1,5 +1,10 @@
 
-// Export the direct hooks and types
+export * from './AuthContext';
+export * from './AuthProvider';
+export * from './authUtils';
+export * from './authService';
+export * from './roleUtils';
+export * from './useAuthState';
+
+// Re-export the auth hook for convenience
 export { useAuthContext } from './AuthContext';
-export { ClerkAuthProvider } from '../../providers/ClerkAuthProvider';
-export type { AuthContextType } from '@/types/auth';

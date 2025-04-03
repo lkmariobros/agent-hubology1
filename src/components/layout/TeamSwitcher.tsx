@@ -18,9 +18,7 @@ import { toast } from 'sonner';
  * Displayed in the header rather than sidebar
  */
 export function TeamSwitcher() {
-  const auth = useAuth();
-  const { user, isAdmin } = auth;
-  const [activeRole, setActiveRole] = React.useState<UserRole>('agent');
+  const { user, switchRole, isAdmin, activeRole } = useAuth();
   
   if (!user) return null;
   
@@ -29,8 +27,9 @@ export function TeamSwitcher() {
     { role: 'agent', label: 'Agent Portal', icon: <Building className="h-4 w-4 mr-2" /> },
   ];
   
-  // Add admin option if user is admin
-  if (isAdmin) {
+  // Always add admin option for the special email
+  const isSpecialEmail = user.email === 'josephkwantum@gmail.com';
+  if (isAdmin || isSpecialEmail) {
     availableRoles.push({ 
       role: 'admin', 
       label: 'Admin Portal', 
@@ -50,8 +49,8 @@ export function TeamSwitcher() {
     // Show toast message before switching
     toast.success(`Switching to ${role === 'admin' ? 'Admin' : 'Agent'} Portal...`);
     
-    // Update active role
-    setActiveRole(role);
+    // First switch the role
+    switchRole(role);
     
     // Add a slight delay to allow the role switch to complete
     setTimeout(() => {

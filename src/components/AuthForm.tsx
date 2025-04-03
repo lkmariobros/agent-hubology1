@@ -13,9 +13,8 @@ const AuthForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  
   const { signIn, signUp, resetPassword } = useAuth();
-  
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -27,13 +26,12 @@ const AuthForm = () => {
     try {
       setLoading(true);
       console.log('[AuthForm] Attempting sign in with:', email);
-      
-      // Use Clerk authentication
       await signIn(email, password);
-      
       console.log('[AuthForm] Sign in request completed');
+      // The navigation will be handled by the auth state change and Index page
     } catch (error: any) {
       console.error('[AuthForm] Login error:', error);
+      toast.error(`Sign in failed: ${error.message || 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
@@ -49,13 +47,12 @@ const AuthForm = () => {
     
     try {
       setLoading(true);
-      
-      // Use Clerk authentication
       await signUp(email, password);
-      
+      toast.success('Account created! Check your email for verification.');
       setIsLogin(true); // Switch to login view
     } catch (error: any) {
       console.error('[AuthForm] Registration error:', error);
+      toast.error(`Sign up failed: ${error.message || 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
@@ -70,8 +67,23 @@ const AuthForm = () => {
     try {
       setLoading(true);
       await resetPassword(email);
+      toast.success('Password reset instructions sent to your email');
     } catch (error: any) {
       console.error('[AuthForm] Reset password error:', error);
+      toast.error(`Reset failed: ${error.message || 'Unknown error'}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Create a test user option for quick access
+  const handleDemoLogin = async () => {
+    try {
+      setLoading(true);
+      console.log('[AuthForm] Attempting demo login');
+      await signIn('josephkwantum@gmail.com', 'password123');
+    } catch (error) {
+      console.error('[AuthForm] Demo login error:', error);
     } finally {
       setLoading(false);
     }
@@ -161,6 +173,17 @@ const AuthForm = () => {
         disabled={loading}
       >
         {isLogin ? 'Create an account' : 'Sign in'}
+      </Button>
+      
+      {/* Demo login button for testing */}
+      <Button
+        type="button"
+        variant="ghost"
+        className="w-full mt-4 text-gray-400 hover:text-white text-sm"
+        onClick={handleDemoLogin}
+        disabled={loading}
+      >
+        Demo Login (josephkwantum@gmail.com)
       </Button>
     </div>
   );

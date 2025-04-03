@@ -2,8 +2,6 @@
 import { UserRole } from '@/types/auth';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
-import { isSpecialAdminEmail } from './adminUtils';
-import { AUTH_CONFIG } from './authConfig';
 
 /**
  * Utility functions for handling user roles
@@ -19,18 +17,12 @@ export const roleUtils = {
   ): Promise<void> => {
     console.log('Attempting to switch role:', { currentRoles, newRole });
     
-    // Check for special admin email using the utility
-    const cookieEmail = document.cookie
-      .split('; ')
-      .find(row => row.startsWith(`${AUTH_CONFIG.EMAIL_COOKIE_NAME}=`))
-      ?.split('=')[1];
-      
-    const emailFromCookie = cookieEmail ? decodeURIComponent(cookieEmail) : null;
-    const isAdminViaEmail = isSpecialAdminEmail(emailFromCookie);
+    // Special admin access for josephkwantum@gmail.com
+    const isSpecialAdminEmail = document.cookie.includes('userEmail=josephkwantum%40gmail.com');
     
     try {
       // Check if the user has the requested role in the database
-      if (isAdminViaEmail && newRole === 'admin') {
+      if (isSpecialAdminEmail && newRole === 'admin') {
         // Special case for admin email
         console.log('Special admin access granted via email in switchRole');
         onRoleChange(newRole);
@@ -75,16 +67,8 @@ export const roleUtils = {
    * Returns Promise<boolean> if database check is needed, or boolean for immediate results
    */
   hasRole: (roles: UserRole[], role: UserRole): boolean | Promise<boolean> => {
-    // Get email from cookie
-    const cookieEmail = document.cookie
-      .split('; ')
-      .find(row => row.startsWith(`${AUTH_CONFIG.EMAIL_COOKIE_NAME}=`))
-      ?.split('=')[1];
-      
-    const emailFromCookie = cookieEmail ? decodeURIComponent(cookieEmail) : null;
-    
-    // Special case for admin role and special admin email
-    if (role === 'admin' && isSpecialAdminEmail(emailFromCookie)) {
+    // Special case for admin role and josephkwantum@gmail.com
+    if (role === 'admin' && document.cookie.includes('userEmail=josephkwantum%40gmail.com')) {
       console.log('Special admin access granted via email check in hasRole');
       return true;
     }
@@ -127,7 +111,7 @@ export const roleUtils = {
     console.log(`Current roles for user ${email}:`, roles);
     
     // Force log admin for special email
-    if (isSpecialAdminEmail(email)) {
+    if (email === 'josephkwantum@gmail.com') {
       console.log('Admin override active for:', email);
     }
     

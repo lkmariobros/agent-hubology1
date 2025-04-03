@@ -1,26 +1,32 @@
 
-import React from "react";
-import ReactDOM from "react-dom/client";
-import App from "./App";
-import "./index.css";
-import { ClerkProvider } from "@clerk/clerk-react";
+import { createRoot } from 'react-dom/client';
+import App from './App.tsx';
+import './index.css';
+import { initSentry } from './lib/sentry';
+import { Toaster } from './components/ui/sonner';
 
-// Import your Publishable Key from environment variables
-const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || 
-  "pk_test_cG9zaXRpdmUtYmxvd2Zpc2gtNjAuY2xlcmsuYWNjb3VudHMuZGV2JA"; // Fallback demo key
+// Get root element - do this before Sentry initialization
+const rootElement = document.getElementById("root");
 
-// Log the configuration status for debugging
-console.log(`Using Clerk with ${CLERK_PUBLISHABLE_KEY.startsWith('pk_test') ? 'TEST' : 'PRODUCTION'} key`);
-
-// Check that the key exists (will use fallback if not provided)
-if (!CLERK_PUBLISHABLE_KEY) {
-  throw new Error("Missing CLERK_PUBLISHABLE_KEY - Check your environment variables");
-}
-
-ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-  <React.StrictMode>
-    <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY} afterSignOutUrl="/">
+// Make sure we have a root element before proceeding
+if (!rootElement) {
+  console.error("Root element not found! Cannot mount React application.");
+} else {
+  // Initialize Sentry after we've verified DOM is available
+  initSentry();
+  
+  // Create and render React root
+  const root = createRoot(rootElement);
+  root.render(
+    <>
       <App />
-    </ClerkProvider>
-  </React.StrictMode>
-);
+      <Toaster 
+        expand={false} 
+        visibleToasts={3} 
+        closeButton={true}
+        richColors={true}
+        position="top-right"
+      />
+    </>
+  );
+}

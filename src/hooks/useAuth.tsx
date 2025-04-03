@@ -1,24 +1,15 @@
 
-import { useClerkAuth } from "../providers/ClerkAuthProvider";
-import { UserRole } from "@/types/auth";
+import { useContext } from 'react';
+import { AuthContext } from '@/providers/AuthProvider';
 
-export function useAuth() {
-  const auth = useClerkAuth();
+export const useAuth = () => {
+  const context = useContext(AuthContext);
   
-  // Enhanced auth interface to maintain compatibility with previous code
-  return {
-    ...auth,
-    // For backward compatibility with code that expects has method with params object
-    has: (params: { role: string }) => auth.hasRole(params.role as UserRole),
-    // Explicitly exposing standard properties for clarity
-    isAuthenticated: auth.isAuthenticated,
-    isAdmin: auth.isAdmin,
-    user: auth.user,
-    loading: auth.loading,
-    error: auth.error,
-    // For code that expects an activeRole property
-    activeRole: auth.activeRole
-  };
-}
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  
+  return context;
+};
 
 export default useAuth;

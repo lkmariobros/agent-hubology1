@@ -1,14 +1,13 @@
 
 // This file is a wrapper around the refactored auth context for backward compatibility
-import { ClerkAuthProvider, useAuth } from '../providers/ClerkAuthProvider';
+import { AuthProvider, useAuthContext } from './auth';
 import type { AuthContextType } from '@/types/auth';
 
 // Re-export for backward compatibility
-export { ClerkAuthProvider as AuthProvider };
-export { useAuth as useAuthContext };
+export { AuthProvider, useAuthContext };
 
-// Export default useAuth as useAuth for backward compatibility
-export { useAuth };
+// Export default useAuthContext as useAuth for backward compatibility
+export const useAuth = useAuthContext;
 export type { AuthContextType };
 
-export default ClerkAuthProvider;
+export default AuthProvider;
