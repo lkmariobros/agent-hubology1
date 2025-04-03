@@ -19,7 +19,8 @@ import { toast } from 'sonner';
  */
 export function TeamSwitcher() {
   const auth = useAuth();
-  const { userId, user, isAdmin } = auth;
+  const { user, isAdmin } = auth;
+  const userId = user?.id; // Get userId from user object instead of directly from auth
   const [activeRole, setActiveRole] = React.useState<UserRole>('agent');
   
   if (!userId || !user) return null;

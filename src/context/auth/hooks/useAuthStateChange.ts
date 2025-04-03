@@ -55,7 +55,9 @@ export async function handleAuthStateChange(
     }
     
     // CRITICAL: Use setTimeout to avoid potential deadlocks with Supabase client
-    const timeoutId = setTimeout(async () => {
+    // We're storing the timeout ID as a number here - TypeScript expects a number
+    // but setTimeout returns NodeJS.Timeout in Node environments
+    const timeoutId = window.setTimeout(async () => {
       try {
         console.log('[AuthProvider] Processing sign-in event');
         

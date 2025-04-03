@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -25,7 +24,7 @@ const InvitationsManagement: React.FC<InvitationsManagementProps> = ({
       case 'pending':
         return 'secondary';
       case 'accepted':
-        return 'success';
+        return 'default'; // Changed from 'success' to 'default'
       case 'expired':
         return 'destructive';
       case 'cancelled':
@@ -34,6 +33,7 @@ const InvitationsManagement: React.FC<InvitationsManagementProps> = ({
         return 'default';
     }
   };
+  
   
   return (
     <Card>

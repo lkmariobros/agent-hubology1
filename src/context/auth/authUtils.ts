@@ -26,7 +26,7 @@ export const createUserProfile = async (user: User): Promise<UserProfile> => {
       .maybeSingle();
       
     // Determine roles based on tier
-    roles = [...AUTH_CONFIG.DEFAULT_ROLES]; // Everyone has basic roles
+    roles = [...AUTH_CONFIG.DEFAULT_ROLES] as UserRole[]; // Everyone has basic roles
     
     if (profileData) {
       const tier = safelyExtractProperty(profileData, 'tier', 1);
@@ -50,7 +50,7 @@ export const createUserProfile = async (user: User): Promise<UserProfile> => {
   }
   
   // Ensure admin role for special admin email
-  roles = ensureAdminRoleForSpecialEmail(roles, user.email);
+  roles = ensureAdminRoleForSpecialEmail(roles, user.email) as UserRole[];
   
   // Default to agent role if no roles returned
   if (!roles || !roles.length) {
@@ -70,7 +70,7 @@ export const createUserProfile = async (user: User): Promise<UserProfile> => {
     id: user.id,
     email: user.email || '',
     name: user.email?.split('@')[0] || '',
-    roles: roles as UserRole[],
+    roles: roles,
     activeRole: activeRole as UserRole,
   };
 };
@@ -145,7 +145,7 @@ export const fetchProfileAndRoles = async (userId: string, userEmail: string | u
     }
     
     // Ensure admin role for special admin email
-    finalRoles = ensureAdminRoleForSpecialEmail(finalRoles, userEmail);
+    finalRoles = ensureAdminRoleForSpecialEmail(finalRoles, userEmail) as UserRole[];
     
     // Set active role with admin taking precedence
     const finalActiveRole = getPreferredActiveRole(finalRoles);
@@ -173,7 +173,7 @@ export const fetchProfileAndRoles = async (userId: string, userEmail: string | u
     const defaultRoles: UserRole[] = [AUTH_CONFIG.DEFAULT_ROLE as UserRole];
     
     // Ensure admin role for special admin email
-    const finalRoles = ensureAdminRoleForSpecialEmail(defaultRoles, userEmail);
+    const finalRoles = ensureAdminRoleForSpecialEmail(defaultRoles, userEmail) as UserRole[];
     const finalActiveRole = getPreferredActiveRole(finalRoles);
     
     return {
@@ -182,10 +182,10 @@ export const fetchProfileAndRoles = async (userId: string, userEmail: string | u
         id: userId,
         email: userEmail || '',
         name: userEmail?.split('@')[0] || '',
-        roles: finalRoles as UserRole[],
+        roles: finalRoles,
         activeRole: finalActiveRole as UserRole,
       },
-      roles: finalRoles as UserRole[],
+      roles: finalRoles,
       activeRole: finalActiveRole as UserRole
     };
   }

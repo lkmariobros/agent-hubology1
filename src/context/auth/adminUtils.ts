@@ -1,3 +1,5 @@
+import { UserRole } from '@/types/auth';
+
 /**
  * Utility functions for admin-related checks and operations
  */
@@ -18,36 +20,40 @@ export const isSpecialAdminEmail = (email: string | null | undefined): boolean =
  * and it doesn't already have the admin role
  */
 export const ensureAdminRoleForSpecialEmail = (
-  roles: string[], 
+  roles: string[] | UserRole[], 
   email: string | null | undefined
-): string[] => {
-  if (!isSpecialAdminEmail(email)) return roles;
+): UserRole[] => {
+  const typedRoles = roles as UserRole[];
+  
+  if (!isSpecialAdminEmail(email)) return typedRoles;
   
   // Create a new array with the admin role added if not already present
-  if (!roles.includes('admin')) {
-    return [...roles, 'admin'];
+  if (!typedRoles.includes('admin')) {
+    return [...typedRoles, 'admin'];
   }
   
-  return roles;
+  return typedRoles;
 };
 
 /**
  * Get active role with precedence for admin if it's available
  */
 export const getPreferredActiveRole = (
-  roles: string[], 
+  roles: string[] | UserRole[], 
   currentActiveRole?: string
-): string => {
+): UserRole => {
+  const typedRoles = roles as UserRole[];
+  
   // If roles include admin and current role is not admin, prefer admin
-  if (roles.includes('admin')) {
+  if (typedRoles.includes('admin')) {
     return 'admin';
   }
   
   // Otherwise use current role if it's available, or first available role
-  if (currentActiveRole && roles.includes(currentActiveRole)) {
-    return currentActiveRole;
+  if (currentActiveRole && typedRoles.includes(currentActiveRole as UserRole)) {
+    return currentActiveRole as UserRole;
   }
   
   // Fallback to first available role or agent if empty
-  return roles[0] || 'agent';
+  return typedRoles[0] || 'agent';
 };

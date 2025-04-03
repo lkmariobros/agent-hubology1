@@ -32,6 +32,22 @@ const RoleDebugInfo: React.FC = () => {
     }
   };
 
+  // Handle Clerk user format or our own UserProfile format
+  const getUserEmail = () => {
+    if (user.primaryEmailAddress?.emailAddress) {
+      return user.primaryEmailAddress.emailAddress;
+    }
+    return user.email || 'No email';
+  };
+
+  // Safely access metadata from Clerk user or our own UserProfile
+  const getRoles = () => {
+    if (user.publicMetadata?.roles) {
+      return (user.publicMetadata.roles as string[]).join(', ');
+    }
+    return (user.roles || []).join(', ');
+  };
+
   return (
     <div className="relative inline-block">
       <div 
@@ -51,12 +67,10 @@ const RoleDebugInfo: React.FC = () => {
         <div className="absolute bottom-full right-0 z-10 mb-1 p-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-md w-72">
           <h3 className="font-medium text-gray-800 dark:text-gray-300 mb-2">Debug Information (Dev Only)</h3>
           <div className="space-y-1 text-sm">
-            <p><strong>Email:</strong> {user.primaryEmailAddress?.emailAddress || 'No email'}</p>
+            <p><strong>Email:</strong> {getUserEmail()}</p>
             <p><strong>Is Admin:</strong> <span className={isAdmin ? "text-green-600 dark:text-green-400 font-semibold" : ""}>{isAdmin ? 'Yes ✓' : 'No'}</span></p>
             <p><strong>User ID:</strong> {user.id || 'Unknown'}</p>
-            {user.publicMetadata?.roles && (
-              <p><strong>Roles:</strong> {(user.publicMetadata.roles as string[]).join(', ')}</p>
-            )}
+            <p><strong>Roles:</strong> {getRoles() || 'none'}</p>
           </div>
           <button 
             onClick={handleRefreshSession} 

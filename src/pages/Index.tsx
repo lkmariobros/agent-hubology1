@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthForm from '../components/AuthForm';
@@ -14,7 +13,9 @@ import { AUTH_CONFIG } from '@/context/auth/authConfig';
 const Index = () => {
   const navigate = useNavigate();
   const auth = useAuth();
-  const { isLoaded, isSignedIn } = auth;
+  const { userId, user, isAdmin } = auth;
+  const isLoaded = auth.loading === false; // Derive from loading state
+  const isSignedIn = auth.isAuthenticated; // Use isAuthenticated instead
   const { session } = useClerk();
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [initialCheckDone, setInitialCheckDone] = useState(false);
