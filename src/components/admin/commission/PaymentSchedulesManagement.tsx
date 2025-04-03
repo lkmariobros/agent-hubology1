@@ -1,24 +1,11 @@
 
 import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
-import { PaymentSchedule, ScheduleInstallment } from '@/types/commission';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
@@ -26,148 +13,76 @@ import { toast } from 'sonner';
 import { Loader2, Plus, Trash2, Edit, CheckCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { usePaymentScheduleAdmin } from '@/hooks/usePaymentScheduleAdmin';
+import { PaymentSchedule } from '@/types/commission';
+import InstallmentsList from '../../commission/InstallmentsList';
+import PaymentScheduleForm from './PaymentScheduleForm';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 export function PaymentSchedulesManagement() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [currentSchedule, setCurrentSchedule] = useState<PaymentSchedule | null>(null);
-  const [scheduleName, setScheduleName] = useState('');
-  const [scheduleDescription, setScheduleDescription] = useState('');
-  const [installments, setInstallments] = useState<Partial<ScheduleInstallment>[]>([{ 
-    installmentNumber: 1, 
-    percentage: 100, 
-    daysAfterTransaction: 0 
-  }]);
-  
-  const queryClient = useQueryClient();
-  
-  // Fetch all payment schedules
-  const { data: schedules, isLoading } = useQuery({
-    queryKey: ['paymentSchedules'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('commission_payment_schedules')
-        .select('*, installments:schedule_installments(*)');
-        
-      if (error) throw error;
-      
-      // Transform the data to match our interface
-      return data.map(schedule => ({
-        id: schedule.id,
-        name: schedule.name,
-        description: schedule.description,
-        isDefault: schedule.is_default,
-        createdAt: schedule.created_at,
-        updatedAt: schedule.updated_at,
-        installments: schedule.installments.map((inst: any) => ({
-          id: inst.id,
-          scheduleId: inst.schedule_id,
-          installmentNumber: inst.installment_number,
-          percentage: inst.percentage,
-          daysAfterTransaction: inst.days_after_transaction,
-          description: inst.description
-        }))
-      })) as PaymentSchedule[];
-    }
-  });
+  const [scheduleToDelete, setScheduleToDelete] = useState<string | null>(null);
   
   const { 
+    schedules,
+    isLoading,
     createPaymentSchedule,
     updatePaymentSchedule,
     deletePaymentSchedule,
     setDefaultSchedule
   } = usePaymentScheduleAdmin();
   
-  const resetForm = () => {
-    setScheduleName('');
-    setScheduleDescription('');
-    setInstallments([{ installmentNumber: 1, percentage: 100, daysAfterTransaction: 0 }]);
+  const handleNewSchedule = () => {
     setCurrentSchedule(null);
-  };
-  
-  const handleAddInstallment = () => {
-    const lastInstallment = installments[installments.length - 1];
-    const newInstallmentNumber = (lastInstallment?.installmentNumber || 0) + 1;
-    
-    setInstallments([
-      ...installments, 
-      { installmentNumber: newInstallmentNumber, percentage: 0, daysAfterTransaction: 0 }
-    ]);
-  };
-  
-  const handleRemoveInstallment = (index: number) => {
-    const newInstallments = [...installments];
-    newInstallments.splice(index, 1);
-    
-    // Renumber installments
-    const renumberedInstallments = newInstallments.map((inst, idx) => ({
-      ...inst,
-      installmentNumber: idx + 1
-    }));
-    
-    setInstallments(renumberedInstallments);
-  };
-  
-  const handleInstallmentChange = (index: number, field: string, value: any) => {
-    const newInstallments = [...installments];
-    newInstallments[index] = { ...newInstallments[index], [field]: value };
-    setInstallments(newInstallments);
-  };
-  
-  const handleSubmit = () => {
-    // Validate total percentage equals 100%
-    const totalPercentage = installments.reduce((sum, inst) => sum + (Number(inst.percentage) || 0), 0);
-    
-    if (totalPercentage !== 100) {
-      toast.error('Total percentage must equal 100%');
-      return;
-    }
-    
-    if (isEditing && currentSchedule) {
-      updatePaymentSchedule.mutate({
-        scheduleId: currentSchedule.id,
-        schedule: {
-          name: scheduleName,
-          description: scheduleDescription,
-          installments
-        }
-      });
-    } else {
-      createPaymentSchedule.mutate({
-        name: scheduleName,
-        description: scheduleDescription,
-        installments
-      });
-    }
-    
-    setIsDialogOpen(false);
+    setIsEditing(false);
+    setIsDialogOpen(true);
   };
   
   const handleEditSchedule = (schedule: PaymentSchedule) => {
     setCurrentSchedule(schedule);
-    setScheduleName(schedule.name);
-    setScheduleDescription(schedule.description || '');
-    setInstallments(schedule.installments || []);
     setIsEditing(true);
     setIsDialogOpen(true);
   };
   
-  const handleDeleteSchedule = (scheduleId: string) => {
-    if (confirm('Are you sure you want to delete this payment schedule?')) {
-      deletePaymentSchedule.mutate(scheduleId);
+  const handleSubmit = (data: any) => {
+    if (isEditing && currentSchedule) {
+      updatePaymentSchedule.mutate({
+        scheduleId: currentSchedule.id,
+        schedule: data
+      }, {
+        onSuccess: () => {
+          setIsDialogOpen(false);
+        }
+      });
+    } else {
+      createPaymentSchedule.mutate(data, {
+        onSuccess: () => {
+          setIsDialogOpen(false);
+        }
+      });
     }
   };
   
-  const handleNewSchedule = () => {
-    resetForm();
-    setInstallments([{ installmentNumber: 1, percentage: 100, daysAfterTransaction: 0 }]);
-    setIsEditing(false);
-    setIsDialogOpen(true);
+  const handleDeleteClick = (scheduleId: string) => {
+    setScheduleToDelete(scheduleId);
+    setIsDeleteDialogOpen(true);
+  };
+  
+  const confirmDelete = () => {
+    if (scheduleToDelete) {
+      deletePaymentSchedule.mutate(scheduleToDelete);
+      setIsDeleteDialogOpen(false);
+      setScheduleToDelete(null);
+    }
   };
   
   const handleSetDefault = (scheduleId: string) => {
     setDefaultSchedule.mutate(scheduleId);
   };
+  
+  const isSubmitting = createPaymentSchedule.isPending || updatePaymentSchedule.isPending;
   
   if (isLoading) {
     return (
@@ -227,7 +142,7 @@ export function PaymentSchedulesManagement() {
                   <Button 
                     variant="ghost" 
                     size="sm"
-                    onClick={() => handleDeleteSchedule(schedule.id)}
+                    onClick={() => handleDeleteClick(schedule.id)}
                     disabled={schedule.isDefault}
                   >
                     <Trash2 className="h-4 w-4 text-destructive" />
@@ -239,24 +154,7 @@ export function PaymentSchedulesManagement() {
                   <p className="text-muted-foreground mb-4">{schedule.description}</p>
                 )}
                 
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Installment</TableHead>
-                      <TableHead>Percentage</TableHead>
-                      <TableHead>Days After Transaction</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {schedule.installments?.sort((a, b) => a.installmentNumber - b.installmentNumber).map(installment => (
-                      <TableRow key={installment.id}>
-                        <TableCell>{installment.installmentNumber}</TableCell>
-                        <TableCell>{installment.percentage}%</TableCell>
-                        <TableCell>{installment.daysAfterTransaction} days</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                <InstallmentsList installments={schedule.installments || []} />
               </CardContent>
             </Card>
           ))}
@@ -272,123 +170,33 @@ export function PaymentSchedulesManagement() {
             </DialogDescription>
           </DialogHeader>
           
-          <div className="space-y-4 py-4">
-            <div className="grid grid-cols-1 gap-4">
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium leading-6">
-                  Schedule Name
-                </label>
-                <Input
-                  id="name"
-                  value={scheduleName}
-                  onChange={(e) => setScheduleName(e.target.value)}
-                  placeholder="e.g., Standard Quarterly Payments"
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="description" className="block text-sm font-medium leading-6">
-                  Description (Optional)
-                </label>
-                <Input
-                  id="description"
-                  value={scheduleDescription}
-                  onChange={(e) => setScheduleDescription(e.target.value)}
-                  placeholder="Brief description of this payment schedule"
-                />
-              </div>
-            </div>
-            
-            <div>
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="text-sm font-medium leading-6">Installments</h3>
-                <Button size="sm" variant="outline" onClick={handleAddInstallment}>
-                  <Plus className="h-3 w-3 mr-1" /> Add Installment
-                </Button>
-              </div>
-              
-              <div className="border rounded-md overflow-hidden">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Installment #</TableHead>
-                      <TableHead>Percentage (%)</TableHead>
-                      <TableHead>Days After Transaction</TableHead>
-                      <TableHead></TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {installments.map((installment, index) => (
-                      <TableRow key={index}>
-                        <TableCell>{installment.installmentNumber}</TableCell>
-                        <TableCell>
-                          <Input
-                            type="number"
-                            value={installment.percentage}
-                            onChange={(e) => handleInstallmentChange(index, 'percentage', Number(e.target.value))}
-                            min="0"
-                            max="100"
-                            className="w-20"
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Input
-                            type="number"
-                            value={installment.daysAfterTransaction}
-                            onChange={(e) => handleInstallmentChange(index, 'daysAfterTransaction', Number(e.target.value))}
-                            min="0"
-                            className="w-20"
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleRemoveInstallment(index)}
-                            disabled={installments.length <= 1}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                    <TableRow>
-                      <TableCell colSpan={2}>
-                        <div className="flex justify-between">
-                          <span className="font-medium">Total</span>
-                          <span>
-                            {installments.reduce((sum, inst) => sum + (Number(inst.percentage) || 0), 0)}%
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell colSpan={2}>
-                        {installments.reduce((sum, inst) => sum + (Number(inst.percentage) || 0), 0) !== 100 && (
-                          <p className="text-destructive text-sm">Total must equal 100%</p>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </div>
-            </div>
-          </div>
-          
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button 
-              onClick={handleSubmit} 
-              disabled={
-                !scheduleName || 
-                installments.reduce((sum, inst) => sum + (Number(inst.percentage) || 0), 0) !== 100
-              }
-            >
-              Save Schedule
-            </Button>
-          </DialogFooter>
+          <PaymentScheduleForm
+            schedule={currentSchedule || undefined}
+            onSubmit={handleSubmit}
+            isSubmitting={isSubmitting}
+            onCancel={() => setIsDialogOpen(false)}
+          />
         </DialogContent>
       </Dialog>
+      
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the
+              payment schedule and all its installments.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground">
+              {deletePaymentSchedule.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
