@@ -8,5 +8,5 @@ export * from './useAuthState';
 // Re-export the auth hook for convenience
 export { useAuthContext } from './AuthContext';
 
-// Export the AuthProvider with a clean approach
+// Export the AuthProvider (only once)
 export { default as AuthProvider } from './AuthProvider';
