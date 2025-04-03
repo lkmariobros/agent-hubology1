@@ -82,90 +82,81 @@ export const fetchProfileAndRoles = async (userId: string, userEmail: string | u
   try {
     console.log('Fetching profile for user:', userId);
     
-    // Get user roles from database first
-    const { data: dbRoles, error: rolesError } = await supabase
-      .rpc('get_user_roles', { p_user_id: userId });
+    // IMPORTANT: Avoid RLS recursion by getting roles first directly 
+    // and not trying to get the profile details until we have to
+    let finalRoles: UserRole[] = [...AUTH_CONFIG.DEFAULT_ROLES] as UserRole[];
+    let profileData = null;
     
-    // Use direct SQL query to avoid RLS recursion issue
-    const { data: primaryProfileData, error: profileError } = await supabase
-      .rpc('get_agent_profile_by_id', { user_id: userId })
-      .single();
-      
-    // Determine which profile data to use (primary or fallback)
-    let finalProfileData = primaryProfileData;
-    
-    if (profileError) {
-      console.error('Profile fetch error:', profileError);
-      // Try using the simple select query as fallback
-      const { data: fallbackData, error: fallbackError } = await supabase
-        .from('agent_profiles')
-        .select('*')
-        .eq('id', userId)
-        .maybeSingle();
+    // First try to get the roles directly - this avoids potential recursion issues
+    try {
+      const { data: dbRoles, error: rolesError } = await supabase
+        .rpc('get_user_roles', { p_user_id: userId });
         
-      if (fallbackError) {
-        console.error('Fallback profile fetch error:', fallbackError);
-        // No profile data available, will use defaults
-        finalProfileData = null;
-      } else {
-        // Use fallback data instead
-        finalProfileData = fallbackData;
+      if (!rolesError && dbRoles && dbRoles.length > 0) {
+        finalRoles = dbRoles.map(r => r.role_name as UserRole);
+        
+        // Ensure basic roles
+        for (const baseRole of AUTH_CONFIG.DEFAULT_ROLES) {
+          if (!finalRoles.includes(baseRole as UserRole)) {
+            finalRoles.push(baseRole as UserRole);
+          }
+        }
+        
+        console.log('Retrieved roles from database:', finalRoles);
       }
+    } catch (rolesError) {
+      console.warn('Error getting user roles, using defaults:', rolesError);
     }
     
-    // Determine roles based on what we have
-    let roles: UserRole[] = [...AUTH_CONFIG.DEFAULT_ROLES] as UserRole[]; // Everyone has basic roles
-    
-    if (!rolesError && dbRoles && dbRoles.length > 0) {
-      // Use roles from database
-      roles = dbRoles.map(r => r.role_name as UserRole);
-      
-      // Ensure basic roles
-      for (const baseRole of AUTH_CONFIG.DEFAULT_ROLES) {
-        if (!roles.includes(baseRole as UserRole)) {
-          roles.push(baseRole as UserRole);
+    // As a LAST resort, attempt to get the profile data - but this is optional!
+    if (finalRoles.length <= AUTH_CONFIG.DEFAULT_ROLES.length) {
+      try {
+        const { data, error } = await supabase
+          .from('agent_profiles')
+          .select('full_name, tier')
+          .eq('id', userId)
+          .maybeSingle();
+          
+        if (!error && data) {
+          profileData = data;
+          
+          // Determine additional roles based on tier if we didn't get them earlier
+          const tier = data.tier || 1;
+          if (tier >= 5) finalRoles.push('admin');
+          if (tier >= 4) finalRoles.push('team_leader');
+          if (tier >= 3) finalRoles.push('manager');
+          if (tier >= 2) finalRoles.push('finance');
         }
+      } catch (err) {
+        console.warn('Could not get profile data, using email-based profile only');
       }
-      
-      console.log('Retrieved roles from database:', roles);
-    } else if (finalProfileData) {
-      // Fall back to tier-based role determination
-      const tier = safelyExtractProperty(finalProfileData, 'tier', 1);
-      console.log('User tier level:', tier);
-      
-      // Map tiers to roles
-      if (tier >= 5) roles.push('admin');
-      if (tier >= 4) roles.push('team_leader');
-      if (tier >= 3) roles.push('manager');
-      if (tier >= 2) roles.push('finance');
-      
-      console.log('Determined roles from tier:', roles);
     }
     
     // Ensure admin role for special admin email
-    roles = ensureAdminRoleForSpecialEmail(roles, userEmail);
+    finalRoles = ensureAdminRoleForSpecialEmail(finalRoles, userEmail);
     
     // Set active role with admin taking precedence
-    const activeRole = getPreferredActiveRole(roles);
+    const finalActiveRole = getPreferredActiveRole(finalRoles);
     
     const userProfile = {
       id: userId,
       email: userEmail || '',
-      name: safelyExtractProperty(finalProfileData, 'full_name', userEmail?.split('@')[0] || ''),
-      roles: roles,
-      activeRole: activeRole as UserRole,
+      name: profileData?.full_name || userEmail?.split('@')[0] || '',
+      roles: finalRoles,
+      activeRole: finalActiveRole as UserRole,
     };
     
     console.log('User profile created:', userProfile);
     
     return {
-      profile: finalProfileData,
+      profile: profileData,
       userProfile,
       roles: userProfile.roles,
       activeRole: userProfile.activeRole
     };
   } catch (err) {
     console.error('Error fetching user profile or roles', { userId, error: err });
+    
     // Still return a basic profile even if there's an error
     const defaultRoles: UserRole[] = [AUTH_CONFIG.DEFAULT_ROLE as UserRole];
     

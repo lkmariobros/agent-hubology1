@@ -45,7 +45,7 @@ export async function handleAuthStateChange(
   }
   
   // For other events that require async processing, use setTimeout to avoid deadlocks
-  if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session) {
+  if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') && session) {
     // First update with just the session to show the user is logged in
     setLoading(true);
     

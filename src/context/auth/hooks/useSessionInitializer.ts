@@ -64,9 +64,30 @@ export async function initializeFromSession(
         setLoading(false);
       } catch (profileError) {
         console.error('[AuthProvider] Error fetching profile:', profileError);
-        setError(profileError instanceof Error ? profileError : new Error('Failed to load profile'));
-        setLoading(false);
+        
+        // Don't fatally fail - use the basic profile from the session
+        // This is important to prevent a completely broken login experience
+        const basicRoles = [AUTH_CONFIG.DEFAULT_ROLE];
+        const finalRoles = ensureAdminRoleForSpecialEmail(basicRoles, session.user.email);
+        const finalActiveRole = getPreferredActiveRole(finalRoles);
+        
+        updateSessionState(
+          session,
+          {
+            id: session.user.id,
+            email: session.user.email || '',
+            name: session.user.email?.split('@')[0] || '',
+            roles: finalRoles,
+            activeRole: finalActiveRole
+          },
+          null,
+          finalRoles,
+          finalActiveRole
+        );
+        
+        console.log('[AuthProvider] Session initialized with BASIC roles due to profile error');
         setIsInitialized(true);
+        setLoading(false);
       }
     } else {
       console.log('[AuthProvider] No existing session found');

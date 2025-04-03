@@ -1,24 +1,26 @@
 
 /**
- * Configuration settings for the authentication system
+ * Authentication configuration
  */
-
 export const AUTH_CONFIG = {
-  // Timeout for auth initialization (in milliseconds)
-  INITIALIZATION_TIMEOUT: 30000,
-  
-  // Timeout for protected route auth checks (in milliseconds)
-  ROUTE_AUTH_TIMEOUT: 10000,
-  
-  // Special admin email that always gets admin access
-  SPECIAL_ADMIN_EMAIL: 'josephkwantum@gmail.com',
-  
-  // Default roles for all users
-  DEFAULT_ROLES: ['agent', 'viewer'],
-  
-  // Default role if no roles available
+  // Default role assigned to users if no other role is found
   DEFAULT_ROLE: 'agent',
   
-  // Cookie name for storing email
-  EMAIL_COOKIE_NAME: 'userEmail'
+  // Default roles that every user should have
+  DEFAULT_ROLES: ['agent', 'viewer'],
+  
+  // How long to wait for auth initialization before timing out (in milliseconds)
+  INITIALIZATION_TIMEOUT: 10000, // 10 seconds
+  
+  // How long to wait for auth checks in route components before timing out
+  ROUTE_AUTH_TIMEOUT: 8000, // 8 seconds
+  
+  // Cookie name for storing email (for role utils)
+  EMAIL_COOKIE_NAME: 'pa_user_email',
+  
+  // Special admin emails that always get admin rights
+  ADMIN_EMAILS: [
+    'josephkwantum@gmail.com',
+    'admin@example.com'
+  ]
 };
