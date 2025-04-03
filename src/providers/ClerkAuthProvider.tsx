@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth as useClerkAuth, useOrganization, useUser } from '@clerk/clerk-react';
 import { UserRole } from '@/types/auth';
@@ -49,7 +48,7 @@ export const ClerkAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   // Determine if user is an admin based on Clerk roles
   const isAdmin = clerkUser?.publicMetadata?.isAdmin === true || 
     // Check if organization has roles and if user has admin role in the organization
-    (organization?.membershipRole === 'admin') ||
+    (organization?.membership?.role === 'admin') ||
     clerkUser?.emailAddresses.some(email => 
       email.emailAddress === 'josephkwantum@gmail.com'
     );

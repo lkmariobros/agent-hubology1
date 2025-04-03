@@ -9,9 +9,12 @@ export interface UserProfile {
   activeRole: UserRole;
   
   // Clerk-specific properties
-  primaryEmailAddress?: { emailAddress: string };
+  primaryEmailAddress?: { 
+    emailAddress: string;
+    [key: string]: any;
+  };
   publicMetadata?: { 
-    roles?: string[];
+    roles?: string[] | string;
     isAdmin?: boolean;
     [key: string]: any;
   };
