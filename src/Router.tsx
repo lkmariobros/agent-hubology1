@@ -29,11 +29,12 @@ import CommissionForecastPage from './pages/admin/CommissionForecast';
 import Reports from './pages/Reports'; // Using the existing Reports page for all report routes
 import AdminSettings from './pages/admin/Settings';
 import ProtectedRoute from './components/auth/ProtectedRoute';
+import Index from './pages/Index';
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <AuthProvider><AppLayout /></AuthProvider>,
+    element: <AuthProvider><ProtectedRoute><AppLayout /></ProtectedRoute></AuthProvider>,
     children: [
       { index: true, element: <Dashboard /> },
       { path: 'properties', element: <PropertyList /> },
@@ -46,7 +47,7 @@ const router = createBrowserRouter([
       { path: 'commission/forecast', element: <CommissionForecast /> },
       {
         path: 'admin',
-        element: <AdminLayout />,
+        element: <ProtectedRoute requireAdmin={true}><AdminLayout /></ProtectedRoute>,
         children: [
           { index: true, element: <AdminDashboard /> },
           { path: 'dashboard', element: <AdminDashboard /> },
@@ -75,6 +76,7 @@ const router = createBrowserRouter([
   { path: '/signup', element: <Signup /> },
   { path: '/forgot-password', element: <ForgotPassword /> },
   { path: '/reset-password', element: <ResetPassword /> },
+  { path: '/index', element: <AuthProvider><Index /></AuthProvider> },
   { path: '*', element: <NotFound /> },
 ]);
 

@@ -18,7 +18,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children, 
   requireAdmin = false,
   requireRoles = [],
-  redirectTo = '/' 
+  redirectTo = '/index' 
 }) => {
   const { user, loading, isAuthenticated, isAdmin, hasRole, error, activeRole } = useAuth();
   const location = useLocation();
@@ -79,7 +79,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
             <Button 
               variant="outline" 
               onClick={() => {
-                window.location.href = '/';
+                window.location.href = '/index';
               }}
             >
               Back to Login
@@ -107,7 +107,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
             <Button 
               variant="outline" 
               onClick={() => {
-                window.location.href = '/';
+                window.location.href = '/index';
               }}
             >
               Back to Login
@@ -158,7 +158,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   if (!location.pathname.startsWith('/admin') && activeRole === 'admin' && isAdmin && !isSpecialAdminUser) {
     console.log('[ProtectedRoute] Trying to access agent route with admin role, redirecting to agent portal switcher');
     toast.error("Please switch to agent role to access this section");
-    return <Navigate to="/admin" replace />;
+    return <Navigate to="/" replace />;
   }
 
   // Check for specific role requirements (but make exception for special admin user)
