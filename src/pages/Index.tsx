@@ -14,6 +14,7 @@ const Index = () => {
   const navigate = useNavigate();
   const auth = useAuth();
   const clerk = useClerk();
+  // Access loaded state correctly
   const isLoaded = clerk.loaded;
   const isSignedIn = !!clerk.user;
   const { isAdmin, user } = auth;
