@@ -4,7 +4,7 @@
  */
 
 export const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || 
-  "pk_test_YWN0aXZlLWR1Y2stOTcuY2xlcmsuYWNjb3VudHMuZGV2JA"; // This is a fallback key for development only
+  "pk_test_cG9zaXRpdmUtYmxvd2Zpc2gtNjAuY2xlcmsuYWNjb3VudHMuZGV2JA"; // Updated publishable key
 
 // Map of role keys to Clerk organization role names
 export const CLERK_ROLE_MAPPING = {
