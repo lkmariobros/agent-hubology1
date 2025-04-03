@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useClerk, useUser, useOrganization } from '@clerk/clerk-react';
 import { UserRole } from '@/types/auth';
@@ -24,7 +23,8 @@ interface ClerkAuthContextType {
 
 const ClerkAuthContext = createContext<ClerkAuthContextType | undefined>(undefined);
 
-export const useAuth = () => {
+// Renamed to avoid naming conflict with other useAuth hooks
+export const useClerkAuth = () => {
   const context = useContext(ClerkAuthContext);
   
   if (context === undefined) {
@@ -33,6 +33,9 @@ export const useAuth = () => {
   
   return context;
 };
+
+// For backward compatibility
+export const useAuth = useClerkAuth;
 
 export const ClerkAuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const clerk = useClerk();

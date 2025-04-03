@@ -4,14 +4,12 @@ import { AuthContextType } from '@/types/auth';
 import { useAuth as useClerkAuth } from '../../providers/ClerkAuthProvider';
 
 // Create context with default values (undefined for type safety)
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 /**
  * Custom hook to use the auth context
  */
 export const useAuthContext = (): AuthContextType => {
-  // We're now using the ClerkAuthProvider under the hood
+  // We're now using the ClerkAuthProvider directly to avoid circular dependencies
   return useClerkAuth();
 };
-
-export { AuthContext };

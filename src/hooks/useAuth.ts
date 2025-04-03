@@ -1,30 +1,24 @@
 
-import { useAuthContext } from '@/context/auth';
-import type { AuthContextType } from '@/types/auth';
-import { useSentry } from './useSentry';
-import { isSpecialAdminEmail } from '@/context/auth/adminUtils';
+import { useClerkAuth } from "@/providers/ClerkAuthProvider";
+import type { AuthContextType, UserRole } from "@/types/auth";
 
 /**
- * Enhanced useAuth hook with additional error tracking
+ * Enhanced useAuth hook that directly uses ClerkAuthProvider
  */
 export function useAuth(): AuthContextType {
-  const auth = useAuthContext();
-  const { logError, setUser } = useSentry();
+  const auth = useClerkAuth();
   
-  // If there's an error in the auth context, log it to Sentry
-  if (auth.error && !auth.loading) {
-    logError(auth.error, { 
-      source: 'AuthContext', 
-      isAuthenticated: auth.isAuthenticated 
-    });
-  }
-  
-  // Set Sentry user context when authenticated
-  if (auth.user?.id && !auth.loading) {
-    setUser(auth.user.id, auth.user.email, auth.user.name);
-  }
-  
-  return auth;
+  return {
+    ...auth,
+    // For backward compatibility with code that expects has method with params object
+    has: (params: { role: string }) => auth.hasRole(params.role as UserRole),
+    // Explicitly exposing standard properties for clarity
+    isAuthenticated: auth.isAuthenticated,
+    isAdmin: auth.isAdmin,
+    user: auth.user,
+    loading: auth.loading,
+    error: auth.error,
+  };
 }
 
 // Export the hook as default for backwards compatibility

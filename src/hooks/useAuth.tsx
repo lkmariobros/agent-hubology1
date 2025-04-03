@@ -1,5 +1,5 @@
 
-import { useAuth as useClerkAuth } from "../providers/ClerkAuthProvider";
+import { useClerkAuth } from "../providers/ClerkAuthProvider";
 import { UserRole } from "@/types/auth";
 
 export function useAuth() {
@@ -9,7 +9,7 @@ export function useAuth() {
   return {
     ...auth,
     // For backward compatibility with code that expects has method with params object
-    has: (params: { role: string }) => auth.hasRole(params.role),
+    has: (params: { role: string }) => auth.hasRole(params.role as UserRole),
     // Explicitly exposing standard properties for clarity
     isAuthenticated: auth.isAuthenticated,
     isAdmin: auth.isAdmin,
@@ -17,7 +17,7 @@ export function useAuth() {
     loading: auth.loading,
     error: auth.error,
     // For code that expects an activeRole property
-    activeRole: auth.isAdmin ? 'admin' : 'agent' as UserRole
+    activeRole: auth.activeRole
   };
 }
 
