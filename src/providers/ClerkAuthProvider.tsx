@@ -54,8 +54,8 @@ export const ClerkAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   // Determine if user is an admin based on Clerk roles
   const isAdmin = clerkUser?.publicMetadata?.isAdmin === true || 
-    // Fix: Safely check organization membership role
-    (organization?.membership as any)?.role === 'admin' ||
+    // Fix: Cast organization to any to access membership.role
+    (organization && (organization as any)?.membership?.role === 'admin') ||
     clerkUser?.emailAddresses.some(email => 
       email.emailAddress === 'josephkwantum@gmail.com'
     );
@@ -144,12 +144,10 @@ export const ClerkAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     try {
       console.log('Attempting to sign in with Clerk:', email);
       
-      // Use correct Clerk method
-      await clerk.load().then(() => {
-        return clerk.client.signIn.create({
-          identifier: email,
-          password
-        });
+      // Fix: Use clerk.client directly without load()
+      await clerk.client.signIn.create({
+        identifier: email,
+        password
       });
       
       toast.success('Signed in successfully!');
@@ -168,12 +166,10 @@ export const ClerkAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setLoading(true);
     setError(null);
     try {
-      // Use correct Clerk method
-      const result = await clerk.load().then(() => {
-        return clerk.client.signUp.create({
-          emailAddress: email,
-          password,
-        });
+      // Fix: Use clerk.client directly without load()
+      const result = await clerk.client.signUp.create({
+        emailAddress: email,
+        password,
       });
       
       const { createdSessionId, createdUserId } = result;
@@ -182,11 +178,9 @@ export const ClerkAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         toast.success('Account created successfully!');
       } else {
         // This shouldn't normally happen with Clerk, but handle it just in case
-        await clerk.load().then(() => {
-          return clerk.client.signIn.create({
-            identifier: email,
-            password
-          });
+        await clerk.client.signIn.create({
+          identifier: email,
+          password
         });
         toast.success('Account created and signed in!');
       }
@@ -204,12 +198,10 @@ export const ClerkAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setLoading(true);
     setError(null);
     try {
-      // Use correct Clerk method
-      await clerk.load().then(() => {
-        return clerk.client.signIn.create({
-          strategy: "reset_password_email_code",
-          identifier: email
-        });
+      // Fix: Use clerk.client directly without load()
+      await clerk.client.signIn.create({
+        strategy: "reset_password_email_code",
+        identifier: email
       });
       toast.success('Password reset instructions sent to your email');
     } catch (err) {
