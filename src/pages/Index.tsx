@@ -1,18 +1,21 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthForm from '../components/AuthForm';
-import { useClerk } from '@clerk/clerk-react';
 import { useAuth } from '@/hooks/useAuth';
 import LoadingIndicator from '@/components/ui/loading-indicator';
 import { Button } from '@/components/ui/button';
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { AUTH_CONFIG } from '@/context/auth/authConfig';
+import { useClerk } from '@clerk/clerk-react';
 
 const Index = () => {
   const navigate = useNavigate();
   const auth = useAuth();
-  const { isSignedIn, isLoaded } = useClerk();
+  const clerk = useClerk();
+  const isLoaded = clerk.loaded;
+  const isSignedIn = !!clerk.user;
   const { isAdmin, user } = auth;
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [initialCheckDone, setInitialCheckDone] = useState(false);

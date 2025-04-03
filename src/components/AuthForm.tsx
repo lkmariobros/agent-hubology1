@@ -14,7 +14,7 @@ const AuthForm = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, resetPassword } = useAuth();
   
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,7 +34,6 @@ const AuthForm = () => {
       console.log('[AuthForm] Sign in request completed');
     } catch (error: any) {
       console.error('[AuthForm] Login error:', error);
-      // Error is already handled in the provider
     } finally {
       setLoading(false);
     }
@@ -57,7 +56,6 @@ const AuthForm = () => {
       setIsLogin(true); // Switch to login view
     } catch (error: any) {
       console.error('[AuthForm] Registration error:', error);
-      // Error is already handled in the provider
     } finally {
       setLoading(false);
     }
@@ -71,11 +69,9 @@ const AuthForm = () => {
     
     try {
       setLoading(true);
-      // Use our resetPassword that now uses Clerk's functionality
-      await useAuth().resetPassword(email);
+      await resetPassword(email);
     } catch (error: any) {
       console.error('[AuthForm] Reset password error:', error);
-      // Error is already handled in the provider
     } finally {
       setLoading(false);
     }

@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useAuth as useClerkAuth, useOrganization, useUser } from '@clerk/clerk-react';
+import { useClerk, useUser, useOrganization } from '@clerk/clerk-react';
 import { UserRole } from '@/types/auth';
 import { toast } from 'sonner';
 
@@ -35,7 +35,8 @@ export const useAuth = () => {
 };
 
 export const ClerkAuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isLoaded: isClerkLoaded, userId, sessionId, signOut: clerkSignOut, signIn: clerkSignIn } = useClerkAuth();
+  const clerk = useClerk();
+  const { isLoaded: isClerkLoaded, userId, sessionId } = clerk;
   const { user: clerkUser, isLoaded: isUserLoaded } = useUser();
   const { organization, isLoaded: isOrgLoaded } = useOrganization();
   
@@ -50,7 +51,7 @@ export const ClerkAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const isAdmin = clerkUser?.publicMetadata?.isAdmin === true || 
     // Fix: Organization might not have membership property in the type definition
     // Use optional chaining to access potentially undefined properties safely
-    (organization?.membership?.role === 'admin') ||
+    (organization?.membership as any)?.role === 'admin' ||
     clerkUser?.emailAddresses.some(email => 
       email.emailAddress === 'josephkwantum@gmail.com'
     );
@@ -122,7 +123,7 @@ export const ClerkAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const signOut = async () => {
     setLoading(true);
     try {
-      await clerkSignOut();
+      await clerk.signOut();
     } catch (err) {
       console.error('Sign out error:', err);
       setError(err instanceof Error ? err : new Error('Sign out failed'));
@@ -139,7 +140,7 @@ export const ClerkAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     try {
       console.log('Attempting to sign in with Clerk:', email);
       
-      await clerkSignIn.create({
+      await clerk.signIn.create({
         identifier: email,
         password
       });
@@ -160,9 +161,8 @@ export const ClerkAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setLoading(true);
     setError(null);
     try {
-      const { createdSessionId, createdUserId } = await clerkSignIn.create({
-        strategy: 'password',
-        identifier: email,
+      const { createdSessionId, createdUserId } = await clerk.signUp.create({
+        emailAddress: email,
         password,
       });
       
@@ -170,7 +170,7 @@ export const ClerkAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         toast.success('Account created successfully!');
       } else {
         // This shouldn't normally happen with Clerk, but handle it just in case
-        await clerkSignIn.create({
+        await clerk.signIn.create({
           identifier: email,
           password
         });
@@ -191,7 +191,7 @@ export const ClerkAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setError(null);
     try {
       // Use Clerk's password reset functionality
-      await clerkSignIn.create({
+      await clerk.signIn.create({
         strategy: "reset_password_email_code",
         identifier: email
       });
