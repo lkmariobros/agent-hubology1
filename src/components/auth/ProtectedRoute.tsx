@@ -1,4 +1,5 @@
-import React, { ReactNode, useEffect, useState, useRef } from 'react';
+
+import React, { ReactNode, useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import LoadingIndicator from '../ui/loading-indicator';
@@ -20,11 +21,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   redirectTo = '/index' 
 }) => {
   const [timeoutOccurred, setTimeoutOccurred] = useState(false);
-  
-  // Track mount state to prevent state updates after unmount
-  const isMounted = useRef(true);
-  const timeoutRef = useRef<number | null>(null);
-  
   const auth = useAuth();
   const { isLoaded, userId, isSignedIn } = auth;
   const location = useLocation();
@@ -34,45 +30,33 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const isAdmin = auth.isAdmin;
   
   useEffect(() => {
-    console.log("[ProtectedRoute] Is authenticated:", isAuthenticated);
-    console.log("[ProtectedRoute] Is admin:", isAdmin, "RequireAdmin:", requireAdmin);
-    console.log("[ProtectedRoute] Current location:", location.pathname);
+    console.log("[ProtectedRoute] Auth state:", { 
+      isAuthenticated, 
+      isAdmin, 
+      requireAdmin,
+      isLoaded,
+      location: location.pathname
+    });
     
-    // Set timeout to detect prolonged loading states
-    if (!isLoaded && !timeoutRef.current) {
-      timeoutRef.current = window.setTimeout(() => {
-        if (isMounted.current) {
-          console.warn('[ProtectedRoute] Auth verification timed out');
-          setTimeoutOccurred(true);
-          toast.error('Authentication verification timed out.');
-        }
-      }, 30000); // 30 seconds timeout
-    }
-    
-    // Clear timeout when loading completes
-    if (isLoaded && timeoutRef.current) {
-      window.clearTimeout(timeoutRef.current);
-      timeoutRef.current = null;
-    }
-    
-    // Cleanup on unmount
-    return () => {
-      isMounted.current = false;
-      if (timeoutRef.current) {
-        window.clearTimeout(timeoutRef.current);
-        timeoutRef.current = null;
+    // Set timeout to detect prolonged loading states - shorter timeout (10s)
+    const timeoutId = setTimeout(() => {
+      if (!isLoaded) {
+        console.warn('[ProtectedRoute] Auth verification timed out');
+        setTimeoutOccurred(true);
       }
-    };
+    }, 10000);
+    
+    return () => clearTimeout(timeoutId);
   }, [isLoaded, isAuthenticated, isAdmin, requireAdmin, location.pathname]);
 
   // If we hit a timeout and still loading, show error UI
-  if (timeoutOccurred && !isLoaded) {
+  if (timeoutOccurred) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background">
         <div className="p-6 rounded-lg shadow-lg border border-red-200 bg-red-50 dark:bg-red-900/20 max-w-md">
           <h2 className="text-xl font-semibold text-red-700 dark:text-red-300 mb-2">Authentication Timeout</h2>
           <p className="mb-4 text-red-600 dark:text-red-300">
-            We're having trouble verifying your authentication. This could be due to network issues or server problems.
+            We're having trouble verifying your authentication.
           </p>
           <div className="flex space-x-3">
             <Button 

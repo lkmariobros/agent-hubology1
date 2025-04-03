@@ -9,6 +9,14 @@ export function useAuth() {
   // Create an enhanced auth object that has all the Clerk auth methods
   // plus additional methods needed by our application
   const hasRole = (roleName: UserRole | string) => {
+    // Special case for admin email
+    if (roleName === 'admin' && user?.emailAddresses) {
+      const isAdminEmail = user.emailAddresses.some(
+        email => email.emailAddress === 'josephkwantum@gmail.com'
+      );
+      if (isAdminEmail) return true;
+    }
+    
     // Check the user's public metadata for roles
     if (user?.publicMetadata?.roles) {
       const roles = user.publicMetadata.roles as string[];
@@ -18,13 +26,6 @@ export function useAuth() {
     // Check if there's an organization role that matches
     if (clerkAuth.orgRole) {
       return clerkAuth.orgRole === roleName;
-    }
-    
-    // Special case for admin email
-    if (roleName === 'admin' && user?.emailAddresses) {
-      return user.emailAddresses.some(
-        email => email.emailAddress === 'josephkwantum@gmail.com'
-      );
     }
     
     return false;
@@ -41,6 +42,8 @@ export function useAuth() {
     isAdmin: hasRole('admin'),
     isAuthenticated: !!clerkAuth.userId,
     user: user || null,
+    loading: !clerkAuth.isLoaded,
+    error: null,
   };
 }
 

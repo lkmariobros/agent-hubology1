@@ -12,6 +12,9 @@ if (!CLERK_PUBLISHABLE_KEY) {
   throw new Error("Missing Publishable Key")
 }
 
+// Make sure to log the key being used (without exposing it fully)
+console.log(`Using Clerk with key starting with: ${CLERK_PUBLISHABLE_KEY.substring(0, 8)}...`);
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY}>
