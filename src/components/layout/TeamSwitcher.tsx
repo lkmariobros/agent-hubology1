@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from '@/components/ui/button';
 import { Building, Shield, ChevronDown } from 'lucide-react';
-import { useAuth } from '@/providers/ClerkAuthProvider';
+import { useAuth, useUser } from '@clerk/clerk-react';
 import { UserRole } from '@/types/auth';
 import { toast } from 'sonner';
 
@@ -18,9 +18,12 @@ import { toast } from 'sonner';
  * Displayed in the header rather than sidebar
  */
 export function TeamSwitcher() {
-  const { user, switchRole, isAdmin, activeRole } = useAuth();
+  const { userId, has } = useAuth();
+  const { user } = useUser();
+  const [activeRole, setActiveRole] = React.useState<UserRole>('agent');
+  const isAdmin = has({ role: "admin" });
   
-  if (!user) return null;
+  if (!userId || !user) return null;
   
   // Calculate which roles the user can switch to
   const availableRoles: { role: UserRole; label: string; icon: React.ReactNode }[] = [
@@ -28,7 +31,7 @@ export function TeamSwitcher() {
   ];
   
   // Always add admin option for the special email
-  const isSpecialEmail = user.email === 'josephkwantum@gmail.com';
+  const isSpecialEmail = user.primaryEmailAddress?.emailAddress === 'josephkwantum@gmail.com';
   if (isAdmin || isSpecialEmail) {
     availableRoles.push({ 
       role: 'admin', 
@@ -49,8 +52,8 @@ export function TeamSwitcher() {
     // Show toast message before switching
     toast.success(`Switching to ${role === 'admin' ? 'Admin' : 'Agent'} Portal...`);
     
-    // First switch the role
-    switchRole(role);
+    // Update active role
+    setActiveRole(role);
     
     // Add a slight delay to allow the role switch to complete
     setTimeout(() => {

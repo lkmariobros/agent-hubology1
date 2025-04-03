@@ -19,14 +19,13 @@ import Roles from './pages/admin/Roles';
 import NewTransaction from './pages/NewTransaction';
 import TransactionList from './pages/TransactionList';
 import TransactionDetail from './pages/TransactionDetail';
-import { ClerkAuthProvider } from './providers/ClerkAuthProvider';
 import Login from './pages/auth/Login';
 import Signup from './pages/auth/Signup';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import ResetPassword from './pages/auth/ResetPassword';
 import NotFound from './pages/NotFound';
 import CommissionForecastPage from './pages/admin/CommissionForecast';
-import Reports from './pages/Reports'; // Using the existing Reports page for all report routes
+import Reports from './pages/Reports';
 import AdminSettings from './pages/admin/Settings';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import Index from './pages/Index';
@@ -34,7 +33,7 @@ import Index from './pages/Index';
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <ClerkAuthProvider><ProtectedRoute><AppLayout /></ProtectedRoute></ClerkAuthProvider>,
+    element: <ProtectedRoute><AppLayout /></ProtectedRoute>,
     children: [
       { index: true, element: <Dashboard /> },
       { path: 'properties', element: <PropertyList /> },
@@ -76,7 +75,7 @@ const router = createBrowserRouter([
   { path: '/signup', element: <Signup /> },
   { path: '/forgot-password', element: <ForgotPassword /> },
   { path: '/reset-password', element: <ResetPassword /> },
-  { path: '/index', element: <ClerkAuthProvider><Index /></ClerkAuthProvider> },
+  { path: '/index', element: <Index /> },
   { path: '*', element: <NotFound /> },
 ]);
 

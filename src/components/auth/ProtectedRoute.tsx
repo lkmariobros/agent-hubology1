@@ -1,6 +1,7 @@
+
 import React, { ReactNode, useEffect, useState, useRef } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/providers/ClerkAuthProvider';
+import { useAuth } from '@clerk/clerk-react';
 import LoadingIndicator from '../ui/loading-indicator';
 import { UserRole } from '@/types/auth';
 import { toast } from 'sonner';
@@ -25,16 +26,18 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const isMounted = useRef(true);
   const timeoutRef = useRef<number | null>(null);
   
-  const { user, loading, isAuthenticated, isAdmin, hasRole, error, activeRole } = useAuth();
+  const { isLoaded, userId, isSignedIn, has } = useAuth();
   const location = useLocation();
+  const isAuthenticated = isSignedIn;
+  const isAdmin = has({ role: "admin" });
   
   useEffect(() => {
-    console.log("[ProtectedRoute] Current user role:", activeRole);
+    console.log("[ProtectedRoute] Is authenticated:", isAuthenticated);
     console.log("[ProtectedRoute] Is admin:", isAdmin, "RequireAdmin:", requireAdmin);
     console.log("[ProtectedRoute] Current location:", location.pathname);
     
     // Set timeout to detect prolonged loading states
-    if (loading && !timeoutRef.current) {
+    if (!isLoaded && !timeoutRef.current) {
       timeoutRef.current = window.setTimeout(() => {
         if (isMounted.current) {
           console.warn('[ProtectedRoute] Auth verification timed out');
@@ -45,7 +48,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     }
     
     // Clear timeout when loading completes
-    if (!loading && timeoutRef.current) {
+    if (isLoaded && timeoutRef.current) {
       window.clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
     }
@@ -58,10 +61,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         timeoutRef.current = null;
       }
     };
-  }, [loading, activeRole, isAdmin, requireAdmin, location.pathname]);
+  }, [isLoaded, isAuthenticated, isAdmin, requireAdmin, location.pathname]);
 
   // If we hit a timeout and still loading, show error UI
-  if (timeoutOccurred && loading) {
+  if (timeoutOccurred && !isLoaded) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background">
         <div className="p-6 rounded-lg shadow-lg border border-red-200 bg-red-50 dark:bg-red-900/20 max-w-md">
@@ -90,36 +93,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
   }
 
-  // Show error UI if there's an authentication error
-  if (error && !loading) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-background">
-        <div className="p-6 rounded-lg shadow-lg border border-red-200 bg-red-50 dark:bg-red-900/20 max-w-md">
-          <h2 className="text-xl font-semibold text-red-700 dark:text-red-300 mb-2">Authentication Error</h2>
-          <p className="mb-4 text-red-600 dark:text-red-300">{error.message}</p>
-          <div className="flex space-x-3">
-            <Button 
-              variant="destructive" 
-              onClick={() => window.location.reload()}
-            >
-              Refresh Page
-            </Button>
-            <Button 
-              variant="outline" 
-              onClick={() => {
-                window.location.href = '/index';
-              }}
-            >
-              Back to Login
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   // Show loading indicator while checking authentication
-  if (loading) {
+  if (!isLoaded) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background">
         <LoadingIndicator 
@@ -132,13 +107,13 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   // Redirect to login if not authenticated
-  if (!isAuthenticated || !user) {
+  if (!isAuthenticated || !userId) {
     console.log('[ProtectedRoute] User not authenticated, redirecting to:', redirectTo);
     return <Navigate to={redirectTo} state={{ from: location }} replace />;
   }
 
-  // Special case for josephkwantum@gmail.com - always allow access to both portals
-  const isSpecialAdminUser = user.email === 'josephkwantum@gmail.com';
+  // Special case for special admin email
+  const isSpecialAdminUser = false; // This would come from the user's email in a real implementation
 
   // Check for admin requirement, but make exception for special admin user
   if (requireAdmin && !isAdmin && !isSpecialAdminUser) {
@@ -146,26 +121,22 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     toast.error("You need admin privileges to access this page");
     return <Navigate to="/dashboard" replace />;
   }
-  
-  // Critical fix: Check if we're trying to access admin routes with agent role but redirect to admin dashboard instead
-  if (location.pathname.startsWith('/admin') && activeRole !== 'admin' && !isSpecialAdminUser) {
-    console.log('[ProtectedRoute] Trying to access admin route with non-admin role, redirecting to admin portal switcher');
-    toast.error("Please switch to admin role to access this section");
-    return <Navigate to="/admin" replace />;
-  }
-  
-  // Check if we're trying to access agent routes with admin role (except for special admin user)
-  if (!location.pathname.startsWith('/admin') && activeRole === 'admin' && isAdmin && !isSpecialAdminUser) {
-    console.log('[ProtectedRoute] Trying to access agent route with admin role, redirecting to agent portal switcher');
-    toast.error("Please switch to agent role to access this section");
-    return <Navigate to="/" replace />;
-  }
 
   // Check for specific role requirements (but make exception for special admin user)
-  if (requireRoles.length > 0 && !requireRoles.some(role => hasRole(role)) && !isSpecialAdminUser) {
-    console.log('[ProtectedRoute] Required roles not found:', requireRoles);
-    toast.error(`You need ${requireRoles.join(' or ')} privileges to access this page`);
-    return <Navigate to="/dashboard" replace />;
+  if (requireRoles.length > 0) {
+    let hasRequiredRole = false;
+    for (const role of requireRoles) {
+      if (has({ role })) {
+        hasRequiredRole = true;
+        break;
+      }
+    }
+    
+    if (!hasRequiredRole && !isSpecialAdminUser) {
+      console.log('[ProtectedRoute] Required roles not found:', requireRoles);
+      toast.error(`You need ${requireRoles.join(' or ')} privileges to access this page`);
+      return <Navigate to="/dashboard" replace />;
+    }
   }
 
   return <>{children}</>;

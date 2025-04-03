@@ -1,7 +1,8 @@
+
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthForm from '../components/AuthForm';
-import { useAuth } from '@/providers/ClerkAuthProvider';
+import { useClerk, useAuth } from '@clerk/clerk-react';
 import LoadingIndicator from '@/components/ui/loading-indicator';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -10,9 +11,13 @@ import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { CLERK_AUTH_SETTINGS } from '@/config/clerk';
 
 const Index = () => {
+  const navigate = useNavigate();
+  const { isLoaded, isSignedIn } = useAuth();
+  const { session } = useClerk();
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [initialCheckDone, setInitialCheckDone] = useState(false);
   const [timeoutCount, setTimeoutCount] = useState(0);
+  const [error, setError] = useState<Error | null>(null);
   
   // Track mount state to prevent state updates after unmount
   const isMounted = useRef(true);
@@ -24,8 +29,8 @@ const Index = () => {
   const logAuthState = () => {
     if (import.meta.env.DEV) {
       console.log('[IndexPage] Auth state:', { 
-        isAuthenticated, 
-        loading, 
+        isSignedIn, 
+        isLoaded, 
         sessionExists: !!session,
         initialCheckDone,
         error: error?.message
@@ -46,9 +51,9 @@ const Index = () => {
     logAuthState();
     
     // Set a timeout to avoid infinite loading state
-    if (loading && !timeoutRef.current) {
+    if (!isLoaded && !timeoutRef.current) {
       timeoutRef.current = window.setTimeout(() => {
-        if (isMounted.current && loading) {
+        if (isMounted.current && !isLoaded) {
           console.warn('[IndexPage] Auth check timed out, forcing initialCheckDone');
           setInitialCheckDone(true);
           setTimeoutCount(prev => prev + 1);
@@ -58,22 +63,22 @@ const Index = () => {
     }
     
     // Clear timeout when loading completes
-    if (!loading && timeoutRef.current) {
+    if (isLoaded && timeoutRef.current) {
       window.clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
     }
     
     // Only redirect after the initial auth check is complete
-    if (!loading && isAuthenticated && !isRedirecting) {
+    if (isLoaded && isSignedIn && !isRedirecting) {
       setIsRedirecting(true);
       navigate(CLERK_AUTH_SETTINGS.REDIRECT_PATHS.AFTER_LOGIN);
     }
     
     // Mark initial check as done when loading is complete
-    if (!loading && !initialCheckDone) {
+    if (isLoaded && !initialCheckDone) {
       setInitialCheckDone(true);
     }
-  }, [isAuthenticated, loading, navigate, initialCheckDone, session, error]);
+  }, [isSignedIn, isLoaded, navigate, initialCheckDone, session]);
 
   const handleRetry = () => {
     window.location.reload();
@@ -122,7 +127,7 @@ const Index = () => {
   }
 
   // Show loading indicator while checking authentication or redirecting
-  if (loading || isRedirecting) {
+  if (!isLoaded || isRedirecting) {
     return (
       <div 
         className="min-h-screen flex flex-col items-center justify-center bg-black"
@@ -135,7 +140,7 @@ const Index = () => {
           size="lg"
           className="text-white"
         />
-        {loading && timeoutCount > 0 && (
+        {!isLoaded && timeoutCount > 0 && (
           <Button
             variant="link"
             onClick={handleRetry}
