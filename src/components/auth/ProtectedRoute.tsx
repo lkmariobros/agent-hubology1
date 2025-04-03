@@ -1,7 +1,7 @@
 
 import React, { ReactNode, useEffect, useState, useRef } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth } from '@/hooks/useAuth';
 import LoadingIndicator from '../ui/loading-indicator';
 import { UserRole } from '@/types/auth';
 import { toast } from 'sonner';
@@ -26,10 +26,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const isMounted = useRef(true);
   const timeoutRef = useRef<number | null>(null);
   
-  const { isLoaded, userId, isSignedIn, has } = useAuth();
+  const auth = useAuth();
+  const { isLoaded, userId, isSignedIn } = auth;
   const location = useLocation();
   const isAuthenticated = isSignedIn;
-  const isAdmin = has({ role: "admin" });
+  const isAdmin = auth.has({ role: "admin" });
   
   useEffect(() => {
     console.log("[ProtectedRoute] Is authenticated:", isAuthenticated);
@@ -126,7 +127,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   if (requireRoles.length > 0) {
     let hasRequiredRole = false;
     for (const role of requireRoles) {
-      if (has({ role })) {
+      if (auth.has({ role })) {
         hasRequiredRole = true;
         break;
       }

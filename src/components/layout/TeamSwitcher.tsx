@@ -9,7 +9,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from '@/components/ui/button';
 import { Building, Shield, ChevronDown } from 'lucide-react';
-import { useAuth, useUser } from '@clerk/clerk-react';
+import { useUser } from '@clerk/clerk-react';
+import { useAuth } from '@/hooks/useAuth';
 import { UserRole } from '@/types/auth';
 import { toast } from 'sonner';
 
@@ -18,10 +19,11 @@ import { toast } from 'sonner';
  * Displayed in the header rather than sidebar
  */
 export function TeamSwitcher() {
-  const { userId, has } = useAuth();
+  const auth = useAuth();
+  const { userId } = auth;
   const { user } = useUser();
   const [activeRole, setActiveRole] = React.useState<UserRole>('agent');
-  const isAdmin = has({ role: "admin" });
+  const isAdmin = auth.has({ role: "admin" });
   
   if (!userId || !user) return null;
   

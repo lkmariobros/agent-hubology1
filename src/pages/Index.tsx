@@ -2,7 +2,8 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthForm from '../components/AuthForm';
-import { useClerk, useAuth } from '@clerk/clerk-react';
+import { useClerk } from '@clerk/clerk-react';
+import { useAuth } from '@/hooks/useAuth';
 import LoadingIndicator from '@/components/ui/loading-indicator';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -12,7 +13,8 @@ import { CLERK_AUTH_SETTINGS } from '@/config/clerk';
 
 const Index = () => {
   const navigate = useNavigate();
-  const { isLoaded, isSignedIn } = useAuth();
+  const auth = useAuth();
+  const { isLoaded, isSignedIn } = auth;
   const { session } = useClerk();
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [initialCheckDone, setInitialCheckDone] = useState(false);
