@@ -1,25 +1,22 @@
 
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import App from './App.tsx'
-import './index.css'
-import { ClerkProvider } from '@clerk/clerk-react'
-import { Toaster } from './components/ui/sonner'
-import { CLERK_PUBLISHABLE_KEY } from './config/clerk'
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App";
+import "./index.css";
+import { ClerkProvider } from "@clerk/clerk-react";
 
-// Use the key from the config file
+// Get the publishable key from environment variables
+const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+
+// Check if the key is available
 if (!CLERK_PUBLISHABLE_KEY) {
-  throw new Error("Missing Publishable Key")
+  throw new Error("Missing CLERK_PUBLISHABLE_KEY - Check your environment variables");
 }
 
-// Make sure to log the key being used (without exposing it fully)
-console.log(`Using Clerk with key starting with: ${CLERK_PUBLISHABLE_KEY.substring(0, 8)}...`);
-
-ReactDOM.createRoot(document.getElementById('root')!).render(
+ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY}>
       <App />
-      <Toaster />
     </ClerkProvider>
-  </React.StrictMode>,
-)
+  </React.StrictMode>
+);

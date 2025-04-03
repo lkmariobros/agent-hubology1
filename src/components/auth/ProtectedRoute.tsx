@@ -6,8 +6,9 @@ import LoadingIndicator from '../ui/loading-indicator';
 import { UserRole } from '@/types/auth';
 import { toast } from 'sonner';
 import { Button } from '../ui/button';
-import { AUTH_CONFIG } from '@/context/auth/authConfig';
-import { isSpecialAdminEmail } from '@/context/auth/adminUtils';
+
+// Define a timeout for auth checks
+const ROUTE_AUTH_TIMEOUT = 10000; // 10 seconds
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -24,10 +25,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 }) => {
   const [timeoutOccurred, setTimeoutOccurred] = useState(false);
   const auth = useAuth();
-  const { loading, error, isAuthenticated, user, hasRole } = auth;
+  const { loading, error, isAuthenticated, hasRole } = auth;
   const location = useLocation();
   
-  // Use the has method from our enhanced auth hook
   const isAdmin = auth.isAdmin;
   
   useEffect(() => {
@@ -37,7 +37,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       requireAdmin,
       loading,
       location: location.pathname,
-      user: user?.id ? `User ID: ${user.id}` : 'No user'
+      user: auth.user?.id ? `User ID: ${auth.user.id}` : 'No user'
     });
     
     // Set timeout to detect prolonged loading states
@@ -46,10 +46,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         console.warn('[ProtectedRoute] Auth verification timed out');
         setTimeoutOccurred(true);
       }
-    }, AUTH_CONFIG.ROUTE_AUTH_TIMEOUT);
+    }, ROUTE_AUTH_TIMEOUT);
     
     return () => clearTimeout(timeoutId);
-  }, [loading, isAuthenticated, isAdmin, requireAdmin, location.pathname, user]);
+  }, [loading, isAuthenticated, isAdmin, requireAdmin, location.pathname, auth.user]);
 
   // If we hit a timeout and still loading, show error UI
   if (timeoutOccurred) {
@@ -125,22 +125,19 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   // Redirect to login if not authenticated
-  if (!isAuthenticated || !user?.id) {
+  if (!isAuthenticated || !auth.user?.id) {
     console.log('[ProtectedRoute] User not authenticated, redirecting to:', redirectTo);
     return <Navigate to={redirectTo} state={{ from: location }} replace />;
   }
 
-  // Check if user is special admin
-  const isSpecialAdmin = user?.email ? isSpecialAdminEmail(user.email) : false;
-
-  // Check for admin requirement, but make exception for special admin user
-  if (requireAdmin && !isAdmin && !isSpecialAdmin) {
+  // Check for admin requirement
+  if (requireAdmin && !isAdmin) {
     console.log('[ProtectedRoute] Admin access required but user is not admin, redirecting to dashboard');
     toast.error("You need admin privileges to access this page");
     return <Navigate to="/dashboard" replace />;
   }
 
-  // Check for specific role requirements (but make exception for special admin user)
+  // Check for specific role requirements
   if (requireRoles.length > 0) {
     let hasRequiredRole = false;
     for (const role of requireRoles) {
@@ -150,7 +147,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       }
     }
     
-    if (!hasRequiredRole && !isSpecialAdmin) {
+    if (!hasRequiredRole) {
       console.log('[ProtectedRoute] Required roles not found:', requireRoles);
       toast.error(`You need ${requireRoles.join(' or ')} privileges to access this page`);
       return <Navigate to="/dashboard" replace />;

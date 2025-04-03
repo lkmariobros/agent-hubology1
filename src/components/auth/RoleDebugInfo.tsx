@@ -1,24 +1,12 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { roleUtils } from '@/context/auth/roleUtils';
 import { ChevronDown, ChevronUp, Shield, RefreshCw } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
-import { toast } from 'sonner';
-import { isSpecialAdminEmail } from '@/context/auth/adminUtils';
 
 const RoleDebugInfo: React.FC = () => {
-  const { user, roles, profile, isAdmin, activeRole } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [forceAdminEnabled, setForceAdminEnabled] = useState(false);
-
-  // Check for admin override on mount and when user changes
-  useEffect(() => {
-    if (user && user.email && isSpecialAdminEmail(user.email)) {
-      setForceAdminEnabled(true);
-    }
-  }, [user]);
 
   // Ensure this component only renders in development mode
   if (import.meta.env.PROD) {
@@ -26,11 +14,6 @@ const RoleDebugInfo: React.FC = () => {
   }
 
   if (!user) return null;
-  
-  // Log user role information to console
-  if (user.email) {
-    roleUtils.debugRoles(roles, user.email);
-  }
 
   // Determine badge color based on admin status
   const badgeColorClasses = isAdmin 
@@ -40,19 +23,14 @@ const RoleDebugInfo: React.FC = () => {
   const handleRefreshSession = async () => {
     setIsRefreshing(true);
     try {
-      // Force refresh session
-      const { error } = await supabase.auth.refreshSession();
-      if (error) throw error;
-      toast.success("Session refreshed. Roles updated.");
+      // Force page refresh to reload Clerk auth
+      window.location.reload();
     } catch (error) {
       console.error('Error refreshing session:', error);
-      toast.error("Failed to refresh session");
     } finally {
       setIsRefreshing(false);
     }
   };
-
-  const showAdminOverrideMessage = user.email && isSpecialAdminEmail(user.email) && !isAdmin;
 
   return (
     <div className="relative inline-block">
@@ -73,20 +51,12 @@ const RoleDebugInfo: React.FC = () => {
         <div className="absolute bottom-full right-0 z-10 mb-1 p-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg shadow-md w-72">
           <h3 className="font-medium text-gray-800 dark:text-gray-300 mb-2">Debug Information (Dev Only)</h3>
           <div className="space-y-1 text-sm">
-            <p><strong>Email:</strong> {user.email}</p>
-            <p><strong>Roles:</strong> {roles.join(', ') || 'No roles assigned'}</p>
-            <p><strong>Active Role:</strong> {activeRole}</p>
+            <p><strong>Email:</strong> {user.primaryEmailAddress?.emailAddress || 'No email'}</p>
             <p><strong>Is Admin:</strong> <span className={isAdmin ? "text-green-600 dark:text-green-400 font-semibold" : ""}>{isAdmin ? 'Yes ✓' : 'No'}</span></p>
-            <p><strong>Profile Tier:</strong> {profile?.tier || 'Not set'} {profile?.tier_name ? `(${profile.tier_name})` : ''}</p>
-            {showAdminOverrideMessage && (
-              <p className="text-amber-600 dark:text-amber-400 font-semibold">
-                Admin override should be active. Try refreshing session.
-              </p>
+            <p><strong>User ID:</strong> {user.id || 'Unknown'}</p>
+            {user.publicMetadata?.roles && (
+              <p><strong>Roles:</strong> {(user.publicMetadata.roles as string[]).join(', ')}</p>
             )}
-          </div>
-          <div className="mt-2 text-xs text-gray-600 dark:text-gray-400">
-            <p>Note: Admin access requires tier level 5 or higher</p>
-            {forceAdminEnabled && <p className="text-green-600 dark:text-green-400">Special admin override active for this email</p>}
           </div>
           <button 
             onClick={handleRefreshSession} 
