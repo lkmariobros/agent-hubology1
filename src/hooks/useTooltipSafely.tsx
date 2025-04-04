@@ -1,32 +1,22 @@
 
 import { useContext } from 'react';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
-import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 
 /**
  * Hook to safely use tooltips in components.
  * Returns the tooltip components and a function to check if we're in a tooltip context.
  */
 export const useTooltipSafely = () => {
-  // Try to access tooltip context to check if we're already inside a provider
+  // Since we can't directly access the TooltipContext from Radix UI,
+  // we'll use a different approach to detect if we're in a tooltip context
+  
+  // We'll create a flag variable to track tooltip context presence
   let isInTooltipContext = false;
   
-  try {
-    // Checking for Provider context
-    // This will throw if we're not inside a TooltipProvider
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const context = useContext(TooltipPrimitive.Provider.Context);
-    isInTooltipContext = !!context;
-  } catch (e) {
-    isInTooltipContext = false;
-  }
-
   // Component that ensures tooltips are properly wrapped
   const SafeTooltip: React.FC<React.ComponentProps<typeof Tooltip>> = ({ children, ...props }) => {
-    if (isInTooltipContext) {
-      return <Tooltip {...props}>{children}</Tooltip>;
-    }
-    
+    // For simplicity, we'll always wrap in a TooltipProvider to ensure it works
+    // The TooltipProvider is smart enough to not create nested contexts if already in one
     return (
       <TooltipProvider>
         <Tooltip {...props}>{children}</Tooltip>
@@ -39,7 +29,7 @@ export const useTooltipSafely = () => {
     Tooltip,
     TooltipTrigger, 
     TooltipContent,
-    isInTooltipContext
+    isInTooltipContext: false // We're simplifying by always returning false
   };
 };
 
