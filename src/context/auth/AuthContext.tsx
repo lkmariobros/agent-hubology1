@@ -1,9 +1,9 @@
 
 import React, { createContext, useContext } from 'react';
-import type { AuthContextType } from '@/types/auth';
+import { AuthContextType } from '@/types/auth';
 
 // Create context with default values (undefined for type safety)
-export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 /**
  * Custom hook to use the auth context
