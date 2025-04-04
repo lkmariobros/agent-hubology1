@@ -1,4 +1,6 @@
 
+import { UserRole } from '@/types/auth';
+
 /**
  * Centralized utility for handling special admin access
  * This prevents hardcoded emails scattered throughout the codebase
@@ -20,12 +22,12 @@ export const isSpecialAdmin = (email?: string | null): boolean => {
  * Ensures an array of roles contains the admin role if user is a special admin
  * Returns a new array with admin added if needed
  */
-export const ensureAdminRole = (roles: string[], email?: string | null): string[] => {
+export const ensureAdminRole = (roles: UserRole[], email?: string | null): UserRole[] => {
   if (!isSpecialAdmin(email)) return roles;
   
   const newRoles = [...roles];
   if (!newRoles.includes('admin')) {
-    newRoles.push('admin');
+    newRoles.push('admin' as UserRole);
   }
   return newRoles;
 };
@@ -34,12 +36,11 @@ export const ensureAdminRole = (roles: string[], email?: string | null): string[
  * Gets the preferred active role for a user based on their email and roles
  * For special admins, this will return 'admin' if available
  */
-export const getPreferredActiveRole = (roles: string[], email?: string | null): string => {
+export const getPreferredActiveRole = (roles: UserRole[], email?: string | null): UserRole => {
   if (isSpecialAdmin(email) && roles.includes('admin')) {
-    return 'admin';
+    return 'admin' as UserRole;
   }
   
   // Default to admin if available, otherwise first role
-  return roles.includes('admin') ? 'admin' : roles[0];
+  return roles.includes('admin') ? 'admin' as UserRole : roles[0];
 };
-

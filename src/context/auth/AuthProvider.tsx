@@ -69,14 +69,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
                 await fetchProfileAndRoles(session.user.id, session.user.email);
               
               // Handle special admin access with the utility function
-              let finalRoles = [...roles];
+              let finalRoles = [...roles] as UserRole[];
               let finalActiveRole = activeRole;
               
               if (isSpecialAdmin(session.user.email)) {
                 console.log('[AuthProvider] Admin email detected, forcing admin role');
                 finalRoles = ensureAdminRole(finalRoles, session.user.email);
                 if (finalRoles.includes('admin')) {
-                  finalActiveRole = 'admin';
+                  finalActiveRole = 'admin' as UserRole;
                 }
               }
               
@@ -135,14 +135,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               await fetchProfileAndRoles(session.user.id, session.user.email);
             
             // Handle special admin access using the centralized utility
-            let finalRoles = [...roles];
+            let finalRoles = [...roles] as UserRole[];
             let finalActiveRole = activeRole;
             
             if (isSpecialAdmin(session.user.email)) {
               console.log('[AuthProvider] Admin email detected, forcing admin role');
               finalRoles = ensureAdminRole(finalRoles, session.user.email);
               if (finalRoles.includes('admin')) {
-                finalActiveRole = 'admin';
+                finalActiveRole = 'admin' as UserRole;
               }
             }
             
