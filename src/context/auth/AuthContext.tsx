@@ -18,4 +18,5 @@ export const useAuthContext = (): AuthContextType => {
   return context;
 };
 
+// Export the AuthContext only once
 export { AuthContext };
