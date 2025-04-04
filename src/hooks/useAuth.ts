@@ -1,5 +1,6 @@
 
-import { useAuthContext } from '@/context/auth';
+import { useContext } from 'react';
+import { AuthContext } from '@/context/auth/AuthContext';
 import type { AuthContextType } from '@/types/auth';
 import { useSentry } from './useSentry';
 
@@ -7,7 +8,12 @@ import { useSentry } from './useSentry';
  * Enhanced useAuth hook with additional error tracking
  */
 export function useAuth(): AuthContextType {
-  const auth = useAuthContext();
+  const auth = useContext(AuthContext);
+  
+  if (auth === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  
   const { logError, setUser } = useSentry();
   
   // If there's an error in the auth context, log it to Sentry

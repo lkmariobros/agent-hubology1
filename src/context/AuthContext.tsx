@@ -6,7 +6,7 @@ import type { AuthContextType } from '@/types/auth';
 // Re-export for backward compatibility
 export { AuthProvider, useAuthContext };
 
-// Export default useAuthContext as useAuth for backward compatibility
+// Export default useAuthContext as AuthContext for backward compatibility
 export const useAuth = useAuthContext;
 export type { AuthContextType };
 

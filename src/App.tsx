@@ -153,7 +153,7 @@ function App() {
                 {/* Fallback */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
-              {/* Removed duplicate Toaster from here as it's now in main.tsx */}
+              {/* Toaster is now in main.tsx */}
             </NotificationProvider>
           </AuthProvider>
         </Router>
