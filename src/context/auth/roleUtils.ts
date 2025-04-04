@@ -2,6 +2,7 @@
 import { UserRole } from '@/types/auth';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
+import { isSpecialAdmin } from '@/utils/adminAccess';
 
 /**
  * Utility functions for handling user roles
@@ -17,23 +18,19 @@ export const roleUtils = {
   ): Promise<void> => {
     console.log('Attempting to switch role:', { currentRoles, newRole });
     
-    // Special admin access for josephkwantum@gmail.com
-    const isSpecialAdminEmail = document.cookie.includes('userEmail=josephkwantum%40gmail.com');
-    
     try {
-      // Check if the user has the requested role in the database
-      if (isSpecialAdminEmail && newRole === 'admin') {
-        // Special case for admin email
-        console.log('Special admin access granted via email in switchRole');
-        onRoleChange(newRole);
-        return;
-      }
-      
-      // Get user id from session
+      // Get user from session for email checking
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         console.error('No authenticated user found');
         toast.error('Authentication error');
+        return;
+      }
+      
+      // Check for special admin access
+      if (isSpecialAdmin(user.email) && newRole === 'admin') {
+        console.log('Special admin access granted to', user.email);
+        onRoleChange(newRole);
         return;
       }
       
@@ -67,10 +64,18 @@ export const roleUtils = {
    * Returns Promise<boolean> if database check is needed, or boolean for immediate results
    */
   hasRole: (roles: UserRole[], role: UserRole): boolean | Promise<boolean> => {
-    // Special case for admin role and josephkwantum@gmail.com
-    if (role === 'admin' && document.cookie.includes('userEmail=josephkwantum%40gmail.com')) {
-      console.log('Special admin access granted via email check in hasRole');
-      return true;
+    // Use centralized utility to check for special admin status
+    if (role === 'admin') {
+      // Check for special admin email in cookie for client-side checks
+      const cookies = document.cookie.split(';');
+      const emailCookie = cookies.find(c => c.trim().startsWith('userEmail='));
+      if (emailCookie) {
+        const email = decodeURIComponent(emailCookie.split('=')[1]);
+        if (isSpecialAdmin(email)) {
+          console.log('Special admin access granted to', email);
+          return true;
+        }
+      }
     }
     
     const hasRoleInMemory = roles.includes(role);
@@ -81,6 +86,11 @@ export const roleUtils = {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
+          // Check for special admin access first
+          if (role === 'admin' && isSpecialAdmin(user.email)) {
+            return resolve(true);
+          }
+          
           const { data, error } = await supabase.rpc('has_role', {
             p_user_id: user.id,
             p_role_name: role
@@ -110,8 +120,8 @@ export const roleUtils = {
   debugRoles: (roles: UserRole[], email: string): void => {
     console.log(`Current roles for user ${email}:`, roles);
     
-    // Force log admin for special email
-    if (email === 'josephkwantum@gmail.com') {
+    // Use centralized utility to check for special admin status
+    if (isSpecialAdmin(email)) {
       console.log('Admin override active for:', email);
     }
     
