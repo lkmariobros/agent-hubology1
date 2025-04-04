@@ -12,9 +12,10 @@ export const useTooltipSafely = () => {
   let isInTooltipContext = false;
   
   try {
+    // Checking for Provider context
     // This will throw if we're not inside a TooltipProvider
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    const context = useContext(TooltipPrimitive.TooltipContext);
+    const context = useContext(TooltipPrimitive.Provider.Context);
     isInTooltipContext = !!context;
   } catch (e) {
     isInTooltipContext = false;
