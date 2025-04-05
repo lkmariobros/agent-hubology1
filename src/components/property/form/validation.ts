@@ -164,46 +164,49 @@ export const propertySchema = z.object({
 );
 
 // Create a separate validation schema for each step of the form
-export const basicInfoSchema = propertySchema.pick({
-  title: true,
-  description: true,
-  propertyType: true,
-  transactionType: true,
-  status: true,
+// Use the proper way to extract fields from the schema
+const baseSchema = propertySchema;
+
+export const basicInfoSchema = z.object({
+  title: baseSchema.shape.title,
+  description: baseSchema.shape.description,
+  propertyType: baseSchema.shape.propertyType,
+  transactionType: baseSchema.shape.transactionType,
+  status: baseSchema.shape.status,
 });
 
-export const residentialDetailsSchema = propertySchema.pick({
-  price: true,
-  rentalRate: true,
-  builtUpArea: true,
-  bedrooms: true,
-  bathrooms: true,
-  furnishingStatus: true,
+export const residentialDetailsSchema = z.object({
+  price: baseSchema.shape.price,
+  rentalRate: baseSchema.shape.rentalRate,
+  builtUpArea: baseSchema.shape.builtUpArea,
+  bedrooms: baseSchema.shape.bedrooms,
+  bathrooms: baseSchema.shape.bathrooms,
+  furnishingStatus: baseSchema.shape.furnishingStatus,
 });
 
-export const commercialDetailsSchema = propertySchema.pick({
-  price: true,
-  rentalRate: true,
-  floorArea: true,
-  buildingClass: true,
+export const commercialDetailsSchema = z.object({
+  price: baseSchema.shape.price,
+  rentalRate: baseSchema.shape.rentalRate,
+  floorArea: baseSchema.shape.floorArea,
+  buildingClass: baseSchema.shape.buildingClass,
 });
 
-export const landDetailsSchema = propertySchema.pick({
-  price: true,
-  rentalRate: true,
-  landSize: true,
-  zoning: true,
+export const landDetailsSchema = z.object({
+  price: baseSchema.shape.price,
+  rentalRate: baseSchema.shape.rentalRate,
+  landSize: baseSchema.shape.landSize,
+  zoning: baseSchema.shape.zoning,
 });
 
-export const addressSchema = propertySchema.pick({
-  address: true,
+export const addressSchema = z.object({
+  address: baseSchema.shape.address,
 });
 
-export const mediaSchema = propertySchema.pick({
-  images: true,
+export const mediaSchema = z.object({
+  images: baseSchema.shape.images,
 });
 
-export const contactsSchema = propertySchema.pick({
-  ownerContacts: true,
-  agentNotes: true,
+export const contactsSchema = z.object({
+  ownerContacts: baseSchema.shape.ownerContacts,
+  agentNotes: baseSchema.shape.agentNotes,
 });

@@ -174,18 +174,18 @@ const PropertyFormSteps: React.FC<PropertyFormStepsProps> = ({ form }) => {
             >
               Load Draft
             </Button>
-            <PropertyEssentialInfo form={form} />
+            <PropertyEssentialInfo form={form} nextTab={nextTab} />
           </div>
         )}
         
         {/* Step 2: Property Details */}
         {activeTab === "details" && (
-          <PropertyDetailsInfo form={form} />
+          <PropertyDetailsInfo form={form} nextTab={nextTab} prevTab={prevTab} />
         )}
         
         {/* Step 3: Address Information */}
         {activeTab === "address" && (
-          <PropertyAddressInfo form={form} />
+          <PropertyAddressInfo form={form} nextTab={nextTab} prevTab={prevTab} />
         )}
         
         {/* Step 4: Media Upload */}
