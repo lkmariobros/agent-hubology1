@@ -105,9 +105,19 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
       } else {
         // Create new property
         const result = await createProperty.mutateAsync(data);
-        if (result.success && result.propertyId) {
+        if (result.success) {
+          // Check if propertyId exists in the result, otherwise use a fallback
+          const createdPropertyId = 'propertyId' in result ? result.propertyId : undefined;
+          
           toast.success('Property created successfully!');
-          navigate(`/properties/${result.propertyId}`);
+          
+          // Navigate to the property detail or back to list if we don't have an ID
+          if (createdPropertyId) {
+            navigate(`/properties/${createdPropertyId}`);
+          } else {
+            console.warn('Property created but no ID was returned');
+            navigate('/properties');
+          }
         } else {
           throw new Error('Failed to create property. Please try again.');
         }
