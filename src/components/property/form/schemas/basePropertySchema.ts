@@ -33,12 +33,20 @@ export const basePropertySchema = z.object({
   price: z.number()
     .positive('Price must be greater than 0')
     .nullable()
-    .optional(),
+    .optional()
+    .refine(
+      (val) => val === null || val === undefined || val > 0,
+      'Price must be greater than 0'
+    ),
   
   rentalRate: z.number()
     .positive('Rental rate must be greater than 0')
     .nullable()
-    .optional(),
+    .optional()
+    .refine(
+      (val) => val === null || val === undefined || val > 0,
+      'Rental rate must be greater than 0'
+    ),
   
   // Location information
   address: z.object({
@@ -55,8 +63,15 @@ export const basePropertySchema = z.object({
     z.object({
       name: z.string().min(1, 'Contact name is required'),
       role: z.string().optional(),
-      phone: z.string().optional(),
-      email: z.string().email('Invalid email').optional(),
+      phone: z.string()
+        .optional()
+        .refine(
+          (val) => !val || /^(\+?6?01[0-46-9]-?\d{7,8}|\+?60\d{2}-?\d{7})$/.test(val),
+          { message: 'Please enter a valid Malaysian phone number' }
+        ),
+      email: z.string()
+        .email('Invalid email')
+        .optional(),
     })
   ).default([]),
   
@@ -80,6 +95,7 @@ export type BasePropertyFormData = z.infer<typeof basePropertySchema>;
 
 /**
  * Conditional validator for price/rentalRate based on transactionType
+ * Returns a standardized result object with success flag and error message
  */
 export const validatePricing = (data: { transactionType: string; price?: number | null; rentalRate?: number | null }) => {
   if (data.transactionType === 'Sale' && (!data.price || data.price <= 0)) {
@@ -90,32 +106,61 @@ export const validatePricing = (data: { transactionType: string; price?: number 
     return { success: false, error: 'A valid rental rate is required for rental properties' };
   }
   
-  return { success: true };
+  return { success: true, error: null };
 };
 
 /**
- * Type-specific schema validators
+ * Type-specific schema validators with standardized return format
  */
 export const typeSpecificValidation = {
   Residential: (data: any) => {
-    if (!data.bedrooms) return { success: false, error: 'Number of bedrooms is required' };
-    if (!data.bathrooms) return { success: false, error: 'Number of bathrooms is required' };
-    if (!data.builtUpArea) return { success: false, error: 'Built-up area is required' };
-    return { success: true };
+    const errors = [];
+    
+    if (!data.bedrooms) errors.push('Number of bedrooms is required');
+    if (!data.bathrooms) errors.push('Number of bathrooms is required');
+    if (!data.builtUpArea) errors.push('Built-up area is required');
+    
+    if (errors.length > 0) {
+      return { success: false, error: errors.join(', ') };
+    }
+    
+    return { success: true, error: null };
   },
   
   Commercial: (data: any) => {
-    if (!data.floorArea) return { success: false, error: 'Floor area is required' };
-    return { success: true };
+    const errors = [];
+    
+    if (!data.floorArea) errors.push('Floor area is required');
+    
+    if (errors.length > 0) {
+      return { success: false, error: errors.join(', ') };
+    }
+    
+    return { success: true, error: null };
   },
   
   Industrial: (data: any) => {
-    if (!data.landArea) return { success: false, error: 'Land area is required' };
-    return { success: true };
+    const errors = [];
+    
+    if (!data.landArea) errors.push('Land area is required');
+    if (data.ceilingHeight && data.ceilingHeight <= 0) errors.push('Ceiling height must be greater than 0');
+    
+    if (errors.length > 0) {
+      return { success: false, error: errors.join(', ') };
+    }
+    
+    return { success: true, error: null };
   },
   
   Land: (data: any) => {
-    if (!data.landSize) return { success: false, error: 'Land size is required' };
-    return { success: true };
+    const errors = [];
+    
+    if (!data.landSize) errors.push('Land size is required');
+    
+    if (errors.length > 0) {
+      return { success: false, error: errors.join(', ') };
+    }
+    
+    return { success: true, error: null };
   }
 };
