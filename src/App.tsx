@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from '@/context/AuthContext';
 
 // Components
@@ -34,7 +34,9 @@ function App() {
           <Route path="/reset-password" element={<ResetPassword />} />
           
           <Route path="/" element={<AppLayout />}>
-            <Route index element={<Dashboard />} />
+            {/* Redirect root to dashboard */}
+            <Route index element={<Navigate to="/dashboard" replace />} />
+            <Route path="dashboard" element={<Dashboard />} />
             <Route path="properties" element={<Properties />} />
             <Route path="properties/new" element={<NewProperty />} />
             <Route path="properties/:id" element={<PropertyDetail />} />
