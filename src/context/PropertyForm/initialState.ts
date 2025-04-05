@@ -20,6 +20,7 @@ export const initialPropertyFormState: PropertyFormState = {
     rentalRate: null,
     agentNotes: '',
     ownerContacts: [],
+    propertyFeatures: [],
     
     // Residential specific fields
     bedrooms: 0,
@@ -59,6 +60,7 @@ export const getInitialPropertyData = (
     rentalRate: null,
     agentNotes: '',
     ownerContacts: [],
+    propertyFeatures: [],
   };
 
   // Add type-specific fields
@@ -88,6 +90,7 @@ export const getInitialPropertyData = (
       return {
         ...baseData,
         landSize: 0,
+        freehold: false,
       };
     default:
       return baseData;

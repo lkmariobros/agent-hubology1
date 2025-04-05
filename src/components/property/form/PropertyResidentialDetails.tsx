@@ -28,7 +28,7 @@ const PropertyResidentialDetails: React.FC = () => {
           <Input
             id="bedrooms"
             type="number"
-            value={formData.bedrooms}
+            value={formData.bedrooms || 0}
             onChange={(e) => updateFormData({ bedrooms: Number(e.target.value) })}
             min={0}
           />
@@ -39,7 +39,7 @@ const PropertyResidentialDetails: React.FC = () => {
           <Input
             id="bathrooms"
             type="number"
-            value={formData.bathrooms}
+            value={formData.bathrooms || 0}
             onChange={(e) => updateFormData({ bathrooms: Number(e.target.value) })}
             min={0}
             step="0.5"
@@ -51,7 +51,7 @@ const PropertyResidentialDetails: React.FC = () => {
           <Input
             id="builtUpArea"
             type="number"
-            value={formData.builtUpArea}
+            value={formData.builtUpArea || 0}
             onChange={(e) => updateFormData({ builtUpArea: Number(e.target.value) })}
             min={0}
           />
@@ -62,8 +62,8 @@ const PropertyResidentialDetails: React.FC = () => {
         <div className="space-y-2">
           <Label htmlFor="furnishingStatus">Furnishing Status</Label>
           <Select
-            value={formData.furnishingStatus}
-            onValueChange={(value) => updateFormData({ furnishingStatus: value as any })}
+            value={formData.furnishingStatus || 'Unfurnished'}
+            onValueChange={(value) => updateFormData({ furnishingStatus: value as 'Unfurnished' | 'Partially Furnished' | 'Fully Furnished' })}
           >
             <SelectTrigger id="furnishingStatus">
               <SelectValue placeholder="Select furnishing status" />
@@ -77,12 +77,12 @@ const PropertyResidentialDetails: React.FC = () => {
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="yearBuilt">Year Built</Label>
+          <Label htmlFor="constructionYear">Year Built</Label>
           <Input
-            id="yearBuilt"
+            id="constructionYear"
             type="number"
-            value={formData.yearBuilt || ''}
-            onChange={(e) => updateFormData({ yearBuilt: Number(e.target.value) })}
+            value={formData.constructionYear || ''}
+            onChange={(e) => updateFormData({ constructionYear: Number(e.target.value) })}
             min={1900}
             max={new Date().getFullYear() + 5}
             placeholder="Year built"

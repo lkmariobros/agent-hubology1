@@ -4,7 +4,54 @@ import { usePropertyForm } from '@/context/PropertyFormContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { propertySubtypes, getFeaturesByType } from './schemas/propertyTypes';
+
+// Sample features for different property types
+const getFeaturesByType = (propertyType: string) => {
+  switch (propertyType) {
+    case 'Residential':
+      return [
+        { id: 'central_ac', label: 'Central Air Conditioning' },
+        { id: 'hardwood_floors', label: 'Hardwood Floors' },
+        { id: 'balcony', label: 'Balcony/Patio' },
+        { id: 'pool', label: 'Swimming Pool' },
+        { id: 'gym', label: 'Fitness Center' },
+        { id: 'security', label: 'Security System' },
+        { id: 'pet_friendly', label: 'Pet Friendly' },
+        { id: 'storage', label: 'Storage Space' },
+        { id: 'parking', label: 'Parking' },
+      ];
+    case 'Commercial':
+      return [
+        { id: 'elevator', label: 'Elevator' },
+        { id: 'loading_dock', label: 'Loading Dock' },
+        { id: 'security_system', label: 'Security System' },
+        { id: 'reception', label: 'Reception Area' },
+        { id: 'kitchen', label: 'Kitchen/Pantry' },
+        { id: 'conference', label: 'Conference Rooms' },
+        { id: 'parking', label: 'Parking' },
+      ];
+    case 'Industrial':
+      return [
+        { id: 'loading_bays', label: 'Loading Bays' },
+        { id: 'dock_high', label: 'Dock-High Doors' },
+        { id: 'crane', label: 'Overhead Crane' },
+        { id: 'heavy_power', label: 'Heavy Power Supply' },
+        { id: 'security', label: 'Security System' },
+        { id: 'climate_control', label: 'Climate Control' },
+      ];
+    case 'Land':
+      return [
+        { id: 'road_access', label: 'Road Access' },
+        { id: 'water_supply', label: 'Water Supply' },
+        { id: 'electricity', label: 'Electricity' },
+        { id: 'sewage', label: 'Sewage Connection' },
+        { id: 'cleared', label: 'Cleared Land' },
+        { id: 'fenced', label: 'Fenced' },
+      ];
+    default:
+      return [];
+  }
+};
 
 const PropertyFeatures: React.FC = () => {
   const { state, updateFormData } = usePropertyForm();
@@ -13,19 +60,22 @@ const PropertyFeatures: React.FC = () => {
   // Get features based on property type
   const features = getFeaturesByType(formData.propertyType);
   
+  // Initialize propertyFeatures array if it doesn't exist
+  const propertyFeatures = formData.propertyFeatures || [];
+  
   // Handle feature toggle
   const toggleFeature = (featureId: string) => {
-    // Create a copy of the current features array (or initialize if undefined)
-    const currentFeatures = Array.isArray(formData.features) ? [...formData.features] : [];
+    // Create a copy of the current features array
+    const currentFeatures = [...propertyFeatures];
     
     // Toggle the feature
     if (currentFeatures.includes(featureId)) {
       // Remove the feature if it's already selected
       const updatedFeatures = currentFeatures.filter(id => id !== featureId);
-      updateFormData({ features: updatedFeatures });
+      updateFormData({ propertyFeatures: updatedFeatures });
     } else {
       // Add the feature if it's not selected
-      updateFormData({ features: [...currentFeatures, featureId] });
+      updateFormData({ propertyFeatures: [...currentFeatures, featureId] });
     }
   };
   
@@ -40,7 +90,7 @@ const PropertyFeatures: React.FC = () => {
               <div key={feature.id} className="flex items-center space-x-2">
                 <Checkbox 
                   id={`feature-${feature.id}`} 
-                  checked={formData.features?.includes(feature.id)}
+                  checked={propertyFeatures.includes(feature.id)}
                   onCheckedChange={() => toggleFeature(feature.id)}
                 />
                 <Label 

@@ -28,7 +28,7 @@ const PropertyCommercialDetails: React.FC = () => {
           <Input
             id="floorArea"
             type="number"
-            value={formData.floorArea}
+            value={formData.floorArea || ''}
             onChange={(e) => updateFormData({ floorArea: Number(e.target.value) })}
             min={0}
             placeholder="Floor area in square feet"
@@ -36,20 +36,10 @@ const PropertyCommercialDetails: React.FC = () => {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="zoningType">Zoning Type</Label>
-          <Input
-            id="zoningType"
-            value={formData.zoningType}
-            onChange={(e) => updateFormData({ zoningType: e.target.value })}
-            placeholder="e.g., Commercial, Mixed Use"
-          />
-        </div>
-
-        <div className="space-y-2">
           <Label htmlFor="buildingClass">Building Class</Label>
           <Select
-            value={formData.buildingClass}
-            onValueChange={(value) => updateFormData({ buildingClass: value as any })}
+            value={formData.buildingClass || 'Class A'}
+            onValueChange={(value) => updateFormData({ buildingClass: value as 'Class A' | 'Class B' | 'Class C' })}
           >
             <SelectTrigger id="buildingClass">
               <SelectValue placeholder="Select building class" />
@@ -60,6 +50,16 @@ const PropertyCommercialDetails: React.FC = () => {
               <SelectItem value="Class C">Class C</SelectItem>
             </SelectContent>
           </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="zoningType">Zoning Type</Label>
+          <Input
+            id="zoningType"
+            value={formData.zoningType || ''}
+            onChange={(e) => updateFormData({ zoningType: e.target.value })}
+            placeholder="e.g., Retail, Office, Mixed-use"
+          />
         </div>
       </div>
     </div>

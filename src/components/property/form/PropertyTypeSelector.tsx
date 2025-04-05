@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Building, Home, Warehouse, Landmark } from 'lucide-react';
+import { Building, Home, Factory, Map } from 'lucide-react';
 
 type PropertyType = 'Residential' | 'Commercial' | 'Industrial' | 'Land';
 
@@ -11,31 +11,47 @@ interface PropertyTypeSelectorProps {
 }
 
 const PropertyTypeSelector: React.FC<PropertyTypeSelectorProps> = ({ value, onChange }) => {
-  const propertyTypes: Array<{
-    id: PropertyType;
-    label: string;
-    icon: React.ReactNode;
-  }> = [
-    { id: 'Residential', label: 'Residential', icon: <Home className="h-5 w-5" /> },
-    { id: 'Commercial', label: 'Commercial', icon: <Building className="h-5 w-5" /> },
-    { id: 'Industrial', label: 'Industrial', icon: <Warehouse className="h-5 w-5" /> },
-    { id: 'Land', label: 'Land', icon: <Landmark className="h-5 w-5" /> },
-  ];
-
   return (
     <div className="grid grid-cols-2 gap-2">
-      {propertyTypes.map((type) => (
-        <Button
-          key={type.id}
-          type="button"
-          variant={value === type.id ? "default" : "outline"}
-          className="flex flex-col items-center justify-center h-24 gap-2"
-          onClick={() => onChange(type.id)}
-        >
-          {type.icon}
-          <span>{type.label}</span>
-        </Button>
-      ))}
+      <Button
+        type="button"
+        variant={value === 'Residential' ? "default" : "outline"}
+        className="flex flex-col items-center justify-center h-24 gap-2"
+        onClick={() => onChange('Residential')}
+      >
+        <Home className="h-5 w-5" />
+        <span>Residential</span>
+      </Button>
+      
+      <Button
+        type="button"
+        variant={value === 'Commercial' ? "default" : "outline"}
+        className="flex flex-col items-center justify-center h-24 gap-2"
+        onClick={() => onChange('Commercial')}
+      >
+        <Building className="h-5 w-5" />
+        <span>Commercial</span>
+      </Button>
+      
+      <Button
+        type="button"
+        variant={value === 'Industrial' ? "default" : "outline"}
+        className="flex flex-col items-center justify-center h-24 gap-2"
+        onClick={() => onChange('Industrial')}
+      >
+        <Factory className="h-5 w-5" />
+        <span>Industrial</span>
+      </Button>
+      
+      <Button
+        type="button"
+        variant={value === 'Land' ? "default" : "outline"}
+        className="flex flex-col items-center justify-center h-24 gap-2"
+        onClick={() => onChange('Land')}
+      >
+        <Map className="h-5 w-5" />
+        <span>Land</span>
+      </Button>
     </div>
   );
 };

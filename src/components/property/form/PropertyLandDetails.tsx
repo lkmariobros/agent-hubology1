@@ -63,11 +63,11 @@ const PropertyLandDetails: React.FC = () => {
 
         <div className="flex items-center space-x-2">
           <Switch
-            id="isFreehold"
-            checked={!!formData.isFreehold}
-            onCheckedChange={(checked) => updateFormData({ isFreehold: checked })}
+            id="freehold"
+            checked={!!formData.freehold}
+            onCheckedChange={(checked) => updateFormData({ freehold: checked })}
           />
-          <Label htmlFor="isFreehold">Freehold Property</Label>
+          <Label htmlFor="freehold">Freehold Property</Label>
         </div>
       </div>
     </div>

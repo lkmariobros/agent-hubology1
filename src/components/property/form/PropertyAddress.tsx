@@ -1,8 +1,34 @@
 
 import React from 'react';
 import { usePropertyForm } from '@/context/PropertyFormContext';
-import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+
+const malaysiaStates = [
+  'Johor',
+  'Kedah',
+  'Kelantan',
+  'Kuala Lumpur',
+  'Labuan',
+  'Malacca',
+  'Negeri Sembilan',
+  'Pahang',
+  'Penang',
+  'Perak',
+  'Perlis',
+  'Putrajaya',
+  'Sabah',
+  'Sarawak',
+  'Selangor',
+  'Terengganu'
+];
 
 const PropertyAddress: React.FC = () => {
   const { state, updateFormData } = usePropertyForm();
@@ -29,8 +55,8 @@ const PropertyAddress: React.FC = () => {
           placeholder="Enter street address"
         />
       </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <Label htmlFor="city">City *</Label>
           <Input
@@ -43,16 +69,21 @@ const PropertyAddress: React.FC = () => {
         
         <div className="space-y-2">
           <Label htmlFor="state">State *</Label>
-          <Input
-            id="state"
+          <Select
             value={address?.state || ''}
-            onChange={(e) => handleAddressChange('state', e.target.value)}
-            placeholder="Enter state"
-          />
+            onValueChange={(value) => handleAddressChange('state', value)}
+          >
+            <SelectTrigger id="state">
+              <SelectValue placeholder="Select state" />
+            </SelectTrigger>
+            <SelectContent>
+              {malaysiaStates.map(state => (
+                <SelectItem key={state} value={state}>{state}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        
         <div className="space-y-2">
           <Label htmlFor="zip">Postal Code</Label>
           <Input
@@ -68,8 +99,8 @@ const PropertyAddress: React.FC = () => {
           <Input
             id="country"
             value={address?.country || 'Malaysia'}
-            onChange={(e) => handleAddressChange('country', e.target.value)}
-            placeholder="Enter country"
+            disabled
+            readOnly
           />
         </div>
       </div>
