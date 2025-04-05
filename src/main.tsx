@@ -5,6 +5,9 @@ import './index.css';
 import { initSentry } from './lib/sentry';
 import { Toaster } from './components/ui/sonner';
 import { TooltipProvider } from './components/ui/tooltip';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { queryClient } from './lib/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 
 // Get root element - do this before Sentry initialization
 const rootElement = document.getElementById("root");
@@ -21,7 +24,10 @@ if (!rootElement) {
   root.render(
     <>
       <TooltipProvider>
-        <App />
+        <QueryClientProvider client={queryClient}>
+          <App />
+          {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
+        </QueryClientProvider>
       </TooltipProvider>
       <Toaster 
         expand={false} 
