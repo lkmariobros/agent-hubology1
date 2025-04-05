@@ -3,7 +3,7 @@ import { supabase } from '@/lib/supabase';
 import { Permission, PermissionCategory } from '@/types/role';
 import { toast } from 'sonner';
 import { useSentry } from '@/hooks/useSentry';
-import { executeRPC, safeQueryExecution } from '@/utils/dbHelpers';
+import { executeRPC, safeQueryExecution, safeMutationExecution } from '@/utils/dbHelpers';
 
 export const permissionService = {
   async getPermissions(): Promise<Permission[]> {
@@ -56,12 +56,16 @@ export const permissionService = {
       console.log(`Fetching permissions for role ${roleId}`);
       return await safeQueryExecution<Permission[]>(
         `getRolePermissions(${roleId})`,
-        () => supabase
-          .from('role_permissions')
-          .select(`
-            permission:permission_id(*)
-          `)
-          .eq('role_id', roleId)
+        () => {
+          const query = supabase
+            .from('role_permissions')
+            .select(`
+              permission:permission_id(*)
+            `)
+            .eq('role_id', roleId);
+          
+          return query.then(result => result);
+        }
       ).then(data => {
         // Transform the nested permissions array
         const permissions = data.map((rp: any) => rp.permission);
@@ -81,10 +85,14 @@ export const permissionService = {
       // First, delete all existing role permissions
       await safeMutationExecution(
         `deleteRolePermissions(${roleId})`,
-        () => supabase
-          .from('role_permissions')
-          .delete()
-          .eq('role_id', roleId)
+        () => {
+          const query = supabase
+            .from('role_permissions')
+            .delete()
+            .eq('role_id', roleId);
+          
+          return query.then(result => result);
+        }
       );
       
       // Get selected permissions
@@ -103,9 +111,13 @@ export const permissionService = {
       
       await safeMutationExecution(
         `insertRolePermissions(${roleId})`,
-        () => supabase
-          .from('role_permissions')
-          .insert(rolePermissions)
+        () => {
+          const query = supabase
+            .from('role_permissions')
+            .insert(rolePermissions);
+          
+          return query.then(result => result);
+        }
       );
       
       console.log(`Successfully updated permissions for role ${roleId}`);
