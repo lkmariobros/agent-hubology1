@@ -24,9 +24,11 @@ export function useRoles() {
     retry: 2,
     retryDelay: attempt => Math.min(1000 * 2 ** attempt, 10000),
     staleTime: 5 * 60 * 1000, // 5 minutes
-    onError: (error: any) => {
-      console.error('Error fetching roles:', error);
-      toast.error(`Failed to load roles: ${error.message || 'Unknown error'}`);
+    meta: {
+      onError: (error: any) => {
+        console.error('Error fetching roles:', error);
+        toast.error(`Failed to load roles: ${error.message || 'Unknown error'}`);
+      }
     }
   });
 
@@ -44,9 +46,11 @@ export function useRoles() {
     retry: 2,
     retryDelay: attempt => Math.min(1000 * 2 ** attempt, 10000),
     staleTime: 10 * 60 * 1000, // 10 minutes
-    onError: (error: any) => {
-      console.error('Error fetching permissions:', error);
-      toast.error(`Failed to load permissions: ${error.message || 'Unknown error'}`);
+    meta: {
+      onError: (error: any) => {
+        console.error('Error fetching permissions:', error);
+        toast.error(`Failed to load permissions: ${error.message || 'Unknown error'}`);
+      }
     }
   });
 
@@ -64,9 +68,11 @@ export function useRoles() {
     retry: 2,
     retryDelay: attempt => Math.min(1000 * 2 ** attempt, 10000),
     staleTime: 10 * 60 * 1000, // 10 minutes
-    onError: (error: any) => {
-      console.error('Error fetching permission categories:', error);
-      toast.error(`Failed to load permission categories: ${error.message || 'Unknown error'}`);
+    meta: {
+      onError: (error: any) => {
+        console.error('Error fetching permission categories:', error);
+        toast.error(`Failed to load permission categories: ${error.message || 'Unknown error'}`);
+      }
     }
   });
 
