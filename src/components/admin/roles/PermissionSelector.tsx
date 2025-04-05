@@ -6,19 +6,26 @@ import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import LoadingIndicator from '@/components/ui/loading-indicator';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle, RefreshCw } from 'lucide-react';
 
 interface PermissionSelectorProps {
   permissionCategories: PermissionCategory[];
   selectedPermissions: Permission[];
   onPermissionChange: (updatedPermissions: Permission[]) => void;
   isLoading?: boolean;
+  error?: string;
+  onRetry?: () => void;
 }
 
 export function PermissionSelector({ 
   permissionCategories, 
   selectedPermissions, 
   onPermissionChange,
-  isLoading = false
+  isLoading = false,
+  error,
+  onRetry
 }: PermissionSelectorProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [preparedCategories, setPreparedCategories] = useState<PermissionCategory[]>([]);
@@ -75,10 +82,55 @@ export function PermissionSelector({
     return <LoadingIndicator size="md" text="Loading permissions..." />;
   }
   
+  if (error) {
+    return (
+      <Alert variant="destructive" className="mb-4">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription className="flex flex-row items-center justify-between">
+          <span>{error}</span>
+          {onRetry && (
+            <Button 
+              size="sm" 
+              variant="outline" 
+              onClick={onRetry} 
+              className="ml-4"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Retry
+            </Button>
+          )}
+        </AlertDescription>
+      </Alert>
+    );
+  }
+  
+  const hasPermissions = preparedCategories.length > 0 && preparedCategories.some(c => c.permissions.length > 0);
   const selectedCount = preparedCategories
     .flatMap(c => c.permissions)
     .filter(p => p.selected)
     .length;
+    
+  if (!hasPermissions) {
+    return (
+      <Alert variant="warning" className="mb-4">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription className="flex flex-row items-center justify-between">
+          <span>No permissions available to display.</span>
+          {onRetry && (
+            <Button 
+              size="sm" 
+              variant="outline" 
+              onClick={onRetry} 
+              className="ml-4"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Reload
+            </Button>
+          )}
+        </AlertDescription>
+      </Alert>
+    );
+  }
   
   return (
     <div className="space-y-4">

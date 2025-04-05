@@ -10,6 +10,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PermissionSelector } from './PermissionSelector';
 import { useRoles } from '@/hooks/useRoles';
 import LoadingIndicator from '@/components/ui/loading-indicator';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
 
 interface RoleFormValues {
   name: string;
@@ -43,12 +45,16 @@ export function RoleDialog({
   const { 
     permissionCategories, 
     isLoadingCategories,
-    loadRolePermissions
+    loadRolePermissions,
+    error: roleError,
+    refetchPermissions,
+    refetchPermissionCategories
   } = useRoles();
   
   const [selectedPermissions, setSelectedPermissions] = useState<Permission[]>([]);
   const [activeTab, setActiveTab] = useState("basic");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   // Reset form when dialog opens or role changes
   useEffect(() => {
@@ -58,6 +64,14 @@ export function RoleDialog({
         description: role?.description || ''
       });
       
+      setError(null);
+      
+      // Attempt to refetch data if there was an error
+      if (roleError) {
+        refetchPermissions();
+        refetchPermissionCategories();
+      }
+      
       // Load role permissions if editing
       if (role?.id) {
         loadRolePermissionsForRole(role.id);
@@ -65,16 +79,18 @@ export function RoleDialog({
         setSelectedPermissions([]);
       }
     }
-  }, [open, role, reset]);
+  }, [open, role, reset, roleError, refetchPermissions, refetchPermissionCategories]);
   
   // Load permissions for a specific role
   const loadRolePermissionsForRole = async (roleId: string) => {
     try {
       setLoading(true);
+      setError(null);
       const permissions = await loadRolePermissions(roleId);
       setSelectedPermissions(permissions.map(p => ({ ...p, selected: true })));
     } catch (error) {
       console.error('Error loading role permissions:', error);
+      setError('Could not load permissions for this role. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -87,13 +103,20 @@ export function RoleDialog({
   
   // Handle form submission
   const handleFormSubmit = (values: RoleFormValues) => {
-    onSubmit({
-      ...values,
-      permissions: selectedPermissions
-    });
+    try {
+      setError(null);
+      onSubmit({
+        ...values,
+        permissions: selectedPermissions
+      });
+    } catch (err) {
+      setError('An error occurred while saving. Please try again.');
+      console.error('Form submission error:', err);
+    }
   };
   
   const isLoadingData = isLoadingCategories || loading;
+  const showError = error || roleError;
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
@@ -104,6 +127,13 @@ export function RoleDialog({
             {role ? 'Update the role details and permissions below.' : 'Create a new role with the form below.'}
           </DialogDescription>
         </DialogHeader>
+
+        {showError && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error || 'Failed to load data. Please try again.'}</AlertDescription>
+          </Alert>
+        )}
 
         <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4 pt-4">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -150,6 +180,11 @@ export function RoleDialog({
                   permissionCategories={permissionCategories}
                   selectedPermissions={selectedPermissions}
                   onPermissionChange={handlePermissionChange}
+                  error={roleError ? 'Failed to load permissions' : undefined}
+                  onRetry={() => {
+                    refetchPermissions();
+                    refetchPermissionCategories();
+                  }}
                 />
               )}
             </TabsContent>
