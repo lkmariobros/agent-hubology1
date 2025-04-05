@@ -31,13 +31,11 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
   useEffect(() => {
     const initializeForm = async () => {
       try {
-        // Simply check storage configuration - don't try to create buckets
-        await propertyFormHelpers.ensurePropertyBuckets();
+        // Check storage configuration
+        const bucketsExist = await propertyFormHelpers.ensurePropertyBuckets();
         setIsInitializing(false);
       } catch (error) {
         console.error('Error initializing property form:', error);
-        // Don't block the form, just show a warning
-        toast.warning('Storage initialization warning: Proceeding with limited functionality');
         setIsInitializing(false);
       }
     };

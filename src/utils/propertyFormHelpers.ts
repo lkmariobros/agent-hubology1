@@ -139,7 +139,6 @@ export async function createProperty(propertyData: Record<string, any>): Promise
 
 /**
  * Checks if property-related buckets exist in Supabase storage
- * and creates them if they don't
  */
 export async function ensurePropertyBuckets(): Promise<boolean> {
   try {
@@ -150,8 +149,7 @@ export async function ensurePropertyBuckets(): Promise<boolean> {
     
     if (error) {
       console.error('Error listing buckets:', error);
-      // Don't throw an error, just return true to let the form continue
-      return true;
+      return false;
     }
     
     const requiredBuckets = [
@@ -162,23 +160,17 @@ export async function ensurePropertyBuckets(): Promise<boolean> {
     const existingBuckets = buckets?.map(b => b.name) || [];
     console.log('Existing buckets:', existingBuckets);
     
-    // In production, don't try to create buckets on the client side
-    // Just check if they exist and inform the user if they don't
+    // Check if all required buckets exist
     const missingBuckets = requiredBuckets.filter(bucket => 
       !existingBuckets.includes(bucket.name)
     );
     
-    if (missingBuckets.length > 0) {
-      console.warn('Missing storage buckets:', missingBuckets.map(b => b.name).join(', '));
-      toast.warning(`Some required storage buckets do not exist. Please contact your administrator.`);
-    }
-    
-    // Always return true to let the form continue
-    return true;
+    // If there are missing buckets, return false but don't show a warning
+    // We've already created the buckets in Supabase
+    return missingBuckets.length === 0;
   } catch (error) {
     console.error('Error checking property buckets:', error);
-    // Don't block the form due to storage issues
-    return true;
+    return false;
   }
 }
 
