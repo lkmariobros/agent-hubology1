@@ -1,7 +1,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { UploadCloud, X, Loader2 } from 'lucide-react';
+import { UploadCloud, X, Loader2, Check, Image } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { usePropertyForm } from '@/context/PropertyForm/PropertyFormContext';
 import { useStorageUpload } from '@/hooks/useStorageUpload';
@@ -16,7 +16,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   maxImages = 10,
   maxSizeMB = 5
 }) => {
-  const { state, addImage, removeImage } = usePropertyForm();
+  const { state, addImage, removeImage, setCoverImage } = usePropertyForm();
   const { uploadFile, isUploading, progress } = useStorageUpload();
   const [processingFiles, setProcessingFiles] = useState<string[]>([]);
 
@@ -46,19 +46,19 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
           uploadStatus: 'uploading'
         });
 
-        try {
-          // If connected to Supabase, try uploading
-          if (window.location.hostname !== 'localhost') {
+        // In a production environment, we'd actually upload the file here
+        if (window.location.hostname !== 'localhost') {
+          try {
             await uploadFile(file, {
               bucket: 'property-images',
               path: 'temp',
               maxSizeMB,
               acceptedFileTypes: ['image/jpeg', 'image/png', 'image/webp']
             });
+          } catch (error) {
+            console.error('Error uploading file:', error);
+            toast.error(`Failed to upload ${file.name}`);
           }
-        } catch (error) {
-          console.error('Error uploading file:', error);
-          toast.error(`Failed to upload ${file.name}`);
         }
       }
     } finally {
@@ -84,6 +84,11 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     removeImage(index);
   };
 
+  const handleSetCover = (index: number) => {
+    setCoverImage(index);
+    toast.success('Cover image updated');
+  };
+
   return (
     <div className="space-y-4">
       <div 
@@ -91,7 +96,6 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
         className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
           isDragActive ? 'border-primary bg-primary/5' : 'border-muted-foreground/25 hover:border-primary/50'
         } cursor-pointer`}
-        onClick={open} // Explicitly add click handler
       >
         <input {...getInputProps()} />
         <div className="flex flex-col items-center justify-center space-y-2">
@@ -109,6 +113,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
               open();
             }}
           >
+            <Image className="h-4 w-4 mr-2" />
             Select Files
           </Button>
           {isUploading && (
@@ -125,24 +130,50 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {state.images.map((image, index) => (
             <div key={index} className="relative group">
-              <div className="overflow-hidden rounded-lg aspect-square">
+              <div className={`overflow-hidden rounded-lg aspect-square ${image.uploadStatus === 'uploading' ? 'opacity-70' : ''}`}>
                 <img 
                   src={image.previewUrl || image.url} 
                   alt={`Property preview ${index + 1}`}
                   className="w-full h-full object-cover transition-transform group-hover:scale-105"
                 />
               </div>
-              <Button
-                variant="destructive"
-                size="icon"
-                className="absolute top-2 right-2 h-8 w-8 opacity-80 shadow-md"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleRemoveImage(index);
-                }}
-              >
-                <X className="h-4 w-4" />
-              </Button>
+              
+              {/* Image status indicator */}
+              {image.uploadStatus === 'uploading' && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+              )}
+              
+              <div className="absolute top-2 right-2 flex gap-1">
+                {!image.isCover && (
+                  <Button
+                    variant="secondary"
+                    size="icon"
+                    className="h-8 w-8 opacity-90 shadow-md"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSetCover(index);
+                    }}
+                    title="Set as cover image"
+                  >
+                    <Check className="h-4 w-4" />
+                  </Button>
+                )}
+                <Button
+                  variant="destructive"
+                  size="icon"
+                  className="h-8 w-8 opacity-90 shadow-md"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRemoveImage(index);
+                  }}
+                  title="Remove image"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              
               {image.isCover && (
                 <div className="absolute bottom-2 left-2 text-xs font-semibold bg-primary text-primary-foreground px-2 py-1 rounded-md">
                   Cover

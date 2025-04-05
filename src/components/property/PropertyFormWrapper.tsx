@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { usePropertyManagement } from '@/hooks/usePropertyManagement';
 import EnhancedPropertyForm from '@/components/property/EnhancedPropertyForm';
 import { PropertyFormData } from '@/types/property-form';
@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import propertyFormHelpers from '@/utils/propertyFormHelpers';
 
 interface PropertyFormWrapperProps {
   propertyId?: string;
@@ -23,8 +24,26 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
   const { user } = useAuth();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { createProperty, updateProperty } = usePropertyManagement();
+  
+  // Initialize and check for necessary storage buckets
+  useEffect(() => {
+    const initializeForm = async () => {
+      try {
+        // Check if the required storage buckets exist
+        await propertyFormHelpers.ensurePropertyBuckets();
+        setIsInitializing(false);
+      } catch (error) {
+        console.error('Error initializing property form:', error);
+        setError('Failed to initialize property form. Please try again later.');
+        setIsInitializing(false);
+      }
+    };
+    
+    initializeForm();
+  }, []);
   
   const handleFormSubmit = async (data: PropertyFormData) => {
     if (!user) {
@@ -86,8 +105,12 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
       } else {
         // Create new property
         const result = await createProperty.mutateAsync(data);
-        toast.success('Property created successfully!');
-        navigate(`/properties/${result.propertyId}`);
+        if (result.success && result.propertyId) {
+          toast.success('Property created successfully!');
+          navigate(`/properties/${result.propertyId}`);
+        } else {
+          throw new Error('Failed to create property. Please try again.');
+        }
       }
     } catch (error: any) {
       console.error('Error submitting property:', error);
@@ -97,6 +120,17 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
       setIsSubmitting(false);
     }
   };
+  
+  if (isInitializing) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8">
+        <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
+        <h3 className="text-xl font-semibold mb-2">
+          Initializing property form...
+        </h3>
+      </div>
+    );
+  }
   
   if (isSubmitting) {
     return (

@@ -8,6 +8,7 @@ type UploadOptions = {
   path?: string;
   maxSizeMB?: number;
   acceptedFileTypes?: string[];
+  upsert?: boolean;
 };
 
 export function useStorageUpload() {
@@ -16,7 +17,7 @@ export function useStorageUpload() {
   const [error, setError] = useState<Error | null>(null);
 
   const uploadFile = async (file: File, options: UploadOptions): Promise<string> => {
-    const { bucket, path = '', maxSizeMB = 10, acceptedFileTypes = [] } = options;
+    const { bucket, path = '', maxSizeMB = 10, acceptedFileTypes = [], upsert = false } = options;
     
     // Reset state
     setIsUploading(true);
@@ -40,12 +41,20 @@ export function useStorageUpload() {
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
       const filePath = path ? `${path}/${fileName}` : fileName;
       
+      // Check if bucket exists, if not create it (for local dev only)
+      if (window.location.hostname === 'localhost') {
+        const { data: buckets } = await supabase.storage.listBuckets();
+        if (!buckets?.find(b => b.name === bucket)) {
+          console.log(`Bucket ${bucket} does not exist, this would fail in production`);
+        }
+      }
+      
       // Upload the file to Supabase Storage
       const { data, error } = await supabase.storage
         .from(bucket)
         .upload(filePath, file, {
           cacheControl: '3600',
-          upsert: false,
+          upsert: upsert,
         });
       
       if (error) throw error;
@@ -60,6 +69,8 @@ export function useStorageUpload() {
     } catch (err) {
       const error = err as Error;
       setError(error);
+      console.error('File upload error:', error.message);
+      toast.error(`Upload failed: ${error.message}`);
       throw error;
     } finally {
       setIsUploading(false);
@@ -73,9 +84,13 @@ export function useStorageUpload() {
         .remove([path]);
       
       if (error) throw error;
+      
+      toast.success('File deleted successfully');
     } catch (err) {
       const error = err as Error;
       setError(error);
+      console.error('File deletion error:', error.message);
+      toast.error(`Deletion failed: ${error.message}`);
       throw error;
     }
   };
