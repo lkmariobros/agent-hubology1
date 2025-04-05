@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 
@@ -16,10 +16,18 @@ export function useStorageUpload() {
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<Error | null>(null);
   const [storageStatus, setStorageStatus] = useState<'checking' | 'available' | 'unavailable'>('checking');
+  const checkInProgress = useRef(false);
 
   // Function to verify storage buckets exist and are accessible
   const checkStorageBuckets = async (bucketNames: string[]): Promise<boolean> => {
+    // Prevent concurrent checks
+    if (checkInProgress.current) {
+      console.log('Storage bucket check already in progress, skipping...');
+      return storageStatus === 'available';
+    }
+    
     try {
+      checkInProgress.current = true;
       setStorageStatus('checking');
       
       console.log('Checking storage buckets:', bucketNames);
@@ -50,6 +58,8 @@ export function useStorageUpload() {
       console.error('Error verifying storage buckets:', err);
       setStorageStatus('unavailable');
       return false;
+    } finally {
+      checkInProgress.current = false;
     }
   };
 

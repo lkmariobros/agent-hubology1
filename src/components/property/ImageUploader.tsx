@@ -1,3 +1,4 @@
+
 import React, { useCallback, useRef, useState, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { UploadCloud, X, Loader2, Check, Image, AlertTriangle, RefreshCcw } from 'lucide-react';
@@ -24,11 +25,18 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   const [processingFiles, setProcessingFiles] = useState<string[]>([]);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [bucketStatus, setBucketStatus] = useState<'checking' | 'available' | 'unavailable'>('checking');
+  const bucketCheckAttempted = useRef(false);
 
   // Check if the storage buckets are accessible
   useEffect(() => {
+    // Prevent multiple initialization attempts that could cause infinite loops
+    if (bucketCheckAttempted.current) {
+      return;
+    }
+    
     const verifyStorageBuckets = async () => {
       try {
+        bucketCheckAttempted.current = true;
         setBucketStatus('checking');
         const bucketsExist = await checkStorageBuckets(['property-images']);
         setBucketStatus(bucketsExist ? 'available' : 'unavailable');

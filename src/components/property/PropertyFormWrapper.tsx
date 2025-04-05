@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { usePropertyManagement } from '@/hooks/usePropertyManagement';
 import EnhancedPropertyForm from '@/components/property/EnhancedPropertyForm';
 import { PropertyFormData } from '@/types/property-form';
@@ -31,11 +31,18 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
   const [storageReady, setStorageReady] = useState(false);
   const { createProperty, updateProperty } = usePropertyManagement();
   const { checkStorageBuckets } = useStorageUpload();
+  const initializationAttempted = useRef(false);
   
   // Initialize form and check storage
   useEffect(() => {
+    // Prevent multiple initialization attempts
+    if (initializationAttempted.current) {
+      return;
+    }
+    
     const initializeForm = async () => {
       try {
+        initializationAttempted.current = true;
         setIsInitializing(true);
         
         // Check storage configuration
