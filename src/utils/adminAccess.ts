@@ -1,17 +1,12 @@
-
-import { UserRole } from '@/types/auth';
-
 /**
- * Centralized utility for handling special admin access
- * This prevents hardcoded emails scattered throughout the codebase
+ * Utility functions for checking admin access
  */
 
-// List of special admin emails that always have admin access
-// This can be extended to load from environment variables or config
+// List of special admin emails that always get admin privileges
 const SPECIAL_ADMIN_EMAILS = ['josephkwantum@gmail.com'];
 
 /**
- * Checks if an email is in the special admins list
+ * Check if an email is in the special admins list
  */
 export const isSpecialAdmin = (email?: string | null): boolean => {
   if (!email) return false;
@@ -19,28 +14,27 @@ export const isSpecialAdmin = (email?: string | null): boolean => {
 };
 
 /**
- * Ensures an array of roles contains the admin role if user is a special admin
- * Returns a new array with admin added if needed
+ * Ensure admin role is added to roles array if the user is a special admin
  */
-export const ensureAdminRole = (roles: UserRole[], email?: string | null): UserRole[] => {
-  if (!isSpecialAdmin(email)) return roles;
-  
-  const newRoles = [...roles];
-  if (!newRoles.includes('admin')) {
-    newRoles.push('admin' as UserRole);
+export const ensureAdminRole = (roles: string[], email?: string | null): string[] => {
+  if (isSpecialAdmin(email) && !roles.includes('admin')) {
+    return [...roles, 'admin'];
   }
-  return newRoles;
+  return roles;
 };
 
 /**
- * Gets the preferred active role for a user based on their email and roles
- * For special admins, this will return 'admin' if available
+ * Get preferred active role based on roles and email
  */
-export const getPreferredActiveRole = (roles: UserRole[], email?: string | null): UserRole => {
+export const getPreferredActiveRole = (roles: string[], email?: string | null): string => {
+  // Special admins always default to admin role if available
   if (isSpecialAdmin(email) && roles.includes('admin')) {
-    return 'admin' as UserRole;
+    return 'admin';
   }
   
-  // Default to admin if available, otherwise first role
-  return roles.includes('admin') ? 'admin' as UserRole : roles[0];
+  // Otherwise use the first role with preference for admin > team_leader > other roles
+  if (roles.includes('admin')) return 'admin';
+  if (roles.includes('team_leader')) return 'team_leader';
+  
+  return roles[0] || 'agent';
 };

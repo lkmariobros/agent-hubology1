@@ -88,6 +88,52 @@ export const permissionService = {
       console.error(`Error in getRolePermissions(${roleId}):`, error);
       throw new Error(`Failed to load role permissions: ${error.message || 'Unknown error'}`);
     }
+  },
+  
+  async updateRolePermissions(roleId: string, permissions: Permission[]): Promise<boolean> {
+    try {
+      console.log(`Updating permissions for role ${roleId}`);
+      
+      // First, delete all existing role permissions
+      const { error: deleteError } = await supabase
+        .from('role_permissions')
+        .delete()
+        .eq('role_id', roleId);
+        
+      if (deleteError) {
+        console.error(`Error deleting existing permissions for role ${roleId}:`, deleteError);
+        throw new Error(`Failed to update role permissions: ${deleteError.message}`);
+      }
+      
+      // Get selected permissions
+      const selectedPermissions = permissions.filter(p => p.selected && p.id);
+      
+      if (selectedPermissions.length === 0) {
+        console.log(`No permissions selected for role ${roleId}`);
+        return true;
+      }
+      
+      // Insert new role permissions
+      const rolePermissions = selectedPermissions.map(p => ({
+        role_id: roleId,
+        permission_id: p.id
+      }));
+      
+      const { error: insertError } = await supabase
+        .from('role_permissions')
+        .insert(rolePermissions);
+        
+      if (insertError) {
+        console.error(`Error inserting new permissions for role ${roleId}:`, insertError);
+        throw new Error(`Failed to update role permissions: ${insertError.message}`);
+      }
+      
+      console.log(`Successfully updated permissions for role ${roleId}`);
+      return true;
+    } catch (error: any) {
+      console.error(`Error in updateRolePermissions(${roleId}):`, error);
+      throw new Error(`Failed to update role permissions: ${error.message || 'Unknown error'}`);
+    }
   }
 };
 
