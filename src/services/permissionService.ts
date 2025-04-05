@@ -3,26 +3,16 @@ import { supabase } from '@/lib/supabase';
 import { Permission, PermissionCategory } from '@/types/role';
 import { toast } from 'sonner';
 import { useSentry } from '@/hooks/useSentry';
+import { executeRPC, safeQueryExecution } from '@/utils/dbHelpers';
 
 export const permissionService = {
   async getPermissions(): Promise<Permission[]> {
     try {
       console.log('Fetching permissions using get_permissions_simple RPC');
-      const { data, error } = await supabase
-        .rpc('get_permissions_simple');
-
-      if (error) {
-        console.error('Supabase error when fetching permissions:', error);
-        throw new Error(`Failed to load permissions: ${error.message}`);
-      }
-      
-      if (!data) {
-        console.warn('No permissions data returned from get_permissions_simple RPC');
-        return [];
-      }
+      const data = await executeRPC<Permission[]>('get_permissions_simple');
       
       console.log(`Successfully fetched ${data.length} permissions`);
-      return data as Permission[];
+      return data;
     } catch (error: any) {
       console.error('Error in getPermissions():', error);
       throw new Error(`Failed to load permissions: ${error.message || 'Unknown error'}`);
@@ -33,7 +23,7 @@ export const permissionService = {
     try {
       console.log('Fetching permissions by categories');
       
-      // First try to get all permissions using the simpler function
+      // First get all permissions
       const permissions = await this.getPermissions();
       
       // Group permissions by category

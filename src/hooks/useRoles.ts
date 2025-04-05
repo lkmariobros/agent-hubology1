@@ -7,6 +7,7 @@ import { Role, Permission, PermissionCategory } from '@/types/role';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { captureException } from '@/lib/sentry';
+import { executeRPC } from '@/utils/dbHelpers';
 
 export function useRoles() {
   const queryClient = useQueryClient();
@@ -71,8 +72,8 @@ export function useRoles() {
     status: categoriesStatus
   } = useQuery({
     queryKey: ['permissionCategories'],
-    queryFn: permissionService.getPermissionsByCategories,
-    enabled: isAdminMode && permissions.length > 0,
+    queryFn: () => permissionService.getPermissionsByCategories(),
+    enabled: isAdminMode,
     retry: 3,
     retryDelay: attempt => Math.min(1000 * 2 ** attempt, 30000),
     staleTime: 10 * 60 * 1000, // 10 minutes
