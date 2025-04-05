@@ -1,9 +1,9 @@
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { PropertyFormData, PropertyImage, PropertyDocument } from '@/types/property-form';
+import propertyFormHelpers from '@/utils/propertyFormHelpers';
 
 /**
  * Hook for managing property storage operations
@@ -198,17 +198,33 @@ export function usePropertyManagement() {
       console.log('Creating property with data:', data);
       
       try {
-        // Step 1: Insert the property data
+        // Step 1: Get IDs for the reference data before inserting
+        const propertyTypeId = await propertyFormHelpers.getOrCreatePropertyType(data.propertyType);
+        if (!propertyTypeId) {
+          throw new Error(`Could not retrieve ID for property type: ${data.propertyType}`);
+        }
+        
+        const transactionTypeId = await propertyFormHelpers.getOrCreateTransactionType(data.transactionType);
+        if (!transactionTypeId) {
+          throw new Error(`Could not retrieve ID for transaction type: ${data.transactionType}`);
+        }
+        
+        const statusId = await propertyFormHelpers.getOrCreatePropertyStatus(data.status);
+        if (!statusId) {
+          throw new Error(`Could not retrieve ID for status: ${data.status}`);
+        }
+        
+        // Step 2: Insert the property data with the correct IDs
         const { data: propertyData, error: propertyError } = await supabase
           .from('enhanced_properties')
           .insert({
             title: data.title,
             description: data.description,
-            property_type_id: data.propertyType,
-            transaction_type_id: data.transactionType,
+            property_type_id: propertyTypeId, // Use the UUID not the string
+            transaction_type_id: transactionTypeId, // Use the UUID not the string
             price: data.price,
             rental_rate: data.rentalRate,
-            status_id: data.status,
+            status_id: statusId, // Use the UUID not the string
             featured: data.featured,
             // Address fields
             street: data.address.street,

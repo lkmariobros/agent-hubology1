@@ -67,7 +67,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     }
   }, [state.images, addImage, maxImages, maxSizeMB, uploadFile]);
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+  const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
     accept: {
       'image/jpeg': ['.jpg', '.jpeg'],
@@ -75,7 +75,9 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
       'image/webp': ['.webp']
     },
     maxSize: maxSizeMB * 1024 * 1024, // Convert MB to bytes
-    disabled: isUploading
+    disabled: isUploading,
+    noClick: false, // Allow clicking to trigger file dialog
+    noKeyboard: false, // Allow keyboard navigation
   });
 
   const handleRemoveImage = (index: number) => {
@@ -86,9 +88,10 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     <div className="space-y-4">
       <div 
         {...getRootProps()} 
-        className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
+        className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
           isDragActive ? 'border-primary bg-primary/5' : 'border-muted-foreground/25 hover:border-primary/50'
-        }`}
+        } cursor-pointer`}
+        onClick={open} // Explicitly add click handler
       >
         <input {...getInputProps()} />
         <div className="flex flex-col items-center justify-center space-y-2">
@@ -97,6 +100,17 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
           <p className="text-sm text-muted-foreground">
             or click to browse (max {maxSizeMB}MB per image)
           </p>
+          <Button 
+            type="button" 
+            variant="secondary" 
+            className="mt-2" 
+            onClick={(e) => {
+              e.stopPropagation();
+              open();
+            }}
+          >
+            Select Files
+          </Button>
           {isUploading && (
             <div className="mt-2 flex items-center gap-2">
               <Loader2 className="h-5 w-5 animate-spin text-primary" />
@@ -122,7 +136,10 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
                 variant="destructive"
                 size="icon"
                 className="absolute top-2 right-2 h-8 w-8 opacity-80 shadow-md"
-                onClick={() => handleRemoveImage(index)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRemoveImage(index);
+                }}
               >
                 <X className="h-4 w-4" />
               </Button>

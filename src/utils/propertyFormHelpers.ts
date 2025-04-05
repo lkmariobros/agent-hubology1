@@ -1,9 +1,5 @@
 
 import { supabase } from '@/lib/supabase';
-import { safeQueryExecution } from './dbHelpers';
-import { PostgrestSingleResponse } from '@supabase/supabase-js';
-
-// Helper functions for property form operations
 
 /**
  * Get or create a property type by name
@@ -15,9 +11,9 @@ export async function getOrCreatePropertyType(name: string): Promise<string | nu
       .from('property_types')
       .select('id')
       .eq('name', name)
-      .single();
+      .maybeSingle();
     
-    if (data) return data.id;
+    if (data?.id) return data.id;
     
     // If not found, create a new property type
     const { data: newPropertyType, error: createError } = await supabase
@@ -48,9 +44,9 @@ export async function getOrCreateTransactionType(name: string): Promise<string |
       .from('transaction_types')
       .select('id')
       .eq('name', name)
-      .single();
+      .maybeSingle();
     
-    if (data) return data.id;
+    if (data?.id) return data.id;
     
     // If not found, create a new transaction type
     const { data: newTransactionType, error: createError } = await supabase
@@ -81,9 +77,9 @@ export async function getOrCreatePropertyStatus(name: string): Promise<string | 
       .from('property_statuses')
       .select('id')
       .eq('name', name)
-      .single();
+      .maybeSingle();
     
-    if (data) return data.id;
+    if (data?.id) return data.id;
     
     // If not found, create a new property status
     const { data: newPropertyStatus, error: createError } = await supabase
