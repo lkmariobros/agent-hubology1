@@ -7,7 +7,7 @@ import { captureException } from '@/lib/sentry';
  */
 export async function safeQueryExecution<T>(
   queryName: string, 
-  queryFn: () => Promise<{ data: T | null; error: any }>
+  queryFn: () => Promise<{ data: any; error: any }>
 ): Promise<T> {
   try {
     const { data, error } = await queryFn();
@@ -23,7 +23,7 @@ export async function safeQueryExecution<T>(
       return [] as unknown as T;
     }
     
-    return data;
+    return data as T;
   } catch (error) {
     console.error(`Exception in ${queryName}:`, error);
     captureException(error, { context: { query: queryName } });
@@ -36,7 +36,7 @@ export async function safeQueryExecution<T>(
  */
 export async function safeMutationExecution<T>(
   mutationName: string,
-  mutationFn: () => Promise<{ data: T | null; error: any }>
+  mutationFn: () => Promise<{ data: any; error: any }>
 ): Promise<T | null> {
   try {
     const { data, error } = await mutationFn();
@@ -47,7 +47,7 @@ export async function safeMutationExecution<T>(
       throw new Error(`Mutation failed (${mutationName}): ${error.message}`);
     }
     
-    return data;
+    return data as T;
   } catch (error) {
     console.error(`Exception in ${mutationName}:`, error);
     captureException(error, { context: { mutation: mutationName } });
@@ -67,7 +67,7 @@ export async function executeRPC<T>(
     async () => {
       // Create the query
       const query = params ? supabase.rpc(functionName, params) : supabase.rpc(functionName);
-      // Complete the query and return a Promise with the expected shape
+      // Complete the query and return
       return await query;
     }
   );

@@ -5,6 +5,11 @@ import { toast } from 'sonner';
 import { useSentry } from '@/hooks/useSentry';
 import { executeRPC, safeQueryExecution, safeMutationExecution } from '@/utils/dbHelpers';
 
+// Interface to match the structure returned by Supabase for role permissions
+interface RolePermissionResponse {
+  permission: Permission;
+}
+
 export const permissionService = {
   async getPermissions(): Promise<Permission[]> {
     try {
@@ -54,7 +59,8 @@ export const permissionService = {
   async getRolePermissions(roleId: string): Promise<Permission[]> {
     try {
       console.log(`Fetching permissions for role ${roleId}`);
-      return await safeQueryExecution<Permission[]>(
+      
+      const rolePermissions = await safeQueryExecution<RolePermissionResponse[]>(
         `getRolePermissions(${roleId})`,
         async () => {
           const query = supabase
@@ -66,12 +72,12 @@ export const permissionService = {
           
           return await query;
         }
-      ).then(data => {
-        // Transform the nested permissions array
-        const permissions = data.map((rp: any) => rp.permission);
-        console.log(`Successfully fetched ${permissions.length} permissions for role ${roleId}`);
-        return permissions;
-      });
+      );
+      
+      // Transform the nested permissions array
+      const permissions = rolePermissions.map(rp => rp.permission);
+      console.log(`Successfully fetched ${permissions.length} permissions for role ${roleId}`);
+      return permissions;
     } catch (error: any) {
       console.error(`Error in getRolePermissions(${roleId}):`, error);
       throw new Error(`Failed to load role permissions: ${error.message || 'Unknown error'}`);
