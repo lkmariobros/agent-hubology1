@@ -10,8 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PermissionSelector } from './PermissionSelector';
 import { useRoles } from '@/hooks/useRoles';
 import LoadingIndicator from '@/components/ui/loading-indicator';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle } from 'lucide-react';
+import QueryError from '@/components/ui/query-error';
 
 interface RoleFormValues {
   name: string;
@@ -128,11 +127,8 @@ export function RoleDialog({
           </DialogDescription>
         </DialogHeader>
 
-        {showError && (
-          <Alert variant="destructive" className="mb-4">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{error || 'Failed to load data. Please try again.'}</AlertDescription>
-          </Alert>
+        {error && (
+          <QueryError message={error} />
         )}
 
         <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4 pt-4">
@@ -175,6 +171,15 @@ export function RoleDialog({
                 <div className="flex justify-center py-8">
                   <LoadingIndicator text="Loading permissions..." />
                 </div>
+              ) : roleError ? (
+                <QueryError 
+                  title="Permission Loading Error" 
+                  message="Failed to load permission data" 
+                  onRetry={() => {
+                    refetchPermissions();
+                    refetchPermissionCategories();
+                  }}
+                />
               ) : (
                 <PermissionSelector
                   permissionCategories={permissionCategories}

@@ -8,9 +8,7 @@ export const permissionService = {
     try {
       console.log('Fetching permissions from Supabase');
       const { data, error } = await supabase
-        .from('permissions')
-        .select('*')
-        .order('name');
+        .rpc('get_permissions');
 
       if (error) {
         console.error('Supabase error when fetching permissions:', error);
@@ -33,6 +31,24 @@ export const permissionService = {
   async getPermissionsByCategories(): Promise<PermissionCategory[]> {
     try {
       console.log('Fetching permissions by categories from Supabase');
+      
+      // Try to use the RPC function first
+      const { data: categoryData, error: categoryError } = await supabase
+        .rpc('get_permissions_by_category');
+        
+      if (!categoryError && categoryData) {
+        // Transform the data to match the expected format
+        const result = categoryData.map((item: any) => ({
+          name: item.category || 'General',
+          permissions: Array.isArray(item.permissions) ? item.permissions : []
+        }));
+        
+        console.log(`Successfully grouped permissions into ${result.length} categories via RPC`);
+        return result;
+      }
+      
+      // Fallback to direct query if RPC fails
+      console.log('Falling back to direct permission query');
       const { data, error } = await supabase
         .from('permissions')
         .select('*')
