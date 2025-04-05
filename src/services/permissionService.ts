@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 export const permissionService = {
   async getPermissions(): Promise<Permission[]> {
     try {
-      console.log('Fetching permissions from Supabase');
+      console.log('Fetching permissions using get_permissions RPC');
       const { data, error } = await supabase
         .rpc('get_permissions');
 
@@ -16,7 +16,7 @@ export const permissionService = {
       }
       
       if (!data) {
-        console.warn('No permissions data returned from Supabase');
+        console.warn('No permissions data returned from get_permissions RPC');
         return [];
       }
       
@@ -30,56 +30,26 @@ export const permissionService = {
   
   async getPermissionsByCategories(): Promise<PermissionCategory[]> {
     try {
-      console.log('Fetching permissions by categories from Supabase');
+      console.log('Fetching permissions by categories using get_permissions_by_category RPC');
       
-      // Try to use the RPC function first
-      const { data: categoryData, error: categoryError } = await supabase
+      // Use the specialized RPC function for getting permissions by category
+      const { data, error } = await supabase
         .rpc('get_permissions_by_category');
         
-      if (!categoryError && categoryData) {
-        // Transform the data to match the expected format
-        const result = categoryData.map((item: any) => ({
-          name: item.category || 'General',
-          permissions: Array.isArray(item.permissions) ? item.permissions : []
-        }));
-        
-        console.log(`Successfully grouped permissions into ${result.length} categories via RPC`);
-        return result;
-      }
-      
-      // Fallback to direct query if RPC fails
-      console.log('Falling back to direct permission query');
-      const { data, error } = await supabase
-        .from('permissions')
-        .select('*')
-        .order('category')
-        .order('name');
-
       if (error) {
         console.error('Supabase error when fetching permissions by categories:', error);
         throw new Error(`Failed to load permission categories: ${error.message}`);
       }
       
       if (!data || data.length === 0) {
-        console.warn('No permissions data returned from Supabase for categories');
+        console.warn('No categories data returned from get_permissions_by_category RPC');
         return [];
       }
       
-      // Group permissions by category
-      const categories: Record<string, Permission[]> = {};
-      
-      data.forEach((permission: Permission) => {
-        const category = permission.category || 'General';
-        if (!categories[category]) {
-          categories[category] = [];
-        }
-        categories[category].push(permission);
-      });
-      
-      // Transform into PermissionCategory array
-      const result = Object.entries(categories).map(([name, permissions]) => ({
-        name,
-        permissions
+      // Transform the data to match the expected format
+      const result = data.map((item: any) => ({
+        name: item.category || 'General',
+        permissions: Array.isArray(item.permissions) ? item.permissions : []
       }));
       
       console.log(`Successfully grouped permissions into ${result.length} categories`);

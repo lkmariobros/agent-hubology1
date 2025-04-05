@@ -1216,6 +1216,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      is_admin_tier: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       is_reviewer: {
         Args: {
           user_id: string
