@@ -605,18 +605,21 @@ export type Database = {
       }
       permissions: {
         Row: {
+          category: string | null
           created_at: string | null
           description: string | null
           id: string
           name: string
         }
         Insert: {
+          category?: string | null
           created_at?: string | null
           description?: string | null
           id?: string
           name: string
         }
         Update: {
+          category?: string | null
           created_at?: string | null
           description?: string | null
           id?: string
@@ -1121,6 +1124,23 @@ export type Database = {
           p_approval_id: string
         }
         Returns: Json[]
+      }
+      get_permissions: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          category: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+        }[]
+      }
+      get_permissions_by_category: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          category: string
+          permissions: Json
+        }[]
       }
       get_team_performance_metrics: {
         Args: {
