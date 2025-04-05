@@ -1,84 +1,54 @@
 
 import { z } from 'zod';
 
-// Define the base schema without refinements
+/**
+ * Base property schema that defines common validation rules for properties
+ * regardless of their type (Residential, Commercial, Industrial, Land)
+ */
 export const basePropertySchema = z.object({
+  // Basic Property Information
   title: z.string()
     .min(3, 'Title must be at least 3 characters')
     .max(100, 'Title must be less than 100 characters'),
   
   description: z.string()
     .min(20, 'Description must be at least 20 characters')
-    .max(5000, 'Description must be less than 5000 characters'),
+    .max(2000, 'Description must be less than 2000 characters'),
   
-  propertyType: z.string()
-    .min(1, 'Property type is required'),
+  propertyType: z.enum(['Residential', 'Commercial', 'Industrial', 'Land'], {
+    errorMap: () => ({ message: 'Please select a property type' })
+  }),
   
   transactionType: z.enum(['Sale', 'Rent', 'Primary'], {
-    errorMap: () => ({ message: 'Transaction type must be selected' })
+    errorMap: () => ({ message: 'Please select a transaction type' })
   }),
   
-  // Conditional price validation based on transaction type
-  price: z.number({
-    required_error: "Price is required",
-    invalid_type_error: "Price must be a number",
-  })
-    .min(0, 'Price cannot be negative')
+  status: z.enum(['Available', 'Under Offer', 'Pending', 'Sold', 'Rented'], {
+    errorMap: () => ({ message: 'Please select a status' })
+  }).default('Available'),
+  
+  featured: z.boolean().default(false),
+  
+  // Price information based on transaction type
+  price: z.number()
+    .positive('Price must be greater than 0')
     .nullable()
     .optional(),
   
-  rentalRate: z.number({
-    invalid_type_error: "Rental rate must be a number",
-  })
-    .min(0, 'Rental rate cannot be negative')
+  rentalRate: z.number()
+    .positive('Rental rate must be greater than 0')
     .nullable()
     .optional(),
   
-  status: z.string({
-    required_error: "Status is required"
-  }),
-  
-  // Property details
-  builtUpArea: z.number({
-    invalid_type_error: "Built-up area must be a number",
-  })
-    .min(0, 'Built-up area cannot be negative')
-    .optional(),
-  
-  bedrooms: z.number({
-    invalid_type_error: "Bedrooms must be a number",
-  })
-    .min(0, 'Bedrooms cannot be negative')
-    .int('Bedrooms must be a whole number')
-    .optional(),
-  
-  bathrooms: z.number({
-    invalid_type_error: "Bathrooms must be a number",
-  })
-    .min(0, 'Bathrooms cannot be negative')
-    .optional(),
-  
-  features: z.array(z.string()).default([]),
-  
+  // Location information
   address: z.object({
     street: z.string().min(1, 'Street address is required'),
     city: z.string().min(1, 'City is required'),
     state: z.string().min(1, 'State is required'),
     zip: z.string().optional(),
     country: z.string().default('Malaysia'),
-  }, {
-    required_error: "Address is required",
-    invalid_type_error: "Address must be an object",
+    coordinates: z.tuple([z.number(), z.number()]).optional(),
   }),
-  
-  images: z.array(z.string()).default([]),
-  
-  // Additional fields for specific property types
-  furnishingStatus: z.string().optional(),
-  floorArea: z.number().min(0).optional(),
-  landSize: z.number().min(0).optional(),
-  buildingClass: z.string().optional(),
-  zoning: z.string().optional(),
   
   // Owner contact information
   ownerContacts: z.array(
@@ -88,27 +58,64 @@ export const basePropertySchema = z.object({
       phone: z.string().optional(),
       email: z.string().email('Invalid email').optional(),
     })
-  ).optional(),
+  ).default([]),
   
-  // Agent notes
+  // Features and amenities
+  features: z.array(z.string()).default([]),
+  
+  // Media
+  images: z.array(z.string()).default([]),
+  
+  // Agent notes (private)
   agentNotes: z.string().max(2000, 'Notes must be less than 2000 characters').optional(),
+  
+  // Documents
+  documents: z.array(z.string()).default([]),
 });
 
-// Enhanced Zod validation schema for property form with better error messages
-export const propertySchema = basePropertySchema.refine(
-  (data) => {
-    // For sale properties, price is required
-    if (data.transactionType === 'Sale') {
-      return data.price != null && data.price > 0;
-    }
-    // For rental properties, rental rate is required
-    if (data.transactionType === 'Rent') {
-      return data.rentalRate != null && data.rentalRate > 0;
-    }
-    return true;
-  },
-  {
-    message: "A valid price is required for sale properties, or rental rate for rental properties",
-    path: ["price"],
+/**
+ * Type definition for the base property schema
+ */
+export type BasePropertyFormData = z.infer<typeof basePropertySchema>;
+
+/**
+ * Conditional validator for price/rentalRate based on transactionType
+ */
+export const validatePricing = (data: { transactionType: string; price?: number | null; rentalRate?: number | null }) => {
+  if (data.transactionType === 'Sale' && (!data.price || data.price <= 0)) {
+    return { success: false, error: 'A valid price is required for sale properties' };
   }
-);
+  
+  if (data.transactionType === 'Rent' && (!data.rentalRate || data.rentalRate <= 0)) {
+    return { success: false, error: 'A valid rental rate is required for rental properties' };
+  }
+  
+  return { success: true };
+};
+
+/**
+ * Type-specific schema validators
+ */
+export const typeSpecificValidation = {
+  Residential: (data: any) => {
+    if (!data.bedrooms) return { success: false, error: 'Number of bedrooms is required' };
+    if (!data.bathrooms) return { success: false, error: 'Number of bathrooms is required' };
+    if (!data.builtUpArea) return { success: false, error: 'Built-up area is required' };
+    return { success: true };
+  },
+  
+  Commercial: (data: any) => {
+    if (!data.floorArea) return { success: false, error: 'Floor area is required' };
+    return { success: true };
+  },
+  
+  Industrial: (data: any) => {
+    if (!data.landArea) return { success: false, error: 'Land area is required' };
+    return { success: true };
+  },
+  
+  Land: (data: any) => {
+    if (!data.landSize) return { success: false, error: 'Land size is required' };
+    return { success: true };
+  }
+};
