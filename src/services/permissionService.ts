@@ -56,7 +56,7 @@ export const permissionService = {
       console.log(`Fetching permissions for role ${roleId}`);
       return await safeQueryExecution<Permission[]>(
         `getRolePermissions(${roleId})`,
-        () => {
+        async () => {
           const query = supabase
             .from('role_permissions')
             .select(`
@@ -64,7 +64,7 @@ export const permissionService = {
             `)
             .eq('role_id', roleId);
           
-          return query.then(result => result);
+          return await query;
         }
       ).then(data => {
         // Transform the nested permissions array
@@ -85,13 +85,13 @@ export const permissionService = {
       // First, delete all existing role permissions
       await safeMutationExecution(
         `deleteRolePermissions(${roleId})`,
-        () => {
+        async () => {
           const query = supabase
             .from('role_permissions')
             .delete()
             .eq('role_id', roleId);
           
-          return query.then(result => result);
+          return await query;
         }
       );
       
@@ -111,12 +111,12 @@ export const permissionService = {
       
       await safeMutationExecution(
         `insertRolePermissions(${roleId})`,
-        () => {
+        async () => {
           const query = supabase
             .from('role_permissions')
             .insert(rolePermissions);
           
-          return query.then(result => result);
+          return await query;
         }
       );
       
