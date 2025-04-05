@@ -1,3 +1,4 @@
+
 import { supabase } from '@/lib/supabase';
 import { Permission, PermissionCategory } from '@/types/role';
 import { toast } from 'sonner';
@@ -32,23 +33,12 @@ export const permissionService = {
       console.log('Fetching permissions by categories');
       
       // First try to get all permissions using the simpler function
-      const { data, error } = await supabase
-        .rpc('get_permissions_simple');
-        
-      if (error) {
-        console.error('Supabase error when fetching permissions by categories:', error);
-        throw new Error(`Failed to load permission categories: ${error.message}`);
-      }
-      
-      if (!data || data.length === 0) {
-        console.warn('No permissions data returned from get_permissions_simple RPC');
-        return [];
-      }
+      const permissions = await this.getPermissions();
       
       // Group permissions by category
       const categoriesMap = new Map<string, Permission[]>();
       
-      data.forEach(permission => {
+      permissions.forEach(permission => {
         const category = permission.category || 'General';
         if (!categoriesMap.has(category)) {
           categoriesMap.set(category, []);
