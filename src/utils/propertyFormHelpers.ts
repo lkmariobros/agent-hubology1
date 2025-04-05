@@ -1,4 +1,3 @@
-
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 
@@ -144,14 +143,15 @@ export async function createProperty(propertyData: Record<string, any>): Promise
  */
 export async function ensurePropertyBuckets(): Promise<boolean> {
   try {
-    console.log('Ensuring property buckets exist...');
+    console.log('Checking if property buckets exist...');
     
     // Check if buckets exist
     const { data: buckets, error } = await supabase.storage.listBuckets();
     
     if (error) {
       console.error('Error listing buckets:', error);
-      return false;
+      // Don't throw an error, just return true to let the form continue
+      return true;
     }
     
     const requiredBuckets = [
@@ -162,35 +162,23 @@ export async function ensurePropertyBuckets(): Promise<boolean> {
     const existingBuckets = buckets?.map(b => b.name) || [];
     console.log('Existing buckets:', existingBuckets);
     
-    // Create any missing buckets (only for development, in production they should be created via migrations)
-    for (const bucket of requiredBuckets) {
-      if (!existingBuckets.includes(bucket.name)) {
-        console.log(`Creating bucket ${bucket.name}...`);
-        try {
-          const { error: createError } = await supabase.storage.createBucket(
-            bucket.name, 
-            { 
-              public: bucket.public,
-              fileSizeLimit: bucket.name === 'property-images' ? 5242880 : 10485760 // 5MB for images, 10MB for docs
-            }
-          );
-          
-          if (createError) {
-            console.warn(`Could not create bucket ${bucket.name}:`, createError);
-            toast.warning(`Storage initialization warning: ${createError.message}`);
-          } else {
-            console.log(`Bucket ${bucket.name} created successfully`);
-          }
-        } catch (createErr) {
-          console.warn(`Exception creating bucket ${bucket.name}:`, createErr);
-        }
-      }
+    // In production, don't try to create buckets on the client side
+    // Just check if they exist and inform the user if they don't
+    const missingBuckets = requiredBuckets.filter(bucket => 
+      !existingBuckets.includes(bucket.name)
+    );
+    
+    if (missingBuckets.length > 0) {
+      console.warn('Missing storage buckets:', missingBuckets.map(b => b.name).join(', '));
+      toast.warning(`Some required storage buckets do not exist. Please contact your administrator.`);
     }
     
+    // Always return true to let the form continue
     return true;
   } catch (error) {
-    console.error('Error ensuring property buckets:', error);
-    return false;
+    console.error('Error checking property buckets:', error);
+    // Don't block the form due to storage issues
+    return true;
   }
 }
 
