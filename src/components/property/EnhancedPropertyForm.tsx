@@ -1,307 +1,261 @@
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { PropertyFormProvider, usePropertyForm } from '@/context/PropertyForm';
+import React, { useState, useEffect } from 'react';
+import { PropertyFormData } from '@/types/property-form';
+import { usePropertyForm } from '@/context/PropertyForm/PropertyFormContext';
+import { PropertyFormProvider } from '@/context/PropertyForm/PropertyFormContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { toast } from 'sonner';
-import { Loader2, Save, ArrowLeft, ArrowRight } from 'lucide-react';
-import { PropertyFormData } from '@/types/property-form';
-
-// Form step components
-import PropertyTypeSelector from './form/PropertyTypeSelector';
-import TransactionTypeToggle from './form/TransactionTypeToggle';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Separator } from '@/components/ui/separator';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AlertCircle, ArrowLeft, ArrowRight, Save, Send } from 'lucide-react';
 import PropertyBasicInfo from './form/PropertyBasicInfo';
-import PropertyAddress from './form/PropertyAddress';
+import PropertyDetails from './form/PropertyDetails';
+import PropertyLocation from './form/PropertyLocation';
+import PropertyPricing from './form/PropertyPricing';
+import PropertyFeatures from './form/PropertyFeatures';
 import PropertyImagesUpload from './form/PropertyImagesUpload';
-import PropertyDocumentsUpload from './form/PropertyDocumentsUpload';
-import PropertyAgentNotes from './form/PropertyAgentNotes';
-import PropertyFormStepper from './form/PropertyFormStepper';
-import PropertyOwnerContacts from './form/PropertyOwnerContacts';
+import PropertyDocuments from './form/PropertyDocuments';
+import ImageUploader from './ImageUploader';
 
-// Property type specific components
-import PropertyResidentialDetails from './form/PropertyResidentialDetails';
-import PropertyCommercialDetails from './form/PropertyCommercialDetails';
-import PropertyIndustrialDetails from './form/PropertyIndustrialDetails';
-import PropertyLandDetails from './form/PropertyLandDetails';
-
-interface PropertyFormStepsProps {
-  onSubmit?: (data: PropertyFormData) => Promise<void>;
+interface EnhancedPropertyFormProps {
+  onSubmit?: (data: PropertyFormData) => void;
   initialData?: Partial<PropertyFormData>;
   isEdit?: boolean;
+  storageReady?: boolean;
 }
 
-const PropertyFormSteps: React.FC<PropertyFormStepsProps> = ({ onSubmit, initialData, isEdit = false }) => {
-  const { state, prevStep, nextStep, saveForm, submitForm, updateFormData } = usePropertyForm();
-  const { currentStep, isSubmitting, lastSaved, formData } = state;
-  const navigate = useNavigate();
+const FormSteps = [
+  { id: 'basic-info', label: 'Basic Info' },
+  { id: 'details', label: 'Details' },
+  { id: 'location', label: 'Location' },
+  { id: 'pricing', label: 'Pricing' },
+  { id: 'features', label: 'Features' },
+  { id: 'media', label: 'Media' },
+  { id: 'documents', label: 'Documents' },
+];
 
-  // If initialData is provided, update the form data on component mount
+const EnhancedPropertyFormContent: React.FC<EnhancedPropertyFormProps> = ({ 
+  onSubmit, 
+  initialData, 
+  isEdit = false,
+  storageReady = true
+}) => {
+  const { 
+    state, 
+    updateFormData, 
+    nextStep, 
+    prevStep, 
+    goToStep, 
+    submitForm,
+    saveForm
+  } = usePropertyForm();
+  
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  
+  // Initialize form with initial data if provided
   useEffect(() => {
     if (initialData) {
       updateFormData(initialData);
     }
   }, [initialData, updateFormData]);
-
-  const PropertyDetailsComponent = () => {
-    switch (formData.propertyType) {
-      case 'Residential':
-        return <PropertyResidentialDetails />;
-      case 'Commercial':
-        return <PropertyCommercialDetails />;
-      case 'Industrial':
-        return <PropertyIndustrialDetails />;
-      case 'Land':
-        return <PropertyLandDetails />;
-      default:
-        return null;
-    }
-  };
-
-  const handleSaveDraft = async () => {
-    try {
-      await saveForm();
-      toast.success('Property saved as draft');
-    } catch (error) {
-      toast.error('Failed to save property');
-    }
-  };
-
+  
   const handleSubmit = async () => {
-    try {
-      // If onSubmit prop is provided, use it
-      if (onSubmit) {
-        await onSubmit(formData);
-      } else {
-        // Otherwise use the context's submitForm
-        await submitForm();
-        toast.success('Property listing created successfully!');
-        navigate('/properties');
-      }
-    } catch (error) {
-      toast.error('Failed to create property listing');
+    // Validate form
+    const errors = validateForm();
+    if (errors.length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
+    
+    // Clear validation errors
+    setValidationErrors([]);
+    
+    // If onSubmit is provided, use it
+    if (onSubmit) {
+      onSubmit(state.formData);
+    } else {
+      // Otherwise use the context's submit function
+      await submitForm();
     }
   };
-
-  // Form validation by step
-  const canProceed = () => {
-    switch (currentStep) {
-      case 0: // Basic Info
-        return !!formData.title && !!formData.description;
-      case 1: // Details
-        return true; // All fields are optional or have defaults
-      case 2: // Location
-        return !!formData.address.street && !!formData.address.city && !!formData.address.state;
-      case 3: // Owner Contacts
-        return true; // Contacts are optional
-      case 4: // Images
-      case 5: // Documents
-        return true; // Images and documents are optional
-      default:
-        return true;
+  
+  const validateForm = (): string[] => {
+    const errors: string[] = [];
+    const { formData } = state;
+    
+    // Basic validation
+    if (!formData.title) errors.push('Title is required');
+    if (!formData.description) errors.push('Description is required');
+    if (!formData.propertyType) errors.push('Property type is required');
+    if (!formData.transactionType) errors.push('Transaction type is required');
+    
+    // Address validation
+    if (!formData.address?.street) errors.push('Street address is required');
+    if (!formData.address?.city) errors.push('City is required');
+    if (!formData.address?.state) errors.push('State is required');
+    
+    // Price validation
+    if (formData.transactionType === 'Sale' && !formData.price) {
+      errors.push('Price is required for sale properties');
     }
+    
+    if (formData.transactionType === 'Rent' && !formData.rentalRate) {
+      errors.push('Rental rate is required for rental properties');
+    }
+    
+    return errors;
   };
-
+  
+  const handleSaveDraft = async () => {
+    await saveForm();
+  };
+  
+  const currentStepIndex = FormSteps.findIndex(step => step.id === state.currentStep.toString()) || 0;
+  
   return (
     <div className="space-y-6">
-      <PropertyFormStepper />
+      {validationErrors.length > 0 && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>
+            <ul className="list-disc pl-5 mt-2">
+              {validationErrors.map((error, index) => (
+                <li key={index}>{error}</li>
+              ))}
+            </ul>
+          </AlertDescription>
+        </Alert>
+      )}
       
-      <Card>
-        <CardContent className="pt-6">
-          {/* Step 0: Basic Info */}
-          {currentStep === 0 && (
-            <div className="space-y-8">
-              <PropertyTypeSelector />
-              <TransactionTypeToggle />
-              <PropertyBasicInfo />
-            </div>
-          )}
-
-          {/* Step 1: Property Details */}
-          {currentStep === 1 && (
-            <div className="space-y-8">
-              <PropertyDetailsComponent />
-            </div>
-          )}
-
-          {/* Step 2: Location */}
-          {currentStep === 2 && (
-            <div className="space-y-8">
-              <PropertyAddress />
-            </div>
-          )}
-
-          {/* Step 3: Owner Contacts */}
-          {currentStep === 3 && (
-            <div className="space-y-8">
-              <PropertyOwnerContacts />
-            </div>
-          )}
-
-          {/* Step 4: Images */}
-          {currentStep === 4 && (
-            <div className="space-y-8">
-              <PropertyImagesUpload />
-            </div>
-          )}
-
-          {/* Step 5: Documents */}
-          {currentStep === 5 && (
-            <div className="space-y-8">
-              <PropertyDocumentsUpload />
-              <PropertyAgentNotes />
-            </div>
-          )}
-
-          {/* Step 6: Review & Submit */}
-          {currentStep === 6 && (
-            <div className="space-y-8">
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium">Review & Submit</h3>
-                <p className="text-muted-foreground">
-                  Please review all details before submitting your property listing.
-                </p>
-                
-                {/* Summary of property info */}
-                <div className="space-y-6 mt-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-                    <div>
-                      <h4 className="text-sm font-medium text-muted-foreground mb-1">Property Type</h4>
-                      <p>{formData.propertyType}</p>
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-medium text-muted-foreground mb-1">Transaction Type</h4>
-                      <p>{formData.transactionType}</p>
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-medium text-muted-foreground mb-1">Title</h4>
-                      <p>{formData.title}</p>
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-medium text-muted-foreground mb-1">Status</h4>
-                      <p>{formData.status}</p>
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-medium text-muted-foreground mb-1">
-                        {formData.transactionType === 'Sale' ? 'Price' : 'Rental Rate'}
-                      </h4>
-                      <p>
-                        RM {formData.transactionType === 'Sale' 
-                          ? (formData.price || 0).toLocaleString() 
-                          : (formData.rentalRate || 0).toLocaleString()}
-                      </p>
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-medium text-muted-foreground mb-1">Address</h4>
-                      <p>
-                        {formData.address.street}, {formData.address.city}, {formData.address.state}
-                        {formData.address.zip ? `, ${formData.address.zip}` : ''}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <h4 className="text-sm font-medium text-muted-foreground mb-1">Description</h4>
-                    <p className="text-sm">{formData.description}</p>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <h4 className="text-sm font-medium text-muted-foreground mb-1">Owner Contacts</h4>
-                      <p>{formData.ownerContacts.length} contacts</p>
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-medium text-muted-foreground mb-1">Images</h4>
-                      <p>{state.images.length} images attached</p>
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-medium text-muted-foreground mb-1">Documents</h4>
-                      <p>{state.documents.length} documents attached</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Navigation buttons */}
-          <div className="flex justify-between mt-8">
-            <div>
-              {currentStep > 0 && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={prevStep}
-                  disabled={isSubmitting}
-                >
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Back
-                </Button>
-              )}
-            </div>
-            
-            <div className="flex gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleSaveDraft}
-                disabled={isSubmitting}
+      {/* Form Steps Progress */}
+      <div className="hidden md:block">
+        <Tabs 
+          value={state.currentStep.toString()} 
+          onValueChange={(value) => goToStep(parseInt(value))}
+          className="w-full"
+        >
+          <TabsList className="grid grid-cols-7 w-full">
+            {FormSteps.map((step, index) => (
+              <TabsTrigger 
+                key={step.id} 
+                value={index.toString()}
+                disabled={state.isSubmitting}
               >
-                <Save className="h-4 w-4 mr-2" />
-                Save Draft
-              </Button>
-              
-              {currentStep < 6 ? (
-                <Button
-                  type="button"
-                  onClick={nextStep}
-                  disabled={!canProceed() || isSubmitting}
-                >
-                  Next
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
-              ) : (
-                <Button
-                  type="button"
-                  onClick={handleSubmit}
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Submitting...
-                    </>
-                  ) : (
-                    isEdit ? 'Update Property' : 'Submit Property'
-                  )}
-                </Button>
-              )}
-            </div>
-          </div>
+                {step.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
           
-          {/* Auto-save indicator */}
-          {lastSaved && (
-            <div className="mt-4 text-right">
-              <p className="text-xs text-muted-foreground">
-                Last saved: {lastSaved.toLocaleTimeString()}
-              </p>
-            </div>
+          <TabsContent value="0">
+            <PropertyBasicInfo />
+          </TabsContent>
+          
+          <TabsContent value="1">
+            <PropertyDetails />
+          </TabsContent>
+          
+          <TabsContent value="2">
+            <PropertyLocation />
+          </TabsContent>
+          
+          <TabsContent value="3">
+            <PropertyPricing />
+          </TabsContent>
+          
+          <TabsContent value="4">
+            <PropertyFeatures />
+          </TabsContent>
+          
+          <TabsContent value="5">
+            <Card>
+              <CardContent className="pt-6">
+                <ImageUploader 
+                  disabled={!storageReady} 
+                />
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="6">
+            <PropertyDocuments />
+          </TabsContent>
+        </Tabs>
+      </div>
+      
+      {/* Mobile Steps View */}
+      <div className="md:hidden">
+        <div className="text-lg font-semibold mb-4">
+          {FormSteps[currentStepIndex]?.label || 'Property Form'}
+        </div>
+        
+        {state.currentStep === 0 && <PropertyBasicInfo />}
+        {state.currentStep === 1 && <PropertyDetails />}
+        {state.currentStep === 2 && <PropertyLocation />}
+        {state.currentStep === 3 && <PropertyPricing />}
+        {state.currentStep === 4 && <PropertyFeatures />}
+        {state.currentStep === 5 && (
+          <Card>
+            <CardContent className="pt-6">
+              <ImageUploader 
+                disabled={!storageReady} 
+              />
+            </CardContent>
+          </Card>
+        )}
+        {state.currentStep === 6 && <PropertyDocuments />}
+      </div>
+      
+      <Separator className="my-6" />
+      
+      {/* Navigation Buttons */}
+      <div className="flex justify-between">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={prevStep}
+          disabled={state.currentStep === 0 || state.isSubmitting}
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" /> Previous
+        </Button>
+        
+        <div className="flex gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleSaveDraft}
+            disabled={state.isSubmitting}
+          >
+            <Save className="mr-2 h-4 w-4" /> Save Draft
+          </Button>
+          
+          {state.currentStep < FormSteps.length - 1 ? (
+            <Button
+              type="button"
+              onClick={nextStep}
+              disabled={state.isSubmitting}
+            >
+              Next <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              onClick={handleSubmit}
+              disabled={state.isSubmitting}
+            >
+              <Send className="mr-2 h-4 w-4" /> {isEdit ? 'Update' : 'Submit'} Property
+            </Button>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 };
 
-interface EnhancedPropertyFormProps {
-  onSubmit?: (data: PropertyFormData) => Promise<void>;
-  initialData?: Partial<PropertyFormData>;
-  isEdit?: boolean;
-}
-
 const EnhancedPropertyForm: React.FC<EnhancedPropertyFormProps> = (props) => {
   return (
     <PropertyFormProvider>
-      <PropertyFormSteps {...props} />
+      <EnhancedPropertyFormContent {...props} />
     </PropertyFormProvider>
   );
 };

@@ -1,3 +1,4 @@
+
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 
@@ -149,12 +150,14 @@ export async function ensurePropertyBuckets(): Promise<boolean> {
     
     if (error) {
       console.error('Error listing buckets:', error);
+      // We'll assume buckets don't exist when there's an error
+      toast.error('Could not access storage buckets. You may not have permission to upload files.');
       return false;
     }
     
     const requiredBuckets = [
-      { name: 'property-images', public: true },
-      { name: 'property-documents', public: false }
+      'property-images',
+      'property-documents'
     ];
     
     const existingBuckets = buckets?.map(b => b.name) || [];
@@ -162,14 +165,20 @@ export async function ensurePropertyBuckets(): Promise<boolean> {
     
     // Check if all required buckets exist
     const missingBuckets = requiredBuckets.filter(bucket => 
-      !existingBuckets.includes(bucket.name)
+      !existingBuckets.includes(bucket)
     );
     
-    // If there are missing buckets, return false but don't show a warning
-    // We've already created the buckets in Supabase
-    return missingBuckets.length === 0;
+    if (missingBuckets.length > 0) {
+      console.warn('Missing buckets:', missingBuckets);
+      toast.warning(`Missing storage buckets: ${missingBuckets.join(', ')}. Image uploads may not work properly.`);
+      return false;
+    }
+    
+    console.log('All required buckets exist');
+    return true;
   } catch (error) {
     console.error('Error checking property buckets:', error);
+    toast.error('Failed to check storage buckets');
     return false;
   }
 }

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { usePropertyManagement } from '@/hooks/usePropertyManagement';
 import EnhancedPropertyForm from '@/components/property/EnhancedPropertyForm';
@@ -25,6 +26,7 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [storageReady, setStorageReady] = useState(false);
   const { createProperty, updateProperty } = usePropertyManagement();
   
   // Initialize form
@@ -33,10 +35,12 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
       try {
         // Check storage configuration
         const bucketsExist = await propertyFormHelpers.ensurePropertyBuckets();
+        setStorageReady(bucketsExist);
         setIsInitializing(false);
       } catch (error) {
         console.error('Error initializing property form:', error);
         setIsInitializing(false);
+        setStorageReady(false);
       }
     };
     
@@ -163,10 +167,20 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
         </Alert>
       )}
       
+      {!storageReady && (
+        <Alert variant="warning" className="mb-6">
+          <AlertTitle>Storage Notice</AlertTitle>
+          <AlertDescription>
+            Image and document uploads may not work correctly. This could be due to missing storage buckets or permission issues.
+          </AlertDescription>
+        </Alert>
+      )}
+      
       <EnhancedPropertyForm 
         onSubmit={handleFormSubmit}
         initialData={initialData}
         isEdit={isEdit}
+        storageReady={storageReady}
       />
     </>
   );
