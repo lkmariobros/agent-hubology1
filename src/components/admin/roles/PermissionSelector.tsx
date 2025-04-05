@@ -2,20 +2,19 @@
 import React, { useState, useEffect } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Permission, PermissionCategory } from '@/types/role';
-import { Search } from 'lucide-react';
+import { Search, AlertCircle, RefreshCw } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import LoadingIndicator from '@/components/ui/loading-indicator';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle, RefreshCw } from 'lucide-react';
 
 interface PermissionSelectorProps {
   permissionCategories: PermissionCategory[];
   selectedPermissions: Permission[];
   onPermissionChange: (updatedPermissions: Permission[]) => void;
   isLoading?: boolean;
-  error?: string;
+  error?: Error | null | string;
   onRetry?: () => void;
 }
 
@@ -82,12 +81,14 @@ export function PermissionSelector({
     return <LoadingIndicator size="md" text="Loading permissions..." />;
   }
   
-  if (error) {
+  const errorMessage = error ? (typeof error === 'string' ? error : error.message || 'Failed to load permissions') : null;
+  
+  if (errorMessage) {
     return (
       <Alert variant="destructive" className="mb-4">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription className="flex flex-row items-center justify-between">
-          <span>{error}</span>
+          <span>{errorMessage}</span>
           {onRetry && (
             <Button 
               size="sm" 
@@ -96,7 +97,7 @@ export function PermissionSelector({
               className="ml-4"
             >
               <RefreshCw className="h-4 w-4 mr-2" />
-              Retry
+              Try Again
             </Button>
           )}
         </AlertDescription>
@@ -112,7 +113,7 @@ export function PermissionSelector({
     
   if (!hasPermissions) {
     return (
-      <Alert variant="warning" className="mb-4">
+      <Alert className="mb-4">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription className="flex flex-row items-center justify-between">
           <span>No permissions available to display.</span>
