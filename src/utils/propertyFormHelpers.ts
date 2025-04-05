@@ -144,6 +144,8 @@ export async function createProperty(propertyData: Record<string, any>): Promise
  */
 export async function ensurePropertyBuckets(): Promise<boolean> {
   try {
+    console.log('Ensuring property buckets exist...');
+    
     // Check if buckets exist
     const { data: buckets, error } = await supabase.storage.listBuckets();
     
@@ -152,14 +154,36 @@ export async function ensurePropertyBuckets(): Promise<boolean> {
       return false;
     }
     
-    const requiredBuckets = ['property-images', 'property-documents'];
-    const existingBuckets = buckets.map(b => b.name);
+    const requiredBuckets = [
+      { name: 'property-images', public: true },
+      { name: 'property-documents', public: false }
+    ];
     
-    // Create any missing buckets (only for admin users in real world)
-    for (const bucketName of requiredBuckets) {
-      if (!existingBuckets.includes(bucketName)) {
-        console.warn(`Bucket ${bucketName} doesn't exist. This should be created via migrations in production.`);
-        // In production, buckets should be created via SQL migrations, not via client
+    const existingBuckets = buckets?.map(b => b.name) || [];
+    console.log('Existing buckets:', existingBuckets);
+    
+    // Create any missing buckets (only for development, in production they should be created via migrations)
+    for (const bucket of requiredBuckets) {
+      if (!existingBuckets.includes(bucket.name)) {
+        console.log(`Creating bucket ${bucket.name}...`);
+        try {
+          const { error: createError } = await supabase.storage.createBucket(
+            bucket.name, 
+            { 
+              public: bucket.public,
+              fileSizeLimit: bucket.name === 'property-images' ? 5242880 : 10485760 // 5MB for images, 10MB for docs
+            }
+          );
+          
+          if (createError) {
+            console.warn(`Could not create bucket ${bucket.name}:`, createError);
+            toast.warning(`Storage initialization warning: ${createError.message}`);
+          } else {
+            console.log(`Bucket ${bucket.name} created successfully`);
+          }
+        } catch (createErr) {
+          console.warn(`Exception creating bucket ${bucket.name}:`, createErr);
+        }
       }
     }
     
@@ -170,10 +194,37 @@ export async function ensurePropertyBuckets(): Promise<boolean> {
   }
 }
 
+/**
+ * Gets a property by ID
+ */
+export async function getPropertyById(id: string): Promise<Record<string, any> | null> {
+  try {
+    const { data, error } = await supabase
+      .from('enhanced_properties')
+      .select('*')
+      .eq('id', id)
+      .single();
+    
+    if (error) {
+      console.error('Error fetching property:', error);
+      toast.error(`Failed to fetch property: ${error.message}`);
+      return null;
+    }
+    
+    return data;
+  } catch (err) {
+    const error = err as Error;
+    console.error('Error in getPropertyById:', error);
+    toast.error(`Database error: ${error.message}`);
+    return null;
+  }
+}
+
 export default {
   getOrCreatePropertyType,
   getOrCreateTransactionType,
   getOrCreatePropertyStatus,
   createProperty,
-  ensurePropertyBuckets
+  ensurePropertyBuckets,
+  getPropertyById
 };

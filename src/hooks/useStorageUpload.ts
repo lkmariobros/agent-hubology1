@@ -25,6 +25,8 @@ export function useStorageUpload() {
     setError(null);
     
     try {
+      console.log('Starting upload process for file:', file.name);
+      
       // Validate file size
       const fileSizeInMB = file.size / (1024 * 1024);
       if (fileSizeInMB > maxSizeMB) {
@@ -41,15 +43,35 @@ export function useStorageUpload() {
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
       const filePath = path ? `${path}/${fileName}` : fileName;
       
-      // Check if bucket exists, if not create it (for local dev only)
-      if (window.location.hostname === 'localhost') {
-        const { data: buckets } = await supabase.storage.listBuckets();
-        if (!buckets?.find(b => b.name === bucket)) {
-          console.log(`Bucket ${bucket} does not exist, this would fail in production`);
+      console.log('Uploading to path:', filePath);
+      
+      // Create bucket if it doesn't exist (for development environments)
+      try {
+        if (window.location.hostname === 'localhost') {
+          const { data: buckets } = await supabase.storage.listBuckets();
+          if (!buckets?.find(b => b.name === bucket)) {
+            console.log(`Creating bucket ${bucket} for local development`);
+            await supabase.storage.createBucket(bucket, {
+              public: bucket === 'property-images',
+              fileSizeLimit: maxSizeMB * 1024 * 1024
+            });
+          }
         }
+      } catch (bucketError) {
+        console.warn('Bucket check/creation warning:', bucketError);
+        // Continue even if bucket operations fail, as they might be restricted
       }
       
+      // Simulate progress (in real implementation, this would use upload events)
+      const progressInterval = setInterval(() => {
+        setProgress(prev => {
+          const nextProgress = Math.min(prev + 10, 90);
+          return nextProgress;
+        });
+      }, 300);
+      
       // Upload the file to Supabase Storage
+      console.log('Executing upload to Supabase');
       const { data, error } = await supabase.storage
         .from(bucket)
         .upload(filePath, file, {
@@ -57,12 +79,21 @@ export function useStorageUpload() {
           upsert: upsert,
         });
       
-      if (error) throw error;
+      clearInterval(progressInterval);
+      
+      if (error) {
+        console.error('Supabase upload error:', error);
+        throw error;
+      }
+      
+      console.log('Upload successful, data:', data);
       
       // Get public URL for the uploaded file
       const { data: { publicUrl } } = supabase.storage
         .from(bucket)
         .getPublicUrl(data?.path || filePath);
+      
+      console.log('Generated public URL:', publicUrl);
       
       setProgress(100);
       return publicUrl;

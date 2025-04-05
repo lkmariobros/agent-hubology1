@@ -1,5 +1,5 @@
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { UploadCloud, X, Loader2, Check, Image } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   maxImages = 10,
   maxSizeMB = 5
 }) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { state, addImage, removeImage, setCoverImage } = usePropertyForm();
   const { uploadFile, isUploading, progress } = useStorageUpload();
   const [processingFiles, setProcessingFiles] = useState<string[]>([]);
@@ -67,7 +68,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     }
   }, [state.images, addImage, maxImages, maxSizeMB, uploadFile]);
 
-  const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
       'image/jpeg': ['.jpg', '.jpeg'],
@@ -77,7 +78,6 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     maxSize: maxSizeMB * 1024 * 1024, // Convert MB to bytes
     disabled: isUploading,
     noClick: false, // Allow clicking to trigger file dialog
-    noKeyboard: false, // Allow keyboard navigation
   });
 
   const handleRemoveImage = (index: number) => {
@@ -89,6 +89,14 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     toast.success('Cover image updated');
   };
 
+  const handleSelectClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    // Manually trigger the file input click
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div 
@@ -97,7 +105,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
           isDragActive ? 'border-primary bg-primary/5' : 'border-muted-foreground/25 hover:border-primary/50'
         } cursor-pointer`}
       >
-        <input {...getInputProps()} />
+        <input {...getInputProps()} ref={fileInputRef} />
         <div className="flex flex-col items-center justify-center space-y-2">
           <UploadCloud className="h-12 w-12 text-muted-foreground" />
           <h3 className="text-lg font-medium">Drag & drop property images</h3>
@@ -108,10 +116,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
             type="button" 
             variant="secondary" 
             className="mt-2" 
-            onClick={(e) => {
-              e.stopPropagation();
-              open();
-            }}
+            onClick={handleSelectClick}
           >
             <Image className="h-4 w-4 mr-2" />
             Select Files
