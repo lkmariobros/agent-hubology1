@@ -54,27 +54,20 @@ export const permissionService = {
   async getRolePermissions(roleId: string): Promise<Permission[]> {
     try {
       console.log(`Fetching permissions for role ${roleId}`);
-      const { data, error } = await supabase
-        .from('role_permissions')
-        .select(`
-          permission:permission_id(*)
-        `)
-        .eq('role_id', roleId);
-
-      if (error) {
-        console.error(`Supabase error when fetching permissions for role ${roleId}:`, error);
-        throw new Error(`Failed to load role permissions: ${error.message}`);
-      }
-      
-      if (!data) {
-        console.warn(`No permission data returned for role ${roleId}`);
-        return [];
-      }
-      
-      // Transform the nested permissions array
-      const permissions = data.map((rp: any) => rp.permission);
-      console.log(`Successfully fetched ${permissions.length} permissions for role ${roleId}`);
-      return permissions;
+      return await safeQueryExecution<Permission[]>(
+        `getRolePermissions(${roleId})`,
+        () => supabase
+          .from('role_permissions')
+          .select(`
+            permission:permission_id(*)
+          `)
+          .eq('role_id', roleId)
+      ).then(data => {
+        // Transform the nested permissions array
+        const permissions = data.map((rp: any) => rp.permission);
+        console.log(`Successfully fetched ${permissions.length} permissions for role ${roleId}`);
+        return permissions;
+      });
     } catch (error: any) {
       console.error(`Error in getRolePermissions(${roleId}):`, error);
       throw new Error(`Failed to load role permissions: ${error.message || 'Unknown error'}`);
@@ -86,15 +79,13 @@ export const permissionService = {
       console.log(`Updating permissions for role ${roleId}`);
       
       // First, delete all existing role permissions
-      const { error: deleteError } = await supabase
-        .from('role_permissions')
-        .delete()
-        .eq('role_id', roleId);
-        
-      if (deleteError) {
-        console.error(`Error deleting existing permissions for role ${roleId}:`, deleteError);
-        throw new Error(`Failed to update role permissions: ${deleteError.message}`);
-      }
+      await safeMutationExecution(
+        `deleteRolePermissions(${roleId})`,
+        () => supabase
+          .from('role_permissions')
+          .delete()
+          .eq('role_id', roleId)
+      );
       
       // Get selected permissions
       const selectedPermissions = permissions.filter(p => p.selected && p.id);
@@ -110,14 +101,12 @@ export const permissionService = {
         permission_id: p.id
       }));
       
-      const { error: insertError } = await supabase
-        .from('role_permissions')
-        .insert(rolePermissions);
-        
-      if (insertError) {
-        console.error(`Error inserting new permissions for role ${roleId}:`, insertError);
-        throw new Error(`Failed to update role permissions: ${insertError.message}`);
-      }
+      await safeMutationExecution(
+        `insertRolePermissions(${roleId})`,
+        () => supabase
+          .from('role_permissions')
+          .insert(rolePermissions)
+      );
       
       console.log(`Successfully updated permissions for role ${roleId}`);
       return true;

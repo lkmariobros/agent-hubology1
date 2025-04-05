@@ -64,6 +64,11 @@ export async function executeRPC<T>(
 ): Promise<T> {
   return safeQueryExecution<T>(
     `RPC:${functionName}`,
-    () => params ? supabase.rpc(functionName, params) : supabase.rpc(functionName)
+    () => {
+      // Make sure we complete the query chain with an explicit promise
+      const query = params ? supabase.rpc(functionName, params) : supabase.rpc(functionName);
+      // Return the promise with data and error properties
+      return query;
+    }
   );
 }
