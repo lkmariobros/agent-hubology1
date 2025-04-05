@@ -15,6 +15,43 @@ export function useStorageUpload() {
   const [isUploading, setIsUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<Error | null>(null);
+  const [storageStatus, setStorageStatus] = useState<'checking' | 'available' | 'unavailable'>('checking');
+
+  // Function to verify storage buckets exist and are accessible
+  const checkStorageBuckets = async (bucketNames: string[]): Promise<boolean> => {
+    try {
+      setStorageStatus('checking');
+      
+      console.log('Checking storage buckets:', bucketNames);
+      
+      // Check if buckets exist
+      const { data: buckets, error } = await supabase.storage.listBuckets();
+      
+      if (error) {
+        console.error('Error checking buckets:', error);
+        setStorageStatus('unavailable');
+        return false;
+      }
+      
+      const existingBuckets = buckets?.map(b => b.name) || [];
+      console.log('Available buckets:', existingBuckets);
+      
+      // Check if all required buckets exist
+      const allBucketsExist = bucketNames.every(bucket => existingBuckets.includes(bucket));
+      
+      if (!allBucketsExist) {
+        const missingBuckets = bucketNames.filter(b => !existingBuckets.includes(b));
+        console.warn('Missing buckets:', missingBuckets);
+      }
+      
+      setStorageStatus(allBucketsExist ? 'available' : 'unavailable');
+      return allBucketsExist;
+    } catch (err) {
+      console.error('Error verifying storage buckets:', err);
+      setStorageStatus('unavailable');
+      return false;
+    }
+  };
 
   const uploadFile = async (file: File, options: UploadOptions): Promise<string> => {
     const { bucket, path = '', maxSizeMB = 10, acceptedFileTypes = [], upsert = false } = options;
@@ -26,6 +63,12 @@ export function useStorageUpload() {
     
     try {
       console.log('Starting upload process for file:', file.name);
+      
+      // Check bucket accessibility first
+      const bucketExists = await checkStorageBuckets([bucket]);
+      if (!bucketExists) {
+        throw new Error(`Storage bucket '${bucket}' is not accessible. Please check your storage configuration.`);
+      }
       
       // Validate file size
       const fileSizeInMB = file.size / (1024 * 1024);
@@ -121,8 +164,10 @@ export function useStorageUpload() {
   return {
     uploadFile,
     deleteFile,
+    checkStorageBuckets,
     isUploading,
     progress,
-    error
+    error,
+    storageStatus
   };
 }

@@ -6,10 +6,10 @@ import { PropertyFormData } from '@/types/property-form';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { Loader2, AlertCircle } from 'lucide-react';
+import { Loader2, AlertCircle, AlertTriangle } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import propertyFormHelpers from '@/utils/propertyFormHelpers';
-import { supabase } from '@/lib/supabase';
+import { useStorageUpload } from '@/hooks/useStorageUpload';
 import { Button } from '@/components/ui/button';
 
 interface PropertyFormWrapperProps {
@@ -30,47 +30,36 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [storageReady, setStorageReady] = useState(false);
   const { createProperty, updateProperty } = usePropertyManagement();
+  const { checkStorageBuckets } = useStorageUpload();
   
-  // Initialize form
+  // Initialize form and check storage
   useEffect(() => {
     const initializeForm = async () => {
       try {
+        setIsInitializing(true);
+        
         // Check storage configuration
-        const { data: buckets, error } = await supabase.storage.listBuckets();
-        
-        if (error) {
-          console.error('Error checking buckets:', error);
-          setStorageReady(false);
-          setIsInitializing(false);
-          return;
-        }
-        
         const requiredBuckets = ['property-images', 'property-documents'];
-        const existingBuckets = buckets.map(b => b.name);
+        const bucketsExist = await checkStorageBuckets(requiredBuckets);
         
-        // Check if all required buckets exist
-        const allBucketsExist = requiredBuckets.every(bucket => 
-          existingBuckets.includes(bucket)
-        );
+        setStorageReady(bucketsExist);
         
-        setStorageReady(allBucketsExist);
-        
-        if (!allBucketsExist) {
-          console.warn('Missing required buckets. Found:', existingBuckets);
+        if (!bucketsExist) {
+          console.warn('Missing required storage buckets');
+          toast.warning('Storage configuration issue detected. Image and document uploads may not work correctly.');
         } else {
-          console.log('All required buckets are available:', existingBuckets);
+          console.log('All required storage buckets are available');
         }
-        
-        setIsInitializing(false);
       } catch (error) {
         console.error('Error initializing property form:', error);
-        setIsInitializing(false);
         setStorageReady(false);
+      } finally {
+        setIsInitializing(false);
       }
     };
     
     initializeForm();
-  }, []);
+  }, [checkStorageBuckets]);
   
   const handleFormSubmit = async (data: PropertyFormData) => {
     if (!user) {
@@ -161,35 +150,22 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
   // Function to recheck storage buckets
   const recheckStorageBuckets = async () => {
     setIsInitializing(true);
+    
     try {
-      // Check storage configuration
-      const { data: buckets, error } = await supabase.storage.listBuckets();
-      
-      if (error) {
-        console.error('Error checking buckets:', error);
-        setStorageReady(false);
-        toast.error('Unable to connect to storage buckets');
-        return;
-      }
-      
       const requiredBuckets = ['property-images', 'property-documents'];
-      const existingBuckets = buckets.map(b => b.name);
+      const bucketsExist = await checkStorageBuckets(requiredBuckets);
       
-      // Check if all required buckets exist
-      const allBucketsExist = requiredBuckets.every(bucket => 
-        existingBuckets.includes(bucket)
-      );
+      setStorageReady(bucketsExist);
       
-      setStorageReady(allBucketsExist);
-      
-      if (allBucketsExist) {
+      if (bucketsExist) {
         toast.success('Storage buckets are now available');
       } else {
-        toast.warning('Some required storage buckets are still missing');
+        toast.warning('Some required storage buckets are still missing or inaccessible');
       }
     } catch (error) {
       console.error('Error checking storage buckets:', error);
       toast.error('Failed to check storage bucket availability');
+      setStorageReady(false);
     } finally {
       setIsInitializing(false);
     }
@@ -232,7 +208,7 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
       
       {!storageReady && (
         <Alert variant="warning" className="mb-6">
-          <AlertCircle className="h-4 w-4 mr-2" />
+          <AlertTriangle className="h-4 w-4 mr-2" />
           <AlertTitle>Storage Notice</AlertTitle>
           <AlertDescription className="flex flex-col space-y-3">
             <p>
