@@ -34,7 +34,7 @@ export const roleUtils = {
         return;
       }
       
-      // Check role in database
+      // Check role in database using our security definer function
       const { data, error } = await supabase.rpc('has_role', {
         p_user_id: user.id,
         p_role_name: newRole
@@ -81,7 +81,7 @@ export const roleUtils = {
     const hasRoleInMemory = roles.includes(role);
     console.log(`Checking if user has role ${role} in memory:`, hasRoleInMemory);
     
-    // For critical checks, also verify against the database
+    // For critical checks, also verify against the database using our security definer function
     return new Promise(async (resolve) => {
       try {
         const { data: { user } } = await supabase.auth.getUser();

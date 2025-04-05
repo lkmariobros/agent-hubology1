@@ -1113,6 +1113,29 @@ export type Database = {
           upline_id: string | null
         }[]
       }
+      get_all_downline: {
+        Args: {
+          leader_id: string
+        }
+        Returns: {
+          agency_id: string
+          avatar_url: string | null
+          commission_percentage: number
+          email: string | null
+          full_name: string | null
+          id: string
+          join_date: string
+          license_number: string | null
+          phone: string | null
+          specializations: string[] | null
+          tier: number
+          tier_name: string
+          total_sales: number | null
+          total_transactions: number | null
+          updated_at: string
+          upline_id: string | null
+        }[]
+      }
       get_commission_approval_detail: {
         Args: {
           p_approval_id: string
@@ -1124,6 +1147,29 @@ export type Database = {
           p_approval_id: string
         }
         Returns: Json[]
+      }
+      get_direct_reports: {
+        Args: {
+          manager_id: string
+        }
+        Returns: {
+          agency_id: string
+          avatar_url: string | null
+          commission_percentage: number
+          email: string | null
+          full_name: string | null
+          id: string
+          join_date: string
+          license_number: string | null
+          phone: string | null
+          specializations: string[] | null
+          tier: number
+          tier_name: string
+          total_sales: number | null
+          total_transactions: number | null
+          updated_at: string
+          upline_id: string | null
+        }[]
       }
       get_permissions: {
         Args: Record<PropertyKey, never>
@@ -1236,7 +1282,33 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_direct_downline: {
+        Args: {
+          upline_id: string
+          agent_id: string
+        }
+        Returns: boolean
+      }
+      is_in_downline: {
+        Args: {
+          upline_id: string
+          agent_id: string
+        }
+        Returns: boolean
+      }
       is_reviewer: {
+        Args: {
+          user_id: string
+        }
+        Returns: boolean
+      }
+      is_user_admin: {
+        Args: {
+          user_id: string
+        }
+        Returns: boolean
+      }
+      is_user_team_leader: {
         Args: {
           user_id: string
         }
