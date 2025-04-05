@@ -41,6 +41,8 @@ function App() {
             <Route path="properties/new" element={<NewProperty />} />
             <Route path="properties/:id" element={<PropertyDetail />} />
             <Route path="properties/:id/edit" element={<PropertyEdit />} />
+            {/* Add support for both URL patterns for editing properties */}
+            <Route path="properties/edit/:id" element={<PropertyEdit />} />
             <Route path="transactions" element={<Transactions />} />
             <Route path="profile" element={<Profile />} />
             <Route path="settings" element={<Settings />} />
