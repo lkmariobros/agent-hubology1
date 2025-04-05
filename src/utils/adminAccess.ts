@@ -1,6 +1,8 @@
+
 /**
  * Utility functions for checking admin access
  */
+import { UserRole } from '@/types/auth';
 
 // List of special admin emails that always get admin privileges
 const SPECIAL_ADMIN_EMAILS = ['josephkwantum@gmail.com'];
@@ -16,7 +18,7 @@ export const isSpecialAdmin = (email?: string | null): boolean => {
 /**
  * Ensure admin role is added to roles array if the user is a special admin
  */
-export const ensureAdminRole = (roles: string[], email?: string | null): string[] => {
+export const ensureAdminRole = (roles: UserRole[], email?: string | null): UserRole[] => {
   if (isSpecialAdmin(email) && !roles.includes('admin')) {
     return [...roles, 'admin'];
   }
@@ -26,7 +28,7 @@ export const ensureAdminRole = (roles: string[], email?: string | null): string[
 /**
  * Get preferred active role based on roles and email
  */
-export const getPreferredActiveRole = (roles: string[], email?: string | null): string => {
+export const getPreferredActiveRole = (roles: UserRole[], email?: string | null): UserRole => {
   // Special admins always default to admin role if available
   if (isSpecialAdmin(email) && roles.includes('admin')) {
     return 'admin';

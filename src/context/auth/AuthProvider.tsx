@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { AuthContext } from './AuthContext';
@@ -70,7 +71,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               
               // Handle special admin access with the utility function
               let finalRoles = [...roles] as UserRole[];
-              let finalActiveRole = activeRole;
+              let finalActiveRole = activeRole as UserRole;
               
               if (isSpecialAdmin(session.user.email)) {
                 console.log('[AuthProvider] Admin email detected, forcing admin role');
@@ -136,7 +137,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             
             // Handle special admin access using the centralized utility
             let finalRoles = [...roles] as UserRole[];
-            let finalActiveRole = activeRole;
+            let finalActiveRole = activeRole as UserRole;
             
             if (isSpecialAdmin(session.user.email)) {
               console.log('[AuthProvider] Admin email detected, forcing admin role');
