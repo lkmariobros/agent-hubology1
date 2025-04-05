@@ -45,23 +45,6 @@ export function useStorageUpload() {
       
       console.log('Uploading to path:', filePath);
       
-      // Create bucket if it doesn't exist (for development environments)
-      try {
-        if (window.location.hostname === 'localhost') {
-          const { data: buckets } = await supabase.storage.listBuckets();
-          if (!buckets?.find(b => b.name === bucket)) {
-            console.log(`Creating bucket ${bucket} for local development`);
-            await supabase.storage.createBucket(bucket, {
-              public: bucket === 'property-images',
-              fileSizeLimit: maxSizeMB * 1024 * 1024
-            });
-          }
-        }
-      } catch (bucketError) {
-        console.warn('Bucket check/creation warning:', bucketError);
-        // Continue even if bucket operations fail, as they might be restricted
-      }
-      
       // Simulate progress (in real implementation, this would use upload events)
       const progressInterval = setInterval(() => {
         setProgress(prev => {
@@ -71,7 +54,7 @@ export function useStorageUpload() {
       }, 300);
       
       // Upload the file to Supabase Storage
-      console.log('Executing upload to Supabase');
+      console.log('Executing upload to Supabase bucket:', bucket);
       const { data, error } = await supabase.storage
         .from(bucket)
         .upload(filePath, file, {
@@ -83,7 +66,15 @@ export function useStorageUpload() {
       
       if (error) {
         console.error('Supabase upload error:', error);
-        throw error;
+        
+        // Check for specific error types and provide user-friendly messages
+        if (error.message.includes('storage/object-too-large')) {
+          throw new Error(`File is too large. Maximum size is ${maxSizeMB}MB.`);
+        } else if (error.message.includes('permission denied')) {
+          throw new Error('You do not have permission to upload files to this storage bucket.');
+        } else {
+          throw error;
+        }
       }
       
       console.log('Upload successful, data:', data);
@@ -101,7 +92,8 @@ export function useStorageUpload() {
       const error = err as Error;
       setError(error);
       console.error('File upload error:', error.message);
-      toast.error(`Upload failed: ${error.message}`);
+      
+      // Return a more specific error
       throw error;
     } finally {
       setIsUploading(false);

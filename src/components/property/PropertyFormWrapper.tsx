@@ -6,9 +6,11 @@ import { PropertyFormData } from '@/types/property-form';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertCircle } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import propertyFormHelpers from '@/utils/propertyFormHelpers';
+import { supabase } from '@/lib/supabase';
+import { Button } from '@/components/ui/button';
 
 interface PropertyFormWrapperProps {
   propertyId?: string;
@@ -34,8 +36,31 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
     const initializeForm = async () => {
       try {
         // Check storage configuration
-        const bucketsExist = await propertyFormHelpers.ensurePropertyBuckets();
-        setStorageReady(bucketsExist);
+        const { data: buckets, error } = await supabase.storage.listBuckets();
+        
+        if (error) {
+          console.error('Error checking buckets:', error);
+          setStorageReady(false);
+          setIsInitializing(false);
+          return;
+        }
+        
+        const requiredBuckets = ['property-images', 'property-documents'];
+        const existingBuckets = buckets.map(b => b.name);
+        
+        // Check if all required buckets exist
+        const allBucketsExist = requiredBuckets.every(bucket => 
+          existingBuckets.includes(bucket)
+        );
+        
+        setStorageReady(allBucketsExist);
+        
+        if (!allBucketsExist) {
+          console.warn('Missing required buckets. Found:', existingBuckets);
+        } else {
+          console.log('All required buckets are available:', existingBuckets);
+        }
+        
         setIsInitializing(false);
       } catch (error) {
         console.error('Error initializing property form:', error);
@@ -133,6 +158,43 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
     }
   };
   
+  // Function to recheck storage buckets
+  const recheckStorageBuckets = async () => {
+    setIsInitializing(true);
+    try {
+      // Check storage configuration
+      const { data: buckets, error } = await supabase.storage.listBuckets();
+      
+      if (error) {
+        console.error('Error checking buckets:', error);
+        setStorageReady(false);
+        toast.error('Unable to connect to storage buckets');
+        return;
+      }
+      
+      const requiredBuckets = ['property-images', 'property-documents'];
+      const existingBuckets = buckets.map(b => b.name);
+      
+      // Check if all required buckets exist
+      const allBucketsExist = requiredBuckets.every(bucket => 
+        existingBuckets.includes(bucket)
+      );
+      
+      setStorageReady(allBucketsExist);
+      
+      if (allBucketsExist) {
+        toast.success('Storage buckets are now available');
+      } else {
+        toast.warning('Some required storage buckets are still missing');
+      }
+    } catch (error) {
+      console.error('Error checking storage buckets:', error);
+      toast.error('Failed to check storage bucket availability');
+    } finally {
+      setIsInitializing(false);
+    }
+  };
+  
   if (isInitializing) {
     return (
       <div className="flex flex-col items-center justify-center p-8">
@@ -162,6 +224,7 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
     <>
       {error && (
         <Alert variant="destructive" className="mb-6">
+          <AlertCircle className="h-4 w-4 mr-2" />
           <AlertTitle>Error</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
@@ -169,9 +232,20 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
       
       {!storageReady && (
         <Alert variant="warning" className="mb-6">
+          <AlertCircle className="h-4 w-4 mr-2" />
           <AlertTitle>Storage Notice</AlertTitle>
-          <AlertDescription>
-            Image and document uploads may not work correctly. This could be due to missing storage buckets or permission issues.
+          <AlertDescription className="flex flex-col space-y-3">
+            <p>
+              Image and document uploads may not work correctly. This could be due to missing storage buckets or permission issues.
+            </p>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={recheckStorageBuckets}
+              className="self-start"
+            >
+              Check Again
+            </Button>
           </AlertDescription>
         </Alert>
       )}

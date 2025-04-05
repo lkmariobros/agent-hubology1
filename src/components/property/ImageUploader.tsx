@@ -1,11 +1,13 @@
-import React, { useCallback, useRef, useState } from 'react';
+
+import React, { useCallback, useRef, useState, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { UploadCloud, X, Loader2, Check, Image, AlertCircle } from 'lucide-react';
+import { UploadCloud, X, Loader2, Check, Image, AlertCircle, RefreshCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { usePropertyForm } from '@/context/PropertyForm/PropertyFormContext';
 import { useStorageUpload } from '@/hooks/useStorageUpload';
 import { toast } from 'sonner';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { supabase } from '@/lib/supabase';
 
 interface ImageUploaderProps {
   maxImages?: number;
@@ -23,6 +25,46 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   const { uploadFile, isUploading, progress } = useStorageUpload();
   const [processingFiles, setProcessingFiles] = useState<string[]>([]);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [bucketStatus, setBucketStatus] = useState<'checking' | 'available' | 'unavailable'>('checking');
+
+  // Check if the storage buckets are accessible
+  useEffect(() => {
+    const checkBuckets = async () => {
+      try {
+        setBucketStatus('checking');
+        
+        // Try to list buckets to check permissions
+        const { data: buckets, error } = await supabase.storage.listBuckets();
+        
+        if (error) {
+          console.error('Error checking buckets:', error);
+          setBucketStatus('unavailable');
+          return;
+        }
+        
+        const requiredBuckets = ['property-images', 'property-documents'];
+        const existingBuckets = buckets.map(b => b.name);
+        
+        // Check if our required buckets exist
+        const allBucketsExist = requiredBuckets.every(bucket => 
+          existingBuckets.includes(bucket)
+        );
+        
+        setBucketStatus(allBucketsExist ? 'available' : 'unavailable');
+        
+        if (!allBucketsExist) {
+          console.warn('Missing required buckets. Found:', existingBuckets);
+        } else {
+          console.log('All required buckets are available:', existingBuckets);
+        }
+      } catch (error) {
+        console.error('Error checking buckets:', error);
+        setBucketStatus('unavailable');
+      }
+    };
+    
+    checkBuckets();
+  }, []);
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     // Reset any previous errors
@@ -53,21 +95,24 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
           uploadStatus: 'uploading'
         });
 
-        // Try to upload the file (will work once buckets are properly set up)
+        // Try to upload the file
         try {
-          await uploadFile(file, {
+          const result = await uploadFile(file, {
             bucket: 'property-images',
             path: 'temp',
             maxSizeMB,
             acceptedFileTypes: ['image/jpeg', 'image/png', 'image/webp']
           });
-          console.log(`Successfully uploaded: ${file.name}`);
+          
+          console.log(`Successfully uploaded: ${file.name}`, result);
         } catch (error: any) {
           console.error('Error uploading file:', error);
           setUploadError(`Error uploading: ${error.message || 'Unknown error'}`);
           // We'll still keep the image in the UI for preview purposes
         }
       }
+      
+      toast.success(`Added ${acceptedFiles.length} image(s) for upload`);
     } finally {
       // Remove files from processing state
       setProcessingFiles(prev => prev.filter(name => !fileNames.includes(name)));
@@ -82,7 +127,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
       'image/webp': ['.webp']
     },
     maxSize: maxSizeMB * 1024 * 1024, // Convert MB to bytes
-    disabled: isUploading || disabled,
+    disabled: isUploading || disabled || bucketStatus !== 'available',
     noClick: false, // Allow clicking to trigger file dialog
   });
 
@@ -102,14 +147,67 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
       fileInputRef.current.click();
     }
   };
+  
+  const retryBucketCheck = () => {
+    setBucketStatus('checking');
+    // Re-check bucket status
+    setTimeout(async () => {
+      try {
+        const { data: buckets, error } = await supabase.storage.listBuckets();
+        
+        if (error) {
+          console.error('Error checking buckets:', error);
+          setBucketStatus('unavailable');
+          return;
+        }
+        
+        const requiredBuckets = ['property-images', 'property-documents'];
+        const existingBuckets = buckets.map(b => b.name);
+        
+        const allBucketsExist = requiredBuckets.every(bucket => 
+          existingBuckets.includes(bucket)
+        );
+        
+        setBucketStatus(allBucketsExist ? 'available' : 'unavailable');
+        
+        if (allBucketsExist) {
+          toast.success('Storage buckets are now available');
+        }
+      } catch (error) {
+        console.error('Error checking buckets:', error);
+        setBucketStatus('unavailable');
+      }
+    }, 1000);
+  };
 
   return (
     <div className="space-y-4">
-      {disabled && (
+      {bucketStatus === 'checking' && (
+        <Alert className="mb-4">
+          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+          <AlertDescription>
+            Checking storage configuration...
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {bucketStatus === 'unavailable' && (
         <Alert variant="warning" className="mb-4">
           <AlertCircle className="h-4 w-4 mr-2" />
-          <AlertDescription>
-            Image uploads are currently disabled due to storage configuration issues.
+          <AlertTitle>Storage Configuration Issue</AlertTitle>
+          <AlertDescription className="flex flex-col space-y-2">
+            <p>
+              Image uploads might not work correctly. This could be due to missing storage buckets or permission issues.
+            </p>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={retryBucketCheck} 
+              className="self-start flex items-center"
+            >
+              <RefreshCcw className="h-3 w-3 mr-2" />
+              Retry Connection
+            </Button>
           </AlertDescription>
         </Alert>
       )}
@@ -125,9 +223,9 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
         {...getRootProps()} 
         className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
           isDragActive ? 'border-primary bg-primary/5' : 'border-muted-foreground/25 hover:border-primary/50'
-        } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+        } ${bucketStatus !== 'available' || disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
       >
-        <input {...getInputProps()} ref={fileInputRef} disabled={disabled} />
+        <input {...getInputProps()} ref={fileInputRef} disabled={bucketStatus !== 'available' || disabled} />
         <div className="flex flex-col items-center justify-center space-y-2">
           <UploadCloud className="h-12 w-12 text-muted-foreground" />
           <h3 className="text-lg font-medium">Drag & drop property images</h3>
@@ -139,7 +237,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
             variant="secondary" 
             className="mt-2" 
             onClick={handleSelectClick}
-            disabled={disabled || isUploading}
+            disabled={bucketStatus !== 'available' || disabled || isUploading}
           >
             <Image className="h-4 w-4 mr-2" />
             Select Files
