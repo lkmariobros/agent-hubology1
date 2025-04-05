@@ -1,57 +1,41 @@
 
 import React from 'react';
-import { usePropertyForm } from '@/context/PropertyFormContext';
 import { Button } from '@/components/ui/button';
-import { Building, Home, Factory, Landmark } from 'lucide-react';
+import { Building, Home, Warehouse, Landmark } from 'lucide-react';
 
-const PropertyTypeSelector: React.FC = () => {
-  const { state, updatePropertyType } = usePropertyForm();
-  const selectedType = state.formData.propertyType;
+type PropertyType = 'Residential' | 'Commercial' | 'Industrial' | 'Land';
+
+interface PropertyTypeSelectorProps {
+  value: PropertyType;
+  onChange: (type: PropertyType) => void;
+}
+
+const PropertyTypeSelector: React.FC<PropertyTypeSelectorProps> = ({ value, onChange }) => {
+  const propertyTypes: Array<{
+    id: PropertyType;
+    label: string;
+    icon: React.ReactNode;
+  }> = [
+    { id: 'Residential', label: 'Residential', icon: <Home className="h-5 w-5" /> },
+    { id: 'Commercial', label: 'Commercial', icon: <Building className="h-5 w-5" /> },
+    { id: 'Industrial', label: 'Industrial', icon: <Warehouse className="h-5 w-5" /> },
+    { id: 'Land', label: 'Land', icon: <Landmark className="h-5 w-5" /> },
+  ];
 
   return (
-    <div className="space-y-4">
-      <h3 className="text-lg font-medium">Property Type</h3>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 gap-2">
+      {propertyTypes.map((type) => (
         <Button
+          key={type.id}
           type="button"
-          variant={selectedType === 'Residential' ? 'default' : 'outline'}
-          className="flex flex-col h-24 gap-2 items-center justify-center"
-          onClick={() => updatePropertyType('Residential')}
+          variant={value === type.id ? "default" : "outline"}
+          className="flex flex-col items-center justify-center h-24 gap-2"
+          onClick={() => onChange(type.id)}
         >
-          <Home className="h-6 w-6" />
-          <span>Residential</span>
+          {type.icon}
+          <span>{type.label}</span>
         </Button>
-
-        <Button
-          type="button"
-          variant={selectedType === 'Commercial' ? 'default' : 'outline'}
-          className="flex flex-col h-24 gap-2 items-center justify-center"
-          onClick={() => updatePropertyType('Commercial')}
-        >
-          <Building className="h-6 w-6" />
-          <span>Commercial</span>
-        </Button>
-
-        <Button
-          type="button"
-          variant={selectedType === 'Industrial' ? 'default' : 'outline'}
-          className="flex flex-col h-24 gap-2 items-center justify-center"
-          onClick={() => updatePropertyType('Industrial')}
-        >
-          <Factory className="h-6 w-6" />
-          <span>Industrial</span>
-        </Button>
-
-        <Button
-          type="button"
-          variant={selectedType === 'Land' ? 'default' : 'outline'}
-          className="flex flex-col h-24 gap-2 items-center justify-center"
-          onClick={() => updatePropertyType('Land')}
-        >
-          <Landmark className="h-6 w-6" />
-          <span>Land</span>
-        </Button>
-      </div>
+      ))}
     </div>
   );
 };

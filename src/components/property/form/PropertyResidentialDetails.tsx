@@ -22,7 +22,7 @@ const PropertyResidentialDetails: React.FC = () => {
     <div className="space-y-6">
       <h3 className="text-lg font-medium">Residential Property Details</h3>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="space-y-2">
           <Label htmlFor="bedrooms">Bedrooms</Label>
           <Input
@@ -31,10 +31,9 @@ const PropertyResidentialDetails: React.FC = () => {
             value={formData.bedrooms}
             onChange={(e) => updateFormData({ bedrooms: Number(e.target.value) })}
             min={0}
-            placeholder="Number of bedrooms"
           />
         </div>
-
+        
         <div className="space-y-2">
           <Label htmlFor="bathrooms">Bathrooms</Label>
           <Input
@@ -43,11 +42,10 @@ const PropertyResidentialDetails: React.FC = () => {
             value={formData.bathrooms}
             onChange={(e) => updateFormData({ bathrooms: Number(e.target.value) })}
             min={0}
-            step={0.5}
-            placeholder="Number of bathrooms"
+            step="0.5"
           />
         </div>
-
+        
         <div className="space-y-2">
           <Label htmlFor="builtUpArea">Built-up Area (sq ft)</Label>
           <Input
@@ -56,10 +54,11 @@ const PropertyResidentialDetails: React.FC = () => {
             value={formData.builtUpArea}
             onChange={(e) => updateFormData({ builtUpArea: Number(e.target.value) })}
             min={0}
-            placeholder="Built-up area in square feet"
           />
         </div>
-
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <Label htmlFor="furnishingStatus">Furnishing Status</Label>
           <Select
@@ -75,6 +74,19 @@ const PropertyResidentialDetails: React.FC = () => {
               <SelectItem value="Fully Furnished">Fully Furnished</SelectItem>
             </SelectContent>
           </Select>
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="yearBuilt">Year Built</Label>
+          <Input
+            id="yearBuilt"
+            type="number"
+            value={formData.yearBuilt || ''}
+            onChange={(e) => updateFormData({ yearBuilt: Number(e.target.value) })}
+            min={1900}
+            max={new Date().getFullYear() + 5}
+            placeholder="Year built"
+          />
         </div>
       </div>
     </div>
