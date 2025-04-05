@@ -1,4 +1,3 @@
-
 import { supabase } from '@/lib/supabase';
 import { Permission, PermissionCategory } from '@/types/role';
 import { toast } from 'sonner';
@@ -6,9 +5,9 @@ import { toast } from 'sonner';
 export const permissionService = {
   async getPermissions(): Promise<Permission[]> {
     try {
-      console.log('Fetching permissions using get_permissions RPC');
+      console.log('Fetching permissions using get_permissions_simple RPC');
       const { data, error } = await supabase
-        .rpc('get_permissions');
+        .rpc('get_permissions_simple');
 
       if (error) {
         console.error('Supabase error when fetching permissions:', error);
@@ -16,7 +15,7 @@ export const permissionService = {
       }
       
       if (!data) {
-        console.warn('No permissions data returned from get_permissions RPC');
+        console.warn('No permissions data returned from get_permissions_simple RPC');
         return [];
       }
       
@@ -30,14 +29,11 @@ export const permissionService = {
   
   async getPermissionsByCategories(): Promise<PermissionCategory[]> {
     try {
-      console.log('Fetching permissions by categories using get_permissions_by_category RPC');
+      console.log('Fetching permissions by categories');
       
-      // Use direct query instead of RPC function if there are issues with the RPC
+      // First try to get all permissions using the simpler function
       const { data, error } = await supabase
-        .from('permissions')
-        .select('*')
-        .order('category')
-        .order('name');
+        .rpc('get_permissions_simple');
         
       if (error) {
         console.error('Supabase error when fetching permissions by categories:', error);
@@ -45,7 +41,7 @@ export const permissionService = {
       }
       
       if (!data || data.length === 0) {
-        console.warn('No permissions data returned from query');
+        console.warn('No permissions data returned from get_permissions_simple RPC');
         return [];
       }
       

@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -86,7 +87,7 @@ export function RoleDialog({
       setError(null);
       const permissions = await loadRolePermissions(roleId);
       setSelectedPermissions(permissions.map(p => ({ ...p, selected: true })));
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading role permissions:', error);
       setError('Could not load permissions for this role. Please try again.');
     } finally {
@@ -107,7 +108,7 @@ export function RoleDialog({
         ...values,
         permissions: selectedPermissions
       });
-    } catch (err) {
+    } catch (err: any) {
       setError('An error occurred while saving. Please try again.');
       console.error('Form submission error:', err);
     }

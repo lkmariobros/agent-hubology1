@@ -1142,6 +1142,16 @@ export type Database = {
           permissions: Json
         }[]
       }
+      get_permissions_simple: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          category: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+        }[]
+      }
       get_team_performance_metrics: {
         Args: {
           p_agent_id: string

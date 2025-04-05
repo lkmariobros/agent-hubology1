@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { roleService } from '@/services/roleService';
@@ -131,18 +130,6 @@ export function useRoles() {
     return deleteMutation.mutateAsync(id);
   }, [deleteMutation]);
 
-  // Load permissions for a role
-  const loadRolePermissions = useCallback(async (roleId: string) => {
-    try {
-      const rolePermissions = await roleService.getRolePermissions(roleId);
-      return rolePermissions;
-    } catch (error: any) {
-      console.error('Error loading role permissions:', error);
-      toast.error(`Failed to load role permissions: ${error.message || "Unknown error"}`);
-      return [];
-    }
-  }, []);
-
   // Helper to determine if we have any errors
   const error = rolesError || permissionsError || categoriesError;
 
@@ -169,12 +156,12 @@ export function useRoles() {
     permissionCategories,
     isLoadingPermissions,
     isLoadingCategories,
-    loadRolePermissions,
+    loadRolePermissions: roleService.getRolePermissions,
     refetchPermissions,
     refetchPermissionCategories,
-    createRole,
-    updateRole,
-    deleteRole,
+    createRole: roleService.createRole,
+    updateRole: roleService.updateRole,
+    deleteRole: roleService.deleteRole,
     isCreating: createMutation.isPending,
     isUpdating: updateMutation.isPending,
     isDeleting: deleteMutation.isPending,
