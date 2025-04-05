@@ -2,6 +2,7 @@
 import { supabase } from '@/lib/supabase';
 import { Permission, PermissionCategory } from '@/types/role';
 import { toast } from 'sonner';
+import { useSentry } from '@/hooks/useSentry';
 
 export const permissionService = {
   async getPermissions(): Promise<Permission[]> {

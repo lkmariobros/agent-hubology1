@@ -2,31 +2,37 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { roleService } from '@/services/roleService';
+import { permissionService } from '@/services/permissionService';
 import { Role, Permission, PermissionCategory } from '@/types/role';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
+import { captureException } from '@/lib/sentry';
 
 export function useRoles() {
   const queryClient = useQueryClient();
   const { isAuthenticated, user, activeRole, isAdmin } = useAuth();
   
+  const isAdminMode = isAuthenticated && (isAdmin || activeRole === 'admin');
+  
   // Fetch all roles
   const { 
     data: roles = [],
-    isLoading,
+    isLoading: isLoadingRoles,
     error: rolesError,
     refetch: refetchRoles,
     status: rolesStatus
   } = useQuery({
     queryKey: ['roles'],
     queryFn: roleService.getRoles,
-    enabled: isAuthenticated && (isAdmin || activeRole === 'admin'),
-    retry: 2,
-    retryDelay: attempt => Math.min(1000 * 2 ** attempt, 10000),
+    enabled: isAdminMode,
+    retry: 3,
+    retryDelay: attempt => Math.min(1000 * 2 ** attempt, 30000),
     staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
     meta: {
       onError: (error: any) => {
         console.error('Error fetching roles:', error);
+        captureException(error, { source: 'useRoles.getRoles' });
         toast.error(`Failed to load roles: ${error.message || 'Unknown error'}`);
       }
     }
@@ -41,14 +47,16 @@ export function useRoles() {
     status: permissionsStatus
   } = useQuery({
     queryKey: ['permissions'],
-    queryFn: roleService.getPermissions,
-    enabled: isAuthenticated && (isAdmin || activeRole === 'admin'),
-    retry: 2,
-    retryDelay: attempt => Math.min(1000 * 2 ** attempt, 10000),
+    queryFn: permissionService.getPermissions,
+    enabled: isAdminMode,
+    retry: 3,
+    retryDelay: attempt => Math.min(1000 * 2 ** attempt, 30000),
     staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 15 * 60 * 1000, // 15 minutes
     meta: {
       onError: (error: any) => {
         console.error('Error fetching permissions:', error);
+        captureException(error, { source: 'useRoles.getPermissions' });
         toast.error(`Failed to load permissions: ${error.message || 'Unknown error'}`);
       }
     }
@@ -63,14 +71,16 @@ export function useRoles() {
     status: categoriesStatus
   } = useQuery({
     queryKey: ['permissionCategories'],
-    queryFn: roleService.getPermissionsByCategories,
-    enabled: isAuthenticated && (isAdmin || activeRole === 'admin'),
-    retry: 2,
-    retryDelay: attempt => Math.min(1000 * 2 ** attempt, 10000),
+    queryFn: permissionService.getPermissionsByCategories,
+    enabled: isAdminMode && permissions.length > 0,
+    retry: 3,
+    retryDelay: attempt => Math.min(1000 * 2 ** attempt, 30000),
     staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 15 * 60 * 1000, // 15 minutes
     meta: {
       onError: (error: any) => {
         console.error('Error fetching permission categories:', error);
+        captureException(error, { source: 'useRoles.getPermissionCategories' });
         toast.error(`Failed to load permission categories: ${error.message || 'Unknown error'}`);
       }
     }
@@ -85,6 +95,7 @@ export function useRoles() {
     },
     onError: (error: any) => {
       console.error('Error creating role:', error);
+      captureException(error, { source: 'useRoles.createRole' });
       toast.error(`Failed to create role: ${error.message || "Unknown error"}`);
     }
   });
@@ -99,6 +110,7 @@ export function useRoles() {
     },
     onError: (error: any) => {
       console.error('Error updating role:', error);
+      captureException(error, { source: 'useRoles.updateRole' });
       toast.error(`Failed to update role: ${error.message || "Unknown error"}`);
     }
   });
@@ -112,6 +124,7 @@ export function useRoles() {
     },
     onError: (error: any) => {
       console.error('Error deleting role:', error);
+      captureException(error, { source: 'useRoles.deleteRole' });
       toast.error(`Failed to delete role: ${error.message || "Unknown error"}`);
     }
   });
@@ -133,9 +146,11 @@ export function useRoles() {
 
   // Helper to determine if we have any errors
   const error = rolesError || permissionsError || categoriesError;
+  const isLoading = isLoadingRoles || isLoadingPermissions || isLoadingCategories;
 
   // Retry all queries at once
   const refetchAll = useCallback(() => {
+    console.log('Attempting to refetch all role data...');
     refetchRoles();
     refetchPermissions();
     refetchPermissionCategories();
@@ -143,10 +158,10 @@ export function useRoles() {
 
   // Refresh data when auth status changes
   useEffect(() => {
-    if (isAuthenticated && (isAdmin || activeRole === 'admin')) {
+    if (isAdminMode) {
       refetchAll();
     }
-  }, [isAuthenticated, isAdmin, activeRole, refetchAll]);
+  }, [isAdminMode, refetchAll]);
 
   return {
     roles,
@@ -155,14 +170,15 @@ export function useRoles() {
     refetch: refetchAll,
     permissions,
     permissionCategories,
+    isLoadingRoles,
     isLoadingPermissions,
     isLoadingCategories,
-    loadRolePermissions: roleService.getRolePermissions,
+    loadRolePermissions: permissionService.getRolePermissions,
     refetchPermissions,
     refetchPermissionCategories,
-    createRole: roleService.createRole,
-    updateRole: roleService.updateRole,
-    deleteRole: roleService.deleteRole,
+    createRole,
+    updateRole,
+    deleteRole,
     isCreating: createMutation.isPending,
     isUpdating: updateMutation.isPending,
     isDeleting: deleteMutation.isPending,
