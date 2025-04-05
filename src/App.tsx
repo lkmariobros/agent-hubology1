@@ -1,7 +1,14 @@
 
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import AppLayout from '@/layouts/AppLayout';
+import { AuthProvider } from '@/context/AuthContext';
+import { ThemeProvider } from '@/providers/ThemeProvider';
+import { Toaster } from 'sonner';
+
+// Components
+import AppLayout from '@/components/layout/AppLayout';
+
+// Pages
 import Dashboard from '@/pages/Dashboard';
 import Properties from '@/pages/Properties';
 import NewProperty from '@/pages/NewProperty';
@@ -9,15 +16,14 @@ import PropertyEdit from '@/pages/PropertyEdit';
 import PropertyDetail from '@/pages/PropertyDetail';
 import Transactions from '@/pages/Transactions';
 import NotFound from '@/pages/NotFound';
-import Login from '@/pages/Login';
-import Register from '@/pages/Register';
-import ForgotPassword from '@/pages/ForgotPassword';
-import ResetPassword from '@/pages/ResetPassword';
 import Profile from '@/pages/Profile';
 import Settings from '@/pages/Settings';
-import { AuthProvider } from '@/context/AuthContext';
-import { Toaster } from 'sonner';
-import { ThemeProvider } from '@/context/ThemeContext';
+
+// Auth Pages
+import Login from '@/pages/auth/Login';
+import Signup from '@/pages/auth/Signup';
+import ForgotPassword from '@/pages/auth/ForgotPassword';
+import ResetPassword from '@/pages/auth/ResetPassword';
 
 function App() {
   return (
@@ -26,7 +32,7 @@ function App() {
         <Router>
           <Routes>
             <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+            <Route path="/signup" element={<Signup />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             
