@@ -1,6 +1,11 @@
 
-// This file exists for backward compatibility
-// It re-exports the main useAuth hook from the consolidated implementation
-import { useAuth } from '@/hooks/useAuth';
-export { useAuth };
-export default useAuth;
+import { useContext } from 'react';
+import { AuthContext } from '@/context/AuthContext';
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
