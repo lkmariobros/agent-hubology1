@@ -1289,6 +1289,13 @@ export type Database = {
           similarity: number
         }[]
       }
+      property_belongs_to_agent: {
+        Args: {
+          property_id: string
+          agent_id: string
+        }
+        Returns: boolean
+      }
       resend_agent_invitation: {
         Args: {
           p_invitation_id: string
