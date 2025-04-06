@@ -37,9 +37,9 @@ const PropertySummaryCard: React.FC<PropertySummaryCardProps> = ({
 
   return (
     <Card className="mb-6 overflow-hidden bg-card border-neutral-800/60">
-      <CardContent>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
+      <CardContent className="p-0">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <div className="lg:col-span-3">
             <PropertyGallery 
               propertyId={property.id} 
               images={propertyImages} 
@@ -47,8 +47,8 @@ const PropertySummaryCard: React.FC<PropertySummaryCardProps> = ({
             />
           </div>
           
-          <div className="p-6 lg:p-0 lg:pr-6 lg:py-6">
-            <div className="space-y-6">
+          <div className="p-6">
+            <div className="space-y-4">
               <div>
                 <div className="flex items-center mb-3">
                   {getPropertyTypeIcon(propertyType)}
@@ -61,7 +61,7 @@ const PropertySummaryCard: React.FC<PropertySummaryCardProps> = ({
                 <h2 className="text-2xl font-bold">{formattedPrice || formattedRentalRate}</h2>
               </div>
               
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-3">
                 {property.bedrooms > 0 && (
                   <div className="flex items-center">
                     <BedDouble className="h-5 w-5 mr-2 text-muted-foreground" />
@@ -91,7 +91,7 @@ const PropertySummaryCard: React.FC<PropertySummaryCardProps> = ({
               {property.street && (
                 <div className="pt-2">
                   <h3 className="text-sm font-medium text-muted-foreground mb-1">Location</h3>
-                  <p>
+                  <p className="text-sm">
                     {property.street}
                     {property.city && `, ${property.city}`}
                     {property.state && `, ${property.state}`}
@@ -103,7 +103,7 @@ const PropertySummaryCard: React.FC<PropertySummaryCardProps> = ({
               {property.description && (
                 <div className="pt-2">
                   <h3 className="text-sm font-medium text-muted-foreground mb-1">Description</h3>
-                  <p className="text-sm line-clamp-4">{property.description}</p>
+                  <p className="text-sm line-clamp-3">{property.description}</p>
                 </div>
               )}
             </div>
