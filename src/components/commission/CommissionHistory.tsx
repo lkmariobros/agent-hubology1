@@ -4,14 +4,16 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, CheckCircle, Clock, DollarSign } from 'lucide-react';
-import { formatCurrency } from '@/utils/propertyUtils';
-import { CommissionHistory } from '@/types';
 
 interface CommissionHistoryProps {
-  commissions: CommissionHistory[];
+  commissions: any[];
+  limit?: number;
 }
 
-const CommissionHistoryComponent: React.FC<CommissionHistoryProps> = ({ commissions }) => {
+const CommissionHistory: React.FC<CommissionHistoryProps> = ({ 
+  commissions,
+  limit = 10
+}) => {
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
@@ -20,27 +22,36 @@ const CommissionHistoryComponent: React.FC<CommissionHistoryProps> = ({ commissi
     });
   };
 
-  // Helper function to safely extract property title
-  const getPropertyTitle = (property: string | { title: string; location: string }): string => {
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      maximumFractionDigits: 0
+    }).format(amount);
+  };
+
+  // Get property title and location safely
+  const getPropertyTitle = (property: any): string => {
     if (typeof property === 'string') {
       return property;
     }
-    return property.title;
+    return property.title || '';
   };
 
-  // Helper function to safely extract property location
-  const getPropertyLocation = (property: string | { title: string; location: string }): string => {
+  const getPropertyLocation = (property: any): string => {
     if (typeof property === 'string') {
       return '';
     }
-    return property.location;
+    return property.location || '';
   };
+
+  const displayCommissions = commissions.slice(0, limit);
 
   return (
     <div className="space-y-4">
-      {commissions.length > 0 ? (
+      {displayCommissions.length > 0 ? (
         <>
-          {commissions.map((commission) => (
+          {displayCommissions.map((commission) => (
             <div key={commission.id} className="flex items-center p-3 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors">
               <div className="flex-1 flex items-center space-x-4">
                 <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
@@ -92,4 +103,4 @@ const CommissionHistoryComponent: React.FC<CommissionHistoryProps> = ({ commissi
   );
 };
 
-export default CommissionHistoryComponent;
+export default CommissionHistory;

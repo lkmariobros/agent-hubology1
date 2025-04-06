@@ -1,8 +1,8 @@
 
 import React from 'react';
-import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { DollarSign, TrendingUp, Calendar } from 'lucide-react';
 import { Progress } from "@/components/ui/progress";
+import CommissionMetricsCard from './CommissionMetricsCard';
 
 interface MetricsData {
   currentMonth: {
@@ -29,76 +29,78 @@ interface CommissionMetricsProps {
 const CommissionMetrics: React.FC<CommissionMetricsProps> = ({ metrics }) => {
   const { currentMonth, previousMonth, yearToDate } = metrics;
   
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      maximumFractionDigits: 0
+    }).format(amount);
+  };
+  
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <Card>
-        <CardHeader className="p-5">
-          <CardTitle className="text-sm font-medium">Current Month</CardTitle>
-        </CardHeader>
-        <CardContent className="p-5 pt-0 space-y-4">
-          <div className="flex items-center gap-2">
-            <DollarSign className="h-5 w-5 text-muted-foreground" />
-            <span className="text-2xl font-bold">${currentMonth.earned.toLocaleString()}</span>
-            <span className="text-muted-foreground">/ ${currentMonth.target.toLocaleString()}</span>
+      <div className="bg-card rounded-lg border shadow">
+        <div className="p-5">
+          <h3 className="text-sm font-medium text-muted-foreground">Current Month</h3>
+          <div className="mt-4 flex items-center gap-2">
+            <DollarSign className="h-5 w-5 text-blue-500" />
+            <span className="text-2xl font-bold">{formatCurrency(currentMonth.earned)}</span>
+            <span className="text-muted-foreground">/ {formatCurrency(currentMonth.target)}</span>
           </div>
-          <div className="space-y-2">
+          <div className="mt-4 space-y-2">
             <Progress 
               value={currentMonth.progress} 
-              className="h-2" 
-              indicatorClassName="bg-property-blue"
+              className="h-2 bg-blue-100" 
+              indicatorClassName="bg-blue-500"
             />
             <p className="text-xs text-muted-foreground">
-              {currentMonth.progress}% of monthly target
+              {currentMonth.progress.toFixed(2)}% of monthly target
             </p>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
       
-      <Card>
-        <CardHeader className="p-5">
-          <CardTitle className="text-sm font-medium">Previous Month</CardTitle>
-        </CardHeader>
-        <CardContent className="p-5 pt-0 space-y-4">
-          <div className="flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-muted-foreground" />
-            <span className="text-2xl font-bold">${previousMonth.earned.toLocaleString()}</span>
-            <span className="text-muted-foreground">/ ${previousMonth.target.toLocaleString()}</span>
+      <div className="bg-card rounded-lg border shadow">
+        <div className="p-5">
+          <h3 className="text-sm font-medium text-muted-foreground">Previous Month</h3>
+          <div className="mt-4 flex items-center gap-2">
+            <Calendar className="h-5 w-5 text-purple-500" />
+            <span className="text-2xl font-bold">{formatCurrency(previousMonth.earned)}</span>
+            <span className="text-muted-foreground">/ {formatCurrency(previousMonth.target)}</span>
           </div>
-          <div className="space-y-2">
+          <div className="mt-4 space-y-2">
             <Progress 
               value={previousMonth.progress} 
-              className="h-2" 
-              indicatorClassName="bg-property-purple"
+              className="h-2 bg-purple-100" 
+              indicatorClassName="bg-purple-500"
             />
             <p className="text-xs text-muted-foreground">
-              {previousMonth.progress}% of monthly target
+              {previousMonth.progress.toFixed(2)}% of monthly target
             </p>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
       
-      <Card>
-        <CardHeader className="p-5">
-          <CardTitle className="text-sm font-medium">Year to Date</CardTitle>
-        </CardHeader>
-        <CardContent className="p-5 pt-0 space-y-4">
-          <div className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-muted-foreground" />
-            <span className="text-2xl font-bold">${yearToDate.earned.toLocaleString()}</span>
-            <span className="text-muted-foreground">/ ${yearToDate.target.toLocaleString()}</span>
+      <div className="bg-card rounded-lg border shadow">
+        <div className="p-5">
+          <h3 className="text-sm font-medium text-muted-foreground">Year to Date</h3>
+          <div className="mt-4 flex items-center gap-2">
+            <TrendingUp className="h-5 w-5 text-pink-500" />
+            <span className="text-2xl font-bold">{formatCurrency(yearToDate.earned)}</span>
+            <span className="text-muted-foreground">/ {formatCurrency(yearToDate.target)}</span>
           </div>
-          <div className="space-y-2">
+          <div className="mt-4 space-y-2">
             <Progress 
               value={yearToDate.progress} 
-              className="h-2" 
-              indicatorClassName="bg-property-pink"
+              className="h-2 bg-pink-100" 
+              indicatorClassName="bg-pink-500"
             />
             <p className="text-xs text-muted-foreground">
-              {yearToDate.progress}% of yearly target
+              {yearToDate.progress.toFixed(2)}% of yearly target
             </p>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 };

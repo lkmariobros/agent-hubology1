@@ -3,7 +3,19 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { cn } from '@/lib/utils';
-import { CommissionTier } from '@/types';
+
+interface CommissionTier {
+  id: string;
+  name: string;
+  tier: string;
+  rate: number;
+  minTransactions: number;
+  color: string;
+  rank: string;
+  percentage: number;
+  commissionRate: number;
+  requirements: string[];
+}
 
 interface CommissionTiersProps {
   tiers: CommissionTier[];
@@ -49,7 +61,7 @@ const CommissionTiers = ({
         <div className="flex items-center justify-between gap-4">
           <div className="space-y-2">
             <p className="text-sm font-medium text-foreground">Current Tier</p>
-            <h3 className="text-2xl font-bold text-gradient">
+            <h3 className="text-2xl font-bold">
               {currentTierObj.tier}
             </h3>
             <p className="text-xs text-muted-foreground">
@@ -74,7 +86,6 @@ const CommissionTiers = ({
           <Progress 
             value={progress} 
             className="h-2" 
-            indicatorClassName={cn("bg-gradient-to-r", getProgressColor(currentTierObj.color))} 
           />
         </div>
         
@@ -84,7 +95,7 @@ const CommissionTiers = ({
               key={tier.tier} 
               className={cn(
                 "flex flex-col items-center text-center transition-all rounded-lg py-3 px-2",
-                currentTier === tier.tier ? "glass-card ring-1 ring-white/20" : "bg-transparent hover:bg-white/5",
+                currentTier === tier.tier ? "bg-muted ring-1 ring-primary/20" : "bg-transparent hover:bg-muted/30",
                 index < tiers.findIndex(t => t.tier === currentTier) && "opacity-70"
               )}
             >
@@ -99,7 +110,7 @@ const CommissionTiers = ({
               <p className="text-xs font-medium truncate mb-0.5">{tier.tier}</p>
               <p className="text-xs text-muted-foreground">{tier.rate}%</p>
               {currentTier === tier.tier && (
-                <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-white rounded-full animate-pulse" />
+                <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-primary rounded-full animate-pulse" />
               )}
             </div>
           ))}
@@ -112,34 +123,17 @@ const CommissionTiers = ({
 function getTierColor(color: string) {
   switch (color) {
     case 'blue':
-      return 'bg-property-blue';
+      return 'bg-blue-500';
     case 'purple':
-      return 'bg-property-purple';
+      return 'bg-purple-500';
     case 'pink':
-      return 'bg-property-pink';
+      return 'bg-pink-500';
     case 'orange':
-      return 'bg-property-orange';
+      return 'bg-orange-500';
     case 'green':
-      return 'bg-property-green';
+      return 'bg-green-500';
     default:
-      return 'bg-accent';
-  }
-}
-
-function getProgressColor(color: string) {
-  switch (color) {
-    case 'blue':
-      return 'from-property-blue/50 to-property-blue';
-    case 'purple':
-      return 'from-property-purple/50 to-property-purple';
-    case 'pink':
-      return 'from-property-pink/50 to-property-pink';
-    case 'orange':
-      return 'from-property-orange/50 to-property-orange';
-    case 'green':
-      return 'from-property-green/50 to-property-green';
-    default:
-      return 'from-accent/50 to-accent';
+      return 'bg-primary';
   }
 }
 
