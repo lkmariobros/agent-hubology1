@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -50,16 +49,10 @@ const PropertyGallery: React.FC<PropertyGalleryProps> = ({ images, title }) => {
               throw new Error('Property images storage is not properly configured');
             }
             
-            // Try to get public URL
-            const { data, error: urlError } = await supabase.storage
+            // Try to get public URL - this method doesn't return an error property
+            const { data } = await supabase.storage
               .from('property-images')
               .getPublicUrl(path);
-            
-            if (urlError) {
-              console.error('PropertyGallery: Error getting public URL:', urlError);
-              setDebugData(prev => ({ ...prev, urlError }));
-              throw urlError;
-            }
               
             return data.publicUrl;
           })
