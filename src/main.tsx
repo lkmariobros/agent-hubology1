@@ -1,5 +1,5 @@
 
-import React from 'react'; // Explicitly import React
+import * as React from 'react'; // Use namespace import to ensure React is fully available
 import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
