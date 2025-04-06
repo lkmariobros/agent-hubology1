@@ -100,7 +100,7 @@ const PropertyListContainer: React.FC<PropertyListContainerProps> = ({
         <div className="flex space-x-2">
           <Button 
             variant="outline" 
-            onClick={() => setPage(p => Math.max(1, p - 1))}
+            onClick={() => setPage(Math.max(1, page - 1))}
             disabled={page === 1}
           >
             Previous
@@ -110,7 +110,7 @@ const PropertyListContainer: React.FC<PropertyListContainerProps> = ({
           </span>
           <Button 
             variant="outline" 
-            onClick={() => setPage(p => p + 1)}
+            onClick={() => setPage(page + 1)}
             disabled={page >= totalPages}
           >
             Next

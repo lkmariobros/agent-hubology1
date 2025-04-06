@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { withRetry, logError, handleApiError } from '@/utils/errorHandlingUtils';
 import { safeSupabaseOperation } from '@/utils/supabaseHelpers';
+import { PostgrestError } from '@supabase/supabase-js';
 
 export interface PropertyFilters {
   title?: string;
@@ -74,12 +75,15 @@ export const useProperties = (page: number = 1, pageSize: number = 10, filters: 
       query = query.range(from, to);
       
       // Use the retry wrapper for better resilience
-      const { data, error, count } = await withRetry(
-        () => query,
+      const response = await withRetry(
+        async () => await query,
         3, // 3 retries
         1000, // Start with 1 second delay
         'useProperties'
       );
+      
+      // Properly type and extract the data, error, and count
+      const { data, error, count } = response;
       
       if (error) {
         logError(error, 'useProperties', { filters, page, pageSize });
@@ -118,8 +122,8 @@ export const useProperty = (propertyId: string, options = {}) => {
       console.log('Fetching property details for ID:', propertyId);
       
       // Use withRetry for better resilience
-      const { data, error } = await withRetry(
-        () => supabase
+      const response = await withRetry(
+        async () => await supabase
           .from('enhanced_properties')
           .select(`
             *,
@@ -134,6 +138,9 @@ export const useProperty = (propertyId: string, options = {}) => {
         1000,
         'useProperty'
       );
+      
+      // Properly type and extract the data and error
+      const { data, error } = response;
       
       if (error) {
         logError(error, 'useProperty', { propertyId });
