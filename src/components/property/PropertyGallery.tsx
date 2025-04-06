@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ExternalLink, ImageOff, AlertCircle, Maximize2 } from 'lucide-react';
+import { ImageOff, AlertCircle, Maximize2 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
@@ -16,7 +16,6 @@ const PropertyGallery: React.FC<PropertyGalleryProps> = ({ propertyId, images = 
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [debugData, setDebugData] = useState<any>(null);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   
   useEffect(() => {
@@ -42,12 +41,10 @@ const PropertyGallery: React.FC<PropertyGalleryProps> = ({ propertyId, images = 
             const paths = imageData.map(img => img.storage_path);
             console.log('PropertyGallery: Found images in DB:', paths);
             setImageUrls(paths);
-            setDebugData({ source: 'database', count: paths.length, paths });
             setLoading(false);
             return;
           } else {
             console.log('PropertyGallery: No images found in DB for property ID:', propertyId);
-            setDebugData({ source: 'database', count: 0 });
           }
         }
         
@@ -55,7 +52,6 @@ const PropertyGallery: React.FC<PropertyGalleryProps> = ({ propertyId, images = 
         if (images && images.length > 0) {
           console.log('PropertyGallery: Using provided image array:', images);
           setImageUrls(images);
-          setDebugData({ source: 'props', count: images.length, images });
           setLoading(false);
           return;
         }
@@ -63,12 +59,10 @@ const PropertyGallery: React.FC<PropertyGalleryProps> = ({ propertyId, images = 
         // No images available
         console.log('PropertyGallery: No images available from any source');
         setImageUrls([]);
-        setDebugData({ source: 'none', message: 'No images available from any source' });
         setLoading(false);
       } catch (err: any) {
         console.error('PropertyGallery: Error fetching images:', err);
         setError(err.message || 'Failed to load images');
-        setDebugData({ error: err.message, code: err.code });
         setLoading(false);
       }
     };
@@ -82,11 +76,11 @@ const PropertyGallery: React.FC<PropertyGalleryProps> = ({ propertyId, images = 
   
   if (loading) {
     return (
-      <div className="space-y-2">
-        <Skeleton className="aspect-video w-full h-40 border border-neutral-800 rounded-md" />
-        <div className="grid grid-cols-4 gap-2">
+      <div className="space-y-4">
+        <Skeleton className="w-full aspect-[4/3] rounded-md border border-neutral-800/60" />
+        <div className="grid grid-cols-4 gap-4">
           {Array(4).fill(0).map((_, index) => (
-            <Skeleton key={index} className="aspect-square h-10 border border-neutral-800 rounded-md" />
+            <Skeleton key={index} className="aspect-square w-full rounded-md border border-neutral-800/60" />
           ))}
         </div>
       </div>
@@ -105,38 +99,40 @@ const PropertyGallery: React.FC<PropertyGalleryProps> = ({ propertyId, images = 
   const hasImages = imageUrls && imageUrls.length > 0;
   
   return (
-    <div className="space-y-2">
-      <div className="aspect-video bg-black/20 rounded-md overflow-hidden h-40 max-h-40 border border-neutral-800 shadow-md relative group">
+    <div className="space-y-4">
+      {/* Main large image */}
+      <div className="w-full aspect-[4/3] bg-black/30 rounded-md overflow-hidden border border-neutral-800/60 shadow-md relative group">
         {hasImages ? (
           <>
             <img 
               src={imageUrls[activeImageIndex]} 
               alt={`${title} main view`} 
-              className="w-full h-full object-cover transition-transform group-hover:scale-[1.02] duration-300"
+              className="w-full h-full object-cover transition-transform duration-300"
               onError={(e) => {
                 console.error('Failed to load image:', imageUrls[activeImageIndex]);
                 e.currentTarget.src = '/placeholder.svg';
               }}
             />
             <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-              <Maximize2 className="h-6 w-6 text-white opacity-80" />
+              <Maximize2 className="h-8 w-8 text-white opacity-80" />
             </div>
           </>
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground">
-            <ImageOff className="h-8 w-8 mb-2 opacity-40" />
+            <ImageOff className="h-10 w-10 mb-2 opacity-40" />
             <span className="text-sm">No images available</span>
           </div>
         )}
       </div>
       
-      <div className="grid grid-cols-4 gap-2">
+      {/* Thumbnails row - equally sized squares */}
+      <div className="grid grid-cols-4 gap-4">
         {hasImages ? (
           imageUrls.slice(0, 4).map((imageUrl, index) => (
             <div 
               key={index} 
-              className={`aspect-square bg-black/20 rounded-md overflow-hidden h-10 border border-neutral-800 shadow-md cursor-pointer transition-all duration-150 ${
-                index === activeImageIndex ? 'ring-2 ring-primary/70 scale-[1.03]' : 'hover:ring-1 hover:ring-primary/40 hover:scale-[1.02]'
+              className={`aspect-square bg-black/30 rounded-md overflow-hidden border border-neutral-800/60 shadow-md cursor-pointer transition-all duration-150 ${
+                index === activeImageIndex ? 'ring-2 ring-primary/70' : 'hover:ring-1 hover:ring-primary/40'
               }`}
               onClick={() => handleThumbnailClick(index)}
             >
@@ -153,53 +149,21 @@ const PropertyGallery: React.FC<PropertyGalleryProps> = ({ propertyId, images = 
           ))
         ) : (
           Array(4).fill(0).map((_, index) => (
-            <div key={index} className="aspect-square bg-black/20 rounded-md h-10 flex items-center justify-center border border-neutral-800 shadow-md">
-              <ImageOff className="h-3 w-3 opacity-20" />
+            <div key={index} className="aspect-square bg-black/30 rounded-md flex items-center justify-center border border-neutral-800/60 shadow-md">
+              <ImageOff className="h-4 w-4 opacity-40" />
             </div>
           ))
         )}
       </div>
       
-      {/* Enhanced debug info */}
+      {/* Development-only debug info */}
       {import.meta.env.DEV && (
-        <Card className="mt-2 p-2 border border-dashed border-gray-200 rounded-md bg-gray-50 text-xs text-gray-500">
+        <Card className="mt-4 p-2 border border-dashed border-gray-200 rounded-md bg-gray-50 text-xs text-gray-500">
           <div className="flex items-center justify-between mb-1">
             <span className="font-medium">Debug Info: {imageUrls.length} images</span>
-            {hasImages && (
-              <a 
-                href="https://supabase.com/dashboard/project/synabhmsxsvsxkyzhfss/storage/buckets/property-images/explore" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="flex items-center text-blue-500 hover:underline"
-              >
-                <ExternalLink size={12} className="mr-1" />
-                View in Supabase
-              </a>
-            )}
           </div>
-          <div className="overflow-x-auto">
-            {debugData && (
-              <pre className="text-xs overflow-auto max-h-40">
-                {JSON.stringify(debugData, null, 2)}
-              </pre>
-            )}
-            <div className="mt-2">
-              <strong>Property ID:</strong> {propertyId || 'Not provided'}
-            </div>
-            <div className="mt-2">
-              <strong>Image URLs:</strong>
-              {imageUrls && imageUrls.length > 0 ? (
-                <ul className="list-disc pl-4">
-                  {imageUrls.map((url, idx) => (
-                    <li key={idx} className="truncate hover:text-clip">
-                      {idx+1}. {url}
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-red-500">No image URLs available</p>
-              )}
-            </div>
+          <div>
+            <strong>Property ID:</strong> {propertyId || 'Not provided'}
           </div>
         </Card>
       )}

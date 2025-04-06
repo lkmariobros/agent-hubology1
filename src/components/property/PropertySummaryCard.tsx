@@ -38,8 +38,9 @@ const PropertySummaryCard: React.FC<PropertySummaryCardProps> = ({
   return (
     <Card className="mb-6 overflow-hidden bg-card border-neutral-800/60">
       <CardContent className="p-0">
-        <div className="grid grid-cols-1 lg:grid-cols-7 gap-4">
-          <div className="lg:col-span-5 p-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Gallery section - Takes up 2/3 of the card */}
+          <div className="lg:col-span-2 p-6">
             <PropertyGallery 
               propertyId={property.id} 
               images={propertyImages} 
@@ -47,10 +48,12 @@ const PropertySummaryCard: React.FC<PropertySummaryCardProps> = ({
             />
           </div>
           
-          <div className="lg:col-span-2 p-4">
-            <div className="space-y-3">
+          {/* Property info section - Takes up 1/3 of the card */}
+          <div className="lg:col-span-1 p-6 border-l border-neutral-800/30">
+            <div className="space-y-6">
+              {/* Property type and transaction type */}
               <div>
-                <div className="flex items-center mb-2">
+                <div className="flex items-center mb-3">
                   {getPropertyTypeIcon(propertyType)}
                   <Badge variant="outline" className="ml-2">{propertyType}</Badge>
                   {property.transaction_types?.name && (
@@ -58,28 +61,29 @@ const PropertySummaryCard: React.FC<PropertySummaryCardProps> = ({
                   )}
                 </div>
                 
-                <h2 className="text-xl font-bold">{formattedPrice || formattedRentalRate}</h2>
+                <h2 className="text-2xl font-bold">{formattedPrice || formattedRentalRate}</h2>
               </div>
               
-              <div className="grid grid-cols-1 gap-2">
+              {/* Property details */}
+              <div className="space-y-3">
                 {property.bedrooms > 0 && (
                   <div className="flex items-center">
-                    <BedDouble className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <span className="text-sm">{property.bedrooms} Bedroom{property.bedrooms !== 1 ? 's' : ''}</span>
+                    <BedDouble className="h-5 w-5 mr-3 text-muted-foreground" />
+                    <span>{property.bedrooms} Bedroom{property.bedrooms !== 1 ? 's' : ''}</span>
                   </div>
                 )}
                 
                 {property.bathrooms > 0 && (
                   <div className="flex items-center">
-                    <Bath className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <span className="text-sm">{property.bathrooms} Bathroom{property.bathrooms !== 1 ? 's' : ''}</span>
+                    <Bath className="h-5 w-5 mr-3 text-muted-foreground" />
+                    <span>{property.bathrooms} Bathroom{property.bathrooms !== 1 ? 's' : ''}</span>
                   </div>
                 )}
                 
                 {(property.built_up_area > 0 || property.land_area > 0) && (
                   <div className="flex items-center">
-                    <Ruler className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <span className="text-sm">
+                    <Ruler className="h-5 w-5 mr-3 text-muted-foreground" />
+                    <span>
                       {property.built_up_area > 0 
                         ? `${property.built_up_area.toLocaleString()} sqft` 
                         : `${property.land_area.toLocaleString()} sqft land`}
@@ -88,10 +92,11 @@ const PropertySummaryCard: React.FC<PropertySummaryCardProps> = ({
                 )}
               </div>
               
+              {/* Location */}
               {property.street && (
                 <div className="pt-1">
-                  <h3 className="text-xs font-medium text-muted-foreground mb-1">Location</h3>
-                  <p className="text-xs">
+                  <h3 className="text-sm font-medium text-muted-foreground mb-2">Location</h3>
+                  <p className="text-sm">
                     {property.street}
                     {property.city && `, ${property.city}`}
                     {property.state && `, ${property.state}`}
@@ -100,10 +105,11 @@ const PropertySummaryCard: React.FC<PropertySummaryCardProps> = ({
                 </div>
               )}
               
+              {/* Description */}
               {property.description && (
                 <div className="pt-1">
-                  <h3 className="text-xs font-medium text-muted-foreground mb-1">Description</h3>
-                  <p className="text-xs line-clamp-3">{property.description}</p>
+                  <h3 className="text-sm font-medium text-muted-foreground mb-2">Description</h3>
+                  <p className="text-sm">{property.description}</p>
                 </div>
               )}
             </div>
