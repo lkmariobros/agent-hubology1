@@ -42,9 +42,9 @@ const PropertySummaryCard: React.FC<PropertySummaryCardProps> = ({
     <Card className="mb-6 overflow-hidden bg-card border-neutral-800/60">
       <CardContent className="p-0">
         {/* Use grid for desktop, stack for mobile */}
-        <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-2'} gap-4`}>
-          {/* Gallery section - Left side on desktop, top on mobile */}
-          <div className="w-full">
+        <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-3'} gap-0`}>
+          {/* Gallery section - Left side on desktop (2/3 width), top on mobile */}
+          <div className={`${isMobile ? 'w-full' : 'col-span-2'}`}>
             <PropertyGallery 
               propertyId={property.id} 
               images={propertyImages} 
@@ -52,7 +52,7 @@ const PropertySummaryCard: React.FC<PropertySummaryCardProps> = ({
             />
           </div>
           
-          {/* Property info section - Right side on desktop, bottom on mobile */}
+          {/* Property info section - Right side on desktop (1/3 width), bottom on mobile */}
           <div className="p-6 space-y-6">
             {/* Property type and transaction type */}
             <div>
