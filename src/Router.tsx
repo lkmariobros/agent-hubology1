@@ -8,6 +8,7 @@ import PropertyDetail from './pages/PropertyDetail';
 import Transactions from './pages/Transactions';
 import Team from './pages/Team';
 import Commission from './pages/Commission';
+import CommissionForecast from './pages/CommissionForecast';
 import Leaderboard from './pages/Leaderboard';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
@@ -18,6 +19,7 @@ import Index from './pages/Index';
 import { AuthProvider } from './context/auth';
 import { NotificationProvider } from './context/NotificationContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
+import NewProperty from './pages/NewProperty';
 
 // Create our router with proper route structure and authentication
 const router = createBrowserRouter([
@@ -42,10 +44,12 @@ const router = createBrowserRouter([
     children: [
       { path: 'dashboard', element: <Dashboard /> },
       { path: 'properties', element: <PropertyList /> },
+      { path: 'properties/new', element: <NewProperty /> },
       { path: 'properties/:id', element: <PropertyDetail /> },
       { path: 'transactions', element: <Transactions /> },
       { path: 'team', element: <Team /> },
       { path: 'commission', element: <Commission /> },
+      { path: 'commission-forecast', element: <CommissionForecast /> },
       { path: 'leaderboard', element: <Leaderboard /> },
       { path: 'reports', element: <Reports /> },
       { path: 'settings', element: <Settings /> },

@@ -1,6 +1,5 @@
 
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
-import { useAuthContext } from '@/context/auth';
 import { Notification } from '@/types/notification';
 import { useNotificationActions } from '@/hooks/useNotificationActions';
 import { useNotificationSubscription } from '@/hooks/useNotificationSubscription';
@@ -23,13 +22,17 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   
-  // Use try/catch to safely get auth context
+  // Safe access to user ID - don't rely on useAuthContext directly
   let userId: string | null = null;
   try {
-    const { user } = useAuthContext();
-    userId = user?.id || null;
+    // Try to get user from localStorage as a fallback
+    const userDataStr = localStorage.getItem('userData');
+    if (userDataStr) {
+      const userData = JSON.parse(userDataStr);
+      userId = userData.id || null;
+    }
   } catch (error) {
-    console.warn("Auth context not available yet in NotificationProvider");
+    console.warn("Could not retrieve user data for notifications", error);
     userId = null;
   }
   
@@ -60,7 +63,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   // Use subscription hook for real-time notifications
   useNotificationSubscription(userId, addNotification);
 
-  // Initialize notifications - FIX: Add proper dependency array and avoid unnecessary fetches
+  // Initialize notifications
   useEffect(() => {
     // Only fetch notifications if we have a userId and aren't already loading
     if (!userId) {
@@ -82,8 +85,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     };
     
     loadNotifications();
-    
-    // Add userId and fetchUserNotifications to dependency array
   }, [userId, fetchUserNotifications]);
 
   // Mark a notification as read

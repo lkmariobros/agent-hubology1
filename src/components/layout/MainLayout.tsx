@@ -33,9 +33,9 @@ const MainLayout: React.FC = () => {
   return (
     <AuthStateHandler>
       <SidebarProvider defaultState={savedState} onStateChange={handleStateChange}>
-        <div className="flex min-h-screen w-full">
+        <div className="flex min-h-screen w-full bg-[#161920]">
           <AppSidebar />
-          <main className="flex-1 overflow-x-hidden bg-[#161920]">
+          <main className="flex-1 overflow-x-hidden">
             <div className="p-6">
               <Outlet />
             </div>
