@@ -6,11 +6,8 @@ import { PropertyFormData } from '@/types/property-form';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { Loader2, AlertCircle, AlertTriangle, Info } from 'lucide-react';
+import { Loader2, AlertCircle } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import propertyFormHelpers from '@/utils/propertyFormHelpers';
-import { useStorageUpload } from '@/hooks/useStorageUpload';
-import { Button } from '@/components/ui/button';
 
 interface PropertyFormWrapperProps {
   propertyId?: string;
@@ -28,73 +25,36 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [storageReady, setStorageReady] = useState(false);
   const { createProperty, updateProperty } = usePropertyManagement();
-  const { checkStorageBuckets, forceCheckStorageBuckets } = useStorageUpload();
-  const initializationAttempted = useRef(false);
-  const [retryCount, setRetryCount] = useState(0);
   const isComponentMounted = useRef(true);
   
-  // Initialize form and check storage - only run once on mount and when retryCount changes
+  // Initialize form - simplified to avoid storage checks
   useEffect(() => {
     isComponentMounted.current = true;
     
     const initializeForm = async () => {
-      // Skip if component has been unmounted
       if (!isComponentMounted.current) return;
       
       try {
         setIsInitializing(true);
-        initializationAttempted.current = true;
-        
-        // Check storage configuration - use force check if retrying
-        console.log(`Initializing form, retry count: ${retryCount}`);
-        const requiredBuckets = ['property-images', 'property-documents'];
-        const bucketsExist = retryCount > 0
-          ? await forceCheckStorageBuckets(requiredBuckets)
-          : await checkStorageBuckets(requiredBuckets);
-        
-        // Skip further processing if component has been unmounted
-        if (!isComponentMounted.current) return;
-        
-        setStorageReady(bucketsExist);
-        
-        if (!bucketsExist) {
-          console.warn('Missing required storage buckets');
-          // Only show toast on retry to avoid duplicate notifications
-          if (retryCount > 0) {
-            toast.warning('Storage bucket issue persists. Check if buckets exist with proper names: "Property Images" and "Property Documents"');
-          }
-        } else {
-          console.log('All required storage buckets are available');
-          if (retryCount > 0) {
-            toast.success('Successfully connected to storage buckets');
-          }
-        }
+        // Simplified initialization - no storage checks
+        console.log('Form initialized successfully');
       } catch (error) {
-        // Skip error handling if component has been unmounted
         if (!isComponentMounted.current) return;
-        
         console.error('Error initializing property form:', error);
-        setStorageReady(false);
       } finally {
-        // Only update state if component is still mounted
         if (isComponentMounted.current) {
           setIsInitializing(false);
         }
       }
     };
     
-    // Only run initialization if we haven't tried yet or if retryCount changed
-    if (!initializationAttempted.current || retryCount > 0) {
-      initializeForm();
-    }
+    initializeForm();
     
-    // Cleanup function to prevent state updates after unmount
     return () => {
       isComponentMounted.current = false;
     };
-  }, [checkStorageBuckets, forceCheckStorageBuckets, retryCount]);
+  }, []);
   
   const handleFormSubmit = async (data: PropertyFormData) => {
     if (!user) {
@@ -182,11 +142,6 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
     }
   };
   
-  // Function to recheck storage buckets
-  const recheckStorageBuckets = () => {
-    setRetryCount(prev => prev + 1);
-  };
-  
   if (isInitializing) {
     return (
       <div className="flex flex-col items-center justify-center p-8">
@@ -222,43 +177,11 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
         </Alert>
       )}
       
-      {!storageReady && (
-        <Alert variant="warning" className="mb-6">
-          <AlertTriangle className="h-4 w-4 mr-2" />
-          <AlertTitle>Storage Buckets Missing or Inaccessible</AlertTitle>
-          <AlertDescription className="flex flex-col space-y-3">
-            <p>
-              Image and document uploads will not work because the required storage buckets 
-              ('Property Images', 'Property Documents') are missing or inaccessible in your Supabase project.
-            </p>
-            <div className="flex flex-col space-y-1 text-sm mt-1">
-              <p className="font-semibold flex items-center">
-                <Info className="h-3 w-3 mr-1" /> Troubleshooting:
-              </p>
-              <ol className="list-decimal ml-5 space-y-1">
-                <li>Ensure both buckets exist in your Supabase storage</li>
-                <li>Check that your buckets have the correct names: "Property Images" and "Property Documents" (with spaces and capital letters)</li>
-                <li>Check that your buckets have the correct RLS policies for uploads</li>
-                <li>Verify that your application has the correct permissions</li>
-              </ol>
-            </div>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={recheckStorageBuckets}
-              className="self-start mt-2"
-            >
-              Check Again
-            </Button>
-          </AlertDescription>
-        </Alert>
-      )}
-      
       <EnhancedPropertyForm 
         onSubmit={handleFormSubmit}
         initialData={initialData}
         isEdit={isEdit}
-        storageReady={storageReady}
+        storageReady={true}
       />
     </>
   );
