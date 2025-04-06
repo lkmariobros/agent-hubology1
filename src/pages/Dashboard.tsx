@@ -52,17 +52,21 @@ const Dashboard: React.FC = () => {
     <div className="p-6 space-y-6">
       <h1 className="text-3xl font-semibold">Dashboard</h1>
       
-      {/* Move RecentTransactions to the top */}
-      <RecentTransactions onViewAll={handleViewAllTransactions} limit={5} />
-      
-      {/* Move metrics to the left side (they'll be full width on mobile) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <MetricsContainer metrics={filteredMetrics} className="md:max-w-xs" />
+      {/* Main dashboard layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left side - Recent Transactions taking up 2/3 of the space on large screens */}
+        <div className="lg:col-span-2">
+          <RecentTransactions onViewAll={handleViewAllTransactions} limit={8} />
         </div>
-        <UpcomingPayments onViewAll={handleViewAllPayments} />
+        
+        {/* Right side - Metrics */}
+        <div className="space-y-6">
+          <MetricsContainer metrics={filteredMetrics} className="grid grid-cols-1 gap-4" />
+          <UpcomingPayments onViewAll={handleViewAllPayments} />
+        </div>
       </div>
       
+      {/* Bottom Section */}
       <OpportunitiesBoard onViewAll={handleViewAllOpportunities} />
       
       <PropertyShowcase />
