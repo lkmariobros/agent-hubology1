@@ -1,4 +1,3 @@
-
 export interface PropertyFormData {
   title: string;
   description: string;
@@ -51,6 +50,7 @@ export interface PropertyFormData {
     phone: string;
     email: string;
     address: string;
+    company?: string;
     notes: string;
     isPrimaryContact: boolean;
   };

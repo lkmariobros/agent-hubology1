@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -10,7 +9,7 @@ import {
   Map, 
   Bath, 
   BedDouble, 
-  SquareFeet, 
+  Square, 
   Info, 
   Landmark,
   CheckCircle2,
@@ -129,7 +128,7 @@ const PropertyDetails: React.FC<PropertyDetailsProps> = ({
           )}
           
           <div className="flex items-center space-x-3">
-            <SquareFeet className="h-5 w-5 text-blue-500" />
+            <Square className="h-5 w-5 text-blue-500" />
             <div>
               <p className="text-sm font-medium">Area</p>
               <p className="text-sm text-muted-foreground">{formatArea(property)}</p>

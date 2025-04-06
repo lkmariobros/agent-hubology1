@@ -8,12 +8,12 @@ import { PropertyFormProvider } from '@/context/PropertyForm/PropertyFormContext
 import { PropertyFormData } from '@/types/property-form';
 import { toast } from 'sonner';
 import { submitPropertyForm } from '@/context/PropertyForm/formSubmission';
-import BasicInfoTab from '@/components/property/form/BasicInfoTab';
-import AddressTab from '@/components/property/form/AddressTab';
-import FeaturesTab from '@/components/property/form/FeaturesTab';
-import MediaTab from '@/components/property/form/MediaTab';
-import AdditionalDetailsTab from '@/components/property/form/AdditionalDetailsTab';
-import PropertyOwnerInfo from '@/components/property/form/PropertyOwnerInfo';
+import BasicInfoTab from './BasicInfoTab';
+import AddressTab from './AddressTab';
+import FeaturesTab from './FeaturesTab';
+import MediaTab from './MediaTab';
+import AdditionalDetailsTab from './AdditionalDetailsTab';
+import PropertyOwnerInfo from './PropertyOwnerInfo';
 
 interface PropertyFormWrapperProps {
   propertyId?: string;
@@ -34,11 +34,10 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
     setIsSubmitting(true);
     
     try {
-      await submitPropertyForm({ 
-        formData: {} as PropertyFormData, // This will be filled by the context
-        images: [],
-        documents: []
-      });
+      // Get the form state from the context during submission
+      // We don't need to pass the complete state here since it will be
+      // accessed from the context in the submitPropertyForm function
+      await submitPropertyForm();
       
       toast.success(`Property ${isEdit ? 'updated' : 'created'} successfully!`);
       navigate('/properties');
@@ -51,7 +50,7 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
   };
 
   return (
-    <PropertyFormProvider initialData={initialData}>
+    <PropertyFormProvider>
       <div className="space-y-6">
         <Tabs 
           value={activeTab} 
