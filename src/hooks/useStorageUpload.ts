@@ -11,6 +11,12 @@ type UploadOptions = {
   upsert?: boolean;
 };
 
+// Map to translate bucket names to actual bucket IDs in Supabase
+const BUCKET_NAME_MAP: Record<string, string> = {
+  'property-images': 'Property Images', // Map hyphenated code names to actual bucket names
+  'property-documents': 'Property Documents',
+};
+
 export function useStorageUpload() {
   const [isUploading, setIsUploading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -54,33 +60,41 @@ export function useStorageUpload() {
       const existingBuckets = buckets?.map(b => b.name) || [];
       console.log('Available buckets:', existingBuckets);
       
-      // Check if all required buckets exist
-      const allBucketsExist = bucketNames.every(bucket => existingBuckets.includes(bucket));
+      // Check if all required buckets exist, using the mapping for actual bucket names
+      const allBucketsExist = bucketNames.every(bucket => {
+        const actualBucketName = BUCKET_NAME_MAP[bucket] || bucket;
+        return existingBuckets.includes(actualBucketName);
+      });
       
       // Cache the results
       bucketNames.forEach(bucket => {
-        bucketCache.current[bucket] = existingBuckets.includes(bucket);
+        const actualBucketName = BUCKET_NAME_MAP[bucket] || bucket;
+        bucketCache.current[bucket] = existingBuckets.includes(actualBucketName);
       });
       
       if (!allBucketsExist) {
-        const missingBuckets = bucketNames.filter(b => !existingBuckets.includes(b));
+        const missingBuckets = bucketNames.filter(b => {
+          const actualBucketName = BUCKET_NAME_MAP[b] || b;
+          return !existingBuckets.includes(actualBucketName);
+        });
         console.warn('Missing buckets:', missingBuckets);
         
         // Try to test bucket permissions even if it exists
         for (const bucket of bucketNames) {
-          if (existingBuckets.includes(bucket)) {
+          const actualBucketName = BUCKET_NAME_MAP[bucket] || bucket;
+          if (existingBuckets.includes(actualBucketName)) {
             try {
               // Test if we can list files in the bucket
               const { error: listError } = await supabase.storage
-                .from(bucket)
+                .from(actualBucketName)
                 .list('', { limit: 1 });
                 
               if (listError) {
-                console.error(`Permission error for bucket ${bucket}:`, listError);
+                console.error(`Permission error for bucket ${actualBucketName}:`, listError);
                 bucketCache.current[bucket] = false;
               }
             } catch (err) {
-              console.error(`Error testing bucket ${bucket}:`, err);
+              console.error(`Error testing bucket ${actualBucketName}:`, err);
               bucketCache.current[bucket] = false;
             }
           }
@@ -111,6 +125,7 @@ export function useStorageUpload() {
 
   const uploadFile = async (file: File, options: UploadOptions): Promise<string> => {
     const { bucket, path = '', maxSizeMB = 10, acceptedFileTypes = [], upsert = false } = options;
+    const actualBucketName = BUCKET_NAME_MAP[bucket] || bucket;
     
     // Reset state
     setIsUploading(true);
@@ -118,12 +133,12 @@ export function useStorageUpload() {
     setError(null);
     
     try {
-      console.log('Starting upload process for file:', file.name);
+      console.log(`Starting upload process for file: ${file.name} to bucket: ${actualBucketName} (mapped from ${bucket})`);
       
       // Check bucket accessibility first
       const bucketExists = await checkStorageBuckets([bucket]);
       if (!bucketExists) {
-        throw new Error(`Storage bucket '${bucket}' is not accessible. Please check your storage configuration.`);
+        throw new Error(`Storage bucket '${bucket}' (mapped to '${actualBucketName}') is not accessible. Please check your storage configuration.`);
       }
       
       // Validate file size
@@ -152,10 +167,10 @@ export function useStorageUpload() {
         });
       }, 300);
       
-      // Upload the file to Supabase Storage
-      console.log('Executing upload to Supabase bucket:', bucket);
+      // Upload the file to Supabase Storage using the actual bucket name
+      console.log('Executing upload to Supabase bucket:', actualBucketName);
       const { data, error } = await supabase.storage
-        .from(bucket)
+        .from(actualBucketName)
         .upload(filePath, file, {
           cacheControl: '3600',
           upsert: upsert,
@@ -178,9 +193,9 @@ export function useStorageUpload() {
       
       console.log('Upload successful, data:', data);
       
-      // Get public URL for the uploaded file
+      // Get public URL for the uploaded file using the actual bucket name
       const { data: { publicUrl } } = supabase.storage
-        .from(bucket)
+        .from(actualBucketName)
         .getPublicUrl(data?.path || filePath);
       
       console.log('Generated public URL:', publicUrl);
@@ -200,9 +215,11 @@ export function useStorageUpload() {
   };
   
   const deleteFile = async (bucket: string, path: string): Promise<void> => {
+    const actualBucketName = BUCKET_NAME_MAP[bucket] || bucket;
+    
     try {
       const { error } = await supabase.storage
-        .from(bucket)
+        .from(actualBucketName)
         .remove([path]);
       
       if (error) throw error;

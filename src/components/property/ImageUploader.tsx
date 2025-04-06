@@ -1,4 +1,3 @@
-
 import React, { useCallback, useRef, useState, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { UploadCloud, X, Loader2, Check, Image, AlertTriangle, RefreshCcw, Info } from 'lucide-react';
@@ -180,15 +179,14 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
           <AlertTitle>Storage Configuration Issue</AlertTitle>
           <AlertDescription className="flex flex-col space-y-2">
             <p>
-              Image uploads will not work. This is because the required storage bucket 'property-images' 
-              is missing or inaccessible in your Supabase project.
+              Image uploads will not work. This could be due to a naming mismatch between the code and Supabase storage buckets.
             </p>
             <div className="flex flex-col space-y-1 text-sm mt-2">
               <p className="font-semibold flex items-center">
                 <Info className="h-3 w-3 mr-1" /> Troubleshooting:
               </p>
               <ol className="list-decimal ml-5 space-y-1">
-                <li>Ensure the 'property-images' bucket exists in your Supabase storage</li>
+                <li>Ensure the 'Property Images' bucket exists in your Supabase storage</li>
                 <li>Check that your bucket has the correct RLS policies for uploads</li>
                 <li>Verify that your application has the correct permissions</li>
               </ol>
