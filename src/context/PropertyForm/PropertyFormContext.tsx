@@ -39,7 +39,7 @@ export const PropertyFormProvider: React.FC<{ children: ReactNode }> = ({ childr
   }, []);
 
   // Update transaction type
-  const updateTransactionType = useCallback((type: 'Sale' | 'Rent') => {
+  const updateTransactionType = useCallback((type: 'Sale' | 'Rent' | 'Primary') => {
     dispatch({ type: 'UPDATE_TRANSACTION_TYPE', payload: type });
   }, []);
 
@@ -79,16 +79,34 @@ export const PropertyFormProvider: React.FC<{ children: ReactNode }> = ({ childr
 
   // Navigation functions
   const nextStep = useCallback(() => {
+    // Check if there are any images currently uploading
+    const hasUploadingImages = state.images.some(image => image.uploadStatus === 'uploading');
+    
+    if (hasUploadingImages) {
+      toast.warning("Please wait for image uploads to complete before proceeding");
+      return;
+    }
+    
     dispatch({ type: 'NEXT_STEP' });
-  }, []);
+  }, [state.images]);
 
   const prevStep = useCallback(() => {
     dispatch({ type: 'PREV_STEP' });
   }, []);
 
   const goToStep = useCallback((step: number) => {
+    // Check if navigating away from media step and if there are uploads in progress
+    if (state.currentStep === 6 && step !== 6) {
+      const hasUploadingImages = state.images.some(image => image.uploadStatus === 'uploading');
+      
+      if (hasUploadingImages) {
+        toast.warning("Please wait for image uploads to complete before navigating away");
+        return;
+      }
+    }
+    
     dispatch({ type: 'GO_TO_STEP', payload: step });
-  }, []);
+  }, [state.currentStep, state.images]);
 
   // Reset form
   const resetForm = useCallback(() => {
@@ -109,6 +127,14 @@ export const PropertyFormProvider: React.FC<{ children: ReactNode }> = ({ childr
 
   // Submit form
   const submitForm = useCallback(async () => {
+    // Check if there are any images currently uploading
+    const hasUploadingImages = state.images.some(image => image.uploadStatus === 'uploading');
+    
+    if (hasUploadingImages) {
+      toast.error("Please wait for all image uploads to complete before submitting");
+      return Promise.reject(new Error("Uploads in progress"));
+    }
+    
     dispatch({ type: 'SUBMITTING', payload: true });
     
     try {

@@ -162,7 +162,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
           // Find the index of this image in the current state
           const currentIndex = state.images.findIndex(img => img.id === imageId);
           if (currentIndex !== -1) {
-            // Update the image status to success
+            // Update the image status to success and set the actual uploaded URL
             updateImageStatus(currentIndex, 'success', uploadedUrl);
             
             // Update local upload state for this image
@@ -239,6 +239,13 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   const retryBucketCheck = () => {
     setRetryCount(prev => prev + 1);
     setDebugInfo("Retrying bucket connection...");
+  };
+
+  // Helper to check if the upload is currently in progress
+  const isAnyImageUploading = () => {
+    return state.images.some(image => image.uploadStatus === 'uploading') || 
+           Object.values(localUploadState).some(value => value === true) ||
+           isUploading;
   };
 
   return (
@@ -404,6 +411,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
                         handleSetCover(index);
                       }}
                       title="Set as cover image"
+                      disabled={isImageUploading}
                     >
                       <Check className="h-4 w-4" />
                     </Button>
@@ -417,6 +425,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
                       handleRemoveImage(index);
                     }}
                     title="Remove image"
+                    disabled={isImageUploading}
                   >
                     <X className="h-4 w-4" />
                   </Button>

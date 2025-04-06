@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { PropertyFormData } from '@/types/property-form';
 import { usePropertyForm } from '@/context/PropertyForm/PropertyFormContext';
@@ -7,14 +8,15 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertCircle, ArrowLeft, ArrowRight, Save, Send } from 'lucide-react';
+import { AlertCircle, ArrowLeft, ArrowRight, Save, Send, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 import PropertyBasicInfo from './form/PropertyBasicInfo';
 import PropertyDetails from './form/PropertyDetails';
 import PropertyLocation from './form/PropertyLocation';
 import PropertyPricing from './form/PropertyPricing';
 import PropertyFeatures from './form/PropertyFeatures';
 import PropertyImagesUpload from './form/PropertyImagesUpload';
-import PropertyDocuments from './form/PropertyDocuments';
+import PropertyDocumentsUpload from './form/PropertyDocumentsUpload';
 import ImageUploader from './ImageUploader';
 import PropertyOwnerInfo from './form/PropertyOwnerInfo';
 
