@@ -309,32 +309,40 @@ export function usePropertyManagement() {
             }
           }
           
-          // Step 5: Upload images if any are provided via the state
-          if (state && state.images && state.images.length > 0) {
-            const imagesToUpload = state.images
+          // Step 5: Upload images if any are provided
+          const imagesToUpload: File[] = [];
+          
+          // If we have images from property form data, process them
+          if (data.images && data.images.length > 0) {
+            data.images
               .filter(img => img.file)
-              .map(img => img.file as File);
+              .forEach(img => {
+                if (img.file) imagesToUpload.push(img.file);
+              });
+          }
               
-            if (imagesToUpload.length > 0) {
-              await uploadImages(propertyId, imagesToUpload);
-            }
+          if (imagesToUpload.length > 0) {
+            await uploadImages(propertyId, imagesToUpload);
           }
           
-          // Step 6: Upload documents if any are provided via the state
-          if (state && state.documents && state.documents.length > 0) {
-            const docsToUpload = state.documents
+          // Step 6: Upload documents if any are provided
+          const docsToUpload: File[] = [];
+          let documentTypes: Record<string, string> = {};
+          
+          // If we have documents from property form data, process them
+          if (data.documents && data.documents.length > 0) {
+            data.documents
               .filter(doc => doc.file)
-              .map(doc => doc.file as File);
-              
-            const documentTypes = Object.fromEntries(
-              state.documents
-                .filter(doc => doc.file)
-                .map(doc => [doc.file?.name || '', doc.documentType])
-            );
+              .forEach(doc => {
+                if (doc.file) {
+                  docsToUpload.push(doc.file);
+                  documentTypes[doc.file.name] = doc.documentType;
+                }
+              });
+          }
             
-            if (docsToUpload.length > 0) {
-              await uploadDocuments(propertyId, docsToUpload, documentTypes);
-            }
+          if (docsToUpload.length > 0) {
+            await uploadDocuments(propertyId, docsToUpload, documentTypes);
           }
           
           return {
@@ -360,10 +368,10 @@ export function usePropertyManagement() {
      * Update an existing property
      */
     const updateProperty = useMutation({
-      mutationFn: async ({ id, data, state }: { 
+      mutationFn: async ({ id, data, formState }: { 
         id: string; 
         data: Partial<PropertyFormData>;
-        state?: { images?: PropertyImage[], documents?: PropertyDocument[] }
+        formState?: { images?: PropertyImage[], documents?: PropertyDocument[] }
       }) => {
         console.log('Updating property with ID:', id, data);
         
@@ -428,8 +436,8 @@ export function usePropertyManagement() {
           
           // Handle images/documents updates
           // New images to upload
-          if (state && state.images) {
-            const imagesToUpload = state.images
+          if (formState && formState.images) {
+            const imagesToUpload = formState.images
               .filter(img => img.file && !img.id)
               .map(img => img.file as File);
               
@@ -439,14 +447,14 @@ export function usePropertyManagement() {
           }
           
           // New documents to upload
-          if (state && state.documents) {
-            const documentsToUpload = state.documents
+          if (formState && formState.documents) {
+            const documentsToUpload = formState.documents
               .filter(doc => doc.file && !doc.id)
               .map(doc => doc.file as File);
               
             if (documentsToUpload.length > 0) {
               const documentTypes = Object.fromEntries(
-                state.documents
+                formState.documents
                   .filter(doc => doc.file && !doc.id)
                   .map(doc => [doc.file?.name || '', doc.documentType])
               );

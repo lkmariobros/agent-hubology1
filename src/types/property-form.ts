@@ -72,6 +72,10 @@ export interface PropertyFormData {
   // For tracking deleted items during edits
   imagesToDelete?: string[];
   documentsToDelete?: string[];
+  
+  // Images and documents arrays to track during form submission
+  images?: PropertyImage[];
+  documents?: PropertyDocument[];
 }
 
 export interface OwnerContact {
