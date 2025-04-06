@@ -1,118 +1,253 @@
-
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { PropertyFormProvider } from '@/context/PropertyForm/PropertyFormContext';
-import { PropertyFormData } from '@/types/property-form';
-import { toast } from 'sonner';
-import { submitPropertyForm } from '@/context/PropertyForm/formSubmission';
-import BasicInfoTab from './BasicInfoTab';
-import AddressTab from './AddressTab';
-import FeaturesTab from './FeaturesTab';
-import MediaTab from './MediaTab';
-import AdditionalDetailsTab from './AdditionalDetailsTab';
-import PropertyOwnerInfo from './PropertyOwnerInfo';
+import { toast } from "sonner";
+import { PropertyFormValues, propertyFormSchema } from "@/types";
+import { PropertyFormContext } from '@/context/PropertyForm/PropertyFormContext';
+import { saveFormAsDraft, submitPropertyForm } from "@/context/PropertyForm/formSubmission";
+import { PropertyFormState } from '@/types/property-form';
+import { supabase } from '@/lib/supabase';
 
 interface PropertyFormWrapperProps {
-  propertyId?: string;
-  initialData?: Partial<PropertyFormData>;
-  isEdit?: boolean;
+  initialData?: PropertyFormValues;
+  onSubmit: (data: PropertyFormValues) => Promise<void>;
+  onSaveDraft?: (state: PropertyFormState) => Promise<void>;
+  onCancel?: () => void;
+  isSubmitting?: boolean;
+  mode?: 'create' | 'edit';
 }
 
 const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({ 
-  propertyId,
-  initialData,
-  isEdit = false
+  initialData, 
+  onSubmit, 
+  onSaveDraft,
+  onCancel,
+  isSubmitting,
+  mode = 'create'
 }) => {
+  const [formData, setFormData] = useState<PropertyFormValues>(initialData || {
+    title: '',
+    description: '',
+    propertyType: 'Residential',
+    transactionType: 'Sale',
+    status: 'Available',
+    featured: false,
+    address: {
+      street: '',
+      city: '',
+      state: '',
+      zip: '',
+      country: 'USA'
+    },
+    price: 0,
+    rentalRate: 0,
+    bedrooms: 0,
+    bathrooms: 0,
+    builtUpArea: 0,
+    furnishingStatus: 'Unfurnished',
+    floorArea: 0,
+    zoningType: '',
+    buildingClass: '',
+    landArea: 0,
+    ceilingHeight: 0,
+    loadingBays: 0,
+    powerCapacity: 0,
+    landSize: 0,
+    zoning: '',
+    roadFrontage: 0,
+    topography: '',
+    agentNotes: '',
+    stock: {
+      total: 0,
+      available: 0,
+      reserved: 0,
+      sold: 0
+    },
+    propertyFeatures: [],
+    owner: {
+      name: '',
+      email: '',
+      phone: '',
+      address: '',
+      company: '',
+      notes: '',
+      isPrimaryContact: true
+    },
+    images: [],
+    documents: []
+  });
+  const [images, setImages] = useState<any[]>([]);
+  const [documents, setDocuments] = useState<any[]>([]);
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('basic');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleSubmit = async () => {
-    setIsSubmitting(true);
+  
+  const form = useForm<PropertyFormValues>({
+    resolver: zodResolver(propertyFormSchema),
+    defaultValues: initialData,
+    mode: "onChange"
+  });
+  
+  // Check storage buckets on component mount
+  useEffect(() => {
+    const checkStorageBuckets = async () => {
+      try {
+        const { data: buckets, error } = await supabase.storage.listBuckets();
+        
+        if (error) {
+          console.error("Error checking storage buckets:", error);
+          return;
+        }
+        
+        const propertyImagesBucketExists = buckets?.some(b => b.name === 'property-images');
+        
+        if (!propertyImagesBucketExists) {
+          console.warn("Property-images bucket does not exist! Image uploads will fail.");
+          toast.warning("Storage configuration issue: The required 'property-images' bucket is missing. Please set it up in Supabase dashboard.");
+        } else {
+          console.log("Property-images bucket verified successfully");
+        }
+      } catch (err) {
+        console.error("Error checking storage configuration:", err);
+      }
+    };
     
+    checkStorageBuckets();
+  }, []);
+  
+  const addImage = useCallback((image: any) => {
+    setImages(prevImages => [...prevImages, image]);
+  }, []);
+  
+  const removeImage = useCallback((index: number) => {
+    setImages(prevImages => {
+      const newImages = [...prevImages];
+      newImages.splice(index, 1);
+      return newImages;
+    });
+  }, []);
+  
+  const setCoverImage = useCallback((index: number) => {
+    setImages(prevImages => {
+      return prevImages.map((img, i) => ({
+        ...img,
+        isCover: i === index
+      }));
+    });
+  }, []);
+  
+  const updateImageStatus = useCallback((index: number, status: 'uploading' | 'success' | 'error', url: string = '') => {
+    setImages(prevImages => {
+      const newImages = [...prevImages];
+      newImages[index] = {
+        ...newImages[index],
+        uploadStatus: status,
+        url: url || newImages[index].url
+      };
+      return newImages;
+    });
+  }, []);
+  
+  const reorderImages = useCallback((fromIndex: number, toIndex: number) => {
+    setImages(prevImages => {
+      const newImages = [...prevImages];
+      const element = newImages.splice(fromIndex, 1)[0];
+      newImages.splice(toIndex, 0, element);
+      return newImages;
+    });
+  }, []);
+  
+  const addDocument = useCallback((document: any) => {
+    setDocuments(prevDocuments => [...prevDocuments, document]);
+  }, []);
+  
+  const removeDocument = useCallback((index: number) => {
+    setDocuments(prevDocuments => {
+      const newDocuments = [...prevDocuments];
+      newDocuments.splice(index, 1);
+      return newDocuments;
+    });
+  }, []);
+  
+  const handleSaveDraft = async () => {
     try {
-      // Get the form state from the context during submission
-      // We need to pass the state to submitPropertyForm
-      await submitPropertyForm();
+      const state: PropertyFormState = {
+        formData: form.getValues(),
+        images: images,
+        documents: documents
+      };
       
-      toast.success(`Property ${isEdit ? 'updated' : 'created'} successfully!`);
-      navigate('/properties');
+      if (onSaveDraft) {
+        await onSaveDraft(state);
+        toast.success("Draft saved successfully!");
+      } else {
+        await saveFormAsDraft(state);
+        toast.info("Draft saved (mock function)");
+      }
     } catch (error) {
-      console.error('Error submitting form:', error);
-      toast.error(`Failed to ${isEdit ? 'update' : 'create'} property. Please check your form and try again.`);
-    } finally {
-      setIsSubmitting(false);
+      console.error("Error saving draft:", error);
+      toast.error("Failed to save draft.");
     }
   };
-
+  
+  const handleSubmit = form.handleSubmit(async (data) => {
+    try {
+      const state: PropertyFormState = {
+        formData: data,
+        images: images,
+        documents: documents
+      };
+      
+      // Call the submitPropertyForm function from context
+      if (onSubmit) {
+        await onSubmit(data);
+      } else {
+        await submitPropertyForm(state);
+      }
+      
+      toast.success("Property submitted successfully!");
+      navigate('/properties');
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      toast.error("Failed to submit property.");
+    }
+  });
+  
+  const handleCancel = () => {
+    if (onCancel) {
+      onCancel();
+    } else {
+      navigate('/properties');
+    }
+  };
+  
+  const contextValue = {
+    state: {
+      formData: form.getValues(),
+      images: images,
+      documents: documents
+    },
+    form,
+    addImage,
+    removeImage,
+    setCoverImage,
+    updateImageStatus,
+    reorderImages,
+    addDocument,
+    removeDocument,
+  };
+  
   return (
-    <PropertyFormProvider>
-      <div className="space-y-6">
-        <Tabs 
-          value={activeTab} 
-          onValueChange={setActiveTab}
-          className="w-full"
-        >
-          <TabsList className="grid w-full grid-cols-3 md:grid-cols-6">
-            <TabsTrigger value="basic">Basic Info</TabsTrigger>
-            <TabsTrigger value="address">Location</TabsTrigger>
-            <TabsTrigger value="features">Features</TabsTrigger>
-            <TabsTrigger value="owner">Owner</TabsTrigger>
-            <TabsTrigger value="media">Media</TabsTrigger>
-            <TabsTrigger value="additional">Additional</TabsTrigger>
-          </TabsList>
-
-          <Card className="mt-4 p-4">
-            <TabsContent value="basic" className="mt-0">
-              <BasicInfoTab />
-            </TabsContent>
-            
-            <TabsContent value="address" className="mt-0">
-              <AddressTab />
-            </TabsContent>
-            
-            <TabsContent value="features" className="mt-0">
-              <FeaturesTab />
-            </TabsContent>
-            
-            <TabsContent value="owner" className="mt-0">
-              <PropertyOwnerInfo />
-            </TabsContent>
-            
-            <TabsContent value="media" className="mt-0">
-              <MediaTab />
-            </TabsContent>
-            
-            <TabsContent value="additional" className="mt-0">
-              <AdditionalDetailsTab />
-            </TabsContent>
-          </Card>
-        </Tabs>
-
-        <div className="flex justify-between">
-          <Button 
-            variant="outline" 
-            onClick={() => navigate('/properties')}
-            disabled={isSubmitting}
-          >
-            Cancel
-          </Button>
-          
-          <div className="space-x-2">
-            <Button
-              type="button"
-              onClick={handleSubmit}
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? 'Saving...' : isEdit ? 'Update Property' : 'Create Property'}
-            </Button>
-          </div>
-        </div>
-      </div>
-    </PropertyFormProvider>
+    <PropertyFormContext.Provider value={contextValue}>
+      {React.Children.map(children => {
+        return React.cloneElement(children as React.ReactElement, {
+          onSubmit: handleSubmit,
+          onSaveDraft: handleSaveDraft,
+          onCancel: handleCancel,
+          isSubmitting: isSubmitting,
+          form: form
+        });
+      })}
+    </PropertyFormContext.Provider>
   );
 };
 

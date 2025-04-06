@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useProperty } from '@/hooks/useProperties';
@@ -176,13 +175,28 @@ const PropertyDetail = () => {
     return () => clearTimeout(timer);
   }, [normalizedId, propertyResponse, useMockData, id, isValidPropertyId]);
 
-  // New function to fetch property images separately
+  // Enhanced function to fetch property images separately
   const fetchPropertyImages = async (propertyId: string) => {
     try {
+      console.log('Fetching images for property ID:', propertyId);
+      
+      // Check if the table exists first
+      const { error: tableCheckError } = await supabase
+        .from('property_images')
+        .select('id')
+        .limit(1);
+        
+      if (tableCheckError) {
+        console.error('Error checking property_images table:', tableCheckError);
+        console.log('Property images table may not exist yet');
+        return [];
+      }
+      
       const { data, error } = await supabase
         .from('property_images')
         .select('*')
         .eq('property_id', propertyId)
+        .order('is_cover', { ascending: false })
         .order('display_order', { ascending: true });
       
       if (error) {
@@ -190,6 +204,7 @@ const PropertyDetail = () => {
         return [];
       }
       
+      console.log('PropertyDetail: Successfully fetched images:', data);
       return data || [];
     } catch (err) {
       console.error('Exception fetching property images:', err);
