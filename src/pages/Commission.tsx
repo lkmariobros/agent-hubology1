@@ -8,10 +8,18 @@ import CommissionHistory from '@/components/commission/CommissionHistory';
 import DashboardContent from '@/components/commission/DashboardContent';
 import TeamContent from '@/components/commission/TeamContent';
 import { useAuth } from '@/hooks/useAuth';
+import { AgentWithHierarchy } from '@/types';
+import { useTeamManagement } from '@/hooks/useTeamManagement';
 
 const Commission = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const { isAdmin } = useAuth();
+  const { 
+    teamHierarchy, 
+    selectedAgent, 
+    handleAgentSelect, 
+    isLoadingHierarchy 
+  } = useTeamManagement();
 
   // Sample metrics data for demonstration
   const metricsData = {
@@ -103,7 +111,7 @@ const Commission = () => {
   ];
 
   // Sample agent hierarchy for TeamContent
-  const agentHierarchy = {
+  const agentHierarchy = teamHierarchy || {
     id: '1',
     name: 'John Doe',
     position: 'Team Leader',
@@ -162,7 +170,12 @@ const Commission = () => {
         </TabsContent>
         
         <TabsContent value="team">
-          <TeamContent />
+          <TeamContent 
+            agentHierarchy={agentHierarchy as AgentWithHierarchy} 
+            selectedAgent={selectedAgent} 
+            onAgentClick={handleAgentSelect} 
+            isLoading={isLoadingHierarchy} 
+          />
         </TabsContent>
         
         <TabsContent value="forecast">
