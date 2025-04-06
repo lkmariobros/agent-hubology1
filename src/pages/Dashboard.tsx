@@ -8,20 +8,21 @@ import PropertyShowcase from '@/components/dashboard/PropertyShowcase';
 import UpcomingPayments from '@/components/dashboard/UpcomingPayments';
 import { useMetrics } from '@/hooks/useDashboard';
 import { Building2, Trophy } from 'lucide-react';
+import { DashboardMetric } from '@/types';
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
   const { data: metricsData } = useMetrics();
   
   // Filter to only show two specific metrics
-  const filteredMetrics = metricsData?.data?.metrics 
+  const filteredMetrics: DashboardMetric[] = metricsData?.data?.metrics 
     ? [
         {
           id: "commission",
           label: 'Total Commission',
           value: '$45,682',
           change: 8.2,
-          trend: 'up',
+          trend: 'up' as const,  // Using 'as const' to ensure it's one of the union types
           icon: <Building2 className="h-5 w-5 text-primary" />
         },
         {
@@ -29,7 +30,7 @@ const Dashboard: React.FC = () => {
           label: 'Leaderboard Position',
           value: '#3',
           change: 2,
-          trend: 'up',
+          trend: 'up' as const,  // Using 'as const' to ensure it's one of the union types
           icon: <Trophy className="h-5 w-5 text-primary" />
         }
       ]
