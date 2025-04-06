@@ -35,8 +35,7 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
     
     try {
       // Get the form state from the context during submission
-      // We don't need to pass the complete state here since it will be
-      // accessed from the context in the submitPropertyForm function
+      // We need to pass the state to submitPropertyForm
       await submitPropertyForm();
       
       toast.success(`Property ${isEdit ? 'updated' : 'created'} successfully!`);

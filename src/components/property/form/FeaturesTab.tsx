@@ -4,141 +4,89 @@ import { usePropertyForm } from '@/context/PropertyForm/PropertyFormContext';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Plus, X } from 'lucide-react';
+import { X, Plus } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-
-interface FeatureCategory {
-  name: string;
-  features: string[];
-}
-
-const defaultCategories: FeatureCategory[] = [
-  {
-    name: 'Interior',
-    features: [
-      'Air Conditioning',
-      'Heating',
-      'High Ceiling',
-      'Built-in Wardrobes',
-      'Ensuite',
-      'Modern Kitchen',
-      'Security System'
-    ]
-  },
-  {
-    name: 'Exterior',
-    features: [
-      'Balcony',
-      'Garden',
-      'Parking',
-      'Swimming Pool',
-      'Tennis Court',
-      'BBQ Area',
-      'Outdoor Entertaining'
-    ]
-  },
-  {
-    name: 'Building',
-    features: [
-      'Elevator',
-      'Gym',
-      'Security',
-      'Sauna',
-      'Concierge',
-      'Visitor Parking',
-      'Communal Areas'
-    ]
-  }
-];
 
 const FeaturesTab: React.FC = () => {
   const { state, updateFormData } = usePropertyForm();
   const { formData } = state;
-  const [newFeature, setNewFeature] = useState('');
-  const selectedFeatures = formData.propertyFeatures || [];
-
-  const handleFeatureToggle = (feature: string) => {
-    const updatedFeatures = selectedFeatures.includes(feature)
-      ? selectedFeatures.filter(f => f !== feature)
-      : [...selectedFeatures, feature];
+  const [featureInput, setFeatureInput] = useState('');
+  
+  const features = formData.propertyFeatures || [];
+  
+  const handleAddFeature = () => {
+    if (featureInput.trim() === '') return;
     
+    const updatedFeatures = [...features, featureInput.trim()];
+    updateFormData({ propertyFeatures: updatedFeatures });
+    setFeatureInput('');
+  };
+  
+  const handleRemoveFeature = (index: number) => {
+    const updatedFeatures = [...features];
+    updatedFeatures.splice(index, 1);
     updateFormData({ propertyFeatures: updatedFeatures });
   };
-
-  const handleAddFeature = () => {
-    if (newFeature && !selectedFeatures.includes(newFeature)) {
-      updateFormData({ propertyFeatures: [...selectedFeatures, newFeature] });
-      setNewFeature('');
+  
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddFeature();
     }
-  };
-
-  const handleRemoveFeature = (feature: string) => {
-    updateFormData({
-      propertyFeatures: selectedFeatures.filter(f => f !== feature)
-    });
   };
 
   return (
     <div className="space-y-6">
-      <div>
-        <Label className="text-lg font-medium">Property Features</Label>
-        <p className="text-sm text-muted-foreground mb-4">
-          Select existing features or add custom ones for this property
+      <div className="space-y-2">
+        <Label htmlFor="features">Property Features</Label>
+        <p className="text-sm text-muted-foreground">
+          Add key features that make this property stand out
         </p>
         
-        <div className="flex flex-wrap gap-2 mb-6">
-          {selectedFeatures.map(feature => (
-            <Badge key={feature} variant="secondary" className="px-3 py-1">
-              {feature}
-              <X 
-                className="ml-2 h-3 w-3 cursor-pointer" 
-                onClick={() => handleRemoveFeature(feature)}
-              />
-            </Badge>
-          ))}
-        </div>
-        
-        <div className="flex gap-2 mb-6">
+        <div className="flex gap-2">
           <Input
-            value={newFeature}
-            onChange={(e) => setNewFeature(e.target.value)}
-            placeholder="Enter custom feature"
+            id="features"
+            value={featureInput}
+            onChange={(e) => setFeatureInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Add a feature (e.g. 'Swimming Pool', 'Garden')"
             className="flex-1"
           />
-          <Button
-            type="button"
+          <Button 
+            type="button" 
+            size="sm" 
             onClick={handleAddFeature}
-            disabled={!newFeature}
+            disabled={featureInput.trim() === ''}
           >
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="h-4 w-4 mr-1" />
             Add
           </Button>
         </div>
       </div>
       
-      {defaultCategories.map(category => (
-        <div key={category.name} className="space-y-3">
-          <h3 className="text-md font-medium">{category.name}</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-2">
-            {category.features.map(feature => (
-              <div key={feature} className="flex items-center space-x-2">
-                <Checkbox
-                  id={`feature-${feature}`}
-                  checked={selectedFeatures.includes(feature)}
-                  onCheckedChange={() => handleFeatureToggle(feature)}
-                />
-                <label
-                  htmlFor={`feature-${feature}`}
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+      {features.length > 0 && (
+        <div className="border rounded-md p-4">
+          <h3 className="text-sm font-medium mb-2">Added Features</h3>
+          <div className="flex flex-wrap gap-2">
+            {features.map((feature, index) => (
+              <Badge 
+                key={index} 
+                variant="secondary"
+                className="flex items-center gap-1 px-2 py-1"
+              >
+                {feature}
+                <button 
+                  type="button" 
+                  onClick={() => handleRemoveFeature(index)}
+                  className="ml-1 hover:text-destructive focus:outline-none"
                 >
-                  {feature}
-                </label>
-              </div>
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
             ))}
           </div>
         </div>
-      ))}
+      )}
     </div>
   );
 };
