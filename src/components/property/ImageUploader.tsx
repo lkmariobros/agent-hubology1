@@ -26,9 +26,12 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   const [bucketStatus, setBucketStatus] = useState<'checking' | 'available' | 'unavailable'>('checking');
   const bucketCheckAttempted = useRef(false);
   const [retryCount, setRetryCount] = useState(0);
+  const isComponentMounted = useRef(true);
 
   // Check if the storage buckets are accessible
   useEffect(() => {
+    isComponentMounted.current = true;
+    
     // Prevent multiple initialization attempts that could cause infinite loops
     if (bucketCheckAttempted.current && retryCount === 0) {
       return;
@@ -43,6 +46,8 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
         const bucketsExist = retryCount > 0
           ? await forceCheckStorageBuckets(['property-images'])
           : await checkStorageBuckets(['property-images']);
+        
+        if (!isComponentMounted.current) return;
           
         setBucketStatus(bucketsExist ? 'available' : 'unavailable');
         
@@ -56,6 +61,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
           toast.success('Successfully connected to storage buckets');
         }
       } catch (error) {
+        if (!isComponentMounted.current) return;
         console.error('Error checking storage bucket:', error);
         setBucketStatus('unavailable');
         if (retryCount > 0) {
@@ -65,6 +71,10 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     };
     
     verifyStorageBuckets();
+    
+    return () => {
+      isComponentMounted.current = false;
+    };
   }, [checkStorageBuckets, forceCheckStorageBuckets, retryCount]);
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {

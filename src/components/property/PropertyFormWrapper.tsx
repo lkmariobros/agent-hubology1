@@ -33,9 +33,12 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
   const { checkStorageBuckets, forceCheckStorageBuckets } = useStorageUpload();
   const initializationAttempted = useRef(false);
   const [retryCount, setRetryCount] = useState(0);
+  const isComponentMounted = useRef(true);
   
   // Initialize form and check storage
   useEffect(() => {
+    isComponentMounted.current = true;
+    
     // Prevent multiple initialization attempts
     if (initializationAttempted.current && retryCount === 0) {
       return;
@@ -43,6 +46,8 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
     
     const initializeForm = async () => {
       try {
+        if (!isComponentMounted.current) return;
+        
         initializationAttempted.current = true;
         setIsInitializing(true);
         
@@ -51,6 +56,8 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
         const bucketsExist = retryCount > 0
           ? await forceCheckStorageBuckets(requiredBuckets)
           : await checkStorageBuckets(requiredBuckets);
+        
+        if (!isComponentMounted.current) return;
         
         setStorageReady(bucketsExist);
         
@@ -67,14 +74,21 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
           }
         }
       } catch (error) {
+        if (!isComponentMounted.current) return;
         console.error('Error initializing property form:', error);
         setStorageReady(false);
       } finally {
-        setIsInitializing(false);
+        if (isComponentMounted.current) {
+          setIsInitializing(false);
+        }
       }
     };
     
     initializeForm();
+    
+    return () => {
+      isComponentMounted.current = false;
+    };
   }, [checkStorageBuckets, forceCheckStorageBuckets, retryCount]);
   
   const handleFormSubmit = async (data: PropertyFormData) => {

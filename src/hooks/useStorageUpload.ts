@@ -24,10 +24,11 @@ export function useStorageUpload() {
   const [storageStatus, setStorageStatus] = useState<'checking' | 'available' | 'unavailable'>('checking');
   const checkInProgress = useRef(false);
   const bucketCache = useRef<Record<string, boolean>>({});
+  const initialCheckDone = useRef(false);
 
   // Function to verify storage buckets exist and are accessible
   const checkStorageBuckets = async (bucketNames: string[]): Promise<boolean> => {
-    // Prevent concurrent checks
+    // Prevent concurrent checks and repeated checks if already done
     if (checkInProgress.current) {
       console.log('Storage bucket check already in progress, skipping...');
       return storageStatus === 'available';
@@ -35,13 +36,12 @@ export function useStorageUpload() {
     
     try {
       checkInProgress.current = true;
-      setStorageStatus('checking');
       
       console.log('Checking storage buckets:', bucketNames);
       
       // Use cached results if available for all buckets
       const allCached = bucketNames.every(bucket => typeof bucketCache.current[bucket] !== 'undefined');
-      if (allCached) {
+      if (allCached && initialCheckDone.current) {
         const allExist = bucketNames.every(bucket => bucketCache.current[bucket] === true);
         console.log('Using cached bucket status:', allExist ? 'available' : 'unavailable');
         setStorageStatus(allExist ? 'available' : 'unavailable');
@@ -72,33 +72,14 @@ export function useStorageUpload() {
         bucketCache.current[bucket] = existingBuckets.includes(actualBucketName);
       });
       
+      initialCheckDone.current = true;
+      
       if (!allBucketsExist) {
         const missingBuckets = bucketNames.filter(b => {
           const actualBucketName = BUCKET_NAME_MAP[b] || b;
           return !existingBuckets.includes(actualBucketName);
         });
         console.warn('Missing buckets:', missingBuckets);
-        
-        // Try to test bucket permissions even if it exists
-        for (const bucket of bucketNames) {
-          const actualBucketName = BUCKET_NAME_MAP[bucket] || bucket;
-          if (existingBuckets.includes(actualBucketName)) {
-            try {
-              // Test if we can list files in the bucket
-              const { error: listError } = await supabase.storage
-                .from(actualBucketName)
-                .list('', { limit: 1 });
-                
-              if (listError) {
-                console.error(`Permission error for bucket ${actualBucketName}:`, listError);
-                bucketCache.current[bucket] = false;
-              }
-            } catch (err) {
-              console.error(`Error testing bucket ${actualBucketName}:`, err);
-              bucketCache.current[bucket] = false;
-            }
-          }
-        }
       }
       
       setStorageStatus(allBucketsExist ? 'available' : 'unavailable');
