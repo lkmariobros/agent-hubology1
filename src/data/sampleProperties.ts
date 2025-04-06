@@ -26,7 +26,10 @@ export const sampleProperties: Property[] = [
     createdAt: '2023-09-01T10:00:00Z',
     updatedAt: '2023-09-15T14:30:00Z',
     area: 1200,
-    size: 1200
+    size: 1200,
+    featured: false,
+    transactionType: 'Sale',
+    reference: 'REF-001'
   },
   {
     id: '2',
@@ -52,7 +55,10 @@ export const sampleProperties: Property[] = [
     createdAt: '2023-08-15T09:30:00Z',
     updatedAt: '2023-09-10T11:45:00Z',
     area: 5500,
-    size: 5500
+    size: 5500,
+    featured: true,
+    transactionType: 'Sale',
+    reference: 'REF-002'
   },
   {
     id: '3',
@@ -78,7 +84,10 @@ export const sampleProperties: Property[] = [
     createdAt: '2023-07-20T14:15:00Z',
     updatedAt: '2023-08-25T16:20:00Z',
     area: 2800,
-    size: 2800
+    size: 2800,
+    featured: false,
+    transactionType: 'Sale',
+    reference: 'REF-003'
   },
   {
     id: '4',
@@ -104,7 +113,10 @@ export const sampleProperties: Property[] = [
     createdAt: '2023-08-05T11:45:00Z',
     updatedAt: '2023-09-05T10:30:00Z',
     area: 3200,
-    size: 3200
+    size: 3200,
+    featured: false,
+    transactionType: 'Sale',
+    reference: 'REF-004'
   },
   {
     id: '5',
@@ -130,7 +142,10 @@ export const sampleProperties: Property[] = [
     createdAt: '2023-09-10T13:20:00Z',
     updatedAt: '2023-09-25T09:15:00Z',
     area: 2500,
-    size: 2500
+    size: 2500,
+    featured: false,
+    transactionType: 'Sale',
+    reference: 'REF-005'
   },
   {
     id: '6',
@@ -156,6 +171,15 @@ export const sampleProperties: Property[] = [
     createdAt: '2023-07-15T16:40:00Z',
     updatedAt: '2023-08-20T14:55:00Z',
     area: 1800,
-    size: 1800
+    size: 1800,
+    featured: false,
+    transactionType: 'Sale',
+    reference: 'REF-006',
+    stock: {
+      total: 10,
+      available: 7,
+      reserved: 1,
+      sold: 2
+    }
   }
 ];

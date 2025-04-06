@@ -7,6 +7,13 @@ export interface PropertyAddress {
   country: string;
 }
 
+export interface PropertyStock {
+  total: number;
+  available: number;
+  reserved?: number;
+  sold?: number;
+}
+
 export interface Property {
   id: string;
   title: string;
@@ -27,6 +34,11 @@ export interface Property {
   area: number;
   size: number;
   agent?: PropertyAgent;
+  // Add missing properties
+  stock?: PropertyStock;
+  featured?: boolean;
+  transactionType?: string;
+  reference?: string;
 }
 
 export interface PropertyAgent {
@@ -37,4 +49,23 @@ export interface PropertyAgent {
   email: string;
   phone?: string;
   avatar?: string;
+}
+
+// Add PropertyFormValues type needed for property forms
+export interface PropertyFormValues {
+  title: string;
+  description: string;
+  price: number;
+  propertyType: string;
+  builtUpArea: number;
+  bedrooms: number;
+  bathrooms: number;
+  features: string[];
+  status: string;
+  address: PropertyAddress;
+  images: string[];
+  // Additional fields that may be needed
+  stock?: PropertyStock;
+  transactionType?: string;
+  size?: number;
 }

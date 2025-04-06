@@ -32,18 +32,23 @@ const mapPropertyData = (property: any): Property => {
     bathrooms: property.bathrooms || 0,
     builtUpArea: property.built_up_area || 0,
     area: property.area || property.built_up_area || 0,
+    size: property.land_size || property.built_up_area || 0,
+    listedBy: property.agent_id ? 'agency' : 'owner',
     images: property.property_images?.map((img: any) => img.storage_path) || [],
     status: property.property_statuses?.name?.toLowerCase() || 'available',
     agent: {
       id: property.agent_id || '',
-      name: 'Agent Name', // This would come from a join in a real app
-      firstName: 'Unknown',
-      lastName: 'Agent',
-      email: 'agent@example.com',
-      phone: '123-456-7890'
+      name: property.agent?.full_name || 'Unknown Agent',
+      firstName: property.agent?.first_name || 'Unknown',
+      lastName: property.agent?.last_name || 'Agent',
+      email: property.agent?.email || 'agent@example.com',
+      phone: property.agent?.phone || '123-456-7890'
     },
     createdAt: property.created_at || new Date().toISOString(),
-    updatedAt: property.updated_at || new Date().toISOString()
+    updatedAt: property.updated_at || new Date().toISOString(),
+    featured: !!property.featured,
+    transactionType: property.transaction_types?.name || 'Sale',
+    reference: property.reference || `REF-${property.id.substring(0, 8)}`
   };
 };
 

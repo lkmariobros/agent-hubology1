@@ -100,8 +100,18 @@ export function usePaymentSchedules() {
     staleTime: 5 * 60 * 1000 // 5 minutes
   });
 
+  // Correctly expose all the required properties
+  const paymentSchedules = getPaymentSchedules.data || [];
+  const defaultPaymentSchedule = getDefaultPaymentSchedule.data;
+  const isLoading = getPaymentSchedules.isLoading || getDefaultPaymentSchedule.isLoading;
+  const error = getPaymentSchedules.error || getDefaultPaymentSchedule.error;
+
   return {
     getPaymentSchedules,
-    getDefaultPaymentSchedule
+    getDefaultPaymentSchedule,
+    paymentSchedules,
+    defaultPaymentSchedule,
+    isLoading,
+    error
   };
 }

@@ -119,7 +119,7 @@ export function useRecentProperties() {
 }
 
 export function useOpportunities() {
-  return useQuery({
+  const result = useQuery({
     queryKey: ['opportunities'],
     queryFn: async () => {
       // In a real app, we would fetch from Supabase
@@ -130,4 +130,11 @@ export function useOpportunities() {
     },
     staleTime: 5 * 60 * 1000 // 5 minutes
   });
+  
+  return {
+    ...result,
+    opportunities: result.data?.data || [],
+    isLoading: result.isLoading,
+    error: result.error
+  };
 }

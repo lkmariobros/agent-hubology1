@@ -71,3 +71,33 @@ export interface AgentWithHierarchy {
   downline?: AgentWithHierarchy[];
   salesVolume?: number;
 }
+
+// Export the PropertyFormValues type directly, to avoid importing it from property.ts
+export interface PropertyFormValues {
+  title: string;
+  description: string;
+  price: number;
+  propertyType: string;
+  builtUpArea: number;
+  bedrooms: number;
+  bathrooms: number;
+  features: string[];
+  status: string;
+  address: {
+    street: string;
+    city: string;
+    state: string;
+    zip: string;
+    country: string;
+  };
+  images: string[];
+  // Additional fields that may be needed
+  stock?: {
+    total: number;
+    available: number;
+    reserved?: number;
+    sold?: number;
+  };
+  transactionType?: string;
+  size?: number;
+}
