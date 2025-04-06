@@ -1,7 +1,7 @@
 
 import React, { useCallback, useRef, useState, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { UploadCloud, X, Loader2, Check, Image, AlertTriangle, RefreshCcw } from 'lucide-react';
+import { UploadCloud, X, Loader2, Check, Image, AlertTriangle, RefreshCcw, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { usePropertyForm } from '@/context/PropertyForm/PropertyFormContext';
 import { useStorageUpload } from '@/hooks/useStorageUpload';
@@ -21,16 +21,17 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { state, addImage, removeImage, setCoverImage } = usePropertyForm();
-  const { uploadFile, checkStorageBuckets, isUploading, progress } = useStorageUpload();
+  const { uploadFile, checkStorageBuckets, forceCheckStorageBuckets, isUploading, progress } = useStorageUpload();
   const [processingFiles, setProcessingFiles] = useState<string[]>([]);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [bucketStatus, setBucketStatus] = useState<'checking' | 'available' | 'unavailable'>('checking');
   const bucketCheckAttempted = useRef(false);
+  const [retryCount, setRetryCount] = useState(0);
 
   // Check if the storage buckets are accessible
   useEffect(() => {
     // Prevent multiple initialization attempts that could cause infinite loops
-    if (bucketCheckAttempted.current) {
+    if (bucketCheckAttempted.current && retryCount === 0) {
       return;
     }
     
@@ -38,20 +39,34 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
       try {
         bucketCheckAttempted.current = true;
         setBucketStatus('checking');
-        const bucketsExist = await checkStorageBuckets(['property-images']);
+        
+        // Use force check if this is a retry
+        const bucketsExist = retryCount > 0
+          ? await forceCheckStorageBuckets(['property-images'])
+          : await checkStorageBuckets(['property-images']);
+          
         setBucketStatus(bucketsExist ? 'available' : 'unavailable');
         
         if (!bucketsExist) {
           console.warn('Property images bucket is not accessible');
+          // Only show toast on retry to avoid duplicate messages
+          if (retryCount > 0) {
+            toast.warning('Storage bucket is still not accessible. Please check Supabase configuration.');
+          }
+        } else if (retryCount > 0) {
+          toast.success('Successfully connected to storage buckets');
         }
       } catch (error) {
         console.error('Error checking storage bucket:', error);
         setBucketStatus('unavailable');
+        if (retryCount > 0) {
+          toast.error('Failed to connect to storage buckets');
+        }
       }
     };
     
     verifyStorageBuckets();
-  }, [checkStorageBuckets]);
+  }, [checkStorageBuckets, forceCheckStorageBuckets, retryCount]);
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     // Reset any previous errors
@@ -144,22 +159,8 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     }
   };
   
-  const retryBucketCheck = async () => {
-    setBucketStatus('checking');
-    try {
-      const bucketsExist = await checkStorageBuckets(['property-images']);
-      setBucketStatus(bucketsExist ? 'available' : 'unavailable');
-      
-      if (bucketsExist) {
-        toast.success('Storage bucket is now accessible');
-      } else {
-        toast.warning('Storage bucket is still not accessible');
-      }
-    } catch (error) {
-      console.error('Error checking bucket status:', error);
-      setBucketStatus('unavailable');
-      toast.error('Failed to check storage bucket status');
-    }
+  const retryBucketCheck = () => {
+    setRetryCount(prev => prev + 1);
   };
 
   return (
@@ -179,13 +180,24 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
           <AlertTitle>Storage Configuration Issue</AlertTitle>
           <AlertDescription className="flex flex-col space-y-2">
             <p>
-              Image uploads might not work correctly. This could be due to missing storage buckets or permission issues.
+              Image uploads will not work. This is because the required storage bucket 'property-images' 
+              is missing or inaccessible in your Supabase project.
             </p>
+            <div className="flex flex-col space-y-1 text-sm mt-2">
+              <p className="font-semibold flex items-center">
+                <Info className="h-3 w-3 mr-1" /> Troubleshooting:
+              </p>
+              <ol className="list-decimal ml-5 space-y-1">
+                <li>Ensure the 'property-images' bucket exists in your Supabase storage</li>
+                <li>Check that your bucket has the correct RLS policies for uploads</li>
+                <li>Verify that your application has the correct permissions</li>
+              </ol>
+            </div>
             <Button 
               variant="outline" 
               size="sm" 
               onClick={retryBucketCheck} 
-              className="self-start flex items-center"
+              className="self-start flex items-center mt-2"
             >
               <RefreshCcw className="h-3 w-3 mr-2" />
               Retry Connection

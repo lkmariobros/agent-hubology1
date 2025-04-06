@@ -17,6 +17,7 @@ export function useStorageUpload() {
   const [error, setError] = useState<Error | null>(null);
   const [storageStatus, setStorageStatus] = useState<'checking' | 'available' | 'unavailable'>('checking');
   const checkInProgress = useRef(false);
+  const bucketCache = useRef<Record<string, boolean>>({});
 
   // Function to verify storage buckets exist and are accessible
   const checkStorageBuckets = async (bucketNames: string[]): Promise<boolean> => {
@@ -31,6 +32,15 @@ export function useStorageUpload() {
       setStorageStatus('checking');
       
       console.log('Checking storage buckets:', bucketNames);
+      
+      // Use cached results if available for all buckets
+      const allCached = bucketNames.every(bucket => typeof bucketCache.current[bucket] !== 'undefined');
+      if (allCached) {
+        const allExist = bucketNames.every(bucket => bucketCache.current[bucket] === true);
+        console.log('Using cached bucket status:', allExist ? 'available' : 'unavailable');
+        setStorageStatus(allExist ? 'available' : 'unavailable');
+        return allExist;
+      }
       
       // Check if buckets exist
       const { data: buckets, error } = await supabase.storage.listBuckets();
@@ -47,9 +57,34 @@ export function useStorageUpload() {
       // Check if all required buckets exist
       const allBucketsExist = bucketNames.every(bucket => existingBuckets.includes(bucket));
       
+      // Cache the results
+      bucketNames.forEach(bucket => {
+        bucketCache.current[bucket] = existingBuckets.includes(bucket);
+      });
+      
       if (!allBucketsExist) {
         const missingBuckets = bucketNames.filter(b => !existingBuckets.includes(b));
         console.warn('Missing buckets:', missingBuckets);
+        
+        // Try to test bucket permissions even if it exists
+        for (const bucket of bucketNames) {
+          if (existingBuckets.includes(bucket)) {
+            try {
+              // Test if we can list files in the bucket
+              const { error: listError } = await supabase.storage
+                .from(bucket)
+                .list('', { limit: 1 });
+                
+              if (listError) {
+                console.error(`Permission error for bucket ${bucket}:`, listError);
+                bucketCache.current[bucket] = false;
+              }
+            } catch (err) {
+              console.error(`Error testing bucket ${bucket}:`, err);
+              bucketCache.current[bucket] = false;
+            }
+          }
+        }
       }
       
       setStorageStatus(allBucketsExist ? 'available' : 'unavailable');
@@ -61,6 +96,17 @@ export function useStorageUpload() {
     } finally {
       checkInProgress.current = false;
     }
+  };
+
+  // Clear the bucket cache and force a fresh check
+  const forceCheckStorageBuckets = async (bucketNames: string[]): Promise<boolean> => {
+    // Reset the cache for these buckets
+    bucketNames.forEach(bucket => {
+      delete bucketCache.current[bucket];
+    });
+    
+    // Force the check
+    return await checkStorageBuckets(bucketNames);
   };
 
   const uploadFile = async (file: File, options: UploadOptions): Promise<string> => {
@@ -175,6 +221,7 @@ export function useStorageUpload() {
     uploadFile,
     deleteFile,
     checkStorageBuckets,
+    forceCheckStorageBuckets,
     isUploading,
     progress,
     error,

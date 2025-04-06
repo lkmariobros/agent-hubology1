@@ -6,7 +6,7 @@ import { PropertyFormData } from '@/types/property-form';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { Loader2, AlertCircle, AlertTriangle } from 'lucide-react';
+import { Loader2, AlertCircle, AlertTriangle, Info } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import propertyFormHelpers from '@/utils/propertyFormHelpers';
 import { useStorageUpload } from '@/hooks/useStorageUpload';
@@ -30,13 +30,14 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [storageReady, setStorageReady] = useState(false);
   const { createProperty, updateProperty } = usePropertyManagement();
-  const { checkStorageBuckets } = useStorageUpload();
+  const { checkStorageBuckets, forceCheckStorageBuckets } = useStorageUpload();
   const initializationAttempted = useRef(false);
+  const [retryCount, setRetryCount] = useState(0);
   
   // Initialize form and check storage
   useEffect(() => {
     // Prevent multiple initialization attempts
-    if (initializationAttempted.current) {
+    if (initializationAttempted.current && retryCount === 0) {
       return;
     }
     
@@ -45,17 +46,25 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
         initializationAttempted.current = true;
         setIsInitializing(true);
         
-        // Check storage configuration
+        // Check storage configuration - use force check if retrying
         const requiredBuckets = ['property-images', 'property-documents'];
-        const bucketsExist = await checkStorageBuckets(requiredBuckets);
+        const bucketsExist = retryCount > 0
+          ? await forceCheckStorageBuckets(requiredBuckets)
+          : await checkStorageBuckets(requiredBuckets);
         
         setStorageReady(bucketsExist);
         
         if (!bucketsExist) {
           console.warn('Missing required storage buckets');
-          toast.warning('Storage configuration issue detected. Image and document uploads may not work correctly.');
+          // Only show toast on retry to avoid duplicate notifications
+          if (retryCount > 0) {
+            toast.warning('Storage bucket issue persists. Please check Supabase configuration.');
+          }
         } else {
           console.log('All required storage buckets are available');
+          if (retryCount > 0) {
+            toast.success('Successfully connected to storage buckets');
+          }
         }
       } catch (error) {
         console.error('Error initializing property form:', error);
@@ -66,7 +75,7 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
     };
     
     initializeForm();
-  }, [checkStorageBuckets]);
+  }, [checkStorageBuckets, forceCheckStorageBuckets, retryCount]);
   
   const handleFormSubmit = async (data: PropertyFormData) => {
     if (!user) {
@@ -155,27 +164,8 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
   };
   
   // Function to recheck storage buckets
-  const recheckStorageBuckets = async () => {
-    setIsInitializing(true);
-    
-    try {
-      const requiredBuckets = ['property-images', 'property-documents'];
-      const bucketsExist = await checkStorageBuckets(requiredBuckets);
-      
-      setStorageReady(bucketsExist);
-      
-      if (bucketsExist) {
-        toast.success('Storage buckets are now available');
-      } else {
-        toast.warning('Some required storage buckets are still missing or inaccessible');
-      }
-    } catch (error) {
-      console.error('Error checking storage buckets:', error);
-      toast.error('Failed to check storage bucket availability');
-      setStorageReady(false);
-    } finally {
-      setIsInitializing(false);
-    }
+  const recheckStorageBuckets = () => {
+    setRetryCount(prev => prev + 1);
   };
   
   if (isInitializing) {
@@ -216,16 +206,27 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
       {!storageReady && (
         <Alert variant="warning" className="mb-6">
           <AlertTriangle className="h-4 w-4 mr-2" />
-          <AlertTitle>Storage Notice</AlertTitle>
+          <AlertTitle>Storage Buckets Missing</AlertTitle>
           <AlertDescription className="flex flex-col space-y-3">
             <p>
-              Image and document uploads may not work correctly. This could be due to missing storage buckets or permission issues.
+              Image and document uploads will not work because the required storage buckets 
+              ('property-images', 'property-documents') are missing or inaccessible in your Supabase project.
             </p>
+            <div className="flex flex-col space-y-1 text-sm mt-1">
+              <p className="font-semibold flex items-center">
+                <Info className="h-3 w-3 mr-1" /> Troubleshooting:
+              </p>
+              <ol className="list-decimal ml-5 space-y-1">
+                <li>Ensure both buckets exist in your Supabase storage</li>
+                <li>Check that your buckets have the correct RLS policies for uploads</li>
+                <li>Verify that your application has the correct permissions</li>
+              </ol>
+            </div>
             <Button 
               variant="outline" 
               size="sm" 
               onClick={recheckStorageBuckets}
-              className="self-start"
+              className="self-start mt-2"
             >
               Check Again
             </Button>
