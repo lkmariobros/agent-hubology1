@@ -1,3 +1,4 @@
+
 export interface PropertyFormValues {
   id?: string;
   title?: string;
@@ -21,7 +22,7 @@ export interface PropertyFormValues {
   status?: string;
   images?: string[];
   features?: string[];
-  featured?: boolean; // Added this property
+  featured?: boolean;
   furnishingStatus?: string;
   zoningType?: string;
   buildingClass?: string;
@@ -33,6 +34,7 @@ export interface PropertyFormValues {
   roadFrontage?: number;
   topography?: string;
   agentNotes?: string;
+  documents?: any[]; // Added this property
   stock?: {
     total: number;
     available: number;

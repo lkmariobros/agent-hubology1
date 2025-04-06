@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useNavigate } from 'react-router-dom';
 import { toast } from "sonner";
 import { PropertyFormValues } from "@/types";
-import { propertySchema as propertyFormSchema } from "@/components/property/form/validation";
+import { propertySchema } from "@/components/property/form/validation";
 import { PropertyFormContext } from '@/context/PropertyForm/PropertyFormContext';
 import { saveFormAsDraft, submitPropertyForm } from "@/context/PropertyForm/formSubmission";
 import { PropertyFormState, PropertyFormData } from '@/types/property-form';
@@ -61,6 +60,7 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
     roadFrontage: 0,
     topography: '',
     agentNotes: '',
+    featured: false,
     stock: {
       total: 0,
       available: 0,
@@ -76,7 +76,7 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
   const navigate = useNavigate();
   
   const form = useForm<PropertyFormValues>({
-    resolver: zodResolver(propertyFormSchema),
+    resolver: zodResolver(propertySchema),
     defaultValues: initialData,
     mode: "onChange"
   });
@@ -169,7 +169,7 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
         currentStep: 0,
         formData: {
           ...formValues,
-          featured: false // Add missing property required by PropertyFormData
+          featured: formValues.featured || false // Use existing value or default to false
         } as unknown as PropertyFormData, // Cast to PropertyFormData
         images: images,
         documents: documents,
@@ -197,7 +197,7 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
         currentStep: 0,
         formData: {
           ...data,
-          featured: false // Add missing property required by PropertyFormData
+          featured: data.featured || false // Use existing value or default to false
         } as unknown as PropertyFormData, // Cast to PropertyFormData
         images: images,
         documents: documents,

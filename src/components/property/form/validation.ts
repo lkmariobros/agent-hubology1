@@ -79,6 +79,12 @@ export const propertySchema = z.object({
   
   // Features
   features: z.array(z.string()).default([]),
+  
+  // Boolean flags
+  featured: z.boolean().optional().default(false),
+  
+  // Documents
+  documents: z.array(z.any()).optional().default([]),
 });
 
 export type PropertyFormValues = z.infer<typeof propertySchema>;
