@@ -1,3 +1,4 @@
+
 import { supabase } from '@/lib/supabase';
 import { PropertyFormState, PropertyFormData } from '@/types/property-form';
 import { toast } from 'sonner';
@@ -62,6 +63,7 @@ export const submitPropertyForm = async (state: PropertyFormState): Promise<void
       country: state.formData.address.country,
       agent_notes: state.formData.agentNotes,
       agent_id: agentId,
+      // Removed features field that was causing the error
     };
     
     // Add type-specific fields

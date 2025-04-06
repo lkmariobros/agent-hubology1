@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
@@ -256,8 +255,7 @@ export function usePropertyManagement() {
               agent_notes: data.agentNotes,
               // Current user as agent
               agent_id: (await supabase.auth.getUser()).data.user?.id,
-              // Features
-              features: data.propertyFeatures || []
+              // Removed property features field that was causing the error
             })
             .select('id')
             .single();
@@ -388,7 +386,7 @@ export function usePropertyManagement() {
           if (data.rentalRate !== undefined) propertyData.rental_rate = data.rentalRate;
           if (data.status !== undefined) propertyData.status_id = data.status;
           if (data.featured !== undefined) propertyData.featured = data.featured;
-          if (data.propertyFeatures !== undefined) propertyData.features = data.propertyFeatures;
+          // Removed property features field that was causing the error
           
           // Address
           if (data.address) {

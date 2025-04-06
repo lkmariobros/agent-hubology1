@@ -4,6 +4,8 @@ import { usePropertyForm } from '@/context/PropertyFormContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { InfoIcon } from 'lucide-react';
 
 // Sample features for different property types
 const getFeaturesByType = (propertyType: string) => {
@@ -84,6 +86,13 @@ const PropertyFeatures: React.FC = () => {
       <CardContent className="pt-6">
         <div className="space-y-6">
           <h3 className="text-lg font-medium">Property Features</h3>
+          
+          <Alert variant="info" className="bg-blue-50 dark:bg-blue-950 mb-4">
+            <InfoIcon className="h-4 w-4 mr-2" />
+            <AlertDescription>
+              Features are for internal reference only. They will be displayed in the property details but are not currently stored in the database.
+            </AlertDescription>
+          </Alert>
           
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {features.map((feature) => (
