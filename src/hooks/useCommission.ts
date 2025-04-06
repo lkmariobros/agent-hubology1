@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { commissionApi } from '@/services/commissionService';
 import { CommissionTier, PaymentSchedule, AgentWithHierarchy } from '@/types';
@@ -195,7 +194,8 @@ export function useCommission() {
   
   // Reject Commission
   const rejectCommission = useMutation({
-    mutationFn: commissionApi.rejectCommission,
+    mutationFn: (payload: { id: string; reason: string }) => 
+      commissionApi.rejectCommission(payload.id, payload.reason),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['commissions'] });
       toast.success("Commission rejected successfully");

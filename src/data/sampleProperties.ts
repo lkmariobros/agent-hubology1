@@ -25,7 +25,7 @@ export const sampleProperties: Property[] = [
     images: ['/images/property1-1.jpg', '/images/property1-2.jpg', '/images/property1-3.jpg'],
     createdAt: '2023-09-01T10:00:00Z',
     updatedAt: '2023-09-15T14:30:00Z',
-    area: '1200',
+    area: 1200,
     size: 1200
   },
   {
@@ -51,7 +51,7 @@ export const sampleProperties: Property[] = [
     images: ['/images/property2-1.jpg', '/images/property2-2.jpg', '/images/property2-3.jpg'],
     createdAt: '2023-08-15T09:30:00Z',
     updatedAt: '2023-09-10T11:45:00Z',
-    area: '5500',
+    area: 5500,
     size: 5500
   },
   {
@@ -77,7 +77,7 @@ export const sampleProperties: Property[] = [
     images: ['/images/property3-1.jpg', '/images/property3-2.jpg', '/images/property3-3.jpg'],
     createdAt: '2023-07-20T14:15:00Z',
     updatedAt: '2023-08-25T16:20:00Z',
-    area: '2800',
+    area: 2800,
     size: 2800
   },
   {
@@ -103,7 +103,7 @@ export const sampleProperties: Property[] = [
     images: ['/images/property4-1.jpg', '/images/property4-2.jpg', '/images/property4-3.jpg'],
     createdAt: '2023-08-05T11:45:00Z',
     updatedAt: '2023-09-05T10:30:00Z',
-    area: '3200',
+    area: 3200,
     size: 3200
   },
   {
@@ -129,7 +129,7 @@ export const sampleProperties: Property[] = [
     images: ['/images/property5-1.jpg', '/images/property5-2.jpg', '/images/property5-3.jpg'],
     createdAt: '2023-09-10T13:20:00Z',
     updatedAt: '2023-09-25T09:15:00Z',
-    area: '2500',
+    area: 2500,
     size: 2500
   },
   {
@@ -155,7 +155,7 @@ export const sampleProperties: Property[] = [
     images: ['/images/property6-1.jpg', '/images/property6-2.jpg', '/images/property6-3.jpg'],
     createdAt: '2023-07-15T16:40:00Z',
     updatedAt: '2023-08-20T14:55:00Z',
-    area: '1800',
+    area: 1800,
     size: 1800
   }
 ];

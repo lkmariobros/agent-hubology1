@@ -48,12 +48,12 @@ export interface PaymentSchedule {
   name: string;
   description?: string;
   isDefault: boolean;
-  installments: PaymentInstallment[];
+  installments: ScheduleInstallment[];
   createdAt?: string;
   updatedAt?: string;
 }
 
-export interface PaymentInstallment {
+export interface ScheduleInstallment {
   id: string;
   scheduleId: string;
   installmentNumber: number;
@@ -84,4 +84,20 @@ export interface OverrideCommission {
   percentage: number;
   date: string;
   status: 'Pending' | 'Approved' | 'Paid';
+}
+
+export interface CommissionInstallment {
+  id: string;
+  transactionId: string;
+  agentId: string;
+  installmentNumber: number;
+  percentage: number;
+  amount: number;
+  scheduledDate: string;
+  actualPaymentDate?: string;
+  status: string;
+  notes?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  transaction?: any;
 }

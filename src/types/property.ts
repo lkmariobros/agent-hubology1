@@ -1,33 +1,10 @@
 
-export interface PropertyFormValues {
-  id?: string;
-  title?: string;
-  description?: string;
-  transactionType?: 'Sale' | 'Rent' | 'Primary';
-  propertyType?: string;
-  price?: number;
-  rentalRate?: number;
-  builtUpArea?: number;
-  floorArea?: number;
-  landArea?: number;
-  bedrooms?: number;
-  bathrooms?: number;
-  address?: {
-    street?: string;
-    city?: string;
-    state?: string;
-    zip?: string;
-    country?: string;
-  };
-  status?: string;
-  images?: string[];
-  features?: string[];
-  stock?: {
-    total: number;
-    available: number;
-    reserved: number;
-    sold: number;
-  };
+export interface PropertyAddress {
+  street: string;
+  city: string;
+  state: string;
+  zip: string;
+  country: string;
 }
 
 export interface Property {
@@ -35,42 +12,29 @@ export interface Property {
   title: string;
   description: string;
   price: number;
-  rentalRate?: number;
+  address: PropertyAddress;
   type: string;
-  propertyType?: string;
+  subtype: string;
+  listedBy: string;
+  features: string[];
   bedrooms: number;
   bathrooms: number;
-  builtUpArea?: number;
-  area?: number;
-  size?: number;
-  status: string;
-  address: {
-    street: string;
-    city: string;
-    state: string;
-    zip: string;
-    country: string;
-  };
-  features: string[];
+  builtUpArea: number;
+  status: 'available' | 'pending' | 'sold' | 'rented';
   images: string[];
   createdAt: string;
   updatedAt: string;
-  reference?: string;
-  agent?: {
-    id: string;
-    name: string;
-    email?: string;
-    firstName?: string;
-    lastName?: string;
-    phone?: string;
-  };
-  featured?: boolean;
-  stock?: {
-    total: number;
-    available: number;
-    reserved: number;
-    sold: number;
-  };
-  subtype?: string;
-  transactionType?: string;
+  area: number;
+  size: number;
+  agent?: PropertyAgent;
+}
+
+export interface PropertyAgent {
+  id: string;
+  name: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string;
+  avatar?: string;
 }

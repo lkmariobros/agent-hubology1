@@ -1,184 +1,210 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { propertyService } from '@/services/propertyService';
-import { Property } from '@/types/property';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { PlusCircle } from 'lucide-react';
+import { Plus, Search, Filter, SortDesc, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
-import { format } from 'date-fns';
-import { useToast } from '@/components/ui/use-toast';
-import { useNavigate } from 'react-router-dom';
-import { Skeleton } from '@/components/ui/skeleton';
-import { capitalizeFirstLetter } from '@/utils/stringUtils';
-import { AuthStateHandler } from '@/components/ui/auth-state-handler';
+import { Card, CardContent } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { PropertyTable } from '@/components/property/PropertyTable';
+import { PropertyGrid } from '@/components/property/PropertyGrid';
+import { useProperties } from '@/hooks/useProperties';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Property } from '@/types';
 
-const Properties: React.FC = () => {
-  const [properties, setProperties] = useState<Property[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const { toast } = useToast();
-  const navigate = useNavigate();
+// Utility function to map API data to the format expected by components
+const mapPropertyData = (property: any): Property => {
+  return {
+    id: property.id,
+    title: property.title,
+    description: property.description || '',
+    price: Number(property.price) || 0,
+    address: {
+      street: property.street || '',
+      city: property.city || '',
+      state: property.state || '',
+      zip: property.zip || '',
+      country: property.country || ''
+    },
+    type: property.property_types?.name?.toLowerCase() || 'residential',
+    subtype: property.subtype || '',
+    features: property.features || [],
+    bedrooms: property.bedrooms || 0,
+    bathrooms: property.bathrooms || 0,
+    builtUpArea: property.built_up_area || 0,
+    area: property.area || property.built_up_area || 0,
+    images: property.property_images?.map((img: any) => img.storage_path) || [],
+    status: property.property_statuses?.name?.toLowerCase() || 'available',
+    listedBy: property.listed_by || 'agency',
+    agent: {
+      id: property.agent_id || '',
+      name: 'Agent Name', // This would come from a join in a real app
+      firstName: 'Unknown',
+      lastName: 'Agent',
+      email: 'agent@example.com',
+      phone: '123-456-7890'
+    },
+    createdAt: property.created_at || new Date().toISOString(),
+    updatedAt: property.updated_at || new Date().toISOString(),
+    size: property.built_up_area || 0
+  };
+};
+
+const AdminProperties = () => {
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(12);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedPropertyType, setSelectedPropertyType] = useState('all');
   
-  const { 
-    data, 
-    isLoading, 
-    error, 
-    refetch 
-  } = useQuery({
-    queryKey: ['properties'],
-    queryFn: () => propertyService.getProperties(),
-  });
-
-  useEffect(() => {
-    if (data) {
-      const formattedProperties = data.map((property: any) => ({
-        id: property.id,
-        title: property.title,
-        description: property.description,
-        price: Number(property.price),
-        type: property.type,
-        subtype: property.subtype || 'standard',
-        bedrooms: Number(property.bedrooms),
-        bathrooms: Number(property.bathrooms),
-        builtUpArea: Number(property.builtUpArea),
-        status: property.status,
-        address: {
-          street: property.address.street,
-          city: property.address.city,
-          state: property.address.state,
-          zip: property.address.zip,
-          country: property.address.country,
-        },
-        area: property.area || '0',
-        listedBy: property.listedBy || 'agency',
-        features: property.features,
-        images: property.images,
-        createdAt: property.createdAt,
-        updatedAt: property.updatedAt,
-      }));
-      setProperties(formattedProperties);
-    }
-  }, [data]);
-
-  const filteredProperties = properties.filter(property =>
-    property.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    property.address.city.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Apply filters
+  const filters = {
+    ...(searchTerm && { title: searchTerm }),
+    ...(selectedPropertyType !== 'all' && { propertyType: selectedPropertyType })
+  };
   
-  const handleCreateProperty = () => {
-    navigate('/properties/new');
+  const { data, isLoading, error } = useProperties(page, pageSize, filters);
+  const propertiesRaw = data?.properties || [];
+  
+  // Map the API data structure to the format expected by components
+  const properties: Property[] = propertiesRaw.map(property => mapPropertyData(property));
+
+  // Handle property type change
+  const handlePropertyTypeChange = (value: string) => {
+    setSelectedPropertyType(value);
+    setPage(1); // Reset to first page when changing filters
+  };
+  
+  // Handle search
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    // The search term state is already set via onChange, so just prevent default form submission
+    setPage(1); // Reset to first page when searching
   };
 
   return (
-    <AuthStateHandler>
-      <div className="container mx-auto py-6">
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold">Properties</h1>
-          <Button onClick={handleCreateProperty}>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Add Property
+    <div className="p-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+        <h1 className="text-3xl font-bold">Properties</h1>
+        <Link to="/properties/new">
+          <Button className="mt-3 sm:mt-0">
+            <Plus className="h-4 w-4 mr-2" />
+            Add New Property
           </Button>
-        </div>
-        
-        <div className="mb-4">
-          <Label htmlFor="search">Search Properties</Label>
-          <Input
-            type="text"
-            id="search"
-            placeholder="Search by title or city..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>Property List</CardTitle>
-            <CardDescription>
-              {properties.length} properties listed
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="overflow-auto">
-            {isLoading ? (
-              <div className="p-4 space-y-4">
-                {[...Array(5)].map((_, i) => (
-                  <div key={i} className="flex items-center space-x-4">
-                    <Skeleton className="h-12 w-12 rounded-full" />
-                    <div className="space-y-2">
-                      <Skeleton className="h-4 w-[250px]" />
-                      <Skeleton className="h-4 w-[200px]" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : error ? (
-              <p className="text-red-500">Error: {(error as Error).message}</p>
-            ) : (
-              <Table>
-                <TableCaption>A list of your properties.</TableCaption>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[200px]">Title</TableHead>
-                    <TableHead>Price</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>City</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Listed By</TableHead>
-                    <TableHead>Created At</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredProperties.map((property) => (
-                    <TableRow key={property.id}>
-                      <TableCell className="font-medium">{property.title}</TableCell>
-                      <TableCell>${property.price}</TableCell>
-                      <TableCell>{capitalizeFirstLetter(property.type)}</TableCell>
-                      <TableCell>{property.address.city}</TableCell>
-                      <TableCell>
-                        <Badge variant="secondary">{property.status}</Badge>
-                      </TableCell>
-                      <TableCell>{property.listedBy}</TableCell>
-                      <TableCell>{format(new Date(property.createdAt), 'MMM d, yyyy')}</TableCell>
-                      <TableCell className="text-right">
-                        <Button 
-                          variant="ghost"
-                          size="sm"
-                          asChild
-                        >
-                          <Link to={`/properties/${property.id}`}>View</Link>
-                        </Button>
-                        <Button 
-                          variant="ghost"
-                          size="sm"
-                          asChild
-                        >
-                          <Link to={`/properties/edit/${property.id}`}>Edit</Link>
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </CardContent>
-        </Card>
+        </Link>
       </div>
-    </AuthStateHandler>
+      
+      <Card className="mb-6">
+        <CardContent className="pt-6">
+          <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input 
+                placeholder="Search properties..." 
+                className="pl-9" 
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" type="submit">
+                <Search className="h-4 w-4 mr-2" />
+                Search
+              </Button>
+              <Button variant="outline" type="button" onClick={() => {
+                setSearchTerm('');
+                setSelectedPropertyType('all');
+                setPage(1);
+              }}>
+                Clear
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+      
+      <Tabs defaultValue="grid">
+        <div className="flex justify-between items-center mb-6">
+          <TabsList>
+            <TabsTrigger value="grid">Grid</TabsTrigger>
+            <TabsTrigger value="table">Table</TabsTrigger>
+          </TabsList>
+          
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Show:</span>
+            <Select 
+              value={selectedPropertyType} 
+              onValueChange={handlePropertyTypeChange}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="All Properties" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Properties</SelectItem>
+                <SelectItem value="Residential">Residential</SelectItem>
+                <SelectItem value="Commercial">Commercial</SelectItem>
+                <SelectItem value="Industrial">Industrial</SelectItem>
+                <SelectItem value="Land">Land</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        
+        {isLoading ? (
+          <div className="flex justify-center items-center py-20">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <span className="ml-2 text-lg">Loading properties...</span>
+          </div>
+        ) : error ? (
+          <div className="text-center py-10 text-destructive">
+            <p>Error loading properties. Please try again.</p>
+          </div>
+        ) : properties.length === 0 ? (
+          <div className="text-center py-10">
+            <p>No properties found. Try adjusting your filters or create a new property.</p>
+            <Link to="/properties/new">
+              <Button className="mt-4">
+                <Plus className="h-4 w-4 mr-2" />
+                Add New Property
+              </Button>
+            </Link>
+          </div>
+        ) : (
+          <>
+            <TabsContent value="grid">
+              <PropertyGrid properties={properties} />
+            </TabsContent>
+            
+            <TabsContent value="table">
+              <PropertyTable properties={properties} />
+            </TabsContent>
+          </>
+        )}
+        
+        {data && data.totalCount > pageSize && (
+          <div className="flex justify-center mt-6">
+            <div className="flex space-x-2">
+              <Button 
+                variant="outline" 
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+              >
+                Previous
+              </Button>
+              <span className="py-2 px-4 bg-muted rounded">
+                Page {page} of {Math.ceil(data.totalCount / pageSize)}
+              </span>
+              <Button 
+                variant="outline" 
+                onClick={() => setPage(p => p + 1)}
+                disabled={page >= Math.ceil(data.totalCount / pageSize)}
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+        )}
+      </Tabs>
+    </div>
   );
 };
 
-export default Properties;
+export default AdminProperties;

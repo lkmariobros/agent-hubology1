@@ -32,11 +32,12 @@ const PropertyList: React.FC = () => {
       bathrooms: 2,
       builtUpArea: 1200,
       status: 'available',
-      area: '1200',
+      area: 1200,
       listedBy: 'agency',
       images: ['/images/loft1.jpg', '/images/loft2.jpg'],
       createdAt: '2023-01-15',
-      updatedAt: '2023-02-01'
+      updatedAt: '2023-02-01',
+      size: 1200
     },
     {
       id: 'prop-2',
@@ -57,11 +58,12 @@ const PropertyList: React.FC = () => {
       bathrooms: 3,
       builtUpArea: 2500,
       status: 'available',
-      area: '2500',
+      area: 2500,
       listedBy: 'agency',
       images: ['/images/house1.jpg', '/images/house2.jpg'],
       createdAt: '2023-01-20',
-      updatedAt: '2023-02-05'
+      updatedAt: '2023-02-05',
+      size: 2500
     },
     {
       id: 'prop-3',
@@ -82,16 +84,20 @@ const PropertyList: React.FC = () => {
       bathrooms: 7,
       builtUpArea: 6000,
       status: 'available',
-      area: '6000',
+      area: 6000,
       listedBy: 'agency',
       images: ['/images/villa1.jpg', '/images/villa2.jpg'],
       createdAt: '2023-01-25',
-      updatedAt: '2023-02-10'
+      updatedAt: '2023-02-10',
+      size: 6000
     }
-  ].concat(sampleProperties);
+  ];
+
+  // Combine the hardcoded properties with the imported sampleProperties
+  const allProperties = [...properties, ...sampleProperties];
 
   // Filter properties based on search term and type
-  const filteredProperties = properties.filter(property => {
+  const filteredProperties = allProperties.filter(property => {
     const matchesSearch = 
       property.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       property.address.city.toLowerCase().includes(searchTerm.toLowerCase());
