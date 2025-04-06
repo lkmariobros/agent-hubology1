@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
@@ -187,6 +188,7 @@ export function usePropertyStorage() {
  * Hook for managing property CRUD operations
  */
 export function usePropertyManagement() {
+  // Use a try-catch to handle cases where QueryClient isn't available
   try {
     const queryClient = useQueryClient();
     const { uploadImages, uploadDocuments } = usePropertyStorage();
@@ -238,7 +240,6 @@ export function usePropertyManagement() {
               bathrooms: data.bathrooms,
               built_up_area: data.builtUpArea,
               floor_area: data.floorArea,
-              land_area: data.landArea,
               land_size: data.landSize,
               furnishing_status: data.furnishingStatus,
               // Commercial/industrial specific
@@ -254,8 +255,7 @@ export function usePropertyManagement() {
               // Agent notes
               agent_notes: data.agentNotes,
               // Current user as agent
-              agent_id: (await supabase.auth.getUser()).data.user?.id,
-              // Removed property features field that was causing the error
+              agent_id: (await supabase.auth.getUser()).data.user?.id
             })
             .select('id')
             .single();
@@ -267,80 +267,32 @@ export function usePropertyManagement() {
           
           const propertyId = propertyData.id;
           
-          // Step 3: Save owner information if provided
-          if (data.owner && data.owner.name) {
-            const { error: ownerError } = await supabase
-              .from('property_owners')
-              .insert({
-                property_id: propertyId,
-                name: data.owner.name,
-                phone: data.owner.phone,
-                email: data.owner.email,
-                address: data.owner.address,
-                notes: data.owner.notes,
-                is_primary_contact: data.owner.isPrimaryContact
-              });
-              
-            if (ownerError) {
-              console.warn('Error saving owner info:', ownerError);
-              // Don't fail the whole operation if owner info fails
-            }
-          }
-          
-          // Step 4: Save owner contacts if provided
-          if (data.ownerContacts && data.ownerContacts.length > 0) {
-            const ownerContactsToInsert = data.ownerContacts.map(contact => ({
-              property_id: propertyId,
-              name: contact.name,
-              role: contact.role || null,
-              phone: contact.phone || null,
-              email: contact.email || null
-            }));
-            
-            const { error: contactsError } = await supabase
-              .from('property_contacts')
-              .insert(ownerContactsToInsert);
-              
-            if (contactsError) {
-              console.warn('Error saving owner contacts:', contactsError);
-              // Don't fail the whole operation if contacts fail
-            }
-          }
-          
-          // Step 5: Upload images if any are provided
-          const imagesToUpload: File[] = [];
-          
-          // If we have images from property form data, process them
+          // Step 2: Upload images if any
           if (data.images && data.images.length > 0) {
-            data.images
+            const imagesToUpload = data.images
               .filter(img => img.file)
-              .forEach(img => {
-                if (img.file) imagesToUpload.push(img.file);
-              });
-          }
+              .map(img => img.file as File);
               
-          if (imagesToUpload.length > 0) {
-            await uploadImages(propertyId, imagesToUpload);
+            if (imagesToUpload.length > 0) {
+              await uploadImages(propertyId, imagesToUpload);
+            }
           }
           
-          // Step 6: Upload documents if any are provided
-          const docsToUpload: File[] = [];
-          let documentTypes: Record<string, string> = {};
-          
-          // If we have documents from property form data, process them
+          // Step 3: Upload documents if any
           if (data.documents && data.documents.length > 0) {
-            data.documents
+            const docsToUpload = data.documents
               .filter(doc => doc.file)
-              .forEach(doc => {
-                if (doc.file) {
-                  docsToUpload.push(doc.file);
-                  documentTypes[doc.file.name] = doc.documentType;
-                }
-              });
-          }
+              .map(doc => doc.file as File);
+              
+            const documentTypes = Object.fromEntries(
+              data.documents
+                .filter(doc => doc.file)
+                .map(doc => [doc.file?.name || '', doc.documentType])
+            );
             
-          if (docsToUpload.length > 0) {
-            await uploadDocuments(propertyId, docsToUpload, documentTypes);
+            if (docsToUpload.length > 0) {
+              await uploadDocuments(propertyId, docsToUpload, documentTypes);
+            }
           }
           
           return {
@@ -366,11 +318,7 @@ export function usePropertyManagement() {
      * Update an existing property
      */
     const updateProperty = useMutation({
-      mutationFn: async ({ id, data, formState }: { 
-        id: string; 
-        data: Partial<PropertyFormData>;
-        formState?: { images?: PropertyImage[], documents?: PropertyDocument[] }
-      }) => {
+      mutationFn: async ({ id, data }: { id: string; data: Partial<PropertyFormData> }) => {
         console.log('Updating property with ID:', id, data);
         
         try {
@@ -386,7 +334,6 @@ export function usePropertyManagement() {
           if (data.rentalRate !== undefined) propertyData.rental_rate = data.rentalRate;
           if (data.status !== undefined) propertyData.status_id = data.status;
           if (data.featured !== undefined) propertyData.featured = data.featured;
-          // Removed property features field that was causing the error
           
           // Address
           if (data.address) {
@@ -403,7 +350,6 @@ export function usePropertyManagement() {
           if (data.bathrooms !== undefined) propertyData.bathrooms = data.bathrooms;
           if (data.builtUpArea !== undefined) propertyData.built_up_area = data.builtUpArea;
           if (data.floorArea !== undefined) propertyData.floor_area = data.floorArea;
-          if (data.landArea !== undefined) propertyData.land_area = data.landArea;
           if (data.landSize !== undefined) propertyData.land_size = data.landSize;
           if (data.furnishingStatus !== undefined) propertyData.furnishing_status = data.furnishingStatus;
           if (data.buildingClass !== undefined) propertyData.building_class = data.buildingClass;
@@ -434,81 +380,75 @@ export function usePropertyManagement() {
           
           // Handle images/documents updates
           // New images to upload
-          if (formState && formState.images) {
-            const imagesToUpload = formState.images
-              .filter(img => img.file && !img.id)
-              .map(img => img.file as File);
-              
-            if (imagesToUpload.length > 0) {
-              await uploadImages(id, imagesToUpload);
-            }
+          const imagesToUpload = data.images
+            ?.filter(img => img.file && !img.id)
+            .map(img => img.file as File) || [];
+            
+          if (imagesToUpload.length > 0) {
+            await uploadImages(id, imagesToUpload);
           }
           
           // New documents to upload
-          if (formState && formState.documents) {
-            const documentsToUpload = formState.documents
-              .filter(doc => doc.file && !doc.id)
-              .map(doc => doc.file as File);
-              
-            if (documentsToUpload.length > 0) {
-              const documentTypes = Object.fromEntries(
-                formState.documents
-                  .filter(doc => doc.file && !doc.id)
-                  .map(doc => [doc.file?.name || '', doc.documentType])
-              );
-              
-              await uploadDocuments(id, documentsToUpload, documentTypes);
-            }
+          const documentsToUpload = data.documents
+            ?.filter(doc => doc.file && !doc.id)
+            .map(doc => doc.file as File) || [];
+            
+          if (documentsToUpload.length > 0) {
+            const documentTypes = Object.fromEntries(
+              data.documents
+                ?.filter(doc => doc.file && !doc.id)
+                .map(doc => [doc.file?.name || '', doc.documentType]) || []
+            );
+            
+            await uploadDocuments(id, documentsToUpload, documentTypes);
           }
           
           // Images to delete
-          if (data.imagesToDelete && data.imagesToDelete.length > 0) {
-            for (const imageId of data.imagesToDelete) {
-              // First get the image to find its storage path
-              const { data: imageData } = await supabase
-                .from('property_images')
-                .select('storage_path')
-                .eq('id', imageId)
-                .single();
-                
-              if (imageData?.storage_path) {
-                // Delete the file from storage
-                await supabase.storage
-                  .from('property-images')
-                  .remove([imageData.storage_path]);
-              }
+          const imagesToDelete = data.imagesToDelete || [];
+          for (const imageId of imagesToDelete) {
+            // First get the image to find its storage path
+            const { data: imageData } = await supabase
+              .from('property_images')
+              .select('storage_path')
+              .eq('id', imageId)
+              .single();
               
-              // Delete the record
-              await supabase
-                .from('property_images')
-                .delete()
-                .eq('id', imageId);
+            if (imageData?.storage_path) {
+              // Delete the file from storage
+              await supabase.storage
+                .from('property-images')
+                .remove([imageData.storage_path]);
             }
+            
+            // Delete the record
+            await supabase
+              .from('property_images')
+              .delete()
+              .eq('id', imageId);
           }
           
           // Documents to delete
-          if (data.documentsToDelete && data.documentsToDelete.length > 0) {
-            for (const docId of data.documentsToDelete) {
-              // First get the document to find its storage path
-              const { data: docData } = await supabase
-                .from('property_documents')
-                .select('storage_path')
-                .eq('id', docId)
-                .single();
-                
-              if (docData?.storage_path) {
-                // Delete the file from storage
-                await supabase.storage
-                  .from('property-documents')
-                  .remove([docData.storage_path]);
-              }
+          const documentsToDelete = data.documentsToDelete || [];
+          for (const docId of documentsToDelete) {
+            // First get the document to find its storage path
+            const { data: docData } = await supabase
+              .from('property_documents')
+              .select('storage_path')
+              .eq('id', docId)
+              .single();
               
-              // Delete the record
-              await supabase
-                .from('property_documents')
-                .delete()
-                .eq('id', docId);
+            if (docData?.storage_path) {
+              // Delete the file from storage
+              await supabase.storage
+                .from('property-documents')
+                .remove([docData.storage_path]);
             }
+            
+            // Delete the record
+            await supabase
+              .from('property_documents')
+              .delete()
+              .eq('id', docId);
           }
           
           return {

@@ -5,14 +5,13 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import NotificationBell from '../NotificationBell';
 import { TooltipProvider, Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { TooltipWrapper } from '@/components/ui/tooltip-wrapper';
 
 const NavUtilities: React.FC = () => {
   return (
     <div className="flex items-center space-x-3">
       <NotificationBell />
       
-      <TooltipWrapper>
+      <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
             <Link to="/settings">
@@ -25,7 +24,7 @@ const NavUtilities: React.FC = () => {
             <p>Settings</p>
           </TooltipContent>
         </Tooltip>
-      </TooltipWrapper>
+      </TooltipProvider>
     </div>
   );
 };

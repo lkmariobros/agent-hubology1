@@ -8,7 +8,7 @@ import { AlertTriangle } from 'lucide-react';
 import { PropertyFormData } from '@/types/property-form';
 
 interface PropertyStockManagerProps {
-  form: UseFormReturn<any>; // Changed to 'any' to avoid typing issues
+  form: UseFormReturn<PropertyFormData>;
 }
 
 export function PropertyStockManager({ form }: PropertyStockManagerProps) {
@@ -21,8 +21,7 @@ export function PropertyStockManager({ form }: PropertyStockManagerProps) {
   }
 
   // Initialize stock if it doesn't exist
-  const currentStock = form.getValues('stock');
-  if (!currentStock) {
+  if (!form.getValues('stock')) {
     form.setValue('stock', {
       total: 0,
       available: 0,
@@ -32,10 +31,10 @@ export function PropertyStockManager({ form }: PropertyStockManagerProps) {
   }
 
   // Get the current values for validation
-  const totalStock = Number(form.watch('stock.total') || 0);
-  const availableStock = Number(form.watch('stock.available') || 0);
-  const reservedStock = Number(form.watch('stock.reserved') || 0);
-  const soldStock = Number(form.watch('stock.sold') || 0);
+  const totalStock = form.watch('stock.total') || 0;
+  const availableStock = form.watch('stock.available') || 0;
+  const reservedStock = form.watch('stock.reserved') || 0;
+  const soldStock = form.watch('stock.sold') || 0;
   
   // Calculate if there's a mismatch in stock numbers
   const calculatedTotal = availableStock + reservedStock + soldStock;
@@ -60,65 +59,85 @@ export function PropertyStockManager({ form }: PropertyStockManagerProps) {
         )}
         
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <label htmlFor="stock.total">Total Units</label>
-            <input
-              id="stock.total"
-              type="number"
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-              placeholder="Total number of units"
-              {...form.register('stock.total', {
-                valueAsNumber: true,
-                onChange: (e) => form.setValue('stock.total', parseInt(e.target.value) || 0)
-              })}
-            />
-            <p className="text-xs text-muted-foreground">Total number of units in this development</p>
-          </div>
+          <FormField
+            control={form.control}
+            name="stock.total"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Total Units</FormLabel>
+                <FormControl>
+                  <Input 
+                    type="number" 
+                    placeholder="Total number of units" 
+                    {...field} 
+                    onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                  />
+                </FormControl>
+                <FormDescription>Total number of units in this development</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           
-          <div className="space-y-2">
-            <label htmlFor="stock.available">Available Units</label>
-            <input
-              id="stock.available"
-              type="number"
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-              placeholder="Number of available units"
-              {...form.register('stock.available', {
-                valueAsNumber: true,
-                onChange: (e) => form.setValue('stock.available', parseInt(e.target.value) || 0)
-              })}
-            />
-            <p className="text-xs text-muted-foreground">Units currently available for sale</p>
-          </div>
+          <FormField
+            control={form.control}
+            name="stock.available"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Available Units</FormLabel>
+                <FormControl>
+                  <Input 
+                    type="number" 
+                    placeholder="Number of available units" 
+                    {...field}
+                    onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                  />
+                </FormControl>
+                <FormDescription>Units currently available for sale</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           
-          <div className="space-y-2">
-            <label htmlFor="stock.reserved">Reserved Units</label>
-            <input
-              id="stock.reserved"
-              type="number"
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-              placeholder="Number of reserved units"
-              {...form.register('stock.reserved', {
-                valueAsNumber: true,
-                onChange: (e) => form.setValue('stock.reserved', parseInt(e.target.value) || 0)
-              })}
-            />
-            <p className="text-xs text-muted-foreground">Units currently reserved by clients</p>
-          </div>
+          <FormField
+            control={form.control}
+            name="stock.reserved"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Reserved Units</FormLabel>
+                <FormControl>
+                  <Input 
+                    type="number" 
+                    placeholder="Number of reserved units" 
+                    {...field}
+                    onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                  />
+                </FormControl>
+                <FormDescription>Units currently reserved by clients</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           
-          <div className="space-y-2">
-            <label htmlFor="stock.sold">Sold Units</label>
-            <input
-              id="stock.sold"
-              type="number"
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-              placeholder="Number of sold units"
-              {...form.register('stock.sold', {
-                valueAsNumber: true,
-                onChange: (e) => form.setValue('stock.sold', parseInt(e.target.value) || 0)
-              })}
-            />
-            <p className="text-xs text-muted-foreground">Units already sold</p>
-          </div>
+          <FormField
+            control={form.control}
+            name="stock.sold"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Sold Units</FormLabel>
+                <FormControl>
+                  <Input 
+                    type="number" 
+                    placeholder="Number of sold units" 
+                    {...field}
+                    onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                  />
+                </FormControl>
+                <FormDescription>Units already sold</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
       </CardContent>
     </Card>

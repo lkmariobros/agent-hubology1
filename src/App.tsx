@@ -2,11 +2,9 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from '@/context/AuthContext';
-import { TooltipProvider } from '@/components/ui/tooltip';
-import { NotificationProvider } from '@/context/NotificationContext';
 
-// Layout
-import MainLayout from '@/components/layout/MainLayout';
+// Components
+import AppLayout from '@/components/layout/AppLayout';
 
 // Pages
 import Dashboard from '@/pages/Dashboard';
@@ -28,35 +26,31 @@ import ResetPassword from '@/pages/auth/ResetPassword';
 function App() {
   return (
     <AuthProvider>
-      <NotificationProvider>
-        <TooltipProvider>
-          <Router>
-            <Routes>
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
-              
-              <Route path="/" element={<MainLayout />}>
-                {/* Redirect root to dashboard */}
-                <Route index element={<Navigate to="/dashboard" replace />} />
-                <Route path="dashboard" element={<Dashboard />} />
-                <Route path="properties" element={<Properties />} />
-                <Route path="properties/new" element={<NewProperty />} />
-                <Route path="properties/:id" element={<PropertyDetail />} />
-                <Route path="properties/:id/edit" element={<PropertyEdit />} />
-                {/* Add support for both URL patterns for editing properties */}
-                <Route path="properties/edit/:id" element={<PropertyEdit />} />
-                <Route path="transactions" element={<Transactions />} />
-                <Route path="profile" element={<Profile />} />
-                <Route path="settings" element={<Settings />} />
-              </Route>
-              
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Router>
-        </TooltipProvider>
-      </NotificationProvider>
+      <Router>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          
+          <Route path="/" element={<AppLayout />}>
+            {/* Redirect root to dashboard */}
+            <Route index element={<Navigate to="/dashboard" replace />} />
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="properties" element={<Properties />} />
+            <Route path="properties/new" element={<NewProperty />} />
+            <Route path="properties/:id" element={<PropertyDetail />} />
+            <Route path="properties/:id/edit" element={<PropertyEdit />} />
+            {/* Add support for both URL patterns for editing properties */}
+            <Route path="properties/edit/:id" element={<PropertyEdit />} />
+            <Route path="transactions" element={<Transactions />} />
+            <Route path="profile" element={<Profile />} />
+            <Route path="settings" element={<Settings />} />
+          </Route>
+          
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Router>
     </AuthProvider>
   );
 }

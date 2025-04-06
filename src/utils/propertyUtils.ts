@@ -1,100 +1,152 @@
 
-import { Property } from '@/types';
-
-// Format currency values consistently
-export const formatCurrency = (value?: number): string => {
-  if (value === undefined || value === null) return '$0';
+// Add formatCurrency utility that's imported by various components
+export const formatCurrency = (value: number, currency = 'USD'): string => {
   return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    maximumFractionDigits: 0
+    style: 'decimal',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
   }).format(value);
 };
 
-// Format price with appropriate suffix
-export const formatPrice = (value?: number): string => {
-  if (value === undefined || value === null) return '$0';
-  
-  if (value >= 1000000) {
-    return `$${(value / 1000000).toFixed(1)}M`;
-  } else if (value >= 1000) {
-    return `$${(value / 1000).toFixed(0)}k`;
-  } else {
-    return formatCurrency(value);
-  }
+// Format price with currency symbol
+export const formatPrice = (price: number): string => {
+  return `$${formatCurrency(price)}`;
 };
 
-// Calculate percentage of available stock
-export const calculateStockPercentage = (available: number, total: number): number => {
+// Calculate stock percentage
+export const calculateStockPercentage = (sold: number, total: number): number => {
   if (total === 0) return 0;
-  return Math.round((available / total) * 100);
+  return Math.round((sold / total) * 100);
 };
 
 // Get stock status label
-export const getStockStatusLabel = (available: number, total: number): string => {
-  const percentage = calculateStockPercentage(available, total);
-  return getStockStatusLabelFromPercentage(percentage);
+export const getStockStatusLabel = (percentage: number): string => {
+  if (percentage >= 90) return 'Almost Sold Out';
+  if (percentage >= 75) return 'Selling Fast';
+  if (percentage >= 50) return 'Selling Well';
+  if (percentage >= 25) return 'Available';
+  return 'Just Launched';
 };
 
 // Get stock status class
-export const getStockStatusClass = (available: number, total: number): string => {
-  const percentage = calculateStockPercentage(available, total);
-  return getStockStatusClassFromPercentage(percentage);
+export const getStockStatusClass = (percentage: number): string => {
+  if (percentage >= 90) return 'bg-red-500';
+  if (percentage >= 75) return 'bg-orange-500';
+  if (percentage >= 50) return 'bg-yellow-500';
+  if (percentage >= 25) return 'bg-blue-500';
+  return 'bg-green-500';
 };
 
-// Get stock status label based on percentage
+// Get status badge from percentage
 export const getStockStatusLabelFromPercentage = (percentage: number): string => {
-  if (percentage === 0) return 'Sold Out';
-  if (percentage <= 25) return 'Limited';
-  if (percentage <= 50) return 'Selling Fast';
-  if (percentage <= 75) return 'Available';
-  return 'Fully Available';
+  return getStockStatusLabel(percentage);
 };
 
-// Get stock status class based on percentage
-export const getStockStatusClassFromPercentage = (percentage: number): string => {
-  if (percentage === 0) return 'bg-red-100 text-red-800';
-  if (percentage <= 20) return 'bg-orange-100 text-orange-800';
-  if (percentage <= 50) return 'bg-yellow-100 text-yellow-800';
-  return 'bg-green-100 text-green-800';
-};
-
-// Map Supabase property data to our app's Property interface
-export const mapPropertyData = (property: any): Property => {
+// Convert snake_case property data from the API to camelCase for the frontend
+export const mapPropertyFromApi = (propertyData: any): any => {
+  if (!propertyData) return null;
+  
   return {
-    id: property.id || '',
-    title: property.title || '',
-    description: property.description || '',
-    price: Number(property.price) || 0,
-    rentalRate: property.rental_rate,
-    type: property.property_types?.name?.toLowerCase() || 'residential',
-    propertyType: property.property_types?.name || 'Residential',
-    transactionType: property.transaction_types?.name || 'Sale',
-    bedrooms: Number(property.bedrooms) || 0,
-    bathrooms: Number(property.bathrooms) || 0,
-    builtUpArea: Number(property.built_up_area) || 0,
-    area: property.built_up_area || property.floor_area || property.land_area || 0,
-    size: property.land_size || property.floor_area || 0,
-    status: property.property_statuses?.name?.toLowerCase() || 'available',
+    id: propertyData.id,
+    title: propertyData.title,
+    description: propertyData.description,
+    price: propertyData.price,
+    rentalRate: propertyData.rental_rate,
     address: {
-      street: property.street || '',
-      city: property.city || '',
-      state: property.state || '',
-      zip: property.zip || '',
-      country: property.country || ''
+      street: propertyData.street,
+      city: propertyData.city,
+      state: propertyData.state,
+      zip: propertyData.zip,
+      country: propertyData.country,
     },
-    features: property.property_features || [],
-    images: (property.property_images || []).map((img: any) => img.storage_path || ''),
-    createdAt: property.created_at || new Date().toISOString(),
-    updatedAt: property.updated_at || new Date().toISOString(),
-    reference: property.reference_number || '',
-    featured: property.featured || false,
-    stock: property.total_stock ? {
-      total: property.total_stock || 0,
-      available: property.available_stock || 0,
-      reserved: property.reserved_stock || 0,
-      sold: property.sold_stock || 0
-    } : undefined,
-    subtype: property.subtype || '',
+    type: propertyData.property_types?.name?.toLowerCase() || 'residential',
+    bedrooms: propertyData.bedrooms,
+    bathrooms: propertyData.bathrooms,
+    area: propertyData.built_up_area,
+    status: propertyData.property_statuses?.name || 'available',
+    createdAt: propertyData.created_at,
+    updatedAt: propertyData.updated_at,
+    features: propertyData.features || [],
+    images: propertyData.property_images?.map((img: any) => img.storage_path) || [],
+    reference: propertyData.reference || `P-${propertyData.id.substring(0, 8)}`
+  };
+};
+
+export const getPropertyStatusColor = (status: string): string => {
+  switch (status.toLowerCase()) {
+    case 'available':
+      return 'bg-green-500';
+    case 'under offer':
+      return 'bg-amber-500';
+    case 'pending':
+      return 'bg-blue-500';
+    case 'sold':
+      return 'bg-red-500';
+    case 'rented':
+      return 'bg-purple-500';
+    default:
+      return 'bg-gray-500';
+  }
+};
+
+export const getPropertyTypeBadge = (type: string): { icon: string; color: string } => {
+  switch (type.toLowerCase()) {
+    case 'house':
+    case 'residential':
+      return {
+        icon: 'home',
+        color: 'bg-blue-100 text-blue-800',
+      };
+    case 'apartment':
+    case 'condo':
+      return {
+        icon: 'building',
+        color: 'bg-green-100 text-green-800',
+      };
+    case 'commercial':
+    case 'office':
+      return {
+        icon: 'briefcase',
+        color: 'bg-purple-100 text-purple-800',
+      };
+    case 'industrial':
+    case 'warehouse':
+      return {
+        icon: 'package',
+        color: 'bg-orange-100 text-orange-800',
+      };
+    case 'land':
+      return {
+        icon: 'map',
+        color: 'bg-amber-100 text-amber-800',
+      };
+    default:
+      return {
+        icon: 'home',
+        color: 'bg-gray-100 text-gray-800',
+      };
+  }
+};
+
+// Map property data for admin views
+export const mapPropertyData = (data: any) => {
+  if (!data) return null;
+  
+  return {
+    id: data.id,
+    title: data.title,
+    price: data.price,
+    status: data.status,
+    propertyType: data.property_type || 'residential',
+    location: `${data.city || ''}, ${data.state || ''}`,
+    agentId: data.agent_id,
+    agent: {
+      id: data.agent?.id,
+      name: data.agent?.name,
+      email: data.agent?.email,
+      firstName: data.agent?.first_name,
+      lastName: data.agent?.last_name,
+    },
+    createdAt: data.created_at
   };
 };

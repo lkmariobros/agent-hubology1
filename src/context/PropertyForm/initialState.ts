@@ -1,15 +1,14 @@
 
-import { PropertyFormState } from '@/types/property-form';
+import { PropertyFormState, PropertyFormData } from '../../types/property-form';
 
 export const initialPropertyFormState: PropertyFormState = {
-  currentStep: 0,
   formData: {
     title: '',
     description: '',
-    propertyType: 'Residential',
     transactionType: 'Sale',
-    status: 'Available',
+    propertyType: 'Residential',
     featured: false,
+    status: 'Available',
     address: {
       street: '',
       city: '',
@@ -17,65 +16,83 @@ export const initialPropertyFormState: PropertyFormState = {
       zip: '',
       country: 'Malaysia',
     },
+    price: null,
+    rentalRate: null,
+    agentNotes: '',
+    ownerContacts: [],
+    propertyFeatures: [],
+    
     // Residential specific fields
     bedrooms: 0,
     bathrooms: 0,
     builtUpArea: 0,
     furnishingStatus: 'Unfurnished',
-    constructionYear: new Date().getFullYear(),
-    
-    // Commercial specific fields
-    floorArea: 0,
-    zoningType: '',
-    buildingClass: '',
-    
-    // Industrial specific fields
-    landArea: 0,
-    ceilingHeight: 0,
-    loadingBays: 0,
-    powerCapacity: '',
-    
-    // Land specific fields
-    landSize: 0,
-    zoning: '',
-    roadFrontage: 0,
-    topography: '',
-    freehold: false,
-    
-    // Financial fields
-    price: 0,
-    rentalRate: 0,
-    
-    // Additional fields
-    agentNotes: '',
-    
-    // Owner information
-    owner: {
-      name: '',
-      phone: '',
-      email: '',
-      address: '',
-      notes: '',
-      isPrimaryContact: false
-    },
-    
-    // Property features
-    propertyFeatures: [],
-    
-    // Owner contacts
-    ownerContacts: [],
-    
-    // Stock for Primary market properties
-    stock: {
-      total: 0,
-      available: 0,
-      reserved: 0,
-      sold: 0
-    }
   },
   images: [],
   documents: [],
-  isDirty: false,
+  currentStep: 0,
   isSubmitting: false,
+  isDirty: false,
   lastSaved: null,
+};
+
+// This function returns a new form data object with appropriate fields initialized
+// based on the selected property type
+export const getInitialPropertyData = (
+  propertyType: 'Residential' | 'Commercial' | 'Industrial' | 'Land'
+): PropertyFormData => {
+  // Start with base common fields
+  const baseData: PropertyFormData = {
+    title: '',
+    description: '',
+    transactionType: 'Sale',
+    propertyType,
+    featured: false,
+    status: 'Available',
+    address: {
+      street: '',
+      city: '',
+      state: '',
+      zip: '',
+      country: 'Malaysia',
+    },
+    price: null,
+    rentalRate: null,
+    agentNotes: '',
+    ownerContacts: [],
+    propertyFeatures: [],
+  };
+
+  // Add type-specific fields
+  switch (propertyType) {
+    case 'Residential':
+      return {
+        ...baseData,
+        bedrooms: 0,
+        bathrooms: 0,
+        builtUpArea: 0,
+        furnishingStatus: 'Unfurnished',
+      };
+    case 'Commercial':
+      return {
+        ...baseData,
+        floorArea: 0,
+        buildingClass: 'Class A',
+      };
+    case 'Industrial':
+      return {
+        ...baseData,
+        landArea: 0,
+        ceilingHeight: 0,
+        loadingBays: 0,
+      };
+    case 'Land':
+      return {
+        ...baseData,
+        landSize: 0,
+        freehold: false,
+      };
+    default:
+      return baseData;
+  }
 };

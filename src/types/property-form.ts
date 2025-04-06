@@ -1,28 +1,138 @@
-export interface PropertyFormData {
+
+import { z } from 'zod';
+
+// Common property fields validation schema
+export const commonPropertySchema = z.object({
+  title: z.string().min(3, 'Title must be at least 3 characters'),
+  description: z.string().min(20, 'Description must be at least 20 characters'),
+  transactionType: z.enum(['Sale', 'Rent', 'Primary']),
+  propertyType: z.enum(['Residential', 'Commercial', 'Industrial', 'Land']),
+  featured: z.boolean().default(false),
+  status: z.enum(['Available', 'Under Offer', 'Pending', 'Sold', 'Rented']),
+  
+  // Address fields
+  address: z.object({
+    street: z.string().min(1, 'Street is required'),
+    city: z.string().min(1, 'City is required'),
+    state: z.string().min(1, 'State is required'),
+    zip: z.string().optional(),
+    country: z.string().default('Malaysia'),
+  }),
+  
+  // Price fields - conditional based on transaction type
+  price: z.number().nullable().optional(),
+  rentalRate: z.number().nullable().optional(),
+  
+  // Agent notes
+  agentNotes: z.string().optional(),
+
+  // Owner contact information
+  ownerContacts: z.array(z.object({
+    name: z.string().min(1, 'Contact name is required'),
+    role: z.string().optional(),
+    phone: z.string().optional(),
+    email: z.string().email('Invalid email').optional(),
+  })).default([]),
+  
+  // Stock information for development properties
+  stock: z.object({
+    total: z.number().int().min(0).default(0),
+    available: z.number().int().min(0).default(0),
+    reserved: z.number().int().min(0).default(0),
+    sold: z.number().int().min(0).default(0)
+  }).optional(),
+  
+  // Common features
+  propertyFeatures: z.array(z.string()).optional(),
+});
+
+// Residential property specific fields
+export const residentialPropertySchema = commonPropertySchema.extend({
+  bedrooms: z.number().int().min(0),
+  bathrooms: z.number().min(0),
+  builtUpArea: z.number().min(0),
+  furnishingStatus: z.enum(['Unfurnished', 'Partially Furnished', 'Fully Furnished']),
+  constructionYear: z.number().int().min(1900).max(new Date().getFullYear() + 5).optional(),
+});
+
+// Commercial property specific fields
+export const commercialPropertySchema = commonPropertySchema.extend({
+  floorArea: z.number().min(0),
+  zoningType: z.string().optional(),
+  buildingClass: z.enum(['Class A', 'Class B', 'Class C']).optional(),
+});
+
+// Industrial property specific fields
+export const industrialPropertySchema = commonPropertySchema.extend({
+  landArea: z.number().min(0),
+  ceilingHeight: z.number().min(0).optional(),
+  loadingBays: z.number().int().min(0).optional(),
+  powerCapacity: z.string().optional(),
+});
+
+// Land property specific fields
+export const landPropertySchema = commonPropertySchema.extend({
+  landSize: z.number().min(0),
+  zoning: z.string().optional(),
+  roadFrontage: z.number().min(0).optional(),
+  topography: z.string().optional(),
+  freehold: z.boolean().optional(),
+});
+
+// Owner contact type
+export interface OwnerContact {
+  id?: string;
+  name: string;
+  role?: string;
+  phone?: string;
+  email?: string;
+}
+
+// Stock information type
+export interface PropertyStock {
+  total: number;
+  available: number;
+  reserved: number;
+  sold: number;
+}
+
+// Union type for all property types
+export type PropertyFormData = {
   title: string;
   description: string;
-  propertyType: 'Residential' | 'Commercial' | 'Industrial' | 'Land';
   transactionType: 'Sale' | 'Rent' | 'Primary';
-  status: string;
+  propertyType: 'Residential' | 'Commercial' | 'Industrial' | 'Land';
   featured: boolean;
+  status: 'Available' | 'Under Offer' | 'Pending' | 'Sold' | 'Rented';
   address: {
     street: string;
     city: string;
     state: string;
-    zip: string;
+    zip?: string;
     country: string;
   };
+  price: number | null;
+  rentalRate: number | null;
+  agentNotes: string;
+  ownerContacts: OwnerContact[];
+  
+  // Stock information for development properties
+  stock?: PropertyStock;
+  
+  // Property features
+  propertyFeatures?: string[];
+  
   // Residential specific fields
   bedrooms?: number;
   bathrooms?: number;
   builtUpArea?: number;
-  furnishingStatus?: string;
+  furnishingStatus?: 'Unfurnished' | 'Partially Furnished' | 'Fully Furnished';
   constructionYear?: number;
   
   // Commercial specific fields
   floorArea?: number;
   zoningType?: string;
-  buildingClass?: string;
+  buildingClass?: 'Class A' | 'Class B' | 'Class C';
   
   // Industrial specific fields
   landArea?: number;
@@ -37,94 +147,57 @@ export interface PropertyFormData {
   topography?: string;
   freehold?: boolean;
   
-  // Financial fields
-  price?: number;
-  rentalRate?: number;
-  
-  // Additional fields
-  agentNotes?: string;
-  
-  // Owner information
-  owner?: {
-    name: string;
-    phone: string;
-    email: string;
-    address: string;
-    company?: string;
-    notes: string;
-    isPrimaryContact: boolean;
-  };
-  
-  // Features
-  propertyFeatures?: string[];
-  
-  // Owner contacts
-  ownerContacts?: OwnerContact[];
-  
-  // Stock information for Primary market properties
-  stock?: {
-    total: number;
-    available: number;
-    reserved: number;
-    sold: number;
-  };
-  
-  // For tracking deleted items during edits
-  imagesToDelete?: string[];
-  documentsToDelete?: string[];
-  
-  // Images and documents arrays to track during form submission
+  // Additional properties for update operations
   images?: PropertyImage[];
   documents?: PropertyDocument[];
-}
+  imagesToDelete?: string[];
+  documentsToDelete?: string[];
+};
 
-export interface OwnerContact {
-  id?: string;
-  name: string;
-  role?: string;
-  phone?: string;
-  email?: string;
-}
-
+// Property images type
 export interface PropertyImage {
   id?: string;
   file?: File;
   url: string;
   displayOrder: number;
   isCover: boolean;
-  previewUrl?: string;
-  uploadStatus?: 'uploading' | 'success' | 'error';
+  storagePath?: string;
+  previewUrl?: string; // Added for preview functionality
+  uploadStatus?: 'uploading' | 'success' | 'error'; // Added for tracking upload status
 }
 
+// Property document type
 export interface PropertyDocument {
-  id: string;
+  id?: string;
   file?: File;
   name: string;
   documentType: string;
-  url: string;
-  uploadStatus?: 'uploading' | 'success' | 'error';
+  url?: string;
+  storagePath?: string;
+  uploadStatus?: 'uploading' | 'success' | 'error'; // Added for tracking upload status
 }
 
+// Property form state interface
 export interface PropertyFormState {
-  currentStep: number;
   formData: PropertyFormData;
   images: PropertyImage[];
   documents: PropertyDocument[];
-  isDirty: boolean;
+  currentStep: number;
   isSubmitting: boolean;
+  isDirty: boolean;
   lastSaved: Date | null;
 }
 
+// Property form context interface
 export interface PropertyFormContextType {
   state: PropertyFormState;
   updateFormData: (data: Partial<PropertyFormData>) => void;
   updatePropertyType: (type: 'Residential' | 'Commercial' | 'Industrial' | 'Land') => void;
-  updateTransactionType: (type: 'Sale' | 'Rent' | 'Primary') => void;
+  updateTransactionType: (type: 'Sale' | 'Rent') => void;
   addImage: (image: PropertyImage) => void;
   removeImage: (index: number) => void;
   setCoverImage: (index: number) => void;
   reorderImages: (startIndex: number, endIndex: number) => void;
-  updateImageStatus: (index: number, status: 'uploading' | 'success' | 'error', url?: string) => void;
   addDocument: (document: PropertyDocument) => void;
   removeDocument: (index: number) => void;
   nextStep: () => void;

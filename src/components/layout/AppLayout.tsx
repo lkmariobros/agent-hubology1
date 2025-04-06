@@ -3,7 +3,6 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/layout/AppSidebar';
-import { NotificationProvider } from '@/context/NotificationContext';
 
 const AppLayout: React.FC = () => {
   // Load saved sidebar state from localStorage if available

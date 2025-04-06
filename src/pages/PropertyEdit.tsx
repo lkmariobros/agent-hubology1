@@ -66,11 +66,9 @@ const PropertyEdit = () => {
           roadFrontage: property.road_frontage,
           topography: property.topography,
           agentNotes: property.agent_notes,
-          propertyFeatures: property.features || [],
-          // We'll fetch these separately if needed
+          ownerContacts: [],
           images: [],
-          documents: [],
-          ownerContacts: []
+          documents: []
         };
 
         setPropertyData(formData);

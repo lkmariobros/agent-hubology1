@@ -39,7 +39,7 @@ export const PropertyFormProvider: React.FC<{ children: ReactNode }> = ({ childr
   }, []);
 
   // Update transaction type
-  const updateTransactionType = useCallback((type: 'Sale' | 'Rent' | 'Primary') => {
+  const updateTransactionType = useCallback((type: 'Sale' | 'Rent') => {
     dispatch({ type: 'UPDATE_TRANSACTION_TYPE', payload: type });
   }, []);
 
@@ -58,14 +58,6 @@ export const PropertyFormProvider: React.FC<{ children: ReactNode }> = ({ childr
 
   const reorderImages = useCallback((startIndex: number, endIndex: number) => {
     dispatch({ type: 'REORDER_IMAGES', payload: { startIndex, endIndex } });
-  }, []);
-
-  // Function to update image upload status
-  const updateImageStatus = useCallback((index: number, status: 'uploading' | 'success' | 'error', url?: string) => {
-    dispatch({ 
-      type: 'UPDATE_IMAGE_STATUS', 
-      payload: { index, status, url } 
-    });
   }, []);
 
   // Document management functions
@@ -131,7 +123,6 @@ export const PropertyFormProvider: React.FC<{ children: ReactNode }> = ({ childr
     removeImage,
     setCoverImage,
     reorderImages,
-    updateImageStatus,
     addDocument,
     removeDocument,
     nextStep,
