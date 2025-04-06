@@ -25,8 +25,8 @@ const CommissionForecast: React.FC = () => {
   
   const [activeTab, setActiveTab] = useState('forecast');
   
-  // Group installments by month
-  const forecastByMonth = installments ? groupInstallmentsByMonth(installments) : [];
+  // Group installments by month - make sure we're handling this as an object, not a function
+  const forecastByMonth = installments ? groupInstallmentsByMonth(installments) : {};
   
   const handleRegenerateForecast = () => {
     if (user?.id) {
@@ -96,17 +96,18 @@ const CommissionForecast: React.FC = () => {
         </TabsContent>
         
         <TabsContent value="monthly" className="mt-6">
-          {forecastByMonth.map((month, index) => (
-            <Card key={index} className="mb-6">
+          {/* Ensure we're iterating through an array, not trying to call a function or access properties of a number */}
+          {Object.entries(forecastByMonth).map(([monthKey, monthData], index) => (
+            <Card key={monthKey} className="mb-6">
               <CardHeader className="pb-3">
                 <div className="flex justify-between items-center">
-                  <CardTitle>{month.month}</CardTitle>
-                  <div className="text-2xl font-semibold">{formatCurrency(month.totalAmount)}</div>
+                  <CardTitle>{monthKey}</CardTitle>
+                  <div className="text-2xl font-semibold">{formatCurrency(monthData.totalAmount)}</div>
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {month.installments.map((installment) => (
+                  {monthData.installments && monthData.installments.map((installment) => (
                     <div key={installment.id} className="border rounded-md p-4">
                       <div className="flex justify-between items-start mb-3">
                         <div>
