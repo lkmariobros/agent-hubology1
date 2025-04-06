@@ -54,15 +54,15 @@ const Dashboard: React.FC = () => {
       <h1 className="text-3xl font-semibold">Dashboard</h1>
       
       {/* Main dashboard layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Left side - Recent Transactions taking up 3/4 of the space on large screens */}
-        <div className="lg:col-span-3">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Left side - Recent Transactions taking up 8/12 (instead of 3/4) of the space */}
+        <div className="lg:col-span-8">
           <RecentTransactions onViewAll={handleViewAllTransactions} limit={5} />
         </div>
         
-        {/* Right side - Metrics Cards displayed individually */}
-        <div className="lg:col-span-1 space-y-6">
-          <div className="grid grid-cols-2 lg:grid-cols-1 gap-4">
+        {/* Right side - Metrics Cards displayed side by side */}
+        <div className="lg:col-span-4 space-y-6">
+          <div className="grid grid-cols-2 gap-4">
             {filteredMetrics.map((metric) => (
               <Card key={metric.id} className="border-none shadow-md bg-card">
                 <CardContent className="p-4">
