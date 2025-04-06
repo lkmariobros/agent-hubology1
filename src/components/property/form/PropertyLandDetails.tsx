@@ -3,7 +3,6 @@ import React from 'react';
 import { usePropertyForm } from '@/context/PropertyFormContext';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 
 const PropertyLandDetails: React.FC = () => {
   const { state, updateFormData } = usePropertyForm();
@@ -22,7 +21,7 @@ const PropertyLandDetails: React.FC = () => {
           <Input
             id="landSize"
             type="number"
-            value={formData.landSize || ''}
+            value={formData.landSize}
             onChange={(e) => updateFormData({ landSize: Number(e.target.value) })}
             min={0}
             placeholder="Land size in square feet"
@@ -33,7 +32,7 @@ const PropertyLandDetails: React.FC = () => {
           <Label htmlFor="zoning">Zoning</Label>
           <Input
             id="zoning"
-            value={formData.zoning || ''}
+            value={formData.zoning}
             onChange={(e) => updateFormData({ zoning: e.target.value })}
             placeholder="e.g., Residential, Commercial, Agricultural"
           />
@@ -44,7 +43,7 @@ const PropertyLandDetails: React.FC = () => {
           <Input
             id="roadFrontage"
             type="number"
-            value={formData.roadFrontage || ''}
+            value={formData.roadFrontage}
             onChange={(e) => updateFormData({ roadFrontage: Number(e.target.value) })}
             min={0}
             placeholder="Road frontage in feet"
@@ -55,19 +54,10 @@ const PropertyLandDetails: React.FC = () => {
           <Label htmlFor="topography">Topography</Label>
           <Input
             id="topography"
-            value={formData.topography || ''}
+            value={formData.topography}
             onChange={(e) => updateFormData({ topography: e.target.value })}
             placeholder="e.g., Flat, Sloped, Hilly"
           />
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <Switch
-            id="freehold"
-            checked={!!formData.freehold}
-            onCheckedChange={(checked) => updateFormData({ freehold: checked })}
-          />
-          <Label htmlFor="freehold">Freehold Property</Label>
         </div>
       </div>
     </div>

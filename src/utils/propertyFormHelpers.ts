@@ -1,6 +1,9 @@
 
 import { supabase } from '@/lib/supabase';
-import { toast } from 'sonner';
+import { safeQueryExecution } from './dbHelpers';
+import { PostgrestSingleResponse } from '@supabase/supabase-js';
+
+// Helper functions for property form operations
 
 /**
  * Get or create a property type by name
@@ -12,9 +15,9 @@ export async function getOrCreatePropertyType(name: string): Promise<string | nu
       .from('property_types')
       .select('id')
       .eq('name', name)
-      .maybeSingle();
+      .single();
     
-    if (data?.id) return data.id;
+    if (data) return data.id;
     
     // If not found, create a new property type
     const { data: newPropertyType, error: createError } = await supabase
@@ -25,15 +28,12 @@ export async function getOrCreatePropertyType(name: string): Promise<string | nu
     
     if (createError) {
       console.error('Error creating property type:', createError);
-      toast.error(`Failed to create property type: ${createError.message}`);
       return null;
     }
     
     return newPropertyType.id;
   } catch (err) {
-    const error = err as Error;
-    console.error('Error in getOrCreatePropertyType:', error);
-    toast.error(`Database error: ${error.message}`);
+    console.error('Error in getOrCreatePropertyType:', err);
     return null;
   }
 }
@@ -48,9 +48,9 @@ export async function getOrCreateTransactionType(name: string): Promise<string |
       .from('transaction_types')
       .select('id')
       .eq('name', name)
-      .maybeSingle();
+      .single();
     
-    if (data?.id) return data.id;
+    if (data) return data.id;
     
     // If not found, create a new transaction type
     const { data: newTransactionType, error: createError } = await supabase
@@ -61,15 +61,12 @@ export async function getOrCreateTransactionType(name: string): Promise<string |
     
     if (createError) {
       console.error('Error creating transaction type:', createError);
-      toast.error(`Failed to create transaction type: ${createError.message}`);
       return null;
     }
     
     return newTransactionType.id;
   } catch (err) {
-    const error = err as Error;
-    console.error('Error in getOrCreateTransactionType:', error);
-    toast.error(`Database error: ${error.message}`);
+    console.error('Error in getOrCreateTransactionType:', err);
     return null;
   }
 }
@@ -84,9 +81,9 @@ export async function getOrCreatePropertyStatus(name: string): Promise<string | 
       .from('property_statuses')
       .select('id')
       .eq('name', name)
-      .maybeSingle();
+      .single();
     
-    if (data?.id) return data.id;
+    if (data) return data.id;
     
     // If not found, create a new property status
     const { data: newPropertyStatus, error: createError } = await supabase
@@ -97,15 +94,12 @@ export async function getOrCreatePropertyStatus(name: string): Promise<string | 
     
     if (createError) {
       console.error('Error creating property status:', createError);
-      toast.error(`Failed to create property status: ${createError.message}`);
       return null;
     }
     
     return newPropertyStatus.id;
   } catch (err) {
-    const error = err as Error;
-    console.error('Error in getOrCreatePropertyStatus:', error);
-    toast.error(`Database error: ${error.message}`);
+    console.error('Error in getOrCreatePropertyStatus:', err);
     return null;
   }
 }
@@ -115,8 +109,6 @@ export async function getOrCreatePropertyStatus(name: string): Promise<string | 
  */
 export async function createProperty(propertyData: Record<string, any>): Promise<string | null> {
   try {
-    console.log('Creating property with data:', propertyData);
-    
     const { data, error } = await supabase
       .from('enhanced_properties')
       .insert(propertyData)
@@ -125,86 +117,12 @@ export async function createProperty(propertyData: Record<string, any>): Promise
     
     if (error) {
       console.error('Error creating property:', error);
-      toast.error(`Failed to create property: ${error.message}`);
       return null;
     }
     
     return data.id;
   } catch (err) {
-    const error = err as Error;
-    console.error('Error in createProperty:', error);
-    toast.error(`Database error: ${error.message}`);
-    return null;
-  }
-}
-
-/**
- * Checks if property-related buckets exist in Supabase storage
- */
-export async function ensurePropertyBuckets(): Promise<boolean> {
-  try {
-    console.log('Checking if property buckets exist...');
-    
-    // Check if buckets exist
-    const { data: buckets, error } = await supabase.storage.listBuckets();
-    
-    if (error) {
-      console.error('Error listing buckets:', error);
-      // We'll assume buckets don't exist when there's an error
-      toast.error('Could not access storage buckets. You may not have permission to upload files.');
-      return false;
-    }
-    
-    const requiredBuckets = [
-      'property-images',
-      'property-documents'
-    ];
-    
-    const existingBuckets = buckets?.map(b => b.name) || [];
-    console.log('Existing buckets:', existingBuckets);
-    
-    // Check if all required buckets exist
-    const missingBuckets = requiredBuckets.filter(bucket => 
-      !existingBuckets.includes(bucket)
-    );
-    
-    if (missingBuckets.length > 0) {
-      console.warn('Missing buckets:', missingBuckets);
-      toast.warning(`Missing storage buckets: ${missingBuckets.join(', ')}. Image uploads may not work properly.`);
-      return false;
-    }
-    
-    console.log('All required buckets exist');
-    return true;
-  } catch (error) {
-    console.error('Error checking property buckets:', error);
-    toast.error('Failed to check storage buckets');
-    return false;
-  }
-}
-
-/**
- * Gets a property by ID
- */
-export async function getPropertyById(id: string): Promise<Record<string, any> | null> {
-  try {
-    const { data, error } = await supabase
-      .from('enhanced_properties')
-      .select('*')
-      .eq('id', id)
-      .single();
-    
-    if (error) {
-      console.error('Error fetching property:', error);
-      toast.error(`Failed to fetch property: ${error.message}`);
-      return null;
-    }
-    
-    return data;
-  } catch (err) {
-    const error = err as Error;
-    console.error('Error in getPropertyById:', error);
-    toast.error(`Database error: ${error.message}`);
+    console.error('Error in createProperty:', err);
     return null;
   }
 }
@@ -213,7 +131,5 @@ export default {
   getOrCreatePropertyType,
   getOrCreateTransactionType,
   getOrCreatePropertyStatus,
-  createProperty,
-  ensurePropertyBuckets,
-  getPropertyById
+  createProperty
 };

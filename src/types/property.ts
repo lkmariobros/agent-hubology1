@@ -1,17 +1,33 @@
 
-export interface PropertyAddress {
-  street: string;
-  city: string;
-  state: string;
-  zip: string;
-  country: string;
-}
-
-export interface PropertyStock {
-  total: number;
-  available: number;
-  reserved?: number;
-  sold?: number;
+export interface PropertyFormValues {
+  id?: string;
+  title?: string;
+  description?: string;
+  transactionType?: 'Sale' | 'Rent' | 'Primary';
+  propertyType?: string;
+  price?: number;
+  rentalRate?: number;
+  builtUpArea?: number;
+  floorArea?: number;
+  landArea?: number;
+  bedrooms?: number;
+  bathrooms?: number;
+  address?: {
+    street?: string;
+    city?: string;
+    state?: string;
+    zip?: string;
+    country?: string;
+  };
+  status?: string;
+  images?: string[];
+  features?: string[];
+  stock?: {
+    total: number;
+    available: number;
+    reserved: number;
+    sold: number;
+  };
 }
 
 export interface Property {
@@ -19,53 +35,42 @@ export interface Property {
   title: string;
   description: string;
   price: number;
-  address: PropertyAddress;
+  rentalRate?: number;
   type: string;
-  subtype: string;
-  listedBy: string;
-  features: string[];
+  propertyType?: string;
   bedrooms: number;
   bathrooms: number;
-  builtUpArea: number;
-  status: 'available' | 'pending' | 'sold' | 'rented';
+  builtUpArea?: number;
+  area?: number;
+  size?: number;
+  status: string;
+  address: {
+    street: string;
+    city: string;
+    state: string;
+    zip: string;
+    country: string;
+  };
+  features: string[];
   images: string[];
   createdAt: string;
   updatedAt: string;
-  area: number;
-  size: number;
-  agent?: PropertyAgent;
-  // Adding missing properties that were causing errors
-  stock?: PropertyStock;
-  featured?: boolean;
-  transactionType?: string;
   reference?: string;
-}
-
-export interface PropertyAgent {
-  id: string;
-  name: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone?: string;
-  avatar?: string;
-}
-
-// This is needed for property forms and was missing
-export interface PropertyFormValues {
-  title: string;
-  description: string;
-  price: number;
-  propertyType: string;
-  builtUpArea: number;
-  bedrooms: number;
-  bathrooms: number;
-  features: string[];
-  status: string;
-  address: PropertyAddress;
-  images: string[];
-  // Additional fields that may be needed
-  stock?: PropertyStock;
+  agent?: {
+    id: string;
+    name: string;
+    email?: string;
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
+  };
+  featured?: boolean;
+  stock?: {
+    total: number;
+    available: number;
+    reserved: number;
+    sold: number;
+  };
+  subtype?: string;
   transactionType?: string;
-  size?: number;
 }

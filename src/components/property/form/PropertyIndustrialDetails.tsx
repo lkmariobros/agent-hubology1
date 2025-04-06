@@ -21,7 +21,7 @@ const PropertyIndustrialDetails: React.FC = () => {
           <Input
             id="landArea"
             type="number"
-            value={formData.landArea || ''}
+            value={formData.landArea}
             onChange={(e) => updateFormData({ landArea: Number(e.target.value) })}
             min={0}
             placeholder="Land area in square feet"
@@ -33,10 +33,9 @@ const PropertyIndustrialDetails: React.FC = () => {
           <Input
             id="ceilingHeight"
             type="number"
-            value={formData.ceilingHeight || ''}
+            value={formData.ceilingHeight}
             onChange={(e) => updateFormData({ ceilingHeight: Number(e.target.value) })}
             min={0}
-            step="0.1"
             placeholder="Ceiling height in feet"
           />
         </div>
@@ -46,7 +45,7 @@ const PropertyIndustrialDetails: React.FC = () => {
           <Input
             id="loadingBays"
             type="number"
-            value={formData.loadingBays || ''}
+            value={formData.loadingBays}
             onChange={(e) => updateFormData({ loadingBays: Number(e.target.value) })}
             min={0}
             placeholder="Number of loading bays"
@@ -57,9 +56,9 @@ const PropertyIndustrialDetails: React.FC = () => {
           <Label htmlFor="powerCapacity">Power Capacity</Label>
           <Input
             id="powerCapacity"
-            value={formData.powerCapacity || ''}
+            value={formData.powerCapacity}
             onChange={(e) => updateFormData({ powerCapacity: e.target.value })}
-            placeholder="e.g., 800 Amp, 3-Phase"
+            placeholder="e.g., 200A, 3-phase"
           />
         </div>
       </div>

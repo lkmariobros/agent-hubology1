@@ -9,8 +9,6 @@ import userRoleService from './userRoleService';
 export const roleService = {
   async getRoles(): Promise<Role[]> {
     try {
-      console.log('Fetching roles from Supabase');
-      
       // Get all roles with user counts from the database
       const { data, error } = await supabase
         .from('roles')
@@ -19,28 +17,17 @@ export const roleService = {
           users_count: user_roles(count)
         `);
 
-      if (error) {
-        console.error('Supabase error when fetching roles:', error);
-        throw new Error(`Failed to load roles: ${error.message}`);
-      }
-      
-      if (!data) {
-        console.warn('No roles data returned from Supabase');
-        return [];
-      }
-      
-      console.log(`Successfully fetched ${data.length} roles`);
+      if (error) throw error;
       return formatRoleData(data) as Role[];
     } catch (error: any) {
-      console.error('Error in getRoles():', error);
-      throw new Error(`Failed to load roles: ${error.message || 'Unknown error'}`);
+      console.error('Error fetching roles:', error);
+      toast.error('Failed to load roles');
+      return [];
     }
   },
 
   async getRole(id: string): Promise<Role | null> {
     try {
-      console.log(`Fetching role details for ${id}`);
-      
       const { data, error } = await supabase
         .from('roles')
         .select(`
@@ -53,26 +40,18 @@ export const roleService = {
         .eq('id', id)
         .single();
 
-      if (error) {
-        console.error(`Supabase error when fetching role ${id}:`, error);
-        throw new Error(`Failed to load role details: ${error.message}`);
-      }
-      
-      if (!data) {
-        console.warn(`No role data returned for ${id}`);
-        return null;
-      }
+      if (error) throw error;
       
       // Transform the nested permissions array
       if (data && data.permissions) {
         data.permissions = data.permissions.map((rp: any) => rp.permission);
       }
       
-      console.log(`Successfully fetched role details for ${id}`);
       return data as Role;
     } catch (error: any) {
-      console.error(`Error in getRole(${id}):`, error);
-      throw new Error(`Failed to load role details: ${error.message || 'Unknown error'}`);
+      console.error(`Error fetching role ${id}:`, error);
+      toast.error('Failed to load role details');
+      return null;
     }
   },
 
@@ -83,8 +62,6 @@ export const roleService = {
 
   async createRole(role: Partial<Role>): Promise<Role | null> {
     try {
-      console.log(`Creating new role: ${role.name}`);
-      
       // Check if a role with this name already exists
       const roleExists = await checkRoleNameExists(role.name as string);
       
@@ -102,42 +79,24 @@ export const roleService = {
         .select()
         .single();
 
-      if (error) {
-        console.error('Supabase error when creating role:', error);
-        throw new Error(`Failed to create role: ${error.message}`);
-      }
-      
-      if (!data) {
-        console.warn('No role data returned after creation');
-        throw new Error('Failed to create role: No data returned');
-      }
+      if (error) throw error;
       
       // If permissions are provided, assign them to the role
       if (role.permissions && role.permissions.length > 0) {
         await assignPermissionsToRole(data.id, role.permissions);
       }
       
-      console.log(`Successfully created role: ${role.name} with ID ${data.id}`);
+      toast.success(`Role "${role.name}" created successfully`);
       return data as Role;
     } catch (error: any) {
-      console.error(`Error in createRole(${role.name}):`, error);
-      throw new Error(`Failed to create role: ${error.message || 'Unknown error'}`);
+      console.error('Error creating role:', error);
+      toast.error(error.message || 'Failed to create role');
+      return null;
     }
   },
 
   async updateRole(id: string, updates: Partial<Role>): Promise<Role | null> {
     try {
-      console.log(`Updating role ${id} with name: ${updates.name}`);
-      
-      // Check if a role with this name already exists (excluding this role)
-      if (updates.name) {
-        const roleExists = await checkRoleNameExists(updates.name, id);
-        if (roleExists) {
-          toast.error(`A role with name "${updates.name}" already exists`);
-          return null;
-        }
-      }
-      
       const { data, error } = await supabase
         .from('roles')
         .update({
@@ -149,15 +108,7 @@ export const roleService = {
         .select()
         .single();
 
-      if (error) {
-        console.error(`Supabase error when updating role ${id}:`, error);
-        throw new Error(`Failed to update role: ${error.message}`);
-      }
-      
-      if (!data) {
-        console.warn(`No role data returned after updating ${id}`);
-        throw new Error('Failed to update role: No data returned');
-      }
+      if (error) throw error;
       
       // If permissions are provided, update them
       if (updates.permissions) {
@@ -168,33 +119,29 @@ export const roleService = {
         await assignPermissionsToRole(id, updates.permissions);
       }
       
-      console.log(`Successfully updated role ${id}`);
+      toast.success(`Role "${updates.name}" updated successfully`);
       return data as Role;
     } catch (error: any) {
-      console.error(`Error in updateRole(${id}):`, error);
-      throw new Error(`Failed to update role: ${error.message || 'Unknown error'}`);
+      console.error(`Error updating role ${id}:`, error);
+      toast.error(error.message || 'Failed to update role');
+      return null;
     }
   },
 
   async deleteRole(id: string): Promise<boolean> {
     try {
-      console.log(`Deleting role ${id}`);
-      
       const { error } = await supabase
         .from('roles')
         .delete()
         .eq('id', id);
 
-      if (error) {
-        console.error(`Supabase error when deleting role ${id}:`, error);
-        throw new Error(`Failed to delete role: ${error.message}`);
-      }
-      
-      console.log(`Successfully deleted role ${id}`);
+      if (error) throw error;
+      toast.success('Role deleted successfully');
       return true;
     } catch (error: any) {
-      console.error(`Error in deleteRole(${id}):`, error);
-      throw new Error(`Failed to delete role: ${error.message || 'Unknown error'}`);
+      console.error(`Error deleting role ${id}:`, error);
+      toast.error(error.message || 'Failed to delete role');
+      return false;
     }
   },
   

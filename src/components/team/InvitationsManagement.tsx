@@ -25,8 +25,7 @@ const InvitationsManagement: React.FC<InvitationsManagementProps> = ({
       case 'pending':
         return 'secondary';
       case 'accepted':
-        // Changed from 'success' to 'default' as 'success' is not a valid variant
-        return 'default';
+        return 'success';
       case 'expired':
         return 'destructive';
       case 'cancelled':

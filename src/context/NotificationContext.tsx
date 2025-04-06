@@ -1,5 +1,6 @@
 
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
+import { useAuthContext } from '@/context/AuthContext';
 import { Notification } from '@/types/notification';
 import { useNotificationActions } from '@/hooks/useNotificationActions';
 import { useNotificationSubscription } from '@/hooks/useNotificationSubscription';
@@ -21,20 +22,8 @@ const NotificationContext = createContext<NotificationContextType | undefined>(u
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  
-  // Safe access to user ID - don't rely on useAuthContext directly
-  let userId: string | null = null;
-  try {
-    // Try to get user from localStorage as a fallback
-    const userDataStr = localStorage.getItem('userData');
-    if (userDataStr) {
-      const userData = JSON.parse(userDataStr);
-      userId = userData.id || null;
-    }
-  } catch (error) {
-    console.warn("Could not retrieve user data for notifications", error);
-    userId = null;
-  }
+  const { user } = useAuthContext();
+  const userId = user?.id || null;
   
   const { 
     markAsRead: markNotificationAsRead, 
@@ -63,7 +52,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   // Use subscription hook for real-time notifications
   useNotificationSubscription(userId, addNotification);
 
-  // Initialize notifications
+  // Initialize notifications - FIX: Add proper dependency array and avoid unnecessary fetches
   useEffect(() => {
     // Only fetch notifications if we have a userId and aren't already loading
     if (!userId) {
@@ -85,6 +74,9 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     };
     
     loadNotifications();
+    
+    // Add userId and fetchUserNotifications to dependency array
+    // Since fetchUserNotifications might change between renders, we need to include it
   }, [userId, fetchUserNotifications]);
 
   // Mark a notification as read

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 import { useSidebar } from '@/components/ui/sidebar';
 
 import {
@@ -19,7 +19,7 @@ import { SidebarProfile } from './sidebar/SidebarProfile';
 import { PortalSwitcher } from './PortalSwitcher';
 
 export function AppSidebar() {
-  const { user } = useAuth();
+  const { isAdmin } = useAuth();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   

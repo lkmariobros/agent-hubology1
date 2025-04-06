@@ -22,48 +22,49 @@ const PropertyResidentialDetails: React.FC = () => {
     <div className="space-y-6">
       <h3 className="text-lg font-medium">Residential Property Details</h3>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <Label htmlFor="bedrooms">Bedrooms</Label>
           <Input
             id="bedrooms"
             type="number"
-            value={formData.bedrooms || 0}
+            value={formData.bedrooms}
             onChange={(e) => updateFormData({ bedrooms: Number(e.target.value) })}
             min={0}
+            placeholder="Number of bedrooms"
           />
         </div>
-        
+
         <div className="space-y-2">
           <Label htmlFor="bathrooms">Bathrooms</Label>
           <Input
             id="bathrooms"
             type="number"
-            value={formData.bathrooms || 0}
+            value={formData.bathrooms}
             onChange={(e) => updateFormData({ bathrooms: Number(e.target.value) })}
             min={0}
-            step="0.5"
+            step={0.5}
+            placeholder="Number of bathrooms"
           />
         </div>
-        
+
         <div className="space-y-2">
           <Label htmlFor="builtUpArea">Built-up Area (sq ft)</Label>
           <Input
             id="builtUpArea"
             type="number"
-            value={formData.builtUpArea || 0}
+            value={formData.builtUpArea}
             onChange={(e) => updateFormData({ builtUpArea: Number(e.target.value) })}
             min={0}
+            placeholder="Built-up area in square feet"
           />
         </div>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
         <div className="space-y-2">
           <Label htmlFor="furnishingStatus">Furnishing Status</Label>
           <Select
-            value={formData.furnishingStatus || 'Unfurnished'}
-            onValueChange={(value) => updateFormData({ furnishingStatus: value as 'Unfurnished' | 'Partially Furnished' | 'Fully Furnished' })}
+            value={formData.furnishingStatus}
+            onValueChange={(value) => updateFormData({ furnishingStatus: value as any })}
           >
             <SelectTrigger id="furnishingStatus">
               <SelectValue placeholder="Select furnishing status" />
@@ -74,19 +75,6 @@ const PropertyResidentialDetails: React.FC = () => {
               <SelectItem value="Fully Furnished">Fully Furnished</SelectItem>
             </SelectContent>
           </Select>
-        </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="constructionYear">Year Built</Label>
-          <Input
-            id="constructionYear"
-            type="number"
-            value={formData.constructionYear || ''}
-            onChange={(e) => updateFormData({ constructionYear: Number(e.target.value) })}
-            min={1900}
-            max={new Date().getFullYear() + 5}
-            placeholder="Year built"
-          />
         </div>
       </div>
     </div>

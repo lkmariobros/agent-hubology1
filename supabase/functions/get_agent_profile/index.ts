@@ -8,15 +8,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-// List of special admin emails that always get tier 5 permissions
-const SPECIAL_ADMIN_EMAILS = ['josephkwantum@gmail.com'];
-
-// Check if an email is in the special admins list
-const isSpecialAdmin = (email?: string | null): boolean => {
-  if (!email) return false;
-  return SPECIAL_ADMIN_EMAILS.includes(email.toLowerCase());
-};
-
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -45,9 +36,9 @@ serve(async (req) => {
       .rpc('get_agent_profile_by_id', { user_id: user.id })
       .single();
     
-    // Special handling for special admin accounts using centralized function
-    if (isSpecialAdmin(user.email)) {
-      console.log('Special admin user detected:', user.email);
+    // Special handling for admin
+    if (user.email === 'josephkwantum@gmail.com') {
+      console.log('Admin user detected:', user.email);
       // If profile exists, update it with admin tier
       if (data) {
         data.tier = 5;

@@ -12,7 +12,6 @@ import { Building, Shield, ChevronDown } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { UserRole } from '@/types/auth';
 import { toast } from 'sonner';
-import { isSpecialAdmin } from '@/utils/adminAccess';
 
 /**
  * Component that allows users to switch between different roles/portals
@@ -28,10 +27,9 @@ export function TeamSwitcher() {
     { role: 'agent', label: 'Agent Portal', icon: <Building className="h-4 w-4 mr-2" /> },
   ];
   
-  // Use centralized special admin check
-  const isSpecialAdminUser = isSpecialAdmin(user.email);
-  
-  if (isAdmin || isSpecialAdminUser) {
+  // Always add admin option for the special email
+  const isSpecialEmail = user.email === 'josephkwantum@gmail.com';
+  if (isAdmin || isSpecialEmail) {
     availableRoles.push({ 
       role: 'admin', 
       label: 'Admin Portal', 

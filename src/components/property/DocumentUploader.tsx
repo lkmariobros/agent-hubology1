@@ -1,5 +1,5 @@
 
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { UploadCloud, FileText, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -18,7 +18,6 @@ const DocumentUploader: React.FC<DocumentUploaderProps> = ({
   maxDocuments = 20,
   maxSizeMB = 10
 }) => {
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const { state, addDocument, removeDocument } = usePropertyForm();
   const { uploadFile, isUploading, progress } = useStorageUpload();
   const [documentType, setDocumentType] = useState<string>('Contract');
@@ -84,14 +83,6 @@ const DocumentUploader: React.FC<DocumentUploaderProps> = ({
     removeDocument(index);
   };
 
-  const handleSelectClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    // Manually trigger the file input click
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
-  };
-
   return (
     <div className="space-y-4">
       <div className="mb-4">
@@ -117,22 +108,13 @@ const DocumentUploader: React.FC<DocumentUploaderProps> = ({
           isDragActive ? 'border-primary bg-primary/5' : 'border-muted-foreground/25 hover:border-primary/50'
         }`}
       >
-        <input {...getInputProps()} ref={fileInputRef} />
+        <input {...getInputProps()} />
         <div className="flex flex-col items-center justify-center space-y-2">
           <UploadCloud className="h-12 w-12 text-muted-foreground" />
           <h3 className="text-lg font-medium">Drag & drop property documents</h3>
           <p className="text-sm text-muted-foreground">
             or click to browse (max {maxSizeMB}MB per document)
           </p>
-          <Button 
-            type="button" 
-            variant="secondary" 
-            className="mt-2" 
-            onClick={handleSelectClick}
-          >
-            <FileText className="h-4 w-4 mr-2" />
-            Select Documents
-          </Button>
           {isUploading && (
             <div className="mt-2 flex items-center gap-2">
               <Loader2 className="h-5 w-5 animate-spin text-primary" />

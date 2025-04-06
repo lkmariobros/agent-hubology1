@@ -3,7 +3,6 @@ import { User } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { UserProfile, UserRole } from '@/types/auth';
 import { castParam, safelyExtractProperty } from '@/utils/supabaseHelpers';
-import { isSpecialAdmin, ensureAdminRole, getPreferredActiveRole } from '@/utils/adminAccess';
 
 /**
  * Creates a user profile from Supabase user data and roles
@@ -25,32 +24,37 @@ export const createUserProfile = async (user: User): Promise<UserProfile> => {
       .maybeSingle();
       
     // Determine roles based on tier
-    roles = ['agent', 'viewer'] as UserRole[]; // Everyone has basic roles
+    roles = ['agent', 'viewer']; // Everyone has basic roles
     
     if (profileData) {
       const tier = safelyExtractProperty(profileData, 'tier', 1);
       
       // Map tiers to roles
-      if (tier >= 5) roles.push('admin' as UserRole);
-      if (tier >= 4) roles.push('team_leader' as UserRole);
-      if (tier >= 3) roles.push('manager' as UserRole);
-      if (tier >= 2) roles.push('finance' as UserRole);
+      if (tier >= 5) roles.push('admin');
+      if (tier >= 4) roles.push('team_leader');
+      if (tier >= 3) roles.push('manager');
+      if (tier >= 2) roles.push('finance');
     }
   } else {
     // Convert database roles to user roles array
     roles = userRoles.map(r => r.role_name as UserRole);
     
     // Ensure every user has at least basic roles
-    if (!roles.includes('viewer')) roles.push('viewer' as UserRole);
-    if (!roles.includes('agent')) roles.push('agent' as UserRole);
+    if (!roles.includes('viewer')) roles.push('viewer');
+    if (!roles.includes('agent')) roles.push('agent');
   }
   
-  // Use centralized special admin handling
-  roles = ensureAdminRole(roles, user.email);
+  // Hard-coded admin for specific email
+  if (user.email === 'josephkwantum@gmail.com') {
+    console.log('Granting admin access to:', user.email);
+    if (!roles.includes('admin')) {
+      roles.push('admin');
+    }
+  }
   
   // Default to agent role if no roles returned
   if (!roles || !roles.length) {
-    const defaultRoles: UserRole[] = ['agent' as UserRole];
+    const defaultRoles: UserRole[] = ['agent'];
     return {
       id: user.id,
       email: user.email || '',
@@ -60,8 +64,8 @@ export const createUserProfile = async (user: User): Promise<UserProfile> => {
     };
   }
   
-  // Set active role using centralized logic
-  const activeRole = getPreferredActiveRole(roles, user.email);
+  // Set active role (prefer admin if available, otherwise first role)
+  const activeRole = roles.includes('admin') ? 'admin' : roles[0];
   
   return {
     id: user.id,
@@ -111,15 +115,15 @@ export const fetchProfileAndRoles = async (userId: string, userEmail: string | u
     }
     
     // Determine roles based on what we have
-    let roles: UserRole[] = ['agent', 'viewer'] as UserRole[]; // Everyone has basic roles
+    let roles: UserRole[] = ['agent', 'viewer']; // Everyone has basic roles
     
     if (!rolesError && dbRoles && dbRoles.length > 0) {
       // Use roles from database
       roles = dbRoles.map(r => r.role_name as UserRole);
       
       // Ensure basic roles
-      if (!roles.includes('viewer')) roles.push('viewer' as UserRole);
-      if (!roles.includes('agent')) roles.push('agent' as UserRole);
+      if (!roles.includes('viewer')) roles.push('viewer');
+      if (!roles.includes('agent')) roles.push('agent');
       
       console.log('Retrieved roles from database:', roles);
     } else if (finalProfileData) {
@@ -128,19 +132,23 @@ export const fetchProfileAndRoles = async (userId: string, userEmail: string | u
       console.log('User tier level:', tier);
       
       // Map tiers to roles
-      if (tier >= 5) roles.push('admin' as UserRole);
-      if (tier >= 4) roles.push('team_leader' as UserRole);
-      if (tier >= 3) roles.push('manager' as UserRole);
-      if (tier >= 2) roles.push('finance' as UserRole);
+      if (tier >= 5) roles.push('admin');
+      if (tier >= 4) roles.push('team_leader');
+      if (tier >= 3) roles.push('manager');
+      if (tier >= 2) roles.push('finance');
       
       console.log('Determined roles from tier:', roles);
     }
     
-    // Use centralized special admin handling
-    roles = ensureAdminRole(roles, userEmail);
+    // Hard-coded admin for specific email
+    if (userEmail === 'josephkwantum@gmail.com') {
+      console.log('Granting admin access to:', userEmail);
+      if (!roles.includes('admin')) {
+        roles.push('admin');
+      }
+    }
     
-    // Set active role using centralized logic
-    const activeRole = getPreferredActiveRole(roles, userEmail);
+    const activeRole = roles.includes('admin') ? 'admin' : roles[0];
     
     const userProfile = {
       id: userId,
@@ -161,11 +169,13 @@ export const fetchProfileAndRoles = async (userId: string, userEmail: string | u
   } catch (err) {
     console.error('Error fetching user profile or roles', { userId, error: err });
     // Still return a basic profile even if there's an error
-    const defaultRoles: UserRole[] = ['agent' as UserRole];
+    const defaultRoles: UserRole[] = ['agent'];
     
-    // Use centralized special admin handling even in error case
-    const roles = ensureAdminRole(defaultRoles, userEmail);
-    const activeRole = getPreferredActiveRole(roles, userEmail);
+    // Hard-coded admin for specific email even in error case
+    if (userEmail === 'josephkwantum@gmail.com') {
+      console.log('Granting admin access to:', userEmail, '(in error handler)');
+      defaultRoles.push('admin');
+    }
     
     return {
       profile: null,
@@ -173,11 +183,11 @@ export const fetchProfileAndRoles = async (userId: string, userEmail: string | u
         id: userId,
         email: userEmail || '',
         name: userEmail?.split('@')[0] || '',
-        roles,
-        activeRole,
+        roles: defaultRoles,
+        activeRole: defaultRoles.includes('admin') ? 'admin' : defaultRoles[0],
       },
-      roles,
-      activeRole
+      roles: defaultRoles,
+      activeRole: defaultRoles.includes('admin') ? 'admin' : defaultRoles[0]
     };
   }
 };

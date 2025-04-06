@@ -1,112 +1,125 @@
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-import { PaymentSchedule } from '@/types/commission';
+import { PaymentSchedule, ScheduleInstallment } from '@/types/commission';
+import { toast } from 'sonner';
 
+/**
+ * Hook for managing payment schedules
+ */
 export function usePaymentSchedules() {
-  const getPaymentSchedules = useQuery({
-    queryKey: ['paymentSchedules'],
+  const queryClient = useQueryClient();
+  
+  // Fetch all payment schedules
+  const { data: paymentSchedules, isLoading, error } = useQuery({
+    queryKey: ['payment-schedules'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('commission_payment_schedules')
-        .select(`
-          id,
-          name,
-          description,
-          is_default,
-          created_at,
-          updated_at,
-          schedule_installments (
-            id,
-            schedule_id,
-            installment_number,
-            percentage,
-            days_after_transaction,
-            description
-          )
-        `)
-        .order('name');
-      
-      if (error) throw error;
-      
-      // Transform to match our frontend type
-      const schedules: PaymentSchedule[] = data.map(schedule => ({
-        id: schedule.id,
-        name: schedule.name,
-        description: schedule.description,
-        isDefault: schedule.is_default,
-        createdAt: schedule.created_at,
-        updatedAt: schedule.updated_at,
-        installments: schedule.schedule_installments.map((installment: any) => ({
-          id: installment.id,
-          scheduleId: installment.schedule_id,
-          installmentNumber: installment.installment_number,
+      try {
+        // Fetch payment schedules
+        const { data: schedules, error: schedulesError } = await supabase
+          .from('commission_payment_schedules')
+          .select('*')
+          .order('name');
+          
+        if (schedulesError) throw schedulesError;
+        
+        // For each schedule, fetch its installments
+        const schedulesWithInstallments = await Promise.all(
+          schedules.map(async (schedule) => {
+            const { data: installments, error: installmentsError } = await supabase
+              .from('schedule_installments')
+              .select('*')
+              .eq('schedule_id', schedule.id)
+              .order('installment_number');
+              
+            if (installmentsError) throw installmentsError;
+            
+            // Transform to match our interface
+            return {
+              id: schedule.id,
+              name: schedule.name,
+              description: schedule.description,
+              isDefault: schedule.is_default,
+              createdAt: schedule.created_at,
+              updatedAt: schedule.updated_at,
+              installments: installments.map(inst => ({
+                id: inst.id,
+                scheduleId: inst.schedule_id,
+                installmentNumber: inst.installment_number,
+                percentage: inst.percentage,
+                daysAfterTransaction: inst.days_after_transaction,
+                description: inst.description
+              }))
+            };
+          })
+        );
+        
+        return schedulesWithInstallments as PaymentSchedule[];
+      } catch (err) {
+        console.error('Error fetching payment schedules:', err);
+        throw new Error(err instanceof Error ? err.message : 'Failed to fetch payment schedules');
+      }
+    },
+    retry: 1
+  });
+  
+  // Get default payment schedule
+  const defaultPaymentSchedule = paymentSchedules?.find(schedule => schedule.isDefault);
+  
+  // Create a new payment schedule
+  const createScheduleMutation = useMutation({
+    mutationFn: async (schedule: Omit<PaymentSchedule, 'id' | 'createdAt' | 'updatedAt'>) => {
+      try {
+        // Insert the schedule
+        const { data: newSchedule, error: scheduleError } = await supabase
+          .from('commission_payment_schedules')
+          .insert({
+            name: schedule.name,
+            description: schedule.description,
+            is_default: schedule.isDefault
+          })
+          .select()
+          .single();
+          
+        if (scheduleError) throw scheduleError;
+        
+        // Insert the installments
+        const installmentsToInsert = schedule.installments.map(installment => ({
+          schedule_id: newSchedule.id,
+          installment_number: installment.installmentNumber,
           percentage: installment.percentage,
-          daysAfterTransaction: installment.days_after_transaction,
+          days_after_transaction: installment.daysAfterTransaction,
           description: installment.description
-        }))
-      }));
-      
-      return schedules;
+        }));
+        
+        const { error: installmentsError } = await supabase
+          .from('schedule_installments')
+          .insert(installmentsToInsert);
+          
+        if (installmentsError) throw installmentsError;
+        
+        return newSchedule;
+      } catch (err) {
+        console.error('Error creating payment schedule:', err);
+        throw new Error(err instanceof Error ? err.message : 'Failed to create payment schedule');
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['payment-schedules'] });
+      toast.success('Payment schedule created successfully');
+    },
+    onError: (error: Error) => {
+      console.error('Error creating payment schedule:', error);
+      toast.error(`Failed to create payment schedule: ${error.message}`);
     }
   });
 
-  const getDefaultPaymentSchedule = useQuery({
-    queryKey: ['defaultPaymentSchedule'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('commission_payment_schedules')
-        .select(`
-          id,
-          name,
-          description,
-          is_default,
-          created_at,
-          updated_at,
-          schedule_installments (
-            id,
-            schedule_id,
-            installment_number,
-            percentage,
-            days_after_transaction,
-            description
-          )
-        `)
-        .eq('is_default', true)
-        .single();
-      
-      if (error) throw error;
-      
-      // Transform to match our frontend type
-      const schedule: PaymentSchedule = {
-        id: data.id,
-        name: data.name,
-        description: data.description,
-        isDefault: data.is_default,
-        createdAt: data.created_at,
-        updatedAt: data.updated_at,
-        installments: data.schedule_installments.map((installment: any) => ({
-          id: installment.id,
-          scheduleId: installment.schedule_id,
-          installmentNumber: installment.installment_number,
-          percentage: installment.percentage,
-          daysAfterTransaction: installment.days_after_transaction,
-          description: installment.description
-        }))
-      };
-      
-      return schedule;
-    }
-  });
-
-  // Return wrapper object with the expected properties
   return {
-    getPaymentSchedules,
-    getDefaultPaymentSchedule,
-    // Add these computed properties to match what components expect
-    paymentSchedules: getPaymentSchedules.data || [],
-    defaultPaymentSchedule: getDefaultPaymentSchedule.data,
-    isLoading: getPaymentSchedules.isLoading || getDefaultPaymentSchedule.isLoading,
-    error: getPaymentSchedules.error || getDefaultPaymentSchedule.error
+    paymentSchedules,
+    defaultPaymentSchedule,
+    isLoading,
+    error,
+    createSchedule: createScheduleMutation.mutate,
+    isCreating: createScheduleMutation.isPending
   };
 }

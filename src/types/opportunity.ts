@@ -5,15 +5,8 @@ export interface Opportunity {
   description: string;
   budget: string;
   location: string;
-  status: 'Urgent' | 'New' | 'Featured' | 'Active';
-  propertyType: string;
+  status: string;
   postedBy: string;
   postedDate: string;
-  expiryDate?: string;
-  priority?: number;
-  requirements?: string[];
-  contactInfo?: {
-    email?: string;
-    phone?: string;
-  };
+  propertyType?: string;
 }

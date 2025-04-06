@@ -1,71 +1,75 @@
 
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
-import { toast } from 'sonner';
+import { useState } from 'react';
+import { useAuth } from './useAuth';
+import { useMutation } from '@tanstack/react-query';
 
-/**
- * Hook for commission forecast calculations
- */
-export function useForecastCalculation(agentId?: string) {
-  // Fetch forecast summary data
-  const { data: forecastSummary = [], isLoading: isLoadingSummary } = useQuery({
-    queryKey: ['forecastSummary', agentId],
-    queryFn: async () => {
-      if (!agentId) return [];
-      
-      const { data, error } = await supabase.rpc('calculate_commission_forecast_totals');
-      
-      if (error) throw error;
-      return data || [];
-    },
-    enabled: !!agentId
-  });
-  
-  // Fetch forecast by month data
-  const { data: forecastByMonth = [], isLoading: isLoadingForecastByMonth } = useQuery({
-    queryKey: ['forecastByMonth', agentId],
-    queryFn: async () => {
-      if (!agentId) return [];
-      
-      const { data, error } = await supabase.rpc('get_commission_forecast_by_month', {
-        p_agent_id: agentId
-      });
-      
-      if (error) throw error;
-      return data || [];
-    },
-    enabled: !!agentId
-  });
-  
-  // Generate forecast projections
+export interface CommissionForecast {
+  id: string;
+  month: string;
+  total_amount: number;
+  scheduled_count: number;
+  installments: any[];
+}
+
+interface MonthlyForecastData {
+  month: string;
+  totalAmount: number;
+  installments: any[];
+}
+
+export const useForecastCalculation = (agentId?: string) => {
+  const [forecastSummary, setForecastSummary] = useState<CommissionForecast[]>([]);
+  const [forecastByMonth, setForecastByMonth] = useState<MonthlyForecastData[]>([]);
+  const [isLoadingSummary, setIsLoadingSummary] = useState(false);
+  const [isLoadingForecastByMonth, setIsLoadingForecastByMonth] = useState(false);
+
   const generateForecast = useMutation({
-    mutationFn: async ({ 
-      agentId, 
-      months 
-    }: { 
-      agentId: string;
-      months: number;
-    }) => {
-      const response = await supabase.functions.invoke('generate_commission_forecast', {
-        body: { agentId, months }
-      });
+    mutationFn: async ({ agentId, months }: { agentId: string, months: number }) => {
+      setIsLoadingSummary(true);
+      setIsLoadingForecastByMonth(true);
       
-      if (response.error) throw new Error(response.error.message || 'Failed to generate forecast');
-      return response.data;
-    },
-    onSuccess: (data) => {
-      toast.success(`Forecast regenerated successfully with ${data?.count || 0} projections`);
-    },
-    onError: (error: Error) => {
-      toast.error(`Error generating forecast: ${error.message}`);
+      try {
+        // Mock data for now - in real app this would call an API
+        const mockData = Array.from({ length: 6 }, (_, i) => ({
+          id: `forecast-${i}`,
+          month: new Date(Date.now() + i * 30 * 24 * 60 * 60 * 1000).toLocaleString('default', { month: 'long', year: 'numeric' }),
+          total_amount: Math.floor(Math.random() * 50000) + 5000,
+          scheduled_count: Math.floor(Math.random() * 5) + 1,
+          installments: Array.from({ length: Math.floor(Math.random() * 3) + 1 }, (_, j) => ({
+            id: `installment-${i}-${j}`,
+            installmentNumber: j + 1,
+            amount: Math.floor(Math.random() * 10000) + 1000,
+            scheduledDate: new Date(Date.now() + (i * 30 + j * 10) * 24 * 60 * 60 * 1000).toISOString(),
+            status: 'Projected'
+          }))
+        }));
+        
+        setForecastSummary(mockData);
+        setForecastByMonth(mockData.map(month => ({
+          month: month.month,
+          totalAmount: month.total_amount,
+          installments: month.installments
+        })));
+        
+        return mockData;
+      } finally {
+        setIsLoadingSummary(false);
+        setIsLoadingForecastByMonth(false);
+      }
     }
   });
-  
+
   return {
+    generateForecast,
     forecastSummary,
-    isLoadingSummary,
     forecastByMonth,
+    isLoadingSummary,
     isLoadingForecastByMonth,
-    generateForecast
+    // For backward compatibility with older code
+    calculateForecast: (agentId: string, months: number) => {
+      return generateForecast.mutateAsync({ agentId, months });
+    },
+    isLoading: generateForecast.isPending,
+    error: generateForecast.error
   };
-}
+};

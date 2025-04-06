@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -24,7 +23,6 @@ const PropertyList = ({ properties, isLoading = false, onViewAll }: PropertyList
 
   const handleEditProperty = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    // Update to use the consistent route pattern
     navigate(`/properties/${id}/edit`);
   };
 

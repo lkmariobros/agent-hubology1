@@ -1,9 +1,11 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { usePropertyForm } from '@/context/PropertyFormContext';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { FileText, Upload, X, File } from 'lucide-react';
+import { PropertyDocument } from '@/types/property-form';
 import {
   Select,
   SelectContent,
@@ -11,130 +13,114 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { FileUp, Trash2, FileText } from 'lucide-react';
-import { PropertyDocument } from '@/types/property-form';
-
-const documentTypes = [
-  { value: 'floor-plan', label: 'Floor Plan' },
-  { value: 'title-deed', label: 'Title Deed' },
-  { value: 'brochure', label: 'Property Brochure' },
-  { value: 'certificate', label: 'Building Certificate' },
-  { value: 'other', label: 'Other Document' },
-];
 
 const PropertyDocumentsUpload: React.FC = () => {
   const { state, addDocument, removeDocument } = usePropertyForm();
   const { documents } = state;
-  
-  const [documentName, setDocumentName] = useState('');
-  const [documentType, setDocumentType] = useState('');
-  const [file, setFile] = useState<File | null>(null);
-  
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
-      if (!documentName) {
-        // Use file name as document name if not provided
-        setDocumentName(e.target.files[0].name.split('.')[0]);
-      }
-    }
-  };
-  
-  const handleAddDocument = () => {
-    if (file && documentName && documentType) {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      
+      // Create a new document
       const newDocument: PropertyDocument = {
-        name: documentName,
-        documentType,
         file,
-        uploadStatus: 'uploading'
+        name: file.name,
+        documentType: 'Other', // Default type
+        url: URL.createObjectURL(file),
       };
       
       addDocument(newDocument);
       
-      // Reset form
-      setDocumentName('');
-      setDocumentType('');
-      setFile(null);
-      
-      // Reset file input
-      const fileInput = document.getElementById('documentFile') as HTMLInputElement;
-      if (fileInput) fileInput.value = '';
+      // Reset the input
+      e.target.value = '';
     }
   };
-  
+
+  const handleDocumentTypeChange = (index: number, type: string) => {
+    const updatedDocuments = [...documents];
+    updatedDocuments[index] = { ...updatedDocuments[index], documentType: type };
+    // Remove and add to simulate updating the document
+    removeDocument(index);
+    addDocument(updatedDocuments[index]);
+  };
+
+  const handleNameChange = (index: number, name: string) => {
+    const updatedDocuments = [...documents];
+    updatedDocuments[index] = { ...updatedDocuments[index], name };
+    // Remove and add to simulate updating the document
+    removeDocument(index);
+    addDocument(updatedDocuments[index]);
+  };
+
   return (
     <div className="space-y-6">
       <h3 className="text-lg font-medium">Property Documents</h3>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-2">
-          <Label htmlFor="documentName">Document Name</Label>
+      <div className="border-2 border-dashed rounded-lg p-8 flex flex-col items-center justify-center">
+        <FileText className="h-10 w-10 text-muted-foreground mb-4" />
+        <p className="text-sm text-muted-foreground mb-4 text-center">
+          Upload property-related documents such as floor plans, title deeds, etc.
+        </p>
+        <Label htmlFor="document-upload" className="cursor-pointer">
+          <Button variant="outline" type="button">
+            Select Document
+          </Button>
           <Input
-            id="documentName"
-            value={documentName}
-            onChange={(e) => setDocumentName(e.target.value)}
-            placeholder="Enter document name"
+            id="document-upload"
+            type="file"
+            accept=".pdf,.doc,.docx,.xls,.xlsx"
+            className="hidden"
+            onChange={handleFileChange}
           />
-        </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="documentType">Document Type</Label>
-          <Select
-            value={documentType}
-            onValueChange={setDocumentType}
-          >
-            <SelectTrigger id="documentType">
-              <SelectValue placeholder="Select document type" />
-            </SelectTrigger>
-            <SelectContent>
-              {documentTypes.map(type => (
-                <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        </Label>
       </div>
-      
-      <div className="space-y-2">
-        <Label htmlFor="documentFile">Upload Document</Label>
-        <Input
-          id="documentFile"
-          type="file"
-          onChange={handleFileChange}
-          accept=".pdf,.doc,.docx,.xls,.xlsx,.txt"
-        />
-      </div>
-      
-      <Button
-        type="button"
-        onClick={handleAddDocument}
-        disabled={!file || !documentName || !documentType}
-      >
-        <FileUp className="mr-2 h-4 w-4" /> Add Document
-      </Button>
-      
+
       {documents.length > 0 && (
-        <div className="mt-6">
-          <h4 className="text-sm font-medium mb-2">Added Documents</h4>
-          <div className="space-y-2">
-            {documents.map((doc, index) => (
-              <div key={index} className="flex items-center justify-between p-3 bg-muted rounded-md">
-                <div className="flex items-center">
-                  <FileText className="h-5 w-5 mr-2 text-primary" />
-                  <div>
-                    <p className="font-medium">{doc.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {documentTypes.find(t => t.value === doc.documentType)?.label || doc.documentType}
-                    </p>
-                  </div>
+        <div className="space-y-4">
+          <h4 className="text-sm font-medium">Uploaded Documents ({documents.length})</h4>
+          <div className="space-y-3">
+            {documents.map((document, index) => (
+              <div 
+                key={index} 
+                className="flex items-center space-x-4 p-3 border rounded-md"
+              >
+                <div className="h-10 w-10 flex-shrink-0 bg-muted rounded-md flex items-center justify-center">
+                  <File className="h-5 w-5 text-muted-foreground" />
                 </div>
+                
+                <div className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <Input
+                    value={document.name}
+                    onChange={(e) => handleNameChange(index, e.target.value)}
+                    placeholder="Document name"
+                    className="w-full"
+                  />
+                  
+                  <Select
+                    value={document.documentType}
+                    onValueChange={(value) => handleDocumentTypeChange(index, value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Document type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Floor Plan">Floor Plan</SelectItem>
+                      <SelectItem value="Title Deed">Title Deed</SelectItem>
+                      <SelectItem value="Sales Brochure">Sales Brochure</SelectItem>
+                      <SelectItem value="Legal Document">Legal Document</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
                 <Button
+                  type="button"
                   variant="ghost"
-                  size="sm"
+                  size="icon"
                   onClick={() => removeDocument(index)}
-                  className="text-destructive hover:text-destructive/90"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <X className="h-4 w-4" />
                 </Button>
               </div>
             ))}

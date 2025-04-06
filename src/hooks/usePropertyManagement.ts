@@ -4,7 +4,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { PropertyFormData, PropertyImage, PropertyDocument } from '@/types/property-form';
-import propertyFormHelpers from '@/utils/propertyFormHelpers';
 
 /**
  * Hook for managing property storage operations
@@ -188,385 +187,338 @@ export function usePropertyStorage() {
  * Hook for managing property CRUD operations
  */
 export function usePropertyManagement() {
-  // Use a try-catch to handle cases where QueryClient isn't available
-  try {
-    const queryClient = useQueryClient();
-    const { uploadImages, uploadDocuments } = usePropertyStorage();
-    
-    /**
-     * Create a new property with full data
-     */
-    const createProperty = useMutation({
-      mutationFn: async (data: PropertyFormData) => {
-        console.log('Creating property with data:', data);
-        
-        try {
-          // Step 1: Get IDs for the reference data before inserting
-          const propertyTypeId = await propertyFormHelpers.getOrCreatePropertyType(data.propertyType);
-          if (!propertyTypeId) {
-            throw new Error(`Could not retrieve ID for property type: ${data.propertyType}`);
-          }
+  const queryClient = useQueryClient();
+  const { uploadImages, uploadDocuments } = usePropertyStorage();
+  
+  /**
+   * Create a new property with full data
+   */
+  const createProperty = useMutation({
+    mutationFn: async (data: PropertyFormData) => {
+      console.log('Creating property with data:', data);
+      
+      try {
+        // Step 1: Insert the property data
+        const { data: propertyData, error: propertyError } = await supabase
+          .from('enhanced_properties')
+          .insert({
+            title: data.title,
+            description: data.description,
+            property_type_id: data.propertyType,
+            transaction_type_id: data.transactionType,
+            price: data.price,
+            rental_rate: data.rentalRate,
+            status_id: data.status,
+            featured: data.featured,
+            // Address fields
+            street: data.address.street,
+            city: data.address.city,
+            state: data.address.state,
+            zip: data.address.zip,
+            country: data.address.country,
+            // Property details based on type
+            bedrooms: data.bedrooms,
+            bathrooms: data.bathrooms,
+            built_up_area: data.builtUpArea,
+            floor_area: data.floorArea,
+            land_size: data.landSize,
+            furnishing_status: data.furnishingStatus,
+            // Commercial/industrial specific
+            building_class: data.buildingClass,
+            ceiling_height: data.ceilingHeight,
+            loading_bays: data.loadingBays,
+            power_capacity: data.powerCapacity,
+            // Land specific
+            zoning: data.zoning,
+            zoning_type: data.zoningType,
+            topography: data.topography,
+            road_frontage: data.roadFrontage,
+            // Agent notes
+            agent_notes: data.agentNotes,
+            // Current user as agent
+            agent_id: (await supabase.auth.getUser()).data.user?.id
+          })
+          .select('id')
+          .single();
           
-          const transactionTypeId = await propertyFormHelpers.getOrCreateTransactionType(data.transactionType);
-          if (!transactionTypeId) {
-            throw new Error(`Could not retrieve ID for transaction type: ${data.transactionType}`);
-          }
-          
-          const statusId = await propertyFormHelpers.getOrCreatePropertyStatus(data.status);
-          if (!statusId) {
-            throw new Error(`Could not retrieve ID for status: ${data.status}`);
-          }
-          
-          // Step 2: Insert the property data with the correct IDs
-          const { data: propertyData, error: propertyError } = await supabase
-            .from('enhanced_properties')
-            .insert({
-              title: data.title,
-              description: data.description,
-              property_type_id: propertyTypeId, // Use the UUID not the string
-              transaction_type_id: transactionTypeId, // Use the UUID not the string
-              price: data.price,
-              rental_rate: data.rentalRate,
-              status_id: statusId, // Use the UUID not the string
-              featured: data.featured,
-              // Address fields
-              street: data.address.street,
-              city: data.address.city,
-              state: data.address.state,
-              zip: data.address.zip,
-              country: data.address.country,
-              // Property details based on type
-              bedrooms: data.bedrooms,
-              bathrooms: data.bathrooms,
-              built_up_area: data.builtUpArea,
-              floor_area: data.floorArea,
-              land_size: data.landSize,
-              furnishing_status: data.furnishingStatus,
-              // Commercial/industrial specific
-              building_class: data.buildingClass,
-              ceiling_height: data.ceilingHeight,
-              loading_bays: data.loadingBays,
-              power_capacity: data.powerCapacity,
-              // Land specific
-              zoning: data.zoning,
-              zoning_type: data.zoningType,
-              topography: data.topography,
-              road_frontage: data.roadFrontage,
-              // Agent notes
-              agent_notes: data.agentNotes,
-              // Current user as agent
-              agent_id: (await supabase.auth.getUser()).data.user?.id
-            })
-            .select('id')
-            .single();
-            
-          if (propertyError) {
-            console.error('Error creating property:', propertyError);
-            throw propertyError;
-          }
-          
-          const propertyId = propertyData.id;
-          
-          // Step 2: Upload images if any
-          if (data.images && data.images.length > 0) {
-            const imagesToUpload = data.images
-              .filter(img => img.file)
-              .map(img => img.file as File);
-              
-            if (imagesToUpload.length > 0) {
-              await uploadImages(propertyId, imagesToUpload);
-            }
-          }
-          
-          // Step 3: Upload documents if any
-          if (data.documents && data.documents.length > 0) {
-            const docsToUpload = data.documents
-              .filter(doc => doc.file)
-              .map(doc => doc.file as File);
-              
-            const documentTypes = Object.fromEntries(
-              data.documents
-                .filter(doc => doc.file)
-                .map(doc => [doc.file?.name || '', doc.documentType])
-            );
-            
-            if (docsToUpload.length > 0) {
-              await uploadDocuments(propertyId, docsToUpload, documentTypes);
-            }
-          }
-          
-          return {
-            success: true,
-            propertyId,
-            message: 'Property created successfully'
-          };
-        } catch (error) {
-          console.error('Error in createProperty:', error);
-          throw error;
+        if (propertyError) {
+          console.error('Error creating property:', propertyError);
+          throw propertyError;
         }
-      },
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['properties'] });
-        toast.success('Property created successfully');
-      },
-      onError: (error: any) => {
-        toast.error(`Failed to create property: ${error.message}`);
-      }
-    });
-    
-    /**
-     * Update an existing property
-     */
-    const updateProperty = useMutation({
-      mutationFn: async ({ id, data }: { id: string; data: Partial<PropertyFormData> }) => {
-        console.log('Updating property with ID:', id, data);
         
-        try {
-          // Extract property data for update
-          const propertyData: any = {};
-          
-          // Basic info
-          if (data.title !== undefined) propertyData.title = data.title;
-          if (data.description !== undefined) propertyData.description = data.description;
-          if (data.propertyType !== undefined) propertyData.property_type_id = data.propertyType;
-          if (data.transactionType !== undefined) propertyData.transaction_type_id = data.transactionType;
-          if (data.price !== undefined) propertyData.price = data.price;
-          if (data.rentalRate !== undefined) propertyData.rental_rate = data.rentalRate;
-          if (data.status !== undefined) propertyData.status_id = data.status;
-          if (data.featured !== undefined) propertyData.featured = data.featured;
-          
-          // Address
-          if (data.address) {
-            const { address } = data;
-            if (address.street !== undefined) propertyData.street = address.street;
-            if (address.city !== undefined) propertyData.city = address.city;
-            if (address.state !== undefined) propertyData.state = address.state;
-            if (address.zip !== undefined) propertyData.zip = address.zip;
-            if (address.country !== undefined) propertyData.country = address.country;
-          }
-          
-          // Property specific fields
-          if (data.bedrooms !== undefined) propertyData.bedrooms = data.bedrooms;
-          if (data.bathrooms !== undefined) propertyData.bathrooms = data.bathrooms;
-          if (data.builtUpArea !== undefined) propertyData.built_up_area = data.builtUpArea;
-          if (data.floorArea !== undefined) propertyData.floor_area = data.floorArea;
-          if (data.landSize !== undefined) propertyData.land_size = data.landSize;
-          if (data.furnishingStatus !== undefined) propertyData.furnishing_status = data.furnishingStatus;
-          if (data.buildingClass !== undefined) propertyData.building_class = data.buildingClass;
-          if (data.ceilingHeight !== undefined) propertyData.ceiling_height = data.ceilingHeight;
-          if (data.loadingBays !== undefined) propertyData.loading_bays = data.loadingBays;
-          if (data.powerCapacity !== undefined) propertyData.power_capacity = data.powerCapacity;
-          if (data.zoning !== undefined) propertyData.zoning = data.zoning;
-          if (data.zoningType !== undefined) propertyData.zoning_type = data.zoningType;
-          if (data.topography !== undefined) propertyData.topography = data.topography;
-          if (data.roadFrontage !== undefined) propertyData.road_frontage = data.roadFrontage;
-          
-          // Notes
-          if (data.agentNotes !== undefined) propertyData.agent_notes = data.agentNotes;
-          
-          // Always update the timestamp
-          propertyData.updated_at = new Date().toISOString();
-          
-          // Update the property data
-          const { error: updateError } = await supabase
-            .from('enhanced_properties')
-            .update(propertyData)
-            .eq('id', id);
-            
-          if (updateError) {
-            console.error('Error updating property:', updateError);
-            throw updateError;
-          }
-          
-          // Handle images/documents updates
-          // New images to upload
+        const propertyId = propertyData.id;
+        
+        // Step 2: Upload images if any
+        if (data.images && data.images.length > 0) {
           const imagesToUpload = data.images
-            ?.filter(img => img.file && !img.id)
-            .map(img => img.file as File) || [];
+            .filter(img => img.file)
+            .map(img => img.file as File);
             
           if (imagesToUpload.length > 0) {
-            await uploadImages(id, imagesToUpload);
+            await uploadImages(propertyId, imagesToUpload);
           }
-          
-          // New documents to upload
-          const documentsToUpload = data.documents
-            ?.filter(doc => doc.file && !doc.id)
-            .map(doc => doc.file as File) || [];
-            
-          if (documentsToUpload.length > 0) {
-            const documentTypes = Object.fromEntries(
-              data.documents
-                ?.filter(doc => doc.file && !doc.id)
-                .map(doc => [doc.file?.name || '', doc.documentType]) || []
-            );
-            
-            await uploadDocuments(id, documentsToUpload, documentTypes);
-          }
-          
-          // Images to delete
-          const imagesToDelete = data.imagesToDelete || [];
-          for (const imageId of imagesToDelete) {
-            // First get the image to find its storage path
-            const { data: imageData } = await supabase
-              .from('property_images')
-              .select('storage_path')
-              .eq('id', imageId)
-              .single();
-              
-            if (imageData?.storage_path) {
-              // Delete the file from storage
-              await supabase.storage
-                .from('property-images')
-                .remove([imageData.storage_path]);
-            }
-            
-            // Delete the record
-            await supabase
-              .from('property_images')
-              .delete()
-              .eq('id', imageId);
-          }
-          
-          // Documents to delete
-          const documentsToDelete = data.documentsToDelete || [];
-          for (const docId of documentsToDelete) {
-            // First get the document to find its storage path
-            const { data: docData } = await supabase
-              .from('property_documents')
-              .select('storage_path')
-              .eq('id', docId)
-              .single();
-              
-            if (docData?.storage_path) {
-              // Delete the file from storage
-              await supabase.storage
-                .from('property-documents')
-                .remove([docData.storage_path]);
-            }
-            
-            // Delete the record
-            await supabase
-              .from('property_documents')
-              .delete()
-              .eq('id', docId);
-          }
-          
-          return {
-            success: true,
-            propertyId: id,
-            message: 'Property updated successfully'
-          };
-        } catch (error) {
-          console.error('Error in updateProperty:', error);
-          throw error;
         }
-      },
-      onSuccess: (_, variables) => {
-        queryClient.invalidateQueries({ queryKey: ['properties'] });
-        queryClient.invalidateQueries({ queryKey: ['property', variables.id] });
-        toast.success('Property updated successfully');
-      },
-      onError: (error: any) => {
-        toast.error(`Failed to update property: ${error.message}`);
-      }
-    });
-    
-    /**
-     * Delete a property and all associated data
-     */
-    const deleteProperty = useMutation({
-      mutationFn: async (id: string) => {
-        console.log('Deleting property with ID:', id);
         
-        try {
-          // Step 1: Get all images and documents to delete from storage
-          const { data: images } = await supabase
+        // Step 3: Upload documents if any
+        if (data.documents && data.documents.length > 0) {
+          const docsToUpload = data.documents
+            .filter(doc => doc.file)
+            .map(doc => doc.file as File);
+            
+          const documentTypes = Object.fromEntries(
+            data.documents
+              .filter(doc => doc.file)
+              .map(doc => [doc.file?.name || '', doc.documentType])
+          );
+          
+          if (docsToUpload.length > 0) {
+            await uploadDocuments(propertyId, docsToUpload, documentTypes);
+          }
+        }
+        
+        return {
+          success: true,
+          propertyId,
+          message: 'Property created successfully'
+        };
+      } catch (error) {
+        console.error('Error in createProperty:', error);
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['properties'] });
+      toast.success('Property created successfully');
+    },
+    onError: (error: any) => {
+      toast.error(`Failed to create property: ${error.message}`);
+    }
+  });
+  
+  /**
+   * Update an existing property
+   */
+  const updateProperty = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Partial<PropertyFormData> }) => {
+      console.log('Updating property with ID:', id, data);
+      
+      try {
+        // Extract property data for update
+        const propertyData: any = {};
+        
+        // Basic info
+        if (data.title !== undefined) propertyData.title = data.title;
+        if (data.description !== undefined) propertyData.description = data.description;
+        if (data.propertyType !== undefined) propertyData.property_type_id = data.propertyType;
+        if (data.transactionType !== undefined) propertyData.transaction_type_id = data.transactionType;
+        if (data.price !== undefined) propertyData.price = data.price;
+        if (data.rentalRate !== undefined) propertyData.rental_rate = data.rentalRate;
+        if (data.status !== undefined) propertyData.status_id = data.status;
+        if (data.featured !== undefined) propertyData.featured = data.featured;
+        
+        // Address
+        if (data.address) {
+          const { address } = data;
+          if (address.street !== undefined) propertyData.street = address.street;
+          if (address.city !== undefined) propertyData.city = address.city;
+          if (address.state !== undefined) propertyData.state = address.state;
+          if (address.zip !== undefined) propertyData.zip = address.zip;
+          if (address.country !== undefined) propertyData.country = address.country;
+        }
+        
+        // Property specific fields
+        if (data.bedrooms !== undefined) propertyData.bedrooms = data.bedrooms;
+        if (data.bathrooms !== undefined) propertyData.bathrooms = data.bathrooms;
+        if (data.builtUpArea !== undefined) propertyData.built_up_area = data.builtUpArea;
+        if (data.floorArea !== undefined) propertyData.floor_area = data.floorArea;
+        if (data.landSize !== undefined) propertyData.land_size = data.landSize;
+        if (data.furnishingStatus !== undefined) propertyData.furnishing_status = data.furnishingStatus;
+        if (data.buildingClass !== undefined) propertyData.building_class = data.buildingClass;
+        if (data.ceilingHeight !== undefined) propertyData.ceiling_height = data.ceilingHeight;
+        if (data.loadingBays !== undefined) propertyData.loading_bays = data.loadingBays;
+        if (data.powerCapacity !== undefined) propertyData.power_capacity = data.powerCapacity;
+        if (data.zoning !== undefined) propertyData.zoning = data.zoning;
+        if (data.zoningType !== undefined) propertyData.zoning_type = data.zoningType;
+        if (data.topography !== undefined) propertyData.topography = data.topography;
+        if (data.roadFrontage !== undefined) propertyData.road_frontage = data.roadFrontage;
+        
+        // Notes
+        if (data.agentNotes !== undefined) propertyData.agent_notes = data.agentNotes;
+        
+        // Always update the timestamp
+        propertyData.updated_at = new Date().toISOString();
+        
+        // Update the property data
+        const { error: updateError } = await supabase
+          .from('enhanced_properties')
+          .update(propertyData)
+          .eq('id', id);
+          
+        if (updateError) {
+          console.error('Error updating property:', updateError);
+          throw updateError;
+        }
+        
+        // Handle images/documents updates
+        // New images to upload
+        const imagesToUpload = data.images
+          ?.filter(img => img.file && !img.id)
+          .map(img => img.file as File) || [];
+          
+        if (imagesToUpload.length > 0) {
+          await uploadImages(id, imagesToUpload);
+        }
+        
+        // New documents to upload
+        const documentsToUpload = data.documents
+          ?.filter(doc => doc.file && !doc.id)
+          .map(doc => doc.file as File) || [];
+          
+        if (documentsToUpload.length > 0) {
+          const documentTypes = Object.fromEntries(
+            data.documents
+              ?.filter(doc => doc.file && !doc.id)
+              .map(doc => [doc.file?.name || '', doc.documentType]) || []
+          );
+          
+          await uploadDocuments(id, documentsToUpload, documentTypes);
+        }
+        
+        // Images to delete
+        const imagesToDelete = data.imagesToDelete || [];
+        for (const imageId of imagesToDelete) {
+          // First get the image to find its storage path
+          const { data: imageData } = await supabase
             .from('property_images')
             .select('storage_path')
-            .eq('property_id', id);
+            .eq('id', imageId)
+            .single();
             
-          const { data: documents } = await supabase
-            .from('property_documents')
-            .select('storage_path')
-            .eq('property_id', id);
-            
-          // Step 2: Delete images from storage
-          if (images && images.length > 0) {
-            const imagePaths = images.map(img => img.storage_path);
+          if (imageData?.storage_path) {
+            // Delete the file from storage
             await supabase.storage
               .from('property-images')
-              .remove(imagePaths);
+              .remove([imageData.storage_path]);
           }
           
-          // Step 3: Delete documents from storage
-          if (documents && documents.length > 0) {
-            const documentPaths = documents.map(doc => doc.storage_path);
+          // Delete the record
+          await supabase
+            .from('property_images')
+            .delete()
+            .eq('id', imageId);
+        }
+        
+        // Documents to delete
+        const documentsToDelete = data.documentsToDelete || [];
+        for (const docId of documentsToDelete) {
+          // First get the document to find its storage path
+          const { data: docData } = await supabase
+            .from('property_documents')
+            .select('storage_path')
+            .eq('id', docId)
+            .single();
+            
+          if (docData?.storage_path) {
+            // Delete the file from storage
             await supabase.storage
               .from('property-documents')
-              .remove(documentPaths);
+              .remove([docData.storage_path]);
           }
           
-          // Step 4: Delete the property (this will also delete associated records due to foreign key constraints)
-          const { error } = await supabase
-            .from('enhanced_properties')
+          // Delete the record
+          await supabase
+            .from('property_documents')
             .delete()
-            .eq('id', id);
-            
-          if (error) {
-            console.error('Error deleting property:', error);
-            throw error;
-          }
+            .eq('id', docId);
+        }
+        
+        return {
+          success: true,
+          propertyId: id,
+          message: 'Property updated successfully'
+        };
+      } catch (error) {
+        console.error('Error in updateProperty:', error);
+        throw error;
+      }
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['properties'] });
+      queryClient.invalidateQueries({ queryKey: ['property', variables.id] });
+      toast.success('Property updated successfully');
+    },
+    onError: (error: any) => {
+      toast.error(`Failed to update property: ${error.message}`);
+    }
+  });
+  
+  /**
+   * Delete a property and all associated data
+   */
+  const deleteProperty = useMutation({
+    mutationFn: async (id: string) => {
+      console.log('Deleting property with ID:', id);
+      
+      try {
+        // Step 1: Get all images and documents to delete from storage
+        const { data: images } = await supabase
+          .from('property_images')
+          .select('storage_path')
+          .eq('property_id', id);
           
-          return {
-            success: true,
-            message: 'Property deleted successfully'
-          };
-        } catch (error) {
-          console.error('Error in deleteProperty:', error);
+        const { data: documents } = await supabase
+          .from('property_documents')
+          .select('storage_path')
+          .eq('property_id', id);
+          
+        // Step 2: Delete images from storage
+        if (images && images.length > 0) {
+          const imagePaths = images.map(img => img.storage_path);
+          await supabase.storage
+            .from('property-images')
+            .remove(imagePaths);
+        }
+        
+        // Step 3: Delete documents from storage
+        if (documents && documents.length > 0) {
+          const documentPaths = documents.map(doc => doc.storage_path);
+          await supabase.storage
+            .from('property-documents')
+            .remove(documentPaths);
+        }
+        
+        // Step 4: Delete the property (this will also delete associated records due to foreign key constraints)
+        const { error } = await supabase
+          .from('enhanced_properties')
+          .delete()
+          .eq('id', id);
+          
+        if (error) {
+          console.error('Error deleting property:', error);
           throw error;
         }
-      },
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['properties'] });
-        toast.success('Property deleted successfully');
-      },
-      onError: (error: any) => {
-        toast.error(`Failed to delete property: ${error.message}`);
+        
+        return {
+          success: true,
+          message: 'Property deleted successfully'
+        };
+      } catch (error) {
+        console.error('Error in deleteProperty:', error);
+        throw error;
       }
-    });
-    
-    return {
-      createProperty,
-      updateProperty,
-      deleteProperty
-    };
-  } catch (error) {
-    // Fallback when QueryClient is not available
-    console.error('QueryClient not found:', error);
-    
-    // Return non-functional stubs to prevent crashes
-    return {
-      createProperty: {
-        mutateAsync: async () => {
-          toast.error('QueryClient not initialized. Property creation is unavailable.');
-          return { success: false, message: 'QueryClient not initialized' };
-        },
-        isLoading: false,
-      },
-      updateProperty: {
-        mutateAsync: async () => {
-          toast.error('QueryClient not initialized. Property update is unavailable.');
-          return { success: false, message: 'QueryClient not initialized' };
-        },
-        isLoading: false,
-      },
-      deleteProperty: {
-        mutateAsync: async () => {
-          toast.error('QueryClient not initialized. Property deletion is unavailable.');
-          return { success: false, message: 'QueryClient not initialized' };
-        },
-        isLoading: false,
-      },
-    };
-  }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['properties'] });
+      toast.success('Property deleted successfully');
+    },
+    onError: (error: any) => {
+      toast.error(`Failed to delete property: ${error.message}`);
+    }
+  });
+  
+  return {
+    createProperty,
+    updateProperty,
+    deleteProperty
+  };
 }

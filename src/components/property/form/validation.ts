@@ -1,133 +1,76 @@
 
 import { z } from 'zod';
-import { basePropertySchema, validatePricing, typeSpecificValidation } from './schemas/basePropertySchema';
-import { propertySubtypes, getFeaturesByType } from './schemas/propertyTypes';
-import { 
-  basicInfoSchema, 
-  residentialDetailsSchema, 
-  commercialDetailsSchema,
-  industrialDetailsSchema,
-  landDetailsSchema, 
-  addressSchema, 
-  mediaSchema,
-  contactsSchema
-} from './schemas/stepSchemas';
 
-// Re-export everything from the schemas directory
-export {
-  basePropertySchema,
-  validatePricing,
-  typeSpecificValidation,
-  propertySubtypes,
-  getFeaturesByType,
-  basicInfoSchema,
-  residentialDetailsSchema,
-  commercialDetailsSchema,
-  industrialDetailsSchema,
-  landDetailsSchema,
-  addressSchema,
-  mediaSchema,
-  contactsSchema
+// Property subtypes by property type
+export const propertySubtypes = {
+  residential: ['Apartment', 'House', 'Townhouse', 'Condo', 'Villa'],
+  commercial: ['Office', 'Retail', 'Restaurant', 'Warehouse', 'Mixed Use'],
+  industrial: ['Factory', 'Workshop', 'Storage', 'Distribution Center'],
+  land: ['Residential Land', 'Commercial Land', 'Agricultural Land', 'Development Site']
 };
 
-// Create a combined schema for a complete property form
-export const propertySchema = z.object({
-  // Basic info
-  title: basicInfoSchema.shape.title,
-  description: basicInfoSchema.shape.description,
-  propertyType: basicInfoSchema.shape.propertyType,
-  transactionType: basicInfoSchema.shape.transactionType,
-  status: basicInfoSchema.shape.status,
-  
-  // Property details - common
-  price: z.number().min(0).nullable().optional(),
-  rentalRate: z.number().min(0).nullable().optional(),
-  
-  // Residential details
-  bedrooms: residentialDetailsSchema.shape.bedrooms,
-  bathrooms: residentialDetailsSchema.shape.bathrooms,
-  builtUpArea: residentialDetailsSchema.shape.builtUpArea,
-  furnishingStatus: residentialDetailsSchema.shape.furnishingStatus,
-  
-  // Commercial details
-  floorArea: commercialDetailsSchema.shape.floorArea,
-  buildingClass: commercialDetailsSchema.shape.buildingClass,
-  
-  // Industrial details
-  landArea: industrialDetailsSchema.shape.landArea,
-  ceilingHeight: industrialDetailsSchema.shape.ceilingHeight,
-  loadingBays: industrialDetailsSchema.shape.loadingBays,
-  powerCapacity: industrialDetailsSchema.shape.powerCapacity,
-  
-  // Land details
-  landSize: landDetailsSchema.shape.landSize,
-  zoning: landDetailsSchema.shape.zoning,
-  zoningType: landDetailsSchema.shape.zoningType,
-  topography: landDetailsSchema.shape.topography,
-  roadFrontage: landDetailsSchema.shape.roadFrontage,
-  
-  // Address
-  address: addressSchema.shape.address,
-  
-  // Media
-  images: mediaSchema.shape.images,
-  mainImage: mediaSchema.shape.mainImage,
-  
-  // Contacts and notes
-  ownerContacts: contactsSchema.shape.ownerContacts,
-  agentNotes: contactsSchema.shape.agentNotes,
-  
-  // Features
-  features: z.array(z.string()).default([]),
-});
+// Common features by property type
+export const getFeaturesByType = (type: string) => {
+  const commonFeatures = [
+    { id: 'parking', label: 'Parking' },
+    { id: 'security', label: 'Security System' },
+    { id: 'highSpeedInternet', label: 'High-Speed Internet' },
+  ];
 
-export type PropertyFormValues = z.infer<typeof propertySchema>;
-
-/**
- * Comprehensive validation function that combines all validations
- * Returns a standardized result with success flag and detailed error messages
- */
-export const validatePropertyForm = (data: Partial<PropertyFormValues>): { 
-  success: boolean; 
-  errors: Record<string, string>; 
-} => {
-  const errors: Record<string, string> = {};
-  
-  // Validate with Zod schema
-  try {
-    propertySchema.parse(data);
-  } catch (error: any) {
-    if (error.errors) {
-      error.errors.forEach((err: any) => {
-        const path = err.path.join('.');
-        errors[path] = err.message;
-      });
-    }
-  }
-  
-  // Add conditional validation for pricing based on transaction type
-  if (data.transactionType) {
-    const pricingValidation = validatePricing({
-      transactionType: data.transactionType,
-      price: data.price,
-      rentalRate: data.rentalRate
-    });
-    
-    if (!pricingValidation.success && pricingValidation.error) {
-      errors['pricing'] = pricingValidation.error;
-    }
-  }
-  
-  // Add type-specific validation based on property type
-  if (data.propertyType) {
-    const typeValidation = typeSpecificValidation[data.propertyType as keyof typeof typeSpecificValidation]?.(data);
-    if (typeValidation && !typeValidation.success && typeValidation.error) {
-      errors['typeSpecific'] = typeValidation.error;
-    }
-  }
-  
-  return {
-    success: Object.keys(errors).length === 0,
-    errors
+  const typeSpecificFeatures = {
+    residential: [
+      { id: 'airConditioning', label: 'Air Conditioning' },
+      { id: 'furnishing', label: 'Furnished' },
+      { id: 'balcony', label: 'Balcony' },
+      { id: 'pool', label: 'Swimming Pool' },
+      { id: 'gym', label: 'Gym' },
+      { id: 'petFriendly', label: 'Pet Friendly' },
+    ],
+    commercial: [
+      { id: 'elevators', label: 'Elevators' },
+      { id: 'conferenceRooms', label: 'Conference Rooms' },
+      { id: 'reception', label: 'Reception Area' },
+      { id: '24HourAccess', label: '24-Hour Access' },
+      { id: 'kitchenette', label: 'Kitchenette' },
+    ],
+    industrial: [
+      { id: 'loadingDocks', label: 'Loading Docks' },
+      { id: 'highCeilings', label: 'High Ceilings' },
+      { id: 'heavyPower', label: 'Heavy Power Supply' },
+      { id: 'craneSystem', label: 'Crane System' },
+    ],
+    land: [
+      { id: 'roadAccess', label: 'Road Access' },
+      { id: 'utilities', label: 'Utilities Available' },
+      { id: 'fenced', label: 'Fenced' },
+      { id: 'cleared', label: 'Cleared' },
+    ]
   };
+
+  if (type in typeSpecificFeatures) {
+    return [...commonFeatures, ...typeSpecificFeatures[type as keyof typeof typeSpecificFeatures]];
+  }
+  
+  return commonFeatures;
 };
+
+// Zod validation schema for property form
+export const propertySchema = z.object({
+  title: z.string().min(3, 'Title must be at least 3 characters'),
+  description: z.string().min(20, 'Description must be at least 20 characters'),
+  price: z.coerce.number().min(0, 'Price cannot be negative'),
+  type: z.enum(['residential', 'commercial', 'industrial', 'land']),
+  status: z.string(),
+  area: z.coerce.number().optional(),
+  bedrooms: z.coerce.number().optional(),
+  bathrooms: z.coerce.number().optional(),
+  features: z.array(z.string()).default([]),
+  address: z.object({
+    street: z.string().min(1, 'Street is required'),
+    city: z.string().min(1, 'City is required'),
+    state: z.string().min(1, 'State is required'),
+    zip: z.string().optional(),
+    country: z.string().default('USA'),
+  }),
+  images: z.array(z.string()).default([]),
+});

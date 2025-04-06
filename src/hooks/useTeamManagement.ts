@@ -18,7 +18,6 @@ export function useTeamManagement() {
       try {
         // If admin, fetch the complete organization hierarchy
         if (isAdmin) {
-          // Get top-level agents (those without uplines)
           const { data: topLevelAgents, error } = await supabase
             .from('agent_profiles')
             .select('*')
@@ -38,14 +37,16 @@ export function useTeamManagement() {
         } 
         // If team leader, fetch only their team hierarchy
         else {
-          // Check if the user is a team leader using the security definer function
-          const { data: isTeamLeader, error: roleError } = await supabase
-            .rpc('is_user_team_leader', { user_id: user?.id });
+          // First check if the user is a team leader
+          const { data: userRole, error: roleError } = await supabase.rpc('has_role', {
+            p_user_id: user?.id,
+            p_role_name: 'team_leader'
+          });
           
           if (roleError) throw roleError;
           
           // If team leader, fetch their team hierarchy
-          if (isTeamLeader) {
+          if (userRole) {
             return await fetchAgentWithDownline(user?.id);
           } 
           // If regular agent, fetch their upline and personal info
@@ -73,11 +74,9 @@ export function useTeamManagement() {
                 tier: agentProfile.upline.tier_name,
                 commission: agentProfile.upline.commission_percentage,
                 avatar: agentProfile.upline.avatar_url,
-                rank: agentProfile.upline.tier_name,
-                totalCommission: 0 // Required by the type
+                rank: agentProfile.upline.tier_name
               } : undefined,
-              downline: [],
-              totalCommission: 0 // Required by the type
+              downline: []
             };
           }
         }
@@ -93,26 +92,26 @@ export function useTeamManagement() {
   // Recursive function to fetch an agent with their complete downline
   async function fetchAgentWithDownline(agentId: string): Promise<AgentWithHierarchy | null> {
     try {
-      // Fetch the agent using the security definer function
+      // Fetch the agent
       const { data: agent, error: agentError } = await supabase
-        .rpc('get_agent_profile_by_id', { user_id: agentId });
+        .from('agent_profiles')
+        .select('*')
+        .eq('id', agentId)
+        .single();
         
-      if (agentError || !agent || agent.length === 0) throw agentError;
+      if (agentError) throw agentError;
       
-      // Use the first result if multiple are returned
-      const agentData = Array.isArray(agent) ? agent[0] : agent;
-      
-      // Fetch the agent's direct downline using security definer function
+      // Fetch the agent's direct downline
       const { data: directDownline, error: downlineError } = await supabase
-        .rpc('get_direct_reports', { manager_id: agentId });
+        .from('agent_profiles')
+        .select('*')
+        .eq('upline_id', agentId);
         
       if (downlineError) throw downlineError;
       
-      const downlineArray = Array.isArray(directDownline) ? directDownline : [directDownline];
-      
       // Recursively fetch each downline agent's own downline
       const downlineWithHierarchy = await Promise.all(
-        downlineArray.map(async (downlineAgent) => {
+        directDownline.map(async (downlineAgent) => {
           return await fetchAgentWithDownline(downlineAgent.id);
         })
       );
@@ -121,31 +120,26 @@ export function useTeamManagement() {
       const validDownline = downlineWithHierarchy
         .filter(Boolean)
         .sort((a, b) => 
-          (parseInt((b?.tier || '').replace(/[^0-9]/g, '') || '0') - 
-          parseInt((a?.tier || '').replace(/[^0-9]/g, '') || '0')) || 
-          ((a?.name || '').localeCompare(b?.name || ''))
+          (parseInt(b?.tier?.replace(/[^0-9]/g, '') || '0') - 
+          parseInt(a?.tier?.replace(/[^0-9]/g, '') || '0')) || 
+          (a?.name || '').localeCompare(b?.name || '')
         );
-      
-      // Calculate personal and override commissions
-      const personalCommission = calculatePersonalCommission(agentData);
-      const overrideCommission = calculateOverrideCommission(agentData, validDownline);
       
       // Return the agent with their downline
       return {
-        id: agentData.id,
-        name: agentData.full_name,
-        email: agentData.email,
-        tier: agentData.tier_name,
-        commission: agentData.commission_percentage,
-        avatar: agentData.avatar_url,
-        rank: agentData.tier_name,
-        phone: agentData.phone,
-        joinDate: agentData.join_date,
-        transactions: agentData.total_transactions,
-        salesVolume: agentData.total_sales,
-        personalCommission: personalCommission,
-        overrideCommission: overrideCommission,
-        totalCommission: personalCommission + overrideCommission,
+        id: agent.id,
+        name: agent.full_name,
+        email: agent.email,
+        tier: agent.tier_name,
+        commission: agent.commission_percentage,
+        avatar: agent.avatar_url,
+        rank: agent.tier_name,
+        phone: agent.phone,
+        joinDate: agent.join_date,
+        transactions: agent.total_transactions,
+        salesVolume: agent.total_sales,
+        personalCommission: calculatePersonalCommission(agent),
+        overrideCommission: calculateOverrideCommission(agent, validDownline),
         downline: validDownline
       };
     } catch (error) {
@@ -177,12 +171,24 @@ export function useTeamManagement() {
       try {
         const targetAgentId = selectedAgent?.id || user?.id;
         
-        const { data, error } = await supabase.rpc('get_team_performance_metrics', {
-          p_agent_id: targetAgentId
-        });
-        
-        if (error) throw error;
-        return data;
+        // For admins looking at the whole organization or a specific team
+        if (isAdmin || selectedAgent) {
+          const { data, error } = await supabase.rpc('get_team_performance_metrics', {
+            p_agent_id: targetAgentId
+          });
+          
+          if (error) throw error;
+          return data;
+        } 
+        // For team leaders looking at their own team
+        else {
+          const { data, error } = await supabase.rpc('get_team_performance_metrics', {
+            p_agent_id: user?.id
+          });
+          
+          if (error) throw error;
+          return data;
+        }
       } catch (error) {
         console.error('Error fetching team metrics:', error);
         toast.error('Failed to load team performance metrics');

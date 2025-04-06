@@ -1,172 +1,217 @@
 
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Plus, Filter, ArrowUpDown, Search, Eye } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-// Sample transaction data
-const transactionsData = [
-  {
-    id: "TX-1234",
-    property: "Bungalow with Pool",
-    date: "2023-04-04",
-    client: "Alex Johnson",
-    amount: 450000,
-    status: "In progress"
-  },
-  {
-    id: "TX-1233",
-    property: "Penthouse Suite",
-    date: "2023-04-01",
-    client: "Sarah Williams",
-    amount: 820000,
-    status: "Completed"
-  },
-  {
-    id: "TX-1232",
-    property: "Modern Office Space",
-    date: "2023-03-28",
-    client: "Tech Innovations Inc.",
-    amount: 950000,
-    status: "Completed"
-  },
-  {
-    id: "TX-1231",
-    property: "Downtown Apartment",
-    date: "2023-03-25",
-    client: "Michael Davis",
-    amount: 320000,
-    status: "Completed"
-  },
-  {
-    id: "TX-1230",
-    property: "Retail Space",
-    date: "2023-03-20",
-    client: "Fashion Boutique LLC",
-    amount: 580000,
-    status: "Cancelled"
-  }
-];
+import { Card } from '@/components/ui/card';
+import { Search, Filter, Download, Plus, ArrowUpDown } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { useTransactions } from '@/hooks/useTransactions';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const Transactions = () => {
   const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(0);
+  
+  const { useTransactionsQuery } = useTransactions();
+  const { data, isLoading, isError } = useTransactionsQuery({
+    search: searchQuery,
+    limit: 10,
+    page: currentPage
+  });
+  
+  const transactions = data?.transactions || [];
+  const totalTransactions = data?.total || 0;
+  const totalPages = Math.ceil(totalTransactions / 10);
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      maximumFractionDigits: 0
-    }).format(amount);
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Reset to first page when searching
+    setCurrentPage(0);
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
-
-  const getStatusColor = (status: string) => {
-    switch(status.toLowerCase()) {
+  // Function to determine which badge variant to use
+  const getStatusBadge = (status: string) => {
+    switch (status.toLowerCase()) {
       case 'completed':
-        return "bg-green-100 text-green-800";
-      case 'in progress':
-        return "bg-blue-100 text-blue-800";
+        return <Badge>Completed</Badge>;
       case 'pending':
-        return "bg-yellow-100 text-yellow-800";
+        return <Badge variant="outline" className="bg-orange-500/10 text-orange-500 hover:bg-orange-500/20">Pending</Badge>;
+      case 'in progress':
+        return <Badge variant="outline" className="bg-blue-500/10 text-blue-500 hover:bg-blue-500/20">In Progress</Badge>;
       case 'cancelled':
-        return "bg-red-100 text-red-800";
+        return <Badge variant="destructive">Cancelled</Badge>;
       default:
-        return "bg-gray-100 text-gray-800";
+        return <Badge>{status}</Badge>;
     }
   };
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="p-6 space-y-6 max-w-[1200px] mx-auto">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold tracking-tight">Transactions</h1>
-        <Button className="gap-1">
-          <Plus size={16} />
-          New Transaction
-        </Button>
+        <h1 className="text-xl font-normal tracking-tight">Transactions</h1>
+        <div className="flex space-x-2">
+          <Button variant="outline" size="sm" className="gap-2">
+            <Download size={16} />
+            Export
+          </Button>
+          <Button 
+            size="sm"
+            className="gap-2"
+            onClick={() => navigate('/transactions/new')}
+          >
+            <Plus size={16} />
+            Add Transaction
+          </Button>
+        </div>
       </div>
       
-      <div className="flex flex-wrap gap-4 items-center justify-between">
-        <div className="flex items-center w-full sm:w-auto">
-          <div className="relative w-full sm:w-64">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+      <Card className="p-4">
+        <form onSubmit={handleSearch} className="flex flex-wrap gap-4">
+          <div className="flex-1 min-w-[200px]">
             <Input 
-              placeholder="Search transactions..." 
-              className="pl-10"
+              placeholder="Search by property, agent..." 
+              className="w-full h-9" 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-        </div>
-        
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="gap-1">
+          <Button variant="outline" size="sm" className="gap-2">
             <Filter size={16} />
-            Filter
+            Filters
           </Button>
-          <Button variant="outline" size="sm" className="gap-1">
-            <ArrowUpDown size={16} />
-            Sort
-          </Button>
-        </div>
-      </div>
+          <Button size="sm" type="submit">Search</Button>
+        </form>
+      </Card>
       
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Transactions</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
+      <Card className="overflow-hidden">
+        {isLoading ? (
+          <div className="p-6 space-y-4">
+            {Array(5).fill(0).map((_, index) => (
+              <div key={index} className="flex items-center space-x-4">
+                <Skeleton className="h-12 w-12 rounded-full" />
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-[250px]" />
+                  <Skeleton className="h-4 w-[200px]" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : isError ? (
+          <div className="p-6 text-center">
+            <p className="text-red-500">Error loading transactions. Please try again.</p>
+          </div>
+        ) : transactions.length === 0 ? (
+          <div className="p-6 text-center">
+            <p className="text-muted-foreground">No transactions found.</p>
+            <Button 
+              className="mt-4"
+              onClick={() => navigate('/transactions/new')}
+            >
+              Create your first transaction
+            </Button>
+          </div>
+        ) : (
+          <>
+            <table className="clean-table">
               <thead>
-                <tr className="border-b">
-                  <th className="text-left py-3 px-4 font-medium">ID</th>
-                  <th className="text-left py-3 px-4 font-medium">Property</th>
-                  <th className="text-left py-3 px-4 font-medium">Date</th>
-                  <th className="text-left py-3 px-4 font-medium">Client</th>
-                  <th className="text-right py-3 px-4 font-medium">Amount</th>
-                  <th className="text-center py-3 px-4 font-medium">Status</th>
-                  <th className="text-right py-3 px-4 font-medium">Actions</th>
+                <tr>
+                  <th>
+                    <div className="flex items-center">
+                      Date <ArrowUpDown size={14} className="ml-1" />
+                    </div>
+                  </th>
+                  <th>Property</th>
+                  <th>Agent</th>
+                  <th>
+                    <div className="flex items-center">
+                      Price <ArrowUpDown size={14} className="ml-1" />
+                    </div>
+                  </th>
+                  <th>
+                    <div className="flex items-center">
+                      Commission <ArrowUpDown size={14} className="ml-1" />
+                    </div>
+                  </th>
+                  <th>Status</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
-                {transactionsData.map((transaction) => (
-                  <tr key={transaction.id} className="border-b hover:bg-muted/50">
-                    <td className="py-3 px-4">{transaction.id}</td>
-                    <td className="py-3 px-4">{transaction.property}</td>
-                    <td className="py-3 px-4">{formatDate(transaction.date)}</td>
-                    <td className="py-3 px-4">{transaction.client}</td>
-                    <td className="py-3 px-4 text-right">{formatCurrency(transaction.amount)}</td>
-                    <td className="py-3 px-4">
-                      <div className="flex justify-center">
-                        <Badge className={getStatusColor(transaction.status)}>
-                          {transaction.status}
-                        </Badge>
+                {transactions.map((transaction) => (
+                  <tr 
+                    key={transaction.id}
+                    className="cursor-pointer"
+                    onClick={() => navigate(`/transactions/${transaction.id}`)}
+                  >
+                    <td>
+                      {new Date(transaction.date).toLocaleDateString()}
+                    </td>
+                    <td>
+                      <div>
+                        <div className="font-medium">{transaction.property?.title}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {transaction.property?.address?.city}, {transaction.property?.address?.state}
+                        </div>
                       </div>
                     </td>
-                    <td className="py-3 px-4 text-right">
+                    <td>
+                      {transaction.agent?.name}
+                    </td>
+                    <td className="font-medium">
+                      ${transaction.price?.toLocaleString()}
+                    </td>
+                    <td className="font-medium">
+                      ${transaction.commission.toLocaleString()}
+                    </td>
+                    <td>
+                      {getStatusBadge(transaction.status)}
+                    </td>
+                    <td>
                       <Button 
                         variant="ghost" 
                         size="sm"
-                        className="h-8 w-8 p-0"
-                        onClick={() => navigate(`/transactions/${transaction.id}`)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/transactions/${transaction.id}/edit`);
+                        }}
                       >
-                        <Eye size={16} />
+                        Edit
                       </Button>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          </div>
-        </CardContent>
+            
+            {totalPages > 1 && (
+              <div className="p-4 border-t flex items-center justify-between">
+                <div className="text-sm text-muted-foreground">
+                  Showing {currentPage * 10 + 1} to {Math.min((currentPage + 1) * 10, totalTransactions)} of {totalTransactions} transactions
+                </div>
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    disabled={currentPage === 0}
+                    onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
+                  >
+                    Previous
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    disabled={currentPage >= totalPages - 1}
+                    onClick={() => setCurrentPage(prev => Math.min(totalPages - 1, prev + 1))}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </Card>
     </div>
   );

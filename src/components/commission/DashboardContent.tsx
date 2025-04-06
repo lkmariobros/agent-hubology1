@@ -3,13 +3,20 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import CommissionBreakdown from './CommissionBreakdown';
+import CommissionHistory from './CommissionHistory';
 import CommissionTiers from './CommissionTiers';
-import { Progress } from "@/components/ui/progress";
+import CommissionForecastChart from './CommissionForecastChart';
+import CommissionNotificationFeed from './CommissionNotificationFeed';
+import PaymentScheduleDetail from './PaymentScheduleDetail';
+import useAuth from '@/hooks/useAuth';
+import { useForecastCalculation } from '@/hooks/useForecastCalculation';
+import { usePaymentSchedules } from '@/hooks/usePaymentSchedules';
+import { AgentWithHierarchy, CommissionHistory as CommissionHistoryType, CommissionTier } from '@/types';
 
 interface DashboardContentProps {
-  commissionTiers: any[];
-  commissions: any[];
-  agentHierarchy: any;
+  commissionTiers: CommissionTier[];
+  commissions: CommissionHistoryType[];
+  agentHierarchy: AgentWithHierarchy;
 }
 
 const DashboardContent: React.FC<DashboardContentProps> = ({ 
@@ -17,17 +24,13 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
   commissions,
   agentHierarchy
 }) => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
+  const { forecastSummary, generateForecast, isLoadingSummary } = useForecastCalculation(user?.id);
+  const { paymentSchedules } = usePaymentSchedules();
   
-  // Format currency
-  const formatCurrency = (amount?: number): string => {
-    if (amount === undefined) return '$0';
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      maximumFractionDigits: 0
-    }).format(amount);
-  };
+  // Get the default payment schedule for visualization
+  const defaultSchedule = paymentSchedules?.find(schedule => schedule.isDefault);
   
   return (
     <div className="space-y-6">
@@ -47,116 +50,82 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
                   <CardTitle>Commission History</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {commissions.map((commission) => (
-                    <div key={commission.id} className="flex items-center justify-between p-3 mb-2 hover:bg-muted/50 rounded-lg">
-                      <div className="flex items-center space-x-4">
-                        <div className="h-9 w-9 rounded-full bg-muted flex items-center justify-center">
-                          <span className="text-lg font-medium">$</span>
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium">{commission.property.title}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {new Date(commission.date).toLocaleDateString()} • {commission.property.location}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center">
-                        <div className="text-right mr-4">
-                          <p className="text-sm font-medium">{formatCurrency(commission.amount)}</p>
-                          <span className={`text-xs px-2 py-0.5 rounded-full ${
-                            commission.type === 'override' ? 'bg-purple-100 text-purple-600' : 'bg-green-100 text-green-600'
-                          }`}>
-                            {commission.type === 'override' ? 'Override' : 'Personal'}
-                            {commission.source && ` • ${commission.source}`}
-                          </span>
-                        </div>
-                        <button className="text-muted-foreground hover:text-foreground">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M5 12h14M12 5l7 7-7 7"/>
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                  <button className="w-full mt-4 py-2 border rounded-md text-sm hover:bg-muted">
-                    View All Commissions
-                  </button>
+                  <CommissionHistory commissions={commissions} />
                 </CardContent>
               </Card>
             </div>
             
             <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Commission Breakdown</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center py-3 border-b">
-                      <span className="font-medium">Personal Sales Commission</span>
-                      <span className="text-xl font-bold">{formatCurrency(agentHierarchy.personalCommission)}</span>
-                    </div>
-                    <div className="flex justify-between items-center py-3 border-b">
-                      <span className="font-medium">Override Commission</span>
-                      <span className="text-xl font-bold">{formatCurrency(agentHierarchy.overrideCommission)}</span>
-                    </div>
-                    <div className="flex justify-between items-center py-3">
-                      <span className="font-medium">Total Commission (YTD)</span>
-                      <span className="text-2xl font-bold">{formatCurrency(agentHierarchy.totalCommission)}</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <CommissionBreakdown 
+                personalCommission={agentHierarchy.personalCommission} 
+                overrideCommission={agentHierarchy.overrideCommission} 
+                totalCommission={agentHierarchy.totalCommission} 
+              />
               
-              <Card>
-                <CardHeader>
-                  <CardTitle>Commission Tiers</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-6">
-                    <div>
-                      <div className="flex justify-between mb-2">
-                        <div>
-                          <p className="font-medium">Current Tier</p>
-                          <h3 className="text-2xl font-bold">Silver</h3>
-                        </div>
-                        <div className="flex h-14 w-14 items-center justify-center rounded-full">
-                          <div className="text-center">
-                            <span className="text-2xl font-bold">25%</span>
-                            <p className="text-xs text-muted-foreground">Rate</p>
-                          </div>
-                        </div>
-                      </div>
-                      <p className="text-xs text-muted-foreground mb-2">Progress to next tier</p>
-                      <Progress value={100} className="h-2" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <CommissionTiers 
+                tiers={commissionTiers} 
+                currentTier="Silver" 
+                salesVolume={agentHierarchy.salesVolume} 
+              />
             </div>
           </div>
         </TabsContent>
         
         <TabsContent value="forecast" className="pt-4">
-          <Card className="p-8 text-center">
-            <p className="text-muted-foreground">Forecast content will be displayed here</p>
-          </Card>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <CommissionForecastChart forecastData={forecastSummary} />
+            </div>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Forecast Summary</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {forecastSummary.slice(0, 6).map((month, index) => (
+                    <div key={index} className="flex justify-between items-center border-b pb-2 last:border-0">
+                      <span>{month.month}</span>
+                      <span className="font-medium">{formatCurrency(month.total_amount)}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
         
         <TabsContent value="schedules" className="pt-4">
-          <Card className="p-8 text-center">
-            <p className="text-muted-foreground">Payment schedules content will be displayed here</p>
-          </Card>
+          {defaultSchedule && (
+            <PaymentScheduleDetail 
+              schedule={defaultSchedule} 
+              commissionAmount={10000} // Example commission amount
+            />
+          )}
+          
+          {!defaultSchedule && (
+            <Card className="p-8 text-center">
+              <p className="text-muted-foreground">No payment schedules available</p>
+            </Card>
+          )}
         </TabsContent>
         
         <TabsContent value="notifications" className="pt-4">
-          <Card className="p-8 text-center">
-            <p className="text-muted-foreground">Notifications will be displayed here</p>
-          </Card>
+          <CommissionNotificationFeed limit={10} />
         </TabsContent>
       </Tabs>
     </div>
   );
+};
+
+// Helper function for formatting currency
+const formatCurrency = (amount?: number): string => {
+  if (amount === undefined) return '$0.00';
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2
+  }).format(amount);
 };
 
 export default DashboardContent;

@@ -1,183 +1,155 @@
 
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
 
-type UploadOptions = {
+export interface UploadOptions {
   bucket: string;
   path?: string;
   maxSizeMB?: number;
   acceptedFileTypes?: string[];
-  upsert?: boolean;
-};
+}
 
-export function useStorageUpload() {
+export interface UploadResult {
+  path: string;
+  url: string;
+  id?: string;
+}
+
+export const useStorageUpload = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<Error | null>(null);
-  const [storageStatus, setStorageStatus] = useState<'checking' | 'available' | 'unavailable'>('checking');
-  const checkInProgress = useRef(false);
 
-  // Function to verify storage buckets exist and are accessible
-  const checkStorageBuckets = async (bucketNames: string[]): Promise<boolean> => {
-    // Prevent concurrent checks
-    if (checkInProgress.current) {
-      console.log('Storage bucket check already in progress, skipping...');
-      return storageStatus === 'available';
-    }
-    
-    try {
-      checkInProgress.current = true;
-      setStorageStatus('checking');
-      
-      console.log('Checking storage buckets:', bucketNames);
-      
-      // Check if buckets exist
-      const { data: buckets, error } = await supabase.storage.listBuckets();
-      
-      if (error) {
-        console.error('Error checking buckets:', error);
-        setStorageStatus('unavailable');
-        return false;
-      }
-      
-      const existingBuckets = buckets?.map(b => b.name) || [];
-      console.log('Available buckets:', existingBuckets);
-      
-      // Check if all required buckets exist
-      const allBucketsExist = bucketNames.every(bucket => existingBuckets.includes(bucket));
-      
-      if (!allBucketsExist) {
-        const missingBuckets = bucketNames.filter(b => !existingBuckets.includes(b));
-        console.warn('Missing buckets:', missingBuckets);
-      }
-      
-      setStorageStatus(allBucketsExist ? 'available' : 'unavailable');
-      return allBucketsExist;
-    } catch (err) {
-      console.error('Error verifying storage buckets:', err);
-      setStorageStatus('unavailable');
-      return false;
-    } finally {
-      checkInProgress.current = false;
-    }
-  };
-
-  const uploadFile = async (file: File, options: UploadOptions): Promise<string> => {
-    const { bucket, path = '', maxSizeMB = 10, acceptedFileTypes = [], upsert = false } = options;
-    
-    // Reset state
+  /**
+   * Upload a single file to Supabase Storage
+   */
+  const uploadFile = async (
+    file: File, 
+    options: UploadOptions
+  ): Promise<UploadResult> => {
     setIsUploading(true);
     setProgress(0);
     setError(null);
     
     try {
-      console.log('Starting upload process for file:', file.name);
+      // Check if bucket exists
+      const { data: buckets } = await supabase.storage.listBuckets();
+      const bucketExists = buckets?.some(b => b.name === options.bucket);
       
-      // Check bucket accessibility first
-      const bucketExists = await checkStorageBuckets([bucket]);
       if (!bucketExists) {
-        throw new Error(`Storage bucket '${bucket}' is not accessible. Please check your storage configuration.`);
+        throw new Error(`Bucket ${options.bucket} does not exist`);
       }
       
       // Validate file size
-      const fileSizeInMB = file.size / (1024 * 1024);
-      if (fileSizeInMB > maxSizeMB) {
-        throw new Error(`File size exceeds the maximum limit of ${maxSizeMB}MB`);
+      if (options.maxSizeMB && file.size > options.maxSizeMB * 1024 * 1024) {
+        throw new Error(`File size exceeds maximum allowed size of ${options.maxSizeMB}MB`);
       }
       
-      // Validate file type if specified
-      if (acceptedFileTypes.length > 0 && !acceptedFileTypes.includes(file.type)) {
-        throw new Error(`File type not supported. Accepted types: ${acceptedFileTypes.join(', ')}`);
+      // Validate file type
+      if (options.acceptedFileTypes && !options.acceptedFileTypes.includes(file.type)) {
+        throw new Error(`File type ${file.type} is not supported. Supported types: ${options.acceptedFileTypes.join(', ')}`);
       }
       
-      // Generate a unique file name to avoid collisions
+      // Generate a unique file path
       const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
-      const filePath = path ? `${path}/${fileName}` : fileName;
+      const filePath = `${options.path || ''}${options.path ? '/' : ''}${uuidv4()}.${fileExt}`;
       
-      console.log('Uploading to path:', filePath);
-      
-      // Simulate progress (in real implementation, this would use upload events)
-      const progressInterval = setInterval(() => {
-        setProgress(prev => {
-          const nextProgress = Math.min(prev + 10, 90);
-          return nextProgress;
-        });
-      }, 300);
-      
-      // Upload the file to Supabase Storage
-      console.log('Executing upload to Supabase bucket:', bucket);
-      const { data, error } = await supabase.storage
-        .from(bucket)
+      // Upload the file
+      const { data, error: uploadError } = await supabase.storage
+        .from(options.bucket)
         .upload(filePath, file, {
           cacheControl: '3600',
-          upsert: upsert,
+          upsert: false
         });
-      
-      clearInterval(progressInterval);
-      
-      if (error) {
-        console.error('Supabase upload error:', error);
         
-        // Check for specific error types and provide user-friendly messages
-        if (error.message.includes('storage/object-too-large')) {
-          throw new Error(`File is too large. Maximum size is ${maxSizeMB}MB.`);
-        } else if (error.message.includes('permission denied')) {
-          throw new Error('You do not have permission to upload files to this storage bucket.');
-        } else {
-          throw error;
-        }
+      if (uploadError) {
+        throw uploadError;
       }
       
-      console.log('Upload successful, data:', data);
-      
-      // Get public URL for the uploaded file
+      // Get the public URL
       const { data: { publicUrl } } = supabase.storage
-        .from(bucket)
-        .getPublicUrl(data?.path || filePath);
-      
-      console.log('Generated public URL:', publicUrl);
+        .from(options.bucket)
+        .getPublicUrl(filePath);
       
       setProgress(100);
-      return publicUrl;
-    } catch (err) {
-      const error = err as Error;
-      setError(error);
-      console.error('File upload error:', error.message);
-      
-      // Return a more specific error
-      throw error;
+      return { 
+        path: filePath,
+        url: publicUrl,
+        id: data?.id
+      };
+    } catch (err: any) {
+      const errorMessage = err.message || 'Failed to upload file';
+      setError(err);
+      throw new Error(errorMessage);
     } finally {
       setIsUploading(false);
     }
   };
   
+  /**
+   * Upload multiple files to Supabase Storage
+   */
+  const uploadFiles = async (
+    files: File[], 
+    options: UploadOptions
+  ): Promise<UploadResult[]> => {
+    setIsUploading(true);
+    setProgress(0);
+    setError(null);
+    
+    try {
+      const results: UploadResult[] = [];
+      let completed = 0;
+      
+      for (const file of files) {
+        try {
+          const result = await uploadFile(file, options);
+          results.push(result);
+        } catch (err) {
+          console.error('Error uploading file:', err);
+          // Continue with next file
+        }
+        
+        completed++;
+        setProgress(Math.round((completed / files.length) * 100));
+      }
+      
+      return results;
+    } catch (err: any) {
+      setError(err);
+      toast.error('Some files failed to upload');
+      throw err;
+    } finally {
+      setIsUploading(false);
+    }
+  };
+  
+  /**
+   * Delete a file from Supabase Storage
+   */
   const deleteFile = async (bucket: string, path: string): Promise<void> => {
     try {
       const { error } = await supabase.storage
         .from(bucket)
         .remove([path]);
-      
-      if (error) throw error;
-      
-      toast.success('File deleted successfully');
-    } catch (err) {
-      const error = err as Error;
-      setError(error);
-      console.error('File deletion error:', error.message);
-      toast.error(`Deletion failed: ${error.message}`);
-      throw error;
+        
+      if (error) {
+        throw error;
+      }
+    } catch (err: any) {
+      toast.error(`Failed to delete file: ${err.message}`);
+      throw err;
     }
   };
   
   return {
     uploadFile,
+    uploadFiles,
     deleteFile,
-    checkStorageBuckets,
     isUploading,
     progress,
-    error,
-    storageStatus
+    error
   };
-}
+};

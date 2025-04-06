@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -7,65 +8,55 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PropertyTable } from '@/components/property/PropertyTable';
 import { PropertyGrid } from '@/components/property/PropertyGrid';
-import { useProperties } from '@/hooks/useProperties';
+import { useProperties, PropertyFilters } from '@/hooks/useProperties';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { mapPropertyData } from '@/utils/propertyUtils';
 import { Property } from '@/types';
+import { Switch } from '@/components/ui/switch';
 
-// Utility function to map API data to the format expected by components
-const mapPropertyData = (property: any): Property => {
-  return {
-    id: property.id,
-    title: property.title,
-    description: property.description || '',
-    price: Number(property.price) || 0,
-    address: {
-      street: property.street || '',
-      city: property.city || '',
-      state: property.state || '',
-      zip: property.zip || '',
-      country: property.country || ''
-    },
-    type: property.property_types?.name?.toLowerCase() || 'residential',
-    subtype: property.subtype || '',
-    features: property.features || [],
-    bedrooms: property.bedrooms || 0,
-    bathrooms: property.bathrooms || 0,
-    builtUpArea: property.built_up_area || 0,
-    area: property.area || property.built_up_area || 0,
-    images: property.property_images?.map((img: any) => img.storage_path) || [],
-    status: property.property_statuses?.name?.toLowerCase() || 'available',
-    listedBy: property.listed_by || 'agency',
-    agent: {
-      id: property.agent_id || '',
-      name: 'Agent Name', // This would come from a join in a real app
-      firstName: 'Unknown',
-      lastName: 'Agent',
-      email: 'agent@example.com',
-      phone: '123-456-7890'
-    },
-    createdAt: property.created_at || new Date().toISOString(),
-    updatedAt: property.updated_at || new Date().toISOString(),
-    size: property.built_up_area || 0
-  };
-};
-
-const AdminProperties = () => {
+const Properties = () => {
   const [page, setPage] = useState(1);
   const [pageSize] = useState(12);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedPropertyType, setSelectedPropertyType] = useState('all');
+  const [featuredOnly, setFeaturedOnly] = useState(false);
   
   // Apply filters
-  const filters = {
+  const filters: PropertyFilters = {
     ...(searchTerm && { title: searchTerm }),
-    ...(selectedPropertyType !== 'all' && { propertyType: selectedPropertyType })
+    ...(selectedPropertyType !== 'all' && { propertyType: selectedPropertyType }),
+    ...(featuredOnly && { featured: true })
   };
   
   const { data, isLoading, error } = useProperties(page, pageSize, filters);
   const propertiesRaw = data?.properties || [];
   
-  // Map the API data structure to the format expected by components
-  const properties: Property[] = propertiesRaw.map(property => mapPropertyData(property));
+  // Map the API data to ensure correct types
+  const properties: Property[] = propertiesRaw.map(property => {
+    // Ensure each property conforms to the Property interface
+    return {
+      id: property.id || '',
+      title: property.title || '',
+      description: property.description || '',
+      price: Number(property.price) || 0,
+      type: property.propertyType?.toLowerCase() || 'residential',
+      bedrooms: Number(property.bedrooms) || 0,
+      bathrooms: Number(property.bathrooms) || 0,
+      builtUpArea: Number(property.builtUpArea) || 0,
+      status: property.status || 'available',
+      address: {
+        street: property.location?.street || '',
+        city: property.location?.city || '',
+        state: property.location?.state || '',
+        zip: property.location?.zip || '',
+        country: property.location?.country || ''
+      },
+      features: property.features || [],
+      images: property.images || [],
+      createdAt: property.createdAt || new Date().toISOString(),
+      updatedAt: property.updatedAt || new Date().toISOString()
+    };
+  });
 
   // Handle property type change
   const handlePropertyTypeChange = (value: string) => {
@@ -78,6 +69,12 @@ const AdminProperties = () => {
     e.preventDefault();
     // The search term state is already set via onChange, so just prevent default form submission
     setPage(1); // Reset to first page when searching
+  };
+
+  // Handle featured toggle
+  const handleFeaturedToggle = (checked: boolean) => {
+    setFeaturedOnly(checked);
+    setPage(1); // Reset to first page when toggling
   };
 
   return (
@@ -112,6 +109,7 @@ const AdminProperties = () => {
               <Button variant="outline" type="button" onClick={() => {
                 setSearchTerm('');
                 setSelectedPropertyType('all');
+                setFeaturedOnly(false);
                 setPage(1);
               }}>
                 Clear
@@ -145,6 +143,17 @@ const AdminProperties = () => {
                 <SelectItem value="Land">Land</SelectItem>
               </SelectContent>
             </Select>
+            
+            <div className="flex items-center space-x-2 ml-4">
+              <Switch 
+                id="featured-only" 
+                checked={featuredOnly} 
+                onCheckedChange={handleFeaturedToggle} 
+              />
+              <label htmlFor="featured-only" className="text-sm">
+                Featured Only
+              </label>
+            </div>
           </div>
         </div>
         
@@ -207,4 +216,4 @@ const AdminProperties = () => {
   );
 };
 
-export default AdminProperties;
+export default Properties;

@@ -1,4 +1,3 @@
-
 import { z } from 'zod';
 
 // Common property fields validation schema
@@ -41,9 +40,6 @@ export const commonPropertySchema = z.object({
     reserved: z.number().int().min(0).default(0),
     sold: z.number().int().min(0).default(0)
   }).optional(),
-  
-  // Common features
-  propertyFeatures: z.array(z.string()).optional(),
 });
 
 // Residential property specific fields
@@ -52,7 +48,6 @@ export const residentialPropertySchema = commonPropertySchema.extend({
   bathrooms: z.number().min(0),
   builtUpArea: z.number().min(0),
   furnishingStatus: z.enum(['Unfurnished', 'Partially Furnished', 'Fully Furnished']),
-  constructionYear: z.number().int().min(1900).max(new Date().getFullYear() + 5).optional(),
 });
 
 // Commercial property specific fields
@@ -76,7 +71,6 @@ export const landPropertySchema = commonPropertySchema.extend({
   zoning: z.string().optional(),
   roadFrontage: z.number().min(0).optional(),
   topography: z.string().optional(),
-  freehold: z.boolean().optional(),
 });
 
 // Owner contact type
@@ -119,15 +113,11 @@ export type PropertyFormData = {
   // Stock information for development properties
   stock?: PropertyStock;
   
-  // Property features
-  propertyFeatures?: string[];
-  
   // Residential specific fields
   bedrooms?: number;
   bathrooms?: number;
   builtUpArea?: number;
   furnishingStatus?: 'Unfurnished' | 'Partially Furnished' | 'Fully Furnished';
-  constructionYear?: number;
   
   // Commercial specific fields
   floorArea?: number;
@@ -145,7 +135,6 @@ export type PropertyFormData = {
   zoning?: string;
   roadFrontage?: number;
   topography?: string;
-  freehold?: boolean;
   
   // Additional properties for update operations
   images?: PropertyImage[];

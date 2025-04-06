@@ -1,7 +1,7 @@
 
 import React, { useEffect } from 'react';
 import { UseFormReturn } from 'react-hook-form';
-import { Building, Home, Factory, Map } from 'lucide-react';
+import { Building, Home } from 'lucide-react';
 import { PropertyFormValues } from '@/types';
 import { propertySubtypes } from './validation';
 import {
@@ -62,11 +62,11 @@ const PropertyEssentialInfo: React.FC<PropertyEssentialInfoProps> = ({ form, nex
                   Commercial
                 </ToggleGroupItem>
                 <ToggleGroupItem value="industrial" className="gap-2">
-                  <Factory className="h-4 w-4" />
+                  <Building className="h-4 w-4" />
                   Industrial
                 </ToggleGroupItem>
                 <ToggleGroupItem value="land" className="gap-2">
-                  <Map className="h-4 w-4" />
+                  <Building className="h-4 w-4" />
                   Land
                 </ToggleGroupItem>
               </ToggleGroup>
@@ -97,15 +97,15 @@ const PropertyEssentialInfo: React.FC<PropertyEssentialInfoProps> = ({ form, nex
           <FormLabel>Property Subtype *</FormLabel>
           <select
             className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-            value={propertySubtypes[propertyType as keyof typeof propertySubtypes]?.[0]?.id || ''}
+            value={propertySubtypes[propertyType as keyof typeof propertySubtypes]?.[0] || ''}
             onChange={(e) => {
               // Handle subtype change without using form.setValue
               console.log("Selected subtype:", e.target.value);
             }}
           >
-            {propertySubtypes[propertyType as keyof typeof propertySubtypes]?.map((subtype) => (
-              <option key={subtype.id} value={subtype.id}>
-                {subtype.label}
+            {propertySubtypes[propertyType as keyof typeof propertySubtypes]?.map((subtype: string) => (
+              <option key={subtype} value={subtype}>
+                {subtype}
               </option>
             ))}
           </select>
