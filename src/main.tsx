@@ -1,6 +1,6 @@
 
 import { createRoot } from 'react-dom/client';
-import App from './App.tsx';
+import Router from './Router.tsx';
 import './index.css';
 import { initSentry } from './lib/sentry';
 import { Toaster } from './components/ui/sonner';
@@ -26,7 +26,7 @@ if (!rootElement) {
     <ThemeProvider>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
-          <App />
+          <Router />
           {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
         </TooltipProvider>
         <Toaster 
