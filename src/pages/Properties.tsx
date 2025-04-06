@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Plus, Search, Filter, SortDesc, Loader2 } from 'lucide-react';
+import { Plus, Search, Filter, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -11,8 +11,8 @@ import { PropertyGrid } from '@/components/property/PropertyGrid';
 import { useProperties, PropertyFilters } from '@/hooks/useProperties';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { mapPropertyData } from '@/utils/propertyUtils';
-import { Property } from '@/types';
 import { Switch } from '@/components/ui/switch';
+import { toast } from 'sonner';
 
 const Properties = () => {
   const [page, setPage] = useState(1);
@@ -29,34 +29,12 @@ const Properties = () => {
   };
   
   const { data, isLoading, error } = useProperties(page, pageSize, filters);
-  const propertiesRaw = data?.properties || [];
   
   // Map the API data to ensure correct types
-  const properties: Property[] = propertiesRaw.map(property => {
-    // Ensure each property conforms to the Property interface
-    return {
-      id: property.id || '',
-      title: property.title || '',
-      description: property.description || '',
-      price: Number(property.price) || 0,
-      type: property.propertyType?.toLowerCase() || 'residential',
-      bedrooms: Number(property.bedrooms) || 0,
-      bathrooms: Number(property.bathrooms) || 0,
-      builtUpArea: Number(property.builtUpArea) || 0,
-      status: property.status || 'available',
-      address: {
-        street: property.location?.street || '',
-        city: property.location?.city || '',
-        state: property.location?.state || '',
-        zip: property.location?.zip || '',
-        country: property.location?.country || ''
-      },
-      features: property.features || [],
-      images: property.images || [],
-      createdAt: property.createdAt || new Date().toISOString(),
-      updatedAt: property.updatedAt || new Date().toISOString()
-    };
-  });
+  const properties = React.useMemo(() => {
+    if (!data?.properties) return [];
+    return data.properties.map(property => mapPropertyData(property));
+  }, [data?.properties]);
 
   // Handle property type change
   const handlePropertyTypeChange = (value: string) => {
@@ -77,9 +55,17 @@ const Properties = () => {
     setPage(1); // Reset to first page when toggling
   };
 
+  // Handle error display
+  React.useEffect(() => {
+    if (error) {
+      toast.error("Error loading properties. Please try again later.");
+      console.error("Properties loading error:", error);
+    }
+  }, [error]);
+
   return (
-    <div className="p-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
         <h1 className="text-3xl font-bold">Properties</h1>
         <Link to="/properties/new">
           <Button className="mt-3 sm:mt-0">
@@ -89,7 +75,7 @@ const Properties = () => {
         </Link>
       </div>
       
-      <Card className="mb-6">
+      <Card>
         <CardContent className="pt-6">
           <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">

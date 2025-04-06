@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { AppSidebar } from './AppSidebar';
-import { SidebarProvider, useSidebar } from "@/components/ui/sidebar";
+import { SidebarProvider, useSidebar, Sidebar, SidebarContent } from "@/components/ui/sidebar";
 import { Button } from '@/components/ui/button';
 import NavUtilities from './sidebar/NavUtilities';
 import PageBreadcrumb from './PageBreadcrumb';
@@ -17,7 +17,7 @@ const Header = () => {
   const { state, toggleSidebar } = useSidebar();
   
   return (
-    <div className="sticky top-0 z-10 bg-[#161920]">
+    <div className="sticky top-0 z-10 bg-[#161920] border-b border-border/10">
       {/* Breadcrumb and Navigation Section */}
       <div className="flex items-center justify-between px-6 py-3">
         <div className="flex items-center space-x-2">
@@ -25,7 +25,7 @@ const Header = () => {
             variant="ghost" 
             size="icon" 
             onClick={toggleSidebar} 
-            className="h-8 w-8 mr-1" 
+            className="h-8 w-8 mr-1 text-muted-foreground hover:text-foreground" 
             aria-label="Toggle sidebar"
           >
             {state === "expanded" ? (
@@ -40,9 +40,6 @@ const Header = () => {
         {/* Utilities section */}
         <NavUtilities />
       </div>
-      
-      {/* Divider */}
-      <div className="border-b border-border"></div>
     </div>
   );
 };

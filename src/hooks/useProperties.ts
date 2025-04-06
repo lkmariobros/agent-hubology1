@@ -1,408 +1,100 @@
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
-import { PropertyFormData } from '@/types/property-form';
-import { normalizeUuid, isValidUuid } from '@/utils/uuidUtils';
-import { dbLogger } from '@/utils/dbLogger';
 
-// Define the filters interface 
 export interface PropertyFilters {
-  propertyType?: string;
-  transactionType?: string;
-  status?: string;
-  minPrice?: number;
-  maxPrice?: number;
   title?: string;
-  bedrooms?: number;
-  bathrooms?: number;
-  agentId?: string;
+  propertyType?: string;
   featured?: boolean;
-  sortBy?: string;
-  sortDirection?: 'asc' | 'desc';
-  createdAfter?: string;
+  status?: string;
+  transactionType?: string;
+  priceMin?: number;
+  priceMax?: number;
   [key: string]: any;
 }
 
-// Get all properties with filtering and pagination
-export function useProperties(page = 1, pageSize = 10, filters: PropertyFilters = {}) {
-  return useQuery({
-    queryKey: ['properties', page, pageSize, filters],
-    queryFn: async () => {
-      dbLogger.log('Fetching properties with filters', filters, {
-        table: 'enhanced_properties',
-        operation: 'select'
-      });
+export const useProperties = (page: number = 1, pageSize: number = 10, filters: PropertyFilters = {}) => {
+  const fetchProperties = async () => {
+    try {
+      console.log('Fetching properties with filters:', filters);
+      // Calculate pagination values
+      const from = (page - 1) * pageSize;
+      const to = from + pageSize - 1;
       
-      // Start with the base query
+      // Start building the query
       let query = supabase
         .from('enhanced_properties')
         .select(`
           *,
-          property_types(name),
-          transaction_types(name),
-          property_statuses(name),
-          property_images(id, storage_path, is_cover, display_order)
-        `);
-        
-      // Apply sort order - default to newest first
-      const sortBy = filters.sortBy || 'created_at';
-      const sortDirection = filters.sortDirection || 'desc';
-      query = query.order(sortBy, { ascending: sortDirection === 'asc' });
-        
-      // Apply filters if provided
-      if (filters) {
-        // Property type filter
-        if (filters.propertyType && filters.propertyType !== 'all') {
-          // Get the property type ID first
-          const { data: propertyTypeData } = await supabase
-            .from('property_types')
-            .select('id')
-            .eq('name', filters.propertyType)
-            .single();
-            
-          if (propertyTypeData) {
-            query = query.eq('property_type_id', propertyTypeData.id);
-          }
-        }
-        
-        // Transaction type filter
-        if (filters.transactionType && filters.transactionType !== 'all') {
-          // Get the transaction type ID first
-          const { data: transactionTypeData } = await supabase
-            .from('transaction_types')
-            .select('id')
-            .eq('name', filters.transactionType)
-            .single();
-            
-          if (transactionTypeData) {
-            query = query.eq('transaction_type_id', transactionTypeData.id);
-          }
-        }
-        
-        // Status filter
-        if (filters.status && filters.status !== 'all') {
-          // Get the status ID first
-          const { data: statusData } = await supabase
-            .from('property_statuses')
-            .select('id')
-            .eq('name', filters.status)
-            .single();
-            
-          if (statusData) {
-            query = query.eq('status_id', statusData.id);
-          }
-        }
-        
-        // Handle price range filters
-        if (filters.minPrice) {
-          query = query.gte('price', filters.minPrice);
-        }
-        
-        if (filters.maxPrice) {
-          query = query.lte('price', filters.maxPrice);
-        }
-        
-        // Handle title search
-        if (filters.title) {
-          query = query.ilike('title', `%${filters.title}%`);
-        }
-        
-        // Filter by number of bedrooms
-        if (filters.bedrooms) {
-          query = query.gte('bedrooms', filters.bedrooms);
-        }
-        
-        // Filter by number of bathrooms
-        if (filters.bathrooms) {
-          query = query.gte('bathrooms', filters.bathrooms);
-        }
-        
-        // Filter by agent
-        if (filters.agentId) {
-          query = query.eq('agent_id', filters.agentId);
-        }
-        
-        // Filter for featured properties
-        if (filters.featured) {
-          query = query.eq('featured', true);
-        }
-        
-        // Filter by creation date
-        if (filters.createdAfter) {
-          query = query.gte('created_at', filters.createdAfter);
-        }
+          property_types(*),
+          transaction_types(*),
+          property_statuses(*),
+          property_images(*)
+        `, { count: 'exact' });
+      
+      // Apply filters if they exist
+      if (filters.title) {
+        query = query.ilike('title', `%${filters.title}%`);
       }
+      
+      if (filters.propertyType && filters.propertyType !== 'all') {
+        // Join to property_types and filter by name
+        query = query.eq('property_types.name', filters.propertyType);
+      }
+      
+      if (filters.featured !== undefined) {
+        query = query.eq('featured', filters.featured);
+      }
+      
+      if (filters.status && filters.status !== 'all') {
+        // Join to property_statuses and filter by name
+        query = query.eq('property_statuses.name', filters.status);
+      }
+      
+      if (filters.transactionType && filters.transactionType !== 'all') {
+        // Join to transaction_types and filter by name
+        query = query.eq('transaction_types.name', filters.transactionType);
+      }
+      
+      if (filters.priceMin !== undefined) {
+        query = query.gte('price', filters.priceMin);
+      }
+      
+      if (filters.priceMax !== undefined) {
+        query = query.lte('price', filters.priceMax);
+      }
+      
+      // Order by creation date (newest first)
+      query = query.order('created_at', { ascending: false });
       
       // Apply pagination
-      query = query.range((page - 1) * pageSize, page * pageSize - 1);
+      query = query.range(from, to);
       
-      // Execute the query
-      const { data, error } = await query;
+      const { data, error, count } = await query;
       
       if (error) {
-        dbLogger.error('Error fetching properties', error, 'enhanced_properties', 'select');
+        console.error('Error fetching properties:', error);
+        toast.error(`Failed to load properties: ${error.message}`);
         throw error;
       }
       
-      // Also get the total count for pagination
-      const countQuery = supabase
-        .from('enhanced_properties')
-        .select('*', { count: 'exact', head: true });
-        
-      // Apply the same filters to the count query
-      if (filters) {
-        // Apply the same filters as above
-        // Property type filter
-        if (filters.propertyType && filters.propertyType !== 'all') {
-          // Get the property type ID first
-          const { data: propertyTypeData } = await supabase
-            .from('property_types')
-            .select('id')
-            .eq('name', filters.propertyType)
-            .single();
-            
-          if (propertyTypeData) {
-            countQuery.eq('property_type_id', propertyTypeData.id);
-          }
-        }
-        
-        // Handle all other filters the same way as the main query
-        // Handle price range filters
-        if (filters.minPrice) {
-          countQuery.gte('price', filters.minPrice);
-        }
-        
-        if (filters.maxPrice) {
-          countQuery.lte('price', filters.maxPrice);
-        }
-        
-        // Handle title search
-        if (filters.title) {
-          countQuery.ilike('title', `%${filters.title}%`);
-        }
-        
-        // Filter by number of bedrooms
-        if (filters.bedrooms) {
-          countQuery.gte('bedrooms', filters.bedrooms);
-        }
-        
-        // Filter by number of bathrooms
-        if (filters.bathrooms) {
-          countQuery.gte('bathrooms', filters.bathrooms);
-        }
-        
-        // Filter by agent
-        if (filters.agentId) {
-          countQuery.eq('agent_id', filters.agentId);
-        }
-        
-        // Filter for featured properties
-        if (filters.featured) {
-          countQuery.eq('featured', true);
-        }
-        
-        // Filter by creation date
-        if (filters.createdAfter) {
-          countQuery.gte('created_at', filters.createdAfter);
-        }
-      }
-      
-      const { count: totalCount, error: countError } = await countQuery;
-        
-      if (countError) {
-        dbLogger.error('Error fetching property count', countError, 'enhanced_properties', 'select');
-      }
-      
-      dbLogger.success(`Retrieved ${data?.length || 0} properties (total: ${totalCount || 0})`, null, 'enhanced_properties', 'select');
-      
-      return { 
-        properties: data || [], 
-        totalCount: totalCount || 0
+      return {
+        properties: data || [],
+        totalCount: count || 0
       };
+    } catch (err: any) {
+      console.error('Exception in useProperties:', err);
+      toast.error(`An error occurred: ${err.message || 'Unknown error'}`);
+      throw err;
     }
-  });
-}
-
-// Get a single property by ID
-export function useProperty(id: string, options = {}) {
+  };
+  
   return useQuery({
-    queryKey: ['property', id],
-    queryFn: async () => {
-      if (!id) return { success: false, message: 'No property ID provided', data: null };
-      
-      // Normalize the UUID format
-      const normalizedId = normalizeUuid(id);
-      
-      dbLogger.log(`Fetching property with ID: ${normalizedId}`, { id: normalizedId }, {
-        table: 'enhanced_properties',
-        operation: 'select'
-      });
-      
-      // Check if the ID is a valid UUID
-      const propertyIdIsValid = isValidUuid(normalizedId);
-      
-      if (!propertyIdIsValid) {
-        dbLogger.error('Invalid UUID format provided', { id: normalizedId }, 'enhanced_properties', 'select');
-        
-        // In development, handle this gracefully
-        if (process.env.NODE_ENV === 'development') {
-          return { 
-            success: false, 
-            message: 'Invalid UUID format - using mock data in development', 
-            data: null
-          };
-        }
-        
-        return { 
-          success: false, 
-          message: 'Invalid property ID format', 
-          data: null 
-        };
-      }
-      
-      try {
-        const { data, error } = await supabase
-          .from('enhanced_properties')
-          .select(`
-            *,
-            property_types(name),
-            transaction_types(name),
-            property_statuses(name),
-            property_images(id, storage_path, is_cover, display_order)
-          `)
-          .eq('id', normalizedId)
-          .single();
-          
-        if (error) {
-          dbLogger.error('Error fetching property', error, 'enhanced_properties', 'select');
-          return { success: false, message: error.message, data: null };
-        }
-        
-        dbLogger.success('Property retrieved successfully', { id: normalizedId }, 'enhanced_properties', 'select');
-        
-        return { 
-          success: true, 
-          message: 'Property retrieved successfully', 
-          data
-        };
-      } catch (err: any) {
-        dbLogger.error('Exception fetching property', err.message, 'enhanced_properties', 'select');
-        return { 
-          success: false, 
-          message: err.message, 
-          data: null
-        };
-      }
-    },
-    enabled: !!id,
-    ...options,
+    queryKey: ['properties', page, pageSize, filters],
+    queryFn: fetchProperties,
+    keepPreviousData: true,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    retry: 1
   });
-}
-
-// Create a new property
-export function useCreateProperty() {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: async (propertyData: Partial<PropertyFormData>) => {
-      // This function is now handled by the formSubmission.ts file
-      // which does all the property creation including image uploads
-      console.log('Property creation is handled by formSubmission.ts');
-      return { success: true };
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['properties'] });
-    },
-    onError: (error: Error) => {
-      toast.error(`Failed to create property: ${error.message}`);
-    },
-  });
-}
-
-// Update an existing property
-export function useUpdateProperty() {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: Partial<PropertyFormData> }) => {
-      console.log('Updating property with ID:', id, data);
-      
-      const { error } = await supabase
-        .from('enhanced_properties')
-        .update({
-          title: data.title,
-          description: data.description,
-          price: data.price,
-          // Add all other fields to update
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', id);
-        
-      if (error) {
-        console.error('Error updating property:', error);
-        throw error;
-      }
-      
-      return { success: true };
-    },
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['properties'] });
-      queryClient.invalidateQueries({ queryKey: ['property', variables.id] });
-      toast.success('Property updated successfully');
-    },
-    onError: (error: Error) => {
-      toast.error(`Failed to update property: ${error.message}`);
-    },
-  });
-}
-
-// Delete a property
-export function useDeleteProperty() {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: async (id: string) => {
-      console.log('Deleting property with ID:', id);
-      
-      // Delete associated images and documents first
-      const { error: imagesError } = await supabase
-        .from('property_images')
-        .delete()
-        .eq('property_id', id);
-        
-      if (imagesError) {
-        console.error('Error deleting property images:', imagesError);
-      }
-      
-      const { error: documentsError } = await supabase
-        .from('property_documents')
-        .delete()
-        .eq('property_id', id);
-        
-      if (documentsError) {
-        console.error('Error deleting property documents:', documentsError);
-      }
-      
-      // Then delete the property
-      const { error } = await supabase
-        .from('enhanced_properties')
-        .delete()
-        .eq('id', id);
-        
-      if (error) {
-        console.error('Error deleting property:', error);
-        throw error;
-      }
-      
-      return { success: true };
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['properties'] });
-      toast.success('Property deleted successfully');
-    },
-    onError: (error: Error) => {
-      toast.error(`Failed to delete property: ${error.message}`);
-    },
-  });
-}
+};
