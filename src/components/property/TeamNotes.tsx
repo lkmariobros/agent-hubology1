@@ -39,7 +39,7 @@ interface TeamNotesProps {
 }
 
 export const TeamNotes: React.FC<TeamNotesProps> = ({ 
-  notes, 
+  notes = [], // Default to empty array
   onAddNote,
   className = '',
   hideTitle = false // Default to showing the title
@@ -120,8 +120,10 @@ export const TeamNotes: React.FC<TeamNotesProps> = ({
             ))}
           </Timeline>
         ) : (
-          <div className="text-center py-4 text-sm text-muted-foreground">
-            No team notes yet
+          <div className="text-center py-12 text-sm text-muted-foreground">
+            <MessageSquare className="h-10 w-10 mx-auto mb-4 opacity-20" />
+            <p>No team notes yet</p>
+            <p className="text-xs mt-1">Add the first note to collaborate with your team</p>
           </div>
         )}
         
@@ -167,3 +169,5 @@ export const TeamNotes: React.FC<TeamNotesProps> = ({
     </Card>
   );
 };
+
+export default TeamNotes;

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import PropertyDetails from './PropertyDetails';
@@ -9,14 +9,14 @@ import { TeamNotes, TeamNote } from './TeamNotes';
 interface PropertyTabsSectionProps {
   property: any;
   owner: any;
-  notes: TeamNote[];
-  onAddNote: (note: Omit<TeamNote, 'id' | 'date'>) => void;
+  notes?: TeamNote[];
+  onAddNote?: (note: Omit<TeamNote, 'id' | 'date'>) => void;
 }
 
 const PropertyTabsSection: React.FC<PropertyTabsSectionProps> = ({ 
   property,
   owner,
-  notes, 
+  notes = [], // Default to empty array 
   onAddNote 
 }) => {
   return (
@@ -37,16 +37,7 @@ const PropertyTabsSection: React.FC<PropertyTabsSectionProps> = ({
           </TabsContent>
           
           <TabsContent value="owner">
-            <Card>
-              <CardHeader>
-                <CardTitle>Owner Information</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="max-w-md mx-auto md:mx-0">
-                  <PropertyOwnerInfo owner={owner} />
-                </div>
-              </CardContent>
-            </Card>
+            <PropertyOwnerInfo owner={owner} />
           </TabsContent>
           
           <TabsContent value="transactions">

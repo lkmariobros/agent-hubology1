@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useProperty } from '@/hooks/useProperties';
@@ -15,27 +16,6 @@ import { TeamNote } from '@/components/property/TeamNotes';
 import LoadingIndicator from '@/components/ui/loading-indicator';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-
-// Mock data for team notes
-const mockNotes: TeamNote[] = [{
-  id: 1,
-  author: {
-    name: "John Smith",
-    initials: "JS",
-    avatarColor: "bg-blue-500"
-  },
-  date: "2 hours ago",
-  content: "Just showed this property to the Johnsons. They're very interested and might make an offer soon."
-}, {
-  id: 2,
-  author: {
-    name: "Sarah Lee",
-    initials: "SL",
-    avatarColor: "bg-green-500"
-  },
-  date: "Yesterday",
-  content: "Owner mentioned they might be willing to negotiate on the price. Starting point is firm though."
-}];
 
 const PropertyDetail = () => {
   console.log('PropertyDetail: Component rendering');
@@ -58,7 +38,7 @@ const PropertyDetail = () => {
     enabled: !useMockData && isValidPropertyId && !!normalizedId
   });
   
-  const [notes, setNotes] = useState<TeamNote[]>(mockNotes);
+  const [notes, setNotes] = useState<TeamNote[]>([]); // Initialize as empty array
   const [property, setProperty] = useState<any>(null);
   const [isLocalLoading, setIsLocalLoading] = useState(true);
   
@@ -228,13 +208,9 @@ const PropertyDetail = () => {
   // Create an array of image URLs from property_images
   const propertyImages = property.property_images ? property.property_images.map((img: any) => img.storage_path).filter(Boolean) : [];
 
-  // Mock owner data - in a real app this would come from the API
-  const owner = {
-    name: "Michael Roberts",
-    email: "michael.roberts@example.com",
-    phone: "+1 (555) 123-4567",
-    company: "Roberts Real Estate Holdings"
-  };
+  // Owner data - in a real app this would come from the API
+  // Start with null to show the "No owner" state
+  const owner = null;
 
   return (
     <div className="p-6">
@@ -255,7 +231,7 @@ const PropertyDetail = () => {
       <PropertyTabsSection 
         property={property}
         owner={owner}
-        notes={notes}
+        notes={[]} // Use empty array for notes to prevent showing mock data
         onAddNote={handleAddNote}
       />
     </div>

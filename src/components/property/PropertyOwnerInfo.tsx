@@ -2,7 +2,8 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Mail, Phone, User } from 'lucide-react';
+import { Mail, Phone, User, Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface PropertyOwnerInfoProps {
   owner?: {
@@ -10,11 +11,16 @@ interface PropertyOwnerInfoProps {
     email?: string;
     phone?: string;
     company?: string;
-  };
+  } | null;
   className?: string;
+  onAddOwner?: () => void;
 }
 
-const PropertyOwnerInfo: React.FC<PropertyOwnerInfoProps> = ({ owner, className = '' }) => {
+const PropertyOwnerInfo: React.FC<PropertyOwnerInfoProps> = ({ 
+  owner, 
+  className = '',
+  onAddOwner 
+}) => {
   if (!owner) {
     return (
       <Card className={`${className}`}>
@@ -22,8 +28,15 @@ const PropertyOwnerInfo: React.FC<PropertyOwnerInfoProps> = ({ owner, className 
           <CardTitle className="text-sm font-medium">Owner Information</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center text-muted-foreground py-4">
-            No owner information available
+          <div className="flex flex-col items-center justify-center py-10 text-center">
+            <User className="h-10 w-10 mb-4 text-muted-foreground opacity-40" />
+            <p className="text-muted-foreground mb-4">No owner information available</p>
+            {onAddOwner && (
+              <Button variant="outline" onClick={onAddOwner} className="mt-2">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Owner Information
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>
