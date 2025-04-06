@@ -9,7 +9,7 @@ import PropertyLocation from './PropertyLocation';
 import PropertyPricing from './PropertyPricing';
 import PropertyFeatures from './PropertyFeatures';
 import PropertyOwnerInfo from './PropertyOwnerInfo';
-import ImageUploader from '../ImageUploader';
+import PropertyImageManager from './PropertyImageManager';
 import PropertyDocuments from './PropertyDocuments';
 
 interface MobileFormStepsViewProps {
@@ -35,9 +35,7 @@ const MobileFormStepsView: React.FC<MobileFormStepsViewProps> = ({ storageReady 
       {state.currentStep === 6 && (
         <Card>
           <CardContent className="pt-6">
-            <ImageUploader 
-              disabled={!storageReady} 
-            />
+            <PropertyImageManager />
           </CardContent>
         </Card>
       )}

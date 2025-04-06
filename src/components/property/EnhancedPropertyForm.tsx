@@ -18,7 +18,7 @@ import PropertyLocation from './form/PropertyLocation';
 import PropertyPricing from './form/PropertyPricing';
 import PropertyFeatures from './form/PropertyFeatures';
 import PropertyOwnerInfo from './form/PropertyOwnerInfo';
-import ImageUploader from './ImageUploader';
+import PropertyImageManager from './form/PropertyImageManager';
 import PropertyDocuments from './form/PropertyDocuments';
 
 interface EnhancedPropertyFormProps {
@@ -135,9 +135,7 @@ const EnhancedPropertyFormContent: React.FC<EnhancedPropertyFormProps> = ({
           <TabsContent value="6">
             <Card>
               <CardContent className="pt-6">
-                <ImageUploader 
-                  disabled={!storageReady} 
-                />
+                <PropertyImageManager />
               </CardContent>
             </Card>
           </TabsContent>
