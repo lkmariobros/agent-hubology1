@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import NavUtilities from './sidebar/NavUtilities';
 import PageBreadcrumb from './PageBreadcrumb';
 import Container from '../ui/container';
+import { NotificationProvider } from '@/context/NotificationContext';
 
 interface MainLayoutProps {
   children?: React.ReactNode;
