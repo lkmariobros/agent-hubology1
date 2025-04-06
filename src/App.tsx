@@ -4,8 +4,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from '@/context/AuthContext';
 import { TooltipProvider } from '@/components/ui/tooltip';
 
-// Components
-import AppLayout from '@/components/layout/AppLayout';
+// Layout
+import MainLayout from '@/components/layout/MainLayout';
 
 // Pages
 import Dashboard from '@/pages/Dashboard';
@@ -35,7 +35,7 @@ function App() {
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             
-            <Route path="/" element={<AppLayout />}>
+            <Route path="/" element={<MainLayout />}>
               {/* Redirect root to dashboard */}
               <Route index element={<Navigate to="/dashboard" replace />} />
               <Route path="dashboard" element={<Dashboard />} />

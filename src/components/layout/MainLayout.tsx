@@ -7,6 +7,7 @@ import { SidebarProvider, useSidebar, Sidebar, SidebarContent } from "@/componen
 import { Button } from '@/components/ui/button';
 import NavUtilities from './sidebar/NavUtilities';
 import PageBreadcrumb from './PageBreadcrumb';
+import Container from '../ui/container';
 
 interface MainLayoutProps {
   children?: React.ReactNode;
@@ -81,9 +82,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         <AppSidebar />
         <main className="flex-1 overflow-x-hidden bg-[#161920]">
           <Header />
-          <div className="px-[44px] py-[36px]">
+          <Container className="py-6">
             {children || <Outlet />}
-          </div>
+          </Container>
         </main>
       </div>
     </SidebarProvider>
