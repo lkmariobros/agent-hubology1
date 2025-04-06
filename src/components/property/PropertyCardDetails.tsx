@@ -9,6 +9,7 @@ import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { TooltipWrapper } from '@/components/ui/tooltip-wrapper';
 
 export interface PropertyCardDetailsProps {
   property: Property;
@@ -159,28 +160,32 @@ export const PropertyCardDetails: React.FC<PropertyCardDetailsProps> = ({
       
       {/* Actions */}
       <div className="pt-2 flex justify-end gap-2">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button variant="outline" size="sm" onClick={handleViewDetails}>
-              View Details
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>View complete property information</p>
-          </TooltipContent>
-        </Tooltip>
-        
-        {onEdit && (
+        <TooltipWrapper>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="outline" size="sm" onClick={() => onEdit(property.id)}>
-                Edit Property
+              <Button variant="outline" size="sm" onClick={handleViewDetails}>
+                View Details
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Edit property details</p>
+              <p>View complete property information</p>
             </TooltipContent>
           </Tooltip>
+        </TooltipWrapper>
+        
+        {onEdit && (
+          <TooltipWrapper>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" size="sm" onClick={() => onEdit(property.id)}>
+                  Edit Property
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Edit property details</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipWrapper>
         )}
       </div>
     </div>
