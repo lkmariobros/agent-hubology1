@@ -2,22 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { PropertyFormData } from '@/types/property-form';
 import { usePropertyForm } from '@/context/PropertyForm/PropertyFormContext';
 import { PropertyFormProvider } from '@/context/PropertyForm/PropertyFormContext';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { TabsContent } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertCircle, ArrowLeft, ArrowRight, Save, Send, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+
+import FormStepsNavigation from './form/FormStepsNavigation';
+import FormActions from './form/FormActions';
+import ValidationErrors from './form/ValidationErrors';
+import MobileFormStepsView from './form/MobileFormStepsView';
+
 import PropertyBasicInfo from './form/PropertyBasicInfo';
 import PropertyDetails from './form/PropertyDetails';
 import PropertyLocation from './form/PropertyLocation';
 import PropertyPricing from './form/PropertyPricing';
 import PropertyFeatures from './form/PropertyFeatures';
-import PropertyImagesUpload from './form/PropertyImagesUpload';
-import PropertyDocumentsUpload from './form/PropertyDocumentsUpload';
-import ImageUploader from './ImageUploader';
 import PropertyOwnerInfo from './form/PropertyOwnerInfo';
+import ImageUploader from './ImageUploader';
 import PropertyDocuments from './form/PropertyDocuments';
 
 interface EnhancedPropertyFormProps {
@@ -26,17 +27,6 @@ interface EnhancedPropertyFormProps {
   isEdit?: boolean;
   storageReady?: boolean;
 }
-
-const FormSteps = [
-  { id: 'basic-info', label: 'Basic Info' },
-  { id: 'details', label: 'Details' },
-  { id: 'location', label: 'Location' },
-  { id: 'pricing', label: 'Pricing' },
-  { id: 'features', label: 'Features' },
-  { id: 'owner', label: 'Owner' },
-  { id: 'media', label: 'Media' },
-  { id: 'documents', label: 'Documents' },
-];
 
 const EnhancedPropertyFormContent: React.FC<EnhancedPropertyFormProps> = ({ 
   onSubmit, 
@@ -47,9 +37,6 @@ const EnhancedPropertyFormContent: React.FC<EnhancedPropertyFormProps> = ({
   const { 
     state, 
     updateFormData, 
-    nextStep, 
-    prevStep, 
-    goToStep, 
     submitForm,
     saveForm
   } = usePropertyForm();
@@ -114,43 +101,13 @@ const EnhancedPropertyFormContent: React.FC<EnhancedPropertyFormProps> = ({
     await saveForm();
   };
   
-  const currentStepIndex = state.currentStep;
-  
   return (
     <div className="space-y-6">
-      {validationErrors.length > 0 && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>
-            <ul className="list-disc pl-5 mt-2">
-              {validationErrors.map((error, index) => (
-                <li key={index}>{error}</li>
-              ))}
-            </ul>
-          </AlertDescription>
-        </Alert>
-      )}
+      <ValidationErrors errors={validationErrors} />
       
-      {/* Form Steps Progress */}
+      {/* Desktop Form Steps View */}
       <div className="hidden md:block">
-        <Tabs 
-          value={state.currentStep.toString()} 
-          onValueChange={(value) => goToStep(parseInt(value))}
-          className="w-full"
-        >
-          <TabsList className="grid grid-cols-8 w-full">
-            {FormSteps.map((step, index) => (
-              <TabsTrigger 
-                key={step.id} 
-                value={index.toString()}
-                disabled={state.isSubmitting}
-              >
-                {step.label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-          
+        <FormStepsNavigation>
           <TabsContent value="0">
             <PropertyBasicInfo />
           </TabsContent>
@@ -188,75 +145,21 @@ const EnhancedPropertyFormContent: React.FC<EnhancedPropertyFormProps> = ({
           <TabsContent value="7">
             <PropertyDocuments />
           </TabsContent>
-        </Tabs>
+        </FormStepsNavigation>
       </div>
       
       {/* Mobile Steps View */}
-      <div className="md:hidden">
-        <div className="text-lg font-semibold mb-4">
-          {FormSteps[currentStepIndex]?.label || 'Property Form'}
-        </div>
-        
-        {state.currentStep === 0 && <PropertyBasicInfo />}
-        {state.currentStep === 1 && <PropertyDetails />}
-        {state.currentStep === 2 && <PropertyLocation />}
-        {state.currentStep === 3 && <PropertyPricing />}
-        {state.currentStep === 4 && <PropertyFeatures />}
-        {state.currentStep === 5 && <PropertyOwnerInfo />}
-        {state.currentStep === 6 && (
-          <Card>
-            <CardContent className="pt-6">
-              <ImageUploader 
-                disabled={!storageReady} 
-              />
-            </CardContent>
-          </Card>
-        )}
-        {state.currentStep === 7 && <PropertyDocuments />}
-      </div>
+      <MobileFormStepsView storageReady={storageReady} />
       
       <Separator className="my-6" />
       
       {/* Navigation Buttons */}
-      <div className="flex justify-between">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={prevStep}
-          disabled={state.currentStep === 0 || state.isSubmitting}
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" /> Previous
-        </Button>
-        
-        <div className="flex gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleSaveDraft}
-            disabled={state.isSubmitting}
-          >
-            <Save className="mr-2 h-4 w-4" /> Save Draft
-          </Button>
-          
-          {state.currentStep < FormSteps.length - 1 ? (
-            <Button
-              type="button"
-              onClick={nextStep}
-              disabled={state.isSubmitting}
-            >
-              Next <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          ) : (
-            <Button
-              type="button"
-              onClick={handleSubmit}
-              disabled={state.isSubmitting}
-            >
-              <Send className="mr-2 h-4 w-4" /> {isEdit ? 'Update' : 'Submit'} Property
-            </Button>
-          )}
-        </div>
-      </div>
+      <FormActions 
+        isEdit={isEdit}
+        onSubmit={handleSubmit}
+        onSaveDraft={handleSaveDraft}
+        validationErrors={validationErrors}
+      />
     </div>
   );
 };
