@@ -60,7 +60,7 @@ export const PropertyFormProvider: React.FC<{ children: ReactNode }> = ({ childr
     dispatch({ type: 'REORDER_IMAGES', payload: { startIndex, endIndex } });
   }, []);
 
-  // New function to update image upload status
+  // Function to update image upload status
   const updateImageStatus = useCallback((index: number, status: 'uploading' | 'success' | 'error', url?: string) => {
     dispatch({ 
       type: 'UPDATE_IMAGE_STATUS', 

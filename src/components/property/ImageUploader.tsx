@@ -171,6 +171,9 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
               [imageId]: false
             }));
           }
+
+          // Add success message with the URL
+          setDebugInfo(`Upload successful: ${uploadedUrl}`);
         } catch (error: any) {
           console.error('Error uploading file:', error);
           setDebugInfo(`Upload error: ${error.message || 'Unknown error'}`);

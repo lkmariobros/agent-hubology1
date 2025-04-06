@@ -114,7 +114,7 @@ const EnhancedPropertyFormContent: React.FC<EnhancedPropertyFormProps> = ({
     await saveForm();
   };
   
-  const currentStepIndex = FormSteps.findIndex(step => step.id === state.currentStep.toString()) || 0;
+  const currentStepIndex = state.currentStep;
   
   return (
     <div className="space-y-6">
