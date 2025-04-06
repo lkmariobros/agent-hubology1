@@ -2,87 +2,85 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ImageOff, AlertCircle, Maximize2 } from 'lucide-react';
+import { ExternalLink, ImageOff, AlertCircle } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 interface PropertyGalleryProps {
-  propertyId?: string;
-  images?: string[];
+  images: string[];
   title: string;
 }
 
-const PropertyGallery: React.FC<PropertyGalleryProps> = ({ propertyId, images = [], title }) => {
+const PropertyGallery: React.FC<PropertyGalleryProps> = ({ images, title }) => {
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeImageIndex, setActiveImageIndex] = useState(0);
-  const isMobile = useIsMobile();
+  const [debugData, setDebugData] = useState<any>(null);
   
   useEffect(() => {
-    const fetchImages = async () => {
-      setLoading(true);
-      setError(null);
-      
-      try {
-        // If propertyId is provided, fetch images directly from the database
-        if (propertyId) {
-          console.log('PropertyGallery: Fetching images for property ID:', propertyId);
-          
-          const { data: imageData, error: imageError } = await supabase
-            .from('property_images')
-            .select('storage_path, is_cover, display_order')
-            .eq('property_id', propertyId)
-            .order('is_cover', { ascending: false })
-            .order('display_order', { ascending: true });
-            
-          if (imageError) throw imageError;
-          
-          if (imageData && imageData.length > 0) {
-            const paths = imageData.map(img => img.storage_path);
-            console.log('PropertyGallery: Found images in DB:', paths);
-            setImageUrls(paths);
-            setLoading(false);
-            return;
-          } else {
-            console.log('PropertyGallery: No images found in DB for property ID:', propertyId);
-          }
-        }
-        
-        // If images array is provided or no DB images found, use those
-        if (images && images.length > 0) {
-          console.log('PropertyGallery: Using provided image array:', images);
-          setImageUrls(images);
-          setLoading(false);
-          return;
-        }
-        
-        // No images available
-        console.log('PropertyGallery: No images available from any source');
+    const fetchImageUrls = async () => {
+      if (!images || images.length === 0) {
+        console.log('PropertyGallery: No images provided');
         setImageUrls([]);
         setLoading(false);
+        return;
+      }
+      
+      console.log('PropertyGallery: Fetching URLs for images:', images);
+      setDebugData({ originalImages: images });
+      
+      try {
+        const urls = await Promise.all(
+          images.map(async (path) => {
+            // If it's already a full URL, return it
+            if (path.startsWith('http')) {
+              return path;
+            }
+            
+            // Check if the bucket exists
+            const { data: buckets, error: bucketError } = await supabase
+              .storage
+              .listBuckets();
+            
+            const propertyImagesBucketExists = buckets?.some(b => b.name === 'property-images');
+            
+            if (bucketError || !propertyImagesBucketExists) {
+              console.error('PropertyGallery: Error checking buckets:', bucketError);
+              setDebugData(prev => ({ ...prev, bucketError, buckets }));
+              throw new Error('Property images storage is not properly configured');
+            }
+            
+            // Try to get public URL - this method doesn't return an error property
+            const { data } = await supabase.storage
+              .from('property-images')
+              .getPublicUrl(path);
+              
+            return data.publicUrl;
+          })
+        );
+        
+        console.log('PropertyGallery: Fetched image URLs:', urls);
+        setDebugData(prev => ({ ...prev, urls }));
+        setImageUrls(urls);
       } catch (err: any) {
-        console.error('PropertyGallery: Error fetching images:', err);
+        console.error('PropertyGallery: Error fetching image URLs:', err);
         setError(err.message || 'Failed to load images');
+        setDebugData(prev => ({ ...prev, error: err }));
+      } finally {
         setLoading(false);
       }
     };
     
-    fetchImages();
-  }, [propertyId, images]);
-
-  const handleThumbnailClick = (index: number) => {
-    setActiveImageIndex(index);
-  };
+    fetchImageUrls();
+  }, [images]);
   
   if (loading) {
     return (
-      <div className="space-y-4 p-6">
-        <Skeleton className="w-full aspect-video rounded-md" />
-        <div className="grid grid-cols-4 gap-4">
+      <div className="space-y-2">
+        <Skeleton className="aspect-video w-full h-64" />
+        <div className="grid grid-cols-4 gap-2">
           {Array(4).fill(0).map((_, index) => (
-            <Skeleton key={index} className="aspect-square w-full rounded-md" />
+            <Skeleton key={index} className="aspect-square" />
           ))}
         </div>
       </div>
@@ -91,7 +89,7 @@ const PropertyGallery: React.FC<PropertyGalleryProps> = ({ propertyId, images = 
   
   if (error) {
     return (
-      <Alert variant="destructive" className="m-6">
+      <Alert variant="destructive" className="mb-4">
         <AlertCircle className="h-4 w-4 mr-2" />
         <AlertDescription>{error}</AlertDescription>
       </Alert>
@@ -101,46 +99,33 @@ const PropertyGallery: React.FC<PropertyGalleryProps> = ({ propertyId, images = 
   const hasImages = imageUrls && imageUrls.length > 0;
   
   return (
-    <div className="space-y-4 p-6 h-full flex flex-col">
-      {/* Main large image */}
-      <div className="w-full aspect-video bg-black/20 rounded-md overflow-hidden border border-neutral-800/40 shadow-md relative group flex-grow">
+    <div className="space-y-2">
+      <div className="aspect-video bg-black/20 rounded-md overflow-hidden">
         {hasImages ? (
-          <>
-            <img 
-              src={imageUrls[activeImageIndex]} 
-              alt={`${title} main view`} 
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                console.error('Failed to load image:', imageUrls[activeImageIndex]);
-                e.currentTarget.src = '/placeholder.svg';
-              }}
-            />
-            <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-              <Maximize2 className="h-8 w-8 text-white opacity-80" />
-            </div>
-          </>
+          <img 
+            src={imageUrls[0]} 
+            alt={`${title} main view`} 
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              console.error('Failed to load image:', imageUrls[0]);
+              e.currentTarget.src = '/placeholder.svg';
+            }}
+          />
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground">
-            <ImageOff className="h-10 w-10 mb-2 opacity-40" />
-            <span className="text-sm">No images available</span>
+            <ImageOff className="h-12 w-12 mb-2 opacity-40" />
+            <span>No images available</span>
           </div>
         )}
       </div>
       
-      {/* Thumbnails row - equally sized squares */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-4 gap-2">
         {hasImages ? (
-          imageUrls.slice(0, 4).map((imageUrl, index) => (
-            <div 
-              key={index} 
-              className={`aspect-square bg-black/20 rounded-md overflow-hidden border border-neutral-800/40 shadow-md cursor-pointer transition-all duration-150 ${
-                index === activeImageIndex ? 'ring-2 ring-primary/70' : 'hover:ring-1 hover:ring-primary/40'
-              }`}
-              onClick={() => handleThumbnailClick(index)}
-            >
+          imageUrls.slice(1, 5).map((imageUrl, index) => (
+            <div key={index} className="aspect-square bg-black/20 rounded-md overflow-hidden">
               <img 
                 src={imageUrl} 
-                alt={`${title} view ${index + 1}`}
+                alt={`${title} view ${index + 2}`}
                 className="w-full h-full object-cover"
                 onError={(e) => {
                   console.error('Failed to load thumbnail:', imageUrl);
@@ -151,21 +136,50 @@ const PropertyGallery: React.FC<PropertyGalleryProps> = ({ propertyId, images = 
           ))
         ) : (
           Array(4).fill(0).map((_, index) => (
-            <div key={index} className="aspect-square bg-black/20 rounded-md flex items-center justify-center border border-neutral-800/40 shadow-md">
-              <ImageOff className="h-4 w-4 opacity-40" />
+            <div key={index} className="aspect-square bg-black/20 rounded-md flex items-center justify-center">
+              <ImageOff className="h-5 w-5 opacity-20" />
             </div>
           ))
         )}
       </div>
       
-      {/* Development-only debug info */}
+      {/* Enhanced debug info */}
       {import.meta.env.DEV && (
-        <Card className="mt-4 p-2 border border-dashed border-gray-200 rounded-md bg-gray-50 text-xs text-gray-500">
+        <Card className="mt-2 p-2 border border-dashed border-gray-200 rounded-md bg-gray-50 text-xs text-gray-500">
           <div className="flex items-center justify-between mb-1">
-            <span className="font-medium">Debug Info: {imageUrls.length} images</span>
+            <span className="font-medium">Debug Info: {images ? images.length : 0} images</span>
+            {hasImages && (
+              <a 
+                href="https://supabase.com/dashboard/project/synabhmsxsvsxkyzhfss/storage/buckets/property-images/explore" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center text-blue-500 hover:underline"
+              >
+                <ExternalLink size={12} className="mr-1" />
+                View in Supabase
+              </a>
+            )}
           </div>
-          <div>
-            <strong>Property ID:</strong> {propertyId || 'Not provided'}
+          <div className="overflow-x-auto">
+            {debugData && (
+              <pre className="text-xs overflow-auto max-h-40">
+                {JSON.stringify(debugData, null, 2)}
+              </pre>
+            )}
+            <div className="mt-2">
+              <strong>Original image paths:</strong>
+              {images && images.length > 0 ? (
+                <ul className="list-disc pl-4">
+                  {images.map((path, idx) => (
+                    <li key={idx} className="truncate hover:text-clip">
+                      {idx+1}. {path}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-red-500">No image paths provided</p>
+              )}
+            </div>
           </div>
         </Card>
       )}

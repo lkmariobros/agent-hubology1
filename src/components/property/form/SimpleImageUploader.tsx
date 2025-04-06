@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { toast } from 'sonner';
 import { Upload, X, Star, AlertTriangle, Check, Loader2 } from 'lucide-react';
@@ -27,28 +28,6 @@ const SimpleImageUploader: React.FC = () => {
     if (state.images.length + imageFiles.length > 20) {
       toast.error('You can only upload a maximum of 20 images');
       return;
-    }
-
-    // Check if bucket exists before processing files
-    try {
-      const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
-      if (bucketsError) {
-        console.error("Error checking buckets:", bucketsError);
-        setError(`Storage error: ${bucketsError.message}`);
-        toast.error("Unable to access storage buckets. Image uploads may fail.");
-      } else {
-        const bucketExists = buckets?.some(b => b.name === 'property-images');
-        if (!bucketExists) {
-          console.error("Property-images bucket does not exist");
-          setError("The required storage bucket 'property-images' does not exist. Please create it in the Supabase dashboard.");
-          toast.error("Storage configuration issue detected. Images cannot be uploaded.");
-          return;
-        }
-      }
-    } catch (err: any) {
-      console.error("Error checking buckets:", err);
-      setError(`Storage configuration error: ${err.message}`);
-      toast.error("Error verifying storage configuration. Image uploads may fail.");
     }
 
     for (const file of imageFiles) {

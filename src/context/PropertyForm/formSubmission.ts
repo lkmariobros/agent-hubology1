@@ -22,7 +22,7 @@ export const submitPropertyForm = async (state?: PropertyFormState) => {
   }
   
   const { formData, images, documents } = state;
-  console.log("Submitting form:", { formData, images: images.length });
+  console.log("Submitting form:", { formData, images, documents });
   
   try {
     // Step 1: Create the property record
@@ -76,14 +76,7 @@ export const submitPropertyForm = async (state?: PropertyFormState) => {
       .select("id")
       .single();
     
-    if (propertyError) {
-      console.error("Error creating property:", propertyError);
-      throw propertyError;
-    }
-    
-    if (!propertyData || !propertyData.id) {
-      throw new Error("Failed to get property ID after insertion");
-    }
+    if (propertyError) throw propertyError;
     
     const propertyId = propertyData.id;
     console.log("Property created with ID:", propertyId);
@@ -92,20 +85,6 @@ export const submitPropertyForm = async (state?: PropertyFormState) => {
     if (images && images.length > 0) {
       console.log(`Processing ${images.length} images for property ${propertyId}`);
       
-      // Check if property-images bucket exists
-      const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
-      if (bucketsError) {
-        console.error("Error checking buckets:", bucketsError);
-        toast.error("Error checking storage buckets. Some images may not be uploaded.");
-      }
-      
-      const bucketExists = buckets?.some(b => b.name === 'property-images');
-      if (!bucketExists) {
-        console.error("Property-images bucket does not exist");
-        toast.error("Storage bucket for property images does not exist. Please create it in the Supabase dashboard.");
-        throw new Error("Property-images bucket does not exist");
-      }
-      
       for (let i = 0; i < images.length; i++) {
         const image = images[i];
         console.log(`Processing image ${i+1}/${images.length}:`, image);
@@ -113,16 +92,11 @@ export const submitPropertyForm = async (state?: PropertyFormState) => {
         try {
           let imageUrl = '';
           
-          // If we already have a successful upload with URL
-          if (image.uploadStatus === 'success' && image.url) {
-            imageUrl = image.url;
-            console.log(`Using already uploaded image URL: ${imageUrl}`);
-          }
           // If we have an actual file to upload
-          else if (image.file) {
+          if (image.file) {
             const fileExt = image.file.name.split('.').pop();
             const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
-            const filePath = `properties/${propertyId}/${fileName}`;
+            const filePath = `${propertyId}/${fileName}`;
             
             console.log(`Uploading image to storage path: ${filePath}`);
             
@@ -138,7 +112,7 @@ export const submitPropertyForm = async (state?: PropertyFormState) => {
             }
             
             // Get public URL
-            const { data: urlData } = await supabase.storage
+            const { data: urlData } = supabase.storage
               .from('property-images')
               .getPublicUrl(filePath);
               
@@ -153,33 +127,25 @@ export const submitPropertyForm = async (state?: PropertyFormState) => {
             continue;
           }
           
-          if (!imageUrl) {
-            console.error(`No valid URL obtained for image ${i+1}`);
-            continue;
-          }
-          
           // Create image record
-          console.log(`Creating database record for image ${i+1} with URL: ${imageUrl}`);
-          const { data: imageData, error: imageError } = await supabase
-            .from('property_images')
+          console.log(`Creating database record for image ${i+1}`);
+          const { error: imageError } = await supabase.from('property_images')
             .insert({
               property_id: propertyId,
               storage_path: imageUrl,
               is_cover: image.isCover,
               display_order: image.displayOrder || i
-            })
-            .select('id')
-            .single();
+            });
           
           if (imageError) {
             console.error("Error creating image record:", imageError);
             toast.error(`Failed to save image ${i+1} metadata. ${imageError.message}`);
           } else {
-            console.log(`Successfully saved image ${i+1} record with ID: ${imageData?.id}`);
+            console.log(`Successfully saved image ${i+1} record`);
           }
-        } catch (imgError: any) {
+        } catch (imgError) {
           console.error(`Error processing image ${i+1}:`, imgError);
-          toast.error(`An error occurred while processing image ${i+1}: ${imgError.message}`);
+          toast.error(`An error occurred while processing image ${i+1}`);
         }
       }
     } else {
@@ -196,9 +162,7 @@ export const submitPropertyForm = async (state?: PropertyFormState) => {
         feature_category: 'General'
       }));
       
-      const { error: featuresError } = await supabase
-        .from('property_features')
-        .insert(featuresData);
+      const { error: featuresError } = await supabase.from('property_features').insert(featuresData);
       
       if (featuresError) {
         console.error("Error saving property features:", featuresError);
@@ -212,18 +176,16 @@ export const submitPropertyForm = async (state?: PropertyFormState) => {
     if (formData.owner && formData.owner.name) {
       console.log("Saving property owner information");
       
-      const { error: ownerError } = await supabase
-        .from('property_owners')
-        .insert({
-          property_id: propertyId,
-          name: formData.owner.name,
-          email: formData.owner.email,
-          phone: formData.owner.phone,
-          address: formData.owner.address,
-          company: formData.owner.company,
-          notes: formData.owner.notes,
-          is_primary_contact: formData.owner.isPrimaryContact !== false
-        });
+      const { error: ownerError } = await supabase.from('property_owners').insert({
+        property_id: propertyId,
+        name: formData.owner.name,
+        email: formData.owner.email,
+        phone: formData.owner.phone,
+        address: formData.owner.address,
+        company: formData.owner.company,
+        notes: formData.owner.notes,
+        is_primary_contact: formData.owner.isPrimaryContact !== false
+      });
       
       if (ownerError) {
         console.error("Error saving property owner:", ownerError);
@@ -276,9 +238,8 @@ export const submitPropertyForm = async (state?: PropertyFormState) => {
     }
     
     return propertyId;
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error in property submission:", error);
-    toast.error(`Property submission failed: ${error.message}`);
     throw error;
   }
 };

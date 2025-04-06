@@ -22,19 +22,6 @@ export interface PropertyFormValues {
   status?: string;
   images?: string[];
   features?: string[];
-  featured?: boolean;
-  furnishingStatus?: string;
-  zoningType?: string;
-  buildingClass?: string;
-  ceilingHeight?: number;
-  loadingBays?: number;
-  powerCapacity?: string;
-  landSize?: number;
-  zoning?: string;
-  roadFrontage?: number;
-  topography?: string;
-  agentNotes?: string;
-  documents?: any[]; // Added this property
   stock?: {
     total: number;
     available: number;
