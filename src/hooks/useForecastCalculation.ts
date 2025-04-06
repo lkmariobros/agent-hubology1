@@ -21,6 +21,22 @@ export function useForecastCalculation(agentId?: string) {
     enabled: !!agentId
   });
   
+  // Fetch forecast by month data
+  const { data: forecastByMonth = [], isLoading: isLoadingForecastByMonth } = useQuery({
+    queryKey: ['forecastByMonth', agentId],
+    queryFn: async () => {
+      if (!agentId) return [];
+      
+      const { data, error } = await supabase.rpc('get_commission_forecast_by_month', {
+        p_agent_id: agentId
+      });
+      
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!agentId
+  });
+  
   // Generate forecast projections
   const generateForecast = useMutation({
     mutationFn: async ({ 
@@ -48,6 +64,8 @@ export function useForecastCalculation(agentId?: string) {
   return {
     forecastSummary,
     isLoadingSummary,
+    forecastByMonth,
+    isLoadingForecastByMonth,
     generateForecast
   };
 }
