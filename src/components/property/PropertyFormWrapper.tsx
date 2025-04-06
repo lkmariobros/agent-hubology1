@@ -35,28 +35,26 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
   const [retryCount, setRetryCount] = useState(0);
   const isComponentMounted = useRef(true);
   
-  // Initialize form and check storage
+  // Initialize form and check storage - only run once on mount and when retryCount changes
   useEffect(() => {
     isComponentMounted.current = true;
     
-    // Prevent multiple initialization attempts
-    if (initializationAttempted.current && retryCount === 0) {
-      return;
-    }
-    
     const initializeForm = async () => {
+      // Skip if component has been unmounted
+      if (!isComponentMounted.current) return;
+      
       try {
-        if (!isComponentMounted.current) return;
-        
-        initializationAttempted.current = true;
         setIsInitializing(true);
+        initializationAttempted.current = true;
         
         // Check storage configuration - use force check if retrying
+        console.log(`Initializing form, retry count: ${retryCount}`);
         const requiredBuckets = ['property-images', 'property-documents'];
         const bucketsExist = retryCount > 0
           ? await forceCheckStorageBuckets(requiredBuckets)
           : await checkStorageBuckets(requiredBuckets);
         
+        // Skip further processing if component has been unmounted
         if (!isComponentMounted.current) return;
         
         setStorageReady(bucketsExist);
@@ -65,7 +63,7 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
           console.warn('Missing required storage buckets');
           // Only show toast on retry to avoid duplicate notifications
           if (retryCount > 0) {
-            toast.warning('Storage bucket issue persists. Please check Supabase configuration.');
+            toast.warning('Storage bucket issue persists. Check if buckets exist with proper names: "Property Images" and "Property Documents"');
           }
         } else {
           console.log('All required storage buckets are available');
@@ -74,18 +72,25 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
           }
         }
       } catch (error) {
+        // Skip error handling if component has been unmounted
         if (!isComponentMounted.current) return;
+        
         console.error('Error initializing property form:', error);
         setStorageReady(false);
       } finally {
+        // Only update state if component is still mounted
         if (isComponentMounted.current) {
           setIsInitializing(false);
         }
       }
     };
     
-    initializeForm();
+    // Only run initialization if we haven't tried yet or if retryCount changed
+    if (!initializationAttempted.current || retryCount > 0) {
+      initializeForm();
+    }
     
+    // Cleanup function to prevent state updates after unmount
     return () => {
       isComponentMounted.current = false;
     };
@@ -220,11 +225,11 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
       {!storageReady && (
         <Alert variant="warning" className="mb-6">
           <AlertTriangle className="h-4 w-4 mr-2" />
-          <AlertTitle>Storage Buckets Missing</AlertTitle>
+          <AlertTitle>Storage Buckets Missing or Inaccessible</AlertTitle>
           <AlertDescription className="flex flex-col space-y-3">
             <p>
               Image and document uploads will not work because the required storage buckets 
-              ('property-images', 'property-documents') are missing or inaccessible in your Supabase project.
+              ('Property Images', 'Property Documents') are missing or inaccessible in your Supabase project.
             </p>
             <div className="flex flex-col space-y-1 text-sm mt-1">
               <p className="font-semibold flex items-center">
@@ -232,6 +237,7 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
               </p>
               <ol className="list-decimal ml-5 space-y-1">
                 <li>Ensure both buckets exist in your Supabase storage</li>
+                <li>Check that your buckets have the correct names: "Property Images" and "Property Documents" (with spaces and capital letters)</li>
                 <li>Check that your buckets have the correct RLS policies for uploads</li>
                 <li>Verify that your application has the correct permissions</li>
               </ol>

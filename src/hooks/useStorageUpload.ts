@@ -48,11 +48,29 @@ export function useStorageUpload() {
         return allExist;
       }
       
-      // Check if buckets exist
-      const { data: buckets, error } = await supabase.storage.listBuckets();
+      // Check if buckets exist (with retry logic)
+      let retryCount = 0;
+      let buckets;
+      let error;
+      
+      // Retry up to 3 times with exponential backoff
+      while (retryCount < 3) {
+        const result = await supabase.storage.listBuckets();
+        buckets = result.data;
+        error = result.error;
+        
+        if (!error && buckets) {
+          break;
+        }
+        
+        retryCount++;
+        console.log(`Attempt ${retryCount} failed, retrying...`);
+        // Exponential backoff
+        await new Promise(resolve => setTimeout(resolve, 500 * Math.pow(2, retryCount)));
+      }
       
       if (error) {
-        console.error('Error checking buckets:', error);
+        console.error('Error checking buckets after retries:', error);
         setStorageStatus('unavailable');
         return false;
       }
@@ -63,13 +81,12 @@ export function useStorageUpload() {
       // Check if all required buckets exist, using the mapping for actual bucket names
       const allBucketsExist = bucketNames.every(bucket => {
         const actualBucketName = BUCKET_NAME_MAP[bucket] || bucket;
-        return existingBuckets.includes(actualBucketName);
-      });
-      
-      // Cache the results
-      bucketNames.forEach(bucket => {
-        const actualBucketName = BUCKET_NAME_MAP[bucket] || bucket;
-        bucketCache.current[bucket] = existingBuckets.includes(actualBucketName);
+        const exists = existingBuckets.includes(actualBucketName);
+        
+        // Cache the result
+        bucketCache.current[bucket] = exists;
+        
+        return exists;
       });
       
       initialCheckDone.current = true;
@@ -140,44 +157,73 @@ export function useStorageUpload() {
       
       console.log('Uploading to path:', filePath);
       
-      // Simulate progress (in real implementation, this would use upload events)
+      // Progress simulation (will update in increments)
+      let currentProgress = 0;
       const progressInterval = setInterval(() => {
-        setProgress(prev => {
-          const nextProgress = Math.min(prev + 10, 90);
-          return nextProgress;
-        });
+        if (currentProgress < 90) {
+          currentProgress += 5;
+          setProgress(currentProgress);
+        }
       }, 300);
       
       // Upload the file to Supabase Storage using the actual bucket name
-      console.log('Executing upload to Supabase bucket:', actualBucketName);
-      const { data, error } = await supabase.storage
-        .from(actualBucketName)
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: upsert,
-        });
+      let uploadResult;
+      let retryCount = 0;
       
-      clearInterval(progressInterval);
-      
-      if (error) {
-        console.error('Supabase upload error:', error);
-        
-        // Check for specific error types and provide user-friendly messages
-        if (error.message.includes('storage/object-too-large')) {
-          throw new Error(`File is too large. Maximum size is ${maxSizeMB}MB.`);
-        } else if (error.message.includes('permission denied')) {
-          throw new Error('You do not have permission to upload files to this storage bucket.');
-        } else {
-          throw error;
+      while (retryCount < 3) {
+        try {
+          console.log(`Attempt ${retryCount + 1}: Uploading to Supabase bucket: ${actualBucketName}`);
+          uploadResult = await supabase.storage
+            .from(actualBucketName)
+            .upload(filePath, file, {
+              cacheControl: '3600',
+              upsert: upsert,
+            });
+            
+          if (!uploadResult.error) {
+            break;
+          }
+          
+          console.error(`Upload attempt ${retryCount + 1} failed:`, uploadResult.error);
+          retryCount++;
+          
+          if (retryCount < 3) {
+            // Wait before retrying (exponential backoff)
+            await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, retryCount)));
+          }
+        } catch (err) {
+          console.error(`Upload attempt ${retryCount + 1} exception:`, err);
+          retryCount++;
+          
+          if (retryCount < 3) {
+            await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, retryCount)));
+          } else {
+            throw err;
+          }
         }
       }
       
-      console.log('Upload successful, data:', data);
+      clearInterval(progressInterval);
+      
+      if (uploadResult?.error) {
+        console.error('Supabase upload error after retries:', uploadResult.error);
+        
+        // Check for specific error types and provide user-friendly messages
+        if (uploadResult.error.message.includes('storage/object-too-large')) {
+          throw new Error(`File is too large. Maximum size is ${maxSizeMB}MB.`);
+        } else if (uploadResult.error.message.includes('permission denied')) {
+          throw new Error('You do not have permission to upload files to this storage bucket.');
+        } else {
+          throw uploadResult.error;
+        }
+      }
+      
+      console.log('Upload successful, data:', uploadResult?.data);
       
       // Get public URL for the uploaded file using the actual bucket name
       const { data: { publicUrl } } = supabase.storage
         .from(actualBucketName)
-        .getPublicUrl(data?.path || filePath);
+        .getPublicUrl(uploadResult?.data?.path || filePath);
       
       console.log('Generated public URL:', publicUrl);
       

@@ -1,3 +1,4 @@
+
 import React, { useCallback, useRef, useState, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { UploadCloud, X, Loader2, Check, Image, AlertTriangle, RefreshCcw, Info } from 'lucide-react';
@@ -32,13 +33,13 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   useEffect(() => {
     isComponentMounted.current = true;
     
-    // Prevent multiple initialization attempts that could cause infinite loops
-    if (bucketCheckAttempted.current && retryCount === 0) {
-      return;
-    }
-    
     const verifyStorageBuckets = async () => {
       try {
+        // Skip if already checking or if we've already checked and not retrying
+        if (bucketCheckAttempted.current && retryCount === 0) {
+          return;
+        }
+        
         bucketCheckAttempted.current = true;
         setBucketStatus('checking');
         
@@ -55,7 +56,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
           console.warn('Property images bucket is not accessible');
           // Only show toast on retry to avoid duplicate messages
           if (retryCount > 0) {
-            toast.warning('Storage bucket is still not accessible. Please check Supabase configuration.');
+            toast.warning('Storage bucket is still not accessible. Check if a bucket named "Property Images" exists in Supabase.');
           }
         } else if (retryCount > 0) {
           toast.success('Successfully connected to storage buckets');
@@ -189,14 +190,14 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
           <AlertTitle>Storage Configuration Issue</AlertTitle>
           <AlertDescription className="flex flex-col space-y-2">
             <p>
-              Image uploads will not work. This could be due to a naming mismatch between the code and Supabase storage buckets.
+              Image uploads will not work. This is due to a naming mismatch between the code and Supabase storage buckets.
             </p>
             <div className="flex flex-col space-y-1 text-sm mt-2">
               <p className="font-semibold flex items-center">
                 <Info className="h-3 w-3 mr-1" /> Troubleshooting:
               </p>
               <ol className="list-decimal ml-5 space-y-1">
-                <li>Ensure the 'Property Images' bucket exists in your Supabase storage</li>
+                <li>Ensure the 'Property Images' bucket exists in your Supabase storage (with spaces and capital letters)</li>
                 <li>Check that your bucket has the correct RLS policies for uploads</li>
                 <li>Verify that your application has the correct permissions</li>
               </ol>
