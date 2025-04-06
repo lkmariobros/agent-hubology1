@@ -9,6 +9,7 @@ import RecentTransactions from '@/components/dashboard/RecentTransactions';
 import { useMetrics } from '@/hooks/useDashboard';
 import { Building2, Trophy } from 'lucide-react';
 import { DashboardMetric } from '@/types';
+import { Card, CardContent } from "@/components/ui/card";
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -22,7 +23,7 @@ const Dashboard: React.FC = () => {
           label: 'Total Commission',
           value: '$45,682',
           change: 8.2,
-          trend: 'up' as const,  // Using 'as const' to ensure it's one of the union types
+          trend: 'up' as const,
           icon: <Building2 className="h-5 w-5 text-primary" />
         },
         {
@@ -30,7 +31,7 @@ const Dashboard: React.FC = () => {
           label: 'Leaderboard Position',
           value: '#3',
           change: 2,
-          trend: 'up' as const,  // Using 'as const' to ensure it's one of the union types
+          trend: 'up' as const,
           icon: <Trophy className="h-5 w-5 text-primary" />
         }
       ]
@@ -53,15 +54,42 @@ const Dashboard: React.FC = () => {
       <h1 className="text-3xl font-semibold">Dashboard</h1>
       
       {/* Main dashboard layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left side - Recent Transactions taking up 2/3 of the space on large screens */}
-        <div className="lg:col-span-2">
-          <RecentTransactions onViewAll={handleViewAllTransactions} limit={8} />
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* Left side - Recent Transactions taking up 3/4 of the space on large screens */}
+        <div className="lg:col-span-3">
+          <RecentTransactions onViewAll={handleViewAllTransactions} limit={5} />
         </div>
         
-        {/* Right side - Metrics */}
-        <div className="space-y-6">
-          <MetricsContainer metrics={filteredMetrics} className="grid grid-cols-1 gap-4" />
+        {/* Right side - Metrics Cards displayed individually */}
+        <div className="lg:col-span-1 space-y-6">
+          <div className="grid grid-cols-2 lg:grid-cols-1 gap-4">
+            {filteredMetrics.map((metric) => (
+              <Card key={metric.id} className="border-none shadow-md bg-card">
+                <CardContent className="p-4">
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-muted-foreground">{metric.label}</p>
+                    <div className="flex items-center justify-between">
+                      <p className="text-2xl font-bold">{metric.value}</p>
+                      {metric.icon && (
+                        <div className="rounded-full p-2 bg-primary/10 flex items-center justify-center">
+                          {metric.icon}
+                        </div>
+                      )}
+                    </div>
+                    {metric.change !== undefined && (
+                      <div className="flex items-center text-sm">
+                        <span className={metric.trend === 'up' ? 'text-green-400' : 'text-red-400'}>
+                          {metric.trend === 'up' ? '+' : ''}{metric.change}%
+                        </span>
+                        <span className="text-muted-foreground ml-1">from last month</span>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          
           <UpcomingPayments onViewAll={handleViewAllPayments} />
         </div>
       </div>
