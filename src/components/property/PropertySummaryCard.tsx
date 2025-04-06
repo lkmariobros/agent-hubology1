@@ -38,8 +38,8 @@ const PropertySummaryCard: React.FC<PropertySummaryCardProps> = ({
   return (
     <Card className="mb-6 overflow-hidden bg-card border-neutral-800/60">
       <CardContent className="p-0">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          <div className="lg:col-span-3">
+        <div className="grid grid-cols-1 lg:grid-cols-7 gap-4">
+          <div className="lg:col-span-5 p-4">
             <PropertyGallery 
               propertyId={property.id} 
               images={propertyImages} 
@@ -47,10 +47,10 @@ const PropertySummaryCard: React.FC<PropertySummaryCardProps> = ({
             />
           </div>
           
-          <div className="p-6">
-            <div className="space-y-4">
+          <div className="lg:col-span-2 p-4">
+            <div className="space-y-3">
               <div>
-                <div className="flex items-center mb-3">
+                <div className="flex items-center mb-2">
                   {getPropertyTypeIcon(propertyType)}
                   <Badge variant="outline" className="ml-2">{propertyType}</Badge>
                   {property.transaction_types?.name && (
@@ -58,28 +58,28 @@ const PropertySummaryCard: React.FC<PropertySummaryCardProps> = ({
                   )}
                 </div>
                 
-                <h2 className="text-2xl font-bold">{formattedPrice || formattedRentalRate}</h2>
+                <h2 className="text-xl font-bold">{formattedPrice || formattedRentalRate}</h2>
               </div>
               
-              <div className="grid grid-cols-1 gap-3">
+              <div className="grid grid-cols-1 gap-2">
                 {property.bedrooms > 0 && (
                   <div className="flex items-center">
-                    <BedDouble className="h-5 w-5 mr-2 text-muted-foreground" />
-                    <span>{property.bedrooms} Bedroom{property.bedrooms !== 1 ? 's' : ''}</span>
+                    <BedDouble className="h-4 w-4 mr-2 text-muted-foreground" />
+                    <span className="text-sm">{property.bedrooms} Bedroom{property.bedrooms !== 1 ? 's' : ''}</span>
                   </div>
                 )}
                 
                 {property.bathrooms > 0 && (
                   <div className="flex items-center">
-                    <Bath className="h-5 w-5 mr-2 text-muted-foreground" />
-                    <span>{property.bathrooms} Bathroom{property.bathrooms !== 1 ? 's' : ''}</span>
+                    <Bath className="h-4 w-4 mr-2 text-muted-foreground" />
+                    <span className="text-sm">{property.bathrooms} Bathroom{property.bathrooms !== 1 ? 's' : ''}</span>
                   </div>
                 )}
                 
                 {(property.built_up_area > 0 || property.land_area > 0) && (
                   <div className="flex items-center">
-                    <Ruler className="h-5 w-5 mr-2 text-muted-foreground" />
-                    <span>
+                    <Ruler className="h-4 w-4 mr-2 text-muted-foreground" />
+                    <span className="text-sm">
                       {property.built_up_area > 0 
                         ? `${property.built_up_area.toLocaleString()} sqft` 
                         : `${property.land_area.toLocaleString()} sqft land`}
@@ -89,9 +89,9 @@ const PropertySummaryCard: React.FC<PropertySummaryCardProps> = ({
               </div>
               
               {property.street && (
-                <div className="pt-2">
-                  <h3 className="text-sm font-medium text-muted-foreground mb-1">Location</h3>
-                  <p className="text-sm">
+                <div className="pt-1">
+                  <h3 className="text-xs font-medium text-muted-foreground mb-1">Location</h3>
+                  <p className="text-xs">
                     {property.street}
                     {property.city && `, ${property.city}`}
                     {property.state && `, ${property.state}`}
@@ -101,9 +101,9 @@ const PropertySummaryCard: React.FC<PropertySummaryCardProps> = ({
               )}
               
               {property.description && (
-                <div className="pt-2">
-                  <h3 className="text-sm font-medium text-muted-foreground mb-1">Description</h3>
-                  <p className="text-sm line-clamp-3">{property.description}</p>
+                <div className="pt-1">
+                  <h3 className="text-xs font-medium text-muted-foreground mb-1">Description</h3>
+                  <p className="text-xs line-clamp-3">{property.description}</p>
                 </div>
               )}
             </div>

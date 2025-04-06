@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ExternalLink, ImageOff, AlertCircle } from 'lucide-react';
+import { ExternalLink, ImageOff, AlertCircle, Maximize2 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
@@ -17,6 +17,7 @@ const PropertyGallery: React.FC<PropertyGalleryProps> = ({ propertyId, images = 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [debugData, setDebugData] = useState<any>(null);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
   
   useEffect(() => {
     const fetchImages = async () => {
@@ -74,14 +75,18 @@ const PropertyGallery: React.FC<PropertyGalleryProps> = ({ propertyId, images = 
     
     fetchImages();
   }, [propertyId, images]);
+
+  const handleThumbnailClick = (index: number) => {
+    setActiveImageIndex(index);
+  };
   
   if (loading) {
     return (
       <div className="space-y-2">
-        <Skeleton className="aspect-video w-full h-48 border border-neutral-800" />
+        <Skeleton className="aspect-video w-full h-40 border border-neutral-800 rounded-md" />
         <div className="grid grid-cols-4 gap-2">
           {Array(4).fill(0).map((_, index) => (
-            <Skeleton key={index} className="aspect-square h-12 border border-neutral-800" />
+            <Skeleton key={index} className="aspect-square h-10 border border-neutral-800 rounded-md" />
           ))}
         </div>
       </div>
@@ -101,17 +106,22 @@ const PropertyGallery: React.FC<PropertyGalleryProps> = ({ propertyId, images = 
   
   return (
     <div className="space-y-2">
-      <div className="aspect-video bg-black/20 rounded-md overflow-hidden h-48 max-h-48 border border-neutral-800 shadow-sm">
+      <div className="aspect-video bg-black/20 rounded-md overflow-hidden h-40 max-h-40 border border-neutral-800 shadow-md relative group">
         {hasImages ? (
-          <img 
-            src={imageUrls[0]} 
-            alt={`${title} main view`} 
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              console.error('Failed to load image:', imageUrls[0]);
-              e.currentTarget.src = '/placeholder.svg';
-            }}
-          />
+          <>
+            <img 
+              src={imageUrls[activeImageIndex]} 
+              alt={`${title} main view`} 
+              className="w-full h-full object-cover transition-transform group-hover:scale-[1.02] duration-300"
+              onError={(e) => {
+                console.error('Failed to load image:', imageUrls[activeImageIndex]);
+                e.currentTarget.src = '/placeholder.svg';
+              }}
+            />
+            <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <Maximize2 className="h-6 w-6 text-white opacity-80" />
+            </div>
+          </>
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground">
             <ImageOff className="h-8 w-8 mb-2 opacity-40" />
@@ -122,11 +132,17 @@ const PropertyGallery: React.FC<PropertyGalleryProps> = ({ propertyId, images = 
       
       <div className="grid grid-cols-4 gap-2">
         {hasImages ? (
-          imageUrls.slice(1, 5).map((imageUrl, index) => (
-            <div key={index} className="aspect-square bg-black/20 rounded-md overflow-hidden h-12 border border-neutral-800 shadow-sm">
+          imageUrls.slice(0, 4).map((imageUrl, index) => (
+            <div 
+              key={index} 
+              className={`aspect-square bg-black/20 rounded-md overflow-hidden h-10 border border-neutral-800 shadow-md cursor-pointer transition-all duration-150 ${
+                index === activeImageIndex ? 'ring-2 ring-primary/70 scale-[1.03]' : 'hover:ring-1 hover:ring-primary/40 hover:scale-[1.02]'
+              }`}
+              onClick={() => handleThumbnailClick(index)}
+            >
               <img 
                 src={imageUrl} 
-                alt={`${title} view ${index + 2}`}
+                alt={`${title} view ${index + 1}`}
                 className="w-full h-full object-cover"
                 onError={(e) => {
                   console.error('Failed to load thumbnail:', imageUrl);
@@ -137,7 +153,7 @@ const PropertyGallery: React.FC<PropertyGalleryProps> = ({ propertyId, images = 
           ))
         ) : (
           Array(4).fill(0).map((_, index) => (
-            <div key={index} className="aspect-square bg-black/20 rounded-md h-12 flex items-center justify-center border border-neutral-800 shadow-sm">
+            <div key={index} className="aspect-square bg-black/20 rounded-md h-10 flex items-center justify-center border border-neutral-800 shadow-md">
               <ImageOff className="h-3 w-3 opacity-20" />
             </div>
           ))
