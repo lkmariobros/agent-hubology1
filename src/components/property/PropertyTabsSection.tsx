@@ -3,8 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PropertyDetails from './PropertyDetails';
 import PropertyOwnerCard from './PropertyOwnerCard';
-import TeamNotesSection from './TeamNotes';
-import { TeamNote } from './TeamNotes';
+import TeamNotesSection, { TeamNote } from './TeamNotes';
 import { supabase } from '@/lib/supabase';
 
 interface PropertyTabsSectionProps {
@@ -102,6 +101,7 @@ const PropertyTabsSection: React.FC<PropertyTabsSectionProps> = ({
       <TabsList className="mb-4">
         <TabsTrigger value="details">Details</TabsTrigger>
         <TabsTrigger value="owner">Owner</TabsTrigger>
+        <TabsTrigger value="notes">Team Notes</TabsTrigger>
         <TabsTrigger value="transactions">Transactions</TabsTrigger>
         <TabsTrigger value="documents">Documents</TabsTrigger>
         <TabsTrigger value="history">History</TabsTrigger>
@@ -119,6 +119,10 @@ const PropertyTabsSection: React.FC<PropertyTabsSectionProps> = ({
             No owner information available
           </div>
         )}
+      </TabsContent>
+      
+      <TabsContent value="notes">
+        <TeamNotesSection notes={notes} onAddNote={onAddNote} />
       </TabsContent>
       
       <TabsContent value="transactions">
