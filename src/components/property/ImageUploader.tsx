@@ -29,6 +29,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   const bucketCheckAttempted = useRef(false);
   const [retryCount, setRetryCount] = useState(0);
   const isComponentMounted = useRef(true);
+  const [localUploadState, setLocalUploadState] = useState<Record<string, boolean>>({});
 
   // Check if the storage buckets are accessible
   useEffect(() => {
@@ -106,6 +107,12 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
 
         // Generate a unique ID for this image
         const imageId = `img-${Date.now()}-${index}`;
+        
+        // Track local upload state for this specific image
+        setLocalUploadState(prev => ({
+          ...prev,
+          [imageId]: true
+        }));
 
         // Add to form state immediately for preview with required properties
         addImage({
@@ -134,6 +141,12 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
           if (currentIndex !== -1) {
             // Update the image status to success
             updateImageStatus(currentIndex, 'success', result);
+            
+            // Update local upload state for this image
+            setLocalUploadState(prev => ({
+              ...prev,
+              [imageId]: false
+            }));
           }
         } catch (error: any) {
           console.error('Error uploading file:', error);
@@ -143,6 +156,12 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
           const currentIndex = state.images.findIndex(img => img.id === imageId);
           if (currentIndex !== -1) {
             updateImageStatus(currentIndex, 'error');
+            
+            // Update local upload state for this image
+            setLocalUploadState(prev => ({
+              ...prev,
+              [imageId]: false
+            }));
           }
         }
       }
@@ -162,11 +181,21 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
       'image/webp': ['.webp']
     },
     maxSize: maxSizeMB * 1024 * 1024, // Convert MB to bytes
-    disabled: isUploading || disabled || bucketStatus !== 'available',
+    disabled: disabled || bucketStatus !== 'available',
     noClick: false, // Allow clicking to trigger file dialog
   });
 
   const handleRemoveImage = (index: number) => {
+    // If the image has an ID, update local state
+    const imageId = state.images[index]?.id;
+    if (imageId) {
+      setLocalUploadState(prev => {
+        const newState = { ...prev };
+        delete newState[imageId];
+        return newState;
+      });
+    }
+    
     removeImage(index);
   };
 
@@ -254,7 +283,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
             variant="secondary" 
             className="mt-2" 
             onClick={handleSelectClick}
-            disabled={bucketStatus !== 'available' || disabled || isUploading}
+            disabled={bucketStatus !== 'available' || disabled}
           >
             <Image className="h-4 w-4 mr-2" />
             Select Files
@@ -271,77 +300,84 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
       {/* Preview Area */}
       {state.images.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-          {state.images.map((image, index) => (
-            <div key={index} className="relative group">
-              <div className={`overflow-hidden rounded-lg aspect-square ${image.uploadStatus === 'uploading' ? 'opacity-70' : ''}`}>
-                <img 
-                  src={image.previewUrl || image.url} 
-                  alt={`Property preview ${index + 1}`}
-                  className={`w-full h-full object-cover transition-transform group-hover:scale-105 ${
-                    image.uploadStatus === 'error' ? 'border-2 border-red-500' : ''
-                  }`}
-                  onError={(e) => {
-                    console.error('Failed to load image:', image.previewUrl || image.url);
-                    e.currentTarget.src = '/placeholder.svg';
-                  }}
-                />
-              </div>
+          {state.images.map((image, index) => {
+            // Determine if this image is still uploading
+            const isImageUploading = 
+              (image.uploadStatus === 'uploading') || 
+              (image.id && localUploadState[image.id]);
               
-              {/* Image status indicator */}
-              {image.uploadStatus === 'uploading' && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            return (
+              <div key={index} className="relative group">
+                <div className={`overflow-hidden rounded-lg aspect-square ${isImageUploading ? 'opacity-70' : ''}`}>
+                  <img 
+                    src={image.previewUrl || image.url} 
+                    alt={`Property preview ${index + 1}`}
+                    className={`w-full h-full object-cover transition-transform group-hover:scale-105 ${
+                      image.uploadStatus === 'error' ? 'border-2 border-red-500' : ''
+                    }`}
+                    onError={(e) => {
+                      console.error('Failed to load image:', image.previewUrl || image.url);
+                      e.currentTarget.src = '/placeholder.svg';
+                    }}
+                  />
                 </div>
-              )}
-              
-              {image.uploadStatus === 'error' && (
-                <div className="absolute top-2 left-2 bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded-md">
-                  Failed
-                </div>
-              )}
-              
-              {image.uploadStatus === 'success' && (
-                <div className="absolute top-2 left-2 bg-green-500 text-white text-xs font-semibold px-2 py-1 rounded-md">
-                  Uploaded
-                </div>
-              )}
-              
-              <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                {!image.isCover && (
+                
+                {/* Image status indicator */}
+                {isImageUploading && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  </div>
+                )}
+                
+                {image.uploadStatus === 'error' && (
+                  <div className="absolute top-2 left-2 bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded-md">
+                    Failed
+                  </div>
+                )}
+                
+                {(image.uploadStatus === 'success' && !isImageUploading) && (
+                  <div className="absolute top-2 left-2 bg-green-500 text-white text-xs font-semibold px-2 py-1 rounded-md">
+                    Uploaded
+                  </div>
+                )}
+                
+                <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  {!image.isCover && (
+                    <Button
+                      variant="secondary"
+                      size="icon"
+                      className="h-8 w-8 shadow-md"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSetCover(index);
+                      }}
+                      title="Set as cover image"
+                    >
+                      <Check className="h-4 w-4" />
+                    </Button>
+                  )}
                   <Button
-                    variant="secondary"
+                    variant="destructive"
                     size="icon"
                     className="h-8 w-8 shadow-md"
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleSetCover(index);
+                      handleRemoveImage(index);
                     }}
-                    title="Set as cover image"
+                    title="Remove image"
                   >
-                    <Check className="h-4 w-4" />
+                    <X className="h-4 w-4" />
                   </Button>
-                )}
-                <Button
-                  variant="destructive"
-                  size="icon"
-                  className="h-8 w-8 shadow-md"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleRemoveImage(index);
-                  }}
-                  title="Remove image"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-              
-              {image.isCover && (
-                <div className="absolute bottom-2 left-2 text-xs font-semibold bg-primary text-primary-foreground px-2 py-1 rounded-md">
-                  Cover
                 </div>
-              )}
-            </div>
-          ))}
+                
+                {image.isCover && (
+                  <div className="absolute bottom-2 left-2 text-xs font-semibold bg-primary text-primary-foreground px-2 py-1 rounded-md">
+                    Cover
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

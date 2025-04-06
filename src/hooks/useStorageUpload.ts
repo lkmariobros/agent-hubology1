@@ -18,6 +18,17 @@ export function useStorageUpload() {
   const [storageStatus, setStorageStatus] = useState<'checking' | 'available' | 'unavailable'>('available');
   const checkInProgress = useRef(false);
   const initialCheckDone = useRef(false);
+  const progressTimers = useRef<Record<string, NodeJS.Timeout>>({});
+
+  // Clear all timers on unmount
+  useEffect(() => {
+    return () => {
+      // Clear all running progress timers
+      Object.values(progressTimers.current).forEach(timer => {
+        clearInterval(timer);
+      });
+    };
+  }, []);
 
   // Simplified storage check - simply returns true to bypass the bucket check
   const checkStorageBuckets = async (bucketNames: string[]): Promise<boolean> => {
@@ -55,26 +66,36 @@ export function useStorageUpload() {
         throw new Error(`File type not supported. Accepted types: ${acceptedFileTypes.join(', ')}`);
       }
       
+      // Create a unique ID for this upload
+      const uploadId = `upload-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+      
       // Instead of uploading, we'll create a mock URL for the file
       // This allows us to proceed with development without relying on storage
       const mockUrl = URL.createObjectURL(file);
       
-      // Simulate upload progress
+      // Simulate upload progress with a timer
       let currentProgress = 0;
-      const progressInterval = setInterval(() => {
+      progressTimers.current[uploadId] = setInterval(() => {
         if (currentProgress < 100) {
           currentProgress += 10;
           setProgress(currentProgress);
         } else {
-          clearInterval(progressInterval);
+          // Clear the timer once we reach 100%
+          clearInterval(progressTimers.current[uploadId]);
+          delete progressTimers.current[uploadId];
+          
+          // Ensure we set progress to 100% in case the last increment didn't exactly hit 100
+          setProgress(100);
+          
+          // Reset the uploading state after a short delay to allow UI to show 100%
+          setTimeout(() => {
+            setIsUploading(false);
+          }, 300);
         }
       }, 100);
       
       // Simulate network delay
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      clearInterval(progressInterval);
-      setProgress(100);
       
       console.log('Simulated upload successful');
       toast.success('File uploaded successfully (simulated)');
@@ -85,9 +106,8 @@ export function useStorageUpload() {
       setError(error);
       console.error('File upload error:', error.message);
       toast.error(`Upload failed: ${error.message}`);
-      throw error;
-    } finally {
       setIsUploading(false);
+      throw error;
     }
   };
   
