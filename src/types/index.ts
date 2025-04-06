@@ -72,7 +72,8 @@ export interface AgentWithHierarchy {
   salesVolume?: number;
 }
 
-// Export the PropertyFormValues type directly, to avoid importing it from property.ts
+// Export the PropertyFormValues type directly from this file too,
+// to avoid the error in components that import it from here
 export interface PropertyFormValues {
   title: string;
   description: string;

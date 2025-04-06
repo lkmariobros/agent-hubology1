@@ -65,12 +65,24 @@ export function formatInstallment(
 /**
  * Group installments by month for charting/display
  */
-export function groupInstallmentsByMonth(installments: CommissionInstallment[]): Record<string, number> {
-  return installments.reduce((acc, installment) => {
+export function groupInstallmentsByMonth(installments: CommissionInstallment[]): Record<string, any> {
+  const result: Record<string, any> = {};
+  
+  installments.forEach(installment => {
     const month = format(new Date(installment.scheduledDate), 'MMM yyyy');
-    acc[month] = (acc[month] || 0) + installment.amount;
-    return acc;
-  }, {} as Record<string, number>);
+    
+    if (!result[month]) {
+      result[month] = {
+        totalAmount: 0,
+        installments: []
+      };
+    }
+    
+    result[month].totalAmount += installment.amount;
+    result[month].installments.push(installment);
+  });
+  
+  return result;
 }
 
 /**

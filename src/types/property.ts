@@ -34,7 +34,7 @@ export interface Property {
   area: number;
   size: number;
   agent?: PropertyAgent;
-  // Add missing properties
+  // Adding missing properties that were causing errors
   stock?: PropertyStock;
   featured?: boolean;
   transactionType?: string;
@@ -51,7 +51,7 @@ export interface PropertyAgent {
   avatar?: string;
 }
 
-// Add PropertyFormValues type needed for property forms
+// This is needed for property forms and was missing
 export interface PropertyFormValues {
   title: string;
   description: string;

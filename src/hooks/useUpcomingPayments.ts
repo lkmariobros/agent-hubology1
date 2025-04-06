@@ -2,87 +2,62 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { CommissionInstallment } from '@/types/commission';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from './useAuth';
 
-/**
- * Hook to fetch upcoming commission payments for the current agent
- */
-export const useUpcomingPayments = () => {
+export function useUpcomingPayments(limit: number = 5) {
   const { user } = useAuth();
   
   return useQuery({
-    queryKey: ['upcomingPayments', user?.id],
+    queryKey: ['upcomingPayments', user?.id, limit],
     queryFn: async () => {
-      if (!user) {
-        return [];
-      }
+      if (!user?.id) return [];
       
       const { data, error } = await supabase
         .from('commission_installments')
         .select(`
           *,
           transaction:property_transactions (
-            *,
-            property:property_id (
-              title
-            )
+            property:property_id (title)
           )
         `)
         .eq('agent_id', user.id)
-        .in('status', ['Pending', 'Processing'])
-        .order('scheduled_date', { ascending: true });
+        .eq('status', 'Pending')
+        .order('scheduled_date')
+        .limit(limit);
         
-      if (error) {
-        console.error('Error fetching upcoming payments:', error);
-        throw new Error(error.message);
-      }
+      if (error) throw error;
       
       return data as CommissionInstallment[];
     },
-    enabled: !!user,
+    enabled: !!user?.id
   });
-};
+}
 
-/**
- * Hook to fetch commission payment forecast grouped by month
- */
-export const useCommissionForecast = () => {
+export function useCommissionForecast() {
   const { user } = useAuth();
   
   return useQuery({
     queryKey: ['commissionForecast', user?.id],
     queryFn: async () => {
-      if (!user) {
-        return [];
-      }
+      if (!user?.id) return [];
       
       const { data, error } = await supabase
         .from('commission_installments')
         .select(`
           *,
           transaction:property_transactions (
-            *,
-            property:property_id (
-              title,
-              address
-            ),
-            agent:agent_id (
-              first_name,
-              last_name
-            )
+            property:property_id (title)
           )
         `)
         .eq('agent_id', user.id)
         .in('status', ['Pending', 'Processing'])
-        .order('scheduled_date', { ascending: true });
+        .gte('scheduled_date', new Date().toISOString().split('T')[0])
+        .order('scheduled_date');
         
-      if (error) {
-        console.error('Error fetching commission forecast:', error);
-        throw new Error(error.message);
-      }
+      if (error) throw error;
       
       return data as CommissionInstallment[];
     },
-    enabled: !!user,
+    enabled: !!user?.id
   });
-};
+}
