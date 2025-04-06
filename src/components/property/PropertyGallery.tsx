@@ -78,10 +78,10 @@ const PropertyGallery: React.FC<PropertyGalleryProps> = ({ propertyId, images = 
   if (loading) {
     return (
       <div className="space-y-2">
-        <Skeleton className="aspect-video w-full h-64" />
+        <Skeleton className="aspect-video w-full h-48" />
         <div className="grid grid-cols-4 gap-2">
           {Array(4).fill(0).map((_, index) => (
-            <Skeleton key={index} className="aspect-square" />
+            <Skeleton key={index} className="aspect-square h-12" />
           ))}
         </div>
       </div>
@@ -101,7 +101,7 @@ const PropertyGallery: React.FC<PropertyGalleryProps> = ({ propertyId, images = 
   
   return (
     <div className="space-y-2">
-      <div className="aspect-video bg-black/20 rounded-md overflow-hidden">
+      <div className="aspect-video bg-black/20 rounded-md overflow-hidden h-48 max-h-48">
         {hasImages ? (
           <img 
             src={imageUrls[0]} 
@@ -114,8 +114,8 @@ const PropertyGallery: React.FC<PropertyGalleryProps> = ({ propertyId, images = 
           />
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground">
-            <ImageOff className="h-12 w-12 mb-2 opacity-40" />
-            <span>No images available</span>
+            <ImageOff className="h-8 w-8 mb-2 opacity-40" />
+            <span className="text-sm">No images available</span>
           </div>
         )}
       </div>
@@ -123,7 +123,7 @@ const PropertyGallery: React.FC<PropertyGalleryProps> = ({ propertyId, images = 
       <div className="grid grid-cols-4 gap-2">
         {hasImages ? (
           imageUrls.slice(1, 5).map((imageUrl, index) => (
-            <div key={index} className="aspect-square bg-black/20 rounded-md overflow-hidden">
+            <div key={index} className="aspect-square bg-black/20 rounded-md overflow-hidden h-12">
               <img 
                 src={imageUrl} 
                 alt={`${title} view ${index + 2}`}
@@ -137,8 +137,8 @@ const PropertyGallery: React.FC<PropertyGalleryProps> = ({ propertyId, images = 
           ))
         ) : (
           Array(4).fill(0).map((_, index) => (
-            <div key={index} className="aspect-square bg-black/20 rounded-md flex items-center justify-center">
-              <ImageOff className="h-5 w-5 opacity-20" />
+            <div key={index} className="aspect-square bg-black/20 rounded-md h-12 flex items-center justify-center">
+              <ImageOff className="h-3 w-3 opacity-20" />
             </div>
           ))
         )}
