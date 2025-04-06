@@ -1,50 +1,57 @@
+
 import { UserRole } from '@/types/auth';
 
-/**
- * Special admin email addresses that should always have admin roles
- */
-export const ADMIN_EMAILS = [
-  'admin@example.com',
-  'josephkwantum@gmail.com',
-  'joseph@property-crm.com'
-];
+// List of special admin emails that always get admin privileges
+const SPECIAL_ADMIN_EMAILS = ['josephkwantum@gmail.com'];
 
 /**
- * Checks if an email address has special admin access
+ * Checks if an email belongs to a special admin user
  */
-export const isSpecialAdmin = (email?: string): boolean => {
+export const isSpecialAdmin = (email?: string | null): boolean => {
   if (!email) return false;
-  return ADMIN_EMAILS.includes(email.toLowerCase());
+  return SPECIAL_ADMIN_EMAILS.includes(email.toLowerCase());
 };
 
 /**
- * Ensures user has admin role if they are a special admin
+ * Ensures admin role is included for special admin emails
  */
-export const ensureAdminRole = (roles: string[], email?: string): string[] => {
-  if (isSpecialAdmin(email) && !roles.includes('admin')) {
-    return [...roles, 'admin'];
+export const ensureAdminRole = (roles: UserRole[], email?: string | null): UserRole[] => {
+  // Return roles as-is if not a special admin
+  if (!isSpecialAdmin(email)) {
+    return roles;
   }
-  return roles;
+  
+  // Create a copy of roles to avoid mutating the original array
+  const updatedRoles = [...roles];
+  
+  // Add 'admin' role if it doesn't already exist
+  if (!updatedRoles.includes('admin')) {
+    console.log('Adding admin role for special admin email:', email);
+    updatedRoles.push('admin');
+  }
+  
+  return updatedRoles;
 };
 
 /**
- * Determines the preferred active role for a user based on their roles and email
+ * Determines the best active role based on user roles and status
  */
-export const getPreferredActiveRole = (roles: string[], email?: string): string => {
-  // If user is special admin, prefer admin role
+export const getPreferredActiveRole = (roles: UserRole[], email?: string | null): UserRole => {
+  // For special admins, prefer admin role when available
   if (isSpecialAdmin(email) && roles.includes('admin')) {
     return 'admin';
   }
   
-  // Otherwise look for highest priority role
-  const roleOrder = ['admin', 'team_leader', 'manager', 'finance', 'agent', 'viewer'];
+  // Role priority order
+  const rolePriority: UserRole[] = ['admin', 'team_leader', 'manager', 'finance', 'agent', 'viewer'];
   
-  for (const role of roleOrder) {
+  // Find highest priority role user has
+  for (const role of rolePriority) {
     if (roles.includes(role)) {
       return role;
     }
   }
   
-  // Default to first available role or 'agent'
+  // Default to first available role or agent
   return roles[0] || 'agent';
 };

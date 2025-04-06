@@ -1,5 +1,4 @@
 
-import * as React from 'react'; // Use namespace import to ensure React is fully available
 import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
@@ -24,22 +23,20 @@ if (!rootElement) {
   // Create and render React root
   const root = createRoot(rootElement);
   root.render(
-    <React.StrictMode>
-      <ThemeProvider>
-        <QueryClientProvider client={queryClient}>
-          <TooltipProvider>
-            <App />
-            {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
-          </TooltipProvider>
-          <Toaster 
-            expand={false} 
-            visibleToasts={3} 
-            closeButton={true}
-            richColors={true}
-            position="top-right"
-          />
-        </QueryClientProvider>
-      </ThemeProvider>
-    </React.StrictMode>
+    <ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <App />
+          {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
+        </TooltipProvider>
+        <Toaster 
+          expand={false} 
+          visibleToasts={3} 
+          closeButton={true}
+          richColors={true}
+          position="top-right"
+        />
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }

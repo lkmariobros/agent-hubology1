@@ -6,8 +6,11 @@ import { PropertyFormData } from '@/types/property-form';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { Loader2, AlertCircle } from 'lucide-react';
+import { Loader2, AlertCircle, AlertTriangle } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import propertyFormHelpers from '@/utils/propertyFormHelpers';
+import { useStorageUpload } from '@/hooks/useStorageUpload';
+import { Button } from '@/components/ui/button';
 
 interface PropertyFormWrapperProps {
   propertyId?: string;
@@ -25,36 +28,45 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [storageReady, setStorageReady] = useState(false);
   const { createProperty, updateProperty } = usePropertyManagement();
-  const isComponentMounted = useRef(true);
+  const { checkStorageBuckets } = useStorageUpload();
+  const initializationAttempted = useRef(false);
   
-  // Initialize form - simplified to avoid storage checks
+  // Initialize form and check storage
   useEffect(() => {
-    isComponentMounted.current = true;
+    // Prevent multiple initialization attempts
+    if (initializationAttempted.current) {
+      return;
+    }
     
     const initializeForm = async () => {
-      if (!isComponentMounted.current) return;
-      
       try {
+        initializationAttempted.current = true;
         setIsInitializing(true);
-        // Simplified initialization - no storage checks
-        console.log('Form initialized successfully');
-      } catch (error) {
-        if (!isComponentMounted.current) return;
-        console.error('Error initializing property form:', error);
-      } finally {
-        if (isComponentMounted.current) {
-          setIsInitializing(false);
+        
+        // Check storage configuration
+        const requiredBuckets = ['property-images', 'property-documents'];
+        const bucketsExist = await checkStorageBuckets(requiredBuckets);
+        
+        setStorageReady(bucketsExist);
+        
+        if (!bucketsExist) {
+          console.warn('Missing required storage buckets');
+          toast.warning('Storage configuration issue detected. Image and document uploads may not work correctly.');
+        } else {
+          console.log('All required storage buckets are available');
         }
+      } catch (error) {
+        console.error('Error initializing property form:', error);
+        setStorageReady(false);
+      } finally {
+        setIsInitializing(false);
       }
     };
     
     initializeForm();
-    
-    return () => {
-      isComponentMounted.current = false;
-    };
-  }, []);
+  }, [checkStorageBuckets]);
   
   const handleFormSubmit = async (data: PropertyFormData) => {
     if (!user) {
@@ -142,6 +154,30 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
     }
   };
   
+  // Function to recheck storage buckets
+  const recheckStorageBuckets = async () => {
+    setIsInitializing(true);
+    
+    try {
+      const requiredBuckets = ['property-images', 'property-documents'];
+      const bucketsExist = await checkStorageBuckets(requiredBuckets);
+      
+      setStorageReady(bucketsExist);
+      
+      if (bucketsExist) {
+        toast.success('Storage buckets are now available');
+      } else {
+        toast.warning('Some required storage buckets are still missing or inaccessible');
+      }
+    } catch (error) {
+      console.error('Error checking storage buckets:', error);
+      toast.error('Failed to check storage bucket availability');
+      setStorageReady(false);
+    } finally {
+      setIsInitializing(false);
+    }
+  };
+  
   if (isInitializing) {
     return (
       <div className="flex flex-col items-center justify-center p-8">
@@ -177,11 +213,31 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
         </Alert>
       )}
       
+      {!storageReady && (
+        <Alert variant="warning" className="mb-6">
+          <AlertTriangle className="h-4 w-4 mr-2" />
+          <AlertTitle>Storage Notice</AlertTitle>
+          <AlertDescription className="flex flex-col space-y-3">
+            <p>
+              Image and document uploads may not work correctly. This could be due to missing storage buckets or permission issues.
+            </p>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={recheckStorageBuckets}
+              className="self-start"
+            >
+              Check Again
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+      
       <EnhancedPropertyForm 
         onSubmit={handleFormSubmit}
         initialData={initialData}
         isEdit={isEdit}
-        storageReady={true}
+        storageReady={storageReady}
       />
     </>
   );

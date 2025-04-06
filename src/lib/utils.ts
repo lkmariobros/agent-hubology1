@@ -1,40 +1,36 @@
 
-import { type ClassValue, clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+import { clsx, type ClassValue } from "clsx"
+import { twMerge } from "tailwind-merge"
+import { format, parseISO } from 'date-fns';
 
-/**
- * Utility function to merge Tailwind classes
- */
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
+  return twMerge(clsx(inputs))
 }
 
 /**
- * Format currency value
+ * Format date for display
  */
-export function formatCurrency(amount: number): string {
+export function formatDate(dateString: string | null | undefined, formatString: string = 'MMM dd, yyyy'): string {
+  if (!dateString) return 'N/A';
+  
+  try {
+    return format(parseISO(dateString), formatString);
+  } catch (error) {
+    console.error('Error formatting date:', error);
+    return 'Invalid Date';
+  }
+}
+
+/**
+ * Format currency for display
+ */
+export function formatCurrency(amount: number | null | undefined): string {
+  if (amount === null || amount === undefined) return '$0';
+  
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
+    minimumFractionDigits: 0,
     maximumFractionDigits: 0
   }).format(amount);
-}
-
-/**
- * Get user initials from name or email
- */
-export function getUserInitials(name?: string, email?: string): string {
-  if (name && name.length > 0) {
-    const parts = name.split(' ');
-    if (parts.length >= 2) {
-      return `${parts[0].charAt(0)}${parts[1].charAt(0)}`.toUpperCase();
-    }
-    return name.substring(0, 2).toUpperCase();
-  }
-  
-  if (email) {
-    return email.substring(0, 2).toUpperCase();
-  }
-  
-  return 'U';
 }

@@ -1,25 +1,21 @@
 
-import React from 'react';
+import { Session } from '@supabase/supabase-js';
+import { UserProfile, UserRole, AuthContextType } from '@/types/auth';
 
-// Props for AuthProvider component
+// Re-export the types from the main types file for convenience
+export type { UserProfile, UserRole, AuthContextType };
+
+// Additional types specific to auth context implementation
 export interface AuthProviderProps {
   children: React.ReactNode;
 }
 
-// Auth context state
 export interface AuthState {
-  user: any | null;
+  user: UserProfile | null;
   profile: any | null;
-  session: any | null;
+  session: Session | null;
   loading: boolean;
   error: Error | null;
-  roles: string[];
-  activeRole: string;
+  roles: UserRole[];
+  activeRole: UserRole;
 }
-
-// Auth service action types
-export type AuthAction = 
-  | { type: 'SET_LOADING'; payload: boolean }
-  | { type: 'SET_ERROR'; payload: Error | null }
-  | { type: 'SET_SESSION'; payload: { session: any; user: any; profile: any; roles: string[]; activeRole: string; } }
-  | { type: 'RESET' };

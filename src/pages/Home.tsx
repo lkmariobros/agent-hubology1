@@ -14,8 +14,7 @@ const Home = () => {
       location: 'Downtown',
       status: 'Active',
       postedBy: 'John Smith',
-      postedDate: '2023-06-15T10:30:00Z',
-      propertyType: 'Residential'
+      postedDate: '2023-06-15T10:30:00Z'
     },
     {
       id: '2',
@@ -25,8 +24,7 @@ const Home = () => {
       location: 'Business District',
       status: 'Urgent',
       postedBy: 'Sarah Johnson',
-      postedDate: '2023-06-18T14:45:00Z',
-      propertyType: 'Commercial'
+      postedDate: '2023-06-18T14:45:00Z'
     }
   ];
 

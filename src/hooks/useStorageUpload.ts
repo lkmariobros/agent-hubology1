@@ -15,22 +15,52 @@ export function useStorageUpload() {
   const [isUploading, setIsUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<Error | null>(null);
-  const [storageStatus, setStorageStatus] = useState<'checking' | 'available' | 'unavailable'>('available');
+  const [storageStatus, setStorageStatus] = useState<'checking' | 'available' | 'unavailable'>('checking');
   const checkInProgress = useRef(false);
-  const initialCheckDone = useRef(false);
 
-  // Simplified storage check - simply returns true to bypass the bucket check
+  // Function to verify storage buckets exist and are accessible
   const checkStorageBuckets = async (bucketNames: string[]): Promise<boolean> => {
-    console.log('Storage check bypassed, assuming storage is available');
-    setStorageStatus('available');
-    return true;
-  };
-
-  // Also simplified to bypass the bucket cache
-  const forceCheckStorageBuckets = async (bucketNames: string[]): Promise<boolean> => {
-    console.log('Force storage check bypassed, assuming storage is available');
-    setStorageStatus('available');
-    return true;
+    // Prevent concurrent checks
+    if (checkInProgress.current) {
+      console.log('Storage bucket check already in progress, skipping...');
+      return storageStatus === 'available';
+    }
+    
+    try {
+      checkInProgress.current = true;
+      setStorageStatus('checking');
+      
+      console.log('Checking storage buckets:', bucketNames);
+      
+      // Check if buckets exist
+      const { data: buckets, error } = await supabase.storage.listBuckets();
+      
+      if (error) {
+        console.error('Error checking buckets:', error);
+        setStorageStatus('unavailable');
+        return false;
+      }
+      
+      const existingBuckets = buckets?.map(b => b.name) || [];
+      console.log('Available buckets:', existingBuckets);
+      
+      // Check if all required buckets exist
+      const allBucketsExist = bucketNames.every(bucket => existingBuckets.includes(bucket));
+      
+      if (!allBucketsExist) {
+        const missingBuckets = bucketNames.filter(b => !existingBuckets.includes(b));
+        console.warn('Missing buckets:', missingBuckets);
+      }
+      
+      setStorageStatus(allBucketsExist ? 'available' : 'unavailable');
+      return allBucketsExist;
+    } catch (err) {
+      console.error('Error verifying storage buckets:', err);
+      setStorageStatus('unavailable');
+      return false;
+    } finally {
+      checkInProgress.current = false;
+    }
   };
 
   const uploadFile = async (file: File, options: UploadOptions): Promise<string> => {
@@ -42,7 +72,13 @@ export function useStorageUpload() {
     setError(null);
     
     try {
-      console.log(`Starting upload process for file: ${file.name}`);
+      console.log('Starting upload process for file:', file.name);
+      
+      // Check bucket accessibility first
+      const bucketExists = await checkStorageBuckets([bucket]);
+      if (!bucketExists) {
+        throw new Error(`Storage bucket '${bucket}' is not accessible. Please check your storage configuration.`);
+      }
       
       // Validate file size
       const fileSizeInMB = file.size / (1024 * 1024);
@@ -55,34 +91,62 @@ export function useStorageUpload() {
         throw new Error(`File type not supported. Accepted types: ${acceptedFileTypes.join(', ')}`);
       }
       
-      // Instead of uploading, we'll create a mock URL for the file
-      // This allows us to proceed with development without relying on storage
-      const mockUrl = URL.createObjectURL(file);
+      // Generate a unique file name to avoid collisions
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+      const filePath = path ? `${path}/${fileName}` : fileName;
       
-      // Simulate upload progress
-      let currentProgress = 0;
+      console.log('Uploading to path:', filePath);
+      
+      // Simulate progress (in real implementation, this would use upload events)
       const progressInterval = setInterval(() => {
-        if (currentProgress < 95) {
-          currentProgress += 5;
-          setProgress(currentProgress);
-        }
-      }, 100);
+        setProgress(prev => {
+          const nextProgress = Math.min(prev + 10, 90);
+          return nextProgress;
+        });
+      }, 300);
       
-      // Simulate network delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Upload the file to Supabase Storage
+      console.log('Executing upload to Supabase bucket:', bucket);
+      const { data, error } = await supabase.storage
+        .from(bucket)
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: upsert,
+        });
       
       clearInterval(progressInterval);
+      
+      if (error) {
+        console.error('Supabase upload error:', error);
+        
+        // Check for specific error types and provide user-friendly messages
+        if (error.message.includes('storage/object-too-large')) {
+          throw new Error(`File is too large. Maximum size is ${maxSizeMB}MB.`);
+        } else if (error.message.includes('permission denied')) {
+          throw new Error('You do not have permission to upload files to this storage bucket.');
+        } else {
+          throw error;
+        }
+      }
+      
+      console.log('Upload successful, data:', data);
+      
+      // Get public URL for the uploaded file
+      const { data: { publicUrl } } = supabase.storage
+        .from(bucket)
+        .getPublicUrl(data?.path || filePath);
+      
+      console.log('Generated public URL:', publicUrl);
+      
       setProgress(100);
-      
-      console.log('Simulated upload successful');
-      toast.success('File uploaded successfully (simulated)');
-      
-      return mockUrl;
+      return publicUrl;
     } catch (err) {
       const error = err as Error;
       setError(error);
       console.error('File upload error:', error.message);
-      toast.error(`Upload failed: ${error.message}`);
+      
+      // Return a more specific error
       throw error;
     } finally {
       setIsUploading(false);
@@ -91,12 +155,13 @@ export function useStorageUpload() {
   
   const deleteFile = async (bucket: string, path: string): Promise<void> => {
     try {
-      console.log(`Simulating deletion of file at ${path} from ${bucket}`);
+      const { error } = await supabase.storage
+        .from(bucket)
+        .remove([path]);
       
-      // Simulate network delay
-      await new Promise(resolve => setTimeout(resolve, 500));
+      if (error) throw error;
       
-      toast.success('File deleted successfully (simulated)');
+      toast.success('File deleted successfully');
     } catch (err) {
       const error = err as Error;
       setError(error);
@@ -110,7 +175,6 @@ export function useStorageUpload() {
     uploadFile,
     deleteFile,
     checkStorageBuckets,
-    forceCheckStorageBuckets,
     isUploading,
     progress,
     error,

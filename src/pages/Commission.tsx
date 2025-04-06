@@ -20,7 +20,7 @@ const fallbackTiers: CommissionTier[] = [{
   minTransactions: 0,
   color: 'orange',
   rank: 'Associate',
-  percentage: 70,
+  agentPercentage: 70,
   commissionRate: 70,
   requirements: []
 }, {
@@ -31,7 +31,7 @@ const fallbackTiers: CommissionTier[] = [{
   minTransactions: 10,
   color: 'blue',
   rank: 'Senior Associate',
-  percentage: 75,
+  agentPercentage: 75,
   commissionRate: 75,
   requirements: []
 }, {
@@ -42,7 +42,7 @@ const fallbackTiers: CommissionTier[] = [{
   minTransactions: 25,
   color: 'orange',
   rank: 'Team Leader',
-  percentage: 80,
+  agentPercentage: 80,
   commissionRate: 80,
   requirements: []
 }, {
@@ -53,7 +53,7 @@ const fallbackTiers: CommissionTier[] = [{
   minTransactions: 50,
   color: 'purple',
   rank: 'Sales Leader',
-  percentage: 85,
+  agentPercentage: 85,
   commissionRate: 85,
   requirements: []
 }, {
@@ -64,7 +64,7 @@ const fallbackTiers: CommissionTier[] = [{
   minTransactions: 100,
   color: 'pink',
   rank: 'Director',
-  percentage: 90,
+  agentPercentage: 90,
   commissionRate: 90,
   requirements: []
 }];
@@ -107,8 +107,8 @@ const fallbackAgentHierarchy: AgentWithHierarchy = {
 // Sample recent commission history (would come from API in production)
 const recentCommissions: CommissionHistory[] = [{
   id: '1',
-  transactionId: 'tx1',
   transactionReference: 'tx1',
+  transactionId: 'tx1',
   property: {
     title: 'Suburban Family Home',
     location: 'Palo Alto, CA'
@@ -119,8 +119,8 @@ const recentCommissions: CommissionHistory[] = [{
   status: 'Completed'
 }, {
   id: '2',
-  transactionId: 'tx2',
   transactionReference: 'tx2',
+  transactionId: 'tx2',
   property: {
     title: 'Downtown Loft',
     location: 'San Francisco, CA'
@@ -131,8 +131,8 @@ const recentCommissions: CommissionHistory[] = [{
   status: 'Completed'
 }, {
   id: '3',
-  transactionId: 'tx3',
   transactionReference: 'tx3',
+  transactionId: 'tx3',
   property: {
     title: 'Luxury Beach Condo',
     location: 'Santa Monica, CA'
@@ -144,8 +144,8 @@ const recentCommissions: CommissionHistory[] = [{
   status: 'Completed'
 }, {
   id: '4',
-  transactionId: 'tx4',
   transactionReference: 'tx4',
+  transactionId: 'tx4',
   property: {
     title: 'Modern Townhouse',
     location: 'Berkeley, CA'

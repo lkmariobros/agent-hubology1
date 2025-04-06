@@ -75,8 +75,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               
               if (isSpecialAdmin(session.user.email)) {
                 console.log('[AuthProvider] Admin email detected, forcing admin role');
-                finalRoles = ensureAdminRole(finalRoles as string[], session.user.email) as UserRole[];
-                if (finalRoles.includes('admin' as UserRole)) {
+                finalRoles = ensureAdminRole(finalRoles, session.user.email);
+                if (finalRoles.includes('admin')) {
                   finalActiveRole = 'admin' as UserRole;
                 }
               }
@@ -141,8 +141,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             
             if (isSpecialAdmin(session.user.email)) {
               console.log('[AuthProvider] Admin email detected, forcing admin role');
-              finalRoles = ensureAdminRole(finalRoles as string[], session.user.email) as UserRole[];
-              if (finalRoles.includes('admin' as UserRole)) {
+              finalRoles = ensureAdminRole(finalRoles, session.user.email);
+              if (finalRoles.includes('admin')) {
                 finalActiveRole = 'admin' as UserRole;
               }
             }
@@ -266,7 +266,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   
   // Role management methods
   const switchRole = (role: UserRole) => {
-    roleUtils.switchRole(state.roles as UserRole[], role, (newRole) => {
+    roleUtils.switchRole(state.roles, role, (newRole) => {
       // Update state with new role
       const newState = {
         ...state,
@@ -278,8 +278,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         newState.session,
         newState.user,
         newState.profile,
-        newState.roles as UserRole[],
-        newState.activeRole as UserRole
+        newState.roles,
+        newState.activeRole
       );
     });
   };
@@ -289,7 +289,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (role === 'admin' && state.user?.email === 'josephkwantum@gmail.com') {
       return true;
     }
-    return roleUtils.hasRole(state.roles as UserRole[], role);
+    return roleUtils.hasRole(state.roles, role);
   };
 
   // Create a proper context value
@@ -335,9 +335,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       loading: state.loading,
       error: state.error,
       isAuthenticated: !!state.session,
-      isAdmin: state.roles.includes('admin' as UserRole),
-      roles: state.roles as UserRole[],
-      activeRole: state.activeRole as UserRole,
+      isAdmin: state.roles.includes('admin'),
+      roles: state.roles,
+      activeRole: state.activeRole,
       signIn,
       signUp,
       signOut,

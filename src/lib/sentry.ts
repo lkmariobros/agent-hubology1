@@ -1,19 +1,82 @@
 
-/**
- * Sentry initialization and utility functions
- */
+import * as Sentry from '@sentry/react';
 
 export function initSentry() {
-  // In a real app, this would initialize Sentry
-  console.log('Sentry initialized');
+  // Only initialize if we're in a browser environment
+  if (typeof window === 'undefined' || !window.document) {
+    console.warn('[Sentry] Not initializing in non-browser environment');
+    return;
+  }
+
+  try {
+    const dsn = "https://ca140a22d2c0617d9c0eb3b996fa799f@o4509071816523776.ingest.us.sentry.io/4509071846014976";
+    
+    // Initialize Sentry with environment-appropriate settings
+    Sentry.init({
+      dsn: dsn,
+      environment: import.meta.env.MODE,
+      integrations: [
+        new Sentry.BrowserTracing({
+          // Trace sampling based on environment
+          tracePropagationTargets: [
+            'localhost', 
+            /^https:\/\/synabhmsxsvsxkyzhfss\.supabase\.co/,
+            /^https:\/\/yourdomain\.com/
+          ],
+        }),
+        // Enable performance monitoring
+        new Sentry.Replay({
+          maskAllText: import.meta.env.PROD, // Mask text in production only
+          blockAllMedia: true,
+        }),
+      ],
+      // Production-appropriate sampling rates
+      tracesSampleRate: import.meta.env.PROD ? 0.2 : 1.0,
+      replaysSessionSampleRate: import.meta.env.PROD ? 0.1 : 1.0,
+      replaysOnErrorSampleRate: import.meta.env.PROD ? 1.0 : 1.0,
+      
+      // Always enabled
+      enabled: true,
+      
+      // Debug mode only in development
+      debug: import.meta.env.DEV,
+      
+      // Only log to console in development
+      beforeSend(event) {
+        if (import.meta.env.DEV) {
+          console.log('Sending event to Sentry:', event);
+        }
+        return event;
+      }
+    });
+    
+    // Log initialization only in development
+    if (import.meta.env.DEV) {
+      console.log('Sentry initialized in', import.meta.env.MODE, 'mode with DSN:', dsn);
+    }
+  } catch (error) {
+    console.error('[Sentry] Error initializing:', error);
+  }
 }
 
-export function captureException(error: Error, context?: Record<string, any>) {
-  // In a real app, this would send the error to Sentry
-  console.error('Error captured for Sentry:', error, context);
-}
-
-export function captureMessage(message: string, level: 'info' | 'warning' | 'error' = 'info') {
-  // In a real app, this would send the message to Sentry
-  console.log(`[Sentry ${level}]:`, message);
-}
+// Helper function to capture exceptions with Sentry
+export const captureException = (error: unknown, context?: Record<string, any>) => {
+  try {
+    // Only log to console in development
+    if (import.meta.env.DEV) {
+      console.error('Error captured:', error);
+    }
+    
+    Sentry.captureException(error, {
+      contexts: {
+        custom: context || {},
+      },
+    });
+    
+    if (import.meta.env.DEV) {
+      console.log('Exception sent to Sentry');
+    }
+  } catch (err) {
+    console.error('[Sentry] Error sending exception:', err);
+  }
+};
