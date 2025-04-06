@@ -52,10 +52,14 @@ const Dashboard: React.FC = () => {
     <div className="p-6 space-y-6">
       <h1 className="text-3xl font-semibold">Dashboard</h1>
       
-      <MetricsContainer metrics={filteredMetrics} />
+      {/* Move RecentTransactions to the top */}
+      <RecentTransactions onViewAll={handleViewAllTransactions} limit={5} />
       
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <RecentTransactions onViewAll={handleViewAllTransactions} limit={5} />
+      {/* Move metrics to the left side (they'll be full width on mobile) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <MetricsContainer metrics={filteredMetrics} className="md:max-w-xs" />
+        </div>
         <UpcomingPayments onViewAll={handleViewAllPayments} />
       </div>
       
