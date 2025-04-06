@@ -1,173 +1,204 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { commissionApi } from '@/lib/api';
-import { AgentRank, AgentWithHierarchy, CommissionTier, OverrideCommission } from '@/types';
-import { stringToAgentRank } from '@/utils/typeConversions';
+import { commissionApi } from '@/services/commissionService';
+import { CommissionTier, PaymentSchedule } from '@/types/commission';
+import { toast } from 'sonner';
+import { captureException } from '@/lib/sentry';
 
-// Get commission summary (current month, previous month, year to date)
-export function useCommissionSummary() {
-  return useQuery({
-    queryKey: ['commission', 'summary'],
-    queryFn: commissionApi.getSummary,
-  });
-}
-
-// Get commission history with pagination
-export function useCommissionHistory(page = 1, pageSize = 10) {
-  return useQuery({
-    queryKey: ['commission', 'history', page, pageSize],
-    queryFn: () => commissionApi.getHistory(page, pageSize),
-    meta: {
-      keepPreviousData: true
-    }
-  });
-}
-
-// Get commission tiers with proper typing
-export function useCommissionTiers() {
-  return useQuery<CommissionTier[]>({
-    queryKey: ['commission', 'tiers'],
-    queryFn: () => {
-      const response = commissionApi.getTiers();
-      return response.then(data => {
-        // Handle the API response and transform it into CommissionTier[]
-        return data.data || [];
-      });
-    },
-  });
-}
-
-// Get agent hierarchy data (for org chart) with proper typing
-export function useAgentHierarchy(agentId?: string) {
-  return useQuery<AgentWithHierarchy>({
-    queryKey: ['agents', 'hierarchy', agentId],
-    queryFn: () => {
-      return commissionApi.getAgentHierarchy(agentId)
-        .then(response => {
-          // Check if the response is already in the correct format (development mode)
-          if ('id' in response) {
-            return response as AgentWithHierarchy;
-          }
-          // Otherwise, extract data from the API response
-          return response.data as AgentWithHierarchy;
-        });
-    },
-    enabled: !!agentId,
-  });
-}
-
-// Get agent's downline (direct reports)
-export function useAgentDownline(agentId?: string) {
-  return useQuery({
-    queryKey: ['agents', 'downline', agentId],
-    queryFn: () => commissionApi.getAgentDownline(agentId),
-    enabled: !!agentId,
-  });
-}
-
-// Calculate expected commission based on property price and agent tier
-export function calculateCommission(propertyPrice: number, commissionRate: number): number {
-  return propertyPrice * (commissionRate / 100);
-}
-
-// Calculate override commissions for upline agents
-export function calculateOverrideCommissions(
-  baseCommission: number, 
-  agent: AgentWithHierarchy
-): OverrideCommission[] {
-  const overrides: OverrideCommission[] = [];
-  
-  // Check if upline exists
-  if (!agent.upline) return overrides;
-  
-  let currentAgent = agent;
-  let currentUpline = agent.upline;
-  
-  // Apply override percentages based on rank
-  while (currentUpline) {
-    // Only apply override if upline's rank is higher than the agent's rank
-    const currentRank = stringToAgentRank(currentAgent.rank as string);
-    const uplineRank = stringToAgentRank(currentUpline.rank as string);
-    
-    if (getRankLevel(uplineRank) > getRankLevel(currentRank)) {
-      const overridePercentage = getOverridePercentage(uplineRank);
-      const overrideAmount = baseCommission * (overridePercentage / 100);
-      
-      overrides.push({
-        id: `override-${currentUpline.id}`,
-        agentId: currentUpline.id,
-        baseAgentId: currentAgent.id,
-        transactionId: '',
-        percentage: overridePercentage,
-        amount: overrideAmount,
-        status: 'Pending',
-        agentName: currentUpline.name,
-        rank: uplineRank,
-        tier: uplineRank // Adding tier field to match the required structure
-      });
-    }
-    
-    currentAgent = currentUpline;
-    currentUpline = currentUpline.upline;
-  }
-  
-  return overrides;
-}
-
-// Helper function to get override percentage based on rank
-function getOverridePercentage(rank: AgentRank): number {
-  switch (rank) {
-    case 'Sales Leader':
-      return 7;
-    case 'Team Leader':
-      return 5;
-    case 'Group Leader':
-      return 8;
-    case 'Supreme Leader':
-      return 6;
-    default:
-      return 0;
-  }
-}
-
-// Helper function to get rank level (higher number = higher rank)
-function getRankLevel(rank: AgentRank): number {
-  switch (rank) {
-    case 'Advisor':
-      return 1;
-    case 'Sales Leader':
-      return 2;
-    case 'Team Leader':
-      return 3;
-    case 'Group Leader':
-      return 4;
-    case 'Supreme Leader':
-      return 5;
-    default:
-      return 0;
-  }
-}
-
-// Update agent rank
-export function useUpdateAgentRank() {
+export function useCommission() {
   const queryClient = useQueryClient();
   
-  return useMutation({
-    mutationFn: commissionApi.updateAgentRank,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['agents'] });
-    }
-  });
-}
-
-// Add new agent to hierarchy
-export function useAddAgent() {
-  const queryClient = useQueryClient();
+  // Commission Tiers
+  const getCommissionTiers = () => {
+    return useQuery({
+      queryKey: ['commissionTiers'],
+      queryFn: commissionApi.getCommissionTiers,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      retry: 3,
+      retryDelay: attempt => Math.min(1000 * 2 ** attempt, 30000),
+      meta: {
+        errorMessage: 'Failed to load commission tiers'
+      },
+      onError: (error: any) => {
+        console.error('Error fetching commission tiers:', error);
+        captureException(error, { source: 'useCommission.getCommissionTiers' });
+        toast.error(`Failed to load commission tiers: ${error.message || 'Unknown error'}`);
+      }
+    });
+  };
   
-  return useMutation({
-    mutationFn: commissionApi.addAgent,
+  const createCommissionTier = useMutation({
+    mutationFn: commissionApi.createCommissionTier,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['agents'] });
+      queryClient.invalidateQueries({ queryKey: ['commissionTiers'] });
+      toast.success("Commission tier created successfully");
+    },
+    onError: (error: any) => {
+      console.error('Error creating commission tier:', error);
+      captureException(error, { source: 'useCommission.createCommissionTier' });
+      toast.error(`Failed to create commission tier: ${error.message || "Unknown error"}`);
     }
   });
+  
+  const updateCommissionTier = useMutation({
+    mutationFn: ({ id, updates }: { id: string; updates: Partial<CommissionTier> }) =>
+      commissionApi.updateCommissionTier(id, updates),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['commissionTiers'] });
+      toast.success("Commission tier updated successfully");
+    },
+    onError: (error: any) => {
+      console.error('Error updating commission tier:', error);
+      captureException(error, { source: 'useCommission.updateCommissionTier' });
+      toast.error(`Failed to update commission tier: ${error.message || "Unknown error"}`);
+    }
+  });
+  
+  const deleteCommissionTier = useMutation({
+    mutationFn: commissionApi.deleteCommissionTier,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['commissionTiers'] });
+      toast.success("Commission tier deleted successfully");
+    },
+    onError: (error: any) => {
+      console.error('Error deleting commission tier:', error);
+      captureException(error, { source: 'useCommission.deleteCommissionTier' });
+      toast.error(`Failed to delete commission tier: ${error.message || "Unknown error"}`);
+    }
+  });
+  
+  // Payment Schedules
+  const getPaymentSchedules = () => {
+    return useQuery({
+      queryKey: ['paymentSchedules'],
+      queryFn: commissionApi.getPaymentSchedules,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      retry: 3,
+      retryDelay: attempt => Math.min(1000 * 2 ** attempt, 30000),
+      meta: {
+        errorMessage: 'Failed to load payment schedules'
+      },
+      onError: (error: any) => {
+        console.error('Error fetching payment schedules:', error);
+        captureException(error, { source: 'useCommission.getPaymentSchedules' });
+        toast.error(`Failed to load payment schedules: ${error.message || 'Unknown error'}`);
+      }
+    });
+  };
+  
+  // Fix the data property error
+  const getAgentHierarchy = (agentId?: string) => {
+    const { data, isLoading, error, refetch } = useQuery({
+      queryKey: ['agentHierarchy', agentId],
+      queryFn: async () => {
+        // Fetch agent hierarchy data
+        const response = await commissionApi.getAgentHierarchy(agentId);
+        return response;
+      },
+      enabled: !!agentId,
+    });
+    
+    return { data: data?.data || null, isLoading, error, refetch };
+  };
+  
+  const createPaymentSchedule = useMutation({
+    mutationFn: commissionApi.createPaymentSchedule,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['paymentSchedules'] });
+      toast.success("Payment schedule created successfully");
+    },
+    onError: (error: any) => {
+      console.error('Error creating payment schedule:', error);
+      captureException(error, { source: 'useCommission.createPaymentSchedule' });
+      toast.error(`Failed to create payment schedule: ${error.message || "Unknown error"}`);
+    }
+  });
+  
+  const updatePaymentSchedule = useMutation({
+    mutationFn: ({ id, updates }: { id: string; updates: Partial<PaymentSchedule> }) =>
+      commissionApi.updatePaymentSchedule(id, updates),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['paymentSchedules'] });
+      toast.success("Payment schedule updated successfully");
+    },
+    onError: (error: any) => {
+      console.error('Error updating payment schedule:', error);
+      captureException(error, { source: 'useCommission.updatePaymentSchedule' });
+      toast.error(`Failed to update payment schedule: ${error.message || "Unknown error"}`);
+    }
+  });
+  
+  const deletePaymentSchedule = useMutation({
+    mutationFn: commissionApi.deletePaymentSchedule,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['paymentSchedules'] });
+      toast.success("Payment schedule deleted successfully");
+    },
+    onError: (error: any) => {
+      console.error('Error deleting payment schedule:', error);
+      captureException(error, { source: 'useCommission.deletePaymentSchedule' });
+      toast.error(`Failed to delete payment schedule: ${error.message || "Unknown error"}`);
+    }
+  });
+  
+  const approveCommission = useMutation({
+    mutationFn: commissionApi.approveCommission,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['commissions'] });
+      toast.success("Commission approved successfully");
+    },
+    onError: (error: any) => {
+      console.error('Error approving commission:', error);
+      captureException(error, { source: 'useCommission.approveCommission' });
+      toast.error(`Failed to approve commission: ${error.message || "Unknown error"}`);
+    }
+  });
+  
+  const rejectCommission = useMutation({
+    mutationFn: commissionApi.rejectCommission,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['commissions'] });
+      toast.success("Commission rejected successfully");
+    },
+    onError: (error: any) => {
+      console.error('Error rejecting commission:', error);
+      captureException(error, { source: 'useCommission.rejectCommission' });
+      toast.error(`Failed to reject commission: ${error.message || "Unknown error"}`);
+    }
+  });
+  
+  // Fix the MutationFunction type error by using the correct parameter signature
+  const updateAgentRank = useMutation<
+    { success: boolean; message: string }, // return type
+    Error, // error type
+    { agentId: string; newRank: string }, // variables type
+    void // context type
+  >({
+    mutationFn: async ({ agentId, newRank }) => {
+      return await commissionApi.updateAgentRank(agentId, newRank);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['agents'] });
+      toast.success("Agent rank updated successfully");
+    },
+    onError: (error) => {
+      console.error('Error updating agent rank:', error);
+      captureException(error, { source: 'useCommission.updateAgentRank' });
+      toast.error(`Failed to update agent rank: ${error.message || "Unknown error"}`);
+    },
+  });
+  
+  return {
+    getCommissionTiers,
+    createCommissionTier,
+    updateCommissionTier,
+    deleteCommissionTier,
+    getPaymentSchedules,
+    createPaymentSchedule,
+    updatePaymentSchedule,
+    deletePaymentSchedule,
+    approveCommission,
+    rejectCommission,
+    updateAgentRank,
+    getAgentHierarchy
+  };
 }

@@ -7,6 +7,7 @@ import OpportunitiesBoard from '@/components/dashboard/OpportunitiesBoard';
 import PropertyShowcase from '@/components/dashboard/PropertyShowcase';
 import UpcomingPayments from '@/components/dashboard/UpcomingPayments';
 import { useMetrics } from '@/hooks/useDashboard';
+import AdminStatusIndicator from '@/components/common/AdminStatusIndicator';
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -23,7 +24,14 @@ const Dashboard: React.FC = () => {
   
   return (
     <div className="p-6 space-y-6">
-      <h1 className="text-3xl font-semibold">Dashboard</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-semibold">Dashboard</h1>
+        
+        {/* Temporary admin status indicator - remove after debugging */}
+        <div className="max-w-xs">
+          <AdminStatusIndicator />
+        </div>
+      </div>
       
       <MetricsContainer metrics={metrics} />
       
