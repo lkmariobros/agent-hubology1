@@ -1,6 +1,7 @@
 
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import AppLayout from './components/layout/AppLayout';
+import MainLayout from './components/layout/MainLayout';
+import AdminLayout from './components/layout/AdminLayout';
 import Dashboard from './pages/Dashboard';
 import PropertyList from './pages/PropertyList';
 import PropertyDetail from './pages/PropertyDetail';
@@ -12,14 +13,32 @@ import Reports from './pages/Reports';
 import Settings from './pages/Settings';
 import Login from './pages/auth/Login';
 import NotFound from './pages/NotFound';
+import AdminDashboard from './pages/admin/Dashboard';
+import Index from './pages/Index';
+import { AuthProvider } from './context/auth';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 
-// Create our router
+// Create our router with proper route structure and authentication
 const router = createBrowserRouter([
+  // Public routes
   {
     path: '/',
-    element: <AppLayout />,
+    element: <Index />,
+  },
+  {
+    path: '/login',
+    element: <Login />,
+  },
+  
+  // Agent portal (protected routes)
+  {
+    path: '/',
+    element: (
+      <ProtectedRoute>
+        <MainLayout />
+      </ProtectedRoute>
+    ),
     children: [
-      { index: true, element: <Dashboard /> },
       { path: 'dashboard', element: <Dashboard /> },
       { path: 'properties', element: <PropertyList /> },
       { path: 'properties/:id', element: <PropertyDetail /> },
@@ -29,13 +48,25 @@ const router = createBrowserRouter([
       { path: 'leaderboard', element: <Leaderboard /> },
       { path: 'reports', element: <Reports /> },
       { path: 'settings', element: <Settings /> },
-      { path: '*', element: <NotFound /> },
     ],
   },
+  
+  // Admin portal (protected routes)
   {
-    path: '/login',
-    element: <Login />,
+    path: '/admin',
+    element: (
+      <ProtectedRoute requireAdmin>
+        <AdminLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      { index: true, element: <AdminDashboard /> },
+      { path: 'dashboard', element: <AdminDashboard /> },
+      // Add other admin routes here as needed
+    ],
   },
+  
+  // Catch-all route for 404
   {
     path: '*',
     element: <NotFound />,
@@ -43,5 +74,9 @@ const router = createBrowserRouter([
 ]);
 
 export default function Router() {
-  return <RouterProvider router={router} />;
+  return (
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
+  );
 }

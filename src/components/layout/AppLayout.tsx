@@ -3,12 +3,14 @@ import React from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/layout/AppSidebar';
+import { useAuth } from '@/hooks/useAuth';
 
 const AppLayout: React.FC = () => {
   // Load saved sidebar state from localStorage if available
   const savedStateStr = localStorage.getItem("sidebar:state");
   const savedState = savedStateStr === "collapsed" ? "collapsed" : "expanded";
   const navigate = useNavigate();
+  const { isAuthenticated, loading } = useAuth();
   
   // Handle state change to save to localStorage
   const handleStateChange = (newState: "expanded" | "collapsed") => {
@@ -17,14 +19,14 @@ const AppLayout: React.FC = () => {
 
   // Simple authentication check
   React.useEffect(() => {
-    // For demo purposes, we'll assume user is logged in
-    // In a real app, you would check for session/token
-    const isLoggedIn = true; // Replace with actual auth check
-    
-    if (!isLoggedIn) {
+    if (!loading && !isAuthenticated) {
       navigate('/login');
     }
-  }, [navigate]);
+  }, [loading, isAuthenticated, navigate]);
+
+  if (loading) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
 
   return (
     <SidebarProvider defaultState={savedState} onStateChange={handleStateChange}>

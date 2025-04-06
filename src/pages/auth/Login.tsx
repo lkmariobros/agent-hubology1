@@ -6,27 +6,33 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { useAuth } from '@/hooks/useAuth';
 
 const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = React.useState('demo@example.com');
   const [password, setPassword] = React.useState('password123');
   const [isLoading, setIsLoading] = React.useState(false);
+  const { signIn, isAuthenticated } = useAuth();
+
+  // If already authenticated, redirect to dashboard
+  React.useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
     try {
-      // For now just simulate a successful login
-      setTimeout(() => {
-        console.log('Login successful');
-        toast.success('Successfully logged in');
-        navigate('/dashboard');
-      }, 1000);
+      await signIn(email, password);
+      toast.success('Successfully logged in');
+      navigate('/dashboard');
     } catch (error) {
       console.error('Login error:', error);
-      toast.error('Failed to login');
+      toast.error('Failed to login: ' + (error instanceof Error ? error.message : 'Unknown error'));
     } finally {
       setIsLoading(false);
     }

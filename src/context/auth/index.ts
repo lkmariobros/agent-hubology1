@@ -1,4 +1,5 @@
 
+// Re-export all auth components and hooks
 export * from './AuthContext';
 export * from './AuthProvider';
 export * from './authUtils';

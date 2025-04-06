@@ -1,7 +1,6 @@
 
 import { useAuthContext } from '@/context/auth';
 import type { AuthContextType } from '@/types/auth';
-import { useSentry } from './useSentry';
 
 /**
  * Enhanced useAuth hook with additional error tracking
@@ -9,7 +8,6 @@ import { useSentry } from './useSentry';
  */
 export function useAuth(): AuthContextType {
   const auth = useAuthContext();
-  
   return auth;
 }
 
