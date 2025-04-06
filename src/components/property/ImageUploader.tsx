@@ -58,7 +58,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
           console.warn('Property images bucket is not accessible');
           // Only show toast on retry to avoid duplicate messages
           if (retryCount > 0) {
-            toast.warning('Storage bucket is still not accessible. Check if a bucket named "Property Images" exists in Supabase.');
+            toast.warning('Storage bucket is still not accessible. Please check if the "Property Images" bucket exists in Supabase.');
           }
         } else if (retryCount > 0) {
           toast.success('Successfully connected to storage buckets');
@@ -127,20 +127,20 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
 
         // Try to upload the file
         try {
-          const result = await uploadFile(file, {
+          const uploadedUrl = await uploadFile(file, {
             bucket: 'property-images',
             path: 'properties',
             maxSizeMB,
             acceptedFileTypes: ['image/jpeg', 'image/png', 'image/webp']
           });
           
-          console.log(`Successfully uploaded: ${file.name}`, result);
+          console.log(`Successfully uploaded: ${file.name}`, uploadedUrl);
           
           // Find the index of this image in the current state
           const currentIndex = state.images.findIndex(img => img.id === imageId);
           if (currentIndex !== -1) {
             // Update the image status to success
-            updateImageStatus(currentIndex, 'success', result);
+            updateImageStatus(currentIndex, 'success', uploadedUrl);
             
             // Update local upload state for this image
             setLocalUploadState(prev => ({
@@ -233,16 +233,16 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
           <AlertTitle>Storage Configuration Issue</AlertTitle>
           <AlertDescription className="flex flex-col space-y-2">
             <p>
-              Image uploads will not work. This is due to a naming mismatch between the code and Supabase storage buckets.
+              Image uploads will not work. Please check if the "Property Images" bucket exists in your Supabase project.
             </p>
             <div className="flex flex-col space-y-1 text-sm mt-2">
               <p className="font-semibold flex items-center">
                 <Info className="h-3 w-3 mr-1" /> Troubleshooting:
               </p>
               <ol className="list-decimal ml-5 space-y-1">
-                <li>Ensure the 'Property Images' bucket exists in your Supabase storage (with spaces and capital letters)</li>
+                <li>Ensure the 'Property Images' bucket exists in your Supabase storage</li>
                 <li>Check that your bucket has the correct RLS policies for uploads</li>
-                <li>Verify that your application has the correct permissions</li>
+                <li>Verify that you are authenticated if the bucket requires authentication</li>
               </ol>
             </div>
             <Button 
@@ -267,9 +267,11 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
 
       <div 
         {...getRootProps()} 
-        className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-          isDragActive ? 'border-primary bg-primary/5' : 'border-muted-foreground/25 hover:border-primary/50'
-        } ${bucketStatus !== 'available' || disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+        className={cn(
+          "border-2 border-dashed rounded-lg p-8 text-center transition-colors",
+          isDragActive ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:border-primary/50",
+          bucketStatus !== 'available' || disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+        )}
       >
         <input {...getInputProps()} ref={fileInputRef} disabled={bucketStatus !== 'available' || disabled} />
         <div className="flex flex-col items-center justify-center space-y-2">
@@ -308,13 +310,17 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
               
             return (
               <div key={index} className="relative group">
-                <div className={`overflow-hidden rounded-lg aspect-square ${isImageUploading ? 'opacity-70' : ''}`}>
+                <div className={cn(
+                  "overflow-hidden rounded-lg aspect-square",
+                  isImageUploading ? "opacity-70" : ""
+                )}>
                   <img 
                     src={image.previewUrl || image.url} 
                     alt={`Property preview ${index + 1}`}
-                    className={`w-full h-full object-cover transition-transform group-hover:scale-105 ${
+                    className={cn(
+                      "w-full h-full object-cover transition-transform group-hover:scale-105",
                       image.uploadStatus === 'error' ? 'border-2 border-red-500' : ''
-                    }`}
+                    )}
                     onError={(e) => {
                       console.error('Failed to load image:', image.previewUrl || image.url);
                       e.currentTarget.src = '/placeholder.svg';
