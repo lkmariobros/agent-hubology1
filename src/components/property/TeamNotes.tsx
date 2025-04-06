@@ -1,173 +1,109 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { User, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { MessageSquare } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
-import { toast } from 'sonner';
-import {
-  Timeline,
-  TimelineContent,
-  TimelineDate,
-  TimelineHeader,
-  TimelineIndicator,
-  TimelineItem,
-  TimelineSeparator,
-  TimelineTitle,
-} from "@/components/ui/timeline";
+import { Separator } from '@/components/ui/separator';
 
-// Mock note type
 export interface TeamNote {
   id: number;
-  author: {
-    name: string;
-    initials: string;
-    avatarColor: string;
-    avatar?: string | null;
-  };
-  date: string;
+  author: string;
   content: string;
-  action?: string; // Keeping this for backward compatibility
+  date: string;
 }
 
 interface TeamNotesProps {
   notes: TeamNote[];
-  onAddNote?: (note: Omit<TeamNote, 'id' | 'date'>) => void;
+  onAddNote: (note: Omit<TeamNote, 'id' | 'date'>) => void;
   className?: string;
-  hideTitle?: boolean; // Add a new prop to hide the title
 }
 
-export const TeamNotes: React.FC<TeamNotesProps> = ({ 
-  notes = [], // Default to empty array
+const TeamNotesSection: React.FC<TeamNotesProps> = ({ 
+  notes = [], 
   onAddNote,
-  className = '',
-  hideTitle = false // Default to showing the title
+  className = ''
 }) => {
   const [newNote, setNewNote] = useState('');
-  const [isAddingNote, setIsAddingNote] = useState(false);
+  const [currentUser] = useState('Current Agent'); // In a real app, get from auth context
 
-  const handleAddNote = () => {
-    if (!newNote.trim()) {
-      toast.error("Note cannot be empty");
-      return;
-    }
-
-    if (onAddNote) {
-      // In a real app, we would get the current user info from context/auth
-      onAddNote({
-        author: {
-          name: "Current User",
-          initials: "CU",
-          avatarColor: "bg-blue-500"
-        },
-        content: newNote,
-        action: "commented on" // Always set as "commented on"
-      });
-    }
-
+  const handleSubmitNote = () => {
+    if (!newNote.trim()) return;
+    
+    onAddNote({
+      author: currentUser,
+      content: newNote.trim()
+    });
+    
     setNewNote('');
-    setIsAddingNote(false);
-    toast.success("Note added successfully");
   };
 
   return (
-    <Card className={`overflow-hidden border-neutral-800 bg-card/90 backdrop-blur-sm h-full flex flex-col ${className}`}>
-      {!hideTitle && (
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center">
-            <MessageSquare className="h-4 w-4 mr-2" />
-            Team Notes
-          </CardTitle>
-        </CardHeader>
-      )}
-      <CardContent className="p-4 flex-grow overflow-auto">
-        {notes.length > 0 ? (
-          <Timeline>
-            {notes.map((note, index) => (
-              <TimelineItem key={note.id} className="pb-4 last:pb-0">
-                <TimelineIndicator>
-                  <Avatar className="h-7 w-7">
-                    {note.author.avatar ? (
-                      <AvatarImage src={note.author.avatar} alt={note.author.name} />
-                    ) : (
-                      <AvatarFallback className={note.author.avatarColor}>
-                        {note.author.initials}
-                      </AvatarFallback>
-                    )}
-                  </Avatar>
-                </TimelineIndicator>
-                
-                {index !== notes.length - 1 && <TimelineSeparator />}
-                
-                <TimelineHeader>
-                  <TimelineTitle>
-                    <span className="font-medium text-sm text-foreground">{note.author.name}</span>
-                    {" "}
-                    <span className="text-muted-foreground text-sm">
-                      commented on
-                    </span>
-                  </TimelineTitle>
-                </TimelineHeader>
-                
-                <TimelineContent>
-                  <div className="rounded-lg border border-neutral-800 bg-black/20 px-5 py-4 text-sm">
-                    {note.content}
-                    <TimelineDate className="mt-2">{note.date}</TimelineDate>
-                  </div>
-                </TimelineContent>
-              </TimelineItem>
-            ))}
-          </Timeline>
-        ) : (
-          <div className="text-center py-12 text-sm text-muted-foreground">
-            <MessageSquare className="h-10 w-10 mx-auto mb-4 opacity-20" />
-            <p>No team notes yet</p>
-            <p className="text-xs mt-1">Add the first note to collaborate with your team</p>
-          </div>
-        )}
-        
-        {isAddingNote ? (
-          <div className="mt-6 space-y-3">
-            <Textarea
-              placeholder="Type your note here..."
-              className="min-h-[120px] bg-black/20 border-neutral-800"
-              value={newNote}
-              onChange={(e) => setNewNote(e.target.value)}
-            />
-            <div className="flex justify-end space-x-2">
+    <Card className={className}>
+      <CardHeader>
+        <CardTitle>Team Notes</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          <div className="flex items-start space-x-2">
+            <Avatar className="h-8 w-8">
+              <AvatarFallback className="bg-primary/10 text-primary">
+                <User className="h-4 w-4" />
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 space-y-2">
+              <Textarea
+                placeholder="Add a note for your team..."
+                value={newNote}
+                onChange={(e) => setNewNote(e.target.value)}
+                className="resize-none"
+              />
               <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => {
-                  setIsAddingNote(false);
-                  setNewNote('');
-                }}
-              >
-                Cancel
-              </Button>
-              <Button 
+                onClick={handleSubmitNote} 
+                disabled={!newNote.trim()}
+                className="flex items-center gap-1 ml-auto"
                 size="sm"
-                onClick={handleAddNote}
               >
+                <Send className="h-4 w-4 mr-1" />
                 Add Note
               </Button>
             </div>
           </div>
-        ) : (
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="w-full mt-4"
-            onClick={() => setIsAddingNote(true)}
-          >
-            <MessageSquare className="h-4 w-4 mr-2" />
-            Add Note
-          </Button>
-        )}
+          
+          {notes.length > 0 && (
+            <>
+              <Separator />
+              <div className="space-y-4">
+                {notes.map((note) => (
+                  <div key={note.id} className="flex items-start space-x-2">
+                    <Avatar className="h-8 w-8 mt-0.5">
+                      <AvatarFallback className="bg-primary/10 text-primary">
+                        {note.author.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">{note.author}</span>
+                        <span className="text-xs text-muted-foreground">{note.date}</span>
+                      </div>
+                      <p className="text-sm mt-1">{note.content}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+          
+          {notes.length === 0 && (
+            <div className="text-center text-muted-foreground py-4">
+              No team notes yet. Be the first to add one!
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
 };
 
-export default TeamNotes;
+export default TeamNotesSection;
