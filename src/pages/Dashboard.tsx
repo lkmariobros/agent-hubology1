@@ -5,7 +5,7 @@ import MetricsContainer from '@/components/dashboard/MetricsContainer';
 import OpportunitiesBoard from '@/components/dashboard/OpportunitiesBoard';
 import PropertyShowcase from '@/components/dashboard/PropertyShowcase';
 import UpcomingPayments from '@/components/dashboard/UpcomingPayments';
-import Leaderboard from '@/components/leaderboard/Leaderboard';
+import RecentTransactions from '@/components/dashboard/RecentTransactions';
 import { useMetrics } from '@/hooks/useDashboard';
 import { Building2, Trophy } from 'lucide-react';
 import { DashboardMetric } from '@/types';
@@ -43,6 +43,10 @@ const Dashboard: React.FC = () => {
   const handleViewAllPayments = () => {
     navigate('/commissions/forecast');
   };
+
+  const handleViewAllTransactions = () => {
+    navigate('/transactions');
+  };
   
   return (
     <div className="p-6 space-y-6">
@@ -51,15 +55,7 @@ const Dashboard: React.FC = () => {
       <MetricsContainer metrics={filteredMetrics} />
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Leaderboard 
-          users={[
-            { id: '1', name: 'Jane Smith', role: 'agent', tier: 'Gold', avatar: '', email: 'jane.smith@example.com' },
-            { id: '2', name: 'John Doe', role: 'agent', tier: 'Silver', avatar: '', email: 'john.doe@example.com' },
-            { id: '3', name: 'Alice Johnson', role: 'agent', tier: 'Bronze', avatar: '', email: 'alice.johnson@example.com' },
-            { id: '4', name: 'Robert Lee', role: 'agent', tier: 'Gold', avatar: '', email: 'robert.lee@example.com' },
-            { id: '5', name: 'Emily Wang', role: 'agent', tier: 'Silver', avatar: '', email: 'emily.wang@example.com' },
-          ]} 
-        />
+        <RecentTransactions onViewAll={handleViewAllTransactions} limit={5} />
         <UpcomingPayments onViewAll={handleViewAllPayments} />
       </div>
       
