@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { PropertyFormData } from '@/types/property-form';
 import { usePropertyForm } from '@/context/PropertyForm/PropertyFormContext';
@@ -19,6 +18,7 @@ import PropertyImagesUpload from './form/PropertyImagesUpload';
 import PropertyDocumentsUpload from './form/PropertyDocumentsUpload';
 import ImageUploader from './ImageUploader';
 import PropertyOwnerInfo from './form/PropertyOwnerInfo';
+import PropertyDocuments from './form/PropertyDocuments';
 
 interface EnhancedPropertyFormProps {
   onSubmit?: (data: PropertyFormData) => void;

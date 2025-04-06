@@ -1,11 +1,10 @@
-
 import { PropertyFormState, PropertyFormData, PropertyImage, PropertyDocument } from '../../types/property-form';
 import { initialPropertyFormState } from './initialState';
 
 type PropertyFormAction =
   | { type: 'UPDATE_FORM_DATA'; payload: Partial<PropertyFormData> }
   | { type: 'UPDATE_PROPERTY_TYPE'; payload: 'Residential' | 'Commercial' | 'Industrial' | 'Land' }
-  | { type: 'UPDATE_TRANSACTION_TYPE'; payload: 'Sale' | 'Rent' }
+  | { type: 'UPDATE_TRANSACTION_TYPE'; payload: 'Sale' | 'Rent' | 'Primary' }
   | { type: 'ADD_IMAGE'; payload: PropertyImage }
   | { type: 'REMOVE_IMAGE'; payload: number }
   | { type: 'SET_COVER_IMAGE'; payload: number }
@@ -145,7 +144,7 @@ export const propertyFormReducer = (
     case 'NEXT_STEP':
       return {
         ...state,
-        currentStep: Math.min(state.currentStep + 1, 6), // Assuming 7 steps (0-6)
+        currentStep: Math.min(state.currentStep + 1, 7), // Updated to handle 8 steps (0-7)
       };
 
     case 'PREV_STEP':
@@ -157,7 +156,7 @@ export const propertyFormReducer = (
     case 'GO_TO_STEP':
       return {
         ...state,
-        currentStep: Math.max(0, Math.min(action.payload, 6)), // Clamp between 0 and 6
+        currentStep: Math.max(0, Math.min(action.payload, 7)), // Updated to clamp between 0 and 7
       };
 
     case 'FORM_SAVED':
