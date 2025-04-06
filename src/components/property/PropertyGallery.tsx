@@ -76,11 +76,11 @@ const PropertyGallery: React.FC<PropertyGalleryProps> = ({ propertyId, images = 
   
   if (loading) {
     return (
-      <div className="space-y-4">
-        <Skeleton className="w-full aspect-[4/3] rounded-md border border-neutral-800/60" />
+      <div className="space-y-4 p-6">
+        <Skeleton className="w-full aspect-video rounded-md" />
         <div className="grid grid-cols-4 gap-4">
           {Array(4).fill(0).map((_, index) => (
-            <Skeleton key={index} className="aspect-square w-full rounded-md border border-neutral-800/60" />
+            <Skeleton key={index} className="aspect-square w-full rounded-md" />
           ))}
         </div>
       </div>
@@ -89,7 +89,7 @@ const PropertyGallery: React.FC<PropertyGalleryProps> = ({ propertyId, images = 
   
   if (error) {
     return (
-      <Alert variant="destructive" className="mb-4">
+      <Alert variant="destructive" className="m-6">
         <AlertCircle className="h-4 w-4 mr-2" />
         <AlertDescription>{error}</AlertDescription>
       </Alert>
@@ -99,15 +99,15 @@ const PropertyGallery: React.FC<PropertyGalleryProps> = ({ propertyId, images = 
   const hasImages = imageUrls && imageUrls.length > 0;
   
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 p-6">
       {/* Main large image */}
-      <div className="w-full aspect-[4/3] bg-black/30 rounded-md overflow-hidden border border-neutral-800/60 shadow-md relative group">
+      <div className="w-full aspect-video bg-black/20 rounded-md overflow-hidden border border-neutral-800/40 shadow-md relative group">
         {hasImages ? (
           <>
             <img 
               src={imageUrls[activeImageIndex]} 
               alt={`${title} main view`} 
-              className="w-full h-full object-cover transition-transform duration-300"
+              className="w-full h-full object-cover"
               onError={(e) => {
                 console.error('Failed to load image:', imageUrls[activeImageIndex]);
                 e.currentTarget.src = '/placeholder.svg';
@@ -131,7 +131,7 @@ const PropertyGallery: React.FC<PropertyGalleryProps> = ({ propertyId, images = 
           imageUrls.slice(0, 4).map((imageUrl, index) => (
             <div 
               key={index} 
-              className={`aspect-square bg-black/30 rounded-md overflow-hidden border border-neutral-800/60 shadow-md cursor-pointer transition-all duration-150 ${
+              className={`aspect-square bg-black/20 rounded-md overflow-hidden border border-neutral-800/40 shadow-md cursor-pointer transition-all duration-150 ${
                 index === activeImageIndex ? 'ring-2 ring-primary/70' : 'hover:ring-1 hover:ring-primary/40'
               }`}
               onClick={() => handleThumbnailClick(index)}
@@ -149,7 +149,7 @@ const PropertyGallery: React.FC<PropertyGalleryProps> = ({ propertyId, images = 
           ))
         ) : (
           Array(4).fill(0).map((_, index) => (
-            <div key={index} className="aspect-square bg-black/30 rounded-md flex items-center justify-center border border-neutral-800/60 shadow-md">
+            <div key={index} className="aspect-square bg-black/20 rounded-md flex items-center justify-center border border-neutral-800/40 shadow-md">
               <ImageOff className="h-4 w-4 opacity-40" />
             </div>
           ))
