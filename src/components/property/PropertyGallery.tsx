@@ -5,6 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ImageOff, AlertCircle, Maximize2 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface PropertyGalleryProps {
   propertyId?: string;
@@ -17,6 +18,7 @@ const PropertyGallery: React.FC<PropertyGalleryProps> = ({ propertyId, images = 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const isMobile = useIsMobile();
   
   useEffect(() => {
     const fetchImages = async () => {
@@ -77,7 +79,7 @@ const PropertyGallery: React.FC<PropertyGalleryProps> = ({ propertyId, images = 
   if (loading) {
     return (
       <div className="space-y-4 p-6">
-        <Skeleton className="w-full aspect-video rounded-md" />
+        <Skeleton className="w-full aspect-[4/3] rounded-md" />
         <div className="grid grid-cols-4 gap-4">
           {Array(4).fill(0).map((_, index) => (
             <Skeleton key={index} className="aspect-square w-full rounded-md" />
@@ -99,9 +101,9 @@ const PropertyGallery: React.FC<PropertyGalleryProps> = ({ propertyId, images = 
   const hasImages = imageUrls && imageUrls.length > 0;
   
   return (
-    <div className="space-y-4 p-6">
+    <div className="space-y-4 p-6 h-full flex flex-col">
       {/* Main large image */}
-      <div className="w-full aspect-video bg-black/20 rounded-md overflow-hidden border border-neutral-800/40 shadow-md relative group">
+      <div className="w-full aspect-[4/3] bg-black/20 rounded-md overflow-hidden border border-neutral-800/40 shadow-md relative group flex-grow">
         {hasImages ? (
           <>
             <img 

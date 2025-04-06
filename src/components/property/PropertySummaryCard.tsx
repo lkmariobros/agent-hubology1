@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { BedDouble, Bath, Ruler } from 'lucide-react';
 import { getPropertyTypeIcon } from '@/utils/propertyIconUtils';
 import PropertyGallery from './PropertyGallery';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface PropertySummaryCardProps {
   property: any;
@@ -17,6 +18,8 @@ const PropertySummaryCard: React.FC<PropertySummaryCardProps> = ({
   propertyImages = [], 
   propertyType 
 }) => {
+  const isMobile = useIsMobile();
+  
   if (!property) return null;
 
   const formattedPrice = property.price && Number(property.price) > 0
@@ -38,19 +41,19 @@ const PropertySummaryCard: React.FC<PropertySummaryCardProps> = ({
   return (
     <Card className="mb-6 overflow-hidden bg-card border-neutral-800/60">
       <CardContent className="p-0">
-        {/* Gallery section - Full width */}
-        <div className="w-full">
-          <PropertyGallery 
-            propertyId={property.id} 
-            images={propertyImages} 
-            title={property.title || 'Property'} 
-          />
-        </div>
-        
-        {/* Property info section - Below gallery */}
-        <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-          {/* Left column */}
-          <div className="space-y-4">
+        {/* Use grid for desktop, stack for mobile */}
+        <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-2'} gap-4`}>
+          {/* Gallery section - Left side on desktop, top on mobile */}
+          <div className="w-full">
+            <PropertyGallery 
+              propertyId={property.id} 
+              images={propertyImages} 
+              title={property.title || 'Property'} 
+            />
+          </div>
+          
+          {/* Property info section - Right side on desktop, bottom on mobile */}
+          <div className="p-6 space-y-6">
             {/* Property type and transaction type */}
             <div>
               <div className="flex items-center mb-3">
@@ -91,10 +94,7 @@ const PropertySummaryCard: React.FC<PropertySummaryCardProps> = ({
                 </div>
               )}
             </div>
-          </div>
-          
-          {/* Right column */}
-          <div className="space-y-4">
+            
             {/* Location */}
             {property.street && (
               <div>
