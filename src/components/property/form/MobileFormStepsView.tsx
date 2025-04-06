@@ -20,26 +20,42 @@ const MobileFormStepsView: React.FC<MobileFormStepsViewProps> = ({ storageReady 
   const { state } = usePropertyForm();
   const currentStepIndex = state.currentStep;
   
+  const renderStepContent = () => {
+    switch (currentStepIndex) {
+      case 0:
+        return <PropertyBasicInfo />;
+      case 1:
+        return <PropertyDetails />;
+      case 2:
+        return <PropertyLocation />;
+      case 3:
+        return <PropertyPricing />;
+      case 4:
+        return <PropertyFeatures />;
+      case 5:
+        return <PropertyOwnerInfo />;
+      case 6:
+        return (
+          <Card>
+            <CardContent className="pt-6">
+              <PropertyImageManager />
+            </CardContent>
+          </Card>
+        );
+      case 7:
+        return <PropertyDocuments />;
+      default:
+        return <div>Invalid step</div>;
+    }
+  };
+  
   return (
     <div className="md:hidden">
       <div className="text-lg font-semibold mb-4">
         {FormSteps[currentStepIndex]?.label || 'Property Form'}
       </div>
       
-      {state.currentStep === 0 && <PropertyBasicInfo />}
-      {state.currentStep === 1 && <PropertyDetails />}
-      {state.currentStep === 2 && <PropertyLocation />}
-      {state.currentStep === 3 && <PropertyPricing />}
-      {state.currentStep === 4 && <PropertyFeatures />}
-      {state.currentStep === 5 && <PropertyOwnerInfo />}
-      {state.currentStep === 6 && (
-        <Card>
-          <CardContent className="pt-6">
-            <PropertyImageManager />
-          </CardContent>
-        </Card>
-      )}
-      {state.currentStep === 7 && <PropertyDocuments />}
+      {renderStepContent()}
     </div>
   );
 };
