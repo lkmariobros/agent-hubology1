@@ -4,8 +4,8 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { 
   calculateStockPercentage,
-  getStockStatusLabel,
-  getStockStatusClass
+  getStockStatusLabelFromPercentage,
+  getStockStatusClassFromPercentage
 } from '@/utils/propertyUtils';
 import { cn } from '@/lib/utils';
 
@@ -33,7 +33,7 @@ export function PropertyStockInfo({
   }
 
   // Calculate stock percentage
-  const availablePercentage = stock.total > 0 ? Math.round((stock.available / stock.total) * 100) : 0;
+  const availablePercentage = calculateStockPercentage(stock.available, stock.total);
   const statusLabel = getStockStatusLabelFromPercentage(availablePercentage);
   const statusClass = getStockStatusClassFromPercentage(availablePercentage);
 
@@ -99,18 +99,3 @@ export function PropertyStockInfo({
     </div>
   );
 }
-
-// Helper functions to avoid type errors with the original functions
-const getStockStatusLabelFromPercentage = (percentage: number): string => {
-  if (percentage === 0) return 'Sold Out';
-  if (percentage <= 20) return 'Limited Units';
-  if (percentage <= 50) return 'Selling Fast';
-  return 'Available';
-};
-
-const getStockStatusClassFromPercentage = (percentage: number): string => {
-  if (percentage === 0) return 'bg-red-100 text-red-800';
-  if (percentage <= 20) return 'bg-orange-100 text-orange-800';
-  if (percentage <= 50) return 'bg-yellow-100 text-yellow-800';
-  return 'bg-green-100 text-green-800';
-};

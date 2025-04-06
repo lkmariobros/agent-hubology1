@@ -93,7 +93,48 @@ export const useProperties = (page: number = 1, pageSize: number = 10, filters: 
   return useQuery({
     queryKey: ['properties', page, pageSize, filters],
     queryFn: fetchProperties,
-    keepPreviousData: true,
+    placeholderData: (previousData) => previousData, // This replaces keepPreviousData in v5
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    retry: 1
+  });
+};
+
+// Add the missing useProperty function for fetching a single property
+export const useProperty = (propertyId: string, options = {}) => {
+  const fetchProperty = async () => {
+    try {
+      console.log('Fetching property details for ID:', propertyId);
+      
+      const { data, error } = await supabase
+        .from('enhanced_properties')
+        .select(`
+          *,
+          property_types(*),
+          transaction_types(*),
+          property_statuses(*),
+          property_images(*)
+        `)
+        .eq('id', propertyId)
+        .maybeSingle();
+      
+      if (error) {
+        console.error('Error fetching property details:', error);
+        toast.error(`Failed to load property details: ${error.message}`);
+        throw error;
+      }
+      
+      return { data };
+    } catch (err: any) {
+      console.error('Exception in useProperty:', err);
+      toast.error(`An error occurred: ${err.message || 'Unknown error'}`);
+      throw err;
+    }
+  };
+  
+  return useQuery({
+    queryKey: ['property', propertyId],
+    queryFn: fetchProperty,
+    ...options,
     staleTime: 1000 * 60 * 5, // 5 minutes
     retry: 1
   });

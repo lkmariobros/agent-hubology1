@@ -24,13 +24,39 @@ export const formatPrice = (value?: number): string => {
   }
 };
 
+// Calculate percentage of available stock
+export const calculateStockPercentage = (available: number, total: number): number => {
+  if (total === 0) return 0;
+  return Math.round((available / total) * 100);
+};
+
 // Get stock status label
+export const getStockStatusLabel = (available: number, total: number): string => {
+  const percentage = calculateStockPercentage(available, total);
+  return getStockStatusLabelFromPercentage(percentage);
+};
+
+// Get stock status class
+export const getStockStatusClass = (available: number, total: number): string => {
+  const percentage = calculateStockPercentage(available, total);
+  return getStockStatusClassFromPercentage(percentage);
+};
+
+// Get stock status label based on percentage
 export const getStockStatusLabelFromPercentage = (percentage: number): string => {
   if (percentage === 0) return 'Sold Out';
   if (percentage <= 25) return 'Limited';
   if (percentage <= 50) return 'Selling Fast';
   if (percentage <= 75) return 'Available';
   return 'Fully Available';
+};
+
+// Get stock status class based on percentage
+export const getStockStatusClassFromPercentage = (percentage: number): string => {
+  if (percentage === 0) return 'bg-red-100 text-red-800';
+  if (percentage <= 20) return 'bg-orange-100 text-orange-800';
+  if (percentage <= 50) return 'bg-yellow-100 text-yellow-800';
+  return 'bg-green-100 text-green-800';
 };
 
 // Map Supabase property data to our app's Property interface
