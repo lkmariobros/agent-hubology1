@@ -2,10 +2,10 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import MetricsContainer from '@/components/dashboard/MetricsContainer';
-import RecentTransactions from '@/components/dashboard/RecentTransactions';
 import OpportunitiesBoard from '@/components/dashboard/OpportunitiesBoard';
 import PropertyShowcase from '@/components/dashboard/PropertyShowcase';
 import UpcomingPayments from '@/components/dashboard/UpcomingPayments';
+import Leaderboard from '@/components/leaderboard/Leaderboard';
 import { useMetrics } from '@/hooks/useDashboard';
 import { Building2, Trophy } from 'lucide-react';
 import { DashboardMetric } from '@/types';
@@ -51,7 +51,15 @@ const Dashboard: React.FC = () => {
       <MetricsContainer metrics={filteredMetrics} />
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <RecentTransactions />
+        <Leaderboard 
+          users={[
+            { id: '1', name: 'Jane Smith', role: 'agent', tier: 'Gold', avatar: '' },
+            { id: '2', name: 'John Doe', role: 'agent', tier: 'Silver', avatar: '' },
+            { id: '3', name: 'Alice Johnson', role: 'agent', tier: 'Bronze', avatar: '' },
+            { id: '4', name: 'Robert Lee', role: 'agent', tier: 'Gold', avatar: '' },
+            { id: '5', name: 'Emily Wang', role: 'agent', tier: 'Silver', avatar: '' },
+          ]} 
+        />
         <UpcomingPayments onViewAll={handleViewAllPayments} />
       </div>
       
