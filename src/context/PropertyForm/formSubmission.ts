@@ -2,6 +2,7 @@
 import { PropertyFormState } from "@/types/property-form";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
+import { getOrCreatePropertyType, getOrCreateTransactionType, getOrCreatePropertyStatus } from "@/utils/propertyFormHelpers";
 
 // Mock function for now
 export const saveFormAsDraft = async (state: PropertyFormState) => {
@@ -30,17 +31,17 @@ export const submitPropertyForm = async (state?: PropertyFormState) => {
       .insert({
         title: formData.title,
         description: formData.description,
-        property_type_id: getPropertyTypeId(formData.propertyType),
-        transaction_type_id: getTransactionTypeId(formData.transactionType),
-        status_id: getStatusId(formData.status),
+        property_type_id: await getPropertyTypeId(formData.propertyType),
+        transaction_type_id: await getTransactionTypeId(formData.transactionType),
+        status_id: await getStatusId(formData.status),
         featured: formData.featured,
         
         // Address fields
-        street: formData.address.street,
-        city: formData.address.city,
-        state: formData.address.state,
-        zip: formData.address.zip,
-        country: formData.address.country,
+        street: formData.address?.street,
+        city: formData.address?.city,
+        state: formData.address?.state,
+        zip: formData.address?.zip,
+        country: formData.address?.country,
         
         // Financial fields
         price: formData.price || 0,
@@ -82,53 +83,100 @@ export const submitPropertyForm = async (state?: PropertyFormState) => {
     
     // Step 2: Upload images to storage and create image records
     if (images && images.length > 0) {
-      for (const image of images) {
-        if (image.file) {
-          const fileExt = image.file.name.split('.').pop();
-          const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
-          const filePath = `${propertyId}/${fileName}`;
+      console.log(`Processing ${images.length} images for property ${propertyId}`);
+      
+      for (let i = 0; i < images.length; i++) {
+        const image = images[i];
+        console.log(`Processing image ${i+1}/${images.length}:`, image);
+        
+        try {
+          let imageUrl = '';
           
-          // Upload to storage
-          const { error: storageError } = await supabase.storage
-            .from('property-images')
-            .upload(filePath, image.file);
-          
-          if (storageError) {
-            console.error("Error uploading image:", storageError);
+          // If we have an actual file to upload
+          if (image.file) {
+            const fileExt = image.file.name.split('.').pop();
+            const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+            const filePath = `${propertyId}/${fileName}`;
+            
+            console.log(`Uploading image to storage path: ${filePath}`);
+            
+            // Upload to storage
+            const { data: uploadData, error: storageError } = await supabase.storage
+              .from('property-images')
+              .upload(filePath, image.file);
+            
+            if (storageError) {
+              console.error("Error uploading image:", storageError);
+              toast.error(`Failed to upload image ${i+1}. ${storageError.message}`);
+              continue;
+            }
+            
+            // Get public URL
+            const { data: urlData } = supabase.storage
+              .from('property-images')
+              .getPublicUrl(filePath);
+              
+            imageUrl = urlData.publicUrl;
+            console.log(`Image uploaded, public URL: ${imageUrl}`);
+          } else if (image.url) {
+            // If we already have a URL (e.g., from a previously uploaded image)
+            imageUrl = image.url;
+            console.log(`Using existing image URL: ${imageUrl}`);
+          } else {
+            console.warn(`Image ${i+1} has no file or URL`);
             continue;
           }
           
-          // Get public URL
-          const { data } = supabase.storage
-            .from('property-images')
-            .getPublicUrl(filePath);
-          
           // Create image record
-          await supabase.from('property_images')
+          console.log(`Creating database record for image ${i+1}`);
+          const { error: imageError } = await supabase.from('property_images')
             .insert({
               property_id: propertyId,
-              storage_path: data.publicUrl,
+              storage_path: imageUrl,
               is_cover: image.isCover,
-              display_order: image.displayOrder
+              display_order: image.displayOrder || i
             });
+          
+          if (imageError) {
+            console.error("Error creating image record:", imageError);
+            toast.error(`Failed to save image ${i+1} metadata. ${imageError.message}`);
+          } else {
+            console.log(`Successfully saved image ${i+1} record`);
+          }
+        } catch (imgError) {
+          console.error(`Error processing image ${i+1}:`, imgError);
+          toast.error(`An error occurred while processing image ${i+1}`);
         }
       }
+    } else {
+      console.log("No images to upload");
     }
     
     // Step 3: Save property features
     if (formData.propertyFeatures && formData.propertyFeatures.length > 0) {
+      console.log(`Saving ${formData.propertyFeatures.length} property features`);
+      
       const featuresData = formData.propertyFeatures.map(feature => ({
         property_id: propertyId,
         feature_name: feature,
         feature_category: 'General'
       }));
       
-      await supabase.from('property_features').insert(featuresData);
+      const { error: featuresError } = await supabase.from('property_features').insert(featuresData);
+      
+      if (featuresError) {
+        console.error("Error saving property features:", featuresError);
+        toast.error(`Failed to save property features. ${featuresError.message}`);
+      } else {
+        console.log("Property features saved successfully");
+      }
     }
     
     // Step 4: Save owner information if provided
     if (formData.owner && formData.owner.name) {
-      await supabase.from('property_owners').insert({
+      console.log("Saving property owner information");
+      
+      const { error: ownerError } = await supabase.from('property_owners').insert({
         property_id: propertyId,
         name: formData.owner.name,
         email: formData.owner.email,
@@ -136,14 +184,57 @@ export const submitPropertyForm = async (state?: PropertyFormState) => {
         address: formData.owner.address,
         company: formData.owner.company,
         notes: formData.owner.notes,
-        is_primary_contact: formData.owner.isPrimaryContact
+        is_primary_contact: formData.owner.isPrimaryContact !== false
       });
+      
+      if (ownerError) {
+        console.error("Error saving property owner:", ownerError);
+        toast.error(`Failed to save property owner information. ${ownerError.message}`);
+      } else {
+        console.log("Property owner saved successfully");
+      }
     }
     
     // Step 5: Handle documents if needed
     if (documents && documents.length > 0) {
-      // Similar logic to images
-      console.log("Documents handling not implemented yet");
+      console.log(`Processing ${documents.length} documents for property ${propertyId}`);
+      
+      for (let i = 0; i < documents.length; i++) {
+        const doc = documents[i];
+        
+        try {
+          if (doc.file) {
+            const fileExt = doc.file.name.split('.').pop();
+            const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+            const filePath = `${propertyId}/${fileName}`;
+            
+            // Upload document to storage
+            const { error: docStorageError } = await supabase.storage
+              .from('property-documents')
+              .upload(filePath, doc.file);
+            
+            if (docStorageError) {
+              console.error(`Error uploading document ${i+1}:`, docStorageError);
+              continue;
+            }
+            
+            // Get public URL
+            const { data: docUrlData } = supabase.storage
+              .from('property-documents')
+              .getPublicUrl(filePath);
+            
+            // Create document record
+            await supabase.from('property_documents').insert({
+              property_id: propertyId,
+              storage_path: docUrlData.publicUrl,
+              name: doc.name,
+              document_type: doc.documentType
+            });
+          }
+        } catch (docError) {
+          console.error(`Error processing document ${i+1}:`, docError);
+        }
+      }
     }
     
     return propertyId;
@@ -153,8 +244,36 @@ export const submitPropertyForm = async (state?: PropertyFormState) => {
   }
 };
 
-// Helper functions for IDs - these would be fetched from the database in a real app
-function getPropertyTypeId(type: string): string {
+// Helper functions for IDs
+async function getPropertyTypeId(type: string): Promise<string> {
+  try {
+    return await getOrCreatePropertyType(type);
+  } catch (error) {
+    console.error("Error getting property type ID:", error);
+    return getDefaultPropertyTypeId(type);
+  }
+}
+
+async function getTransactionTypeId(type: string): Promise<string> {
+  try {
+    return await getOrCreateTransactionType(type);
+  } catch (error) {
+    console.error("Error getting transaction type ID:", error);
+    return getDefaultTransactionTypeId(type);
+  }
+}
+
+async function getStatusId(status: string): Promise<string> {
+  try {
+    return await getOrCreatePropertyStatus(status);
+  } catch (error) {
+    console.error("Error getting status ID:", error);
+    return getDefaultStatusId(status);
+  }
+}
+
+// Fallback functions with default IDs
+function getDefaultPropertyTypeId(type: string): string {
   const typeMap: Record<string, string> = {
     'Residential': 'f096705d-b0a5-402e-9f77-01c1d4f1a881',
     'Commercial': 'c8c5628c-72d8-4d57-9cf1-76723077ddba',
@@ -164,7 +283,7 @@ function getPropertyTypeId(type: string): string {
   return typeMap[type] || typeMap['Residential'];
 }
 
-function getTransactionTypeId(type: string): string {
+function getDefaultTransactionTypeId(type: string): string {
   const typeMap: Record<string, string> = {
     'Sale': '1ed14504-2a59-4f05-927c-7c637cb54326',
     'Rent': 'f2a1be38-9ac0-4a27-b64b-085b5d418a3a',
@@ -173,7 +292,7 @@ function getTransactionTypeId(type: string): string {
   return typeMap[type] || typeMap['Sale'];
 }
 
-function getStatusId(status: string): string {
+function getDefaultStatusId(status: string): string {
   const statusMap: Record<string, string> = {
     'Available': 'aa6b8f96-7f58-4e8d-a390-44c775ecb04c',
     'Under Contract': 'bb7d8f96-7f58-4e8d-a390-44c775ecb04c',
