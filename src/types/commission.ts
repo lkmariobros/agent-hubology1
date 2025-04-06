@@ -1,64 +1,4 @@
 
-// Payment schedule types
-export interface ScheduleInstallment {
-  id: string;
-  scheduleId: string;
-  installmentNumber: number;
-  percentage: number;
-  daysAfterTransaction: number;
-  description?: string;
-}
-
-export interface PaymentSchedule {
-  id: string;
-  name: string;
-  description?: string;
-  isDefault: boolean;
-  createdAt: string;
-  updatedAt: string;
-  installments: ScheduleInstallment[];
-}
-
-// Commission installment types
-export interface CommissionInstallment {
-  id: string;
-  transactionId: string;
-  installmentNumber: number;
-  amount: number;
-  percentage: number;
-  scheduledDate: string;
-  actualPaymentDate?: string;
-  status: string;
-  agentId: string;
-  createdAt: string;
-  updatedAt: string;
-  notes?: string;
-  transaction?: {
-    property?: {
-      title?: string;
-      address?: string;
-    };
-    agent?: {
-      first_name?: string;
-      last_name?: string;
-    };
-  };
-}
-
-// Commission history type
-export interface CommissionHistory {
-  id: string;
-  transactionId: string;
-  transactionReference?: string;
-  property: string | { title: string; location: string };
-  date: string;
-  amount: number;
-  type: 'personal' | 'override';
-  source?: string;
-  status: string;
-}
-
-// Commission tier type
 export interface CommissionTier {
   id: string;
   name: string;
@@ -67,21 +7,81 @@ export interface CommissionTier {
   minTransactions: number;
   color: string;
   rank: string;
-  agentPercentage: number;
+  percentage: number; // Instead of agentPercentage
   commissionRate: number;
   requirements: string[];
 }
 
-// Override commission type
+export interface CommissionBreakdown {
+  totalCommission: number;
+  agencyShare: number;
+  agentShare: number;
+  coAgencyCommission?: number;
+  agentCommissionPercentage?: number;
+  notes?: string;
+}
+
+export interface CommissionSummary {
+  personal: number;
+  override: number;
+  total: number;
+  pending: number;
+  paid: number;
+}
+
+export interface CommissionHistory {
+  id: string;
+  transactionId: string;
+  property: {
+    title: string;
+    location: string;
+  };
+  date: string;
+  amount: number;
+  type: 'personal' | 'override';
+  source?: string;
+  status: string;
+}
+
+export interface PaymentSchedule {
+  id: string;
+  name: string;
+  description?: string;
+  isDefault: boolean;
+  installments: PaymentInstallment[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface PaymentInstallment {
+  id: string;
+  scheduleId: string;
+  installmentNumber: number;
+  percentage: number;
+  daysAfterTransaction: number;
+  description?: string;
+}
+
+export interface CommissionApproval {
+  id: string;
+  transactionId: string;
+  status: 'Pending' | 'Under Review' | 'Approved' | 'Rejected' | 'Ready for Payment' | 'Paid';
+  submittedBy: string;
+  reviewerId?: string;
+  reviewedAt?: string;
+  notes?: string;
+  thresholdExceeded?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface OverrideCommission {
   id: string;
   agentId: string;
-  baseAgentId: string;
-  transactionId: string;
-  percentage: number;
+  downlineAgentId: string;
+  transactionId?: string;
   amount: number;
-  status: string;
-  agentName: string;
-  rank: string;
-  tier: string;
+  percentage: number;
+  date: string;
+  status: 'Pending' | 'Approved' | 'Paid';
 }

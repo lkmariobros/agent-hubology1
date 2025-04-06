@@ -1,31 +1,85 @@
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { commissionApi } from '@/services/commissionService';
-import { CommissionTier, PaymentSchedule } from '@/types/commission';
+import { CommissionTier, PaymentSchedule, AgentWithHierarchy } from '@/types';
 import { toast } from 'sonner';
 import { captureException } from '@/lib/sentry';
 
 export function useCommission() {
   const queryClient = useQueryClient();
   
+  // Commission Summary
+  const getCommissionSummary = (userId: string) => {
+    return useQuery({
+      queryKey: ['commissionSummary', userId],
+      queryFn: () => commissionApi.getSummary(userId),
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      retry: 3,
+      retryDelay: attempt => Math.min(1000 * 2 ** attempt, 30000),
+      meta: {
+        errorMessage: 'Failed to load commission summary'
+      }
+    });
+  };
+  
+  // Commission History
+  const getCommissionHistory = (userId: string, limit = 10) => {
+    return useQuery({
+      queryKey: ['commissionHistory', userId, limit],
+      queryFn: () => commissionApi.getHistory(userId, limit),
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      retry: 3,
+      retryDelay: attempt => Math.min(1000 * 2 ** attempt, 30000),
+      meta: {
+        errorMessage: 'Failed to load commission history'
+      }
+    });
+  };
+  
   // Commission Tiers
   const getCommissionTiers = () => {
     return useQuery({
       queryKey: ['commissionTiers'],
-      queryFn: commissionApi.getCommissionTiers,
+      queryFn: commissionApi.getTiers,
       staleTime: 5 * 60 * 1000, // 5 minutes
       retry: 3,
       retryDelay: attempt => Math.min(1000 * 2 ** attempt, 30000),
       meta: {
         errorMessage: 'Failed to load commission tiers'
-      },
-      onError: (error: any) => {
-        console.error('Error fetching commission tiers:', error);
-        captureException(error, { source: 'useCommission.getCommissionTiers' });
-        toast.error(`Failed to load commission tiers: ${error.message || 'Unknown error'}`);
       }
     });
   };
   
+  // Agent Hierarchy
+  const getAgentHierarchy = (agentId?: string) => {
+    const { data, isLoading, error, refetch } = useQuery({
+      queryKey: ['agentHierarchy', agentId],
+      queryFn: async () => {
+        // Fetch agent hierarchy data
+        const response = await commissionApi.getAgentHierarchy(agentId);
+        return response;
+      },
+      enabled: !!agentId,
+    });
+    
+    return { data: data?.data || null, isLoading, error, refetch };
+  };
+  
+  // Agent Downline
+  const getAgentDownline = (agentId: string) => {
+    return useQuery({
+      queryKey: ['agentDownline', agentId],
+      queryFn: () => commissionApi.getAgentDownline(agentId),
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      retry: 3,
+      retryDelay: attempt => Math.min(1000 * 2 ** attempt, 30000),
+      meta: {
+        errorMessage: 'Failed to load agent downline'
+      }
+    });
+  };
+  
+  // Create Commission Tier
   const createCommissionTier = useMutation({
     mutationFn: commissionApi.createCommissionTier,
     onSuccess: () => {
@@ -39,6 +93,7 @@ export function useCommission() {
     }
   });
   
+  // Update Commission Tier
   const updateCommissionTier = useMutation({
     mutationFn: ({ id, updates }: { id: string; updates: Partial<CommissionTier> }) =>
       commissionApi.updateCommissionTier(id, updates),
@@ -53,6 +108,7 @@ export function useCommission() {
     }
   });
   
+  // Delete Commission Tier
   const deleteCommissionTier = useMutation({
     mutationFn: commissionApi.deleteCommissionTier,
     onSuccess: () => {
@@ -76,30 +132,11 @@ export function useCommission() {
       retryDelay: attempt => Math.min(1000 * 2 ** attempt, 30000),
       meta: {
         errorMessage: 'Failed to load payment schedules'
-      },
-      onError: (error: any) => {
-        console.error('Error fetching payment schedules:', error);
-        captureException(error, { source: 'useCommission.getPaymentSchedules' });
-        toast.error(`Failed to load payment schedules: ${error.message || 'Unknown error'}`);
       }
     });
   };
   
-  // Fix the data property error
-  const getAgentHierarchy = (agentId?: string) => {
-    const { data, isLoading, error, refetch } = useQuery({
-      queryKey: ['agentHierarchy', agentId],
-      queryFn: async () => {
-        // Fetch agent hierarchy data
-        const response = await commissionApi.getAgentHierarchy(agentId);
-        return response;
-      },
-      enabled: !!agentId,
-    });
-    
-    return { data: data?.data || null, isLoading, error, refetch };
-  };
-  
+  // Create Payment Schedule
   const createPaymentSchedule = useMutation({
     mutationFn: commissionApi.createPaymentSchedule,
     onSuccess: () => {
@@ -113,6 +150,7 @@ export function useCommission() {
     }
   });
   
+  // Update Payment Schedule
   const updatePaymentSchedule = useMutation({
     mutationFn: ({ id, updates }: { id: string; updates: Partial<PaymentSchedule> }) =>
       commissionApi.updatePaymentSchedule(id, updates),
@@ -127,6 +165,7 @@ export function useCommission() {
     }
   });
   
+  // Delete Payment Schedule
   const deletePaymentSchedule = useMutation({
     mutationFn: commissionApi.deletePaymentSchedule,
     onSuccess: () => {
@@ -140,6 +179,7 @@ export function useCommission() {
     }
   });
   
+  // Approve Commission
   const approveCommission = useMutation({
     mutationFn: commissionApi.approveCommission,
     onSuccess: () => {
@@ -153,6 +193,7 @@ export function useCommission() {
     }
   });
   
+  // Reject Commission
   const rejectCommission = useMutation({
     mutationFn: commissionApi.rejectCommission,
     onSuccess: () => {
@@ -166,7 +207,7 @@ export function useCommission() {
     }
   });
   
-  // Fix the MutationFunction type error by using the correct parameter signature
+  // Update Agent Rank
   const updateAgentRank = useMutation<
     { success: boolean; message: string }, // return type
     Error, // error type
@@ -187,8 +228,26 @@ export function useCommission() {
     },
   });
   
+  // Add Agent
+  const addAgent = useMutation({
+    mutationFn: commissionApi.addAgent,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['agents'] });
+      toast.success("New agent added successfully");
+    },
+    onError: (error: any) => {
+      console.error('Error adding agent:', error);
+      captureException(error, { source: 'useCommission.addAgent' });
+      toast.error(`Failed to add agent: ${error.message || "Unknown error"}`);
+    }
+  });
+  
   return {
+    getCommissionSummary,
+    getCommissionHistory,
     getCommissionTiers,
+    getAgentHierarchy,
+    getAgentDownline,
     createCommissionTier,
     updateCommissionTier,
     deleteCommissionTier,
@@ -199,6 +258,17 @@ export function useCommission() {
     approveCommission,
     rejectCommission,
     updateAgentRank,
-    getAgentHierarchy
+    addAgent
   };
 }
+
+// For backward compatibility with existing code
+export const useCommissionTiers = () => {
+  const { getCommissionTiers } = useCommission();
+  return getCommissionTiers();
+};
+
+export const useAgentHierarchy = (agentId?: string) => {
+  const { getAgentHierarchy } = useCommission();
+  return getAgentHierarchy(agentId);
+};

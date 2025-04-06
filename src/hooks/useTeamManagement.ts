@@ -73,9 +73,11 @@ export function useTeamManagement() {
                 tier: agentProfile.upline.tier_name,
                 commission: agentProfile.upline.commission_percentage,
                 avatar: agentProfile.upline.avatar_url,
-                rank: agentProfile.upline.tier_name
+                rank: agentProfile.upline.tier_name,
+                totalCommission: 0 // Required by the type
               } : undefined,
-              downline: []
+              downline: [],
+              totalCommission: 0 // Required by the type
             };
           }
         }
@@ -124,6 +126,10 @@ export function useTeamManagement() {
           ((a?.name || '').localeCompare(b?.name || ''))
         );
       
+      // Calculate personal and override commissions
+      const personalCommission = calculatePersonalCommission(agentData);
+      const overrideCommission = calculateOverrideCommission(agentData, validDownline);
+      
       // Return the agent with their downline
       return {
         id: agentData.id,
@@ -137,8 +143,9 @@ export function useTeamManagement() {
         joinDate: agentData.join_date,
         transactions: agentData.total_transactions,
         salesVolume: agentData.total_sales,
-        personalCommission: calculatePersonalCommission(agentData),
-        overrideCommission: calculateOverrideCommission(agentData, validDownline),
+        personalCommission: personalCommission,
+        overrideCommission: overrideCommission,
+        totalCommission: personalCommission + overrideCommission,
         downline: validDownline
       };
     } catch (error) {

@@ -6,7 +6,12 @@ export interface Opportunity {
   budget: string;
   location: string;
   status: string;
+  propertyType: string;
   postedBy: string;
   postedDate: string;
-  propertyType?: string;
+  // Additional fields
+  deadline?: string;
+  requirements?: string[];
+  assignedTo?: string;
+  notes?: string;
 }

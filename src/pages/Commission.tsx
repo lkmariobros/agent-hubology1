@@ -7,7 +7,7 @@ import CommissionHeader from '@/components/commission/CommissionHeader';
 import CommissionMetrics from '@/components/commission/CommissionMetrics';
 import DashboardContent from '@/components/commission/DashboardContent';
 import TeamContent from '@/components/commission/TeamContent';
-import { useCommissionTiers, useAgentHierarchy } from '@/hooks/useCommission';
+import { useCommission } from '@/hooks/useCommission';
 import { AgentWithHierarchy, CommissionHistory, CommissionTier } from '@/types';
 import SendTestNotification from '@/components/commission/SendTestNotification';
 
@@ -20,7 +20,7 @@ const fallbackTiers: CommissionTier[] = [{
   minTransactions: 0,
   color: 'orange',
   rank: 'Associate',
-  agentPercentage: 70,
+  percentage: 70,
   commissionRate: 70,
   requirements: []
 }, {
@@ -31,7 +31,7 @@ const fallbackTiers: CommissionTier[] = [{
   minTransactions: 10,
   color: 'blue',
   rank: 'Senior Associate',
-  agentPercentage: 75,
+  percentage: 75,
   commissionRate: 75,
   requirements: []
 }, {
@@ -42,7 +42,7 @@ const fallbackTiers: CommissionTier[] = [{
   minTransactions: 25,
   color: 'orange',
   rank: 'Team Leader',
-  agentPercentage: 80,
+  percentage: 80,
   commissionRate: 80,
   requirements: []
 }, {
@@ -53,7 +53,7 @@ const fallbackTiers: CommissionTier[] = [{
   minTransactions: 50,
   color: 'purple',
   rank: 'Sales Leader',
-  agentPercentage: 85,
+  percentage: 85,
   commissionRate: 85,
   requirements: []
 }, {
@@ -64,7 +64,7 @@ const fallbackTiers: CommissionTier[] = [{
   minTransactions: 100,
   color: 'pink',
   rank: 'Director',
-  agentPercentage: 90,
+  percentage: 90,
   commissionRate: 90,
   requirements: []
 }];
@@ -107,7 +107,6 @@ const fallbackAgentHierarchy: AgentWithHierarchy = {
 // Sample recent commission history (would come from API in production)
 const recentCommissions: CommissionHistory[] = [{
   id: '1',
-  transactionReference: 'tx1',
   transactionId: 'tx1',
   property: {
     title: 'Suburban Family Home',
@@ -119,7 +118,6 @@ const recentCommissions: CommissionHistory[] = [{
   status: 'Completed'
 }, {
   id: '2',
-  transactionReference: 'tx2',
   transactionId: 'tx2',
   property: {
     title: 'Downtown Loft',
@@ -131,7 +129,6 @@ const recentCommissions: CommissionHistory[] = [{
   status: 'Completed'
 }, {
   id: '3',
-  transactionReference: 'tx3',
   transactionId: 'tx3',
   property: {
     title: 'Luxury Beach Condo',
@@ -144,7 +141,6 @@ const recentCommissions: CommissionHistory[] = [{
   status: 'Completed'
 }, {
   id: '4',
-  transactionReference: 'tx4',
   transactionId: 'tx4',
   property: {
     title: 'Modern Townhouse',
@@ -183,14 +179,12 @@ const Commission = () => {
 
   // Fetch commission data - in production, these would use real API calls
   const {
-    data: commissionTiersResponse,
-    isLoading: isLoadingTiers
-  } = useCommissionTiers();
+    getCommissionTiers,
+    getAgentHierarchy
+  } = useCommission();
   
-  const {
-    data: agentHierarchyResponse,
-    isLoading: isLoadingHierarchy
-  } = useAgentHierarchy('agent123');
+  const { data: commissionTiersResponse } = getCommissionTiers();
+  const { data: agentHierarchyResponse } = getAgentHierarchy('agent123');
 
   // Extract and provide fallbacks for API data
   const commissionTiers = commissionTiersResponse || fallbackTiers;
@@ -226,7 +220,7 @@ const Commission = () => {
             agentHierarchy={agentHierarchy} 
             selectedAgent={selectedAgent} 
             onAgentClick={handleAgentClick} 
-            isLoading={isLoadingHierarchy} 
+            isLoading={false} 
           />
         </TabsContent>
       </Tabs>

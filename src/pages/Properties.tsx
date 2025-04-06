@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -39,13 +40,6 @@ const Properties: React.FC = () => {
   } = useQuery({
     queryKey: ['properties'],
     queryFn: () => propertyService.getProperties(),
-    onError: (error: any) => {
-      toast({
-        title: "Error fetching properties",
-        description: error.message,
-        variant: "destructive",
-      })
-    }
   });
 
   useEffect(() => {
@@ -56,7 +50,7 @@ const Properties: React.FC = () => {
         description: property.description,
         price: Number(property.price),
         type: property.type,
-        subtype: property.subtype || 'standard', // Add missing subtype
+        subtype: property.subtype || 'standard',
         bedrooms: Number(property.bedrooms),
         bathrooms: Number(property.bathrooms),
         builtUpArea: Number(property.builtUpArea),
@@ -68,8 +62,8 @@ const Properties: React.FC = () => {
           zip: property.address.zip,
           country: property.address.country,
         },
-        area: property.area || '0', // Add missing area
-        listedBy: property.listedBy || 'agency', // Add missing listedBy
+        area: property.area || '0',
+        listedBy: property.listedBy || 'agency',
         features: property.features,
         images: property.images,
         createdAt: property.createdAt,
@@ -131,7 +125,7 @@ const Properties: React.FC = () => {
                 ))}
               </div>
             ) : error ? (
-              <p className="text-red-500">Error: {error.message}</p>
+              <p className="text-red-500">Error: {(error as Error).message}</p>
             ) : (
               <Table>
                 <TableCaption>A list of your properties.</TableCaption>
