@@ -605,18 +605,21 @@ export type Database = {
       }
       permissions: {
         Row: {
+          category: string | null
           created_at: string | null
           description: string | null
           id: string
           name: string
         }
         Insert: {
+          category?: string | null
           created_at?: string | null
           description?: string | null
           id?: string
           name: string
         }
         Update: {
+          category?: string | null
           created_at?: string | null
           description?: string | null
           id?: string
@@ -1110,6 +1113,29 @@ export type Database = {
           upline_id: string | null
         }[]
       }
+      get_all_downline: {
+        Args: {
+          leader_id: string
+        }
+        Returns: {
+          agency_id: string
+          avatar_url: string | null
+          commission_percentage: number
+          email: string | null
+          full_name: string | null
+          id: string
+          join_date: string
+          license_number: string | null
+          phone: string | null
+          specializations: string[] | null
+          tier: number
+          tier_name: string
+          total_sales: number | null
+          total_transactions: number | null
+          updated_at: string
+          upline_id: string | null
+        }[]
+      }
       get_commission_approval_detail: {
         Args: {
           p_approval_id: string
@@ -1121,6 +1147,56 @@ export type Database = {
           p_approval_id: string
         }
         Returns: Json[]
+      }
+      get_direct_reports: {
+        Args: {
+          manager_id: string
+        }
+        Returns: {
+          agency_id: string
+          avatar_url: string | null
+          commission_percentage: number
+          email: string | null
+          full_name: string | null
+          id: string
+          join_date: string
+          license_number: string | null
+          phone: string | null
+          specializations: string[] | null
+          tier: number
+          tier_name: string
+          total_sales: number | null
+          total_transactions: number | null
+          updated_at: string
+          upline_id: string | null
+        }[]
+      }
+      get_permissions: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          category: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+        }[]
+      }
+      get_permissions_by_category: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          category: string
+          permissions: Json
+        }[]
+      }
+      get_permissions_simple: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          category: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+        }[]
       }
       get_team_performance_metrics: {
         Args: {
@@ -1196,7 +1272,43 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      is_admin_tier: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      is_admin_user: {
+        Args: {
+          user_id: string
+        }
+        Returns: boolean
+      }
+      is_direct_downline: {
+        Args: {
+          upline_id: string
+          agent_id: string
+        }
+        Returns: boolean
+      }
+      is_in_downline: {
+        Args: {
+          upline_id: string
+          agent_id: string
+        }
+        Returns: boolean
+      }
       is_reviewer: {
+        Args: {
+          user_id: string
+        }
+        Returns: boolean
+      }
+      is_user_admin: {
+        Args: {
+          user_id: string
+        }
+        Returns: boolean
+      }
+      is_user_team_leader: {
         Args: {
           user_id: string
         }
@@ -1264,6 +1376,13 @@ export type Database = {
           metadata: Json
           similarity: number
         }[]
+      }
+      property_belongs_to_agent: {
+        Args: {
+          property_id: string
+          agent_id: string
+        }
+        Returns: boolean
       }
       resend_agent_invitation: {
         Args: {

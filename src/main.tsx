@@ -4,6 +4,7 @@ import App from './App.tsx';
 import './index.css';
 import { initSentry } from './lib/sentry';
 import { Toaster } from './components/ui/sonner';
+import { TooltipProvider } from './components/ui/tooltip';
 
 // Get root element - do this before Sentry initialization
 const rootElement = document.getElementById("root");
@@ -19,7 +20,9 @@ if (!rootElement) {
   const root = createRoot(rootElement);
   root.render(
     <>
-      <App />
+      <TooltipProvider>
+        <App />
+      </TooltipProvider>
       <Toaster 
         expand={false} 
         visibleToasts={3} 

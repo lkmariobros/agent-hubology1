@@ -8,6 +8,7 @@ import { authService } from './authService';
 import { useAuthState } from './useAuthState';
 import { roleUtils } from './roleUtils';
 import { toast } from 'sonner';
+import { isSpecialAdmin, ensureAdminRole } from '@/utils/adminAccess';
 
 // AuthProvider Props
 import { AuthProviderProps } from './types';
@@ -68,16 +69,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               const { profile, userProfile, roles, activeRole } = 
                 await fetchProfileAndRoles(session.user.id, session.user.email);
               
-              // Special handling for josephkwantum@gmail.com
-              let finalRoles = [...roles];
-              let finalActiveRole = activeRole;
+              // Handle special admin access with the utility function
+              let finalRoles = [...roles] as UserRole[];
+              let finalActiveRole = activeRole as UserRole;
               
-              if (session.user.email === 'josephkwantum@gmail.com') {
+              if (isSpecialAdmin(session.user.email)) {
                 console.log('[AuthProvider] Admin email detected, forcing admin role');
-                if (!finalRoles.includes('admin')) {
-                  finalRoles.push('admin');
+                finalRoles = ensureAdminRole(finalRoles, session.user.email);
+                if (finalRoles.includes('admin')) {
+                  finalActiveRole = 'admin' as UserRole;
                 }
-                finalActiveRole = 'admin';
               }
               
               updateSessionState(
@@ -134,16 +135,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             const { profile, userProfile, roles, activeRole } = 
               await fetchProfileAndRoles(session.user.id, session.user.email);
             
-            // Special handling for josephkwantum@gmail.com
-            let finalRoles = [...roles];
-            let finalActiveRole = activeRole;
+            // Handle special admin access using the centralized utility
+            let finalRoles = [...roles] as UserRole[];
+            let finalActiveRole = activeRole as UserRole;
             
-            if (session.user.email === 'josephkwantum@gmail.com') {
+            if (isSpecialAdmin(session.user.email)) {
               console.log('[AuthProvider] Admin email detected, forcing admin role');
-              if (!finalRoles.includes('admin')) {
-                finalRoles.push('admin');
+              finalRoles = ensureAdminRole(finalRoles, session.user.email);
+              if (finalRoles.includes('admin')) {
+                finalActiveRole = 'admin' as UserRole;
               }
-              finalActiveRole = 'admin';
             }
             
             updateSessionState(

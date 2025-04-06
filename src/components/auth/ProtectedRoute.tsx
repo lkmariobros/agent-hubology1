@@ -6,6 +6,7 @@ import LoadingIndicator from '../ui/loading-indicator';
 import { UserRole } from '@/types/auth';
 import { toast } from 'sonner';
 import { Button } from '../ui/button';
+import { isSpecialAdmin } from '@/utils/adminAccess';
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -137,8 +138,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to={redirectTo} state={{ from: location }} replace />;
   }
 
-  // Special case for josephkwantum@gmail.com - always allow access to both portals
-  const isSpecialAdminUser = user.email === 'josephkwantum@gmail.com';
+  // Use centralized special admin check
+  const isSpecialAdminUser = isSpecialAdmin(user.email);
 
   // Check for admin requirement, but make exception for special admin user
   if (requireAdmin && !isAdmin && !isSpecialAdminUser) {

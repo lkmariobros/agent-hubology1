@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PermissionSelector } from './PermissionSelector';
 import { useRoles } from '@/hooks/useRoles';
 import LoadingIndicator from '@/components/ui/loading-indicator';
+import QueryError from '@/components/ui/query-error';
 
 interface RoleFormValues {
   name: string;
@@ -43,12 +44,16 @@ export function RoleDialog({
   const { 
     permissionCategories, 
     isLoadingCategories,
-    loadRolePermissions
+    loadRolePermissions,
+    error: roleError,
+    refetchPermissions,
+    refetchPermissionCategories
   } = useRoles();
   
   const [selectedPermissions, setSelectedPermissions] = useState<Permission[]>([]);
   const [activeTab, setActiveTab] = useState("basic");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   
   // Reset form when dialog opens or role changes
   useEffect(() => {
@@ -58,6 +63,14 @@ export function RoleDialog({
         description: role?.description || ''
       });
       
+      setError(null);
+      
+      // Attempt to refetch data if there was an error
+      if (roleError) {
+        refetchPermissions();
+        refetchPermissionCategories();
+      }
+      
       // Load role permissions if editing
       if (role?.id) {
         loadRolePermissionsForRole(role.id);
@@ -65,16 +78,18 @@ export function RoleDialog({
         setSelectedPermissions([]);
       }
     }
-  }, [open, role, reset]);
+  }, [open, role, reset, roleError, refetchPermissions, refetchPermissionCategories]);
   
   // Load permissions for a specific role
   const loadRolePermissionsForRole = async (roleId: string) => {
     try {
       setLoading(true);
+      setError(null);
       const permissions = await loadRolePermissions(roleId);
       setSelectedPermissions(permissions.map(p => ({ ...p, selected: true })));
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading role permissions:', error);
+      setError('Could not load permissions for this role. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -87,13 +102,20 @@ export function RoleDialog({
   
   // Handle form submission
   const handleFormSubmit = (values: RoleFormValues) => {
-    onSubmit({
-      ...values,
-      permissions: selectedPermissions
-    });
+    try {
+      setError(null);
+      onSubmit({
+        ...values,
+        permissions: selectedPermissions
+      });
+    } catch (err: any) {
+      setError('An error occurred while saving. Please try again.');
+      console.error('Form submission error:', err);
+    }
   };
   
   const isLoadingData = isLoadingCategories || loading;
+  const showError = error || roleError;
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
@@ -104,6 +126,10 @@ export function RoleDialog({
             {role ? 'Update the role details and permissions below.' : 'Create a new role with the form below.'}
           </DialogDescription>
         </DialogHeader>
+
+        {error && (
+          <QueryError message={error} />
+        )}
 
         <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4 pt-4">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -145,11 +171,25 @@ export function RoleDialog({
                 <div className="flex justify-center py-8">
                   <LoadingIndicator text="Loading permissions..." />
                 </div>
+              ) : roleError ? (
+                <QueryError 
+                  title="Permission Loading Error" 
+                  message="Failed to load permission data" 
+                  onRetry={() => {
+                    refetchPermissions();
+                    refetchPermissionCategories();
+                  }}
+                />
               ) : (
                 <PermissionSelector
                   permissionCategories={permissionCategories}
                   selectedPermissions={selectedPermissions}
                   onPermissionChange={handlePermissionChange}
+                  error={roleError ? 'Failed to load permissions' : undefined}
+                  onRetry={() => {
+                    refetchPermissions();
+                    refetchPermissionCategories();
+                  }}
                 />
               )}
             </TabsContent>

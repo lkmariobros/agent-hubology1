@@ -3,12 +3,12 @@ import React from 'react';
 import { Property } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Bed, Bath, Square, MapPin, Calendar, Tag, Building, User, Award, Link as LinkIcon, Check, Info } from 'lucide-react';
+import { Bed, Bath, Square, MapPin, Calendar, Tag, Building, User, Award, Link as LinkIcon } from 'lucide-react';
 import { formatPrice } from '@/utils/propertyUtils';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 export interface PropertyCardDetailsProps {
   property: Property;
@@ -159,32 +159,28 @@ export const PropertyCardDetails: React.FC<PropertyCardDetailsProps> = ({
       
       {/* Actions */}
       <div className="pt-2 flex justify-end gap-2">
-        <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="outline" size="sm" onClick={handleViewDetails}>
+              View Details
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>View complete property information</p>
+          </TooltipContent>
+        </Tooltip>
+        
+        {onEdit && (
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="outline" size="sm" onClick={handleViewDetails}>
-                View Details
+              <Button variant="outline" size="sm" onClick={() => onEdit(property.id)}>
+                Edit Property
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>View complete property information</p>
+              <p>Edit property details</p>
             </TooltipContent>
           </Tooltip>
-        </TooltipProvider>
-        
-        {onEdit && (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="outline" size="sm" onClick={() => onEdit(property.id)}>
-                  Edit Property
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Edit property details</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
         )}
       </div>
     </div>
