@@ -1,3 +1,4 @@
+
 import { Opportunity, Transaction, Property, DashboardMetric, ApiResponse } from '@/types';
 import { Building2, Users, DollarSign, LineChart } from 'lucide-react';
 
@@ -7,7 +8,7 @@ export const dashboardApi = {
   // Get dashboard metrics
   getMetrics: async (): Promise<ApiResponse<{ metrics: DashboardMetric[] }>> => {
     // Mock data for now
-    const metrics = [
+    const metrics: DashboardMetric[] = [
       {
         id: "1",
         label: 'Total Listings',

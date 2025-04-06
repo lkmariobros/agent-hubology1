@@ -32,6 +32,21 @@ export interface Property {
   listedBy: string;
   createdAt: string;
   updatedAt: string;
+  // Additional properties for the PropertyCard component
+  stock?: {
+    total?: number;
+    available?: number;
+    sold?: number;
+  };
+  featured?: boolean;
+  transactionType?: string;
+  reference?: string;
+  agent?: {
+    name?: string;
+    avatar?: string;
+    email?: string;
+  };
+  builtUpArea?: number;
 }
 
 export interface Address {
@@ -67,4 +82,39 @@ export interface Opportunity {
   status: string;
   postedBy: string;
   postedDate: string;
+}
+
+// Dashboard metric definition
+export interface DashboardMetric {
+  id: string;
+  label: string;
+  value: string;
+  change: number;
+  trend: 'up' | 'down' | 'neutral';
+  icon: string;
+}
+
+// Commission types
+export interface CommissionTier {
+  id: string;
+  name: string;
+  threshold: number;
+  percentage: number;
+  description?: string;
+}
+
+export interface CommissionHistory {
+  id: string;
+  date: string;
+  amount: number;
+  transactionId: string;
+  property?: string;
+  status: string;
+}
+
+export interface OverrideCommission {
+  agentId: string;
+  agentName: string;
+  percentage: number;
+  amount: number;
 }

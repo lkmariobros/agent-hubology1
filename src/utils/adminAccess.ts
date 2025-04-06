@@ -32,3 +32,24 @@ export function ensureAdminRole(roles: string[], email?: string | null): string[
 export function isAdminRoute(pathname: string): boolean {
   return pathname.startsWith('/admin');
 }
+
+// Determine preferred active role based on roles array and user email
+export function getPreferredActiveRole(roles: string[], email?: string | null): string {
+  // Special admin users should default to admin role if they have it
+  if (isSpecialAdmin(email) && roles.includes('admin')) {
+    return 'admin';
+  }
+  
+  // Order of preference for roles
+  const preferredOrder = ['admin', 'team_leader', 'manager', 'finance', 'agent', 'viewer'];
+  
+  // Find the highest priority role that the user has
+  for (const role of preferredOrder) {
+    if (roles.includes(role)) {
+      return role;
+    }
+  }
+  
+  // Default to the first role if none of the preferred roles match
+  return roles[0] || 'agent';
+}
