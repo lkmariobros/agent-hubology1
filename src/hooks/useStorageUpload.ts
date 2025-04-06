@@ -62,9 +62,11 @@ export function useStorageUpload() {
       // Simulate upload progress
       let currentProgress = 0;
       const progressInterval = setInterval(() => {
-        if (currentProgress < 95) {
-          currentProgress += 5;
+        if (currentProgress < 100) {
+          currentProgress += 10;
           setProgress(currentProgress);
+        } else {
+          clearInterval(progressInterval);
         }
       }, 100);
       

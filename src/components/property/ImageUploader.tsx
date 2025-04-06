@@ -1,3 +1,4 @@
+
 import React, { useCallback, useRef, useState, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { UploadCloud, X, Loader2, Check, Image, AlertTriangle, RefreshCcw, Info } from 'lucide-react';
@@ -20,7 +21,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   disabled = false
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { state, addImage, removeImage, setCoverImage } = usePropertyForm();
+  const { state, addImage, removeImage, setCoverImage, updateImageStatus } = usePropertyForm();
   const { uploadFile, checkStorageBuckets, forceCheckStorageBuckets, isUploading, progress } = useStorageUpload();
   const [processingFiles, setProcessingFiles] = useState<string[]>([]);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -99,12 +100,16 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     setProcessingFiles(prev => [...prev, ...fileNames]);
 
     try {
-      for (const file of acceptedFiles) {
+      for (const [index, file] of acceptedFiles.entries()) {
         // Convert the file to a fake URL for preview
         const previewUrl = URL.createObjectURL(file);
 
+        // Generate a unique ID for this image
+        const imageId = `img-${Date.now()}-${index}`;
+
         // Add to form state immediately for preview with required properties
         addImage({
+          id: imageId,
           file,
           url: previewUrl, // Use preview URL as temporary URL
           displayOrder: state.images.length, // Set the display order based on current image count
@@ -124,12 +129,21 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
           
           console.log(`Successfully uploaded: ${file.name}`, result);
           
-          // Update image status to success or apply the actual URL
-          // This would be implemented in a real application
+          // Find the index of this image in the current state
+          const currentIndex = state.images.findIndex(img => img.id === imageId);
+          if (currentIndex !== -1) {
+            // Update the image status to success
+            updateImageStatus(currentIndex, 'success', result);
+          }
         } catch (error: any) {
           console.error('Error uploading file:', error);
           setUploadError(`Error uploading: ${error.message || 'Unknown error'}`);
-          // We'll still keep the image in the UI for preview purposes
+          
+          // Find the index and update the status to error
+          const currentIndex = state.images.findIndex(img => img.id === imageId);
+          if (currentIndex !== -1) {
+            updateImageStatus(currentIndex, 'error');
+          }
         }
       }
       
@@ -138,7 +152,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
       // Remove files from processing state
       setProcessingFiles(prev => prev.filter(name => !fileNames.includes(name)));
     }
-  }, [state.images, addImage, maxImages, maxSizeMB, uploadFile, bucketStatus]);
+  }, [state.images, addImage, updateImageStatus, maxImages, maxSizeMB, uploadFile, bucketStatus]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -263,7 +277,9 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
                 <img 
                   src={image.previewUrl || image.url} 
                   alt={`Property preview ${index + 1}`}
-                  className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                  className={`w-full h-full object-cover transition-transform group-hover:scale-105 ${
+                    image.uploadStatus === 'error' ? 'border-2 border-red-500' : ''
+                  }`}
                   onError={(e) => {
                     console.error('Failed to load image:', image.previewUrl || image.url);
                     e.currentTarget.src = '/placeholder.svg';
@@ -275,6 +291,18 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
               {image.uploadStatus === 'uploading' && (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+              )}
+              
+              {image.uploadStatus === 'error' && (
+                <div className="absolute top-2 left-2 bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded-md">
+                  Failed
+                </div>
+              )}
+              
+              {image.uploadStatus === 'success' && (
+                <div className="absolute top-2 left-2 bg-green-500 text-white text-xs font-semibold px-2 py-1 rounded-md">
+                  Uploaded
                 </div>
               )}
               

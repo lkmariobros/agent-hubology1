@@ -198,6 +198,7 @@ export interface PropertyFormContextType {
   removeImage: (index: number) => void;
   setCoverImage: (index: number) => void;
   reorderImages: (startIndex: number, endIndex: number) => void;
+  updateImageStatus: (index: number, status: 'uploading' | 'success' | 'error', url?: string) => void;
   addDocument: (document: PropertyDocument) => void;
   removeDocument: (index: number) => void;
   nextStep: () => void;

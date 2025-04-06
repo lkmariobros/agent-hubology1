@@ -60,6 +60,14 @@ export const PropertyFormProvider: React.FC<{ children: ReactNode }> = ({ childr
     dispatch({ type: 'REORDER_IMAGES', payload: { startIndex, endIndex } });
   }, []);
 
+  // New function to update image upload status
+  const updateImageStatus = useCallback((index: number, status: 'uploading' | 'success' | 'error', url?: string) => {
+    dispatch({ 
+      type: 'UPDATE_IMAGE_STATUS', 
+      payload: { index, status, url } 
+    });
+  }, []);
+
   // Document management functions
   const addDocument = useCallback((document: PropertyDocument) => {
     dispatch({ type: 'ADD_DOCUMENT', payload: document });
@@ -123,6 +131,7 @@ export const PropertyFormProvider: React.FC<{ children: ReactNode }> = ({ childr
     removeImage,
     setCoverImage,
     reorderImages,
+    updateImageStatus,
     addDocument,
     removeDocument,
     nextStep,
