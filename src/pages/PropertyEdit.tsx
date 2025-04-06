@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import PropertyFormWrapper from '@/components/property/PropertyFormWrapper';
@@ -66,9 +65,10 @@ const PropertyEdit = () => {
           roadFrontage: property.road_frontage,
           topography: property.topography,
           agentNotes: property.agent_notes,
-          ownerContacts: [],
+          propertyFeatures: property.features || [],
           images: [],
           documents: []
+          // We'll fetch owner contacts separately if needed
         };
 
         setPropertyData(formData);

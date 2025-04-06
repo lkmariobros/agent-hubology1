@@ -3,7 +3,7 @@ export interface PropertyFormData {
   title: string;
   description: string;
   propertyType: 'Residential' | 'Commercial' | 'Industrial' | 'Land';
-  transactionType: 'Sale' | 'Rent';
+  transactionType: 'Sale' | 'Rent' | 'Primary';
   status: string;
   featured: boolean;
   address: {
@@ -18,6 +18,7 @@ export interface PropertyFormData {
   bathrooms?: number;
   builtUpArea?: number;
   furnishingStatus?: string;
+  constructionYear?: number;
   
   // Commercial specific fields
   floorArea?: number;
@@ -35,6 +36,7 @@ export interface PropertyFormData {
   zoning?: string;
   roadFrontage?: number;
   topography?: string;
+  freehold?: boolean;
   
   // Financial fields
   price?: number;
@@ -51,7 +53,33 @@ export interface PropertyFormData {
     address: string;
     notes: string;
     isPrimaryContact: boolean;
-  }
+  };
+  
+  // Features
+  propertyFeatures?: string[];
+  
+  // Owner contacts
+  ownerContacts?: OwnerContact[];
+  
+  // Stock information for Primary market properties
+  stock?: {
+    total: number;
+    available: number;
+    reserved: number;
+    sold: number;
+  };
+  
+  // For tracking deleted items during edits
+  imagesToDelete?: string[];
+  documentsToDelete?: string[];
+}
+
+export interface OwnerContact {
+  id?: string;
+  name: string;
+  role?: string;
+  phone?: string;
+  email?: string;
 }
 
 export interface PropertyImage {
@@ -87,7 +115,7 @@ export interface PropertyFormContextType {
   state: PropertyFormState;
   updateFormData: (data: Partial<PropertyFormData>) => void;
   updatePropertyType: (type: 'Residential' | 'Commercial' | 'Industrial' | 'Land') => void;
-  updateTransactionType: (type: 'Sale' | 'Rent') => void;
+  updateTransactionType: (type: 'Sale' | 'Rent' | 'Primary') => void;
   addImage: (image: PropertyImage) => void;
   removeImage: (index: number) => void;
   setCoverImage: (index: number) => void;

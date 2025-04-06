@@ -22,6 +22,7 @@ export const initialPropertyFormState: PropertyFormState = {
     bathrooms: 0,
     builtUpArea: 0,
     furnishingStatus: 'Unfurnished',
+    constructionYear: new Date().getFullYear(),
     
     // Commercial specific fields
     floorArea: 0,
@@ -39,6 +40,7 @@ export const initialPropertyFormState: PropertyFormState = {
     zoning: '',
     roadFrontage: 0,
     topography: '',
+    freehold: false,
     
     // Financial fields
     price: 0,
@@ -55,6 +57,20 @@ export const initialPropertyFormState: PropertyFormState = {
       address: '',
       notes: '',
       isPrimaryContact: false
+    },
+    
+    // Property features
+    propertyFeatures: [],
+    
+    // Owner contacts
+    ownerContacts: [],
+    
+    // Stock for Primary market properties
+    stock: {
+      total: 0,
+      available: 0,
+      reserved: 0,
+      sold: 0
     }
   },
   images: [],

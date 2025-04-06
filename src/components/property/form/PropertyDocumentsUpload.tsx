@@ -42,10 +42,13 @@ const PropertyDocumentsUpload: React.FC = () => {
   
   const handleAddDocument = () => {
     if (file && documentName && documentType) {
+      const tempId = `temp-${Date.now()}`;
       const newDocument: PropertyDocument = {
+        id: tempId,
         name: documentName,
         documentType,
         file,
+        url: URL.createObjectURL(file),
         uploadStatus: 'uploading'
       };
       
