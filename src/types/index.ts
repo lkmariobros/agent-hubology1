@@ -48,6 +48,7 @@ export interface Property {
     email?: string;
     firstName?: string;
     lastName?: string;
+    id?: string;
   };
   builtUpArea?: number;
 }
@@ -109,6 +110,7 @@ export interface CommissionTier {
   rate?: number;
   minTransactions?: number;
   color?: string;
+  rank?: string; // Added for compatibility with Commission.tsx
 }
 
 export interface CommissionHistory {
@@ -116,7 +118,7 @@ export interface CommissionHistory {
   date: string;
   amount: number;
   transactionId: string;
-  property?: string;
+  property?: string | { title: string; location: string; }; // Updated for compatibility
   status: string;
   // Additional properties used in components
   type?: string;
@@ -129,6 +131,7 @@ export interface OverrideCommission {
   percentage: number;
   amount: number;
   id?: string; // Added for compatibility
+  baseAgentId?: string; // Added for compatibility with useCommission.ts
 }
 
 // Agent with hierarchy for team view
@@ -143,4 +146,10 @@ export interface AgentWithHierarchy {
   overrideCommission: number;
   totalCommission: number;
   downline?: AgentWithHierarchy[];
+  rank?: string; // Added for components that expect it
+  phone?: string; // Added for components that expect it
+  joinDate?: string; // Added for components that expect it
+  transactions?: number; // Added for components that expect it
+  upline?: AgentWithHierarchy; // Added for useCommission.ts
+  commission?: number; // Added for useTeamManagement.ts
 }

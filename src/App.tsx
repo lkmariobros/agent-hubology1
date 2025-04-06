@@ -26,6 +26,7 @@ import Login from '@/pages/auth/Login';
 import Signup from '@/pages/auth/Signup';
 import ForgotPassword from '@/pages/auth/ForgotPassword';
 import ResetPassword from '@/pages/auth/ResetPassword';
+import Index from '@/pages/Index';
 
 // Admin Pages
 import AdminDashboard from '@/pages/admin/Dashboard';
@@ -36,6 +37,7 @@ function App() {
       <NotificationProvider>
         <Router>
           <Routes>
+            <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
