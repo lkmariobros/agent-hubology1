@@ -1,6 +1,6 @@
 
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
-import { useAuthContext } from '@/context/AuthContext';
+import { useAuthContext } from '@/context/auth';
 import { Notification } from '@/types/notification';
 import { useNotificationActions } from '@/hooks/useNotificationActions';
 import { useNotificationSubscription } from '@/hooks/useNotificationSubscription';
@@ -22,8 +22,16 @@ const NotificationContext = createContext<NotificationContextType | undefined>(u
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const { user } = useAuthContext();
-  const userId = user?.id || null;
+  
+  // Use try/catch to safely get auth context
+  let userId: string | null = null;
+  try {
+    const { user } = useAuthContext();
+    userId = user?.id || null;
+  } catch (error) {
+    console.warn("Auth context not available yet in NotificationProvider");
+    userId = null;
+  }
   
   const { 
     markAsRead: markNotificationAsRead, 
@@ -76,7 +84,6 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     loadNotifications();
     
     // Add userId and fetchUserNotifications to dependency array
-    // Since fetchUserNotifications might change between renders, we need to include it
   }, [userId, fetchUserNotifications]);
 
   // Mark a notification as read

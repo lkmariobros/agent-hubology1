@@ -16,6 +16,7 @@ import NotFound from './pages/NotFound';
 import AdminDashboard from './pages/admin/Dashboard';
 import Index from './pages/Index';
 import { AuthProvider } from './context/auth';
+import { NotificationProvider } from './context/NotificationContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 
 // Create our router with proper route structure and authentication
@@ -76,7 +77,9 @@ const router = createBrowserRouter([
 export default function Router() {
   return (
     <AuthProvider>
-      <RouterProvider router={router} />
+      <NotificationProvider>
+        <RouterProvider router={router} />
+      </NotificationProvider>
     </AuthProvider>
   );
 }
