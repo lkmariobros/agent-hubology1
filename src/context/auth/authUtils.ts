@@ -14,7 +14,7 @@ export const createUserProfile = async (user: User): Promise<UserProfile> => {
     .rpc('get_user_roles', { p_user_id: user.id });
   
   // Fall back to agent_profiles tier-based method if error
-  let roles: UserRole[] = [];
+  let roles: string[] = [];
   
   if (rolesError || !userRoles || userRoles.length === 0) {
     // Get roles from agent_profiles tier-based fallback method
@@ -25,24 +25,24 @@ export const createUserProfile = async (user: User): Promise<UserProfile> => {
       .maybeSingle();
       
     // Determine roles based on tier
-    roles = ['agent', 'viewer'] as UserRole[]; // Everyone has basic roles
+    roles = ['agent', 'viewer']; // Everyone has basic roles
     
     if (profileData) {
       const tier = safelyExtractProperty(profileData, 'tier', 1);
       
       // Map tiers to roles
-      if (tier >= 5) roles.push('admin' as UserRole);
-      if (tier >= 4) roles.push('team_leader' as UserRole);
-      if (tier >= 3) roles.push('manager' as UserRole);
-      if (tier >= 2) roles.push('finance' as UserRole);
+      if (tier >= 5) roles.push('admin');
+      if (tier >= 4) roles.push('team_leader');
+      if (tier >= 3) roles.push('manager');
+      if (tier >= 2) roles.push('finance');
     }
   } else {
     // Convert database roles to user roles array
-    roles = userRoles.map(r => r.role_name as UserRole);
+    roles = userRoles.map(r => r.role_name);
     
     // Ensure every user has at least basic roles
-    if (!roles.includes('viewer')) roles.push('viewer' as UserRole);
-    if (!roles.includes('agent')) roles.push('agent' as UserRole);
+    if (!roles.includes('viewer')) roles.push('viewer');
+    if (!roles.includes('agent')) roles.push('agent');
   }
   
   // Use centralized special admin handling
@@ -50,13 +50,13 @@ export const createUserProfile = async (user: User): Promise<UserProfile> => {
   
   // Default to agent role if no roles returned
   if (!roles || !roles.length) {
-    const defaultRoles: UserRole[] = ['agent' as UserRole];
+    const defaultRoles: string[] = ['agent'];
     return {
       id: user.id,
       email: user.email || '',
       name: user.email?.split('@')[0] || '',
-      roles: defaultRoles,
-      activeRole: defaultRoles[0],
+      roles: defaultRoles as UserRole[],
+      activeRole: defaultRoles[0] as UserRole,
     };
   }
   
@@ -67,8 +67,8 @@ export const createUserProfile = async (user: User): Promise<UserProfile> => {
     id: user.id,
     email: user.email || '',
     name: user.email?.split('@')[0] || '',
-    roles,
-    activeRole,
+    roles: roles as UserRole[],
+    activeRole: activeRole as UserRole,
   };
 };
 
@@ -111,15 +111,15 @@ export const fetchProfileAndRoles = async (userId: string, userEmail: string | u
     }
     
     // Determine roles based on what we have
-    let roles: UserRole[] = ['agent', 'viewer'] as UserRole[]; // Everyone has basic roles
+    let roles: string[] = ['agent', 'viewer']; // Everyone has basic roles
     
     if (!rolesError && dbRoles && dbRoles.length > 0) {
       // Use roles from database
-      roles = dbRoles.map(r => r.role_name as UserRole);
+      roles = dbRoles.map(r => r.role_name);
       
       // Ensure basic roles
-      if (!roles.includes('viewer')) roles.push('viewer' as UserRole);
-      if (!roles.includes('agent')) roles.push('agent' as UserRole);
+      if (!roles.includes('viewer')) roles.push('viewer');
+      if (!roles.includes('agent')) roles.push('agent');
       
       console.log('Retrieved roles from database:', roles);
     } else if (finalProfileData) {
@@ -128,10 +128,10 @@ export const fetchProfileAndRoles = async (userId: string, userEmail: string | u
       console.log('User tier level:', tier);
       
       // Map tiers to roles
-      if (tier >= 5) roles.push('admin' as UserRole);
-      if (tier >= 4) roles.push('team_leader' as UserRole);
-      if (tier >= 3) roles.push('manager' as UserRole);
-      if (tier >= 2) roles.push('finance' as UserRole);
+      if (tier >= 5) roles.push('admin');
+      if (tier >= 4) roles.push('team_leader');
+      if (tier >= 3) roles.push('manager');
+      if (tier >= 2) roles.push('finance');
       
       console.log('Determined roles from tier:', roles);
     }
@@ -146,8 +146,8 @@ export const fetchProfileAndRoles = async (userId: string, userEmail: string | u
       id: userId,
       email: userEmail || '',
       name: safelyExtractProperty(finalProfileData, 'full_name', userEmail?.split('@')[0] || ''),
-      roles: roles,
-      activeRole: activeRole,
+      roles: roles as UserRole[],
+      activeRole: activeRole as UserRole,
     };
     
     console.log('User profile created:', userProfile);
@@ -161,7 +161,7 @@ export const fetchProfileAndRoles = async (userId: string, userEmail: string | u
   } catch (err) {
     console.error('Error fetching user profile or roles', { userId, error: err });
     // Still return a basic profile even if there's an error
-    const defaultRoles: UserRole[] = ['agent' as UserRole];
+    const defaultRoles: string[] = ['agent'];
     
     // Use centralized special admin handling even in error case
     const roles = ensureAdminRole(defaultRoles, userEmail);
@@ -173,11 +173,11 @@ export const fetchProfileAndRoles = async (userId: string, userEmail: string | u
         id: userId,
         email: userEmail || '',
         name: userEmail?.split('@')[0] || '',
-        roles,
-        activeRole,
+        roles: roles as UserRole[],
+        activeRole: activeRole as UserRole,
       },
-      roles,
-      activeRole
+      roles: roles as UserRole[],
+      activeRole: activeRole as UserRole
     };
   }
 };

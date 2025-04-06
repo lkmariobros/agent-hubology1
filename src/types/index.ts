@@ -38,6 +38,7 @@ export interface Property {
     available?: number;
     sold?: number;
   };
+  size?: number; // Allow size property for compatibility
   featured?: boolean;
   transactionType?: string;
   reference?: string;
@@ -45,6 +46,8 @@ export interface Property {
     name?: string;
     avatar?: string;
     email?: string;
+    firstName?: string;
+    lastName?: string;
   };
   builtUpArea?: number;
 }
@@ -101,6 +104,11 @@ export interface CommissionTier {
   threshold: number;
   percentage: number;
   description?: string;
+  // Additional properties used in components
+  tier?: string;
+  rate?: number;
+  minTransactions?: number;
+  color?: string;
 }
 
 export interface CommissionHistory {
@@ -110,6 +118,9 @@ export interface CommissionHistory {
   transactionId: string;
   property?: string;
   status: string;
+  // Additional properties used in components
+  type?: string;
+  source?: string;
 }
 
 export interface OverrideCommission {
@@ -117,4 +128,19 @@ export interface OverrideCommission {
   agentName: string;
   percentage: number;
   amount: number;
+  id?: string; // Added for compatibility
+}
+
+// Agent with hierarchy for team view
+export interface AgentWithHierarchy {
+  id: string;
+  name: string;
+  tier: string;
+  avatar?: string;
+  email?: string;
+  salesVolume: number;
+  personalCommission: number;
+  overrideCommission: number;
+  totalCommission: number;
+  downline?: AgentWithHierarchy[];
 }
