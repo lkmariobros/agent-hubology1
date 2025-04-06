@@ -1,10 +1,11 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import PropertyDetails from './PropertyDetails';
 import PropertyOwnerInfo from './PropertyOwnerInfo';
 import { TeamNotes, TeamNote } from './TeamNotes';
+import { supabase } from '@/lib/supabase';
 
 interface PropertyTabsSectionProps {
   property: any;
@@ -15,12 +16,68 @@ interface PropertyTabsSectionProps {
 
 const PropertyTabsSection: React.FC<PropertyTabsSectionProps> = ({ 
   property,
-  owner,
-  notes = [], // Default to empty array 
+  owner: initialOwner,
+  notes = [], 
   onAddNote 
 }) => {
+  const [propertyFeatures, setPropertyFeatures] = useState<any[]>([]);
+  const [propertyOwner, setPropertyOwner] = useState<any>(initialOwner);
+  const [isLoadingFeatures, setIsLoadingFeatures] = useState(false);
+  const [isLoadingOwner, setIsLoadingOwner] = useState(false);
+  
+  useEffect(() => {
+    // Fetch property features
+    const fetchPropertyFeatures = async () => {
+      if (!property?.id) return;
+      
+      setIsLoadingFeatures(true);
+      try {
+        const { data, error } = await supabase
+          .from('property_features')
+          .select('*')
+          .eq('property_id', property.id);
+          
+        if (error) throw error;
+        setPropertyFeatures(data || []);
+      } catch (err) {
+        console.error('Error fetching property features:', err);
+      } finally {
+        setIsLoadingFeatures(false);
+      }
+    };
+    
+    // Fetch property owner if not provided
+    const fetchPropertyOwner = async () => {
+      if (!property?.id) return;
+      if (initialOwner) return; // Skip if owner is already provided
+      
+      setIsLoadingOwner(true);
+      try {
+        const { data, error } = await supabase
+          .from('property_owners')
+          .select('*')
+          .eq('property_id', property.id)
+          .eq('is_primary_contact', true)
+          .single();
+          
+        if (error && error.code !== 'PGRST116') throw error; // PGRST116 is "No rows returned"
+        if (data) {
+          setPropertyOwner(data);
+        }
+      } catch (err) {
+        console.error('Error fetching property owner:', err);
+      } finally {
+        setIsLoadingOwner(false);
+      }
+    };
+    
+    fetchPropertyFeatures();
+    fetchPropertyOwner();
+  }, [property?.id, initialOwner]);
+  
   console.log('PropertyTabsSection: Property', property);
-  console.log('PropertyTabsSection: Owner', owner);
+  console.log('PropertyTabsSection: Owner', propertyOwner);
+  console.log('PropertyTabsSection: Features', propertyFeatures);
   
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -36,11 +93,11 @@ const PropertyTabsSection: React.FC<PropertyTabsSectionProps> = ({
           </TabsList>
           
           <TabsContent value="details">
-            <PropertyDetails property={property} />
+            <PropertyDetails property={property} features={propertyFeatures} isLoading={isLoadingFeatures} />
           </TabsContent>
           
           <TabsContent value="owner">
-            <PropertyOwnerInfo owner={owner} />
+            <PropertyOwnerInfo owner={propertyOwner} isLoading={isLoadingOwner} />
           </TabsContent>
           
           <TabsContent value="transactions">
@@ -99,7 +156,7 @@ const PropertyTabsSection: React.FC<PropertyTabsSectionProps> = ({
             <CardTitle>Team Notes</CardTitle>
           </CardHeader>
           <CardContent className="p-5">
-            <TeamNotes notes={[]} onAddNote={onAddNote} className="h-full" hideTitle={true} />
+            <TeamNotes notes={notes} onAddNote={onAddNote} className="h-full" hideTitle={true} />
           </CardContent>
         </Card>
       </div>

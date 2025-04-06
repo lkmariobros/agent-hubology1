@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useProperty } from '@/hooks/useProperties';
@@ -13,8 +14,6 @@ import PropertyErrorState from '@/components/property/PropertyErrorState';
 import PropertyLoadingSkeleton from '@/components/property/PropertyLoadingSkeleton';
 import { TeamNote } from '@/components/property/TeamNotes';
 import LoadingIndicator from '@/components/ui/loading-indicator';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { supabase } from '@/lib/supabase';
 
 const PropertyDetail = () => {
@@ -40,7 +39,34 @@ const PropertyDetail = () => {
   
   const [notes, setNotes] = useState<TeamNote[]>([]); // Initialize as empty array
   const [property, setProperty] = useState<any>(null);
+  const [propertyOwner, setPropertyOwner] = useState<any>(null);
   const [isLocalLoading, setIsLocalLoading] = useState(true);
+  
+  // Fetch property owner
+  useEffect(() => {
+    const fetchPropertyOwner = async () => {
+      if (!normalizedId || useMockData) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('property_owners')
+          .select('*')
+          .eq('property_id', normalizedId)
+          .eq('is_primary_contact', true)
+          .maybeSingle();
+          
+        if (error) throw error;
+        if (data) {
+          console.log('PropertyDetail: Owner data loaded:', data);
+          setPropertyOwner(data);
+        }
+      } catch (err) {
+        console.error('Error fetching property owner:', err);
+      }
+    };
+    
+    fetchPropertyOwner();
+  }, [normalizedId, useMockData]);
   
   useEffect(() => {
     console.log('PropertyDetail: useEffect running with propertyResponse =', propertyResponse);
@@ -103,6 +129,17 @@ const PropertyDetail = () => {
         }]
       };
       setProperty(mockProperty);
+      
+      // Mock owner data
+      setPropertyOwner({
+        id: 'mock-owner',
+        name: 'John Smith',
+        email: 'john.smith@example.com',
+        phone: '+1 (555) 123-4567',
+        company: 'Smith Properties',
+        is_primary_contact: true
+      });
+      
       console.log('PropertyDetail: Mock property set', mockProperty);
     } else if (propertyResponse?.data) {
       // Log successful data fetch
@@ -252,10 +289,7 @@ const PropertyDetail = () => {
     : [];
     
   console.log('PropertyDetail: Property images for display:', propertyImages);
-
-  // Owner data - in a real app this would come from the API
-  // Start with null to show the "No owner" state
-  const owner = null;
+  console.log('PropertyDetail: Property owner:', propertyOwner);
 
   return (
     <div className="p-6">
@@ -275,8 +309,8 @@ const PropertyDetail = () => {
       
       <PropertyTabsSection 
         property={property}
-        owner={owner}
-        notes={[]} // Empty array for notes to show empty state
+        owner={propertyOwner}
+        notes={notes}
         onAddNote={handleAddNote}
       />
     </div>

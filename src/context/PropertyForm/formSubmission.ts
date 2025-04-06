@@ -1,3 +1,4 @@
+
 import { supabase } from '@/lib/supabase';
 import { PropertyFormState, PropertyFormData } from '@/types/property-form';
 import { toast } from 'sonner';
@@ -109,10 +110,60 @@ export const submitPropertyForm = async (state: PropertyFormState): Promise<void
     };
     
     // Create property
-    const propertyId = await propertyFormHelpers.createProperty(propertyData);
-    if (!propertyId) throw new Error('Failed to create property');
-
+    const { data: propertyResult, error: propertyError } = await supabase
+      .from('enhanced_properties')
+      .insert(propertyData)
+      .select('id')
+      .single();
+      
+    if (propertyError) throw propertyError;
+    if (!propertyResult) throw new Error('Failed to retrieve created property ID');
+    
+    const propertyId = propertyResult.id;
     console.log('Created property with ID:', propertyId);
+    
+    // Save owner information if provided
+    if (state.formData.owner && state.formData.owner.name) {
+      const ownerData = {
+        property_id: propertyId,
+        name: state.formData.owner.name,
+        email: state.formData.owner.email,
+        phone: state.formData.owner.phone,
+        address: state.formData.owner.address,
+        company: state.formData.owner.company,
+        notes: state.formData.owner.notes,
+        is_primary_contact: state.formData.owner.isPrimaryContact ?? true
+      };
+      
+      const { error: ownerError } = await supabase
+        .from('property_owners')
+        .insert(ownerData);
+        
+      if (ownerError) {
+        console.error('Error saving owner information:', ownerError);
+        toast.error('Failed to save owner information');
+        // Continue with rest of submission even if owner save fails
+      }
+    }
+    
+    // Save property features if provided
+    if (state.formData.propertyFeatures && state.formData.propertyFeatures.length > 0) {
+      const featuresData = state.formData.propertyFeatures.map(feature => ({
+        property_id: propertyId,
+        feature_name: feature,
+        feature_category: 'General'
+      }));
+      
+      const { error: featuresError } = await supabase
+        .from('property_features')
+        .insert(featuresData);
+        
+      if (featuresError) {
+        console.error('Error saving property features:', featuresError);
+        toast.error('Failed to save property features');
+        // Continue with rest of submission even if features save fails
+      }
+    }
     
     // 5. Upload and save images
     if (state.images.length > 0) {
