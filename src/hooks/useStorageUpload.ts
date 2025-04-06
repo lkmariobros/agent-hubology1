@@ -37,17 +37,11 @@ export function useStorageUpload() {
       return storageStatus === 'available';
     }
 
-    // If we've already checked and confirmed buckets exist, return cached result
-    if (initialCheckDone.current) {
-      const allBucketsInCache = bucketNames.every(name => bucketCache.current.has(name));
-      if (allBucketsInCache) {
-        return true;
-      }
-    }
-
     try {
       checkInProgress.current = true;
       setStorageStatus('checking');
+      
+      console.log('Checking storage buckets:', bucketNames);
 
       // Try to list buckets to check access
       const { data: buckets, error } = await supabase.storage.listBuckets();
@@ -58,14 +52,21 @@ export function useStorageUpload() {
         checkInProgress.current = false;
         return false;
       }
-
+      
       // Check if all required buckets exist
       const existingBuckets = new Set(buckets.map(bucket => bucket.name));
-      const allBucketsExist = bucketNames.every(name => existingBuckets.has(name));
+      const existingBucketIds = new Set(buckets.map(bucket => bucket.id));
       
-      // Cache the result
+      console.log('Available buckets:', buckets);
+      
+      // Try both name and id for matching (in case there's inconsistency in how buckets are referenced)
+      const allBucketsExist = bucketNames.every(name => 
+        existingBuckets.has(name) || existingBucketIds.has(name)
+      );
+      
+      // Cache successfully found buckets
       bucketNames.forEach(name => {
-        if (existingBuckets.has(name)) {
+        if (existingBuckets.has(name) || existingBucketIds.has(name)) {
           bucketCache.current.add(name);
         }
       });
@@ -73,6 +74,10 @@ export function useStorageUpload() {
       initialCheckDone.current = true;
       setStorageStatus(allBucketsExist ? 'available' : 'unavailable');
       checkInProgress.current = false;
+      
+      if (!allBucketsExist) {
+        console.warn(`Some buckets not found. Looking for: ${bucketNames.join(', ')}`);
+      }
       
       return allBucketsExist;
     } catch (err) {
@@ -85,9 +90,33 @@ export function useStorageUpload() {
 
   // Force a fresh check of storage buckets (bypass cache)
   const forceCheckStorageBuckets = async (bucketNames: string[]): Promise<boolean> => {
+    console.log('Force checking storage buckets:', bucketNames);
     bucketCache.current.clear();
     initialCheckDone.current = false;
+    checkInProgress.current = false;
     return checkStorageBuckets(bucketNames);
+  };
+
+  // Test direct bucket access - some implementations might need direct bucket access test
+  const testBucketAccess = async (bucketName: string): Promise<boolean> => {
+    try {
+      console.log(`Testing direct access to bucket: ${bucketName}`);
+      // Try to list files in the bucket (just the first one)
+      const { data, error } = await supabase.storage
+        .from(bucketName)
+        .list('', { limit: 1 });
+      
+      if (error) {
+        console.error(`Error accessing ${bucketName} bucket:`, error);
+        return false;
+      }
+      
+      console.log(`Successfully accessed ${bucketName} bucket`);
+      return true;
+    } catch (err) {
+      console.error(`Error testing ${bucketName} bucket access:`, err);
+      return false;
+    }
   };
 
   const uploadFile = async (file: File, options: UploadOptions): Promise<string> => {
@@ -100,6 +129,12 @@ export function useStorageUpload() {
     
     try {
       console.log(`Starting upload process for file: ${file.name}`);
+      
+      // Test bucket access directly before trying upload
+      const canAccessBucket = await testBucketAccess(bucket);
+      if (!canAccessBucket) {
+        throw new Error(`Cannot access the ${bucket} bucket. Please check your permissions.`);
+      }
       
       // Validate file size
       const fileSizeInMB = file.size / (1024 * 1024);
@@ -116,13 +151,27 @@ export function useStorageUpload() {
       const fileExt = file.name.split('.').pop();
       const fileName = `${path ? `${path}/` : ''}${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
       
+      // Simulate upload progress
+      const progressKey = `upload-${Date.now()}`;
+      progressTimers.current[progressKey] = setInterval(() => {
+        setProgress(prev => {
+          const newProgress = Math.min(prev + 5, 95);
+          return newProgress;
+        });
+      }, 100);
+      
       // Upload the file to Supabase Storage
+      console.log(`Uploading to bucket: ${bucket}, path: ${fileName}`);
       const { data, error } = await supabase.storage
         .from(bucket)
         .upload(fileName, file, {
           cacheControl: '3600',
           upsert: upsert
         });
+      
+      // Clear the progress timer
+      clearInterval(progressTimers.current[progressKey]);
+      delete progressTimers.current[progressKey];
       
       if (error) {
         console.error('Error uploading file to Supabase:', error);
@@ -147,6 +196,12 @@ export function useStorageUpload() {
       
       return publicUrl;
     } catch (err) {
+      // Clear any remaining progress timers
+      Object.keys(progressTimers.current).forEach(key => {
+        clearInterval(progressTimers.current[key]);
+        delete progressTimers.current[key];
+      });
+      
       const error = err as Error;
       setError(error);
       console.error('File upload error:', error.message);
@@ -183,6 +238,7 @@ export function useStorageUpload() {
     deleteFile,
     checkStorageBuckets,
     forceCheckStorageBuckets,
+    testBucketAccess,
     isUploading,
     progress,
     error,

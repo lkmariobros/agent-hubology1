@@ -1,14 +1,14 @@
 
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { UploadCloud, FileText, X, Loader2, AlertTriangle } from 'lucide-react';
+import { UploadCloud, FileText, X, Loader2, AlertTriangle, Info, RefreshCcw, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { usePropertyForm } from '@/context/PropertyForm/PropertyFormContext';
 import { useStorageUpload } from '@/hooks/useStorageUpload';
 import { toast } from 'sonner';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
 
 interface DocumentUploaderProps {
@@ -24,26 +24,68 @@ const DocumentUploader: React.FC<DocumentUploaderProps> = ({
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { state, addDocument, removeDocument } = usePropertyForm();
-  const { uploadFile, checkStorageBuckets, isUploading, progress } = useStorageUpload();
+  const { uploadFile, checkStorageBuckets, forceCheckStorageBuckets, testBucketAccess, isUploading, progress } = useStorageUpload();
   const [documentType, setDocumentType] = useState<string>('Contract');
   const [processingFiles, setProcessingFiles] = useState<string[]>([]);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [bucketStatus, setBucketStatus] = useState<'checking' | 'available' | 'unavailable'>('checking');
+  const [retryCount, setRetryCount] = useState(0);
+  const [debugInfo, setDebugInfo] = useState<string | null>(null);
 
   // Check storage bucket on mount
-  React.useEffect(() => {
+  useEffect(() => {
     const verifyStorageBucket = async () => {
       try {
-        const bucketsExist = await checkStorageBuckets(['property-documents']);
-        setBucketStatus(bucketsExist ? 'available' : 'unavailable');
+        setDebugInfo(`Checking document storage bucket (retry: ${retryCount})`);
+        setBucketStatus('checking');
+        
+        // Use force check if it's a retry
+        const bucketsExist = retryCount > 0
+          ? await forceCheckStorageBuckets(['property-documents'])
+          : await checkStorageBuckets(['property-documents']);
+        
+        if (!bucketsExist) {
+          console.warn('Property documents bucket not found. Trying direct access...');
+          setDebugInfo('Trying direct bucket access...');
+          
+          // Try direct bucket access as a fallback
+          const directAccess = await testBucketAccess('property-documents');
+          
+          if (directAccess) {
+            setDebugInfo('Direct bucket access successful');
+            setBucketStatus('available');
+            if (retryCount > 0) {
+              toast.success('Successfully connected to document storage');
+            }
+            return;
+          }
+          
+          setDebugInfo('Failed both bucket listing and direct access');
+          setBucketStatus('unavailable');
+          
+          if (retryCount > 0) {
+            toast.warning('Storage bucket is still not accessible. Please check if the "Property Documents" bucket exists in Supabase.');
+          }
+        } else {
+          setDebugInfo('Document storage bucket verified');
+          setBucketStatus('available');
+          if (retryCount > 0) {
+            toast.success('Successfully connected to document storage');
+          }
+        }
       } catch (error) {
         console.error('Error checking document storage bucket:', error);
+        setDebugInfo(`Error checking document bucket: ${error instanceof Error ? error.message : 'Unknown error'}`);
         setBucketStatus('unavailable');
+        
+        if (retryCount > 0) {
+          toast.error('Failed to connect to document storage');
+        }
       }
     };
     
     verifyStorageBucket();
-  }, [checkStorageBuckets]);
+  }, [checkStorageBuckets, forceCheckStorageBuckets, testBucketAccess, retryCount]);
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     // Reset any previous errors
@@ -83,6 +125,8 @@ const DocumentUploader: React.FC<DocumentUploaderProps> = ({
         });
 
         try {
+          setDebugInfo(`Uploading document: ${file.name} to property-documents/${documentType.toLowerCase()}`);
+          
           // Upload file to Supabase storage
           const uploadedUrl = await uploadFile(file, {
             bucket: 'property-documents',
@@ -98,6 +142,8 @@ const DocumentUploader: React.FC<DocumentUploaderProps> = ({
               'image/png'
             ]
           });
+          
+          setDebugInfo(`Document upload successful: ${uploadedUrl}`);
           
           // Find the document in state and update its status
           const docIndex = state.documents.findIndex(doc => doc.id === docId);
@@ -117,6 +163,7 @@ const DocumentUploader: React.FC<DocumentUploaderProps> = ({
           console.log(`Successfully uploaded document: ${file.name}`, uploadedUrl);
         } catch (error: any) {
           console.error('Error uploading document:', error);
+          setDebugInfo(`Document upload error: ${error.message || 'Unknown error'}`);
           setUploadError(`Error uploading: ${error.message || 'Unknown error'}`);
           
           // Update document status to error
@@ -167,6 +214,11 @@ const DocumentUploader: React.FC<DocumentUploaderProps> = ({
       fileInputRef.current.click();
     }
   };
+  
+  const retryBucketCheck = () => {
+    setRetryCount(prev => prev + 1);
+    setDebugInfo("Retrying document bucket connection...");
+  };
 
   return (
     <div className="space-y-4">
@@ -182,8 +234,41 @@ const DocumentUploader: React.FC<DocumentUploaderProps> = ({
       {bucketStatus === 'unavailable' && (
         <Alert variant="warning" className="mb-4">
           <AlertTriangle className="h-4 w-4 mr-2" />
+          <AlertTitle>Document Storage Issue</AlertTitle>
           <AlertDescription>
-            Document storage is not accessible. Please check if the "Property Documents" bucket exists in Supabase.
+            <p>Document storage is not accessible. Please check if the "Property Documents" bucket exists in Supabase.</p>
+            <div className="flex flex-col space-y-1 text-sm mt-2">
+              <p className="font-semibold flex items-center">
+                <Info className="h-3 w-3 mr-1" /> Troubleshooting:
+              </p>
+              <ol className="list-decimal ml-5 space-y-1">
+                <li>Ensure the 'property-documents' bucket exists in your Supabase storage</li>
+                <li>Check that your bucket has the correct RLS policies for uploads</li>
+                <li>Verify that you are authenticated if the bucket requires authentication</li>
+              </ol>
+            </div>
+            <div className="flex gap-2 mt-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={retryBucketCheck} 
+                className="self-start flex items-center mt-2"
+              >
+                <RefreshCcw className="h-3 w-3 mr-2" />
+                Retry Connection
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="self-start flex items-center mt-2"
+                asChild
+              >
+                <a href="https://supabase.com/dashboard/project/synabhmsxsvsxkyzhfss/storage/buckets" target="_blank" rel="noopener noreferrer">
+                  <ExternalLink className="h-3 w-3 mr-2" />
+                  Open Supabase Storage
+                </a>
+              </Button>
+            </div>
           </AlertDescription>
         </Alert>
       )}
@@ -192,6 +277,13 @@ const DocumentUploader: React.FC<DocumentUploaderProps> = ({
         <Alert variant="destructive" className="mb-4">
           <AlertTriangle className="h-4 w-4 mr-2" />
           <AlertDescription>{uploadError}</AlertDescription>
+        </Alert>
+      )}
+      
+      {debugInfo && (
+        <Alert variant="default" className="mb-4 bg-muted/50">
+          <Info className="h-4 w-4 mr-2" />
+          <AlertDescription className="font-mono text-xs">Debug: {debugInfo}</AlertDescription>
         </Alert>
       )}
 

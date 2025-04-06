@@ -1,13 +1,14 @@
 
 import React, { useCallback, useRef, useState, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { UploadCloud, X, Loader2, Check, Image, AlertTriangle, RefreshCcw, Info } from 'lucide-react';
+import { UploadCloud, X, Loader2, Check, Image, AlertTriangle, RefreshCcw, Info, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { usePropertyForm } from '@/context/PropertyForm/PropertyFormContext';
 import { useStorageUpload } from '@/hooks/useStorageUpload';
 import { toast } from 'sonner';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
+import { Link } from 'react-router-dom';
 
 interface ImageUploaderProps {
   maxImages?: number;
@@ -22,7 +23,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { state, addImage, removeImage, setCoverImage, updateImageStatus } = usePropertyForm();
-  const { uploadFile, checkStorageBuckets, forceCheckStorageBuckets, isUploading, progress } = useStorageUpload();
+  const { uploadFile, checkStorageBuckets, forceCheckStorageBuckets, testBucketAccess, isUploading, progress } = useStorageUpload();
   const [processingFiles, setProcessingFiles] = useState<string[]>([]);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [bucketStatus, setBucketStatus] = useState<'checking' | 'available' | 'unavailable'>('checking');
@@ -30,6 +31,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   const [retryCount, setRetryCount] = useState(0);
   const isComponentMounted = useRef(true);
   const [localUploadState, setLocalUploadState] = useState<Record<string, boolean>>({});
+  const [debugInfo, setDebugInfo] = useState<string | null>(null);
 
   // Check if the storage buckets are accessible
   useEffect(() => {
@@ -44,6 +46,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
         
         bucketCheckAttempted.current = true;
         setBucketStatus('checking');
+        setDebugInfo(`Checking storage buckets (retry: ${retryCount})`);
         
         // Use force check if this is a retry
         const bucketsExist = retryCount > 0
@@ -52,21 +55,39 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
         
         if (!isComponentMounted.current) return;
           
-        setBucketStatus(bucketsExist ? 'available' : 'unavailable');
-        
         if (!bucketsExist) {
           console.warn('Property images bucket is not accessible');
+          setDebugInfo(`Buckets not found. Attempting direct test...`);
+          
+          // Try direct bucket access as a fallback
+          const directAccess = await testBucketAccess('property-images');
+          
+          if (directAccess) {
+            setBucketStatus('available');
+            setDebugInfo(`Direct bucket access successful`);
+            toast.success('Successfully connected to storage buckets');
+            return;
+          }
+          
+          setBucketStatus('unavailable');
+          setDebugInfo(`Failed both bucket listing and direct access`);
+          
           // Only show toast on retry to avoid duplicate messages
           if (retryCount > 0) {
             toast.warning('Storage bucket is still not accessible. Please check if the "Property Images" bucket exists in Supabase.');
           }
-        } else if (retryCount > 0) {
-          toast.success('Successfully connected to storage buckets');
+        } else {
+          setDebugInfo('Buckets verified successfully');
+          setBucketStatus('available');
+          if (retryCount > 0) {
+            toast.success('Successfully connected to storage buckets');
+          }
         }
       } catch (error) {
         if (!isComponentMounted.current) return;
         console.error('Error checking storage bucket:', error);
         setBucketStatus('unavailable');
+        setDebugInfo(`Error checking buckets: ${error instanceof Error ? error.message : 'Unknown error'}`);
         if (retryCount > 0) {
           toast.error('Failed to connect to storage buckets');
         }
@@ -78,7 +99,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     return () => {
       isComponentMounted.current = false;
     };
-  }, [checkStorageBuckets, forceCheckStorageBuckets, retryCount]);
+  }, [checkStorageBuckets, forceCheckStorageBuckets, testBucketAccess, retryCount]);
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     // Reset any previous errors
@@ -127,6 +148,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
 
         // Try to upload the file
         try {
+          setDebugInfo(`Uploading file: ${file.name} to property-images/properties`);
           const uploadedUrl = await uploadFile(file, {
             bucket: 'property-images',
             path: 'properties',
@@ -135,6 +157,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
           });
           
           console.log(`Successfully uploaded: ${file.name}`, uploadedUrl);
+          setDebugInfo(`Upload successful: ${uploadedUrl}`);
           
           // Find the index of this image in the current state
           const currentIndex = state.images.findIndex(img => img.id === imageId);
@@ -150,6 +173,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
           }
         } catch (error: any) {
           console.error('Error uploading file:', error);
+          setDebugInfo(`Upload error: ${error.message || 'Unknown error'}`);
           setUploadError(`Error uploading: ${error.message || 'Unknown error'}`);
           
           // Find the index and update the status to error
@@ -214,6 +238,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   
   const retryBucketCheck = () => {
     setRetryCount(prev => prev + 1);
+    setDebugInfo("Retrying bucket connection...");
   };
 
   return (
@@ -240,20 +265,34 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
                 <Info className="h-3 w-3 mr-1" /> Troubleshooting:
               </p>
               <ol className="list-decimal ml-5 space-y-1">
-                <li>Ensure the 'Property Images' bucket exists in your Supabase storage</li>
+                <li>Ensure the 'property-images' bucket exists in your Supabase storage</li>
                 <li>Check that your bucket has the correct RLS policies for uploads</li>
                 <li>Verify that you are authenticated if the bucket requires authentication</li>
+                <li>Go to Supabase Dashboard → Storage to verify bucket settings</li>
               </ol>
             </div>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={retryBucketCheck} 
-              className="self-start flex items-center mt-2"
-            >
-              <RefreshCcw className="h-3 w-3 mr-2" />
-              Retry Connection
-            </Button>
+            <div className="flex gap-2 mt-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={retryBucketCheck} 
+                className="self-start flex items-center"
+              >
+                <RefreshCcw className="h-3 w-3 mr-2" />
+                Retry Connection
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="self-start flex items-center"
+                asChild
+              >
+                <a href="https://supabase.com/dashboard/project/synabhmsxsvsxkyzhfss/storage/buckets" target="_blank" rel="noopener noreferrer">
+                  <ExternalLink className="h-3 w-3 mr-2" />
+                  Open Supabase Storage
+                </a>
+              </Button>
+            </div>
           </AlertDescription>
         </Alert>
       )}
@@ -262,6 +301,13 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
         <Alert variant="destructive" className="mb-4">
           <AlertTriangle className="h-4 w-4 mr-2" />
           <AlertDescription>{uploadError}</AlertDescription>
+        </Alert>
+      )}
+
+      {debugInfo && (
+        <Alert variant="default" className="mb-4 bg-muted/50">
+          <Info className="h-4 w-4 mr-2" />
+          <AlertDescription className="font-mono text-xs">Debug: {debugInfo}</AlertDescription>
         </Alert>
       )}
 

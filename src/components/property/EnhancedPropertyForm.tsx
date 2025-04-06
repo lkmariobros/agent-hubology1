@@ -16,6 +16,7 @@ import PropertyFeatures from './form/PropertyFeatures';
 import PropertyImagesUpload from './form/PropertyImagesUpload';
 import PropertyDocuments from './form/PropertyDocuments';
 import ImageUploader from './ImageUploader';
+import PropertyOwnerInfo from './form/PropertyOwnerInfo';
 
 interface EnhancedPropertyFormProps {
   onSubmit?: (data: PropertyFormData) => void;
@@ -30,6 +31,7 @@ const FormSteps = [
   { id: 'location', label: 'Location' },
   { id: 'pricing', label: 'Pricing' },
   { id: 'features', label: 'Features' },
+  { id: 'owner', label: 'Owner' },
   { id: 'media', label: 'Media' },
   { id: 'documents', label: 'Documents' },
 ];
@@ -135,7 +137,7 @@ const EnhancedPropertyFormContent: React.FC<EnhancedPropertyFormProps> = ({
           onValueChange={(value) => goToStep(parseInt(value))}
           className="w-full"
         >
-          <TabsList className="grid grid-cols-7 w-full">
+          <TabsList className="grid grid-cols-8 w-full">
             {FormSteps.map((step, index) => (
               <TabsTrigger 
                 key={step.id} 
@@ -168,6 +170,10 @@ const EnhancedPropertyFormContent: React.FC<EnhancedPropertyFormProps> = ({
           </TabsContent>
           
           <TabsContent value="5">
+            <PropertyOwnerInfo />
+          </TabsContent>
+          
+          <TabsContent value="6">
             <Card>
               <CardContent className="pt-6">
                 <ImageUploader 
@@ -177,7 +183,7 @@ const EnhancedPropertyFormContent: React.FC<EnhancedPropertyFormProps> = ({
             </Card>
           </TabsContent>
           
-          <TabsContent value="6">
+          <TabsContent value="7">
             <PropertyDocuments />
           </TabsContent>
         </Tabs>
@@ -194,7 +200,8 @@ const EnhancedPropertyFormContent: React.FC<EnhancedPropertyFormProps> = ({
         {state.currentStep === 2 && <PropertyLocation />}
         {state.currentStep === 3 && <PropertyPricing />}
         {state.currentStep === 4 && <PropertyFeatures />}
-        {state.currentStep === 5 && (
+        {state.currentStep === 5 && <PropertyOwnerInfo />}
+        {state.currentStep === 6 && (
           <Card>
             <CardContent className="pt-6">
               <ImageUploader 
@@ -203,7 +210,7 @@ const EnhancedPropertyFormContent: React.FC<EnhancedPropertyFormProps> = ({
             </CardContent>
           </Card>
         )}
-        {state.currentStep === 6 && <PropertyDocuments />}
+        {state.currentStep === 7 && <PropertyDocuments />}
       </div>
       
       <Separator className="my-6" />
