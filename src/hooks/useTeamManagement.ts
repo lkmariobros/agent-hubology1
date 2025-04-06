@@ -58,6 +58,11 @@ export function useTeamManagement() {
               
             if (profileError) throw profileError;
             
+            // Calculate commission values
+            const personalCommission = calculatePersonalCommission(agentProfile);
+            const overrideCommission = 0; // No overrides for agents without downlines
+            const totalCommission = personalCommission + overrideCommission;
+            
             // Convert to AgentWithHierarchy type
             return {
               id: agentProfile.id,
@@ -73,9 +78,20 @@ export function useTeamManagement() {
                 tier: agentProfile.upline.tier_name,
                 commission: agentProfile.upline.commission_percentage,
                 avatar: agentProfile.upline.avatar_url,
-                rank: agentProfile.upline.tier_name
+                rank: agentProfile.upline.tier_name,
+                salesVolume: 0,
+                personalCommission: 0,
+                overrideCommission: 0,
+                totalCommission: 0
               } : undefined,
-              downline: []
+              downline: [],
+              salesVolume: agentProfile.total_sales || 0,
+              personalCommission,
+              overrideCommission,
+              totalCommission,
+              phone: agentProfile.phone,
+              joinDate: agentProfile.join_date,
+              transactions: agentProfile.total_transactions
             };
           }
         }
@@ -124,6 +140,11 @@ export function useTeamManagement() {
           ((a?.name || '').localeCompare(b?.name || ''))
         );
       
+      // Calculate commissions
+      const personalCommission = calculatePersonalCommission(agentData);
+      const overrideCommission = calculateOverrideCommission(agentData, validDownline);
+      const totalCommission = personalCommission + overrideCommission;
+      
       // Return the agent with their downline
       return {
         id: agentData.id,
@@ -136,10 +157,11 @@ export function useTeamManagement() {
         phone: agentData.phone,
         joinDate: agentData.join_date,
         transactions: agentData.total_transactions,
-        salesVolume: agentData.total_sales,
-        personalCommission: calculatePersonalCommission(agentData),
-        overrideCommission: calculateOverrideCommission(agentData, validDownline),
-        downline: validDownline
+        salesVolume: agentData.total_sales || 0,
+        personalCommission,
+        overrideCommission,
+        totalCommission,
+        downline: validDownline as AgentWithHierarchy[]
       };
     } catch (error) {
       console.error('Error in fetchAgentWithDownline:', error);
@@ -218,8 +240,10 @@ export function useTeamManagement() {
     isLoadingHierarchy,
     isLoadingMetrics,
     handleAgentSelect,
-    updateAgentUpline,
     hierarchyError,
+    updateAgentUpline,
     isAdmin
   };
 }
+
+export default useTeamManagement;

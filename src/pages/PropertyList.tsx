@@ -35,8 +35,9 @@ const PropertyList = () => {
       bedrooms: 2,
       bathrooms: 2,
       builtUpArea: 1200,
+      area: 1200,
       images: ["/properties/apartment-1.jpg", "/properties/apartment-2.jpg"],
-      status: "Available",
+      status: "available",
       features: ["Balcony", "Gym", "Pool"],
       address: {
         street: "123 Main St",
@@ -46,7 +47,9 @@ const PropertyList = () => {
         country: "USA"
       },
       createdAt: "2023-01-15T08:00:00Z",
-      updatedAt: "2023-01-15T08:00:00Z"
+      updatedAt: "2023-01-15T08:00:00Z",
+      listedBy: "John Doe",
+      subtype: "Apartment"
     },
     {
       id: "2",
@@ -57,8 +60,9 @@ const PropertyList = () => {
       bedrooms: 4,
       bathrooms: 3,
       builtUpArea: 3500,
+      area: 3500,
       images: ["/properties/villa-1.jpg", "/properties/villa-2.jpg"],
-      status: "Available",
+      status: "available",
       features: ["Pool", "Garden", "Security"],
       address: {
         street: "456 Palm Ave",
@@ -68,7 +72,9 @@ const PropertyList = () => {
         country: "USA"
       },
       createdAt: "2023-02-10T10:30:00Z",
-      updatedAt: "2023-02-10T10:30:00Z"
+      updatedAt: "2023-02-10T10:30:00Z",
+      listedBy: "Jane Smith",
+      subtype: "Villa"
     },
     {
       id: "3",
@@ -79,8 +85,9 @@ const PropertyList = () => {
       bedrooms: 0,
       bathrooms: 2,
       builtUpArea: 2500,
+      area: 2500,
       images: ["/properties/office-1.jpg"],
-      status: "Available",
+      status: "available",
       features: ["Parking", "24/7 Access", "Elevator"],
       address: {
         street: "789 Business Blvd",
@@ -90,7 +97,9 @@ const PropertyList = () => {
         country: "USA"
       },
       createdAt: "2023-03-05T14:15:00Z",
-      updatedAt: "2023-03-05T14:15:00Z"
+      updatedAt: "2023-03-05T14:15:00Z",
+      listedBy: "Robert Wilson",
+      subtype: "Office"
     }
   ];
 

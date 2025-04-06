@@ -1,6 +1,5 @@
 
-import { Opportunity, Transaction, Property, DashboardMetric, ApiResponse } from '@/types';
-import { Building2, Users, DollarSign, LineChart } from 'lucide-react';
+import { Opportunity, Transaction, Property, DashboardMetric, ApiResponse, AgentWithHierarchy, CommissionTier } from '@/types';
 
 // Mock API client for dashboard data
 // In a real implementation, this would fetch from Supabase
@@ -90,8 +89,101 @@ export const transactionsApi = {
   // API methods for transactions
 };
 
+// Commission API mock implementation
 export const commissionApi = {
-  // API methods for commissions
+  // Get commission summary
+  getSummary: async () => {
+    return {
+      currentMonth: { earned: 12750, target: 20000, progress: 63.75 },
+      previousMonth: { earned: 18900, target: 20000, progress: 94.5 },
+      yearToDate: { earned: 89500, target: 150000, progress: 59.67 }
+    };
+  },
+  
+  // Get commission history
+  getHistory: async (page = 1, pageSize = 10) => {
+    return {
+      data: [],
+      total: 0,
+      page: page,
+      pageSize: pageSize
+    };
+  },
+  
+  // Get commission tiers
+  getTiers: async () => {
+    return {
+      data: [
+        {
+          id: 'bronze',
+          name: 'Bronze',
+          tier: 'Bronze',
+          rate: 20,
+          percentage: 70,
+          minTransactions: 0,
+          color: 'orange',
+          rank: 'Associate'
+        },
+        {
+          id: 'silver',
+          name: 'Silver',
+          tier: 'Silver',
+          rate: 25,
+          percentage: 75,
+          minTransactions: 10,
+          color: 'blue',
+          rank: 'Senior Associate'
+        }
+      ],
+      success: true
+    };
+  },
+  
+  // Get agent hierarchy
+  getAgentHierarchy: async (agentId?: string) => {
+    // Mock implementation
+    return {
+      id: 'agent123',
+      name: 'Jane Smith',
+      email: 'jane.smith@example.com',
+      phone: '+1-555-123-4567',
+      avatar: '',
+      rank: 'Team Leader',
+      tier: 'Team Leader',
+      joinDate: '2023-01-15',
+      transactions: 42,
+      salesVolume: 4500000,
+      personalCommission: 112500,
+      overrideCommission: 45000,
+      totalCommission: 157500,
+      downline: []
+    };
+  },
+  
+  // Get agent downline
+  getAgentDownline: async (agentId?: string) => {
+    return {
+      data: [],
+      success: true
+    };
+  },
+  
+  // Update agent rank
+  updateAgentRank: async (agentId: string, newRank: string) => {
+    return {
+      success: true,
+      message: 'Agent rank updated successfully'
+    };
+  },
+  
+  // Add new agent
+  addAgent: async (agentData: any) => {
+    return {
+      success: true,
+      message: 'Agent added successfully',
+      data: { id: 'new-agent-id' }
+    };
+  }
 };
 
 export const teamApi = {

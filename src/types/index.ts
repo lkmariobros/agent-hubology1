@@ -6,6 +6,7 @@ export * from './user';
 export * from './property';
 export * from './transaction';
 export * from './opportunity';
+export * from './commission';
 
 // Generic API response type
 export interface ApiResponse<T> {
@@ -37,6 +38,7 @@ export interface Property {
     total?: number;
     available?: number;
     sold?: number;
+    reserved?: number;
   };
   size?: number; // Allow size property for compatibility
   featured?: boolean;
@@ -49,8 +51,10 @@ export interface Property {
     firstName?: string;
     lastName?: string;
     id?: string;
+    phone?: string;
   };
   builtUpArea?: number;
+  rentalRate?: number;
 }
 
 export interface Address {
@@ -73,6 +77,12 @@ export interface Transaction {
   commission: number;
   status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
   date: string;
+  price?: number;
+  property?: Property;
+  agent?: {
+    id?: string;
+    name?: string;
+  };
 }
 
 // Opportunity type definitions
@@ -102,15 +112,17 @@ export interface DashboardMetric {
 export interface CommissionTier {
   id: string;
   name: string;
-  threshold: number;
+  tier?: string;
+  threshold?: number;
   percentage: number;
   description?: string;
-  // Additional properties used in components
-  tier?: string;
   rate?: number;
   minTransactions?: number;
   color?: string;
-  rank?: string; // Added for compatibility with Commission.tsx
+  rank?: string;
+  commissionRate?: number;
+  requirements?: string[];
+  agentPercentage?: number; // Added for compatibility with Commission.tsx
 }
 
 export interface CommissionHistory {
@@ -118,11 +130,12 @@ export interface CommissionHistory {
   date: string;
   amount: number;
   transactionId: string;
-  property?: string | { title: string; location: string; }; // Updated for compatibility
+  property?: string | { title: string; location: string; };
   status: string;
   // Additional properties used in components
   type?: string;
   source?: string;
+  transactionReference?: string; // Added for compatibility with Commission.tsx
 }
 
 export interface OverrideCommission {
@@ -130,8 +143,12 @@ export interface OverrideCommission {
   agentName: string;
   percentage: number;
   amount: number;
-  id?: string; // Added for compatibility
-  baseAgentId?: string; // Added for compatibility with useCommission.ts
+  id?: string;
+  baseAgentId?: string;
+  transactionId?: string; // Added for compatibility with useCommission.ts
+  status?: string;
+  rank?: string;
+  tier?: string;
 }
 
 // Agent with hierarchy for team view
@@ -146,10 +163,10 @@ export interface AgentWithHierarchy {
   overrideCommission: number;
   totalCommission: number;
   downline?: AgentWithHierarchy[];
-  rank?: string; // Added for components that expect it
-  phone?: string; // Added for components that expect it
-  joinDate?: string; // Added for components that expect it
-  transactions?: number; // Added for components that expect it
-  upline?: AgentWithHierarchy; // Added for useCommission.ts
-  commission?: number; // Added for useTeamManagement.ts
+  rank?: string;
+  phone?: string;
+  joinDate?: string;
+  transactions?: number;
+  upline?: AgentWithHierarchy;
+  commission?: number;
 }
