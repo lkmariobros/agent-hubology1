@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useProperty } from '@/hooks/useProperties';
@@ -16,6 +15,7 @@ import { TeamNote } from '@/components/property/TeamNotes';
 import LoadingIndicator from '@/components/ui/loading-indicator';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { supabase } from '@/lib/supabase';
 
 const PropertyDetail = () => {
   console.log('PropertyDetail: Component rendering');
@@ -105,8 +105,28 @@ const PropertyDetail = () => {
       setProperty(mockProperty);
       console.log('PropertyDetail: Mock property set', mockProperty);
     } else if (propertyResponse?.data) {
+      // Log successful data fetch
       dbLogger.success('Property data loaded from Supabase', propertyResponse.data, 'enhanced_properties', 'select', false);
-      setProperty(propertyResponse.data);
+      
+      // Fetch property images if they aren't included
+      if (!propertyResponse.data.property_images || propertyResponse.data.property_images.length === 0) {
+        console.log('PropertyDetail: No property_images in data, fetching separately');
+        fetchPropertyImages(propertyResponse.data.id).then(images => {
+          if (images && images.length > 0) {
+            console.log('PropertyDetail: Fetched property images:', images);
+            setProperty({
+              ...propertyResponse.data,
+              property_images: images
+            });
+          } else {
+            console.log('PropertyDetail: No images found for property');
+            setProperty(propertyResponse.data);
+          }
+        });
+      } else {
+        setProperty(propertyResponse.data);
+      }
+      
       console.log('PropertyDetail: Real property data set', propertyResponse.data);
     }
 
@@ -118,6 +138,27 @@ const PropertyDetail = () => {
 
     return () => clearTimeout(timer);
   }, [normalizedId, propertyResponse, useMockData, id, isValidPropertyId]);
+
+  // New function to fetch property images separately
+  const fetchPropertyImages = async (propertyId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('property_images')
+        .select('*')
+        .eq('property_id', propertyId)
+        .order('display_order', { ascending: true });
+      
+      if (error) {
+        console.error('Error fetching property images:', error);
+        return [];
+      }
+      
+      return data || [];
+    } catch (err) {
+      console.error('Exception fetching property images:', err);
+      return [];
+    }
+  };
 
   const handleAddNote = (note: Omit<TeamNote, 'id' | 'date'>) => {
     // In a real app, you would add the note to Supabase here
@@ -203,10 +244,14 @@ const PropertyDetail = () => {
   console.log('PropertyDetail: Rendering property', property);
 
   // Extract property type from property_types relation
-  const propertyType = property.property_types?.name || 'Property';
+  const propertyType = property?.property_types?.name || 'Property';
 
   // Create an array of image URLs from property_images
-  const propertyImages = property.property_images ? property.property_images.map((img: any) => img.storage_path).filter(Boolean) : [];
+  const propertyImages = property?.property_images 
+    ? property.property_images.map((img: any) => img.storage_path).filter(Boolean) 
+    : [];
+    
+  console.log('PropertyDetail: Property images for display:', propertyImages);
 
   // Owner data - in a real app this would come from the API
   // Start with null to show the "No owner" state
@@ -231,7 +276,7 @@ const PropertyDetail = () => {
       <PropertyTabsSection 
         property={property}
         owner={owner}
-        notes={[]} // Use empty array for notes to prevent showing mock data
+        notes={[]} // Empty array for notes to show empty state
         onAddNote={handleAddNote}
       />
     </div>

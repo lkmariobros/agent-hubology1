@@ -1,7 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ExternalLink, ImageOff } from 'lucide-react';
+import { ExternalLink, ImageOff, AlertCircle } from 'lucide-react';
+import { Card } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface PropertyGalleryProps {
   images: string[];
@@ -12,14 +15,19 @@ const PropertyGallery: React.FC<PropertyGalleryProps> = ({ images, title }) => {
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [debugData, setDebugData] = useState<any>(null);
   
   useEffect(() => {
     const fetchImageUrls = async () => {
       if (!images || images.length === 0) {
+        console.log('PropertyGallery: No images provided');
         setImageUrls([]);
         setLoading(false);
         return;
       }
+      
+      console.log('PropertyGallery: Fetching URLs for images:', images);
+      setDebugData({ originalImages: images });
       
       try {
         const urls = await Promise.all(
@@ -29,20 +37,41 @@ const PropertyGallery: React.FC<PropertyGalleryProps> = ({ images, title }) => {
               return path;
             }
             
-            // Otherwise get the URL from Supabase
-            const { data } = supabase.storage
+            // Check if the bucket exists
+            const { data: buckets, error: bucketError } = await supabase
+              .storage
+              .listBuckets();
+            
+            const propertyImagesBucketExists = buckets?.some(b => b.name === 'property-images');
+            
+            if (bucketError || !propertyImagesBucketExists) {
+              console.error('PropertyGallery: Error checking buckets:', bucketError);
+              setDebugData(prev => ({ ...prev, bucketError, buckets }));
+              throw new Error('Property images storage is not properly configured');
+            }
+            
+            // Try to get public URL
+            const { data, error: urlError } = await supabase.storage
               .from('property-images')
               .getPublicUrl(path);
+            
+            if (urlError) {
+              console.error('PropertyGallery: Error getting public URL:', urlError);
+              setDebugData(prev => ({ ...prev, urlError }));
+              throw urlError;
+            }
               
             return data.publicUrl;
           })
         );
         
-        console.log('Fetched image URLs:', urls);
+        console.log('PropertyGallery: Fetched image URLs:', urls);
+        setDebugData(prev => ({ ...prev, urls }));
         setImageUrls(urls);
-      } catch (err) {
-        console.error('Error fetching image URLs:', err);
-        setError('Failed to load images');
+      } catch (err: any) {
+        console.error('PropertyGallery: Error fetching image URLs:', err);
+        setError(err.message || 'Failed to load images');
+        setDebugData(prev => ({ ...prev, error: err }));
       } finally {
         setLoading(false);
       }
@@ -66,9 +95,10 @@ const PropertyGallery: React.FC<PropertyGalleryProps> = ({ images, title }) => {
   
   if (error) {
     return (
-      <div className="aspect-video bg-muted rounded-md flex items-center justify-center">
-        <p className="text-muted-foreground">{error}</p>
-      </div>
+      <Alert variant="destructive" className="mb-4">
+        <AlertCircle className="h-4 w-4 mr-2" />
+        <AlertDescription>{error}</AlertDescription>
+      </Alert>
     );
   }
   
@@ -119,9 +149,9 @@ const PropertyGallery: React.FC<PropertyGalleryProps> = ({ images, title }) => {
         )}
       </div>
       
-      {/* Image debug info - only in development */}
+      {/* Enhanced debug info */}
       {import.meta.env.DEV && (
-        <div className="mt-2 p-2 border border-dashed border-gray-200 rounded-md bg-gray-50 text-xs text-gray-500">
+        <Card className="mt-2 p-2 border border-dashed border-gray-200 rounded-md bg-gray-50 text-xs text-gray-500">
           <div className="flex items-center justify-between mb-1">
             <span className="font-medium">Debug Info: {images ? images.length : 0} images</span>
             {hasImages && (
@@ -137,13 +167,27 @@ const PropertyGallery: React.FC<PropertyGalleryProps> = ({ images, title }) => {
             )}
           </div>
           <div className="overflow-x-auto">
-            {images && images.map((path, idx) => (
-              <div key={idx} className="truncate hover:text-clip">
-                {idx+1}. {path}
-              </div>
-            ))}
+            {debugData && (
+              <pre className="text-xs overflow-auto max-h-40">
+                {JSON.stringify(debugData, null, 2)}
+              </pre>
+            )}
+            <div className="mt-2">
+              <strong>Original image paths:</strong>
+              {images && images.length > 0 ? (
+                <ul className="list-disc pl-4">
+                  {images.map((path, idx) => (
+                    <li key={idx} className="truncate hover:text-clip">
+                      {idx+1}. {path}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-red-500">No image paths provided</p>
+              )}
+            </div>
           </div>
-        </div>
+        </Card>
       )}
     </div>
   );

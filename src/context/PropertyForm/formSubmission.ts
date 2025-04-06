@@ -1,4 +1,3 @@
-
 import { supabase } from '@/lib/supabase';
 import { PropertyFormState, PropertyFormData } from '@/types/property-form';
 import { toast } from 'sonner';
@@ -109,7 +108,7 @@ export const submitPropertyForm = async (state: PropertyFormState): Promise<void
       ...typeSpecificData,
     };
     
-    // 4. Insert property into database
+    // Create property
     const propertyId = await propertyFormHelpers.createProperty(propertyData);
     if (!propertyId) throw new Error('Failed to create property');
 
@@ -129,6 +128,19 @@ export const submitPropertyForm = async (state: PropertyFormState): Promise<void
             
             console.log(`Uploading image ${index+1}/${state.images.length} to path: ${fileName}`);
             
+            // Check if bucket exists first
+            const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
+            if (bucketsError) {
+              console.error('Error checking buckets:', bucketsError);
+              throw new Error('Could not access storage buckets');
+            }
+            
+            const bucketExists = buckets.some(bucket => bucket.name === 'property-images');
+            if (!bucketExists) {
+              console.error('property-images bucket does not exist');
+              throw new Error('Property images storage is not configured');
+            }
+            
             // Upload the file
             const { data, error } = await supabase.storage
               .from('property-images')
@@ -144,13 +156,6 @@ export const submitPropertyForm = async (state: PropertyFormState): Promise<void
             
             console.log('Image upload successful:', data);
             
-            // Get the public URL
-            const { data: publicUrlData } = supabase.storage
-              .from('property-images')
-              .getPublicUrl(fileName);
-              
-            console.log('Public URL for image:', publicUrlData.publicUrl);
-              
             // Add to images to insert
             imagesToInsert.push({
               property_id: propertyId,
@@ -179,7 +184,7 @@ export const submitPropertyForm = async (state: PropertyFormState): Promise<void
           toast.error(`Failed to save image metadata: ${imagesError.message}`);
           // Continue with submission even if image metadata fails
         } else {
-          console.log('Image metadata saved successfully:', insertedImages);
+          console.log('Image metadata saved successfully');
         }
       }
     }

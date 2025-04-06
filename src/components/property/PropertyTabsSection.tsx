@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import PropertyDetails from './PropertyDetails';
@@ -19,6 +19,9 @@ const PropertyTabsSection: React.FC<PropertyTabsSectionProps> = ({
   notes = [], // Default to empty array 
   onAddNote 
 }) => {
+  console.log('PropertyTabsSection: Property', property);
+  console.log('PropertyTabsSection: Owner', owner);
+  
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       {/* Tabs section - takes 2/3 of the space */}
@@ -96,7 +99,7 @@ const PropertyTabsSection: React.FC<PropertyTabsSectionProps> = ({
             <CardTitle>Team Notes</CardTitle>
           </CardHeader>
           <CardContent className="p-5">
-            <TeamNotes notes={notes} onAddNote={onAddNote} className="h-full" hideTitle={true} />
+            <TeamNotes notes={[]} onAddNote={onAddNote} className="h-full" hideTitle={true} />
           </CardContent>
         </Card>
       </div>
