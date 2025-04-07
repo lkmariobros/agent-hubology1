@@ -4,10 +4,19 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
+export default defineConfig(({ mode }) => {
+  // Log environment variables during build
+  console.log('Building with environment:', {
+    VITE_CLERK_PUBLISHABLE_KEY: process.env.VITE_CLERK_PUBLISHABLE_KEY ? 'Set' : 'Not set',
+    NODE_ENV: process.env.NODE_ENV,
+    MODE: mode
+  });
+
+  return ({
   server: {
-    host: "::",
-    port: 8080,
+    host: "localhost",
+    port: 3000,
+    strictPort: false,
   },
   plugins: [
     react(),
@@ -19,4 +28,5 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-}));
+});
+});

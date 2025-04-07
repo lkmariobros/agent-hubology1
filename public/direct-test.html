@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Direct Test Page</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: #0f172a;
+      color: white;
+      height: 100%;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    .container {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .card {
+      width: 100%;
+      max-width: 28rem;
+      background-color: #1e293b;
+      border-radius: 0.5rem;
+      overflow: hidden;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    .card-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid #2d3748;
+    }
+    .card-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+    .card-description {
+      color: #a0aec0;
+      font-size: 0.875rem;
+    }
+    .card-content {
+      padding: 1.5rem;
+    }
+    .text {
+      margin-bottom: 1.5rem;
+      color: #e2e8f0;
+    }
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .button {
+      color: white;
+      padding: 0.75rem 1rem;
+      border-radius: 0.375rem;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.2s;
+      width: 100%;
+      text-align: center;
+      text-decoration: none;
+      display: block;
+    }
+    .button-purple {
+      background-color: #8b5cf6;
+    }
+    .button-purple:hover {
+      background-color: #7c3aed;
+    }
+    .button-indigo {
+      background-color: #6366f1;
+    }
+    .button-indigo:hover {
+      background-color: #4f46e5;
+    }
+    .button-blue {
+      background-color: #3b82f6;
+    }
+    .button-blue:hover {
+      background-color: #2563eb;
+    }
+    .button-cyan {
+      background-color: #06b6d4;
+    }
+    .button-cyan:hover {
+      background-color: #0891b2;
+    }
+    .button-teal {
+      background-color: #14b8a6;
+    }
+    .button-teal:hover {
+      background-color: #0d9488;
+    }
+    .button-green {
+      background-color: #10b981;
+    }
+    .button-green:hover {
+      background-color: #059669;
+    }
+    .button-red {
+      background-color: #ef4444;
+    }
+    .button-red:hover {
+      background-color: #dc2626;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Direct Test Page</h2>
+        <p class="card-description">Testing authentication and profile setup</p>
+      </div>
+
+      <div class="card-content">
+        <p class="text">
+          This page provides direct links to test various authentication and profile setup pages.
+          This is a pure HTML page that bypasses React routing.
+        </p>
+
+        <div class="button-group">
+          <a href="/profile-setup.html" class="button button-purple">
+            Go to Profile Setup (HTML)
+          </a>
+
+          <a href="/standalone.html" class="button button-indigo">
+            Go to Standalone Page
+          </a>
+
+          <a href="/bypass.html" class="button button-blue">
+            Go to Bypass Page
+          </a>
+
+          <a href="/clerk-test.html" class="button button-cyan">
+            Go to Clerk Test
+          </a>
+
+          <a href="/supabase-test.html" class="button button-teal">
+            Go to Supabase Test
+          </a>
+
+          <a href="/sign-in" class="button button-green">
+            Go to Sign In
+          </a>
+
+          <button onclick="clearStorage()" class="button button-red">
+            Clear All Storage
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Clear all storage
+    function clearStorage() {
+      localStorage.clear();
+      sessionStorage.clear();
+      document.cookie.split(";").forEach(function(c) {
+        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+      });
+      alert('All storage cleared!');
+    }
+
+    // Clear all storage on page load
+    window.onload = function() {
+      clearStorage();
+      console.log('All storage cleared on page load');
+    };
+  </script>
+</body>
+</html>

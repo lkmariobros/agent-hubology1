@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple Supabase Test</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: #0f172a;
+      color: white;
+      padding: 2rem;
+      line-height: 1.5;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    h1 {
+      margin-bottom: 1rem;
+    }
+    button {
+      background-color: #3b82f6;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 0.25rem;
+      cursor: pointer;
+      margin-bottom: 1rem;
+    }
+    button:hover {
+      background-color: #2563eb;
+    }
+    pre {
+      background-color: #1e293b;
+      padding: 1rem;
+      border-radius: 0.25rem;
+      overflow: auto;
+      margin-bottom: 1rem;
+    }
+    .success {
+      color: #10b981;
+    }
+    .error {
+      color: #ef4444;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Simple Supabase Test</h1>
+    
+    <button id="testConnection">Test Connection</button>
+    <button id="testProfiles">Test Profiles</button>
+    <button id="createProfile">Create Profile</button>
+    
+    <div id="result"></div>
+  </div>
+
+  <script type="module">
+    // Import Supabase from CDN
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+    
+    // Supabase credentials
+    const supabaseUrl = 'https://twttyqbqhlgyzntcblbz.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR3dHR5cWJxaGxneXpudGNibGJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM2NTc5MDQsImV4cCI6MjA0OTIzMzkwNH0.u8veRmBirnompCeo3Bzgn9TzNqm6VD7NGAiOmwWcP_4';
+    
+    // Create Supabase client
+    const supabase = createClient(supabaseUrl, supabaseKey);
+    
+    // Test connection
+    document.getElementById('testConnection').addEventListener('click', async () => {
+      const resultElement = document.getElementById('result');
+      resultElement.innerHTML = '<p>Testing connection...</p>';
+      
+      try {
+        // Try to get server time
+        const { data, error } = await supabase.rpc('get_server_time');
+        
+        if (error) {
+          // Try a different approach
+          const { data: versionData, error: versionError } = await supabase.from('pg_version').select('*').limit(1);
+          
+          if (versionError) {
+            // Try one more approach
+            const { data: profilesData, error: profilesError } = await supabase.from('profiles').select('count').limit(1);
+            
+            if (profilesError) {
+              resultElement.innerHTML = `<p class="error">Connection failed: ${profilesError.message}</p>`;
+            } else {
+              resultElement.innerHTML = `<p class="success">Connection successful via profiles table!</p>`;
+            }
+          } else {
+            resultElement.innerHTML = `<p class="success">Connection successful via pg_version!</p>`;
+          }
+        } else {
+          resultElement.innerHTML = `
+            <p class="success">Connection successful!</p>
+            <p>Server time: ${data}</p>
+          `;
+        }
+      } catch (err) {
+        resultElement.innerHTML = `<p class="error">Error: ${err.message}</p>`;
+      }
+    });
+    
+    // Test profiles
+    document.getElementById('testProfiles').addEventListener('click', async () => {
+      const resultElement = document.getElementById('result');
+      resultElement.innerHTML = '<p>Testing profiles table...</p>';
+      
+      try {
+        const { data, error } = await supabase.from('profiles').select('*').limit(5);
+        
+        if (error) {
+          resultElement.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+        } else {
+          resultElement.innerHTML = `
+            <p class="success">Successfully queried profiles table!</p>
+            <p>Found ${data.length} profiles</p>
+            <pre>${JSON.stringify(data, null, 2)}</pre>
+          `;
+        }
+      } catch (err) {
+        resultElement.innerHTML = `<p class="error">Error: ${err.message}</p>`;
+      }
+    });
+    
+    // Create profile
+    document.getElementById('createProfile').addEventListener('click', async () => {
+      const resultElement = document.getElementById('result');
+      resultElement.innerHTML = '<p>Creating test profile...</p>';
+      
+      try {
+        const testId = 'test_' + Math.random().toString(36).substring(2, 15);
+        const testEmail = 'test_' + Math.random().toString(36).substring(2, 10) + '@example.com';
+        
+        // Try using the RPC function
+        try {
+          resultElement.innerHTML += '<p>Trying to create profile using RPC function...</p>';
+          
+          const { data, error } = await supabase.rpc('create_profile_for_clerk_user', {
+            p_clerk_id: testId,
+            p_email: testEmail,
+            p_first_name: 'Test',
+            p_last_name: 'User',
+            p_role: 'agent'
+          });
+          
+          if (error) {
+            resultElement.innerHTML += `<p class="error">RPC error: ${error.message}</p>`;
+            throw error;
+          } else {
+            resultElement.innerHTML = `
+              <p class="success">Successfully created test profile using RPC!</p>
+              <pre>${JSON.stringify(data, null, 2)}</pre>
+            `;
+            return;
+          }
+        } catch (rpcErr) {
+          resultElement.innerHTML += `<p>RPC method failed, trying direct insert...</p>`;
+        }
+        
+        // Try direct insert
+        const { data, error } = await supabase.from('profiles').insert({
+          clerk_id: testId,
+          email: testEmail,
+          first_name: 'Test',
+          last_name: 'User',
+          role: 'agent'
+        }).select();
+        
+        if (error) {
+          resultElement.innerHTML += `<p class="error">Error creating profile: ${error.message}</p>`;
+          
+          if (error.message.includes('row-level security')) {
+            resultElement.innerHTML += `
+              <p>This error is due to Row Level Security (RLS) policies. You need to run this SQL in Supabase:</p>
+              <pre>CREATE POLICY "Allow anonymous access for testing"
+    ON public.profiles
+    FOR ALL
+    USING (true)
+    WITH CHECK (true);</pre>
+            `;
+          }
+        } else {
+          resultElement.innerHTML = `
+            <p class="success">Successfully created test profile!</p>
+            <pre>${JSON.stringify(data, null, 2)}</pre>
+          `;
+        }
+      } catch (err) {
+        resultElement.innerHTML += `<p class="error">Error: ${err.message}</p>`;
+      }
+    });
+  </script>
+</body>
+</html>

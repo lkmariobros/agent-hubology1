@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Supabase Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Simple Supabase Connection Test</h1>
+    
+    <p>This page will test your connection to Supabase.</p>
+    
+    <button onclick="testConnection()">Test Connection</button>
+    
+    <div id="result">Click the button to test the connection.</div>
+    
+    <script>
+        function testConnection() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Testing connection...';
+            
+            // Supabase credentials
+            const SUPABASE_URL = 'https://twttyqbqhlgyzntcblbz.supabase.co';
+            const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR3dHR5cWJxaGxneXpudGNibGJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM2NTc5MDQsImV4cCI6MjA0OTIzMzkwNH0.u8veRmBirnompCeo3Bzgn9TzNqm6VD7NGAiOmwWcP_4';
+            
+            try {
+                // Create Supabase client
+                const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                
+                // Test a simple query
+                client.from('profiles').select('count(*)', { count: 'exact' }).limit(0)
+                    .then(response => {
+                        if (response.error) {
+                            throw response.error;
+                        }
+                        
+                        resultDiv.innerHTML = '<span class="success">Connection successful!</span><br><br>' +
+                            'Response: ' + JSON.stringify(response.data);
+                    })
+                    .catch(error => {
+                        resultDiv.innerHTML = '<span class="error">Connection failed!</span><br><br>' +
+                            'Error: ' + error.message;
+                        console.error('Error:', error);
+                    });
+            } catch (error) {
+                resultDiv.innerHTML = '<span class="error">Failed to initialize Supabase client!</span><br><br>' +
+                    'Error: ' + error.message;
+                console.error('Initialization error:', error);
+            }
+        }
+    </script>
+</body>
+</html>

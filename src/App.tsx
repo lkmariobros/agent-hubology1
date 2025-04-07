@@ -1,42 +1,40 @@
-
+import { useState } from 'react';
+import { SignIn } from '@clerk/clerk-react';
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Toaster } from '@/components/ui/sonner';
-import { AuthProvider } from './context/auth'; // Using the consolidated AuthProvider
-import { NotificationProvider } from './context/NotificationContext';
-import Router from './Router'; // Import the consolidated router
+import FallbackAuth from './components/auth/FallbackAuth';
 
-// Configure the QueryClient with optimized settings
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: import.meta.env.PROD ? 60 * 1000 : 0, // 1 minute in production, 0 in development
-      gcTime: import.meta.env.PROD ? 5 * 60 * 1000 : 60 * 1000, // 5 minutes in prod, 1 minute in dev
-      refetchOnWindowFocus: import.meta.env.PROD, // Only refetch on window focus in production
-      retry: import.meta.env.PROD ? 2 : 1, // More retries in production
-      retryDelay: attempt => Math.min(1000 * 2 ** attempt, 30000), // Exponential backoff with max 30s
-    },
-    mutations: {
-      retry: import.meta.env.PROD ? 1 : 0, // Retry mutations in production
-      networkMode: 'always',
-    },
-  },
-});
-
-// Make queryClient globally available for manual invalidations
-if (typeof window !== 'undefined') {
-  window.queryClient = queryClient;
-}
+// Create a simple query client
+const queryClient = new QueryClient();
 
 function App() {
+  const [useFallback, setUseFallback] = useState(false);
+
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <AuthProvider>
-          <NotificationProvider>
-            <Router />
-          </NotificationProvider>
-        </AuthProvider>
+        <div className="min-h-screen flex flex-col items-center justify-center bg-gray-900 text-white p-4">
+          <h1 className="text-2xl font-bold mb-8">Agent Hubology</h1>
+
+          <div className="w-full max-w-md bg-gray-800 p-6 rounded-lg shadow-lg">
+            {useFallback ? (
+              <FallbackAuth />
+            ) : (
+              <div className="relative">
+                <SignIn routing="path" path="/sign-in" afterSignInUrl="/dashboard" />
+
+                <div className="mt-4 text-center">
+                  <button
+                    onClick={() => setUseFallback(true)}
+                    className="text-sm text-gray-400 hover:text-gray-300"
+                  >
+                    Having trouble? Try fallback login
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       </ThemeProvider>
     </QueryClientProvider>
   );

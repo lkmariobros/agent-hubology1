@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bypass Dashboard</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: #0f172a;
+      color: white;
+      padding: 2rem;
+      line-height: 1.5;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    h1 {
+      margin-bottom: 1rem;
+    }
+    .card {
+      background-color: #1e293b;
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: bold;
+      margin-bottom: 1rem;
+    }
+    .button {
+      background-color: #3b82f6;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 0.25rem;
+      cursor: pointer;
+      margin-right: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .button:hover {
+      background-color: #2563eb;
+    }
+    pre {
+      background-color: #0f172a;
+      padding: 1rem;
+      border-radius: 0.25rem;
+      overflow: auto;
+      font-size: 0.875rem;
+    }
+    .success {
+      color: #10b981;
+    }
+    .error {
+      color: #ef4444;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Dashboard Bypass Tool</h1>
+    <p>This tool helps diagnose issues with the dashboard by bypassing React and directly accessing the browser's storage and APIs.</p>
+    
+    <div class="card">
+      <div class="card-title">Browser Storage</div>
+      <div>
+        <button class="button" onclick="showLocalStorage()">Show localStorage</button>
+        <button class="button" onclick="showSessionStorage()">Show sessionStorage</button>
+        <button class="button" onclick="showCookies()">Show Cookies</button>
+        <button class="button" onclick="clearStorage()">Clear All Storage</button>
+      </div>
+      <div id="storageResult"></div>
+    </div>
+    
+    <div class="card">
+      <div class="card-title">Navigation</div>
+      <div>
+        <button class="button" onclick="window.location.href = '/sign-in'">Go to Sign In</button>
+        <button class="button" onclick="window.location.href = '/dashboard'">Go to Dashboard</button>
+        <button class="button" onclick="window.location.href = '/profile/setup'">Go to Profile Setup</button>
+        <button class="button" onclick="window.location.href = '/simple-dashboard.html'">Go to Simple Dashboard</button>
+        <button class="button" onclick="window.location.href = '/simple-test.html'">Go to Simple Test</button>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="card-title">Console Output</div>
+      <p>Open your browser's developer console (F12 or right-click > Inspect > Console) to see detailed error messages.</p>
+      <button class="button" onclick="testConsole()">Test Console Output</button>
+      <div id="consoleResult"></div>
+    </div>
+    
+    <div class="card">
+      <div class="card-title">Network Status</div>
+      <button class="button" onclick="checkNetwork()">Check Network Status</button>
+      <div id="networkResult"></div>
+    </div>
+  </div>
+
+  <script>
+    // Show localStorage
+    function showLocalStorage() {
+      try {
+        const storage = { ...localStorage };
+        document.getElementById('storageResult').innerHTML = `
+          <h3>localStorage:</h3>
+          <pre>${JSON.stringify(storage, null, 2)}</pre>
+        `;
+      } catch (err) {
+        document.getElementById('storageResult').innerHTML = `
+          <h3>localStorage Error:</h3>
+          <pre class="error">${err.message}</pre>
+        `;
+      }
+    }
+    
+    // Show sessionStorage
+    function showSessionStorage() {
+      try {
+        const storage = { ...sessionStorage };
+        document.getElementById('storageResult').innerHTML = `
+          <h3>sessionStorage:</h3>
+          <pre>${JSON.stringify(storage, null, 2)}</pre>
+        `;
+      } catch (err) {
+        document.getElementById('storageResult').innerHTML = `
+          <h3>sessionStorage Error:</h3>
+          <pre class="error">${err.message}</pre>
+        `;
+      }
+    }
+    
+    // Show cookies
+    function showCookies() {
+      try {
+        const cookies = document.cookie.split(';').reduce((acc, cookie) => {
+          const [key, value] = cookie.trim().split('=');
+          if (key) acc[key] = value;
+          return acc;
+        }, {});
+        
+        document.getElementById('storageResult').innerHTML = `
+          <h3>Cookies:</h3>
+          <pre>${JSON.stringify(cookies, null, 2)}</pre>
+        `;
+      } catch (err) {
+        document.getElementById('storageResult').innerHTML = `
+          <h3>Cookies Error:</h3>
+          <pre class="error">${err.message}</pre>
+        `;
+      }
+    }
+    
+    // Clear all storage
+    function clearStorage() {
+      try {
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        // Clear cookies
+        document.cookie.split(';').forEach(cookie => {
+          const name = cookie.trim().split('=')[0];
+          document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+        });
+        
+        document.getElementById('storageResult').innerHTML = `
+          <h3 class="success">All storage cleared!</h3>
+        `;
+      } catch (err) {
+        document.getElementById('storageResult').innerHTML = `
+          <h3>Clear Storage Error:</h3>
+          <pre class="error">${err.message}</pre>
+        `;
+      }
+    }
+    
+    // Test console output
+    function testConsole() {
+      console.log('This is a test log message');
+      console.info('This is a test info message');
+      console.warn('This is a test warning message');
+      console.error('This is a test error message');
+      
+      document.getElementById('consoleResult').innerHTML = `
+        <p class="success">Test messages sent to console. Open your browser's developer console to see them.</p>
+      `;
+    }
+    
+    // Check network status
+    function checkNetwork() {
+      const result = document.getElementById('networkResult');
+      result.innerHTML = `<p>Checking network status...</p>`;
+      
+      // Check if online
+      if (navigator.onLine) {
+        result.innerHTML += `<p class="success">Browser reports online status: Connected</p>`;
+      } else {
+        result.innerHTML += `<p class="error">Browser reports online status: Disconnected</p>`;
+      }
+      
+      // Test fetch to Supabase
+      fetch('https://twttyqbqhlgyzntcblbz.supabase.co/rest/v1/profiles?select=count', {
+        headers: {
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR3dHR5cWJxaGxneXpudGNibGJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM2NTc5MDQsImV4cCI6MjA0OTIzMzkwNH0.u8veRmBirnompCeo3Bzgn9TzNqm6VD7NGAiOmwWcP_4'
+        }
+      })
+        .then(response => {
+          if (response.ok) {
+            result.innerHTML += `<p class="success">Supabase API test: Connected (Status ${response.status})</p>`;
+            return response.json();
+          } else {
+            result.innerHTML += `<p class="error">Supabase API test: Failed (Status ${response.status})</p>`;
+            throw new Error(`Status ${response.status}`);
+          }
+        })
+        .then(data => {
+          result.innerHTML += `<p>Response data: ${JSON.stringify(data)}</p>`;
+        })
+        .catch(err => {
+          result.innerHTML += `<p class="error">Fetch error: ${err.message}</p>`;
+        });
+      
+      // Test fetch to Clerk
+      fetch('https://clerk.com/v1/health')
+        .then(response => {
+          if (response.ok) {
+            result.innerHTML += `<p class="success">Clerk API test: Connected (Status ${response.status})</p>`;
+          } else {
+            result.innerHTML += `<p class="error">Clerk API test: Failed (Status ${response.status})</p>`;
+          }
+        })
+        .catch(err => {
+          result.innerHTML += `<p class="error">Clerk fetch error: ${err.message}</p>`;
+        });
+    }
+  </script>
+</body>
+</html>

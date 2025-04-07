@@ -18,15 +18,10 @@ import Roles from './pages/admin/Roles';
 import NewTransaction from './pages/NewTransaction';
 import TransactionList from './pages/TransactionList';
 import TransactionDetail from './pages/TransactionDetail';
-import Login from './pages/auth/Login';
-import Signup from './pages/auth/Signup';
-import ForgotPassword from './pages/auth/ForgotPassword';
-import ResetPassword from './pages/auth/ResetPassword';
 import NotFound from './pages/NotFound';
 import CommissionForecastPage from './pages/admin/CommissionForecast';
 import Reports from './pages/Reports';
 import AdminSettings from './pages/admin/Settings';
-import ProtectedRoute from './components/auth/ProtectedRoute';
 import NewProperty from './pages/NewProperty';
 import AdminTransactions from './pages/admin/Transactions';
 import Index from './pages/Index';
@@ -43,217 +38,237 @@ import Properties from './pages/Properties';
 import SystemLogs from './pages/admin/SystemLogs';
 import Database from './pages/admin/Database';
 import Settings from './pages/Settings';
+import SupabaseDebug from './pages/debug/SupabaseDebug';
+
+// Import Clerk components
+import ClerkSignIn from './components/auth/ClerkSignIn';
+import ClerkSignUp from './components/auth/ClerkSignUp';
+import ProfileSetup from './pages/auth/ProfileSetup';
+import ProfileSetupTest from './pages/auth/ProfileSetupTest';
+import DirectTest from './pages/auth/DirectTest';
+import ForceProfileSetup from './pages/auth/ForceProfileSetup';
+import AuthTest from './pages/auth/AuthTest';
+import ClerkJwtTest from './pages/auth/ClerkJwtTest';
+import JwtTest from './pages/auth/JwtTest';
+import ClerkProtectedRoute from './components/auth/ClerkProtectedRoute';
 
 // Merged router with all routes from both implementations
 const router = createBrowserRouter([
   // Auth routes - outside of layouts
   { path: '/', element: <Index /> },
-  { path: '/login', element: <Login /> },
-  { path: '/signup', element: <Signup /> },
-  { path: '/invite', element: <Signup /> }, // Handle invitation links
-  { path: '/forgot-password', element: <ForgotPassword /> },
-  { path: '/reset-password', element: <ResetPassword /> },
-  
+  { path: '/sign-in/*', element: <ClerkSignIn /> },
+  { path: '/sign-up/*', element: <ClerkSignUp /> },
+  { path: '/profile/setup', element: <ProfileSetup /> },
+  { path: '/profile/setup-test', element: <ProfileSetupTest /> },
+  { path: '/direct-test', element: <DirectTest /> },
+  { path: '/force-profile-setup', element: <ForceProfileSetup /> },
+  { path: '/auth-test', element: <AuthTest /> },
+  { path: '/clerk-jwt-test', element: <ClerkJwtTest /> },
+  { path: '/jwt-test', element: <JwtTest /> },
+
   // Agent portal routes
   {
     path: '/',
-    element: <ProtectedRoute><AppLayout /></ProtectedRoute>,
+    element: <ClerkProtectedRoute><AppLayout /></ClerkProtectedRoute>,
     errorElement: <NotFound />,
     children: [
-      { 
-        index: true, 
-        element: <Dashboard /> 
+      {
+        index: true,
+        element: <Dashboard />
       },
-      { 
-        path: 'dashboard', 
-        element: <Dashboard /> 
+      {
+        path: 'dashboard',
+        element: <Dashboard />
       },
-      { 
-        path: 'home', 
-        element: <Home /> 
+      {
+        path: 'home',
+        element: <Home />
       },
-      { 
-        path: 'properties', 
-        element: <Properties /> 
+      {
+        path: 'properties',
+        element: <Properties />
       },
-      { 
-        path: 'properties/:id', 
-        element: <PropertyDetail /> 
+      {
+        path: 'properties/:id',
+        element: <PropertyDetail />
       },
-      { 
-        path: 'properties/new', 
-        element: <NewProperty /> 
+      {
+        path: 'properties/new',
+        element: <NewProperty />
       },
-      { 
-        path: 'team', 
-        element: <Team /> 
+      {
+        path: 'team',
+        element: <Team />
       },
-      { 
-        path: 'transactions', 
-        element: <TransactionList /> 
+      {
+        path: 'transactions',
+        element: <TransactionList />
       },
-      { 
-        path: 'transactions/new', 
-        element: <NewTransaction /> 
+      {
+        path: 'transactions/new',
+        element: <NewTransaction />
       },
-      { 
-        path: 'transactions/:id', 
-        element: <TransactionDetail /> 
+      {
+        path: 'transactions/:id',
+        element: <TransactionDetail />
       },
-      { 
-        path: 'commission', 
-        element: <Commission /> 
+      {
+        path: 'commission',
+        element: <Commission />
       },
-      { 
-        path: 'commission/forecast', 
-        element: <CommissionForecast /> 
+      {
+        path: 'commission/forecast',
+        element: <CommissionForecast />
       },
-      { 
-        path: 'profile', 
-        element: <Profile /> 
+      {
+        path: 'profile',
+        element: <Profile />
       },
-      { 
-        path: 'settings', 
-        element: <Settings /> 
+      {
+        path: 'settings',
+        element: <Settings />
       },
-      { 
-        path: 'opportunities', 
-        element: <Opportunities /> 
+      {
+        path: 'opportunities',
+        element: <Opportunities />
       },
-      { 
-        path: 'agents', 
-        element: <Agents /> 
+      {
+        path: 'agents',
+        element: <Agents />
       },
-      { 
-        path: 'agents/:id', 
-        element: <AgentDetail /> 
+      {
+        path: 'agents/:id',
+        element: <AgentDetail />
       },
-      { 
-        path: 'agents/new', 
-        element: <NewAgent /> 
+      {
+        path: 'agents/new',
+        element: <NewAgent />
       },
-      { 
-        path: 'reports', 
-        element: <Reports /> 
+      {
+        path: 'reports',
+        element: <Reports />
       },
-      
+
       // Leaderboard Routes
-      { 
-        path: 'leaderboard', 
-        element: <Leaderboard /> 
+      {
+        path: 'leaderboard',
+        element: <Leaderboard />
       },
-      { 
-        path: 'leaderboard/points', 
-        element: <PointsLeaderboard /> 
+      {
+        path: 'leaderboard/points',
+        element: <PointsLeaderboard />
       },
-      { 
-        path: 'leaderboard/sales', 
-        element: <SalesLeaderboard /> 
+      {
+        path: 'leaderboard/sales',
+        element: <SalesLeaderboard />
       },
     ],
   },
-  
+
   // Admin portal routes
   {
     path: '/admin',
-    element: <ProtectedRoute><AdminLayout /></ProtectedRoute>,
+    element: <ClerkProtectedRoute requireAdmin><AdminLayout /></ClerkProtectedRoute>,
     errorElement: <NotFound />,
     children: [
-      { 
-        index: true, 
-        element: <AdminDashboard /> 
+      {
+        index: true,
+        element: <AdminDashboard />
       },
-      { 
-        path: 'dashboard', 
-        element: <AdminDashboard /> 
+      {
+        path: 'dashboard',
+        element: <AdminDashboard />
       },
-      { 
-        path: 'agents', 
-        element: <AdminAgents /> 
+      {
+        path: 'agents',
+        element: <AdminAgents />
       },
-      { 
-        path: 'properties', 
-        element: <AdminProperties /> 
+      {
+        path: 'properties',
+        element: <AdminProperties />
       },
-      { 
-        path: 'transactions', 
-        element: <AdminTransactions /> 
+      {
+        path: 'transactions',
+        element: <AdminTransactions />
       },
-      { 
-        path: 'commission', 
-        element: <CommissionApproval /> 
+      {
+        path: 'commission',
+        element: <CommissionApproval />
       },
-      { 
-        path: 'commission/tiers', 
-        element: <CommissionTiers /> 
+      {
+        path: 'commission/tiers',
+        element: <CommissionTiers />
       },
-      { 
-        path: 'commission/schedules', 
-        element: <PaymentSchedulesAdmin /> 
+      {
+        path: 'commission/schedules',
+        element: <PaymentSchedulesAdmin />
       },
-      { 
-        path: 'commission/settings', 
-        element: <CommissionSettings /> 
+      {
+        path: 'commission/settings',
+        element: <CommissionSettings />
       },
-      { 
-        path: 'commission/forecast', 
-        element: <CommissionForecastPage /> 
+      {
+        path: 'commission/forecast',
+        element: <CommissionForecastPage />
       },
-      { 
-        path: 'commission/approvals', 
-        element: <CommissionApproval /> 
+      {
+        path: 'commission/approvals',
+        element: <CommissionApproval />
       },
-      { 
-        path: 'commission/approvals/:id', 
-        element: <CommissionApproval /> 
+      {
+        path: 'commission/approvals/:id',
+        element: <CommissionApproval />
       },
-      { 
-        path: 'commissions', 
-        element: <CommissionApproval /> 
+      {
+        path: 'commissions',
+        element: <CommissionApproval />
       },
-      { 
-        path: 'commissions/:id', 
-        element: <CommissionApproval /> 
+      {
+        path: 'commissions/:id',
+        element: <CommissionApproval />
       },
-      { 
-        path: 'roles', 
-        element: <Roles /> 
+      {
+        path: 'roles',
+        element: <Roles />
       },
-      { 
-        path: 'settings', 
-        element: <AdminSettings /> 
+      {
+        path: 'settings',
+        element: <AdminSettings />
       },
-      { 
-        path: 'system-logs', 
-        element: <SystemLogs /> 
+      {
+        path: 'system-logs',
+        element: <SystemLogs />
       },
-      { 
-        path: 'database', 
-        element: <Database /> 
+      {
+        path: 'database',
+        element: <Database />
       },
-      { 
-        path: 'reports/overview', 
-        element: <Reports /> 
+      {
+        path: 'reports/overview',
+        element: <Reports />
       },
-      { 
-        path: 'reports/performance', 
-        element: <Reports /> 
+      {
+        path: 'reports/performance',
+        element: <Reports />
       },
-      { 
-        path: 'reports/sales', 
-        element: <Reports /> 
+      {
+        path: 'reports/sales',
+        element: <Reports />
       },
-      { 
-        path: 'reports/custom', 
-        element: <Reports /> 
+      {
+        path: 'reports/custom',
+        element: <Reports />
       },
     ],
   },
-  
+
+  // Debug routes - only available in development
+  { path: '/debug/supabase', element: <SupabaseDebug /> },
+
   // Root redirects based on role
-  { path: '/admin-redirect', element: <ProtectedRoute><Navigate to="/admin/dashboard" replace /></ProtectedRoute> },
-  { path: '/agent-redirect', element: <ProtectedRoute><Navigate to="/dashboard" replace /></ProtectedRoute> },
-  
+  { path: '/admin-redirect', element: <ClerkProtectedRoute><Navigate to="/admin/dashboard" replace /></ClerkProtectedRoute> },
+  { path: '/agent-redirect', element: <ClerkProtectedRoute><Navigate to="/dashboard" replace /></ClerkProtectedRoute> },
+
   // Fallback
   { path: '*', element: <NotFound /> },
 ]);

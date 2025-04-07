@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile Setup</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: #0f172a;
+      color: white;
+      height: 100%;
+      background-image: radial-gradient(circle at center, rgba(102, 90, 240, 0.15) 0%, rgba(0, 0, 0, 0.5) 100%);
+    }
+    * {
+      box-sizing: border-box;
+    }
+    .container {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .card {
+      width: 100%;
+      max-width: 28rem;
+      background-color: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(8px);
+      border-radius: 0.5rem;
+      overflow: hidden;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    .card-header {
+      padding: 1.5rem;
+      text-align: center;
+    }
+    .avatar {
+      width: 4rem;
+      height: 4rem;
+      border-radius: 9999px;
+      background-color: #8b5cf6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem auto;
+    }
+    .avatar-text {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: white;
+    }
+    .card-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+    .card-description {
+      color: #a0aec0;
+      font-size: 0.875rem;
+    }
+    .card-content {
+      padding: 1.5rem;
+    }
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    .label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-size: 0.875rem;
+    }
+    .input {
+      width: 100%;
+      padding: 0.5rem;
+      border-radius: 0.375rem;
+      background-color: #1f2937;
+      border: 1px solid #374151;
+      color: white;
+    }
+    .select {
+      width: 100%;
+      padding: 0.5rem;
+      border-radius: 0.375rem;
+      background-color: #1f2937;
+      border: 1px solid #374151;
+      color: white;
+    }
+    .button {
+      width: 100%;
+      padding: 0.75rem;
+      border-radius: 0.375rem;
+      background-color: #8b5cf6;
+      color: white;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+    .button:hover {
+      background-color: #7c3aed;
+    }
+    .spinner {
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top: 2px solid white;
+      width: 1rem;
+      height: 1rem;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      margin-right: 0.5rem;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <div class="card-header">
+        <div class="avatar">
+          <span class="avatar-text">P</span>
+        </div>
+        <h2 class="card-title">Complete Your Profile</h2>
+        <p class="card-description">Set up your profile to continue to the portal</p>
+      </div>
+      
+      <div class="card-content">
+        <form id="profile-form">
+          <div class="form-group">
+            <label class="label" for="email">Email</label>
+            <input 
+              class="input" 
+              type="email" 
+              id="email" 
+              value="user@example.com" 
+              disabled
+            />
+          </div>
+          
+          <div class="form-group">
+            <label class="label" for="name">Name</label>
+            <input 
+              class="input" 
+              type="text" 
+              id="name" 
+              value="John Doe" 
+              disabled
+            />
+          </div>
+          
+          <div class="form-group">
+            <label class="label" for="role">Role</label>
+            <select class="select" id="role">
+              <option value="agent">Agent</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          
+          <button type="submit" class="button" id="submit-button">
+            Complete Setup
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Clear all storage on page load
+    window.onload = function() {
+      localStorage.clear();
+      sessionStorage.clear();
+      document.cookie.split(";").forEach(function(c) {
+        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+      });
+      console.log('All storage cleared on page load');
+    };
+
+    // Handle form submission
+    document.getElementById('profile-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Show loading state
+      const button = document.getElementById('submit-button');
+      const originalText = button.innerHTML;
+      button.innerHTML = '<span class="spinner"></span>Creating Profile...';
+      button.disabled = true;
+      
+      // Simulate API call
+      setTimeout(function() {
+        // Reset button
+        button.innerHTML = originalText;
+        button.disabled = false;
+        
+        // Show success message
+        alert('Profile created successfully! You would now be redirected to the dashboard.');
+        
+        // Redirect to dashboard
+        window.location.href = '/dashboard';
+      }, 2000);
+    });
+  </script>
+</body>
+</html>

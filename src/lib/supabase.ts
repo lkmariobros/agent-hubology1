@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { UserRole } from '@/types/auth';
 import { SUPABASE_API_URL, SUPABASE_ANON_KEY, validateEnvironment } from '@/config/supabase';
 
@@ -8,7 +8,7 @@ validateEnvironment();
 // Create a Supabase client instance with explicit auth configuration
 export const supabase = createClient(
   SUPABASE_API_URL,
-  SUPABASE_ANON_KEY, 
+  SUPABASE_ANON_KEY,
   {
     auth: {
       persistSession: true,
@@ -46,14 +46,14 @@ if (import.meta.env.DEV && (!import.meta.env.VITE_SUPABASE_URL || !import.meta.e
 // Error handling utilities for Supabase operations
 export const handleSupabaseError = (error: any, operation: string) => {
   const errorMessage = error?.message || `An error occurred during ${operation}`;
-  
+
   if (import.meta.env.DEV) {
     console.error(`Supabase ${operation} error:`, error);
   }
-  
+
   // Return user-friendly error message
   return {
-    success: false, 
+    success: false,
     error: errorMessage,
     details: import.meta.env.DEV ? error : undefined
   };
@@ -93,7 +93,7 @@ export const supabaseUtils = {
         .select('*')
         .eq('id', userId)
         .single();
-        
+
       if (error) throw error;
       return data as AgentProfile;
     } catch (error) {
@@ -101,7 +101,7 @@ export const supabaseUtils = {
       return null;
     }
   },
-  
+
   // Upload a file to storage
   uploadFile: async (bucket: string, filePath: string, file: File) => {
     try {
@@ -111,7 +111,7 @@ export const supabaseUtils = {
           cacheControl: '3600',
           upsert: false
         });
-      
+
       if (error) throw error;
       return data;
     } catch (error) {
@@ -119,13 +119,32 @@ export const supabaseUtils = {
       throw error;
     }
   },
-  
+
   // Get a public URL for a file
   getPublicUrl: (bucket: string, filePath: string) => {
     return supabase.storage
       .from(bucket)
       .getPublicUrl(filePath);
   },
+};
+
+// Create a Supabase client with a custom JWT token
+export const createSupabaseWithToken = (jwt: string): SupabaseClient => {
+  return createClient(
+    SUPABASE_API_URL,
+    SUPABASE_ANON_KEY,
+    {
+      global: {
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+        },
+      },
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+      },
+    }
+  );
 };
 
 // Export default supabase instance
