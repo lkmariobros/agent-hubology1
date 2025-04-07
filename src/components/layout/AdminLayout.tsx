@@ -1,6 +1,5 @@
-
 import React, { useEffect } from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet, useLocation, Navigate } from 'react-router-dom';
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { AdminSidebar } from './AdminSidebar';
 import { SidebarProvider, useSidebar } from '@/components/ui/sidebar';
@@ -8,6 +7,9 @@ import { Button } from '@/components/ui/button';
 import NavUtilities from './sidebar/NavUtilities';
 import PageBreadcrumb from './PageBreadcrumb';
 import Container from '../ui/container';
+import { useAuth } from '@/hooks/useAuth';
+import { isSpecialAdmin } from '@/utils/adminAccess';
+import AdminAccessDebugger from '../admin/AdminAccessDebugger';
 
 // Create a header component that has access to the sidebar context
 const Header = () => {
@@ -49,10 +51,16 @@ const AdminLayout = () => {
   const savedStateStr = localStorage.getItem("admin-sidebar:state");
   const savedState = savedStateStr === "collapsed" ? "collapsed" : "expanded";
   const location = useLocation();
+  const { isAdmin, user, activeRole } = useAuth();
+  
+  // Direct check for special admin status
+  const isSpecialAdminUser = user && isSpecialAdmin(user.email);
+  const canAccessAdmin = isAdmin || isSpecialAdminUser;
 
   // Add data-route attribute to body
   useEffect(() => {
     document.body.setAttribute('data-route', location.pathname);
+    console.log('[AdminLayout] Rendering with admin access:', canAccessAdmin);
 
     // Set document title based on location
     const pathSegments = location.pathname.split('/').filter(segment => segment);
@@ -66,12 +74,18 @@ const AdminLayout = () => {
     return () => {
       document.body.removeAttribute('data-route');
     };
-  }, [location.pathname]);
+  }, [location.pathname, canAccessAdmin]);
 
   // Set up effect to save sidebar state changes
   const handleStateChange = (newState: "expanded" | "collapsed") => {
     localStorage.setItem("admin-sidebar:state", newState);
   };
+
+  // Basic check to make sure user has admin access - redundant with ProtectedRoute but serves as a fallback
+  if (!canAccessAdmin) {
+    console.log('[AdminLayout] No admin access, redirecting to dashboard');
+    return <Navigate to="/dashboard" replace />;
+  }
 
   return (
     <SidebarProvider defaultState={savedState} onStateChange={handleStateChange}>
@@ -83,6 +97,7 @@ const AdminLayout = () => {
             <Outlet />
           </Container>
         </main>
+        <AdminAccessDebugger />
       </div>
     </SidebarProvider>
   );

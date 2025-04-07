@@ -26,7 +26,7 @@ import ForgotPassword from './pages/auth/ForgotPassword';
 import ResetPassword from './pages/auth/ResetPassword';
 import NotFound from './pages/NotFound';
 import CommissionForecastPage from './pages/admin/CommissionForecast';
-import Reports from './pages/Reports'; // Using the existing Reports page for all report routes
+import Reports from './pages/Reports';
 import AdminSettings from './pages/admin/Settings';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 
@@ -34,6 +34,7 @@ const router = createBrowserRouter([
   {
     path: '/',
     element: <AuthProvider><AppLayout /></AuthProvider>,
+    errorElement: <NotFound />,
     children: [
       { 
         index: true, 
@@ -80,6 +81,7 @@ const router = createBrowserRouter([
   {
     path: '/admin',
     element: <AuthProvider><AdminLayout /></AuthProvider>,
+    errorElement: <NotFound />,
     children: [
       { 
         index: true, 

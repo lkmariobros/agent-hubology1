@@ -16,7 +16,6 @@ import { isSpecialAdmin } from '@/utils/adminAccess';
 
 /**
  * Component that allows users to switch between different roles/portals
- * Displayed in the header rather than sidebar
  */
 export function TeamSwitcher() {
   const { user, switchRole, isAdmin, activeRole } = useAuth();
@@ -30,6 +29,7 @@ export function TeamSwitcher() {
   
   // Use centralized special admin check
   const isSpecialAdminUser = isSpecialAdmin(user.email);
+  console.log('TeamSwitcher: Special admin check:', isSpecialAdminUser);
   
   if (isAdmin || isSpecialAdminUser) {
     availableRoles.push({ 
@@ -58,7 +58,7 @@ export function TeamSwitcher() {
     setTimeout(() => {
       // Hard redirect to correct portal with full page reload
       if (role === 'admin') {
-        console.log('TeamSwitcher: Hard redirect to /admin dashboard');
+        console.log('TeamSwitcher: Hard redirect to /admin/dashboard');
         window.location.href = '/admin/dashboard';
       } else {
         console.log('TeamSwitcher: Hard redirect to /dashboard');

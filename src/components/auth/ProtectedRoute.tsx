@@ -33,6 +33,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     console.log("[ProtectedRoute] Current user role:", activeRole);
     console.log("[ProtectedRoute] Is admin:", isAdmin, "RequireAdmin:", requireAdmin);
     console.log("[ProtectedRoute] Current location:", location.pathname);
+    console.log("[ProtectedRoute] User email:", user?.email);
     
     // Set timeout to detect prolonged loading states
     if (loading && !timeoutRef.current) {
@@ -59,9 +60,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         timeoutRef.current = null;
       }
     };
-  }, [loading, activeRole, isAdmin, requireAdmin, location.pathname]);
+  }, [loading, activeRole, isAdmin, requireAdmin, location.pathname, user?.email]);
 
-  // If we hit a timeout and still loading, show error UI
+  // Handle timeout or error cases first
   if (timeoutOccurred && loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background">
@@ -91,7 +92,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
   }
 
-  // Show error UI if there's an authentication error
   if (error && !loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background">
@@ -119,7 +119,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
   }
 
-  // Show loading indicator while checking authentication
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background">
@@ -138,37 +137,39 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to={redirectTo} state={{ from: location }} replace />;
   }
 
-  // Use centralized special admin check
+  // Special admin handling
   const isSpecialAdminUser = isSpecialAdmin(user.email);
+  console.log('[ProtectedRoute] Is special admin user:', isSpecialAdminUser);
 
-  // Check for admin requirement, but make exception for special admin user
-  if (requireAdmin && !isAdmin && !isSpecialAdminUser) {
-    console.log('[ProtectedRoute] Admin access required but user is not admin, redirecting to dashboard');
-    toast.error("You need admin privileges to access this page");
-    return <Navigate to="/dashboard" replace />;
-  }
-  
-  // Critical fix: Check if we're trying to access admin routes with agent role but redirect to admin dashboard instead
+  // If we're on an admin route but not in admin role (and not a special admin)
   if (location.pathname.startsWith('/admin') && activeRole !== 'admin' && !isSpecialAdminUser) {
-    console.log('[ProtectedRoute] Trying to access admin route with non-admin role, redirecting to admin portal switcher');
+    console.log('[ProtectedRoute] Non-admin user trying to access admin route');
     toast.error("Please switch to admin role to access this section");
     return <Navigate to="/" replace />;
   }
-  
-  // Check if we're trying to access agent routes with admin role (except for special admin user)
-  if (!location.pathname.startsWith('/admin') && activeRole === 'admin' && isAdmin && !isSpecialAdminUser) {
-    console.log('[ProtectedRoute] Trying to access agent route with admin role, redirecting to agent portal switcher');
-    toast.error("Please switch to agent role to access this section");
-    return <Navigate to="/admin" replace />;
+
+  // If admin route is required but user is not admin (and not a special admin)
+  if (requireAdmin && !isAdmin && !isSpecialAdminUser) {
+    console.log('[ProtectedRoute] Admin access required but user is not admin');
+    toast.error("You need admin privileges to access this page");
+    return <Navigate to="/dashboard" replace />;
   }
 
-  // Check for specific role requirements (but make exception for special admin user)
+  // If we're on a regular route but in admin role (except for special admin)
+  if (!location.pathname.startsWith('/admin') && activeRole === 'admin' && !isSpecialAdminUser) {
+    console.log('[ProtectedRoute] Admin trying to access agent route');
+    toast.error("Please switch to agent role to access this section");
+    return <Navigate to="/admin/dashboard" replace />;
+  }
+
+  // Check for specific role requirements (except for special admin)
   if (requireRoles.length > 0 && !requireRoles.some(role => hasRole(role)) && !isSpecialAdminUser) {
     console.log('[ProtectedRoute] Required roles not found:', requireRoles);
     toast.error(`You need ${requireRoles.join(' or ')} privileges to access this page`);
     return <Navigate to="/dashboard" replace />;
   }
 
+  // If all checks pass, render the children
   return <>{children}</>;
 };
 
