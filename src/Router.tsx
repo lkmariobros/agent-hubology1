@@ -1,4 +1,3 @@
-
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
 import AppLayout from './components/layout/AppLayout';
 import AdminLayout from './components/layout/AdminLayout';
