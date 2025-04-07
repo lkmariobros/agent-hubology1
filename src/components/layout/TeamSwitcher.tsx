@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   DropdownMenu,
@@ -54,16 +53,14 @@ export function TeamSwitcher() {
     // First switch the role
     switchRole(role);
     
+    // Use hardcoded paths for redirection to ensure consistency
+    const redirectPath = role === 'admin' ? '/admin/dashboard' : '/dashboard';
+    
     // Add a slight delay to allow the role switch to complete
     setTimeout(() => {
       // Hard redirect to correct portal with full page reload
-      if (role === 'admin') {
-        console.log('TeamSwitcher: Hard redirect to /admin/dashboard');
-        window.location.href = '/admin/dashboard';
-      } else {
-        console.log('TeamSwitcher: Hard redirect to /dashboard');
-        window.location.href = '/dashboard';
-      }
+      console.log(`TeamSwitcher: Hard redirect to ${redirectPath}`);
+      window.location.href = redirectPath;
     }, 100);
   };
 

@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -112,13 +111,14 @@ function App() {
                   <Route path="leaderboard/sales" element={<SalesLeaderboard />} />
                 </Route>
 
-                {/* Admin Routes */}
+                {/* Admin Routes - IMPORTANT FIX: Use ProtectedRoute without requireRoles to allow special admin access */}
                 <Route path="/admin" element={
-                  <ProtectedRoute requireRoles={['admin']}>
+                  <ProtectedRoute>
                     <AdminLayout />
                   </ProtectedRoute>
                 }>
                   <Route index element={<AdminDashboard />} />
+                  <Route path="dashboard" element={<AdminDashboard />} />
                   <Route path="commission" element={<AdminCommission />} />
                   <Route path="commission/approvals" element={<AdminCommissionApproval />} />
                   <Route path="commission/approvals/:id" element={<AdminCommissionApproval />} />
@@ -147,7 +147,7 @@ function App() {
                 </Route>
                 
                 {/* Root redirects based on role */}
-                <Route path="/admin-redirect" element={<Navigate to="/admin" replace />} />
+                <Route path="/admin-redirect" element={<Navigate to="/admin/dashboard" replace />} />
                 <Route path="/agent-redirect" element={<Navigate to="/dashboard" replace />} />
                 
                 {/* Fallback */}

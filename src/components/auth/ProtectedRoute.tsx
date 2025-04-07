@@ -137,15 +137,21 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to={redirectTo} state={{ from: location }} replace />;
   }
 
-  // Special admin handling
+  // Special admin handling - CRITICAL FIX
   const isSpecialAdminUser = isSpecialAdmin(user.email);
   console.log('[ProtectedRoute] Is special admin user:', isSpecialAdminUser);
+
+  // Allow special admin users to access admin routes regardless of active role
+  if (location.pathname.startsWith('/admin') && isSpecialAdminUser) {
+    console.log('[ProtectedRoute] Special admin access granted for admin route');
+    return <>{children}</>;
+  }
 
   // If we're on an admin route but not in admin role (and not a special admin)
   if (location.pathname.startsWith('/admin') && activeRole !== 'admin' && !isSpecialAdminUser) {
     console.log('[ProtectedRoute] Non-admin user trying to access admin route');
     toast.error("Please switch to admin role to access this section");
-    return <Navigate to="/" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   // If admin route is required but user is not admin (and not a special admin)
