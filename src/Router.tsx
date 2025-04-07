@@ -29,6 +29,7 @@ import CommissionForecastPage from './pages/admin/CommissionForecast';
 import Reports from './pages/Reports';
 import AdminSettings from './pages/admin/Settings';
 import ProtectedRoute from './components/auth/ProtectedRoute';
+import NewProperty from './pages/NewProperty';
 
 const router = createBrowserRouter([
   {
@@ -51,6 +52,10 @@ const router = createBrowserRouter([
       { 
         path: 'properties/:id', 
         element: <ProtectedRoute><PropertyDetail /></ProtectedRoute> 
+      },
+      { 
+        path: 'properties/new', 
+        element: <ProtectedRoute><NewProperty /></ProtectedRoute> 
       },
       { 
         path: 'team', 
@@ -85,79 +90,79 @@ const router = createBrowserRouter([
     children: [
       { 
         index: true, 
-        element: <ProtectedRoute requireAdmin={true}><AdminDashboard /></ProtectedRoute> 
+        element: <ProtectedRoute><AdminDashboard /></ProtectedRoute> 
       },
       { 
         path: 'dashboard', 
-        element: <ProtectedRoute requireAdmin={true}><AdminDashboard /></ProtectedRoute> 
+        element: <ProtectedRoute><AdminDashboard /></ProtectedRoute> 
       },
       { 
         path: 'agents', 
-        element: <ProtectedRoute requireAdmin={true}><AdminAgents /></ProtectedRoute> 
+        element: <ProtectedRoute><AdminAgents /></ProtectedRoute> 
       },
       { 
         path: 'properties', 
-        element: <ProtectedRoute requireAdmin={true}><AdminProperties /></ProtectedRoute> 
+        element: <ProtectedRoute><AdminProperties /></ProtectedRoute> 
       },
       { 
         path: 'transactions', 
-        element: <ProtectedRoute requireAdmin={true}><AdminDashboard /></ProtectedRoute> 
+        element: <ProtectedRoute><AdminDashboard /></ProtectedRoute> 
       },
       { 
         path: 'commission/tiers', 
-        element: <ProtectedRoute requireAdmin={true}><CommissionTiers /></ProtectedRoute> 
+        element: <ProtectedRoute><CommissionTiers /></ProtectedRoute> 
       },
       { 
         path: 'commission/schedules', 
-        element: <ProtectedRoute requireAdmin={true}><PaymentSchedulesAdmin /></ProtectedRoute> 
+        element: <ProtectedRoute><PaymentSchedulesAdmin /></ProtectedRoute> 
       },
       { 
         path: 'commission/settings', 
-        element: <ProtectedRoute requireAdmin={true}><CommissionSettings /></ProtectedRoute> 
+        element: <ProtectedRoute><CommissionSettings /></ProtectedRoute> 
       },
       { 
         path: 'commission/forecast', 
-        element: <ProtectedRoute requireAdmin={true}><CommissionForecastPage /></ProtectedRoute> 
+        element: <ProtectedRoute><CommissionForecastPage /></ProtectedRoute> 
       },
       { 
         path: 'commissions', 
-        element: <ProtectedRoute requireAdmin={true}><CommissionApproval /></ProtectedRoute> 
+        element: <ProtectedRoute><CommissionApproval /></ProtectedRoute> 
       },
       { 
         path: 'commissions/:id', 
-        element: <ProtectedRoute requireAdmin={true}><CommissionApproval /></ProtectedRoute> 
+        element: <ProtectedRoute><CommissionApproval /></ProtectedRoute> 
       },
       { 
         path: 'roles', 
-        element: <ProtectedRoute requireAdmin={true}><Roles /></ProtectedRoute> 
+        element: <ProtectedRoute><Roles /></ProtectedRoute> 
       },
       { 
         path: 'settings', 
-        element: <ProtectedRoute requireAdmin={true}><AdminSettings /></ProtectedRoute> 
+        element: <ProtectedRoute><AdminSettings /></ProtectedRoute> 
       },
       { 
         path: 'reports/overview', 
-        element: <ProtectedRoute requireAdmin={true}><Reports /></ProtectedRoute> 
+        element: <ProtectedRoute><Reports /></ProtectedRoute> 
       },
       { 
         path: 'reports/performance', 
-        element: <ProtectedRoute requireAdmin={true}><Reports /></ProtectedRoute> 
+        element: <ProtectedRoute><Reports /></ProtectedRoute> 
       },
       { 
         path: 'reports/sales', 
-        element: <ProtectedRoute requireAdmin={true}><Reports /></ProtectedRoute> 
+        element: <ProtectedRoute><Reports /></ProtectedRoute> 
       },
       { 
         path: 'reports/custom', 
-        element: <ProtectedRoute requireAdmin={true}><Reports /></ProtectedRoute> 
+        element: <ProtectedRoute><Reports /></ProtectedRoute> 
       },
       { 
         path: 'system-logs', 
-        element: <ProtectedRoute requireAdmin={true}><AdminDashboard /></ProtectedRoute> 
+        element: <ProtectedRoute><AdminDashboard /></ProtectedRoute> 
       },
       { 
         path: 'database', 
-        element: <ProtectedRoute requireAdmin={true}><AdminDashboard /></ProtectedRoute> 
+        element: <ProtectedRoute><AdminDashboard /></ProtectedRoute> 
       },
     ],
   },
