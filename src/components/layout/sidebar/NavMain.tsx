@@ -1,139 +1,84 @@
 
 import React from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Building, Briefcase, DollarSign, Users, FileText, BarChart4, Settings, Lightbulb } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
 import { 
-  SidebarGroup, 
-  SidebarGroupLabel, 
-  SidebarGroupContent, 
-  SidebarMenu, 
-  SidebarMenuItem, 
+  Building2, 
+  LayoutDashboard, 
+  FileText, 
+  Users, 
+  DollarSign
+} from 'lucide-react';
+import {
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarGroupContent,
+  SidebarMenu,
+  SidebarMenuItem,
   SidebarMenuButton,
   useSidebar
-} from '@/components/ui/sidebar';
+} from "@/components/ui/sidebar";
+
+// Main navigation data
+const mainNavItems = [
+  { 
+    icon: LayoutDashboard, 
+    label: 'Dashboard', 
+    href: '/dashboard',
+  },
+  { 
+    icon: Building2, 
+    label: 'Properties', 
+    href: '/properties' 
+  },
+  { 
+    icon: FileText, 
+    label: 'Transactions', 
+    href: '/transactions' 
+  },
+  { 
+    icon: Users, 
+    label: 'Team', 
+    href: '/team' 
+  },
+  { 
+    icon: DollarSign, 
+    label: 'Commission', 
+    href: '/commission' 
+  },
+];
 
 export function NavMain() {
   const location = useLocation();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
+  const currentPath = location.pathname;
   
   return (
     <SidebarGroup>
-      {!collapsed && (
-        <SidebarGroupLabel className="text-xs uppercase text-muted-foreground px-4">
-          Main Navigation
-        </SidebarGroupLabel>
-      )}
+      {!collapsed && <SidebarGroupLabel>Main</SidebarGroupLabel>}
       <SidebarGroupContent>
         <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton 
-              asChild 
-              isActive={location.pathname === '/dashboard' || location.pathname === '/'}
-              tooltip="Dashboard"
-            >
-              <NavLink to="/dashboard" className={collapsed ? "justify-center" : "pl-4"}>
-                <LayoutDashboard className="h-4 w-4" />
-                {!collapsed && <span>Dashboard</span>}
-              </NavLink>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton 
-              asChild 
-              isActive={location.pathname.includes('/properties')}
-              tooltip="Properties"
-            >
-              <NavLink to="/properties" className={collapsed ? "justify-center" : "pl-4"}>
-                <Building className="h-4 w-4" />
-                {!collapsed && <span>Properties</span>}
-              </NavLink>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton 
-              asChild 
-              isActive={location.pathname.includes('/transactions')}
-              tooltip="Transactions"
-            >
-              <NavLink to="/transactions" className={collapsed ? "justify-center" : "pl-4"}>
-                <Briefcase className="h-4 w-4" />
-                {!collapsed && <span>Transactions</span>}
-              </NavLink>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton 
-              asChild 
-              isActive={location.pathname.includes('/commission')}
-              tooltip="Commission"
-            >
-              <NavLink to="/commission" className={collapsed ? "justify-center" : "pl-4"}>
-                <DollarSign className="h-4 w-4" />
-                {!collapsed && <span>Commission</span>}
-              </NavLink>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton 
-              asChild 
-              isActive={location.pathname.includes('/team')}
-              tooltip="Team"
-            >
-              <NavLink to="/team" className={collapsed ? "justify-center" : "pl-4"}>
-                <Users className="h-4 w-4" />
-                {!collapsed && <span>Team</span>}
-              </NavLink>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton 
-              asChild 
-              isActive={location.pathname.includes('/opportunities')}
-              tooltip="Opportunities"
-            >
-              <NavLink to="/opportunities" className={collapsed ? "justify-center" : "pl-4"}>
-                <Lightbulb className="h-4 w-4" />
-                {!collapsed && <span>Opportunities</span>}
-              </NavLink>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton 
-              asChild 
-              isActive={location.pathname.includes('/reports')}
-              tooltip="Reports"
-            >
-              <NavLink to="/reports" className={collapsed ? "justify-center" : "pl-4"}>
-                <FileText className="h-4 w-4" />
-                {!collapsed && <span>Reports</span>}
-              </NavLink>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton 
-              asChild 
-              isActive={location.pathname.includes('/leaderboard')}
-              tooltip="Leaderboard"
-            >
-              <NavLink to="/leaderboard" className={collapsed ? "justify-center" : "pl-4"}>
-                <BarChart4 className="h-4 w-4" />
-                {!collapsed && <span>Leaderboard</span>}
-              </NavLink>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton 
-              asChild 
-              isActive={location.pathname.includes('/settings')}
-              tooltip="Settings"
-            >
-              <NavLink to="/settings" className={collapsed ? "justify-center" : "pl-4"}>
-                <Settings className="h-4 w-4" />
-                {!collapsed && <span>Settings</span>}
-              </NavLink>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+          {mainNavItems.map((item) => {
+            // Check if current path starts with this item's href (for nested routes)
+            const isActive = currentPath === item.href || 
+                           (item.href !== '/dashboard' && currentPath.startsWith(item.href));
+            
+            return (
+              <SidebarMenuItem key={item.label}>
+                <SidebarMenuButton 
+                  asChild 
+                  isActive={isActive}
+                  tooltip={item.label}
+                  size="default"
+                >
+                  <Link to={item.href} className={collapsed ? "justify-center" : ""}>
+                    <item.icon />
+                    {!collapsed && <span>{item.label}</span>}
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            );
+          })}
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>
