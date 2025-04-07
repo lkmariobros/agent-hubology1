@@ -30,6 +30,10 @@ import Reports from './pages/Reports';
 import AdminSettings from './pages/admin/Settings';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import NewProperty from './pages/NewProperty';
+import Leaderboard from './pages/leaderboard/Leaderboard';
+import PointsLeaderboard from './pages/leaderboard/Points';
+import SalesLeaderboard from './pages/leaderboard/Sales';
+import Opportunities from './pages/Opportunities';
 
 const router = createBrowserRouter([
   {
@@ -80,6 +84,26 @@ const router = createBrowserRouter([
       { 
         path: 'commission/forecast', 
         element: <ProtectedRoute><CommissionForecast /></ProtectedRoute> 
+      },
+      { 
+        path: 'opportunities', 
+        element: <ProtectedRoute><Opportunities /></ProtectedRoute> 
+      },
+      { 
+        path: 'reports', 
+        element: <ProtectedRoute><Reports /></ProtectedRoute> 
+      },
+      { 
+        path: 'leaderboard', 
+        element: <ProtectedRoute><Leaderboard /></ProtectedRoute> 
+      },
+      { 
+        path: 'leaderboard/points', 
+        element: <ProtectedRoute><PointsLeaderboard /></ProtectedRoute> 
+      },
+      { 
+        path: 'leaderboard/sales', 
+        element: <ProtectedRoute><SalesLeaderboard /></ProtectedRoute> 
       },
     ],
   },

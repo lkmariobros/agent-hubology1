@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Building, Briefcase, DollarSign, Users, FileText, BarChart4, Settings } from 'lucide-react';
+import { LayoutDashboard, Building, Briefcase, DollarSign, Users, FileText, BarChart4, Settings, Lightbulb } from 'lucide-react';
 import { 
   SidebarGroup, 
   SidebarGroupLabel, 
@@ -29,7 +29,7 @@ export function NavMain() {
           <SidebarMenuItem>
             <SidebarMenuButton 
               asChild 
-              isActive={location.pathname === '/dashboard'}
+              isActive={location.pathname === '/dashboard' || location.pathname === '/'}
               tooltip="Dashboard"
             >
               <NavLink to="/dashboard" className={collapsed ? "justify-center" : "pl-4"}>
@@ -83,6 +83,18 @@ export function NavMain() {
               <NavLink to="/team" className={collapsed ? "justify-center" : "pl-4"}>
                 <Users className="h-4 w-4" />
                 {!collapsed && <span>Team</span>}
+              </NavLink>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton 
+              asChild 
+              isActive={location.pathname.includes('/opportunities')}
+              tooltip="Opportunities"
+            >
+              <NavLink to="/opportunities" className={collapsed ? "justify-center" : "pl-4"}>
+                <Lightbulb className="h-4 w-4" />
+                {!collapsed && <span>Opportunities</span>}
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
