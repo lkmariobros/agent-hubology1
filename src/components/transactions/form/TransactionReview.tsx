@@ -38,7 +38,11 @@ const TransactionReview: React.FC<TransactionReviewProps> = ({ onSubmit, isSubmi
       if (error instanceof Error && error.message.includes('Payment schedule')) {
         toast.error('Please select a payment schedule');
         goToStep(4); // Navigate back to commission step
+        return;
       }
+      
+      // For other types of errors, show in the UI
+      toast.error('Failed to submit transaction. Please check the form for errors.');
     }
   };
   
@@ -101,7 +105,18 @@ const TransactionReview: React.FC<TransactionReviewProps> = ({ onSubmit, isSubmi
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Submission Error</AlertTitle>
-          <AlertDescription>{submitError}</AlertDescription>
+          <AlertDescription>
+            {submitError}
+            {submitError.includes('Payment schedule') && (
+              <Button 
+                variant="outline" 
+                className="mt-2 bg-transparent border-white text-white hover:bg-white/10" 
+                onClick={() => goToStep(4)}
+              >
+                Set Payment Schedule
+              </Button>
+            )}
+          </AlertDescription>
         </Alert>
       )}
       
