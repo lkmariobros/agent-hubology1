@@ -4,9 +4,17 @@ import { Transaction, Property } from '@/types';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 
-// Fetch transactions from Supabase
+// Fetch transactions from Supabase with secure RLS enforcement
 const fetchTransactions = async (page: number = 1, pageSize: number = 10) => {
   const startRow = (page - 1) * pageSize;
+  
+  // Get current user - this ensures RLS policies are applied correctly
+  const { data: userData } = await supabase.auth.getUser();
+  
+  if (!userData?.user) {
+    console.warn('No authenticated user found for fetching transactions');
+    return { transactions: [], total: 0 };
+  }
   
   const { data, error, count } = await supabase
     .from('property_transactions')
@@ -74,7 +82,7 @@ export const useTransactionOptions = () => {
   };
 };
 
-// Advanced transactions query with filtering
+// Advanced transactions query with filtering - respects RLS
 export const useTransactionsQuery = ({ 
   page = 0, 
   limit = 10, 
@@ -89,6 +97,14 @@ export const useTransactionsQuery = ({
   return useQuery({
     queryKey: ['transactions', { page, limit, search, status }],
     queryFn: async () => {
+      // Get current user first to ensure RLS is applied
+      const { data: userData } = await supabase.auth.getUser();
+      
+      if (!userData?.user) {
+        console.warn('No authenticated user found for fetching transactions');
+        return { transactions: [], total: 0 };
+      }
+      
       // Build query with filters
       let query = supabase
         .from('property_transactions')
@@ -166,6 +182,13 @@ export const useCreateTransactionMutation = () => {
   
   return useMutation({
     mutationFn: async (transactionData: any) => {
+      // Get current user to ensure RLS is applied
+      const { data: userData } = await supabase.auth.getUser();
+      
+      if (!userData?.user) {
+        throw new Error('User not authenticated');
+      }
+      
       const { data, error } = await supabase
         .from('property_transactions')
         .insert({
@@ -175,7 +198,7 @@ export const useCreateTransactionMutation = () => {
           transaction_value: transactionData.transactionValue,
           commission_rate: transactionData.commissionRate,
           commission_amount: transactionData.commissionAmount,
-          agent_id: (await supabase.auth.getUser()).data.user?.id,
+          agent_id: userData.user.id,
           status: 'Pending',
           notes: transactionData.notes,
           buyer_name: transactionData.buyer?.name,

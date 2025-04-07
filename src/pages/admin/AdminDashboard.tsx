@@ -133,8 +133,8 @@ const AdminDashboard = () => {
                       <div className="flex items-center gap-3">
                         <p className="font-medium">${transaction.transaction_value?.toLocaleString()}</p>
                         <Badge variant={
-                          transaction.status === 'Completed' ? 'success' : 
-                          transaction.status === 'Pending' ? 'warning' : 
+                          transaction.status === 'Completed' ? 'default' : 
+                          transaction.status === 'Pending' ? 'secondary' : 
                           transaction.status === 'Cancelled' ? 'destructive' : 'outline'
                         }>
                           {transaction.status}

@@ -83,7 +83,7 @@ export const submitTransactionForm = async (state: TransactionFormState): Promis
         closing_date: state.formData.closingDate,
         commission_split: state.formData.coBroking?.enabled || false,
         co_agent_id: state.formData.coBroking?.enabled ? 
-          state.formData.coBroking.agentId : null,
+          state.formData.coBroking.coAgentId : null,
         co_agent_commission_percentage: state.formData.coBroking?.enabled ? 
           state.formData.coBroking.commissionSplit : null,
         payment_schedule_id: state.formData.paymentScheduleId

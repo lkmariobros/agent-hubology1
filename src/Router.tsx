@@ -1,3 +1,4 @@
+
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import AppLayout from './components/layout/AppLayout';
 import AdminLayout from './components/layout/AdminLayout';
@@ -12,7 +13,7 @@ import AdminProperties from './pages/admin/Properties';
 import CommissionTiers from './pages/admin/CommissionTiers';
 import PaymentSchedulesAdmin from './pages/admin/PaymentSchedulesAdmin';
 import CommissionApproval from './pages/admin/CommissionApproval';
-import CommissionForecast from './CommissionForecast';
+import CommissionForecast from './pages/CommissionForecast';
 import CommissionSettings from './pages/admin/CommissionSettings';
 import Roles from './pages/admin/Roles';
 import NewTransaction from './pages/NewTransaction';
