@@ -12,7 +12,7 @@ import PaymentScheduleSelector from './PaymentScheduleSelector';
 import { usePaymentSchedules } from '@/hooks/usePaymentSchedules';
 
 const CommissionCalculation: React.FC = () => {
-  const { state, updateFormData, nextStep, prevStep, calculateCommission, selectPaymentSchedule, clearError } = useTransactionForm();
+  const { state, updateFormData, nextStep, prevStep, calculateCommission, selectPaymentSchedule, clearError, setError } = useTransactionForm();
   const { formData, errors } = state;
   const [transactionValue, setTransactionValue] = useState<string>(formData.transactionValue?.toString() || '');
   const [commissionRate, setCommissionRate] = useState<string>(formData.commissionRate?.toString() || '');
@@ -83,12 +83,6 @@ const CommissionCalculation: React.FC = () => {
     if (valid) {
       nextStep();
     }
-  };
-
-  // Set error helper function to match the TransactionForm context
-  const setError = (field: string, message: string) => {
-    clearError(field);
-    updateFormData({ errors: { ...formData.errors, [field]: message } } as any);
   };
   
   return (
