@@ -19,7 +19,9 @@ const CommissionCalculation: React.FC = () => {
     state,
     updateFormData,
     calculateCommission,
-    selectPaymentSchedule
+    selectPaymentSchedule,
+    setError,
+    clearError
   } = useTransactionForm();
   
   const {
@@ -58,6 +60,15 @@ const CommissionCalculation: React.FC = () => {
     }
   }, [defaultPaymentSchedule, paymentScheduleId, updateFormData]);
 
+  // Validate payment schedule when this component is active
+  useEffect(() => {
+    if (!paymentScheduleId) {
+      setError('paymentScheduleId', 'Payment schedule is required');
+    } else {
+      clearError('paymentScheduleId');
+    }
+  }, [paymentScheduleId, setError, clearError]);
+
   // Calculate commission
   const commissionBreakdown = calculateCommission();
   const totalCommission = commissionBreakdown.totalCommission || 0;
@@ -80,7 +91,16 @@ const CommissionCalculation: React.FC = () => {
   const agencyPortionPercentage = 100 - agentPortionPercentage;
   
   const handlePaymentScheduleChange = (scheduleId: string) => {
+    console.log('Payment schedule changed to:', scheduleId);
     selectPaymentSchedule(scheduleId);
+    
+    // Also update form data directly to ensure it's set
+    updateFormData({
+      paymentScheduleId: scheduleId
+    });
+    
+    // Clear any payment schedule errors
+    clearError('paymentScheduleId');
   };
   
   return (
@@ -126,6 +146,15 @@ const CommissionCalculation: React.FC = () => {
                   onChange={handlePaymentScheduleChange}
                   commissionAmount={totalCommission}
                 />
+                
+                {errors.paymentScheduleId && (
+                  <Alert variant="destructive" className="mt-4">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      {errors.paymentScheduleId}
+                    </AlertDescription>
+                  </Alert>
+                )}
               </CardContent>
             </Card>
           </div>

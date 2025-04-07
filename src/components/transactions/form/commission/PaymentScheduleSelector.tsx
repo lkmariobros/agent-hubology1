@@ -9,6 +9,7 @@ import { formatCurrency } from '@/utils/commissionSchedule';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { toast } from 'sonner';
 
 interface PaymentScheduleSelectorProps {
   value: string;
@@ -23,20 +24,27 @@ const PaymentScheduleSelector: React.FC<PaymentScheduleSelectorProps> = ({
 }) => {
   const { paymentSchedules, defaultPaymentSchedule, isLoading, error } = usePaymentSchedules();
   
+  // Set default payment schedule when component mounts or when schedules load
   useEffect(() => {
-    if (paymentSchedules && paymentSchedules.length > 0 && defaultPaymentSchedule && !value) {
-      console.log('Setting default payment schedule:', defaultPaymentSchedule.id);
-      onChange(defaultPaymentSchedule.id);
+    if (paymentSchedules && paymentSchedules.length > 0 && !value) {
+      console.log('Setting default payment schedule:', defaultPaymentSchedule?.id);
+      if (defaultPaymentSchedule) {
+        onChange(defaultPaymentSchedule.id);
+        toast.success('Default payment schedule selected');
+      } else if (paymentSchedules[0]) {
+        onChange(paymentSchedules[0].id);
+        toast.success('Payment schedule selected');
+      }
     }
   }, [paymentSchedules, defaultPaymentSchedule, value, onChange]);
   
+  // Log for debugging
   useEffect(() => {
-    // Log available data
-    console.log('PaymentScheduleSelector data state:', { 
-      paymentSchedules, 
-      defaultPaymentSchedule,
+    console.log('PaymentScheduleSelector state:', { 
+      paymentSchedules: paymentSchedules?.length, 
+      defaultPaymentSchedule: defaultPaymentSchedule?.id,
       isLoading, 
-      error, 
+      error: error ? 'Error exists' : 'No error', 
       currentValue: value 
     });
   }, [paymentSchedules, defaultPaymentSchedule, isLoading, error, value]);
@@ -88,7 +96,10 @@ const PaymentScheduleSelector: React.FC<PaymentScheduleSelectorProps> = ({
           </AlertDescription>
         </Alert>
         
-        <Select value={value} onValueChange={onChange}>
+        <Select value={value} onValueChange={(newValue) => {
+          console.log('Schedule selected:', newValue);
+          onChange(newValue);
+        }}>
           <SelectTrigger>
             <SelectValue placeholder="Select a payment schedule" />
           </SelectTrigger>
@@ -120,8 +131,14 @@ const PaymentScheduleSelector: React.FC<PaymentScheduleSelectorProps> = ({
   
   return (
     <div className="space-y-4">
-      <Select value={value} onValueChange={onChange}>
-        <SelectTrigger>
+      <Select 
+        value={value} 
+        onValueChange={(newValue) => {
+          console.log('Schedule selected:', newValue);
+          onChange(newValue);
+        }}
+      >
+        <SelectTrigger className={value ? "" : "border-destructive"}>
           <SelectValue placeholder="Select a payment schedule" />
         </SelectTrigger>
         <SelectContent>
@@ -135,6 +152,15 @@ const PaymentScheduleSelector: React.FC<PaymentScheduleSelectorProps> = ({
           ))}
         </SelectContent>
       </Select>
+      
+      {!value && (
+        <Alert variant="destructive" className="mt-2">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            A payment schedule is required to complete your transaction
+          </AlertDescription>
+        </Alert>
+      )}
       
       {selectedSchedule && <ScheduleDetails schedule={selectedSchedule} commissionAmount={commissionAmount} />}
     </div>

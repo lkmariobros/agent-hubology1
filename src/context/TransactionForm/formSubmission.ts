@@ -32,7 +32,8 @@ export const saveFormAsDraft = async (state: TransactionFormState): Promise<void
         seller_name: state.formData.seller?.name,
         seller_email: state.formData.seller?.email,
         seller_phone: state.formData.seller?.phone,
-        closing_date: state.formData.closingDate
+        closing_date: state.formData.closingDate,
+        payment_schedule_id: state.formData.paymentScheduleId
       });
       
     if (error) {
@@ -77,13 +78,19 @@ export const submitTransactionForm = async (state: TransactionFormState): Promis
       validationErrors.push('Commission amount must be greater than 0');
     }
     
+    // Check payment schedule with detailed error message
     if (!state.formData.paymentScheduleId) {
       validationErrors.push('Payment schedule is required');
+      console.error('Payment schedule missing. Current form data:', {
+        paymentScheduleId: state.formData.paymentScheduleId,
+        formData: state.formData
+      });
     }
     
     if (validationErrors.length > 0) {
       const errorMessage = `Validation errors: ${validationErrors.join(', ')}`;
       console.error(errorMessage);
+      toast.error(errorMessage);
       throw new Error(errorMessage);
     }
     

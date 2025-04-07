@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { formatCurrency } from '@/utils/commissionSchedule';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { toast } from 'sonner';
 
 interface TransactionReviewProps {
   onSubmit: () => Promise<void>;
@@ -13,21 +14,38 @@ interface TransactionReviewProps {
 }
 
 const TransactionReview: React.FC<TransactionReviewProps> = ({ onSubmit, isSubmitting }) => {
-  const { state, prevStep } = useTransactionForm();
+  const { state, prevStep, goToStep } = useTransactionForm();
   const { formData, errors } = state;
   const [submitError, setSubmitError] = useState<string | null>(null);
   
   const handleSubmit = async () => {
     try {
+      // Check for missing payment schedule specifically
+      if (!formData.paymentScheduleId) {
+        toast.error('Payment schedule is required');
+        // Navigate back to commission step
+        goToStep(4);
+        return;
+      }
+      
       setSubmitError(null);
       await onSubmit();
     } catch (error) {
       console.error('Transaction submission error:', error);
       setSubmitError(error instanceof Error ? error.message : 'Failed to submit transaction');
+      
+      // If it's a payment schedule error, provide a direct way to fix it
+      if (error instanceof Error && error.message.includes('Payment schedule')) {
+        toast.error('Please select a payment schedule');
+        goToStep(4); // Navigate back to commission step
+      }
     }
   };
   
   const hasErrors = Object.keys(errors).length > 0;
+  
+  // Special handling for payment schedule error
+  const hasPaymentScheduleError = !formData.paymentScheduleId || errors.paymentScheduleId;
   
   return (
     <div className="space-y-6">
@@ -44,9 +62,37 @@ const TransactionReview: React.FC<TransactionReviewProps> = ({ onSubmit, isSubmi
             Please fix the following errors before submitting:
             <ul className="mt-2 ml-4 list-disc">
               {Object.entries(errors).map(([field, message]) => (
-                <li key={field}>{message}</li>
+                <li key={field} className="mb-1">
+                  {message}
+                  {field === 'paymentScheduleId' && (
+                    <Button 
+                      variant="link" 
+                      className="p-0 h-auto text-white underline ml-2" 
+                      onClick={() => goToStep(4)}
+                    >
+                      Fix this
+                    </Button>
+                  )}
+                </li>
               ))}
             </ul>
+          </AlertDescription>
+        </Alert>
+      )}
+      
+      {hasPaymentScheduleError && !errors.paymentScheduleId && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Missing Payment Schedule</AlertTitle>
+          <AlertDescription className="flex justify-between items-center">
+            <span>A payment schedule is required to complete this transaction.</span>
+            <Button 
+              variant="outline" 
+              className="bg-transparent border-white text-white hover:bg-white/10" 
+              onClick={() => goToStep(4)}
+            >
+              Set Payment Schedule
+            </Button>
           </AlertDescription>
         </Alert>
       )}
@@ -101,12 +147,14 @@ const TransactionReview: React.FC<TransactionReviewProps> = ({ onSubmit, isSubmi
                 </>
               )}
               
-              {formData.paymentScheduleId && (
-                <>
-                  <p className="text-muted-foreground">Payment Schedule:</p>
-                  <p className="font-medium">Selected</p>
-                </>
-              )}
+              <p className="text-muted-foreground">Payment Schedule:</p>
+              <p className="font-medium">
+                {formData.paymentScheduleId ? (
+                  "Selected"
+                ) : (
+                  <span className="text-destructive">Not Selected</span>
+                )}
+              </p>
             </div>
           </div>
         </CardContent>
