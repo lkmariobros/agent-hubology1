@@ -58,10 +58,10 @@ export function TeamSwitcher() {
     setTimeout(() => {
       // Hard redirect to correct portal with full page reload
       if (role === 'admin') {
-        console.log('TeamSwitcher: Hard reload to /admin after role switch');
-        window.location.href = '/admin';
+        console.log('TeamSwitcher: Hard redirect to /admin dashboard');
+        window.location.href = '/admin/dashboard';
       } else {
-        console.log('TeamSwitcher: Hard reload to /dashboard after role switch');
+        console.log('TeamSwitcher: Hard redirect to /dashboard');
         window.location.href = '/dashboard';
       }
     }, 100);

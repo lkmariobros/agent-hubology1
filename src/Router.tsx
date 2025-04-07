@@ -36,6 +36,7 @@ const router = createBrowserRouter([
     element: <AuthProvider><AppLayout /></AuthProvider>,
     children: [
       { index: true, element: <Dashboard /> },
+      { path: 'dashboard', element: <Dashboard /> },
       { path: 'properties', element: <PropertyList /> },
       { path: 'properties/:id', element: <PropertyDetail /> },
       { path: 'team', element: <Team /> },
@@ -44,31 +45,31 @@ const router = createBrowserRouter([
       { path: 'transactions/:id', element: <TransactionDetail /> },
       { path: 'commission', element: <Commission /> },
       { path: 'commission/forecast', element: <CommissionForecast /> },
-      {
-        path: 'admin',
-        element: <AdminLayout />,
-        children: [
-          { index: true, element: <AdminDashboard /> },
-          { path: 'dashboard', element: <AdminDashboard /> },
-          { path: 'agents', element: <AdminAgents /> },
-          { path: 'properties', element: <AdminProperties /> },
-          { path: 'transactions', element: <AdminDashboard /> }, // Placeholder for now
-          { path: 'commission/tiers', element: <CommissionTiers /> },
-          { path: 'commission/schedules', element: <PaymentSchedulesAdmin /> },
-          { path: 'commission/settings', element: <CommissionSettings /> },
-          { path: 'commission/forecast', element: <CommissionForecastPage /> },
-          { path: 'commissions', element: <CommissionApproval /> },
-          { path: 'commissions/:id', element: <CommissionApproval /> },
-          { path: 'roles', element: <Roles /> },
-          { path: 'settings', element: <AdminSettings /> },
-          { path: 'reports/overview', element: <Reports /> },
-          { path: 'reports/performance', element: <Reports /> },
-          { path: 'reports/sales', element: <Reports /> },
-          { path: 'reports/custom', element: <Reports /> },
-          { path: 'system-logs', element: <AdminDashboard /> }, // Placeholder
-          { path: 'database', element: <AdminDashboard /> }, // Placeholder
-        ],
-      },
+    ],
+  },
+  {
+    path: '/admin',
+    element: <AuthProvider><AdminLayout /></AuthProvider>,
+    children: [
+      { index: true, element: <AdminDashboard /> },
+      { path: 'dashboard', element: <AdminDashboard /> },
+      { path: 'agents', element: <AdminAgents /> },
+      { path: 'properties', element: <AdminProperties /> },
+      { path: 'transactions', element: <AdminDashboard /> }, // Placeholder for now
+      { path: 'commission/tiers', element: <CommissionTiers /> },
+      { path: 'commission/schedules', element: <PaymentSchedulesAdmin /> },
+      { path: 'commission/settings', element: <CommissionSettings /> },
+      { path: 'commission/forecast', element: <CommissionForecastPage /> },
+      { path: 'commissions', element: <CommissionApproval /> },
+      { path: 'commissions/:id', element: <CommissionApproval /> },
+      { path: 'roles', element: <Roles /> },
+      { path: 'settings', element: <AdminSettings /> },
+      { path: 'reports/overview', element: <Reports /> },
+      { path: 'reports/performance', element: <Reports /> },
+      { path: 'reports/sales', element: <Reports /> },
+      { path: 'reports/custom', element: <Reports /> },
+      { path: 'system-logs', element: <AdminDashboard /> }, // Placeholder
+      { path: 'database', element: <AdminDashboard /> }, // Placeholder
     ],
   },
   { path: '/login', element: <Login /> },
