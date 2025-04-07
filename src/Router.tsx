@@ -35,41 +35,128 @@ const router = createBrowserRouter([
     path: '/',
     element: <AuthProvider><AppLayout /></AuthProvider>,
     children: [
-      { index: true, element: <Dashboard /> },
-      { path: 'dashboard', element: <Dashboard /> },
-      { path: 'properties', element: <PropertyList /> },
-      { path: 'properties/:id', element: <PropertyDetail /> },
-      { path: 'team', element: <Team /> },
-      { path: 'transactions', element: <TransactionList /> },
-      { path: 'transactions/new', element: <NewTransaction /> },
-      { path: 'transactions/:id', element: <TransactionDetail /> },
-      { path: 'commission', element: <Commission /> },
-      { path: 'commission/forecast', element: <CommissionForecast /> },
+      { 
+        index: true, 
+        element: <ProtectedRoute><Dashboard /></ProtectedRoute> 
+      },
+      { 
+        path: 'dashboard', 
+        element: <ProtectedRoute><Dashboard /></ProtectedRoute> 
+      },
+      { 
+        path: 'properties', 
+        element: <ProtectedRoute><PropertyList /></ProtectedRoute> 
+      },
+      { 
+        path: 'properties/:id', 
+        element: <ProtectedRoute><PropertyDetail /></ProtectedRoute> 
+      },
+      { 
+        path: 'team', 
+        element: <ProtectedRoute><Team /></ProtectedRoute> 
+      },
+      { 
+        path: 'transactions', 
+        element: <ProtectedRoute><TransactionList /></ProtectedRoute> 
+      },
+      { 
+        path: 'transactions/new', 
+        element: <ProtectedRoute><NewTransaction /></ProtectedRoute> 
+      },
+      { 
+        path: 'transactions/:id', 
+        element: <ProtectedRoute><TransactionDetail /></ProtectedRoute> 
+      },
+      { 
+        path: 'commission', 
+        element: <ProtectedRoute><Commission /></ProtectedRoute> 
+      },
+      { 
+        path: 'commission/forecast', 
+        element: <ProtectedRoute><CommissionForecast /></ProtectedRoute> 
+      },
     ],
   },
   {
     path: '/admin',
     element: <AuthProvider><AdminLayout /></AuthProvider>,
     children: [
-      { index: true, element: <AdminDashboard /> },
-      { path: 'dashboard', element: <AdminDashboard /> },
-      { path: 'agents', element: <AdminAgents /> },
-      { path: 'properties', element: <AdminProperties /> },
-      { path: 'transactions', element: <AdminDashboard /> }, // Placeholder for now
-      { path: 'commission/tiers', element: <CommissionTiers /> },
-      { path: 'commission/schedules', element: <PaymentSchedulesAdmin /> },
-      { path: 'commission/settings', element: <CommissionSettings /> },
-      { path: 'commission/forecast', element: <CommissionForecastPage /> },
-      { path: 'commissions', element: <CommissionApproval /> },
-      { path: 'commissions/:id', element: <CommissionApproval /> },
-      { path: 'roles', element: <Roles /> },
-      { path: 'settings', element: <AdminSettings /> },
-      { path: 'reports/overview', element: <Reports /> },
-      { path: 'reports/performance', element: <Reports /> },
-      { path: 'reports/sales', element: <Reports /> },
-      { path: 'reports/custom', element: <Reports /> },
-      { path: 'system-logs', element: <AdminDashboard /> }, // Placeholder
-      { path: 'database', element: <AdminDashboard /> }, // Placeholder
+      { 
+        index: true, 
+        element: <ProtectedRoute requireAdmin={true}><AdminDashboard /></ProtectedRoute> 
+      },
+      { 
+        path: 'dashboard', 
+        element: <ProtectedRoute requireAdmin={true}><AdminDashboard /></ProtectedRoute> 
+      },
+      { 
+        path: 'agents', 
+        element: <ProtectedRoute requireAdmin={true}><AdminAgents /></ProtectedRoute> 
+      },
+      { 
+        path: 'properties', 
+        element: <ProtectedRoute requireAdmin={true}><AdminProperties /></ProtectedRoute> 
+      },
+      { 
+        path: 'transactions', 
+        element: <ProtectedRoute requireAdmin={true}><AdminDashboard /></ProtectedRoute> 
+      },
+      { 
+        path: 'commission/tiers', 
+        element: <ProtectedRoute requireAdmin={true}><CommissionTiers /></ProtectedRoute> 
+      },
+      { 
+        path: 'commission/schedules', 
+        element: <ProtectedRoute requireAdmin={true}><PaymentSchedulesAdmin /></ProtectedRoute> 
+      },
+      { 
+        path: 'commission/settings', 
+        element: <ProtectedRoute requireAdmin={true}><CommissionSettings /></ProtectedRoute> 
+      },
+      { 
+        path: 'commission/forecast', 
+        element: <ProtectedRoute requireAdmin={true}><CommissionForecastPage /></ProtectedRoute> 
+      },
+      { 
+        path: 'commissions', 
+        element: <ProtectedRoute requireAdmin={true}><CommissionApproval /></ProtectedRoute> 
+      },
+      { 
+        path: 'commissions/:id', 
+        element: <ProtectedRoute requireAdmin={true}><CommissionApproval /></ProtectedRoute> 
+      },
+      { 
+        path: 'roles', 
+        element: <ProtectedRoute requireAdmin={true}><Roles /></ProtectedRoute> 
+      },
+      { 
+        path: 'settings', 
+        element: <ProtectedRoute requireAdmin={true}><AdminSettings /></ProtectedRoute> 
+      },
+      { 
+        path: 'reports/overview', 
+        element: <ProtectedRoute requireAdmin={true}><Reports /></ProtectedRoute> 
+      },
+      { 
+        path: 'reports/performance', 
+        element: <ProtectedRoute requireAdmin={true}><Reports /></ProtectedRoute> 
+      },
+      { 
+        path: 'reports/sales', 
+        element: <ProtectedRoute requireAdmin={true}><Reports /></ProtectedRoute> 
+      },
+      { 
+        path: 'reports/custom', 
+        element: <ProtectedRoute requireAdmin={true}><Reports /></ProtectedRoute> 
+      },
+      { 
+        path: 'system-logs', 
+        element: <ProtectedRoute requireAdmin={true}><AdminDashboard /></ProtectedRoute> 
+      },
+      { 
+        path: 'database', 
+        element: <ProtectedRoute requireAdmin={true}><AdminDashboard /></ProtectedRoute> 
+      },
     ],
   },
   { path: '/login', element: <Login /> },
