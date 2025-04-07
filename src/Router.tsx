@@ -1,4 +1,3 @@
-
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import AppLayout from './components/layout/AppLayout';
 import AdminLayout from './components/layout/AdminLayout';
@@ -34,6 +33,7 @@ import Leaderboard from './pages/leaderboard/Leaderboard';
 import PointsLeaderboard from './pages/leaderboard/Points';
 import SalesLeaderboard from './pages/leaderboard/Sales';
 import Opportunities from './pages/Opportunities';
+import PropertySettings from './pages/PropertySettings';
 
 const router = createBrowserRouter([
   {
