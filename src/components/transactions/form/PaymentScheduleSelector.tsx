@@ -15,17 +15,17 @@ const PaymentScheduleSelector: React.FC<PaymentScheduleSelectorProps> = ({
   onScheduleSelected,
   selectedScheduleId
 }) => {
-  const { data: schedules, isLoading, error } = usePaymentSchedules();
+  const { paymentSchedules, isLoading, error } = usePaymentSchedules();
   
   // Auto-select default schedule if none is selected
   useEffect(() => {
-    if (!selectedScheduleId && schedules && schedules.length > 0) {
-      const defaultSchedule = schedules.find(schedule => schedule.is_default);
+    if (!selectedScheduleId && paymentSchedules && paymentSchedules.length > 0) {
+      const defaultSchedule = paymentSchedules.find(schedule => schedule.isDefault);
       if (defaultSchedule) {
         onScheduleSelected(defaultSchedule.id);
       }
     }
-  }, [schedules, selectedScheduleId, onScheduleSelected]);
+  }, [paymentSchedules, selectedScheduleId, onScheduleSelected]);
   
   if (isLoading) {
     return (
@@ -59,7 +59,7 @@ const PaymentScheduleSelector: React.FC<PaymentScheduleSelectorProps> = ({
     );
   }
   
-  if (!schedules || schedules.length === 0) {
+  if (!paymentSchedules || paymentSchedules.length === 0) {
     return (
       <Card>
         <CardHeader>
@@ -84,13 +84,13 @@ const PaymentScheduleSelector: React.FC<PaymentScheduleSelectorProps> = ({
           value={selectedScheduleId} 
           onValueChange={onScheduleSelected}
         >
-          {schedules.map((schedule) => (
+          {paymentSchedules.map((schedule) => (
             <div className="flex items-center space-x-2 mb-2" key={schedule.id}>
               <RadioGroupItem value={schedule.id} id={`schedule-${schedule.id}`} />
               <Label htmlFor={`schedule-${schedule.id}`} className="cursor-pointer">
                 <div>
                   <span className="font-medium">{schedule.name}</span>
-                  {schedule.is_default && (
+                  {schedule.isDefault && (
                     <span className="text-xs bg-primary/10 text-primary ml-2 px-2 py-0.5 rounded-sm">
                       Default
                     </span>

@@ -17,19 +17,19 @@ const CommissionCalculation: React.FC = () => {
   const [transactionValue, setTransactionValue] = useState<string>(formData.transactionValue?.toString() || '');
   const [commissionRate, setCommissionRate] = useState<string>(formData.commissionRate?.toString() || '');
   const commissionBreakdown = calculateCommission();
-  const { data: schedules, isLoading } = usePaymentSchedules();
+  const { paymentSchedules, isLoading } = usePaymentSchedules();
   
   // Effect to validate payment schedule on mount
   useEffect(() => {
     // If we don't have a payment schedule yet and schedules are loaded, auto-select the default one
-    if (!formData.paymentScheduleId && schedules?.length > 0) {
-      const defaultSchedule = schedules.find(schedule => schedule.is_default);
+    if (!formData.paymentScheduleId && paymentSchedules?.length > 0) {
+      const defaultSchedule = paymentSchedules.find(schedule => schedule.isDefault);
       if (defaultSchedule) {
         selectPaymentSchedule(defaultSchedule.id);
         clearError('paymentScheduleId');
       }
     }
-  }, [schedules, formData.paymentScheduleId, selectPaymentSchedule, clearError]);
+  }, [paymentSchedules, formData.paymentScheduleId, selectPaymentSchedule, clearError]);
   
   const handleTransactionValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTransactionValue(e.target.value);
@@ -64,40 +64,31 @@ const CommissionCalculation: React.FC = () => {
     
     // Validate transaction value
     if (!formData.transactionValue || formData.transactionValue <= 0) {
-      updateFormData({ 
-        errors: { 
-          ...formData.errors, 
-          transactionValue: 'Transaction value must be greater than 0' 
-        } 
-      });
+      setError('transactionValue', 'Transaction value must be greater than 0');
       valid = false;
     }
     
     // Validate commission rate
     if (!formData.commissionRate || formData.commissionRate <= 0) {
-      updateFormData({ 
-        errors: { 
-          ...formData.errors, 
-          commissionRate: 'Commission rate must be greater than 0' 
-        } 
-      });
+      setError('commissionRate', 'Commission rate must be greater than 0');
       valid = false;
     }
     
     // Validate payment schedule - this is critical
     if (!formData.paymentScheduleId) {
-      updateFormData({ 
-        errors: { 
-          ...formData.errors, 
-          paymentScheduleId: 'Please select a payment schedule' 
-        } 
-      });
+      setError('paymentScheduleId', 'Please select a payment schedule');
       valid = false;
     }
     
     if (valid) {
       nextStep();
     }
+  };
+
+  // Set error helper function to match the TransactionForm context
+  const setError = (field: string, message: string) => {
+    clearError(field);
+    updateFormData({ errors: { ...formData.errors, [field]: message } } as any);
   };
   
   return (
