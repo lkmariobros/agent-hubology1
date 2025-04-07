@@ -28,7 +28,7 @@ const UpcomingPayments: React.FC<UpcomingPaymentsProps> = ({ onViewAll }) => {
   };
   
   return (
-    <Card className="h-full border border-border bg-card shadow-sm">
+    <Card className="h-full flex flex-col border border-border bg-card shadow-sm">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-sm font-medium">
           Upcoming Commission Payments
@@ -42,7 +42,7 @@ const UpcomingPayments: React.FC<UpcomingPaymentsProps> = ({ onViewAll }) => {
           View all <ArrowRight className="h-3 w-3" />
         </Button>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex-1 flex flex-col">
         {isLoading ? (
           <div className="space-y-2">
             {Array(3).fill(0).map((_, i) => (
@@ -78,8 +78,8 @@ const UpcomingPayments: React.FC<UpcomingPaymentsProps> = ({ onViewAll }) => {
             ))}
           </div>
         ) : (
-          <div className="py-8 text-center">
-            <CalendarClock className="mx-auto h-8 w-8 text-muted-foreground/60" />
+          <div className="flex-1 flex flex-col items-center justify-center py-8">
+            <CalendarClock className="h-8 w-8 text-muted-foreground/60" />
             <p className="mt-2 text-sm text-muted-foreground">No upcoming payments</p>
           </div>
         )}

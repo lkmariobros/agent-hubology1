@@ -64,7 +64,7 @@ const Dashboard: React.FC = () => {
         </div>
         
         {/* Right side - Metric cards and upcoming payments */}
-        <div className="space-y-6">
+        <div className="space-y-6 flex flex-col">
           {/* Metric Cards */}
           <div className="grid grid-cols-1 gap-4">
             {metrics.map((metric) => (
@@ -95,7 +95,9 @@ const Dashboard: React.FC = () => {
           </div>
           
           {/* Upcoming Payments */}
-          <UpcomingPayments onViewAll={handleViewAllPayments} />
+          <div className="flex-1">
+            <UpcomingPayments onViewAll={handleViewAllPayments} />
+          </div>
         </div>
       </div>
       
