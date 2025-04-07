@@ -1,4 +1,3 @@
-
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import AppLayout from './components/layout/AppLayout';
 import AdminLayout from './components/layout/AdminLayout';
@@ -31,8 +30,18 @@ import AdminSettings from './pages/admin/Settings';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import NewProperty from './pages/NewProperty';
 import AdminTransactions from './pages/admin/Transactions';
+import Index from './pages/Index';
 
 const router = createBrowserRouter([
+  // Auth routes - outside of layouts
+  { path: '/', element: <Index /> },
+  { path: '/login', element: <Login /> },
+  { path: '/signup', element: <Signup /> },
+  { path: '/invite', element: <Signup /> }, // Handle invitation links more cleanly
+  { path: '/forgot-password', element: <ForgotPassword /> },
+  { path: '/reset-password', element: <ResetPassword /> },
+  
+  // Agent portal routes
   {
     path: '/',
     element: <AuthProvider><AppLayout /></AuthProvider>,
@@ -80,6 +89,8 @@ const router = createBrowserRouter([
       },
     ],
   },
+  
+  // Admin portal routes
   {
     path: '/admin',
     element: <AuthProvider><AdminLayout /></AuthProvider>,
@@ -163,10 +174,6 @@ const router = createBrowserRouter([
       },
     ],
   },
-  { path: '/login', element: <Login /> },
-  { path: '/signup', element: <Signup /> },
-  { path: '/forgot-password', element: <ForgotPassword /> },
-  { path: '/reset-password', element: <ResetPassword /> },
   { path: '*', element: <NotFound /> },
 ]);
 
