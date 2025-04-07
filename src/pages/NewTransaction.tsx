@@ -2,7 +2,7 @@
 import React from 'react';
 import EnhancedTransactionForm from '@/components/transactions/EnhancedTransactionForm';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Toaster } from '@/components/ui/toaster';
+import { Toaster } from '@/components/ui/sonner';
 
 const NewTransaction = () => {
   return (
@@ -18,7 +18,7 @@ const NewTransaction = () => {
         </CardContent>
       </Card>
       
-      <Toaster />
+      {/* The Toaster component is now global in main.tsx, so we don't need it here */}
     </div>
   );
 };
