@@ -1,13 +1,45 @@
-import React from 'react';
+
+import React, { useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useMetrics } from '@/hooks/useDashboard';
 import MetricsContainer from '@/components/dashboard/MetricsContainer';
 import { Skeleton } from '@/components/ui/skeleton';
 import { SidebarTrigger } from '@/components/ui/sidebar';
+import { useTransactions } from '@/hooks/useTransactions';
+import { Badge } from '@/components/ui/badge';
+import { supabase } from '@/lib/supabase';
+import { useQueryClient } from '@tanstack/react-query';
 
 const AdminDashboard = () => {
   const { data: metricsData, isLoading: isLoadingMetrics } = useMetrics();
+  const { useTransactionsQuery } = useTransactions();
+  const { data: transactionsData, isLoading: isLoadingTransactions } = useTransactionsQuery({ 
+    limit: 5, 
+    page: 0 
+  });
+  const queryClient = useQueryClient();
+  
+  // Set up real-time subscription to transaction changes
+  useEffect(() => {
+    // Subscribe to changes in property_transactions table
+    const channel = supabase
+      .channel('admin-dashboard-transactions')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'property_transactions' },
+        () => {
+          // Invalidate and refetch transactions data when changes happen
+          queryClient.invalidateQueries({ queryKey: ['transactions'] });
+        }
+      )
+      .subscribe();
+    
+    // Cleanup subscription on unmount
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
   
   return (
     <div className="space-y-6">
@@ -84,7 +116,36 @@ const AdminDashboard = () => {
               <CardDescription>Latest property transactions</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">Transaction data coming soon</p>
+              {isLoadingTransactions ? (
+                <div className="space-y-4">
+                  {[1, 2, 3].map((i) => (
+                    <Skeleton key={i} className="h-16 w-full rounded" />
+                  ))}
+                </div>
+              ) : transactionsData?.transactions?.length ? (
+                <div className="space-y-4">
+                  {transactionsData.transactions.map((transaction) => (
+                    <div key={transaction.id} className="flex justify-between items-center p-4 border rounded-md">
+                      <div>
+                        <p className="font-medium">{transaction.property?.title || 'Unnamed Property'}</p>
+                        <p className="text-sm text-muted-foreground">{new Date(transaction.transaction_date).toLocaleDateString()}</p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <p className="font-medium">${transaction.transaction_value?.toLocaleString()}</p>
+                        <Badge variant={
+                          transaction.status === 'Completed' ? 'success' : 
+                          transaction.status === 'Pending' ? 'warning' : 
+                          transaction.status === 'Cancelled' ? 'destructive' : 'outline'
+                        }>
+                          {transaction.status}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-muted-foreground">No transactions found</p>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

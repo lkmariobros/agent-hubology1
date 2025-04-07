@@ -12,7 +12,7 @@ import AdminProperties from './pages/admin/Properties';
 import CommissionTiers from './pages/admin/CommissionTiers';
 import PaymentSchedulesAdmin from './pages/admin/PaymentSchedulesAdmin';
 import CommissionApproval from './pages/admin/CommissionApproval';
-import CommissionForecast from './pages/CommissionForecast';
+import CommissionForecast from './CommissionForecast';
 import CommissionSettings from './pages/admin/CommissionSettings';
 import Roles from './pages/admin/Roles';
 import NewTransaction from './pages/NewTransaction';
@@ -29,6 +29,7 @@ import Reports from './pages/Reports';
 import AdminSettings from './pages/admin/Settings';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import NewProperty from './pages/NewProperty';
+import AdminTransactions from './pages/admin/Transactions';
 
 const router = createBrowserRouter([
   {
@@ -101,7 +102,7 @@ const router = createBrowserRouter([
       },
       { 
         path: 'transactions', 
-        element: <ProtectedRoute requireAdmin={true}><AdminDashboard /></ProtectedRoute> 
+        element: <ProtectedRoute requireAdmin={true}><AdminTransactions /></ProtectedRoute> 
       },
       { 
         path: 'commission/tiers', 

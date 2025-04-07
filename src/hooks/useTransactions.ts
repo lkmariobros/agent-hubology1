@@ -1,17 +1,31 @@
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Transaction, Property } from '@/types';
+import { supabase } from '@/lib/supabase';
+import { toast } from 'sonner';
 
-// Basic transaction fetch function
+// Fetch transactions from Supabase
 const fetchTransactions = async (page: number = 1, pageSize: number = 10) => {
-  const response = await fetch(`/api/transactions?page=${page}&pageSize=${pageSize}`);
-  if (!response.ok) {
+  const startRow = (page - 1) * pageSize;
+  
+  const { data, error, count } = await supabase
+    .from('property_transactions')
+    .select('*, property:property_id(title)', { count: 'exact' })
+    .range(startRow, startRow + pageSize - 1)
+    .order('created_at', { ascending: false });
+    
+  if (error) {
+    console.error('Error fetching transactions:', error);
     throw new Error('Failed to fetch transactions');
   }
-  return response.json();
+  
+  return {
+    transactions: data,
+    total: count || 0
+  };
 };
 
-// Basic transaction fetching hook (renamed to avoid duplication)
+// Basic transaction fetching hook
 export const useBasicTransactions = (page: number = 1, pageSize: number = 10) => {
   return useQuery({
     queryKey: ['transactions', page, pageSize],
@@ -21,11 +35,17 @@ export const useBasicTransactions = (page: number = 1, pageSize: number = 10) =>
 
 // Property fetching function
 const fetchProperties = async () => {
-  const response = await fetch('/api/properties');
-  if (!response.ok) {
+  const { data, error } = await supabase
+    .from('enhanced_properties')
+    .select('id, title, city, state, status_id, price')
+    .order('created_at', { ascending: false });
+    
+  if (error) {
+    console.error('Error fetching properties:', error);
     throw new Error('Failed to fetch properties');
   }
-  return response.json();
+  
+  return data;
 };
 
 // Property fetching hook for transaction forms
@@ -69,59 +89,45 @@ export const useTransactionsQuery = ({
   return useQuery({
     queryKey: ['transactions', { page, limit, search, status }],
     queryFn: async () => {
-      // In a real app, this would be a real API call with query params
-      const queryParams = new URLSearchParams();
-      queryParams.append('page', page.toString());
-      queryParams.append('limit', limit.toString());
-      if (search) queryParams.append('search', search);
-      if (status) queryParams.append('status', status);
+      // Build query with filters
+      let query = supabase
+        .from('property_transactions')
+        .select(`
+          *,
+          property:property_id(title, state, city),
+          agent:agent_id(full_name)
+        `, { count: 'exact' });
       
-      const mockResponse = {
-        transactions: [
-          {
-            id: '1',
-            date: new Date().toISOString(),
-            propertyId: '101',
-            property: {
-              title: 'Luxury Condominium',
-              address: { city: 'Kuala Lumpur', state: 'Malaysia' }
-            },
-            agent: { id: 'a1', name: 'John Doe' },
-            price: 750000,
-            commission: 22500,
-            status: 'completed'
-          },
-          {
-            id: '2',
-            date: new Date(Date.now() - 86400000).toISOString(), // Yesterday
-            propertyId: '102',
-            property: {
-              title: 'Commercial Shop Lot',
-              address: { city: 'Penang', state: 'Malaysia' }
-            },
-            agent: { id: 'a2', name: 'Jane Smith' },
-            price: 1200000,
-            commission: 36000,
-            status: 'pending'
-          },
-          {
-            id: '3',
-            date: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
-            propertyId: '103',
-            property: {
-              title: 'Bungalow with Pool',
-              address: { city: 'Johor Bahru', state: 'Malaysia' }
-            },
-            agent: { id: 'a3', name: 'Robert Johnson' },
-            price: 1500000,
-            commission: 45000,
-            status: 'in progress'
-          }
-        ],
-        total: 3
+      // Apply filters
+      if (search) {
+        query = query.or(`
+          property.title.ilike.%${search}%,
+          agent.full_name.ilike.%${search}%,
+          buyer_name.ilike.%${search}%,
+          seller_name.ilike.%${search}%
+        `);
+      }
+      
+      if (status) {
+        query = query.eq('status', status);
+      }
+      
+      // Pagination
+      const from = page * limit;
+      const to = from + limit - 1;
+      query = query.range(from, to).order('created_at', { ascending: false });
+      
+      const { data, error, count } = await query;
+      
+      if (error) {
+        console.error('Error fetching transactions:', error);
+        throw error;
+      }
+      
+      return {
+        transactions: data || [],
+        total: count || 0
       };
-      
-      return mockResponse;
     },
     staleTime: 60000 // 1 minute
   });
@@ -132,39 +138,23 @@ export const useTransactionQuery = (id: string) => {
   return useQuery({
     queryKey: ['transaction', id],
     queryFn: async () => {
-      // Mock implementation - in a real app, this would be a real API call
-      const mockTransaction = {
-        id,
-        date: new Date().toISOString(),
-        propertyId: '101',
-        property: {
-          title: 'Luxury Condominium',
-          address: { city: 'Kuala Lumpur', state: 'Malaysia' }
-        },
-        agent: { id: 'a1', name: 'John Doe' },
-        price: 750000,
-        commission: 22500,
-        commissionRate: 3, // Added the missing commissionRate property
-        status: 'completed',
-        buyer: {
-          name: 'Alice Brown',
-          email: 'alice@example.com',
-          phone: '+601234567890'
-        },
-        seller: {
-          name: 'Bob Green',
-          email: 'bob@example.com',
-          phone: '+601234567891'
-        },
-        notes: 'This is a sample transaction.',
-        closingDate: new Date().toISOString(), // Added the missing closingDate property
-        documents: [
-          { id: 'd1', name: 'Sale Agreement.pdf' },
-          { id: 'd2', name: 'Property Inspection.pdf' }
-        ]
-      };
+      const { data, error } = await supabase
+        .from('property_transactions')
+        .select(`
+          *,
+          property:property_id(*),
+          agent:agent_id(*),
+          documents:transaction_documents(*)
+        `)
+        .eq('id', id)
+        .single();
+        
+      if (error) {
+        console.error('Error fetching transaction:', error);
+        throw error;
+      }
       
-      return mockTransaction;
+      return data;
     },
     staleTime: 60000 // 1 minute
   });
@@ -172,16 +162,49 @@ export const useTransactionQuery = (id: string) => {
 
 // Create transaction mutation
 export const useCreateTransactionMutation = () => {
-  return {
-    mutateAsync: async (data: any) => {
-      // Mock implementation - would be a real API call in production
-      console.log('Creating transaction with data:', data);
-      return { success: true, id: 'new-transaction-id' };
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (transactionData: any) => {
+      const { data, error } = await supabase
+        .from('property_transactions')
+        .insert({
+          // Map the form data to database fields
+          transaction_date: transactionData.transactionDate,
+          property_id: transactionData.propertyId,
+          transaction_value: transactionData.transactionValue,
+          commission_rate: transactionData.commissionRate,
+          commission_amount: transactionData.commissionAmount,
+          agent_id: (await supabase.auth.getUser()).data.user?.id,
+          status: 'Pending',
+          notes: transactionData.notes,
+          buyer_name: transactionData.buyer?.name,
+          buyer_email: transactionData.buyer?.email,
+          buyer_phone: transactionData.buyer?.phone,
+          seller_name: transactionData.seller?.name,
+          seller_email: transactionData.seller?.email,
+          seller_phone: transactionData.seller?.phone,
+          closing_date: transactionData.closingDate
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating transaction:', error);
+        throw error;
+      }
+      
+      return data;
     },
-    isLoading: false,
-    isPending: false, // Added isPending property to match TanStack Query v5
-    error: null
-  };
+    onSuccess: () => {
+      // Invalidate queries to refetch data
+      queryClient.invalidateQueries({ queryKey: ['transactions'] });
+      toast.success('Transaction created successfully');
+    },
+    onError: (error) => {
+      toast.error(`Failed to create transaction: ${error.message}`);
+    }
+  });
 };
 
 // Main hook that exports all transaction-related hooks
