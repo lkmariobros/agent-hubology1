@@ -45,7 +45,7 @@ serve(async (req) => {
       .rpc('get_agent_profile_by_id', { user_id: user.id })
       .single();
     
-    // Special handling for special admin accounts using centralized function
+    // Special handling for special admin accounts
     if (isSpecialAdmin(user.email)) {
       console.log('Special admin user detected:', user.email);
       // If profile exists, update it with admin tier
