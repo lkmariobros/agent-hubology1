@@ -1,4 +1,3 @@
-
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import AppLayout from './components/layout/AppLayout';
 import AdminLayout from './components/layout/AdminLayout';
@@ -29,6 +28,7 @@ import CommissionForecastPage from './pages/admin/CommissionForecast';
 import Reports from './pages/Reports';
 import AdminSettings from './pages/admin/Settings';
 import ProtectedRoute from './components/auth/ProtectedRoute';
+import NewProperty from './pages/NewProperty';
 
 const router = createBrowserRouter([
   {
