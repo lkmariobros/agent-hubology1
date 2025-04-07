@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 
-// Hook to get the current agent's total commission amount
+// Hook to get the current agent's total commission amount with real-time updates
 export const useAgentCommission = () => {
   const { user } = useAuth();
   
@@ -84,11 +84,13 @@ export const useAgentCommission = () => {
         change: Math.round(percentChange * 10) / 10 // Round to 1 decimal place
       };
     },
-    enabled: !!user?.id
+    enabled: !!user?.id,
+    staleTime: 60 * 1000, // 1 minute
+    refetchInterval: 5 * 60 * 1000 // 5 minutes
   });
 };
 
-// Hook to get agent's leaderboard position
+// Hook to get agent's leaderboard position with real-time updates
 export const useAgentLeaderboardPosition = () => {
   const { user } = useAuth();
   const [leaderboardPosition, setLeaderboardPosition] = useState<{
@@ -100,10 +102,16 @@ export const useAgentLeaderboardPosition = () => {
     change: 0,
     hasTransactions: false
   });
+  const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
     const fetchLeaderboardPosition = async () => {
-      if (!user?.id) return;
+      if (!user?.id) {
+        setIsLoading(false);
+        return;
+      }
+      
+      setIsLoading(true);
       
       try {
         // Get last month's date range
@@ -123,6 +131,7 @@ export const useAgentLeaderboardPosition = () => {
         
         if (error) {
           console.error('Error fetching leaderboard data:', error);
+          setIsLoading(false);
           return;
         }
         
@@ -168,6 +177,7 @@ export const useAgentLeaderboardPosition = () => {
         if (prevError) {
           console.error('Error fetching previous month leaderboard:', prevError);
           setLeaderboardPosition({ position, change: 0, hasTransactions });
+          setIsLoading(false);
           return;
         }
         
@@ -196,9 +206,11 @@ export const useAgentLeaderboardPosition = () => {
         }
         
         setLeaderboardPosition({ position, change, hasTransactions });
+        setIsLoading(false);
       } catch (error) {
         console.error('Error in leaderboard calculation:', error);
         setLeaderboardPosition({ position: '-', change: 0, hasTransactions: false });
+        setIsLoading(false);
       }
     };
     
@@ -221,7 +233,7 @@ export const useAgentLeaderboardPosition = () => {
     };
   }, [user?.id]);
   
-  return { leaderboardPosition };
+  return { leaderboardPosition, isLoading };
 };
 
 // Helper function to format currency

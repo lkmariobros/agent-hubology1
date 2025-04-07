@@ -6,36 +6,39 @@ import OpportunitiesBoard from '@/components/dashboard/OpportunitiesBoard';
 import PropertyShowcase from '@/components/dashboard/PropertyShowcase';
 import UpcomingPayments from '@/components/dashboard/UpcomingPayments';
 import RecentTransactions from '@/components/dashboard/RecentTransactions';
-import { useMetrics } from '@/hooks/useDashboard';
 import { Building2, Trophy } from 'lucide-react';
 import { DashboardMetric } from '@/types';
 import { Card, CardContent } from "@/components/ui/card";
+import { useAgentCommission, useAgentLeaderboardPosition, formatCurrency } from '@/hooks/useAgentDashboardMetrics';
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { data: metricsData } = useMetrics();
+  const { data: commissionData, isLoading: isLoadingCommission } = useAgentCommission();
+  const { leaderboardPosition, isLoading: isLoadingLeaderboard } = useAgentLeaderboardPosition();
   
-  // Filter to only show two specific metrics
-  const filteredMetrics: DashboardMetric[] = metricsData?.data?.metrics 
-    ? [
-        {
-          id: "commission",
-          label: 'Total Commission',
-          value: '$45,682',
-          change: 8.2,
-          trend: 'up' as const,
-          icon: <Building2 className="h-5 w-5 text-primary" />
-        },
-        {
-          id: "leaderboard",
-          label: 'Leaderboard Position',
-          value: '#3',
-          change: 2,
-          trend: 'up' as const,
-          icon: <Trophy className="h-5 w-5 text-primary" />
-        }
-      ]
-    : [];
+  // Create metrics based on real data
+  const metrics: DashboardMetric[] = [
+    {
+      id: "commission",
+      label: 'Total Commission',
+      value: isLoadingCommission ? 'Loading...' : formatCurrency(commissionData?.total || 0),
+      change: commissionData?.change || 0,
+      trend: (commissionData?.change || 0) >= 0 ? 'up' : 'down',
+      icon: <Building2 className="h-5 w-5 text-primary" />
+    },
+    {
+      id: "leaderboard",
+      label: 'Leaderboard Position',
+      value: isLoadingLeaderboard 
+        ? 'Loading...' 
+        : (leaderboardPosition.hasTransactions 
+            ? `#${leaderboardPosition.position}` 
+            : 'Compete to #1'),
+      change: leaderboardPosition.change,
+      trend: leaderboardPosition.change > 0 ? 'up' : leaderboardPosition.change < 0 ? 'down' : 'neutral',
+      icon: <Trophy className="h-5 w-5 text-primary" />
+    }
+  ];
 
   const handleViewAllOpportunities = () => {
     navigate('/opportunities');
@@ -63,7 +66,7 @@ const Dashboard: React.FC = () => {
         {/* Right side - Metrics Cards displayed side by side */}
         <div className="lg:col-span-4 space-y-6">
           <div className="grid grid-cols-2 gap-4">
-            {filteredMetrics.map((metric) => (
+            {metrics.map((metric) => (
               <Card key={metric.id} className="border-none shadow-md bg-card">
                 <CardContent className="p-4">
                   <div className="space-y-2">
@@ -76,7 +79,7 @@ const Dashboard: React.FC = () => {
                         </div>
                       )}
                     </div>
-                    {metric.change !== undefined && (
+                    {metric.change !== undefined && metric.trend !== 'neutral' && (
                       <div className="flex items-center text-sm">
                         <span className={metric.trend === 'up' ? 'text-green-400' : 'text-red-400'}>
                           {metric.trend === 'up' ? '+' : ''}{metric.change}%

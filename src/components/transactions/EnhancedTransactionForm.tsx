@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TransactionFormProvider } from '@/context/TransactionForm';
@@ -44,8 +45,14 @@ const TransactionFormSteps: React.FC<TransactionFormStepsProps> = ({ onSubmit })
         const result = await createTransaction.mutateAsync(formData);
         toast.success('Transaction created successfully!');
         
-        // Navigate to the transaction detail page
-        navigate(`/transactions/${result.id}`);
+        // After successful submission, invalidate relevant queries to update dashboard metrics
+        if (window.queryClient) {
+          window.queryClient.invalidateQueries({ queryKey: ['agentCommission'] });
+          window.queryClient.invalidateQueries({ queryKey: ['transactions'] });
+        }
+        
+        // Navigate to the dashboard to show updated metrics
+        navigate(`/dashboard`);
       }
     } catch (error) {
       console.error('Error submitting transaction:', error);

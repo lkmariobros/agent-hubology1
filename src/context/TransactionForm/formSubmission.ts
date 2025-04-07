@@ -128,6 +128,14 @@ export const submitTransactionForm = async (state: TransactionFormState): Promis
     }
     
     toast.success('Transaction submitted successfully');
+    
+    // The real-time subscription will handle updates to the UI
+    // but we'll invalidate these queries explicitly to ensure immediate updates
+    if (window.queryClient) {
+      window.queryClient.invalidateQueries({ queryKey: ['agentCommission'] });
+      window.queryClient.invalidateQueries({ queryKey: ['transactions'] });
+    }
+    
     return data; // Return the created transaction
   } catch (error) {
     console.error('Error in submitTransactionForm:', error);

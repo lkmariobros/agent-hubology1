@@ -1,3 +1,4 @@
+
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -69,6 +70,11 @@ const queryClient = new QueryClient({
     },
   },
 });
+
+// Make queryClient globally available for manual invalidations
+if (typeof window !== 'undefined') {
+  window.queryClient = queryClient;
+}
 
 function App() {
   return (
