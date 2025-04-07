@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TransactionFormProvider } from '@/context/TransactionForm';
@@ -37,12 +36,15 @@ const TransactionFormSteps: React.FC<TransactionFormStepsProps> = ({ onSubmit })
   const handleSubmitTransaction = async (formData: TransactionFormData) => {
     try {
       setSubmitting(true);
+      
       if (onSubmit) {
         await onSubmit(formData);
       } else {
         // Use the provided mutation
         const result = await createTransaction.mutateAsync(formData);
         toast.success('Transaction created successfully!');
+        
+        // Navigate to the transaction detail page
         navigate(`/transactions/${result.id}`);
       }
     } catch (error) {
@@ -84,7 +86,10 @@ const TransactionStepContent: React.FC<{
 
   const handleSubmit = async () => {
     try {
-      await submitForm();
+      // This will call the submitTransactionForm function internally
+      const result = await submitForm();
+      
+      // After the form has been submitted, pass the form data to the parent's onSubmit
       await onSubmit(formData);
     } catch (error) {
       console.error('Error submitting form:', error);

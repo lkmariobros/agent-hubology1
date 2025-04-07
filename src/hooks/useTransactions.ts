@@ -1,8 +1,9 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Transaction, Property } from '@/types';
+import { Transaction } from '@/types';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
+import { useEffect } from 'react';
 
 // Fetch transactions from Supabase with secure RLS enforcement
 const fetchTransactions = async (page: number = 1, pageSize: number = 10) => {
@@ -33,8 +34,36 @@ const fetchTransactions = async (page: number = 1, pageSize: number = 10) => {
   };
 };
 
+// Hook for real-time transaction updates
+export const useRealtimeTransactions = () => {
+  const queryClient = useQueryClient();
+  
+  useEffect(() => {
+    // Subscribe to changes in property_transactions table
+    const channel = supabase
+      .channel('public:property_transactions')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'property_transactions' }, 
+        (payload) => {
+          console.log('Realtime transaction update:', payload);
+          // Invalidate all transaction queries to trigger refetch
+          queryClient.invalidateQueries({ queryKey: ['transactions'] });
+        }
+      )
+      .subscribe();
+      
+    // Cleanup subscription on unmount
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
+};
+
 // Basic transaction fetching hook
 export const useBasicTransactions = (page: number = 1, pageSize: number = 10) => {
+  // Set up real-time subscription
+  useRealtimeTransactions();
+  
   return useQuery({
     queryKey: ['transactions', page, pageSize],
     queryFn: () => fetchTransactions(page, pageSize)
@@ -94,6 +123,9 @@ export const useTransactionsQuery = ({
   search?: string;
   status?: string;
 }) => {
+  // Set up real-time subscription
+  useRealtimeTransactions();
+  
   return useQuery({
     queryKey: ['transactions', { page, limit, search, status }],
     queryFn: async () => {
@@ -235,6 +267,7 @@ export const useTransactions = () => {
   return {
     useTransactionsQuery,
     useTransactionQuery,
-    useCreateTransactionMutation
+    useCreateTransactionMutation,
+    useRealtimeTransactions
   };
 };

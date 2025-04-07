@@ -8,38 +8,29 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { useTransactions } from '@/hooks/useTransactions';
 import { Badge } from '@/components/ui/badge';
-import { supabase } from '@/lib/supabase';
-import { useQueryClient } from '@tanstack/react-query';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
   const { data: metricsData, isLoading: isLoadingMetrics } = useMetrics();
-  const { useTransactionsQuery } = useTransactions();
+  const { useTransactionsQuery, useRealtimeTransactions } = useTransactions();
   const { data: transactionsData, isLoading: isLoadingTransactions } = useTransactionsQuery({ 
     limit: 5, 
     page: 0 
   });
-  const queryClient = useQueryClient();
   
-  // Set up real-time subscription to transaction changes
-  useEffect(() => {
-    // Subscribe to changes in property_transactions table
-    const channel = supabase
-      .channel('admin-dashboard-transactions')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'property_transactions' },
-        () => {
-          // Invalidate and refetch transactions data when changes happen
-          queryClient.invalidateQueries({ queryKey: ['transactions'] });
-        }
-      )
-      .subscribe();
-    
-    // Cleanup subscription on unmount
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [queryClient]);
+  // Set up real-time subscription
+  useRealtimeTransactions();
+  
+  // Format date function
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
   
   return (
     <div className="space-y-6">
@@ -111,9 +102,18 @@ const AdminDashboard = () => {
         
         <TabsContent value="transactions" className="space-y-4">
           <Card>
-            <CardHeader>
-              <CardTitle>Recent Transactions</CardTitle>
-              <CardDescription>Latest property transactions</CardDescription>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Recent Transactions</CardTitle>
+                <CardDescription>Latest property transactions</CardDescription>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => navigate('/admin/transactions')}
+              >
+                View All
+              </Button>
             </CardHeader>
             <CardContent>
               {isLoadingTransactions ? (
@@ -125,13 +125,20 @@ const AdminDashboard = () => {
               ) : transactionsData?.transactions?.length ? (
                 <div className="space-y-4">
                   {transactionsData.transactions.map((transaction) => (
-                    <div key={transaction.id} className="flex justify-between items-center p-4 border rounded-md">
+                    <div key={transaction.id} className="flex justify-between items-center p-4 border rounded-md hover:bg-muted/50 cursor-pointer" onClick={() => navigate(`/admin/transactions/${transaction.id}`)}>
                       <div>
                         <p className="font-medium">{transaction.property?.title || 'Unnamed Property'}</p>
-                        <p className="text-sm text-muted-foreground">{new Date(transaction.transaction_date).toLocaleDateString()}</p>
+                        <div className="flex gap-2 text-sm text-muted-foreground">
+                          <span>{formatDate(transaction.transaction_date)}</span>
+                          <span>•</span>
+                          <span>{transaction.agent?.full_name || 'Unknown Agent'}</span>
+                        </div>
                       </div>
                       <div className="flex items-center gap-3">
-                        <p className="font-medium">${transaction.transaction_value?.toLocaleString()}</p>
+                        <div className="text-right">
+                          <p className="font-medium">${transaction.transaction_value?.toLocaleString()}</p>
+                          <p className="text-sm text-muted-foreground">Commission: ${transaction.commission_amount?.toLocaleString()}</p>
+                        </div>
                         <Badge variant={
                           transaction.status === 'Completed' ? 'default' : 
                           transaction.status === 'Pending' ? 'secondary' : 
@@ -144,7 +151,16 @@ const AdminDashboard = () => {
                   ))}
                 </div>
               ) : (
-                <p className="text-muted-foreground">No transactions found</p>
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">No transactions found</p>
+                  <Button 
+                    variant="outline" 
+                    className="mt-4"
+                    onClick={() => navigate('/admin/transactions')}
+                  >
+                    View All Transactions
+                  </Button>
+                </div>
               )}
             </CardContent>
           </Card>

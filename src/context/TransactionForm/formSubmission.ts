@@ -50,7 +50,7 @@ export const saveFormAsDraft = async (state: TransactionFormState): Promise<void
 };
 
 // Function to submit the complete form
-export const submitTransactionForm = async (state: TransactionFormState): Promise<void> => {
+export const submitTransactionForm = async (state: TransactionFormState): Promise<any> => {
   console.log('Submitting transaction form:', state);
   
   try {
@@ -62,33 +62,36 @@ export const submitTransactionForm = async (state: TransactionFormState): Promis
       throw new Error('User not authenticated');
     }
     
+    // Prepare transaction data
+    const transactionData = {
+      status: 'Pending',
+      transaction_date: state.formData.transactionDate,
+      property_id: state.formData.propertyId,
+      transaction_value: state.formData.transactionValue,
+      commission_rate: state.formData.commissionRate,
+      commission_amount: state.formData.commissionAmount,
+      agent_id: userId,
+      notes: state.formData.notes,
+      buyer_name: state.formData.buyer?.name,
+      buyer_email: state.formData.buyer?.email,
+      buyer_phone: state.formData.buyer?.phone,
+      seller_name: state.formData.seller?.name,
+      seller_email: state.formData.seller?.email,
+      seller_phone: state.formData.seller?.phone,
+      closing_date: state.formData.closingDate,
+      commission_split: state.formData.coBroking?.enabled || false,
+      co_agent_id: state.formData.coBroking?.enabled ? 
+        state.formData.coBroking.agentName : null,
+      co_agent_commission_percentage: state.formData.coBroking?.enabled ? 
+        state.formData.coBroking.commissionSplit : null,
+      payment_schedule_id: state.formData.paymentScheduleId
+    };
+    
     // Insert transaction
     const { data, error } = await supabase
       .from('property_transactions')
-      .insert({
-        status: 'Pending',
-        transaction_date: state.formData.transactionDate,
-        property_id: state.formData.propertyId,
-        transaction_value: state.formData.transactionValue,
-        commission_rate: state.formData.commissionRate,
-        commission_amount: state.formData.commissionAmount,
-        agent_id: userId,
-        notes: state.formData.notes,
-        buyer_name: state.formData.buyer?.name,
-        buyer_email: state.formData.buyer?.email,
-        buyer_phone: state.formData.buyer?.phone,
-        seller_name: state.formData.seller?.name,
-        seller_email: state.formData.seller?.email,
-        seller_phone: state.formData.seller?.phone,
-        closing_date: state.formData.closingDate,
-        commission_split: state.formData.coBroking?.enabled || false,
-        co_agent_id: state.formData.coBroking?.enabled ? 
-          state.formData.coBroking.agentName : null,
-        co_agent_commission_percentage: state.formData.coBroking?.enabled ? 
-          state.formData.coBroking.commissionSplit : null,
-        payment_schedule_id: state.formData.paymentScheduleId
-      })
-      .select('id')
+      .insert(transactionData)
+      .select('id, status, transaction_date, transaction_value, commission_amount')
       .single();
       
     if (error) {
@@ -125,11 +128,10 @@ export const submitTransactionForm = async (state: TransactionFormState): Promis
     }
     
     toast.success('Transaction submitted successfully');
-    return Promise.resolve();
+    return data; // Return the created transaction
   } catch (error) {
     console.error('Error in submitTransactionForm:', error);
     toast.error('Failed to submit transaction');
     return Promise.reject(error);
   }
 };
-
