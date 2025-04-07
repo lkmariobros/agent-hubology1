@@ -15,6 +15,8 @@ export function usePaymentSchedules() {
     queryKey: ['payment-schedules'],
     queryFn: async () => {
       try {
+        console.log('Fetching payment schedules...');
+        
         // Fetch payment schedules
         const { data: schedules, error: schedulesError } = await supabase
           .from('commission_payment_schedules')
@@ -23,13 +25,16 @@ export function usePaymentSchedules() {
           
         if (schedulesError) {
           console.error('Error fetching payment schedules:', schedulesError);
-          throw schedulesError;
+          throw new Error(`Failed to fetch payment schedules: ${schedulesError.message}`);
         }
         
         // If no schedules found, return empty array
         if (!schedules || schedules.length === 0) {
-          return [];
+          console.log('No payment schedules found, using fallback...');
+          return getFallbackSchedules();
         }
+        
+        console.log('Fetched schedules:', schedules);
         
         // For each schedule, fetch its installments
         const schedulesWithInstallments = await Promise.all(
@@ -89,50 +94,57 @@ export function usePaymentSchedules() {
         
         return schedulesWithInstallments as PaymentSchedule[];
       } catch (err) {
-        console.error('Error fetching payment schedules:', err);
-        // If we can't fetch real data, provide a fallback default schedule
-        const fallbackSchedule: PaymentSchedule = {
-          id: 'default-fallback',
-          name: 'Standard Payment Schedule',
-          description: 'Default fallback schedule (3 installments)',
-          isDefault: true,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          installments: [
-            {
-              id: 'installment-1',
-              scheduleId: 'default-fallback',
-              installmentNumber: 1,
-              percentage: 40,
-              daysAfterTransaction: 7,
-              description: 'Initial payment'
-            },
-            {
-              id: 'installment-2',
-              scheduleId: 'default-fallback',
-              installmentNumber: 2,
-              percentage: 30,
-              daysAfterTransaction: 30,
-              description: 'Second payment'
-            },
-            {
-              id: 'installment-3',
-              scheduleId: 'default-fallback',
-              installmentNumber: 3,
-              percentage: 30,
-              daysAfterTransaction: 60,
-              description: 'Final payment'
-            }
-          ]
-        };
-        
-        // Return the fallback schedule in an array
-        return [fallbackSchedule];
+        console.error('Error in usePaymentSchedules hook:', err);
+        return getFallbackSchedules();
       }
     },
-    retry: 1,
+    retry: 2,
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
   });
+  
+  // Function to get fallback schedules when DB fails
+  const getFallbackSchedules = (): PaymentSchedule[] => {
+    console.log('Using fallback payment schedules');
+    
+    // Create a fallback default schedule
+    const fallbackSchedule: PaymentSchedule = {
+      id: 'default-fallback',
+      name: 'Standard Payment Schedule',
+      description: 'Default fallback schedule (3 installments)',
+      isDefault: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      installments: [
+        {
+          id: 'installment-1',
+          scheduleId: 'default-fallback',
+          installmentNumber: 1,
+          percentage: 40,
+          daysAfterTransaction: 7,
+          description: 'Initial payment'
+        },
+        {
+          id: 'installment-2',
+          scheduleId: 'default-fallback',
+          installmentNumber: 2,
+          percentage: 30,
+          daysAfterTransaction: 30,
+          description: 'Second payment'
+        },
+        {
+          id: 'installment-3',
+          scheduleId: 'default-fallback',
+          installmentNumber: 3,
+          percentage: 30,
+          daysAfterTransaction: 60,
+          description: 'Final payment'
+        }
+      ]
+    };
+    
+    // Return the fallback schedule in an array
+    return [fallbackSchedule];
+  };
   
   // Get default payment schedule
   const defaultPaymentSchedule = paymentSchedules?.find(schedule => schedule.isDefault) || 
@@ -187,7 +199,7 @@ export function usePaymentSchedules() {
   });
 
   return {
-    paymentSchedules,
+    paymentSchedules: paymentSchedules || getFallbackSchedules(),
     defaultPaymentSchedule,
     isLoading,
     error,

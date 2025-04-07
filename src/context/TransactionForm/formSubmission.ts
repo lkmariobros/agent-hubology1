@@ -54,8 +54,47 @@ export const submitTransactionForm = async (state: TransactionFormState): Promis
   console.log('Submitting transaction form:', state);
   
   try {
+    // Validate required fields
+    const validationErrors: string[] = [];
+    
+    if (!state.formData.transactionDate) {
+      validationErrors.push('Transaction date is required');
+    }
+    
+    if (!state.formData.propertyId) {
+      validationErrors.push('Property is required');
+    }
+    
+    if (!state.formData.transactionValue || state.formData.transactionValue <= 0) {
+      validationErrors.push('Transaction value must be greater than 0');
+    }
+    
+    if (!state.formData.commissionRate || state.formData.commissionRate <= 0) {
+      validationErrors.push('Commission rate must be greater than 0');
+    }
+    
+    if (!state.formData.commissionAmount || state.formData.commissionAmount <= 0) {
+      validationErrors.push('Commission amount must be greater than 0');
+    }
+    
+    if (!state.formData.paymentScheduleId) {
+      validationErrors.push('Payment schedule is required');
+    }
+    
+    if (validationErrors.length > 0) {
+      const errorMessage = `Validation errors: ${validationErrors.join(', ')}`;
+      console.error(errorMessage);
+      throw new Error(errorMessage);
+    }
+    
     // Get current user
-    const { data: userData } = await supabase.auth.getUser();
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    
+    if (userError) {
+      console.error('Authentication error:', userError);
+      throw new Error('Authentication failed: ' + userError.message);
+    }
+    
     const userId = userData.user?.id;
     
     if (!userId) {
@@ -87,6 +126,8 @@ export const submitTransactionForm = async (state: TransactionFormState): Promis
       payment_schedule_id: state.formData.paymentScheduleId
     };
     
+    console.log('Transaction data to insert:', transactionData);
+    
     // Insert transaction
     const { data, error } = await supabase
       .from('property_transactions')
@@ -99,32 +140,50 @@ export const submitTransactionForm = async (state: TransactionFormState): Promis
       throw new Error('Failed to submit transaction: ' + error.message);
     }
     
+    console.log('Transaction created successfully:', data);
+    
     // Upload documents if they exist
     if (state.documents.length > 0) {
-      await Promise.all(state.documents.map(async (doc) => {
+      const documentPromises = state.documents.map(async (doc) => {
         if (doc.file) {
-          // Upload file to storage
-          const fileName = `${Date.now()}_${doc.file.name}`;
-          const filePath = `transactions/${data.id}/${fileName}`;
-          
-          const { error: uploadError } = await supabase.storage
-            .from('transaction_documents')
-            .upload(filePath, doc.file);
+          try {
+            // Upload file to storage
+            const fileName = `${Date.now()}_${doc.file.name}`;
+            const filePath = `transactions/${data.id}/${fileName}`;
             
-          if (uploadError) {
-            console.error('Error uploading document:', uploadError);
-            return;
+            const { error: uploadError } = await supabase.storage
+              .from('transaction_documents')
+              .upload(filePath, doc.file);
+              
+            if (uploadError) {
+              console.error('Error uploading document:', uploadError);
+              return null;
+            }
+            
+            // Add record to transaction_documents table
+            const { error: docError } = await supabase.from('transaction_documents').insert({
+              transaction_id: data.id,
+              name: doc.name,
+              document_type: doc.documentType,
+              storage_path: filePath
+            });
+            
+            if (docError) {
+              console.error('Error saving document metadata:', docError);
+              return null;
+            }
+            
+            return filePath;
+          } catch (err) {
+            console.error('Error processing document:', err);
+            return null;
           }
-          
-          // Add record to transaction_documents table
-          await supabase.from('transaction_documents').insert({
-            transaction_id: data.id,
-            name: doc.name,
-            document_type: doc.documentType,
-            storage_path: filePath
-          });
         }
-      }));
+        return null;
+      });
+      
+      // Wait for all document uploads to complete
+      await Promise.all(documentPromises);
     }
     
     toast.success('Transaction submitted successfully');
@@ -139,7 +198,10 @@ export const submitTransactionForm = async (state: TransactionFormState): Promis
     return data; // Return the created transaction
   } catch (error) {
     console.error('Error in submitTransactionForm:', error);
-    toast.error('Failed to submit transaction');
+    toast.error(error instanceof Error 
+      ? `Failed to submit transaction: ${error.message}` 
+      : 'Failed to submit transaction'
+    );
     return Promise.reject(error);
   }
 };
