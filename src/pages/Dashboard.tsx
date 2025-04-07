@@ -57,15 +57,16 @@ const Dashboard: React.FC = () => {
       <h1 className="text-3xl font-semibold">Dashboard</h1>
       
       {/* Main dashboard layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left side - Recent Transactions taking up 8/12 (instead of 3/4) of the space */}
-        <div className="lg:col-span-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left side - Recent Transactions taking up 2/3 (instead of 70%) of the space */}
+        <div className="lg:col-span-2">
           <RecentTransactions onViewAll={handleViewAllTransactions} limit={5} />
         </div>
         
-        {/* Right side - Metrics Cards displayed side by side */}
-        <div className="lg:col-span-4 space-y-6">
-          <div className="grid grid-cols-2 gap-4">
+        {/* Right side - Metric cards and upcoming payments */}
+        <div className="space-y-6">
+          {/* Metric Cards */}
+          <div className="grid grid-cols-1 gap-4">
             {metrics.map((metric) => (
               <Card key={metric.id} className="border-none shadow-md bg-card">
                 <CardContent className="p-4">
@@ -93,6 +94,7 @@ const Dashboard: React.FC = () => {
             ))}
           </div>
           
+          {/* Upcoming Payments */}
           <UpcomingPayments onViewAll={handleViewAllPayments} />
         </div>
       </div>

@@ -41,20 +41,19 @@ const RecentTransactions = ({ transactions: propTransactions, isLoading: propIsL
   };
 
   return (
-    <Card className="glass-card">
-      <CardHeader className="card-padding-x pt-6 pb-4 flex flex-row items-center justify-between">
+    <Card className="h-full">
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle size="md">Recent Transactions</CardTitle>
         <Button 
           variant="ghost" 
           size="sm" 
-          className="text-accent hover:text-accent/80"
           onClick={onViewAll || (() => navigate('/transactions'))}
         >
           View all <ArrowRight className="ml-1 h-4 w-4" />
         </Button>
       </CardHeader>
-      <CardContent className="card-padding-x pb-6">
-        <div className="card-spacing">
+      <CardContent>
+        <div className="space-y-3">
           {isLoading ? (
             // Loading skeletons
             Array(3).fill(0).map((_, index) => (
@@ -77,11 +76,11 @@ const RecentTransactions = ({ transactions: propTransactions, isLoading: propIsL
             transactions.map((transaction) => (
               <div 
                 key={transaction.id}
-                className="flex items-center space-x-4 p-3 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
+                className="flex items-center space-x-4 p-3 rounded-lg hover:bg-accent/5 transition-colors cursor-pointer"
                 onClick={() => handleViewTransaction(transaction.id)}
               >
-                <div className="h-10 w-10 rounded-full bg-accent/10 flex items-center justify-center">
-                  <DollarSign className="h-5 w-5 text-accent" />
+                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <DollarSign className="h-5 w-5 text-primary" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-foreground truncate">
@@ -98,7 +97,7 @@ const RecentTransactions = ({ transactions: propTransactions, isLoading: propIsL
                   <Badge 
                     variant="outline"
                     className={cn(
-                      "text-[10px] py-0 h-5 mt-0.5 border-white/10",
+                      "text-[10px] py-0 h-5 mt-0.5",
                       transaction.status === 'completed' ? 'text-green-400 border-green-400/30' : 
                       transaction.status === 'pending' ? 'text-yellow-400 border-yellow-400/30' : 
                       'text-red-400 border-red-400/30'
