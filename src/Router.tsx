@@ -1,5 +1,5 @@
 
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
 import AppLayout from './components/layout/AppLayout';
 import AdminLayout from './components/layout/AdminLayout';
 import Dashboard from './pages/Dashboard';
@@ -43,6 +43,7 @@ import NewAgent from './pages/NewAgent';
 import Properties from './pages/Properties';
 import SystemLogs from './pages/admin/SystemLogs';
 import Database from './pages/admin/Database';
+import Settings from './pages/Settings';
 
 // Merged router with all routes from both implementations
 const router = createBrowserRouter([
