@@ -28,7 +28,7 @@ const UpcomingPayments: React.FC<UpcomingPaymentsProps> = ({ onViewAll }) => {
   };
   
   return (
-    <Card className="h-full">
+    <Card className="h-full border border-border bg-card shadow-sm">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-sm font-medium">
           Upcoming Commission Payments
