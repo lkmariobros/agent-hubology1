@@ -1,3 +1,4 @@
+
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import AppLayout from './components/layout/AppLayout';
 import AdminLayout from './components/layout/AdminLayout';
@@ -18,7 +19,6 @@ import Roles from './pages/admin/Roles';
 import NewTransaction from './pages/NewTransaction';
 import TransactionList from './pages/TransactionList';
 import TransactionDetail from './pages/TransactionDetail';
-import { AuthProvider } from './providers/AuthProvider';
 import Login from './pages/auth/Login';
 import Signup from './pages/auth/Signup';
 import ForgotPassword from './pages/auth/ForgotPassword';
@@ -31,61 +31,124 @@ import ProtectedRoute from './components/auth/ProtectedRoute';
 import NewProperty from './pages/NewProperty';
 import AdminTransactions from './pages/admin/Transactions';
 import Index from './pages/Index';
+import Home from './pages/Home';
+import Profile from './pages/Profile';
+import Opportunities from './pages/Opportunities';
+import Leaderboard from './pages/leaderboard/Leaderboard';
+import PointsLeaderboard from './pages/leaderboard/Points';
+import SalesLeaderboard from './pages/leaderboard/Sales';
+import Agents from './pages/Agents';
+import AgentDetail from './pages/AgentDetail';
+import NewAgent from './pages/NewAgent';
+import Properties from './pages/Properties';
+import SystemLogs from './pages/admin/SystemLogs';
+import Database from './pages/admin/Database';
 
+// Merged router with all routes from both implementations
 const router = createBrowserRouter([
   // Auth routes - outside of layouts
   { path: '/', element: <Index /> },
   { path: '/login', element: <Login /> },
   { path: '/signup', element: <Signup /> },
-  { path: '/invite', element: <Signup /> }, // Handle invitation links more cleanly
+  { path: '/invite', element: <Signup /> }, // Handle invitation links
   { path: '/forgot-password', element: <ForgotPassword /> },
   { path: '/reset-password', element: <ResetPassword /> },
   
   // Agent portal routes
   {
     path: '/',
-    element: <AuthProvider><AppLayout /></AuthProvider>,
+    element: <ProtectedRoute><AppLayout /></ProtectedRoute>,
     errorElement: <NotFound />,
     children: [
       { 
         index: true, 
-        element: <ProtectedRoute><Dashboard /></ProtectedRoute> 
+        element: <Dashboard /> 
       },
       { 
         path: 'dashboard', 
-        element: <ProtectedRoute><Dashboard /></ProtectedRoute> 
+        element: <Dashboard /> 
+      },
+      { 
+        path: 'home', 
+        element: <Home /> 
       },
       { 
         path: 'properties', 
-        element: <ProtectedRoute><PropertyList /></ProtectedRoute> 
+        element: <Properties /> 
       },
       { 
         path: 'properties/:id', 
-        element: <ProtectedRoute><PropertyDetail /></ProtectedRoute> 
+        element: <PropertyDetail /> 
+      },
+      { 
+        path: 'properties/new', 
+        element: <NewProperty /> 
       },
       { 
         path: 'team', 
-        element: <ProtectedRoute><Team /></ProtectedRoute> 
+        element: <Team /> 
       },
       { 
         path: 'transactions', 
-        element: <ProtectedRoute><TransactionList /></ProtectedRoute> 
+        element: <TransactionList /> 
       },
       { 
         path: 'transactions/new', 
-        element: <ProtectedRoute><NewTransaction /></ProtectedRoute> 
+        element: <NewTransaction /> 
       },
       { 
         path: 'transactions/:id', 
-        element: <ProtectedRoute><TransactionDetail /></ProtectedRoute> 
+        element: <TransactionDetail /> 
       },
       { 
         path: 'commission', 
-        element: <ProtectedRoute><Commission /></ProtectedRoute> 
+        element: <Commission /> 
       },
       { 
         path: 'commission/forecast', 
-        element: <ProtectedRoute><CommissionForecast /></ProtectedRoute> 
+        element: <CommissionForecast /> 
+      },
+      { 
+        path: 'profile', 
+        element: <Profile /> 
+      },
+      { 
+        path: 'settings', 
+        element: <Settings /> 
+      },
+      { 
+        path: 'opportunities', 
+        element: <Opportunities /> 
+      },
+      { 
+        path: 'agents', 
+        element: <Agents /> 
+      },
+      { 
+        path: 'agents/:id', 
+        element: <AgentDetail /> 
+      },
+      { 
+        path: 'agents/new', 
+        element: <NewAgent /> 
+      },
+      { 
+        path: 'reports', 
+        element: <Reports /> 
+      },
+      
+      // Leaderboard Routes
+      { 
+        path: 'leaderboard', 
+        element: <Leaderboard /> 
+      },
+      { 
+        path: 'leaderboard/points', 
+        element: <PointsLeaderboard /> 
+      },
+      { 
+        path: 'leaderboard/sales', 
+        element: <SalesLeaderboard /> 
       },
     ],
   },
@@ -93,87 +156,105 @@ const router = createBrowserRouter([
   // Admin portal routes
   {
     path: '/admin',
-    element: <AuthProvider><AdminLayout /></AuthProvider>,
+    element: <ProtectedRoute><AdminLayout /></ProtectedRoute>,
     errorElement: <NotFound />,
     children: [
       { 
         index: true, 
-        element: <ProtectedRoute requireAdmin={true}><AdminDashboard /></ProtectedRoute> 
+        element: <AdminDashboard /> 
       },
       { 
         path: 'dashboard', 
-        element: <ProtectedRoute requireAdmin={true}><AdminDashboard /></ProtectedRoute> 
+        element: <AdminDashboard /> 
       },
       { 
         path: 'agents', 
-        element: <ProtectedRoute requireAdmin={true}><AdminAgents /></ProtectedRoute> 
+        element: <AdminAgents /> 
       },
       { 
         path: 'properties', 
-        element: <ProtectedRoute requireAdmin={true}><AdminProperties /></ProtectedRoute> 
+        element: <AdminProperties /> 
       },
       { 
         path: 'transactions', 
-        element: <ProtectedRoute requireAdmin={true}><AdminTransactions /></ProtectedRoute> 
+        element: <AdminTransactions /> 
+      },
+      { 
+        path: 'commission', 
+        element: <CommissionApproval /> 
       },
       { 
         path: 'commission/tiers', 
-        element: <ProtectedRoute requireAdmin={true}><CommissionTiers /></ProtectedRoute> 
+        element: <CommissionTiers /> 
       },
       { 
         path: 'commission/schedules', 
-        element: <ProtectedRoute requireAdmin={true}><PaymentSchedulesAdmin /></ProtectedRoute> 
+        element: <PaymentSchedulesAdmin /> 
       },
       { 
         path: 'commission/settings', 
-        element: <ProtectedRoute requireAdmin={true}><CommissionSettings /></ProtectedRoute> 
+        element: <CommissionSettings /> 
       },
       { 
         path: 'commission/forecast', 
-        element: <ProtectedRoute requireAdmin={true}><CommissionForecastPage /></ProtectedRoute> 
+        element: <CommissionForecastPage /> 
+      },
+      { 
+        path: 'commission/approvals', 
+        element: <CommissionApproval /> 
+      },
+      { 
+        path: 'commission/approvals/:id', 
+        element: <CommissionApproval /> 
       },
       { 
         path: 'commissions', 
-        element: <ProtectedRoute requireAdmin={true}><CommissionApproval /></ProtectedRoute> 
+        element: <CommissionApproval /> 
       },
       { 
         path: 'commissions/:id', 
-        element: <ProtectedRoute requireAdmin={true}><CommissionApproval /></ProtectedRoute> 
+        element: <CommissionApproval /> 
       },
       { 
         path: 'roles', 
-        element: <ProtectedRoute requireAdmin={true}><Roles /></ProtectedRoute> 
+        element: <Roles /> 
       },
       { 
         path: 'settings', 
-        element: <ProtectedRoute requireAdmin={true}><AdminSettings /></ProtectedRoute> 
-      },
-      { 
-        path: 'reports/overview', 
-        element: <ProtectedRoute requireAdmin={true}><Reports /></ProtectedRoute> 
-      },
-      { 
-        path: 'reports/performance', 
-        element: <ProtectedRoute requireAdmin={true}><Reports /></ProtectedRoute> 
-      },
-      { 
-        path: 'reports/sales', 
-        element: <ProtectedRoute requireAdmin={true}><Reports /></ProtectedRoute> 
-      },
-      { 
-        path: 'reports/custom', 
-        element: <ProtectedRoute requireAdmin={true}><Reports /></ProtectedRoute> 
+        element: <AdminSettings /> 
       },
       { 
         path: 'system-logs', 
-        element: <ProtectedRoute requireAdmin={true}><AdminDashboard /></ProtectedRoute> 
+        element: <SystemLogs /> 
       },
       { 
         path: 'database', 
-        element: <ProtectedRoute requireAdmin={true}><AdminDashboard /></ProtectedRoute> 
+        element: <Database /> 
+      },
+      { 
+        path: 'reports/overview', 
+        element: <Reports /> 
+      },
+      { 
+        path: 'reports/performance', 
+        element: <Reports /> 
+      },
+      { 
+        path: 'reports/sales', 
+        element: <Reports /> 
+      },
+      { 
+        path: 'reports/custom', 
+        element: <Reports /> 
       },
     ],
   },
+  
+  // Root redirects based on role
+  { path: '/admin-redirect', element: <ProtectedRoute><Navigate to="/admin/dashboard" replace /></ProtectedRoute> },
+  { path: '/agent-redirect', element: <ProtectedRoute><Navigate to="/dashboard" replace /></ProtectedRoute> },
+  
+  // Fallback
   { path: '*', element: <NotFound /> },
 ]);
 
