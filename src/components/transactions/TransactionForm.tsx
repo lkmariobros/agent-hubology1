@@ -7,6 +7,7 @@ import { format } from 'date-fns';
 import { Calendar as CalendarIcon, Upload, Building, Home, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { usePaymentSchedules } from '@/hooks/usePaymentSchedules';
 
 // UI Components
 import { Button } from '@/components/ui/button';
@@ -18,6 +19,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Form,
   FormControl,
@@ -36,6 +38,7 @@ const transactionSchema = z.object({
   status: z.string(),
   propertyId: z.string().min(1, 'Property is required'),
   agentId: z.string().min(1, 'Agent is required'),
+  paymentScheduleId: z.string().optional(), // Add payment schedule field
   buyer: z.object({
     name: z.string().optional(),
     email: z.string().optional(),
@@ -62,6 +65,9 @@ const TransactionForm = () => {
   const [documentFiles, setDocumentFiles] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Get payment schedules
+  const { paymentSchedules, defaultPaymentSchedule, isLoading: isLoadingSchedules } = usePaymentSchedules();
+
   const form = useForm<FormValues>({
     resolver: zodResolver(transactionSchema),
     defaultValues: {
@@ -70,6 +76,7 @@ const TransactionForm = () => {
       status: 'pending',
       propertyId: '',
       agentId: '',
+      paymentScheduleId: defaultPaymentSchedule?.id, // Add payment schedule default
       transactionValue: 0,
       commissionRate: 5,
       commissionAmount: 0,
@@ -94,16 +101,17 @@ const TransactionForm = () => {
 
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true);
-    
+
     try {
       // Add the files to form data
       const formData = {
         ...data,
         documents: documentFiles,
+        paymentScheduleId: data.paymentScheduleId || defaultPaymentSchedule?.id, // Add payment schedule
       };
-      
+
       console.log('Transaction submitted:', formData);
-      
+
       // Here you would normally send the data to your API
       // For now, we'll just simulate a successful submission
       toast.success('Transaction created successfully!');
@@ -317,10 +325,10 @@ const TransactionForm = () => {
                     <FormControl>
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2">$</span>
-                        <Input 
-                          type="number" 
-                          placeholder="0.00" 
-                          className="pl-7" 
+                        <Input
+                          type="number"
+                          placeholder="0.00"
+                          className="pl-7"
                           {...field}
                           onChange={(e) => {
                             const value = parseFloat(e.target.value);
@@ -347,14 +355,47 @@ const TransactionForm = () => {
                     <FormControl>
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2">$</span>
-                        <Input 
-                          type="number" 
-                          placeholder="0.00" 
-                          className="pl-7" 
+                        <Input
+                          type="number"
+                          placeholder="0.00"
+                          className="pl-7"
                           {...field}
                         />
                       </div>
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Payment Schedule Selection */}
+              <FormField
+                control={form.control}
+                name="paymentScheduleId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Payment Schedule</FormLabel>
+                    <FormControl>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        disabled={isLoadingSchedules}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select payment schedule" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {paymentSchedules.map((schedule) => (
+                            <SelectItem key={schedule.id} value={schedule.id}>
+                              {schedule.name} - {schedule.description}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormDescription>
+                      Choose how the commission will be paid out.
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -425,9 +466,9 @@ const TransactionForm = () => {
 
             {/* Submit Button */}
             <div className="flex justify-end space-x-2">
-              <Button 
-                type="button" 
-                variant="outline" 
+              <Button
+                type="button"
+                variant="outline"
                 onClick={() => navigate('/transactions')}
                 disabled={isSubmitting}
               >

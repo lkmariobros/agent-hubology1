@@ -1,6 +1,6 @@
 
 import React, { useCallback, useMemo } from 'react';
-import { useTransactionForm } from '@/context/TransactionForm';
+import { useClerkTransactionForm } from '@/context/TransactionForm/ClerkTransactionFormContext';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { ErrorBoundary } from 'react-error-boundary';
@@ -29,7 +29,7 @@ const ErrorFallback: React.FC<ErrorFallbackProps> = ({ error, resetErrorBoundary
 );
 
 const CoBrokingSetup: React.FC = () => {
-  const { state, updateFormData } = useTransactionForm();
+  const { state, updateFormData } = useClerkTransactionForm();
   const { formData, errors } = state;
   
   console.log('CoBrokingSetup rendered with formData:', formData);

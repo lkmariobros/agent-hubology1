@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useTransactionForm } from '@/context/TransactionForm';
+import { useClerkTransactionForm } from '@/context/TransactionForm/ClerkTransactionFormContext';
 import { Home, Building, Key } from 'lucide-react';
 import { 
   Card, 
@@ -44,7 +44,7 @@ const transactionTypes: {
 ];
 
 const TransactionTypeSelector: React.FC = () => {
-  const { state, updateTransactionType, nextStep } = useTransactionForm();
+  const { state, updateTransactionType, nextStep } = useClerkTransactionForm();
   const { formData } = state;
   
   const handleContinue = () => {

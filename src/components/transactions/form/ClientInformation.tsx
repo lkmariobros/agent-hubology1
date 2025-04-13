@@ -1,11 +1,11 @@
 import React from 'react';
-import { useTransactionForm } from '@/context/TransactionFormContext';
+import { useClerkTransactionForm } from '@/context/TransactionForm/ClerkTransactionFormContext';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 
 const ClientInformation: React.FC = () => {
-  const { state, updateFormData } = useTransactionForm();
+  const { state, updateFormData } = useClerkTransactionForm();
   const { formData, errors } = state;
 
   // Based on transaction type, we'll show different client fields

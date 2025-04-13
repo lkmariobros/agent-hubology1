@@ -125,7 +125,7 @@ Sidebar.displayName = "Sidebar"
 export const SidebarTrigger = React.forwardRef<
   React.ElementRef<typeof Button>,
   React.ComponentProps<typeof Button>
->(({ className, onClick, ...props }, ref) => {
+>(({ className, onClick, children, ...props }, ref) => {
   const { toggleSidebar } = useSidebar()
 
   return (
@@ -141,8 +141,10 @@ export const SidebarTrigger = React.forwardRef<
       }}
       {...props}
     >
-      <PanelLeft />
-      <span className="sr-only">Toggle Sidebar</span>
+      {/* If no children are provided, use the default PanelLeft icon */}
+      {children || <PanelLeft />}
+      {/* Always include screen reader text if not provided in children */}
+      {!children && <span className="sr-only">Toggle Sidebar</span>}
     </Button>
   )
 })

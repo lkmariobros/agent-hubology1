@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useTransactionForm } from '@/context/TransactionFormContext';
+import { useClerkTransactionForm } from '@/context/TransactionForm/ClerkTransactionFormContext';
 import { Search, MapPin } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -31,7 +31,7 @@ const sampleProperties: PropertyOption[] = [
 ];
 
 const PropertyDetails: React.FC = () => {
-  const { state, updateFormData } = useTransactionForm();
+  const { state, updateFormData } = useClerkTransactionForm();
   const { formData, errors } = state;
   
   const [searchQuery, setSearchQuery] = useState('');

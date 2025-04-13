@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import { useTransactionForm } from '@/context/TransactionForm';
+import { useClerkTransactionForm } from '@/context/TransactionForm/ClerkTransactionFormContext';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
@@ -15,7 +15,7 @@ const CommissionInputs: React.FC<CommissionInputsProps> = ({
   ownerCommissionAmount, 
   setOwnerCommissionAmount 
 }) => {
-  const { state, updateFormData } = useTransactionForm();
+  const { state, updateFormData } = useClerkTransactionForm();
   const { formData } = state;
   
   // Get transaction value and commission rate from form data

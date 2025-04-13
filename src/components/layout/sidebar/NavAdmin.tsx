@@ -2,12 +2,12 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Users, Building, Briefcase, ListChecks, CircleDollarSign, Settings } from 'lucide-react';
-import { 
-  SidebarGroup, 
-  SidebarGroupLabel, 
-  SidebarGroupContent, 
-  SidebarMenu, 
-  SidebarMenuItem, 
+import {
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarGroupContent,
+  SidebarMenu,
+  SidebarMenuItem,
   SidebarMenuButton,
   useSidebar
 } from '@/components/ui/sidebar';
@@ -16,7 +16,7 @@ export function NavAdmin() {
   const location = useLocation();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
-  
+
   return (
     <SidebarGroup>
       {!collapsed && (
@@ -27,32 +27,32 @@ export function NavAdmin() {
       <SidebarGroupContent>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton 
-              asChild 
+            <SidebarMenuButton
+              asChild
               isActive={location.pathname === '/admin' || location.pathname === '/admin/dashboard'}
               tooltip="Dashboard"
             >
-              <NavLink to="/admin" end className={collapsed ? "justify-center" : "pl-4"}>
+              <NavLink to="/admin/dashboard" end className={collapsed ? "justify-center" : "pl-4"}>
                 <LayoutDashboard className="h-4 w-4" />
                 {!collapsed && <span>Dashboard</span>}
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton 
-              asChild 
-              isActive={location.pathname.includes('/admin/agents')}
+            <SidebarMenuButton
+              asChild
+              isActive={location.pathname.includes('/admin/users')}
               tooltip="Agents"
             >
-              <NavLink to="/admin/agents" className={collapsed ? "justify-center" : "pl-4"}>
+              <NavLink to="/admin/users" className={collapsed ? "justify-center" : "pl-4"}>
                 <Users className="h-4 w-4" />
                 {!collapsed && <span>Agents</span>}
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton 
-              asChild 
+            <SidebarMenuButton
+              asChild
               isActive={location.pathname.includes('/admin/properties')}
               tooltip="Properties"
             >
@@ -63,8 +63,8 @@ export function NavAdmin() {
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton 
-              asChild 
+            <SidebarMenuButton
+              asChild
               isActive={location.pathname.includes('/admin/transactions')}
               tooltip="Transactions"
             >
@@ -75,12 +75,12 @@ export function NavAdmin() {
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton 
-              asChild 
-              isActive={location.pathname.includes('/admin/commissions')}
+            <SidebarMenuButton
+              asChild
+              isActive={location.pathname.includes('/admin/commission-approval')}
               tooltip="Commission Approvals"
             >
-              <NavLink to="/admin/commissions" className={collapsed ? "justify-center" : "pl-4"}>
+              <NavLink to="/admin/commission-approval" className={collapsed ? "justify-center" : "pl-4"}>
                 <ListChecks className="h-4 w-4" />
                 {!collapsed && <span>Commission Approvals</span>}
               </NavLink>

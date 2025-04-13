@@ -23,16 +23,16 @@ export function PortalSwitcher({ showLabel = true, className = "" }: PortalSwitc
   const { isAdmin, activeRole, switchRole, roles, user } = useAuth();
   const isAdminActive = activeRole === 'admin';
   const [hasAdminRole, setHasAdminRole] = useState(false);
-  
-  // Check for special admin user (josephkwantum@gmail.com)
-  const isSpecialAdminUser = user?.email === 'josephkwantum@gmail.com';
-  
+
+  // Check for special admin user (admin@example.com)
+  const isSpecialAdminUser = user?.email === 'admin@example.com';
+
   useEffect(() => {
     // Force recheck for admin role
     setHasAdminRole(roles.includes('admin'));
     console.log('PortalSwitcher: roles updated', roles, 'isAdmin:', isAdmin, 'hasAdmin:', roles.includes('admin'));
   }, [roles, isAdmin]);
-  
+
   // For non-admin users who aren't the special admin user, just show the logo without dropdown functionality
   if (!isAdmin && !hasAdminRole && !isSpecialAdminUser) {
     return (
@@ -53,10 +53,10 @@ export function PortalSwitcher({ showLabel = true, className = "" }: PortalSwitc
   const handleSwitchRole = (role: UserRole) => {
     // Show toast notification before switching
     toast.success(`Switching to ${role === 'admin' ? 'Admin' : 'Agent'} Portal...`);
-    
+
     // First switch the role
     switchRole(role);
-    
+
     // Add a slight delay to allow the role switch to complete
     setTimeout(() => {
       // Hard redirect to the appropriate portal
@@ -73,7 +73,7 @@ export function PortalSwitcher({ showLabel = true, className = "" }: PortalSwitc
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button 
+        <button
           className={`flex items-center justify-between w-full px-2 py-2 hover:bg-gray-800/30 rounded-md transition-colors focus:outline-none ${className}`}
           aria-label="Switch between portals"
         >
@@ -88,19 +88,19 @@ export function PortalSwitcher({ showLabel = true, className = "" }: PortalSwitc
           <ChevronsUpDown className="h-4 w-4 opacity-60 ml-2" />
         </button>
       </DropdownMenuTrigger>
-      
+
       <DropdownMenuContent align="start" className="w-[220px] bg-gray-900/95 text-white border-gray-700">
-        <DropdownMenuItem 
+        <DropdownMenuItem
           onClick={() => handleSwitchRole('agent')}
           className={`flex items-center cursor-pointer hover:bg-gray-800 ${!isAdminActive ? 'bg-gray-800/50' : ''}`}
         >
           <Building className="h-4 w-4 mr-2" />
           <span>Agent Portal</span>
         </DropdownMenuItem>
-        
+
         <DropdownMenuSeparator className="bg-gray-700" />
-        
-        <DropdownMenuItem 
+
+        <DropdownMenuItem
           onClick={() => handleSwitchRole('admin')}
           className={`flex items-center cursor-pointer hover:bg-gray-800 ${isAdminActive ? 'bg-gray-800/50' : ''}`}
         >

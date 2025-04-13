@@ -1,12 +1,15 @@
 
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { 
-  Building2, 
-  LayoutDashboard, 
-  FileText, 
-  Users, 
-  DollarSign
+import {
+  Building2,
+  LayoutDashboard,
+  FileText,
+  Users,
+  DollarSign,
+  Briefcase,
+  Trophy,
+  BarChart
 } from 'lucide-react';
 import {
   SidebarGroup,
@@ -20,30 +23,45 @@ import {
 
 // Main navigation data
 const mainNavItems = [
-  { 
-    icon: LayoutDashboard, 
-    label: 'Dashboard', 
+  {
+    icon: LayoutDashboard,
+    label: 'Dashboard',
     href: '/dashboard',
   },
-  { 
-    icon: Building2, 
-    label: 'Properties', 
-    href: '/properties' 
+  {
+    icon: Building2,
+    label: 'Properties',
+    href: '/properties'
   },
-  { 
-    icon: FileText, 
-    label: 'Transactions', 
-    href: '/transactions' 
+  {
+    icon: FileText,
+    label: 'Transactions',
+    href: '/transactions'
   },
-  { 
-    icon: Users, 
-    label: 'Team', 
-    href: '/team' 
+  {
+    icon: Users,
+    label: 'Team',
+    href: '/team'
   },
-  { 
-    icon: DollarSign, 
-    label: 'Commission', 
-    href: '/commission' 
+  {
+    icon: DollarSign,
+    label: 'Commission',
+    href: '/commission'
+  },
+  {
+    icon: Briefcase,
+    label: 'Opportunities',
+    href: '/opportunities'
+  },
+  {
+    icon: BarChart,
+    label: 'Reports',
+    href: '/reports'
+  },
+  {
+    icon: Trophy,
+    label: 'Leaderboard',
+    href: '/leaderboard'
   },
 ];
 
@@ -52,7 +70,7 @@ export function NavMain() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const currentPath = location.pathname;
-  
+
   return (
     <SidebarGroup>
       {!collapsed && <SidebarGroupLabel>Main</SidebarGroupLabel>}
@@ -60,13 +78,13 @@ export function NavMain() {
         <SidebarMenu>
           {mainNavItems.map((item) => {
             // Check if current path starts with this item's href (for nested routes)
-            const isActive = currentPath === item.href || 
+            const isActive = currentPath === item.href ||
                            (item.href !== '/dashboard' && currentPath.startsWith(item.href));
-            
+
             return (
               <SidebarMenuItem key={item.label}>
-                <SidebarMenuButton 
-                  asChild 
+                <SidebarMenuButton
+                  asChild
                   isActive={isActive}
                   tooltip={item.label}
                   size="default"

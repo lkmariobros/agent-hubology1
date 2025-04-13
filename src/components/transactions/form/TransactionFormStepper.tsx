@@ -1,10 +1,10 @@
 
 import React from 'react';
-import { useTransactionForm } from '@/context/TransactionForm';
+import { useClerkTransactionForm } from '@/context/TransactionForm/ClerkTransactionFormContext';
 import { Button } from '@/components/ui/button';
 
 const TransactionFormStepper: React.FC = () => {
-  const { state, prevStep, nextStep, goToStep } = useTransactionForm();
+  const { state, prevStep, nextStep, goToStep } = useClerkTransactionForm();
   const { currentStep } = state;
   
   const steps = [
@@ -20,24 +20,31 @@ const TransactionFormStepper: React.FC = () => {
   return (
     <div className="mb-6">
       <div className="flex items-center justify-between">
-        {steps.map((step, index) => (
-          <React.Fragment key={index}>
-            <Button
-              variant={currentStep === index ? "default" : "ghost"}
-              size="sm"
-              className={`rounded-full ${currentStep === index ? "" : "text-muted-foreground"}`}
-              onClick={() => goToStep(index)}
-              disabled={index > currentStep}
-            >
-              <span className="mr-2">{index + 1}</span>
-              <span className="hidden sm:inline">{step}</span>
-            </Button>
-            
-            {index < steps.length - 1 && (
-              <div className="h-px w-full bg-muted" />
-            )}
-          </React.Fragment>
-        ))}
+        {steps.map((step, index) => {
+          // Create an empty object with only the key prop to avoid data-lov-id
+          const fragmentProps = { key: index };
+          
+          return React.createElement(
+            React.Fragment,
+            fragmentProps,
+            <>
+              <Button
+                variant={currentStep === index ? "default" : "ghost"}
+                size="sm"
+                className={`rounded-full ${currentStep === index ? "" : "text-muted-foreground"}`}
+                onClick={() => goToStep(index)}
+                disabled={index > currentStep}
+              >
+                <span className="mr-2">{index + 1}</span>
+                <span className="hidden sm:inline">{step}</span>
+              </Button>
+              
+              {index < steps.length - 1 && (
+                <div className="h-px w-full bg-muted" />
+              )}
+            </>
+          );
+        })}
       </div>
     </div>
   );

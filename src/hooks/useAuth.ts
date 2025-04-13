@@ -1,24 +1,12 @@
-import { useAuth as useClerkAuth } from '@clerk/clerk-react';
-import { useUser } from '@clerk/clerk-react';
+import { useClerkAuth } from './useClerkAuth';
 import { AuthContextType } from '@/types/auth';
 
 /**
  * Compatibility hook that provides the same interface as the original useAuth hook
  * but uses Clerk for authentication
  */
-export function useAuth(): AuthContextType {
-  const { isLoaded, isSignedIn } = useClerkAuth();
-  const { user } = useUser();
-
-  // Create a compatibility layer for the existing auth interface
-  // Create a user object that matches the UserProfile interface
-  const userProfile = user ? {
-    id: user.id,
-    email: user.primaryEmailAddress?.emailAddress || '',
-    name: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
-    roles: ['agent' as const],
-    activeRole: 'agent' as const
-  } : null;
+export function useAuth(): AuthContextType & { getToken: () => Promise<string | null>, userId: string | null } {
+  const { isLoaded, isSignedIn, user: userProfile, isAdmin, getToken } = useClerkAuth();
 
   const compatAuth: AuthContextType = {
     user: userProfile,
@@ -27,9 +15,9 @@ export function useAuth(): AuthContextType {
     loading: !isLoaded,
     error: null,
     isAuthenticated: !!isSignedIn,
-    isAdmin: false, // We don't have roles yet
-    roles: ['agent'], // Default role
-    activeRole: 'agent', // Default role
+    isAdmin: isAdmin, // Use the admin status from Clerk
+    roles: userProfile?.roles || ['agent'], // Use roles from userProfile
+    activeRole: userProfile?.activeRole || 'agent', // Use activeRole from userProfile
 
     // Auth methods - these will need to be implemented with Clerk equivalents
     signIn: async (email: string, password: string) => {
@@ -54,14 +42,25 @@ export function useAuth(): AuthContextType {
 
     // Role management
     switchRole: (role) => {
-      console.log('Role switching not implemented yet');
+      if (role === 'admin' && !isAdmin) {
+        console.log('User does not have admin role');
+        return;
+      }
+      // In a real implementation, this would update the user's active role
+      console.log(`Switching to role: ${role}`);
+      window.location.href = role === 'admin' ? '/admin/dashboard' : '/dashboard';
     },
     hasRole: (role) => {
-      return role === 'agent'; // Default to agent role for now
+      if (role === 'admin') return isAdmin;
+      return userProfile?.roles?.includes(role) || false;
     }
   };
 
-  return compatAuth;
+  return {
+    ...compatAuth,
+    getToken,
+    userId: userProfile?.id || null
+  };
 }
 
 export default useAuth;

@@ -9,6 +9,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Home } from 'lucide-react';
+import ErrorBoundary from '@/components/common/ErrorBoundary';
 
 const PageBreadcrumb = () => {
   const navigate = useNavigate();
@@ -118,39 +119,55 @@ const PageBreadcrumb = () => {
   }
 
   return (
-    <Breadcrumb>
-      <BreadcrumbList className="text-sm text-muted-foreground">
-        {breadcrumbItems.map((item, index) => (
-          <React.Fragment key={item.path}>
-            <BreadcrumbItem>
-              {index === breadcrumbItems.length - 1 ? (
-                <BreadcrumbPage>
-                  {item.isHome ? (
-                    <span className="sr-only">Home</span>
-                  ) : item.label}
-                </BreadcrumbPage>
-              ) : (
-                <BreadcrumbLink
-                  href={item.path}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    navigate(item.path);
-                  }}
-                >
-                  {item.isHome ? (
-                    <>
-                      <Home size={16} aria-hidden="true" />
-                      <span className="sr-only">Home</span>
-                    </>
-                  ) : item.label}
-                </BreadcrumbLink>
-              )}
-            </BreadcrumbItem>
-            {index < breadcrumbItems.length - 1 && <BreadcrumbSeparator />}
-          </React.Fragment>
-        ))}
-      </BreadcrumbList>
-    </Breadcrumb>
+    <ErrorBoundary fallback={<div className="text-sm text-muted-foreground">Navigation</div>}>
+      <Breadcrumb>
+        <BreadcrumbList className="text-sm text-muted-foreground">
+          {breadcrumbItems.map((item, index) => {
+            // Create an empty object without any extra attributes
+            const fragmentProps = { key: item.path };
+            
+            return React.createElement(
+              React.Fragment,
+              fragmentProps,
+              <>
+                <BreadcrumbItem>
+                  {index === breadcrumbItems.length - 1 ? (
+                    <BreadcrumbPage>
+                      {item.isHome ? (
+                        <div className="flex items-center">
+                          <Home size={16} aria-hidden="true" />
+                          <span className="sr-only">Home</span>
+                        </div>
+                      ) : (
+                        item.label
+                      )}
+                    </BreadcrumbPage>
+                  ) : (
+                    <BreadcrumbLink
+                      href={item.path}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        navigate(item.path);
+                      }}
+                    >
+                      {item.isHome ? (
+                        <div className="flex items-center">
+                          <Home size={16} aria-hidden="true" />
+                          <span className="sr-only">Home</span>
+                        </div>
+                      ) : (
+                        item.label
+                      )}
+                    </BreadcrumbLink>
+                  )}
+                </BreadcrumbItem>
+                {index < breadcrumbItems.length - 1 && <BreadcrumbSeparator />}
+              </>
+            );
+          })}
+        </BreadcrumbList>
+      </Breadcrumb>
+    </ErrorBoundary>
   );
 };
 

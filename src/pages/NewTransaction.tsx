@@ -1,8 +1,7 @@
 
 import React from 'react';
-import EnhancedTransactionForm from '@/components/transactions/EnhancedTransactionForm';
+import ClerkTransactionForm from '@/components/transactions/ClerkTransactionForm';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Toaster } from '@/components/ui/sonner';
 
 const NewTransaction = () => {
   return (
@@ -14,11 +13,10 @@ const NewTransaction = () => {
           <CardTitle>Transaction Details</CardTitle>
         </CardHeader>
         <CardContent>
-          <EnhancedTransactionForm />
+          <ClerkTransactionForm />
         </CardContent>
       </Card>
-      
-      {/* The Toaster component is now global in main.tsx, so we don't need it here */}
+
     </div>
   );
 };

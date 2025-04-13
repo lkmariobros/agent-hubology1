@@ -1,95 +1,121 @@
 
-import React, { useState } from 'react';
-import { useTransactionForm } from '@/context/TransactionForm';
+import React, { useState, useCallback, memo } from 'react';
+import { useClerkTransactionForm } from '@/context/TransactionForm/ClerkTransactionFormContext';
 import { Upload, FileText, X, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { 
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardFooter, 
-  CardHeader, 
-  CardTitle 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle
 } from '@/components/ui/card';
-import { DocumentType, TransactionDocument } from '@/types/transaction-form';
 
-const DocumentUpload: React.FC = () => {
-  const { state, addDocument, removeDocument } = useTransactionForm();
+// Define types for documents
+type DocumentType = 'Contract' | 'Agreement' | 'Invoice' | 'Receipt' | 'Other';
+
+interface TransactionDocument {
+  name: string;
+  documentType: DocumentType;
+  file: File;
+  url?: string;
+}
+
+// Memoized component to prevent unnecessary re-renders
+const DocumentUpload: React.FC = memo(() => {
+  const { state, addDocument, removeDocument, nextStep, prevStep } = useClerkTransactionForm();
   const { documents } = state;
-  
+
+  // Local state for document form
   const [documentName, setDocumentName] = useState('');
   const [documentType, setDocumentType] = useState<DocumentType>('Contract');
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
-  
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+
+  // Memoized handlers to prevent recreating functions on each render
+  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
+
       // Check file size (limit to 5MB)
       if (selectedFile.size > 5 * 1024 * 1024) {
         setError('File size exceeds 5MB limit');
         return;
       }
-      
+
       setFile(selectedFile);
+
       // Use file name as document name if not set
       if (!documentName) {
         const baseName = selectedFile.name.split('.')[0];
         setDocumentName(baseName);
       }
+
       setError(null);
     }
-  };
-  
-  const handleAddDocument = () => {
+  }, [documentName]);
+
+  const handleAddDocument = useCallback(() => {
     if (!documentName.trim()) {
       setError('Document name is required');
       return;
     }
-    
+
     if (!file) {
       setError('Please select a file to upload');
       return;
     }
-    
+
+    // Create document object
     const newDocument: TransactionDocument = {
       name: documentName,
       documentType: documentType,
       file: file,
       url: URL.createObjectURL(file) // Add a temporary URL for preview
     };
-    
+
+    // Add to form state
     addDocument(newDocument);
-    
+
     // Reset form
     setDocumentName('');
     setDocumentType('Contract');
     setFile(null);
     setError(null);
-    
+
     // Reset file input
     const fileInput = document.getElementById('document-file') as HTMLInputElement;
     if (fileInput) {
       fileInput.value = '';
     }
-  };
-  
+  }, [documentName, documentType, file, addDocument]);
+
+  const handleRemoveDocument = useCallback((index: number) => {
+    removeDocument(index);
+  }, [removeDocument]);
+
+  const handleContinue = useCallback(() => {
+    // Documents are optional, so we can always proceed
+    nextStep();
+  }, [nextStep]);
+
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold">Upload Documents</h2>
       <p className="text-muted-foreground">
         Upload any relevant documents for this transaction. This is optional and can be done later.
       </p>
-      
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <Card>
@@ -109,11 +135,11 @@ const DocumentUpload: React.FC = () => {
                   placeholder="Enter document name"
                 />
               </div>
-              
+
               <div>
                 <Label htmlFor="document-type">Document Type</Label>
-                <Select 
-                  value={documentType} 
+                <Select
+                  value={documentType}
                   onValueChange={(value) => setDocumentType(value as DocumentType)}
                 >
                   <SelectTrigger>
@@ -128,7 +154,7 @@ const DocumentUpload: React.FC = () => {
                   </SelectContent>
                 </Select>
               </div>
-              
+
               <div>
                 <Label htmlFor="document-file">File</Label>
                 <div className="mt-1">
@@ -143,7 +169,7 @@ const DocumentUpload: React.FC = () => {
                   Supported file types: PDF, Word, JPG, PNG (max 5MB)
                 </p>
               </div>
-              
+
               {error && (
                 <div className="flex items-center text-destructive text-sm">
                   <AlertCircle className="h-4 w-4 mr-2" />
@@ -159,14 +185,14 @@ const DocumentUpload: React.FC = () => {
             </CardFooter>
           </Card>
         </div>
-        
+
         <div>
           <Card>
             <CardHeader>
               <CardTitle>Uploaded Documents</CardTitle>
               <CardDescription>
-                {documents.length === 0 
-                  ? 'No documents uploaded yet' 
+                {documents.length === 0
+                  ? 'No documents uploaded yet'
                   : `${documents.length} document${documents.length === 1 ? '' : 's'} uploaded`
                 }
               </CardDescription>
@@ -180,8 +206,8 @@ const DocumentUpload: React.FC = () => {
               ) : (
                 <div className="space-y-3">
                   {documents.map((doc, index) => (
-                    <div 
-                      key={index} 
+                    <div
+                      key={index}
                       className="flex items-center justify-between p-3 bg-muted/30 rounded-md"
                     >
                       <div className="flex items-center">
@@ -191,10 +217,10 @@ const DocumentUpload: React.FC = () => {
                           <p className="text-xs text-muted-foreground">{doc.documentType}</p>
                         </div>
                       </div>
-                      <Button 
-                        variant="ghost" 
+                      <Button
+                        variant="ghost"
                         size="icon"
-                        onClick={() => removeDocument(index)}
+                        onClick={() => handleRemoveDocument(index)}
                       >
                         <X className="h-4 w-4" />
                       </Button>
@@ -206,8 +232,27 @@ const DocumentUpload: React.FC = () => {
           </Card>
         </div>
       </div>
+
+      <div className="flex justify-between mt-6">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={prevStep}
+        >
+          Back
+        </Button>
+        <Button
+          type="button"
+          onClick={handleContinue}
+        >
+          Continue
+        </Button>
+      </div>
     </div>
   );
-};
+});
+
+// Add display name for debugging
+DocumentUpload.displayName = 'DocumentUpload';
 
 export default DocumentUpload;

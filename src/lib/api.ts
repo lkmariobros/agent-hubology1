@@ -1,9 +1,11 @@
 import { ApiResponse, PaginatedResponse } from '@/types';
+import { dashboardService } from '@/services/dashboardService';
 
 const API_URL = 'https://your-api-url.com/api';
 
 // Flag to indicate if we're in development mode - use mock data
-const IS_DEVELOPMENT = true;
+// Set to false to use real data from Supabase
+const IS_DEVELOPMENT = false;
 
 // Utility function to handle API requests
 async function apiRequest<T>(
@@ -15,7 +17,7 @@ async function apiRequest<T>(
     // In development mode with missing API, return mock data directly instead of throwing
     if (IS_DEVELOPMENT && endpoint.startsWith('/dashboard')) {
       console.log(`Development mode: Using mock data for ${endpoint}`);
-      
+
       // Return appropriate mock data based on the endpoint
       if (endpoint === '/dashboard/metrics') {
         return getMockMetrics() as unknown as T;
@@ -27,25 +29,25 @@ async function apiRequest<T>(
         return getMockOpportunities() as unknown as T;
       }
     }
-    
+
     const token = localStorage.getItem('token');
-    
+
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
     };
-    
+
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
-    
+
     const config: RequestInit = {
       method,
       headers,
       body: data ? JSON.stringify(data) : undefined,
     };
-    
+
     const response = await fetch(`${API_URL}${endpoint}`, config);
-    
+
     if (!response.ok) {
       // Handle different error statuses
       if (response.status === 401) {
@@ -54,18 +56,18 @@ async function apiRequest<T>(
         window.location.href = '/login';
         throw new Error('Unauthorized access');
       }
-      
+
       if (response.status === 403) {
         throw new Error('Forbidden: You do not have permission to access this resource');
       }
-      
+
       // Try to parse error response
       const errorData = await response.json().catch(() => null);
       throw new Error(
         errorData?.message || `API request failed with status ${response.status}`
       );
     }
-    
+
     return response.json();
   } catch (error) {
     console.error(`API request error for ${endpoint}:`, error);
@@ -469,16 +471,16 @@ export const authApi = {
   login: async (email: string, password: string) => {
     return apiRequest<ApiResponse<{ user: any; token: string }>>('/auth/login', 'POST', { email, password });
   },
-  
+
   register: async (userData: any) => {
     return apiRequest<ApiResponse<{ user: any; token: string }>>('/auth/register', 'POST', userData);
   },
-  
+
   logout: async () => {
     localStorage.removeItem('token');
     return { success: true };
   },
-  
+
   getProfile: async () => {
     return apiRequest<ApiResponse<any>>('/auth/profile');
   }
@@ -492,22 +494,22 @@ export const propertiesApi = {
       pageSize: pageSize.toString(),
       ...filters
     }).toString();
-    
+
     return apiRequest<PaginatedResponse<any>>(`/properties?${queryParams}`);
   },
-  
+
   getById: async (id: string) => {
     return apiRequest<ApiResponse<any>>(`/properties/${id}`);
   },
-  
+
   create: async (propertyData: any) => {
     return apiRequest<ApiResponse<any>>('/properties', 'POST', propertyData);
   },
-  
+
   update: async (id: string, propertyData: any) => {
     return apiRequest<ApiResponse<any>>(`/properties/${id}`, 'PUT', propertyData);
   },
-  
+
   delete: async (id: string) => {
     return apiRequest<ApiResponse<null>>(`/properties/${id}`, 'DELETE');
   }
@@ -521,22 +523,22 @@ export const transactionsApi = {
       pageSize: pageSize.toString(),
       ...filters
     }).toString();
-    
+
     return apiRequest<PaginatedResponse<any>>(`/transactions?${queryParams}`);
   },
-  
+
   getById: async (id: string) => {
     return apiRequest<ApiResponse<any>>(`/transactions/${id}`);
   },
-  
+
   create: async (transactionData: any) => {
     return apiRequest<ApiResponse<any>>('/transactions', 'POST', transactionData);
   },
-  
+
   update: async (id: string, transactionData: any) => {
     return apiRequest<ApiResponse<any>>(`/transactions/${id}`, 'PUT', transactionData);
   },
-  
+
   delete: async (id: string) => {
     return apiRequest<ApiResponse<null>>(`/transactions/${id}`, 'DELETE');
   }
@@ -547,26 +549,26 @@ export const commissionApi = {
   getSummary: async () => {
     return apiRequest<ApiResponse<any>>('/commissions/summary');
   },
-  
+
   getHistory: async (page = 1, pageSize = 10) => {
     // In development mode, return mock data
     if (IS_DEVELOPMENT) {
       console.log('Development mode: Using mock commission history data');
       return getMockCommissionHistory();
     }
-    
+
     const queryParams = new URLSearchParams({
       page: page.toString(),
       pageSize: pageSize.toString()
     }).toString();
-    
+
     return apiRequest<PaginatedResponse<any>>(`/commissions/history?${queryParams}`);
   },
-  
+
   getTiers: async () => {
     return apiRequest<ApiResponse<any[]>>('/commissions/tiers');
   },
-  
+
   // Add new agent hierarchy related functions
   getAgentHierarchy: async (agentId?: string) => {
     // In development mode, return mock data
@@ -574,25 +576,25 @@ export const commissionApi = {
       console.log('Development mode: Using mock agent hierarchy data');
       return getMockAgentHierarchy(agentId).data;
     }
-    
+
     const endpoint = agentId ? `/agents/hierarchy/${agentId}` : '/agents/hierarchy';
     return apiRequest<ApiResponse<any>>(endpoint);
   },
-  
+
   getAgentDownline: async (agentId?: string) => {
     // In development mode, return mock data
     if (IS_DEVELOPMENT) {
       console.log('Development mode: Using mock agent downline data');
       return getMockAgentDownline().data;
     }
-    
+
     return apiRequest<ApiResponse<any[]>>(`/agents/${agentId}/downline`);
   },
-  
+
   updateAgentRank: async ({ agentId, newRank }: { agentId: string, newRank: string }) => {
     return apiRequest<ApiResponse<any>>(`/agents/${agentId}/rank`, 'PUT', { rank: newRank });
   },
-  
+
   addAgent: async (agentData: any) => {
     return apiRequest<ApiResponse<any>>('/agents', 'POST', agentData);
   }
@@ -605,34 +607,38 @@ export const teamApi = {
       page: page.toString(),
       pageSize: pageSize.toString()
     }).toString();
-    
+
     return apiRequest<PaginatedResponse<any>>(`/team/members?${queryParams}`);
   },
-  
+
   getMemberById: async (id: string) => {
     return apiRequest<ApiResponse<any>>(`/team/members/${id}`);
   },
-  
+
   updateMember: async (id: string, memberData: any) => {
     return apiRequest<ApiResponse<any>>(`/team/members/${id}`, 'PUT', memberData);
   }
 };
 
-// Dashboard API functions
+// Dashboard API functions using direct Supabase service
 export const dashboardApi = {
   getMetrics: async () => {
-    return apiRequest<ApiResponse<any>>('/dashboard/metrics');
+    // Use direct Supabase service instead of API request
+    return dashboardService.getMetrics();
   },
-  
+
   getRecentTransactions: async (limit = 5) => {
-    return apiRequest<ApiResponse<any[]>>(`/dashboard/recent-transactions?limit=${limit}`);
+    // Use direct Supabase service instead of API request
+    return dashboardService.getRecentTransactions(limit);
   },
-  
+
   getRecentProperties: async (limit = 5) => {
-    return apiRequest<ApiResponse<any[]>>(`/dashboard/recent-properties?limit=${limit}`);
+    // Use direct Supabase service instead of API request
+    return dashboardService.getRecentProperties(limit);
   },
-  
+
   getOpportunities: async () => {
-    return apiRequest<ApiResponse<any[]>>('/dashboard/opportunities');
+    // Use direct Supabase service instead of API request
+    return dashboardService.getOpportunities();
   }
 };

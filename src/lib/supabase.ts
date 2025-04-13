@@ -44,19 +44,21 @@ if (import.meta.env.DEV && (!import.meta.env.VITE_SUPABASE_URL || !import.meta.e
 }
 
 // Error handling utilities for Supabase operations
-export const handleSupabaseError = (error: any, operation: string) => {
-  const errorMessage = error?.message || `An error occurred during ${operation}`;
+export const handleSupabaseError = (error: any, functionName: string) => {
+  console.error(`Error in ${functionName}:`, error);
 
-  if (import.meta.env.DEV) {
-    console.error(`Supabase ${operation} error:`, error);
+  // Handle specific error types
+  if (error.message?.includes('relation') || error.message?.includes('does not exist')) {
+    throw new Error(`Database table not found. Please ensure the database is properly set up.`);
   }
 
-  // Return user-friendly error message
-  return {
-    success: false,
-    error: errorMessage,
-    details: import.meta.env.DEV ? error : undefined
-  };
+  // Handle authentication errors
+  if (error.message?.includes('JWT') || error.message?.includes('auth')) {
+    throw new Error(`Authentication failed. Please sign in again.`);
+  }
+
+  // Generic error
+  throw new Error(error.message || 'An unknown error occurred');
 };
 
 // Simplified database types to avoid deep instantiation issues
