@@ -8,39 +8,16 @@
 export const SUPABASE_API_URL = import.meta.env.VITE_SUPABASE_URL || "https://twttyqbqhlgyzntcblbz.supabase.co";
 export const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR3dHR5cWJxaGxneXpudGNibGJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM2NTc5MDQsImV4cCI6MjA0OTIzMzkwNH0.u8veRmBirnompCeo3Bzgn9TzNqm6VD7NGAiOmwWcP_4";
 
-// Authentication settings
-export const AUTH_SETTINGS = {
-  // How long to wait for auth initialization before timing out (in milliseconds)
-  AUTH_TIMEOUT: 30000,
+// Database settings
+export const DB_SETTINGS = {
+  // Default schema
+  SCHEMA: 'public',
 
-  // Storage key for auth session
-  STORAGE_KEY: 'property-agency-auth-token',
+  // Timeout for realtime channels (in milliseconds)
+  REALTIME_TIMEOUT: 30000,
 
-  // Enable debug mode for authentication in development
-  DEBUG_MODE: import.meta.env.DEV,
-
-  // Redirect paths for authentication flows
-  REDIRECT_PATHS: {
-    AFTER_LOGIN: '/dashboard',
-    AFTER_SIGNUP: '/dashboard',
-    AFTER_LOGOUT: '/',
-    AFTER_PASSWORD_RESET: '/reset-password/success'
-  }
-};
-
-// Feature flags for authentication
-export const AUTH_FEATURES = {
-  // Enable password reset functionality
-  ENABLE_PASSWORD_RESET: true,
-
-  // Enable social login providers
-  ENABLE_SOCIAL_LOGIN: false,
-
-  // Enable magic link authentication
-  ENABLE_MAGIC_LINK: false,
-
-  // Enable email confirmation bypass (for development)
-  BYPASS_EMAIL_CONFIRMATION: import.meta.env.DEV
+  // Events per second for realtime channels
+  EVENTS_PER_SECOND: 10
 };
 
 // Production validation to ensure required environment variables are set
@@ -70,8 +47,7 @@ export const ENV_STATUS = {
 export default {
   SUPABASE_API_URL,
   SUPABASE_ANON_KEY,
-  AUTH_SETTINGS,
-  AUTH_FEATURES,
+  DB_SETTINGS,
   validateEnvironment,
   ENV_STATUS
 };

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { usePropertyManagement } from '@/hooks/usePropertyManagement';
 import EnhancedPropertyForm from '@/components/property/EnhancedPropertyForm';
 import { PropertyFormData } from '@/types/property-form';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
@@ -15,17 +15,17 @@ interface PropertyFormWrapperProps {
   isEdit?: boolean;
 }
 
-const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({ 
-  propertyId, 
-  initialData, 
-  isEdit = false 
+const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
+  propertyId,
+  initialData,
+  isEdit = false
 }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { createProperty, updateProperty } = usePropertyManagement();
-  
+
   const handleFormSubmit = async (data: PropertyFormData) => {
     if (!user) {
       toast.error('You must be logged in to create a property');
@@ -35,7 +35,7 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
     // Reset error state
     setError(null);
     setIsSubmitting(true);
-    
+
     try {
       // Validate that required fields have values based on property type
       const validatePropertySpecificFields = () => {
@@ -77,7 +77,7 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
       // Perform validations
       validatePropertySpecificFields();
       validateTransactionFields();
-      
+
       if (isEdit && propertyId) {
         // Update existing property
         await updateProperty.mutateAsync({ id: propertyId, data });
@@ -97,7 +97,7 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
       setIsSubmitting(false);
     }
   };
-  
+
   if (isSubmitting) {
     return (
       <div className="flex flex-col items-center justify-center p-8">
@@ -111,7 +111,7 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
       </div>
     );
   }
-  
+
   return (
     <>
       {error && (
@@ -120,8 +120,8 @@ const PropertyFormWrapper: React.FC<PropertyFormWrapperProps> = ({
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
-      
-      <EnhancedPropertyForm 
+
+      <EnhancedPropertyForm
         onSubmit={handleFormSubmit}
         initialData={initialData}
         isEdit={isEdit}

@@ -1,21 +1,19 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { UserRole } from '@/types/auth';
-import { SUPABASE_API_URL, SUPABASE_ANON_KEY, validateEnvironment } from '@/config/supabase';
+import { SUPABASE_API_URL, SUPABASE_ANON_KEY, DB_SETTINGS, validateEnvironment } from '@/config/supabase';
 
 // Validate environment variables in production
 validateEnvironment();
 
-// Create a Supabase client instance with explicit auth configuration
+// Create a Supabase client instance with auth features disabled (using Clerk instead)
 export const supabase = createClient(
   SUPABASE_API_URL,
   SUPABASE_ANON_KEY,
   {
     auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true,
-      storageKey: 'property-agency-auth-token',
-      storage: localStorage,
+      persistSession: false, // Don't persist session as we're using Clerk
+      autoRefreshToken: false, // Don't auto refresh as we're using Clerk
+      detectSessionInUrl: false, // Don't detect session in URL as we're using Clerk
     },
     global: {
       headers: {
@@ -24,12 +22,12 @@ export const supabase = createClient(
       }
     },
     db: {
-      schema: 'public'
+      schema: DB_SETTINGS.SCHEMA
     },
     realtime: {
-      timeout: 30000, // 30s timeout for realtime channels
+      timeout: DB_SETTINGS.REALTIME_TIMEOUT,
       params: {
-        eventsPerSecond: 10
+        eventsPerSecond: DB_SETTINGS.EVENTS_PER_SECOND
       }
     }
   }
@@ -128,7 +126,7 @@ export const supabaseUtils = {
   },
 };
 
-// Create a Supabase client with a custom JWT token
+// Create a Supabase client with a Clerk JWT token
 export const createSupabaseWithToken = (jwt: string): SupabaseClient => {
   return createClient(
     SUPABASE_API_URL,

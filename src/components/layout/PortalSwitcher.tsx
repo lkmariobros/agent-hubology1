@@ -7,7 +7,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Building, Shield, ChevronsUpDown } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import { useClerkAuth } from '@/context/clerk/ClerkProvider';
 import { UserRole } from '@/types/auth';
 import { toast } from 'sonner';
 
@@ -24,8 +24,8 @@ export function PortalSwitcher({ showLabel = true, className = "" }: PortalSwitc
   const isAdminActive = activeRole === 'admin';
   const [hasAdminRole, setHasAdminRole] = useState(false);
   
-  // Check for special admin user (josephkwantum@gmail.com)
-  const isSpecialAdminUser = user?.email === 'josephkwantum@gmail.com';
+  // Check for admin email
+  const isSpecialAdminUser = user?.primaryEmailAddress?.emailAddress === 'josephkwantum@gmail.com';
   
   useEffect(() => {
     // Force recheck for admin role
@@ -93,6 +93,7 @@ export function PortalSwitcher({ showLabel = true, className = "" }: PortalSwitc
         <DropdownMenuItem 
           onClick={() => handleSwitchRole('agent')}
           className={`flex items-center cursor-pointer hover:bg-gray-800 ${!isAdminActive ? 'bg-gray-800/50' : ''}`}
+          disabled={!roles.includes('agent')}
         >
           <Building className="h-4 w-4 mr-2" />
           <span>Agent Portal</span>
@@ -103,6 +104,7 @@ export function PortalSwitcher({ showLabel = true, className = "" }: PortalSwitc
         <DropdownMenuItem 
           onClick={() => handleSwitchRole('admin')}
           className={`flex items-center cursor-pointer hover:bg-gray-800 ${isAdminActive ? 'bg-gray-800/50' : ''}`}
+          disabled={!roles.includes('admin') && !isSpecialAdminUser}
         >
           <Shield className="h-4 w-4 mr-2" />
           <span>Admin Portal</span>

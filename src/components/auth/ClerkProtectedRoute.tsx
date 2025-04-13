@@ -5,6 +5,7 @@ import { SignedIn, SignedOut, RedirectToSignIn } from '@clerk/clerk-react';
 import LoadingIndicator from '../ui/loading-indicator';
 import { UserRole } from '@/types/auth';
 import { toast } from 'sonner';
+import { DEV_MODE, BYPASS_AUTH, devUtils, DEV_USER } from '@/utils/devMode';
 
 interface ClerkProtectedRouteProps {
   children: ReactNode;
@@ -48,7 +49,7 @@ const ClerkProtectedRoute: React.FC<ClerkProtectedRouteProps> = ({
           setTimeoutOccurred(true);
           toast.error('Authentication verification timed out.');
         }
-      }, 10000); // 10 seconds timeout (reduced from 30s)
+      }, 10000); // 10 seconds timeout
     }
 
     // Cleanup on unmount
@@ -95,6 +96,7 @@ const ClerkProtectedRoute: React.FC<ClerkProtectedRouteProps> = ({
           <p>Auth state: {isAuthenticated ? 'Signed in' : 'Not signed in'}</p>
           <p>Profile: {profile ? 'Found' : 'Not found'}</p>
           <p>Loading state: {loading ? 'Loading' : 'Not loading'}</p>
+          <p>Role: {activeRole}</p>
           <button
             onClick={() => window.location.href = '/profile/setup'}
             className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
@@ -106,53 +108,24 @@ const ClerkProtectedRoute: React.FC<ClerkProtectedRouteProps> = ({
     );
   }
 
-  // Use Clerk's SignedIn and SignedOut components to handle authentication
+  // In development mode with auth bypass, skip authentication checks
+  if (DEV_MODE && BYPASS_AUTH) {
+    devUtils.log(`Development mode - bypassing auth for route: ${location.pathname}`);
+
+    // If we're on an admin route but dev user is not in admin role
+    if (location.pathname.startsWith('/admin') && DEV_USER.activeRole !== 'admin') {
+      devUtils.log('Switching dev user to admin role for admin route');
+      // In dev mode, we'll just allow access to admin routes
+    }
+
+    // All checks bypassed in dev mode, render the children
+    return <>{children}</>;
+  }
+
+  // Normal authentication flow for production
   return (
     <SignedIn>
       {() => {
-        // Temporarily bypass profile check
-        // If profile doesn't exist yet, we need to create it
-        if (false && isAuthenticated && !profile) { // Disabled for testing
-          return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-background">
-              <div className="text-center space-y-4 p-6 max-w-md">
-                <h2 className="text-2xl font-bold">Complete Your Profile</h2>
-                <p className="text-muted-foreground">
-                  You need to complete your profile to continue.
-                </p>
-                <div className="space-y-2">
-                  <button
-                    onClick={() => window.location.href = '/profile/setup'}
-                    className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-                  >
-                    Set Up Profile
-                  </button>
-                  <button
-                    onClick={async () => {
-                      try {
-                        // Create profile directly
-                        console.log('[ClerkProtectedRoute] Creating profile directly');
-                        await createUserProfile('agent');
-                        window.location.reload();
-                      } catch (err) {
-                        console.error('[ClerkProtectedRoute] Error creating profile:', err);
-                        toast.error('Failed to create profile. Please try the setup page.');
-                      }
-                    }}
-                    className="w-full px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-                  >
-                    Create Profile Automatically
-                  </button>
-                  <div className="pt-4">
-                    <p className="text-sm text-muted-foreground">Debug Info:</p>
-                    <p className="text-xs text-muted-foreground">User ID: {user?.id || 'Not available'}</p>
-                    <p className="text-xs text-muted-foreground">Auth: {isAuthenticated ? 'Yes' : 'No'}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          );
-        }
 
         // If we're on an admin route but not in admin role
         if (location.pathname.startsWith('/admin') && activeRole !== 'admin') {

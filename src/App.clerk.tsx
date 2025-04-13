@@ -28,8 +28,7 @@ if (typeof window !== 'undefined') {
 }
 
 // Get Clerk publishable key from environment
-const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || 
-  'pk_test_cG9zaXRpdmUtYmxvd2Zpc2gtNjAuY2xlcmsuYWNjb3VudHMuZGV2JA'; // Fallback to the key from Supabase dashboard
+const CLERK_PUBLISHABLE_KEY = 'pk_test_cG9zaXRpdmUtYmxvd2Zpc2gtNjAuY2xlcmsuYWNjb3VudHMuZGV2JA';
 
 function App() {
   return (

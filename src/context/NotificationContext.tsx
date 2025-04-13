@@ -1,6 +1,6 @@
 
 import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
-import { useAuthContext } from '@/context/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 import { Notification } from '@/types/notification';
 import { useNotificationActions } from '@/hooks/useNotificationActions';
 import { useNotificationSubscription } from '@/hooks/useNotificationSubscription';
@@ -22,11 +22,11 @@ const NotificationContext = createContext<NotificationContextType | undefined>(u
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const { user } = useAuthContext();
+  const { user } = useAuth();
   const userId = user?.id || null;
-  
-  const { 
-    markAsRead: markNotificationAsRead, 
+
+  const {
+    markAsRead: markNotificationAsRead,
     markAllAsRead: markAllNotificationsAsRead,
     deleteNotification: deleteUserNotification,
     refreshNotifications: fetchUserNotifications
@@ -40,7 +40,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       if (exists) return prev;
       return [notification, ...prev];
     });
-    
+
     // Show toast for new notifications that aren't already in the list
     if (!notification.read) {
       toast(notification.title, {
@@ -59,7 +59,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       setNotifications([]);
       return;
     }
-    
+
     const loadNotifications = async () => {
       setIsLoading(true);
       try {
@@ -72,9 +72,9 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         setIsLoading(false);
       }
     };
-    
+
     loadNotifications();
-    
+
     // Add userId and fetchUserNotifications to dependency array
     // Since fetchUserNotifications might change between renders, we need to include it
   }, [userId, fetchUserNotifications]);
@@ -84,7 +84,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     try {
       setIsLoading(true);
       const success = await markNotificationAsRead(id);
-      
+
       if (success) {
         setNotifications(prev =>
           prev.map(notification =>
@@ -103,11 +103,11 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   // Mark all notifications as read
   const markAllAsRead = async () => {
     if (!userId) return;
-    
+
     try {
       setIsLoading(true);
       const success = await markAllNotificationsAsRead(userId);
-      
+
       if (success) {
         setNotifications(prev =>
           prev.map(notification => ({ ...notification, read: true }))
@@ -126,9 +126,9 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     try {
       setIsLoading(true);
       const success = await deleteUserNotification(id);
-      
+
       if (success) {
-        setNotifications(prev => 
+        setNotifications(prev =>
           prev.filter(notification => notification.id !== id)
         );
       }
@@ -143,7 +143,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   // Refresh notifications
   const refreshNotifications = async () => {
     if (!userId) return;
-    
+
     try {
       setIsLoading(true);
       const data = await fetchUserNotifications(userId);

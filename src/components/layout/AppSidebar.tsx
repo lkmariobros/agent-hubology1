@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { useClerkAuth } from '@/context/clerk/ClerkProvider';
 import { useSidebar } from '@/components/ui/sidebar';
 
 import {
@@ -19,7 +19,7 @@ import { SidebarProfile } from './sidebar/SidebarProfile';
 import { PortalSwitcher } from './PortalSwitcher';
 
 export function AppSidebar() {
-  const { isAdmin } = useAuth();
+  const { isAdmin } = useClerkAuth();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   

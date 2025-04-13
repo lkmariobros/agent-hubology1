@@ -3,8 +3,7 @@ import { Outlet, useLocation, Navigate, useNavigate } from 'react-router-dom';
 import { AdminSidebar } from './AdminSidebar';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import Container from '../ui/container';
-import { useAuth } from '@/hooks/useAuth';
-import { isSpecialAdmin } from '@/utils/adminAccess';
+import { useClerkAuth } from '@/context/clerk/ClerkProvider';
 import AdminAccessDebugger from '../admin/AdminAccessDebugger';
 import EnhancedHeader from './EnhancedHeader';
 
@@ -16,11 +15,10 @@ const AdminLayout = () => {
   const savedState = savedStateStr === "collapsed" ? "collapsed" : "expanded";
   const location = useLocation();
   const navigate = useNavigate();
-  const { isAdmin, user, activeRole } = useAuth();
+  const { isAdmin, user, activeRole } = useClerkAuth();
 
-  // Direct check for special admin status
-  const isSpecialAdminUser = user && isSpecialAdmin(user.email);
-  const canAccessAdmin = isAdmin || isSpecialAdminUser;
+  // Check for admin access directly from Clerk
+  const canAccessAdmin = isAdmin;
 
   // Add data-route attribute to body
   useEffect(() => {
@@ -55,7 +53,7 @@ const AdminLayout = () => {
     }
   };
 
-  // Basic check to make sure user has admin access - redundant with ProtectedRoute but serves as a fallback
+  // Check if user has admin access
   if (!canAccessAdmin) {
     console.log('[AdminLayout] No admin access, redirecting to dashboard');
     return <Navigate to="/dashboard" replace />;

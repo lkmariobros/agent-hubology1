@@ -14,7 +14,8 @@ import { Role } from '@/types/role';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Loader2, Search, UserPlus2, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { supabase } from '@/lib/supabase';
+import { useClerkUsers } from '@/hooks/useClerkUsers'; // We'll create this hook
+import { toast } from 'sonner';
 
 interface RoleUsersProps {
   open: boolean;
@@ -24,7 +25,8 @@ interface RoleUsersProps {
 
 export function RoleUsers({ open, onClose, role }: RoleUsersProps) {
   const [users, setUsers] = useState<any[]>([]);
-  const [allAgents, setAllAgents] = useState<any[]>([]);
+  const [allUsers, setAllUsers] = useState<any[]>([]);
+  const { getClerkUsers, loading: loadingClerkUsers } = useClerkUsers();
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [addUserDialogOpen, setAddUserDialogOpen] = useState(false);
@@ -51,21 +53,17 @@ export function RoleUsers({ open, onClose, role }: RoleUsersProps) {
     setAddUserDialogOpen(true);
     
     try {
-      // Load all agents who don't have this role
-      const { data, error } = await supabase
-        .from('agent_profiles')
-        .select('id, full_name, email, avatar_url')
-        .order('full_name');
-        
-      if (error) throw error;
+      // Load all Clerk users
+      const clerkUsers = await getClerkUsers();
       
       // Filter out users who already have this role
       const userIds = users.map(u => u.user_id);
-      const filteredAgents = data.filter(agent => !userIds.includes(agent.id));
+      const filteredUsers = clerkUsers.filter(user => !userIds.includes(user.id));
       
-      setAllAgents(filteredAgents);
+      setAllUsers(filteredUsers);
     } catch (error) {
-      console.error('Error loading agents:', error);
+      console.error('Error loading users:', error);
+      toast.error('Could not load users');
     }
   };
   
@@ -79,8 +77,10 @@ export function RoleUsers({ open, onClose, role }: RoleUsersProps) {
       try {
         await roleService.removeRoleFromUser(userId, role.id);
         setUsers(users.filter(u => u.user_id !== userId));
+        toast.success(`Removed ${role.name} role from user`);
       } catch (error) {
         console.error('Error removing role:', error);
+        toast.error('Failed to remove role');
       }
     }
   };
@@ -94,18 +94,25 @@ export function RoleUsers({ open, onClose, role }: RoleUsersProps) {
         // Reload users
         const usersWithRole = await roleService.getUsersWithRole(role.id);
         setUsers(usersWithRole);
+        toast.success(`Added ${role.name} role to user`);
       } catch (error) {
         console.error('Error assigning role:', error);
+        toast.error('Failed to assign role');
       }
     }
   };
   
-  const filteredAgents = searchQuery.trim() === '' 
-    ? allAgents 
-    : allAgents.filter(agent => 
-        agent.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        agent.email?.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+  const filteredUsers = searchQuery.trim() === '' 
+    ? allUsers 
+    : allUsers.filter(user => {
+        const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+        const email = user.emailAddresses && user.emailAddresses[0] 
+          ? user.emailAddresses[0].emailAddress 
+          : '';
+          
+        return fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+               email.toLowerCase().includes(searchQuery.toLowerCase());
+      });
   
   if (!role) return null;
   
@@ -204,7 +211,11 @@ export function RoleUsers({ open, onClose, role }: RoleUsersProps) {
           </div>
           
           <div className="max-h-[300px] overflow-y-auto">
-            {filteredAgents.length === 0 ? (
+            {loadingClerkUsers ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : filteredUsers.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 {searchQuery.trim() !== '' 
                   ? "No matching users found" 
@@ -212,39 +223,46 @@ export function RoleUsers({ open, onClose, role }: RoleUsersProps) {
               </div>
             ) : (
               <div className="space-y-3">
-                {filteredAgents.map((agent) => (
-                  <div 
-                    key={agent.id}
-                    className="flex items-center justify-between p-3 rounded-md border"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Avatar>
-                        <AvatarImage 
-                          src={agent.avatar_url} 
-                          alt={agent.full_name || "User"} 
-                        />
-                        <AvatarFallback>
-                          {(agent.full_name || "U")[0]}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="font-medium">
-                          {agent.full_name || "Unknown User"}
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          {agent.email}
+                {filteredUsers.map((user) => {
+                  const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Unknown User';
+                  const email = user.emailAddresses && user.emailAddresses[0] 
+                    ? user.emailAddresses[0].emailAddress 
+                    : '';
+                  
+                  return (
+                    <div 
+                      key={user.id}
+                      className="flex items-center justify-between p-3 rounded-md border"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Avatar>
+                          <AvatarImage 
+                            src={user.imageUrl} 
+                            alt={fullName}
+                          />
+                          <AvatarFallback>
+                            {fullName[0] || 'U'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="font-medium">
+                            {fullName}
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            {email}
+                          </div>
                         </div>
                       </div>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => handleAddRole(user.id)}
+                      >
+                        Add Role
+                      </Button>
                     </div>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => handleAddRole(agent.id)}
-                    >
-                      Add Role
-                    </Button>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

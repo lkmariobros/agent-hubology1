@@ -1,7 +1,8 @@
 
 import React from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { useClerkAuth } from '@/context/clerk/ClerkProvider';
 import { useSidebar } from '@/components/ui/sidebar';
+import { Network, UserCog } from 'lucide-react';
 
 import {
   Sidebar,
@@ -19,7 +20,7 @@ import { AdminProfile } from './sidebar/AdminProfile';
 import { PortalSwitcher } from './PortalSwitcher';
 
 export function AdminSidebar() {
-  const { isAdmin } = useAuth();
+  const { isAdmin } = useClerkAuth();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   
@@ -36,6 +37,11 @@ export function AdminSidebar() {
         </SidebarHeader>
         
         <SidebarContent className={`${collapsed ? 'px-0 flex flex-col items-center' : 'px-3'} py-4 overflow-y-visible space-y-6`}>
+          {/* 
+            NavAdmin component should be updated to include the new links:
+            - /admin/role-hierarchy with Network icon
+            - /admin/agent-levels with UserCog icon
+          */}
           <NavAdmin />
           <NavReports />
           <NavSystem />

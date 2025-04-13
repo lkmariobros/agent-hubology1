@@ -1,7 +1,18 @@
 
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, Building, Briefcase, ListChecks, CircleDollarSign, Settings } from 'lucide-react';
+import { 
+  LayoutDashboard, 
+  Users, 
+  Building, 
+  Briefcase, 
+  ListChecks, 
+  CircleDollarSign, 
+  Settings,
+  Network,
+  UserCog,
+  Shield
+} from 'lucide-react';
 import { 
   SidebarGroup, 
   SidebarGroupLabel, 
@@ -50,6 +61,45 @@ export function NavAdmin() {
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>
+          
+          {/* Role Management Links */}
+          <SidebarMenuItem>
+            <SidebarMenuButton 
+              asChild 
+              isActive={location.pathname.includes('/admin/roles')}
+              tooltip="Role Management"
+            >
+              <NavLink to="/admin/roles" className={collapsed ? "justify-center" : "pl-4"}>
+                <Shield className="h-4 w-4" />
+                {!collapsed && <span>Roles</span>}
+              </NavLink>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton 
+              asChild 
+              isActive={location.pathname.includes('/admin/role-hierarchy')}
+              tooltip="Role Hierarchy"
+            >
+              <NavLink to="/admin/role-hierarchy" className={collapsed ? "justify-center" : "pl-4"}>
+                <Network className="h-4 w-4" />
+                {!collapsed && <span>Role Hierarchy</span>}
+              </NavLink>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton 
+              asChild 
+              isActive={location.pathname.includes('/admin/agent-levels')}
+              tooltip="Agent Levels"
+            >
+              <NavLink to="/admin/agent-levels" className={collapsed ? "justify-center" : "pl-4"}>
+                <UserCog className="h-4 w-4" />
+                {!collapsed && <span>Agent Levels</span>}
+              </NavLink>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          
           <SidebarMenuItem>
             <SidebarMenuButton 
               asChild 

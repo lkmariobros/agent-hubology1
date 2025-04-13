@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { UserButton } from '@clerk/clerk-react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { Menu, ChevronDown } from 'lucide-react';
 import PageBreadcrumb from './PageBreadcrumb';
+import { useClerkAuth } from '@/context/clerk/ClerkProvider';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,10 +23,22 @@ const EnhancedHeader: React.FC<EnhancedHeaderProps> = ({
   isAdmin = false,
   onSwitchRole
 }) => {
-  const [currentRole, setCurrentRole] = useState<'agent' | 'admin'>(isAdmin ? 'admin' : 'agent');
+  const { activeRole, switchRole, hasRole } = useClerkAuth();
+  const [currentRole, setCurrentRole] = useState<'agent' | 'admin'>(activeRole as 'agent' | 'admin');
+
+  // Update current role when activeRole changes
+  useEffect(() => {
+    setCurrentRole(activeRole as 'agent' | 'admin');
+  }, [activeRole]);
 
   const handleRoleSwitch = (role: 'agent' | 'admin') => {
+    // Use the Clerk auth switchRole function
+    switchRole(role);
+    
+    // Set local state
     setCurrentRole(role);
+    
+    // Call the parent component's handler if provided
     if (onSwitchRole) {
       onSwitchRole(role);
     } else {
@@ -63,12 +76,14 @@ const EnhancedHeader: React.FC<EnhancedHeaderProps> = ({
             <DropdownMenuItem 
               className={`capitalize ${currentRole === 'agent' ? 'bg-purple-900/30 text-purple-300' : ''}`}
               onClick={() => handleRoleSwitch('agent')}
+              disabled={!hasRole('agent')}
             >
               Agent Portal
             </DropdownMenuItem>
             <DropdownMenuItem 
               className={`capitalize ${currentRole === 'admin' ? 'bg-purple-900/30 text-purple-300' : ''}`}
               onClick={() => handleRoleSwitch('admin')}
+              disabled={!hasRole('admin')}
             >
               Admin Portal
             </DropdownMenuItem>

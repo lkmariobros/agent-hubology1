@@ -39,6 +39,8 @@ import SystemLogs from './pages/admin/SystemLogs';
 import Database from './pages/admin/Database';
 import Settings from './pages/Settings';
 import SupabaseDebug from './pages/debug/SupabaseDebug';
+import RoleHierarchyManager from './components/admin/roles/RoleHierarchyManager';
+import AgentLevelManager from './components/admin/roles/AgentLevelManager';
 
 // Import Clerk components
 import ClerkSignIn from './components/auth/ClerkSignIn';
@@ -51,6 +53,8 @@ import AuthTest from './pages/auth/AuthTest';
 import ClerkJwtTest from './pages/auth/ClerkJwtTest';
 import JwtTest from './pages/auth/JwtTest';
 import ClerkProtectedRoute from './components/auth/ClerkProtectedRoute';
+import ProfileSetupFlow from './components/profile/ProfileSetupFlow';
+import UserProfile from './pages/profile/UserProfile';
 
 // Merged router with all routes from both implementations
 const router = createBrowserRouter([
@@ -59,6 +63,7 @@ const router = createBrowserRouter([
   { path: '/sign-in/*', element: <ClerkSignIn /> },
   { path: '/sign-up/*', element: <ClerkSignUp /> },
   { path: '/profile/setup', element: <ProfileSetup /> },
+  { path: '/profile/setup-flow', element: <ProfileSetupFlow /> },
   { path: '/profile/setup-test', element: <ProfileSetupTest /> },
   { path: '/direct-test', element: <DirectTest /> },
   { path: '/force-profile-setup', element: <ForceProfileSetup /> },
@@ -123,6 +128,10 @@ const router = createBrowserRouter([
       {
         path: 'profile',
         element: <Profile />
+      },
+      {
+        path: 'user-profile',
+        element: <UserProfile />
       },
       {
         path: 'settings',
@@ -232,8 +241,20 @@ const router = createBrowserRouter([
         element: <Roles />
       },
       {
+        path: 'role-hierarchy',
+        element: <RoleHierarchyManager />
+      },
+      {
+        path: 'agent-levels',
+        element: <AgentLevelManager />
+      },
+      {
         path: 'settings',
         element: <AdminSettings />
+      },
+      {
+        path: 'profile',
+        element: <UserProfile />
       },
       {
         path: 'system-logs',

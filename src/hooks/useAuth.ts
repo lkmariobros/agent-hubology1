@@ -1,67 +1,58 @@
-import { useAuth as useClerkAuth } from '@clerk/clerk-react';
-import { useUser } from '@clerk/clerk-react';
-import { AuthContextType } from '@/types/auth';
+import { useClerkAuth } from '@/context/clerk/ClerkProvider';
+import { AuthContextType, UserRole } from '@/types/auth';
+import { DEV_MODE, BYPASS_AUTH, DEV_USER } from '@/utils/devMode';
 
 /**
- * Compatibility hook that provides the same interface as the original useAuth hook
- * but uses Clerk for authentication
+ * This hook provides authentication functionality throughout the application.
+ * It now uses Clerk for all authentication, with the Supabase implementation removed.
+ *
+ * In development mode with BYPASS_AUTH enabled, it returns mock auth data.
+ * In production, it forwards all authentication requests to the Clerk auth provider.
+ *
+ * @returns AuthContextType - The auth context containing user info, roles, and auth state
  */
 export function useAuth(): AuthContextType {
-  const { isLoaded, isSignedIn } = useClerkAuth();
-  const { user } = useUser();
+  // In development mode with auth bypass, return mock auth data
+  if (DEV_MODE && BYPASS_AUTH) {
+    // Create a mock auth context for development
+    const mockAuthContext: AuthContextType = {
+      user: DEV_USER,
+      profile: {
+        id: DEV_USER.id,
+        email: DEV_USER.email,
+        first_name: DEV_USER.firstName,
+        last_name: DEV_USER.lastName,
+        role: DEV_USER.role as UserRole,
+        preferences: {
+          darkMode: true,
+          emailNotifications: true,
+          preferredPortal: 'admin'
+        },
+        agent_details: null
+      },
+      session: { user: DEV_USER },
+      loading: false,
+      error: null,
+      isAuthenticated: true,
+      isAdmin: true,
+      roles: DEV_USER.roles as UserRole[],
+      activeRole: DEV_USER.activeRole as UserRole,
+      signIn: async () => { console.log('[DEV] Mock signIn called'); },
+      signUp: async () => { console.log('[DEV] Mock signUp called'); },
+      signOut: async () => { console.log('[DEV] Mock signOut called'); },
+      resetPassword: async () => { console.log('[DEV] Mock resetPassword called'); },
+      switchRole: (role: UserRole) => { console.log('[DEV] Mock switchRole called with:', role); },
+      hasRole: (role: UserRole) => DEV_USER.roles.includes(role),
+      createUserProfile: async () => { console.log('[DEV] Mock createUserProfile called'); },
+      assignRole: async () => { console.log('[DEV] Mock assignRole called'); return true; },
+      removeRole: async () => { console.log('[DEV] Mock removeRole called'); return true; }
+    };
 
-  // Create a compatibility layer for the existing auth interface
-  // Create a user object that matches the UserProfile interface
-  const userProfile = user ? {
-    id: user.id,
-    email: user.primaryEmailAddress?.emailAddress || '',
-    name: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
-    roles: ['agent' as const],
-    activeRole: 'agent' as const
-  } : null;
+    return mockAuthContext;
+  }
 
-  const compatAuth: AuthContextType = {
-    user: userProfile,
-    profile: null, // We don't have profiles yet
-    session: null, // Clerk doesn't use Supabase sessions
-    loading: !isLoaded,
-    error: null,
-    isAuthenticated: !!isSignedIn,
-    isAdmin: false, // We don't have roles yet
-    roles: ['agent'], // Default role
-    activeRole: 'agent', // Default role
-
-    // Auth methods - these will need to be implemented with Clerk equivalents
-    signIn: async (email: string, password: string) => {
-      // This will be handled by Clerk's SignIn component
-      throw new Error('Use Clerk SignIn component instead');
-    },
-
-    signUp: async (email: string, password: string) => {
-      // This will be handled by Clerk's SignUp component
-      throw new Error('Use Clerk SignUp component instead');
-    },
-
-    signOut: async () => {
-      // This will be handled by Clerk's SignOutButton component
-      window.location.href = '/sign-in';
-    },
-
-    resetPassword: async (email: string) => {
-      // This will be handled by Clerk's components
-      throw new Error('Use Clerk components for password reset');
-    },
-
-    // Role management
-    switchRole: (role) => {
-      console.log('Role switching not implemented yet');
-    },
-    hasRole: (role) => {
-      return role === 'agent'; // Default to agent role for now
-    }
-  };
-
-  return compatAuth;
+  // Use the ClerkAuth provider directly for production
+  return useClerkAuth();
 }
 
 export default useAuth;

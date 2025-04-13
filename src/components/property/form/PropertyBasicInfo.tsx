@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { usePropertyForm } from '@/context/PropertyFormContext';
+import { usePropertyForm } from '@/context/PropertyForm';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -21,7 +21,7 @@ const PropertyBasicInfo: React.FC = () => {
   return (
     <div className="space-y-6">
       <h3 className="text-lg font-medium">Basic Information</h3>
-      
+
       <div className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="title">Property Title</Label>

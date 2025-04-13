@@ -1,7 +1,7 @@
 import { createRoot } from 'react-dom/client';
 import './index.css';
 import { initSentry } from './lib/sentry';
-import FixedApp from './FixedApp';
+import App from './App.clerk'; // Changed from FixedApp to App.clerk
 
 // Get root element - do this before Sentry initialization
 const rootElement = document.getElementById("root");
@@ -15,5 +15,5 @@ if (!rootElement) {
 
   // Create and render React root
   const root = createRoot(rootElement);
-  root.render(<FixedApp />);
+  root.render(<App />);
 }
