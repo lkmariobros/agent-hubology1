@@ -1,0 +1,251 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 220 15% 8%; /* #161920 */
+    --foreground: 210 5% 98%; /* #f8f9fa */
+    
+    --card: 220 12% 14%; /* #1E2128 */
+    --card-foreground: 210 5% 98%; /* #f8f9fa */
+    
+    --popover: 220 12% 14%; /* #1E2128 */
+    --popover-foreground: 210 5% 98%; /* #f8f9fa */
+    
+    --primary: 210 5% 98%; /* #f8f9fa */
+    --primary-foreground: 220 15% 8%; /* #161920 */
+    
+    --secondary: 220 13% 18%; /* #232731 */
+    --secondary-foreground: 210 5% 98%; /* #f8f9fa */
+    
+    --muted: 220 13% 18%; /* #232731 */
+    --muted-foreground: 217 10% 65%; /* #a1a1aa */
+    
+    --accent: 264 70% 50%; /* Keep original accent */
+    --accent-foreground: 210 5% 98%; /* #f8f9fa */
+    
+    --destructive: 0 62.8% 30.6%; /* Keep original destructive */
+    --destructive-foreground: 210 5% 98%; /* #f8f9fa */
+    
+    --border: 0 0% 100% / 0.06; /* rgba(255, 255, 255, 0.06) */
+    --input: 220 13% 18%; /* #232731 */
+    --ring: 240 4.9% 83.9%; /* Keep original ring */
+    
+    --radius: 0.5rem;
+
+    --sidebar-background: 220 21% 14%; /* #1A1F2C - updated to match the image */
+    --sidebar-foreground: 210 5% 98%; /* #f8f9fa */
+    --sidebar-primary: 264 70% 50%; /* Keep original sidebar primary */
+    --sidebar-primary-foreground: 0 0% 100%; /* Keep white */
+    --sidebar-accent: 220 13% 18%; /* #232731 */
+    --sidebar-accent-foreground: 210 5% 98%; /* #f8f9fa */
+    --sidebar-border: 0 0% 100% / 0.06; /* rgba(255, 255, 255, 0.06) */
+    --sidebar-ring: 240 4.9% 83.9%; /* Keep original ring */
+  }
+
+  /* Reset styles for full height layout */
+  html, body, #root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    /* Remove overflow: hidden to allow scrolling */
+  }
+  
+  * {
+    @apply border-border selection:bg-accent/10 selection:text-white;
+  }
+  
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    letter-spacing: -0.01em;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-medium tracking-tight;
+  }
+}
+
+@layer components {
+  /* Standardized page content containers */
+  .page-container {
+    @apply p-6 space-y-6;
+  }
+  
+  .page-container-narrow {
+    @apply p-6 space-y-6 max-w-4xl mx-auto;
+  }
+
+  .page-header {
+    @apply flex justify-between items-center;
+  }
+  
+  /* Standardized card title system */
+  .card-title-lg {
+    @apply text-title-lg font-semibold tracking-tight;
+  }
+  
+  .card-title-md {
+    @apply text-title-md font-semibold tracking-tight;
+  }
+  
+  .card-title-sm {
+    @apply text-title-sm font-semibold tracking-tight;
+  }
+  
+  /* Standardized content section layout */
+  .content-section {
+    @apply grid gap-6 w-full;
+  }
+  
+  .content-section-cols-1 {
+    @apply grid-cols-1;
+  }
+  
+  .content-section-cols-2 {
+    @apply grid-cols-1 md:grid-cols-2;
+  }
+  
+  .content-section-cols-3 {
+    @apply grid-cols-1 md:grid-cols-2 lg:grid-cols-3;
+  }
+  
+  .content-section-cols-4 {
+    @apply grid-cols-1 md:grid-cols-2 lg:grid-cols-4;
+  }
+  
+  /* Standardized card content padding */
+  .card-padding {
+    @apply p-5;
+  }
+  
+  .card-padding-x {
+    @apply px-5;
+  }
+  
+  .card-padding-y {
+    @apply py-5;
+  }
+  
+  /* Card header and content spacing */
+  .card-header {
+    @apply flex flex-col space-y-1.5 p-5 pb-0;
+  }
+  
+  .card-content {
+    @apply p-5;
+  }
+  
+  .card-footer {
+    @apply flex items-center p-5 pt-0;
+  }
+  
+  /* Standardized sizing for viewport-aware containers */
+  .viewport-container {
+    @apply h-[calc(100vh-6rem)] overflow-y-auto;
+  }
+  
+  .viewport-container-with-header {
+    @apply h-[calc(100vh-10rem)] overflow-y-auto;
+  }
+  
+  /* Fix the glass-card class by using direct background-color instead of bg-card */
+  .glass-card {
+    @apply backdrop-blur-xl border border-border shadow-[0_4px_12px_-2px_rgba(0,0,0,0.2)];
+    background-color: rgba(30, 33, 40, 0.8); /* Slightly transparent version of #1E2128 */
+  }
+}
+
+@layer utilities {
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .neo-blur {
+    @apply backdrop-blur-2xl bg-black/40 border border-white/10;
+  }
+  
+  .text-gradient {
+    @apply bg-gradient-to-br from-white via-white/90 to-white/70 bg-clip-text text-transparent;
+  }
+  
+  .text-gradient-accent {
+    @apply bg-gradient-to-br from-accent via-accent/80 to-accent/60 bg-clip-text text-transparent;
+  }
+
+  .animate-in {
+    animation-timing-function: cubic-bezier(0.2, 0, 0.05, 1);
+  }
+
+  .page-transition-enter {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  .page-transition-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 300ms, transform 300ms;
+  }
+  
+  .clean-table {
+    @apply w-full border-collapse;
+  }
+  
+  .clean-table th {
+    @apply text-xs uppercase tracking-wider text-muted-foreground font-normal py-3 px-4 text-left border-b border-muted;
+  }
+  
+  .clean-table td {
+    @apply py-3 px-4 border-b border-muted/50;
+  }
+  
+  .clean-table tr:hover {
+    @apply bg-muted/20;
+  }
+  
+  /* Custom border style for sidebar */
+  .border-sidebar-border\/5 {
+    border-color: hsla(var(--sidebar-border) / 0.05);
+  }
+  
+  /* Ensure consistent borders for all content sections */
+  .content-container {
+    @apply min-h-[calc(100vh-6rem-3.5rem)] rounded-xl;
+  }
+  
+  /* Responsive margin and padding utilities */
+  .responsive-p {
+    @apply p-4 sm:p-5 lg:p-6;
+  }
+  
+  .responsive-px {
+    @apply px-4 sm:px-5 lg:px-6;
+  }
+  
+  .responsive-py {
+    @apply py-4 sm:py-5 lg:py-6;
+  }
+  
+  /* Card spacing utilities */
+  .card-spacing {
+    @apply space-y-4;
+  }
+  
+  /* Grid layout utilities */
+  .auto-grid {
+    @apply grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+}

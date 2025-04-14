@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supabase Test</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: #0f172a;
+      color: white;
+      height: 100%;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    .container {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .card {
+      width: 100%;
+      max-width: 40rem;
+      background-color: #1e293b;
+      border-radius: 0.5rem;
+      overflow: hidden;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    .card-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid #2d3748;
+    }
+    .card-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+    .card-description {
+      color: #a0aec0;
+      font-size: 0.875rem;
+    }
+    .card-content {
+      padding: 1.5rem;
+    }
+    .text {
+      margin-bottom: 1.5rem;
+      color: #e2e8f0;
+    }
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .button {
+      color: white;
+      padding: 0.75rem 1rem;
+      border-radius: 0.375rem;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.2s;
+      width: 100%;
+      text-align: center;
+      text-decoration: none;
+      display: block;
+    }
+    .button-purple {
+      background-color: #8b5cf6;
+    }
+    .button-purple:hover {
+      background-color: #7c3aed;
+    }
+    .button-blue {
+      background-color: #3b82f6;
+    }
+    .button-blue:hover {
+      background-color: #2563eb;
+    }
+    .button-green {
+      background-color: #10b981;
+    }
+    .button-green:hover {
+      background-color: #059669;
+    }
+    .button-red {
+      background-color: #ef4444;
+    }
+    .button-red:hover {
+      background-color: #dc2626;
+    }
+    .result {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 0.375rem;
+      background-color: #0f172a;
+      overflow: auto;
+      max-height: 300px;
+    }
+    .result pre {
+      margin: 0;
+      color: #e2e8f0;
+      font-family: monospace;
+      font-size: 0.875rem;
+      white-space: pre-wrap;
+    }
+    .success {
+      color: #10b981;
+    }
+    .error {
+      color: #ef4444;
+    }
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    .label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-size: 0.875rem;
+    }
+    .input {
+      width: 100%;
+      padding: 0.5rem;
+      border-radius: 0.375rem;
+      background-color: #1f2937;
+      border: 1px solid #374151;
+      color: white;
+    }
+    .textarea {
+      width: 100%;
+      padding: 0.5rem;
+      border-radius: 0.375rem;
+      background-color: #1f2937;
+      border: 1px solid #374151;
+      color: white;
+      min-height: 100px;
+      font-family: monospace;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Supabase Test</h2>
+        <p class="card-description">Test Supabase connection directly</p>
+      </div>
+
+      <div class="card-content">
+        <p class="text">
+          This page tests the Supabase connection directly using the Supabase JS SDK.
+        </p>
+
+        <div class="form-group">
+          <label class="label" for="supabase-url">Supabase URL</label>
+          <input
+            class="input"
+            type="text"
+            id="supabase-url"
+            value="https://twttyqbqhlgyzntcblbz.supabase.co"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="label" for="supabase-key">Supabase Anon Key</label>
+          <input
+            class="input"
+            type="text"
+            id="supabase-key"
+            value="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR3dHR5cWJxaGxneXpudGNibGJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM2NTc5MDQsImV4cCI6MjA0OTIzMzkwNH0.u8veRmBirnompCeo3Bzgn9TzNqm6VD7NGAiOmwWcP_4"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="label" for="jwt-token">JWT Token (Optional)</label>
+          <textarea
+            class="textarea"
+            id="jwt-token"
+            placeholder="Paste a JWT token here to use it for authentication"
+          ></textarea>
+        </div>
+
+        <div class="button-group">
+          <button onclick="testConnection()" class="button button-blue">
+            Test Connection
+          </button>
+
+          <button onclick="testProfiles()" class="button button-green">
+            Test Profiles Table
+          </button>
+
+          <button onclick="createProfile()" class="button button-purple">
+            Create Test Profile
+          </button>
+
+          <a href="/bypass.html" class="button button-red">
+            Go to Bypass Page
+          </a>
+        </div>
+
+        <div id="result" class="result" style="display: none;">
+          <pre id="result-content"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Create Supabase client
+    function createClient(useJwt = false) {
+      const url = document.getElementById('supabase-url').value;
+      const key = document.getElementById('supabase-key').value;
+      const jwt = document.getElementById('jwt-token').value;
+
+      if (!url || !key) {
+        showResult('Please enter Supabase URL and key', 'error');
+        return null;
+      }
+
+      let options = {};
+
+      if (useJwt && jwt) {
+        options = {
+          global: {
+            headers: {
+              Authorization: `Bearer ${jwt}`,
+            },
+          },
+          auth: {
+            persistSession: false,
+            autoRefreshToken: false,
+          },
+        };
+      }
+
+      return supabase.createClient(url, key, options);
+    }
+
+    // Test connection
+    async function testConnection() {
+      clearResult();
+      showResult('Testing connection...', 'normal');
+
+      try {
+        const supabase = createClient();
+        if (!supabase) return;
+
+        // Try to query a non-existent table to test connection
+        let data, error;
+        try {
+          const result = await supabase.from('_test').select('*').limit(1);
+          data = result.data;
+          error = result.error;
+        } catch (err) {
+          data = null;
+          error = err;
+        }
+
+        if (error) {
+          if (error.code === '42P01') {
+            showResult('Connection successful, but _test table does not exist. This is normal.', 'success');
+          } else {
+            showResult(`Connection error: ${error.message}`, 'error');
+          }
+        } else {
+          showResult('Connection successful!', 'success');
+          showResult(JSON.stringify(data, null, 2), 'normal');
+        }
+      } catch (err) {
+        showResult(`Error: ${err.message}`, 'error');
+      }
+    }
+
+    // Test profiles table
+    async function testProfiles() {
+      clearResult();
+      showResult('Testing profiles table...', 'normal');
+
+      try {
+        const useJwt = !!document.getElementById('jwt-token').value;
+        const supabase = createClient(useJwt);
+        if (!supabase) return;
+
+        const { data, error } = await supabase.from('profiles').select('*').limit(5);
+
+        if (error) {
+          if (error.code === '42P01') {
+            showResult('Profiles table does not exist. You need to create it.', 'error');
+          } else {
+            showResult(`Error: ${error.message}`, 'error');
+          }
+        } else {
+          showResult('Successfully queried profiles table!', 'success');
+          showResult(JSON.stringify(data, null, 2), 'normal');
+        }
+      } catch (err) {
+        showResult(`Error: ${err.message}`, 'error');
+      }
+    }
+
+    // Create test profile
+    async function createProfile() {
+      clearResult();
+      showResult('Creating test profile...', 'normal');
+
+      try {
+        const useJwt = !!document.getElementById('jwt-token').value;
+        const supabase = createClient(useJwt);
+        if (!supabase) return;
+
+        const testId = 'test_' + Math.random().toString(36).substring(2, 15);
+        const testEmail = 'test_' + Math.random().toString(36).substring(2, 10) + '@example.com';
+
+        // Try using the RPC function first
+        try {
+          showResult('Trying to create profile using RPC function...', 'normal');
+          const { data: rpcData, error: rpcError } = await supabase
+            .rpc('create_test_profile', {
+              p_clerk_id: testId,
+              p_email: testEmail,
+              p_first_name: 'Test',
+              p_last_name: 'User',
+              p_role: 'agent'
+            });
+
+          if (rpcError) {
+            showResult(`RPC error: ${rpcError.message}`, 'error');
+            throw rpcError;
+          } else {
+            showResult('Successfully created test profile using RPC!', 'success');
+            showResult(JSON.stringify(rpcData, null, 2), 'normal');
+            return;
+          }
+        } catch (rpcErr) {
+          showResult(`RPC method failed, trying direct insert...`, 'normal');
+        }
+
+        // Fall back to direct insert
+        const testProfile = {
+          clerk_id: testId,
+          email: testEmail,
+          first_name: 'Test',
+          last_name: 'User',
+          role: 'agent'
+        };
+
+        const { data, error } = await supabase
+          .from('profiles')
+          .upsert(testProfile)
+          .select();
+
+        if (error) {
+          showResult(`Error creating profile: ${error.message}`, 'error');
+
+          // If we get an RLS error, suggest adding the policy
+          if (error.message.includes('row-level security')) {
+            showResult(`\nThis error is due to Row Level Security (RLS) policies. You need to run this SQL in Supabase:\n\nCREATE POLICY "Allow anonymous access for testing" ON public.profiles FOR ALL USING (true) WITH CHECK (true);`, 'normal');
+          }
+        } else {
+          showResult('Successfully created test profile!', 'success');
+          showResult(JSON.stringify(data, null, 2), 'normal');
+        }
+      } catch (err) {
+        showResult(`Error: ${err.message}`, 'error');
+      }
+    }
+
+    // Show result
+    function showResult(content, type = 'normal') {
+      const resultElement = document.getElementById('result');
+      const resultContentElement = document.getElementById('result-content');
+
+      resultElement.style.display = 'block';
+
+      let existingContent = resultContentElement.innerHTML;
+      if (existingContent) {
+        existingContent += '\n\n';
+      }
+
+      let formattedContent = content;
+      if (type === 'success') {
+        formattedContent = `<span class="success">${content}</span>`;
+      } else if (type === 'error') {
+        formattedContent = `<span class="error">${content}</span>`;
+      }
+
+      resultContentElement.innerHTML = existingContent + formattedContent;
+
+      // Scroll to bottom
+      resultElement.scrollTop = resultElement.scrollHeight;
+    }
+
+    // Clear result
+    function clearResult() {
+      const resultElement = document.getElementById('result');
+      const resultContentElement = document.getElementById('result-content');
+
+      resultElement.style.display = 'none';
+      resultContentElement.innerHTML = '';
+    }
+  </script>
+</body>
+</html>

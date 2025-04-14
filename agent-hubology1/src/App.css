@@ -1,0 +1,205 @@
+
+/* Reset default styles */
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+
+/* Custom typography */
+.thin-headings h1, 
+.thin-headings h2, 
+.thin-headings h3, 
+.thin-headings h4 {
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+/* Base theme variables for InnovaCraft Dark Theme */
+:root {
+  --sidebar-bg: #1F232D;
+  --content-bg: #161920;
+  --card-bg: #1E2128;
+  --border-color: rgba(255, 255, 255, 0.06);
+  --text-primary: #f8f9fa;
+  --text-secondary: #a1a1aa;
+}
+
+/* App container */
+.app-container {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* Sidebar styling */
+.sidebar,
+[data-expanded="true"].sidebar,
+[data-expanded="false"].sidebar {
+  background-color: var(--sidebar-bg);
+  border-right: 1px solid var(--border-color);
+}
+
+/* Main content area styling */
+main,
+.main-content,
+.content-area,
+.flex-1 {
+  background-color: var(--content-bg);
+  min-height: 100vh;
+}
+
+/* Component styling */
+.card,
+[role="region"],
+.stat-card,
+.glass-card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+}
+
+/* Table styling */
+.clean-table th {
+  border-color: var(--border-color);
+  color: var(--text-secondary);
+}
+
+.clean-table td {
+  border-color: var(--border-color);
+}
+
+.clean-table tr:hover {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+/* Border styling */
+.border,
+.border-b,
+.border-t,
+.border-l,
+.border-r {
+  border-color: var(--border-color);
+}
+
+/* Header styling */
+header {
+  background-color: var(--sidebar-bg);
+  border-color: var(--border-color);
+}
+
+/* Text coloring */
+h1, h2, h3, h4, h5, h6, p, span {
+  color: var(--text-primary);
+}
+
+.text-muted-foreground {
+  color: var(--text-secondary);
+}
+
+/* High specificity selectors for main content area - added for critical fix */
+.main-content,
+main,
+div[class*="content-area"],
+div[class*="dashboard"],
+body > div > div:not(.sidebar):not([class*="sidebar"]) {
+  background-color: #161920 !important; /* Using !important for critical fix */
+}
+
+/* Target specific sections with high specificity */
+.dashboard-container,
+div[class*="dashboard"],
+div[class*="content-section"] {
+  background-color: #161920 !important;
+}
+
+/* Ensure nested components inherit background unless specifically styled */
+.dashboard-container > div:not(.card):not([role="region"]),
+.main-content > div:not(.card):not([role="region"]) {
+  background-color: inherit;
+}
+
+/* Highly specific selectors for main content area */
+body .app-container > div:nth-child(2),
+body [class*="dashboard-container"],
+body [class*="main-content"],
+body > div > div > main,
+body > div[id="root"] > div > div:not([class*="sidebar"]):last-child,
+body > div[id="root"] > div:nth-child(1) > div:nth-child(2) {
+  background-color: #161920 !important;
+}
+
+/* Target specific pages by route */
+body[data-route="/dashboard"] main,
+body[data-route="/properties"] main,
+body[data-route="/transactions"] main,
+body[data-route="/admin"] main,
+body[data-route="/admin/properties"] main,
+body[data-route="/admin/transactions"] main,
+body[data-route="/admin/agents"] main,
+body[data-route="/admin/commission"] main {
+  background-color: #161920 !important;
+}
+
+/* Override any nested containers that might redefine background */
+body .app-container > div:nth-child(2) > *:not(.card):not([role="region"]) {
+  background-color: inherit;
+}
+
+/* Highly specific main content background fix */
+#root > div > div:not(.sidebar),
+.main-content,
+main,
+[data-page="dashboard"],
+[data-page="properties"],
+[data-page="transactions"] {
+  background-color: #161920 !important;
+}
+
+/* Target main content wrapper directly */
+.content-wrapper,
+.page-container,
+div[class*="layout-content"] {
+  background-color: #161920 !important;
+}
+
+/* Admin-specific portal styling fixes */
+.AdminLayout-container,
+.AdminLayout-container main,
+.AdminLayout-container .main-content,
+.AdminLayout-container div[class*="content-area"],
+div[id="root"] > div > .AdminLayout-container,
+div[id="root"] > .AdminLayout-container {
+  background-color: #161920 !important;
+}
+
+/* Admin sidebar fixes */
+.AdminLayout-container .sidebar,
+.AdminSidebar,
+div[class*="AdminSidebar"] {
+  background-color: #1F232D !important;
+  border-right: 1px solid var(--border-color);
+}
+
+/* Admin header fixes */
+.AdminLayout-container header {
+  background-color: #1F232D !important;
+  border-color: var(--border-color);
+}
+
+/* Keep animation styles */
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}

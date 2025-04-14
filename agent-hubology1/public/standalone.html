@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Standalone Test</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: #0f172a;
+      color: white;
+      height: 100%;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    .container {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .card {
+      width: 100%;
+      max-width: 28rem;
+      background-color: #1e293b;
+      border-radius: 0.5rem;
+      overflow: hidden;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    .card-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid #2d3748;
+    }
+    .card-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+    .card-description {
+      color: #a0aec0;
+      font-size: 0.875rem;
+    }
+    .card-content {
+      padding: 1.5rem;
+    }
+    .text {
+      margin-bottom: 1.5rem;
+      color: #e2e8f0;
+    }
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .button {
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.2s;
+      width: 100%;
+    }
+    .button-purple {
+      background-color: #8b5cf6;
+    }
+    .button-purple:hover {
+      background-color: #7c3aed;
+    }
+    .button-blue {
+      background-color: #3b82f6;
+    }
+    .button-blue:hover {
+      background-color: #2563eb;
+    }
+    .button-green {
+      background-color: #10b981;
+    }
+    .button-green:hover {
+      background-color: #059669;
+    }
+    .button-red {
+      background-color: #ef4444;
+    }
+    .button-red:hover {
+      background-color: #dc2626;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Standalone Test Page</h2>
+        <p class="card-description">This page bypasses all routing and authentication</p>
+      </div>
+      
+      <div class="card-content">
+        <p class="text">
+          This is a completely standalone HTML page that doesn't use React or any JavaScript frameworks.
+          Use the buttons below to navigate to different parts of the application with cleared storage.
+        </p>
+        
+        <div class="button-group">
+          <button 
+            class="button button-purple" 
+            onclick="clearAndRedirect('/profile/setup')"
+          >
+            Go to Profile Setup (Clear Storage)
+          </button>
+          
+          <button 
+            class="button button-blue" 
+            onclick="clearAndRedirect('/jwt-test')"
+          >
+            Go to JWT Test (Clear Storage)
+          </button>
+          
+          <button 
+            class="button button-green" 
+            onclick="clearAndRedirect('/sign-in')"
+          >
+            Go to Sign In (Clear Storage)
+          </button>
+          
+          <button 
+            class="button button-red" 
+            onclick="clearAllStorage()"
+          >
+            Clear All Storage
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Clear all storage and redirect to the specified path
+    function clearAndRedirect(path) {
+      localStorage.clear();
+      sessionStorage.clear();
+      clearCookies();
+      window.location.href = path;
+    }
+
+    // Clear all cookies
+    function clearCookies() {
+      document.cookie.split(";").forEach(function(c) {
+        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+      });
+    }
+
+    // Clear all storage
+    function clearAllStorage() {
+      localStorage.clear();
+      sessionStorage.clear();
+      clearCookies();
+      alert('All storage cleared!');
+    }
+
+    // Clear all storage on page load
+    window.onload = function() {
+      clearAllStorage();
+      console.log('All storage cleared on page load');
+    };
+  </script>
+</body>
+</html>

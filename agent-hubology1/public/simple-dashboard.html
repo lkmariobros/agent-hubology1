@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple Dashboard</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: #0f172a;
+      color: white;
+      padding: 2rem;
+      line-height: 1.5;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    h1 {
+      margin-bottom: 1rem;
+    }
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    .card {
+      background-color: #1e293b;
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: bold;
+      margin-bottom: 1rem;
+    }
+    .card-content {
+      color: #94a3b8;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+    .button {
+      background-color: #3b82f6;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 0.25rem;
+      cursor: pointer;
+    }
+    .button:hover {
+      background-color: #2563eb;
+    }
+    .profile-info {
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #334155;
+      border-radius: 0.5rem;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script async crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@4/dist/clerk.browser.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Simple Dashboard</h1>
+      <button id="signOutButton" class="button">Sign Out</button>
+    </div>
+    
+    <div id="loading">Loading user information...</div>
+    <div id="profileInfo" class="profile-info" style="display: none;"></div>
+    
+    <div class="dashboard">
+      <div class="card">
+        <div class="card-title">Welcome</div>
+        <div class="card-content">
+          This is a simple dashboard that bypasses the React components.
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-title">Supabase Status</div>
+        <div id="supabaseStatus" class="card-content">
+          Checking Supabase connection...
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-title">Profile Status</div>
+        <div id="profileStatus" class="card-content">
+          Checking profile status...
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Initialize variables
+    let clerk;
+    let clerkUser;
+    let supabase;
+    
+    // Initialize Supabase
+    function initSupabase() {
+      const supabaseUrl = 'https://twttyqbqhlgyzntcblbz.supabase.co';
+      const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR3dHR5cWJxaGxneXpudGNibGJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM2NTc5MDQsImV4cCI6MjA0OTIzMzkwNH0.u8veRmBirnompCeo3Bzgn9TzNqm6VD7NGAiOmwWcP_4';
+      return supabase.createClient(supabaseUrl, supabaseKey);
+    }
+    
+    // Initialize Clerk
+    async function initClerk() {
+      try {
+        const publishableKey = 'pk_test_cG9zaXRpdmUtYmxvd2Zpc2gtNjAuY2xlcmsuYWNjb3VudHMuZGV2JA';
+        clerk = window.Clerk(publishableKey);
+        await clerk.load();
+        
+        if (clerk.user) {
+          clerkUser = clerk.user;
+          document.getElementById('loading').style.display = 'none';
+          
+          const profileInfoElement = document.getElementById('profileInfo');
+          profileInfoElement.style.display = 'block';
+          profileInfoElement.innerHTML = `
+            <p><strong>User:</strong> ${clerkUser.firstName} ${clerkUser.lastName}</p>
+            <p><strong>Email:</strong> ${clerkUser.primaryEmailAddress?.emailAddress}</p>
+            <p><strong>ID:</strong> ${clerkUser.id}</p>
+          `;
+          
+          // Check Supabase connection
+          checkSupabaseConnection();
+          
+          // Check profile
+          checkProfile();
+        } else {
+          window.location.href = '/sign-in';
+        }
+      } catch (err) {
+        console.error('Error initializing Clerk:', err);
+        document.getElementById('loading').innerHTML = `Error initializing Clerk: ${err.message}`;
+      }
+    }
+    
+    // Check Supabase connection
+    async function checkSupabaseConnection() {
+      try {
+        supabase = initSupabase();
+        
+        // Try to get server time
+        const { data, error } = await supabase.from('profiles').select('count');
+        
+        if (error) {
+          document.getElementById('supabaseStatus').innerHTML = `
+            <span style="color: #ef4444;">Error connecting to Supabase: ${error.message}</span>
+          `;
+        } else {
+          document.getElementById('supabaseStatus').innerHTML = `
+            <span style="color: #10b981;">Connected to Supabase successfully!</span>
+          `;
+        }
+      } catch (err) {
+        document.getElementById('supabaseStatus').innerHTML = `
+          <span style="color: #ef4444;">Error: ${err.message}</span>
+        `;
+      }
+    }
+    
+    // Check profile
+    async function checkProfile() {
+      try {
+        if (!clerk || !clerkUser) {
+          document.getElementById('profileStatus').innerHTML = `
+            <span style="color: #ef4444;">Not authenticated</span>
+          `;
+          return;
+        }
+        
+        // Get JWT token
+        const token = await clerk.session.getToken({ template: 'supabase' });
+        
+        if (!token) {
+          document.getElementById('profileStatus').innerHTML = `
+            <span style="color: #ef4444;">No JWT token available</span>
+          `;
+          return;
+        }
+        
+        // Create Supabase client with token
+        const supabaseWithToken = supabase.createClient(supabaseUrl, supabaseKey, {
+          global: {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        });
+        
+        // Check if profile exists
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('clerk_id', clerkUser.id)
+          .maybeSingle();
+        
+        if (error) {
+          document.getElementById('profileStatus').innerHTML = `
+            <span style="color: #ef4444;">Error checking profile: ${error.message}</span>
+          `;
+        } else if (data) {
+          document.getElementById('profileStatus').innerHTML = `
+            <span style="color: #10b981;">Profile found!</span>
+            <pre style="margin-top: 0.5rem; font-size: 0.75rem;">${JSON.stringify(data, null, 2)}</pre>
+          `;
+        } else {
+          document.getElementById('profileStatus').innerHTML = `
+            <span style="color: #ef4444;">No profile found for user ID: ${clerkUser.id}</span>
+            <button id="createProfileButton" style="display: block; margin-top: 0.5rem; background-color: #10b981; color: white; border: none; padding: 0.5rem 1rem; border-radius: 0.25rem; cursor: pointer;">
+              Create Profile
+            </button>
+          `;
+          
+          // Add event listener to create profile button
+          document.getElementById('createProfileButton').addEventListener('click', createProfile);
+        }
+      } catch (err) {
+        document.getElementById('profileStatus').innerHTML = `
+          <span style="color: #ef4444;">Error: ${err.message}</span>
+        `;
+      }
+    }
+    
+    // Create profile
+    async function createProfile() {
+      try {
+        document.getElementById('profileStatus').innerHTML = `
+          <span>Creating profile...</span>
+        `;
+        
+        // Create profile
+        const { data, error } = await supabase
+          .from('profiles')
+          .insert({
+            clerk_id: clerkUser.id,
+            email: clerkUser.primaryEmailAddress?.emailAddress || '',
+            first_name: clerkUser.firstName || '',
+            last_name: clerkUser.lastName || '',
+            role: 'agent'
+          })
+          .select();
+        
+        if (error) {
+          document.getElementById('profileStatus').innerHTML = `
+            <span style="color: #ef4444;">Error creating profile: ${error.message}</span>
+          `;
+        } else {
+          document.getElementById('profileStatus').innerHTML = `
+            <span style="color: #10b981;">Profile created successfully!</span>
+            <pre style="margin-top: 0.5rem; font-size: 0.75rem;">${JSON.stringify(data[0], null, 2)}</pre>
+          `;
+        }
+      } catch (err) {
+        document.getElementById('profileStatus').innerHTML = `
+          <span style="color: #ef4444;">Error: ${err.message}</span>
+        `;
+      }
+    }
+    
+    // Sign out
+    document.getElementById('signOutButton').addEventListener('click', async () => {
+      if (clerk) {
+        await clerk.signOut();
+        window.location.href = '/sign-in';
+      }
+    });
+    
+    // Initialize when the page loads
+    window.addEventListener('load', initClerk);
+  </script>
+</body>
+</html>

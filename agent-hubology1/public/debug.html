@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Debug Page</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: #0f172a;
+      color: white;
+      height: 100%;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    .container {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 2rem;
+    }
+    .header {
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+    .title {
+      font-size: 2rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+    .description {
+      color: #a0aec0;
+      font-size: 1rem;
+    }
+    .card {
+      background-color: #1e293b;
+      border-radius: 0.5rem;
+      overflow: hidden;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      margin-bottom: 2rem;
+    }
+    .card-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid #2d3748;
+    }
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+    .card-description {
+      color: #a0aec0;
+      font-size: 0.875rem;
+    }
+    .card-content {
+      padding: 1.5rem;
+    }
+    .text {
+      margin-bottom: 1.5rem;
+      color: #e2e8f0;
+    }
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .button {
+      color: white;
+      padding: 0.75rem 1rem;
+      border-radius: 0.375rem;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.2s;
+      width: 100%;
+      text-align: center;
+      text-decoration: none;
+      display: block;
+    }
+    .button-purple {
+      background-color: #8b5cf6;
+    }
+    .button-purple:hover {
+      background-color: #7c3aed;
+    }
+    .button-red {
+      background-color: #ef4444;
+    }
+    .button-red:hover {
+      background-color: #dc2626;
+    }
+    .button-blue {
+      background-color: #3b82f6;
+    }
+    .button-blue:hover {
+      background-color: #2563eb;
+    }
+    .button-green {
+      background-color: #10b981;
+    }
+    .button-green:hover {
+      background-color: #059669;
+    }
+    .code-block {
+      background-color: #0f172a;
+      padding: 1rem;
+      border-radius: 0.375rem;
+      overflow: auto;
+      margin-bottom: 1rem;
+    }
+    pre {
+      margin: 0;
+      color: #e2e8f0;
+      font-family: monospace;
+      font-size: 0.875rem;
+      white-space: pre-wrap;
+    }
+    .storage-info {
+      margin-top: 1rem;
+    }
+    .storage-item {
+      margin-bottom: 0.5rem;
+      padding: 0.5rem;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 0.25rem;
+    }
+    .storage-key {
+      font-weight: bold;
+      color: #a5b4fc;
+    }
+    .storage-value {
+      color: #e2e8f0;
+      word-break: break-all;
+    }
+    .tabs {
+      display: flex;
+      margin-bottom: 1rem;
+    }
+    .tab {
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+    }
+    .tab.active {
+      border-bottom: 2px solid #8b5cf6;
+      color: #8b5cf6;
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    .label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-size: 0.875rem;
+    }
+    .input {
+      width: 100%;
+      padding: 0.5rem;
+      border-radius: 0.375rem;
+      background-color: #1f2937;
+      border: 1px solid #374151;
+      color: white;
+    }
+    .textarea {
+      width: 100%;
+      padding: 0.5rem;
+      border-radius: 0.375rem;
+      background-color: #1f2937;
+      border: 1px solid #374151;
+      color: white;
+      min-height: 100px;
+      font-family: monospace;
+    }
+    .result {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 0.375rem;
+      background-color: #0f172a;
+      overflow: auto;
+      max-height: 300px;
+    }
+    .success {
+      color: #10b981;
+    }
+    .error {
+      color: #ef4444;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script async crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@4/dist/clerk.browser.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1 class="title">Debug Page</h1>
+      <p class="description">Diagnose authentication and profile issues</p>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Authentication Status</h2>
+        <p class="card-description">Check Clerk authentication status</p>
+      </div>
+      <div class="card-content">
+        <div id="auth-status" class="text">Checking authentication status...</div>
+        <div class="button-group">
+          <button onclick="checkAuth()" class="button button-blue">
+            Check Auth Status
+          </button>
+          <button onclick="signOut()" class="button button-red">
+            Sign Out
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Profile Check</h2>
+        <p class="card-description">Check if profile exists in Supabase</p>
+      </div>
+      <div class="card-content">
+        <div id="profile-status" class="text">Click to check profile status</div>
+        <div class="button-group">
+          <button onclick="checkProfile()" class="button button-green">
+            Check Profile
+          </button>
+          <button onclick="createProfile()" class="button button-purple">
+            Create Profile
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">JWT Token</h2>
+        <p class="card-description">Get and decode JWT token</p>
+      </div>
+      <div class="card-content">
+        <div id="jwt-status" class="text">Click to get JWT token</div>
+        <div class="button-group">
+          <button onclick="getJwtToken()" class="button button-blue">
+            Get JWT Token
+          </button>
+        </div>
+        <div id="jwt-token" class="code-block" style="display: none;">
+          <pre id="jwt-token-content"></pre>
+        </div>
+        <div id="jwt-decoded" class="code-block" style="display: none;">
+          <pre id="jwt-decoded-content"></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Navigation</h2>
+        <p class="card-description">Go to other pages</p>
+      </div>
+      <div class="card-content">
+        <div class="button-group">
+          <a href="/profile/setup" class="button button-purple">
+            Go to Profile Setup
+          </a>
+          <a href="/dashboard" class="button button-green">
+            Go to Dashboard
+          </a>
+          <a href="/admin/dashboard" class="button button-blue">
+            Go to Admin Dashboard
+          </a>
+          <a href="/direct-test.html" class="button button-red">
+            Go to Direct Test Page
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Supabase client
+    const supabaseUrl = 'https://twttyqbqhlgyzntcblbz.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR3dHR5cWJxaGxneXpudGNibGJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM2NTc5MDQsImV4cCI6MjA0OTIzMzkwNH0.u8veRmBirnompCeo3Bzgn9TzNqm6VD7NGAiOmwWcP_4';
+    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+    // Clerk client
+    let clerk;
+    let clerkUser;
+
+    // Initialize Clerk
+    window.addEventListener('load', async function() {
+      try {
+        const publishableKey = 'pk_test_cG9zaXRpdmUtYmxvd2Zpc2gtNjAuY2xlcmsuYWNjb3VudHMuZGV2JA';
+        clerk = window.Clerk(publishableKey);
+        await clerk.load();
+        
+        if (clerk.user) {
+          clerkUser = clerk.user;
+          document.getElementById('auth-status').innerHTML = `
+            <div class="success">
+              Authenticated as ${clerkUser.firstName} ${clerkUser.lastName} (${clerkUser.primaryEmailAddress?.emailAddress})
+              <br>
+              User ID: ${clerkUser.id}
+            </div>
+          `;
+        } else {
+          document.getElementById('auth-status').innerHTML = `
+            <div class="error">
+              Not authenticated
+              <br>
+              <a href="/sign-in" class="button button-blue" style="display: inline-block; width: auto; margin-top: 0.5rem;">
+                Sign In
+              </a>
+            </div>
+          `;
+        }
+      } catch (err) {
+        console.error('Error initializing Clerk:', err);
+        document.getElementById('auth-status').innerHTML = `
+          <div class="error">
+            Error initializing Clerk: ${err.message}
+          </div>
+        `;
+      }
+    });
+
+    // Check authentication status
+    async function checkAuth() {
+      try {
+        document.getElementById('auth-status').innerHTML = 'Checking authentication status...';
+        
+        if (!clerk) {
+          throw new Error('Clerk not initialized');
+        }
+        
+        if (clerk.user) {
+          clerkUser = clerk.user;
+          document.getElementById('auth-status').innerHTML = `
+            <div class="success">
+              Authenticated as ${clerkUser.firstName} ${clerkUser.lastName} (${clerkUser.primaryEmailAddress?.emailAddress})
+              <br>
+              User ID: ${clerkUser.id}
+            </div>
+          `;
+        } else {
+          document.getElementById('auth-status').innerHTML = `
+            <div class="error">
+              Not authenticated
+              <br>
+              <a href="/sign-in" class="button button-blue" style="display: inline-block; width: auto; margin-top: 0.5rem;">
+                Sign In
+              </a>
+            </div>
+          `;
+        }
+      } catch (err) {
+        console.error('Error checking auth:', err);
+        document.getElementById('auth-status').innerHTML = `
+          <div class="error">
+            Error checking auth: ${err.message}
+          </div>
+        `;
+      }
+    }
+
+    // Sign out
+    async function signOut() {
+      try {
+        document.getElementById('auth-status').innerHTML = 'Signing out...';
+        
+        if (!clerk) {
+          throw new Error('Clerk not initialized');
+        }
+        
+        await clerk.signOut();
+        window.location.href = '/sign-in';
+      } catch (err) {
+        console.error('Error signing out:', err);
+        document.getElementById('auth-status').innerHTML = `
+          <div class="error">
+            Error signing out: ${err.message}
+          </div>
+        `;
+      }
+    }
+
+    // Check profile
+    async function checkProfile() {
+      try {
+        document.getElementById('profile-status').innerHTML = 'Checking profile...';
+        
+        if (!clerk || !clerk.user) {
+          throw new Error('Not authenticated');
+        }
+        
+        // Get JWT token
+        const token = await clerk.session.getToken({ template: 'supabase' });
+        if (!token) {
+          throw new Error('No JWT token available');
+        }
+        
+        // Create Supabase client with token
+        const supabaseWithToken = supabase.createClient(supabaseUrl, supabaseKey, {
+          global: {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+          auth: {
+            persistSession: false,
+            autoRefreshToken: false,
+          },
+        });
+        
+        // Check if profile exists
+        const { data, error } = await supabaseWithToken
+          .rpc('get_profile_by_clerk_id', { p_clerk_id: clerk.user.id });
+        
+        if (error) {
+          throw new Error(`Error checking profile: ${error.message}`);
+        }
+        
+        if (data && data.length > 0) {
+          document.getElementById('profile-status').innerHTML = `
+            <div class="success">
+              Profile found:
+              <br>
+              <pre>${JSON.stringify(data[0], null, 2)}</pre>
+            </div>
+          `;
+        } else {
+          document.getElementById('profile-status').innerHTML = `
+            <div class="error">
+              No profile found for user ID: ${clerk.user.id}
+            </div>
+          `;
+        }
+      } catch (err) {
+        console.error('Error checking profile:', err);
+        document.getElementById('profile-status').innerHTML = `
+          <div class="error">
+            Error checking profile: ${err.message}
+          </div>
+        `;
+      }
+    }
+
+    // Create profile
+    async function createProfile() {
+      try {
+        document.getElementById('profile-status').innerHTML = 'Creating profile...';
+        
+        if (!clerk || !clerk.user) {
+          throw new Error('Not authenticated');
+        }
+        
+        // Get JWT token
+        const token = await clerk.session.getToken({ template: 'supabase' });
+        if (!token) {
+          throw new Error('No JWT token available');
+        }
+        
+        // Create Supabase client with token
+        const supabaseWithToken = supabase.createClient(supabaseUrl, supabaseKey, {
+          global: {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+          auth: {
+            persistSession: false,
+            autoRefreshToken: false,
+          },
+        });
+        
+        // Create profile
+        const { data, error } = await supabaseWithToken
+          .rpc('create_profile_for_clerk_user', {
+            p_clerk_id: clerk.user.id,
+            p_email: clerk.user.primaryEmailAddress?.emailAddress || '',
+            p_first_name: clerk.user.firstName || '',
+            p_last_name: clerk.user.lastName || '',
+            p_role: 'agent'
+          });
+        
+        if (error) {
+          throw new Error(`Error creating profile: ${error.message}`);
+        }
+        
+        document.getElementById('profile-status').innerHTML = `
+          <div class="success">
+            Profile created successfully:
+            <br>
+            <pre>${JSON.stringify(data, null, 2)}</pre>
+          </div>
+        `;
+      } catch (err) {
+        console.error('Error creating profile:', err);
+        document.getElementById('profile-status').innerHTML = `
+          <div class="error">
+            Error creating profile: ${err.message}
+            <br>
+            <br>
+            Try running this SQL in Supabase:
+            <br>
+            <pre>CREATE POLICY "Allow anonymous access for testing"
+    ON public.profiles
+    FOR ALL
+    USING (true)
+    WITH CHECK (true);</pre>
+          </div>
+        `;
+      }
+    }
+
+    // Get JWT token
+    async function getJwtToken() {
+      try {
+        document.getElementById('jwt-status').innerHTML = 'Getting JWT token...';
+        document.getElementById('jwt-token').style.display = 'none';
+        document.getElementById('jwt-decoded').style.display = 'none';
+        
+        if (!clerk || !clerk.user) {
+          throw new Error('Not authenticated');
+        }
+        
+        // Get JWT token
+        const token = await clerk.session.getToken({ template: 'supabase' });
+        if (!token) {
+          throw new Error('No JWT token available');
+        }
+        
+        document.getElementById('jwt-status').innerHTML = `
+          <div class="success">
+            JWT token retrieved successfully
+          </div>
+        `;
+        
+        // Display token
+        document.getElementById('jwt-token').style.display = 'block';
+        document.getElementById('jwt-token-content').textContent = token;
+        
+        // Decode token
+        try {
+          const parts = token.split('.');
+          if (parts.length !== 3) {
+            throw new Error('Invalid JWT format');
+          }
+          
+          const decoded = JSON.parse(atob(parts[1]));
+          document.getElementById('jwt-decoded').style.display = 'block';
+          document.getElementById('jwt-decoded-content').textContent = JSON.stringify(decoded, null, 2);
+        } catch (decodeErr) {
+          console.error('Error decoding token:', decodeErr);
+          document.getElementById('jwt-status').innerHTML += `
+            <div class="error">
+              Error decoding token: ${decodeErr.message}
+            </div>
+          `;
+        }
+      } catch (err) {
+        console.error('Error getting JWT token:', err);
+        document.getElementById('jwt-status').innerHTML = `
+          <div class="error">
+            Error getting JWT token: ${err.message}
+          </div>
+        `;
+      }
+    }
+  </script>
+</body>
+</html>

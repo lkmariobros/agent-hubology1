@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Supabase with Clerk Auth Test</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    pre {
+      background-color: #f5f5f5;
+      padding: 15px;
+      border-radius: 5px;
+      overflow-x: auto;
+    }
+    .success {
+      color: green;
+      font-weight: bold;
+    }
+    .error {
+      color: red;
+      font-weight: bold;
+    }
+    .warning {
+      color: orange;
+      font-weight: bold;
+    }
+    button {
+      background-color: #333;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+    button:hover {
+      background-color: #555;
+    }
+    .result-container {
+      margin-top: 20px;
+    }
+    .input-group {
+      margin-bottom: 15px;
+    }
+    .input-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    .input-group input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    .tabs {
+      display: flex;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #ddd;
+    }
+    .tab {
+      padding: 10px 15px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      border-bottom: none;
+      margin-right: 5px;
+      border-top-left-radius: 5px;
+      border-top-right-radius: 5px;
+    }
+    .tab.active {
+      background-color: #f5f5f5;
+      border-color: #ddd;
+      border-bottom-color: #f5f5f5;
+      margin-bottom: -1px;
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <h1>Supabase with Clerk Auth Test</h1>
+  
+  <div class="tabs">
+    <div class="tab active" data-tab="anonymous">Anonymous Access</div>
+    <div class="tab" data-tab="jwt">JWT Authentication</div>
+    <div class="tab" data-tab="info">Connection Info</div>
+  </div>
+  
+  <div id="anonymous-tab" class="tab-content active">
+    <p>Test Supabase access with anonymous credentials (limited by RLS policies):</p>
+    <div>
+      <button id="testAnonymousConnection">Test Connection</button>
+      <button id="listPublicTables">List Public Tables</button>
+      <button id="checkPublicData">Check Public Data</button>
+    </div>
+  </div>
+  
+  <div id="jwt-tab" class="tab-content">
+    <p>Test Supabase access with a JWT token from Clerk:</p>
+    <div class="input-group">
+      <label for="jwtToken">Clerk JWT Token:</label>
+      <input type="text" id="jwtToken" placeholder="Paste your Clerk JWT token here">
+    </div>
+    <div>
+      <button id="testJwtConnection">Test JWT Connection</button>
+      <button id="getMyProfile">Get My Profile</button>
+      <button id="listMyProperties">List My Properties</button>
+    </div>
+  </div>
+  
+  <div id="info-tab" class="tab-content">
+    <h3>Connection Information</h3>
+    <p>This tool tests the connection between your application and Supabase with the following configuration:</p>
+    <pre id="connectionInfo">
+Supabase URL: https://twttyqbqhlgyzntcblbz.supabase.co
+Authentication: Anonymous + JWT (Clerk)
+RLS Policies: Enabled
+    </pre>
+    <p><span class="warning">Note:</span> Most operations will fail with anonymous access due to RLS policies. Use the JWT tab with a valid token for authenticated access.</p>
+    <p>To get a JWT token from Clerk:</p>
+    <ol>
+      <li>Sign in to your application</li>
+      <li>Open browser developer tools (F12)</li>
+      <li>In the Console, type: <code>await Clerk.session.getToken({template: "supabase"})</code></li>
+      <li>Copy the returned token and paste it in the JWT field</li>
+    </ol>
+  </div>
+  
+  <div class="result-container">
+    <h3>Results:</h3>
+    <pre id="results">Select a test to run...</pre>
+  </div>
+
+  <!-- Import Supabase JS from CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
+  
+  <script>
+    // DOM elements
+    const resultsElement = document.getElementById('results');
+    const jwtTokenInput = document.getElementById('jwtToken');
+    const tabs = document.querySelectorAll('.tab');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    // Tab switching
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        // Remove active class from all tabs and contents
+        tabs.forEach(t => t.classList.remove('active'));
+        tabContents.forEach(c => c.classList.remove('active'));
+        
+        // Add active class to clicked tab
+        tab.classList.add('active');
+        
+        // Show corresponding content
+        const tabId = tab.getAttribute('data-tab');
+        document.getElementById(`${tabId}-tab`).classList.add('active');
+      });
+    });
+    
+    // Helper function to display results
+    function displayResult(message, isError = false) {
+      resultsElement.innerHTML = isError 
+        ? `<span class="error">ERROR:</span> ${message}` 
+        : `<span class="success">SUCCESS:</span> ${message}`;
+    }
+    
+    // Helper function to display JSON data
+    function displayJson(data) {
+      resultsElement.textContent = JSON.stringify(data, null, 2);
+    }
+
+    // Supabase configuration from your project
+    const SUPABASE_URL = "https://twttyqbqhlgyzntcblbz.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR3dHR5cWJxaGxneXpudGNibGJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM2NTc5MDQsImV4cCI6MjA0OTIzMzkwNH0.u8veRmBirnompCeo3Bzgn9TzNqm6VD7NGAiOmwWcP_4";
+    
+    // Initialize anonymous Supabase client
+    const supabaseAnon = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    // Function to create authenticated Supabase client with JWT
+    function createAuthClient(jwt) {
+      return window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        global: {
+          headers: {
+            Authorization: `Bearer ${jwt}`
+          }
+        }
+      });
+    }
+    
+    // Test anonymous connection
+    document.getElementById('testAnonymousConnection').addEventListener('click', async () => {
+      try {
+        resultsElement.textContent = "Testing anonymous connection...";
+        
+        // Simple health check
+        const { data, error } = await supabaseAnon.auth.getSession();
+        
+        if (error) throw error;
+        
+        displayResult("Successfully connected to Supabase with anonymous credentials!");
+        displayJson({
+          session: data.session ? "Active" : "None (Anonymous)",
+          user: data.session?.user || "Not authenticated"
+        });
+      } catch (error) {
+        console.error('Connection test error:', error);
+        displayResult(`Connection failed: ${error.message || 'Unknown error'}`, true);
+      }
+    });
+    
+    // List public tables
+    document.getElementById('listPublicTables').addEventListener('click', async () => {
+      try {
+        resultsElement.textContent = "Attempting to list public tables...";
+        
+        // Try to access a view that might be public
+        const { data, error } = await supabaseAnon
+          .from('public_properties')
+          .select('*')
+          .limit(5);
+        
+        if (error) {
+          if (error.message.includes('does not exist')) {
+            displayResult("The 'public_properties' view doesn't exist. This is expected if you haven't created public views.", true);
+          } else {
+            throw error;
+          }
+        } else {
+          displayJson(data);
+        }
+      } catch (error) {
+        console.error('List tables error:', error);
+        displayResult(`Failed to list public tables: ${error.message || 'Unknown error'}`, true);
+      }
+    });
+    
+    // Check public data
+    document.getElementById('checkPublicData').addEventListener('click', async () => {
+      try {
+        resultsElement.textContent = "Checking for public data...";
+        
+        // Try to access public data (if any)
+        const { data, error } = await supabaseAnon
+          .from('properties')
+          .select('id, title, price, status')
+          .eq('is_public', true)
+          .limit(5);
+        
+        if (error) {
+          if (error.message.includes('does not exist')) {
+            displayResult("The 'properties' table or 'is_public' column doesn't exist.", true);
+          } else {
+            throw error;
+          }
+        } else if (data && data.length > 0) {
+          displayJson(data);
+        } else {
+          displayResult("No public properties found or access denied due to RLS policies.");
+        }
+      } catch (error) {
+        console.error('Check public data error:', error);
+        displayResult(`Failed to check public data: ${error.message || 'Unknown error'}`, true);
+      }
+    });
+    
+    // Test JWT connection
+    document.getElementById('testJwtConnection').addEventListener('click', async () => {
+      try {
+        const jwt = jwtTokenInput.value.trim();
+        if (!jwt) {
+          displayResult("Please enter a JWT token", true);
+          return;
+        }
+        
+        resultsElement.textContent = "Testing JWT connection...";
+        
+        // Create authenticated client
+        const supabaseAuth = createAuthClient(jwt);
+        
+        // Try to get auth user
+        const { data, error } = await supabaseAuth.rpc('is_admin');
+        
+        if (error) throw error;
+        
+        displayResult("Successfully connected with JWT authentication!");
+        displayJson(data);
+      } catch (error) {
+        console.error('JWT connection test error:', error);
+        displayResult(`JWT connection failed: ${error.message || 'Unknown error'}`, true);
+      }
+    });
+    
+    // Get my profile
+    document.getElementById('getMyProfile').addEventListener('click', async () => {
+      try {
+        const jwt = jwtTokenInput.value.trim();
+        if (!jwt) {
+          displayResult("Please enter a JWT token", true);
+          return;
+        }
+        
+        resultsElement.textContent = "Getting your profile...";
+        
+        // Create authenticated client
+        const supabaseAuth = createAuthClient(jwt);
+        
+        // Try to get user profile
+        const { data, error } = await supabaseAuth.rpc('get_my_profile');
+        
+        if (error) throw error;
+        
+        if (data) {
+          displayJson(data);
+        } else {
+          displayResult("No profile found for your user ID.");
+        }
+      } catch (error) {
+        console.error('Get profile error:', error);
+        displayResult(`Failed to get profile: ${error.message || 'Unknown error'}`, true);
+      }
+    });
+    
+    // List my properties
+    document.getElementById('listMyProperties').addEventListener('click', async () => {
+      try {
+        const jwt = jwtTokenInput.value.trim();
+        if (!jwt) {
+          displayResult("Please enter a JWT token", true);
+          return;
+        }
+        
+        resultsElement.textContent = "Listing your properties...";
+        
+        // Create authenticated client
+        const supabaseAuth = createAuthClient(jwt);
+        
+        // Try to get user properties
+        const { data, error } = await supabaseAuth
+          .from('properties')
+          .select('id, title, price, status, created_at')
+          .order('created_at', { ascending: false })
+          .limit(10);
+        
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+          displayJson(data);
+        } else {
+          displayResult("No properties found for your user ID.");
+        }
+      } catch (error) {
+        console.error('List properties error:', error);
+        displayResult(`Failed to list properties: ${error.message || 'Unknown error'}`, true);
+      }
+    });
+  </script>
+</body>
+</html>
